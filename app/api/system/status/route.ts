@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { supabaseAdmin } from '../../../../lib/supabase';
+import { getBackgroundServicesStatus } from '../../../../lib/worker-startup';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,13 +23,17 @@ export async function GET(request: NextRequest) {
       total: jobStats?.length || 0
     };
 
+    // Get background worker status
+    const workerStatus = getBackgroundServicesStatus();
+
     return Response.json({
       system: 'IndexNow Pro',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       jobStats: stats,
       database: 'Supabase Connected',
-      googleApi: 'Available'
+      googleApi: 'Available',
+      backgroundWorker: workerStatus
     });
 
   } catch (error) {

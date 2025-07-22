@@ -1,6 +1,18 @@
 -- IndexNow Pro Backend Processing Database Schema Updates
 -- Run this SQL in your Supabase SQL Editor
 
+-- First, check current status constraint
+-- SELECT constraint_name, check_clause FROM information_schema.check_constraints 
+-- WHERE constraint_name LIKE '%indb_indexing_jobs_status%';
+
+-- Drop existing status constraint if it exists to recreate with correct values
+ALTER TABLE indb_indexing_jobs DROP CONSTRAINT IF EXISTS indb_indexing_jobs_status_check;
+
+-- Add proper status constraint with all valid status values
+ALTER TABLE indb_indexing_jobs 
+ADD CONSTRAINT indb_indexing_jobs_status_check 
+CHECK (status IN ('pending', 'running', 'completed', 'failed', 'paused', 'cancelled'));
+
 -- Add encrypted access token column to service accounts table
 ALTER TABLE indb_google_service_accounts 
 ADD COLUMN IF NOT EXISTS encrypted_access_token TEXT,
