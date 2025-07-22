@@ -834,6 +834,9 @@ video {
 .w-12 {
   width: 3rem;
 }
+.w-16 {
+  width: 4rem;
+}
 .w-2 {
   width: 0.5rem;
 }
@@ -1714,6 +1717,11 @@ video {
 .hover\:bg-\[\#0d1b2a\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(13 27 42 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-\[\#E63946\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(230 57 70 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-\[\#F0A202\]\/90:hover {

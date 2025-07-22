@@ -440,6 +440,22 @@ JWT_SECRET=[jwt-secret-key]
 - Enhanced visual hierarchy through strategic color application matching reference designs
 - Maintained clean white backgrounds with vibrant, professional accent distribution
 
+### 2025-01-22: Job Detail Page Enhancement & API Fixes
+- Fixed Next.js 15 dynamic params issue in API routes by properly awaiting params
+- Enhanced job detail page with complete action button set:
+  - Added back Start/Resume Job, Re-run Job, and Delete Job buttons in top right
+  - Implemented proper delete functionality with confirmation dialog
+- Improved text clarity throughout the page by replacing grey (#6C757D) with proper dark colors (#1A1A1A) from project color scheme
+- Enhanced URL submissions table:
+  - Added "#" numbering column for better tracking
+  - Fixed ordering to show latest submissions first (descending by created_at)
+  - Updated column count for proper table display
+- Redesigned Source box with improved layout:
+  - Single icon design (removed duplicate icons)
+  - Manual URL list now shows up to 5 URLs in individual boxes with "+X more URLs" indicator
+  - Sitemap URL display in dedicated box with "View Sitemap" button
+- All text colors now follow project color scheme for better readability and consistency
+
 ### 2025-01-22: Comprehensive Settings Page Enhancement & Bug Fixes
 - Implemented professional toast notification system replacing window alerts
 - Fixed React hydration errors by properly structuring ToastContainer in dashboard layout
