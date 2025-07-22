@@ -27,21 +27,55 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the count of jobs for auto-generating job names
-    const { data, error } = await supabaseAdmin
+    // Parse query parameters for pagination and filtering
+    const url = new URL(request.url)
+    const page = parseInt(url.searchParams.get('page') || '1')
+    const limit = parseInt(url.searchParams.get('limit') || '10')
+    const search = url.searchParams.get('search') || ''
+    const status = url.searchParams.get('status') || ''
+    const schedule = url.searchParams.get('schedule') || ''
+
+    const offset = (page - 1) * limit
+
+    // Build query
+    let query = supabaseAdmin
       .from('indb_indexing_jobs')
-      .select('id')
+      .select('*', { count: 'exact' })
       .eq('user_id', user.id)
+
+    // Apply filters
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,id.ilike.%${search}%`)
+    }
+    if (status && status !== 'All Status') {
+      query = query.eq('status', status)
+    }
+    if (schedule && schedule !== 'All Schedules') {
+      query = query.eq('schedule_type', schedule)
+    }
+
+    // Apply pagination and ordering
+    const { data, error, count } = await query
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
-      console.error('Error fetching jobs count:', error)
+      console.error('Error fetching jobs:', error)
       return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 })
     }
 
+    // Get total count for next job number
+    const { data: allJobs } = await supabaseAdmin
+      .from('indb_indexing_jobs')
+      .select('id')
+      .eq('user_id', user.id)
+
     return NextResponse.json({ 
       jobs: data || [],
-      nextJobNumber: (data?.length || 0) + 1
+      count: count || 0,
+      page,
+      limit,
+      nextJobNumber: (allJobs?.length || 0) + 1
     })
   } catch (error) {
     console.error('Error in GET /api/jobs:', error)

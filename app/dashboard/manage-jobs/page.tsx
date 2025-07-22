@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { 
   Search, 
   Filter, 
@@ -20,67 +21,32 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Archive
+  Archive,
+  Eye,
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import { authService } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
 
 interface Job {
   id: string;
   name: string;
-  jobId: string;
-  created: string;
-  schedule: string;
-  urls: {
-    total: number;
-    success: number;
-    failed: number;
-  };
-  status: 'paused' | 'completed' | 'running' | 'failed';
-  progress: number;
+  type: 'manual' | 'sitemap';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'paused' | 'cancelled';
+  schedule_type: 'one-time' | 'hourly' | 'daily' | 'weekly' | 'monthly';
+  total_urls: number;
+  processed_urls: number;
+  successful_urls: number;
+  failed_urls: number;
+  progress_percentage: number;
+  created_at: string;
+  updated_at: string;
 }
 
-const mockJobs: Job[] = [
-  {
-    id: '1753025054083-857',
-    name: 'Main Website Sitemap',
-    jobId: '#job-1753025054083-857',
-    created: '20/7/2025, 22.24.42',
-    schedule: 'one-time',
-    urls: { total: 100, success: 0, failed: 0 },
-    status: 'paused',
-    progress: 0
-  },
-  {
-    id: '22',
-    name: 'Product Pages', 
-    jobId: '#job-22',
-    created: '18/7/2025, 13.02.11',
-    schedule: 'one-time',
-    urls: { total: 1, success: 0, failed: 1 },
-    status: 'completed',
-    progress: 100
-  },
-  {
-    id: '9',
-    name: 'Blog Posts Update',
-    jobId: '#job-9', 
-    created: '18/7/2025, 02.36.37',
-    schedule: 'daily',
-    urls: { total: 1, success: 1, failed: 0 },
-    status: 'completed',
-    progress: 100
-  },
-  {
-    id: '8',
-    name: 'Category Pages',
-    jobId: '#job-8',
-    created: '18/7/2025, 02.35.54', 
-    schedule: 'weekly',
-    urls: { total: 1, success: 0, failed: 1 },
-    status: 'completed',
-    progress: 100
-  }
-];
+// Real jobs data will be loaded from API
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -113,27 +79,83 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function ManageJobsPage() {
+  const { addToast } = useToast();
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [scheduleFilter, setScheduleFilter] = useState('All Schedules');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const jobsPerPage = 20;
 
-  // Filter jobs
-  const filteredJobs = mockJobs.filter(job => {
-    const matchesSearch = job.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         job.jobId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'All Status' || job.status === statusFilter.toLowerCase();
-    const matchesSchedule = scheduleFilter === 'All Schedules' || job.schedule === scheduleFilter.toLowerCase();
+  // Load jobs data
+  useEffect(() => {
+    loadJobs();
+  }, [currentPage, searchTerm, statusFilter, scheduleFilter]);
 
-    return matchesSearch && matchesStatus && matchesSchedule;
-  });
+  const loadJobs = async () => {
+    try {
+      setLoading(true);
+      const user = await authService.getCurrentUser();
+      if (!user) return;
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: jobsPerPage.toString(),
+        search: searchTerm,
+        status: statusFilter,
+        schedule: scheduleFilter
+      });
+
+      const response = await fetch(`/api/jobs?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setJobs(data.jobs);
+        setTotalCount(data.count);
+      } else {
+        addToast({
+          title: 'Error',
+          description: 'Failed to load jobs',
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error loading jobs:', error);
+      addToast({
+        title: 'Error',
+        description: 'Failed to load jobs',
+        type: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper functions
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  const generateJobId = (id: string) => `#job-${id}`;
 
   // Pagination
-  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+  const totalPages = Math.ceil(totalCount / jobsPerPage);
   const startIndex = (currentPage - 1) * jobsPerPage;
-  const paginatedJobs = filteredJobs.slice(startIndex, startIndex + jobsPerPage);
 
   const handleSelectJob = (jobId: string, checked: boolean) => {
     if (checked) {
@@ -145,9 +167,87 @@ export default function ManageJobsPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedJobs(paginatedJobs.map(job => job.id));
+      setSelectedJobs(jobs.map(job => job.id));
     } else {
       setSelectedJobs([]);
+    }
+  };
+
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch(`/api/jobs/${jobId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        addToast({
+          title: 'Success',
+          description: 'Job deleted successfully',
+          type: 'success'
+        });
+        loadJobs(); // Reload jobs list
+      } else {
+        addToast({
+          title: 'Error',
+          description: 'Failed to delete job',
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      addToast({
+        title: 'Error',
+        description: 'Failed to delete job',
+        type: 'error'
+      });
+    }
+  };
+
+  const handleRerunJob = async (jobId: string) => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch(`/api/jobs/${jobId}`, {
+        method: 'PUT',
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'pending' })
+      });
+
+      if (response.ok) {
+        addToast({
+          title: 'Success',
+          description: 'Job restarted successfully',
+          type: 'success'
+        });
+        loadJobs(); // Reload jobs list
+      } else {
+        addToast({
+          title: 'Error',
+          description: 'Failed to restart job',
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error restarting job:', error);
+      addToast({
+        title: 'Error',
+        description: 'Failed to restart job',
+        type: 'error'
+      });
     }
   };
 
@@ -231,7 +331,7 @@ export default function ManageJobsPage() {
             <Archive className="h-5 w-5 text-[#1A1A1A]" />
             <h2 className="text-lg font-semibold text-[#1A1A1A]">Indexing Jobs</h2>
             <Badge variant="secondary" className="bg-[#F7F9FC] text-[#6C757D]">
-              {filteredJobs.length} jobs
+              {totalCount} jobs
             </Badge>
           </div>
         </div>
@@ -243,7 +343,7 @@ export default function ManageJobsPage() {
               <tr>
                 <th className="text-left p-4 w-12">
                   <Checkbox
-                    checked={selectedJobs.length === paginatedJobs.length && paginatedJobs.length > 0}
+                    checked={selectedJobs.length === jobs.length && jobs.length > 0}
                     onCheckedChange={handleSelectAll}
                     className="border-[#E0E6ED]"
                   />
@@ -258,74 +358,111 @@ export default function ManageJobsPage() {
               </tr>
             </thead>
             <tbody>
-              {paginatedJobs.map((job) => (
-                <tr key={job.id} className="border-b border-[#E0E6ED] hover:bg-[#F7F9FC] transition-colors duration-200">
-                  <td className="p-4">
-                    <Checkbox
-                      checked={selectedJobs.includes(job.id)}
-                      onCheckedChange={(checked) => handleSelectJob(job.id, checked as boolean)}
-                      className="border-[#E0E6ED]"
-                    />
-                  </td>
-                  <td className="p-4">
-                    <div>
-                      <Link 
-                        href={`/dashboard/manage-jobs/${job.id}`}
-                        className="font-medium text-[#1A1A1A] hover:text-[#1C2331] hover:underline"
-                      >
-                        {job.name}
-                      </Link>
-                      <p className="text-sm text-[#6C757D] mt-1">{job.jobId}</p>
-                    </div>
-                  </td>
-                  <td className="p-4 text-[#1A1A1A]">{job.created}</td>
-                  <td className="p-4">
-                    <Badge className="bg-[#1C2331] text-white hover:bg-[#0d1b2a]">
-                      {job.schedule}
-                    </Badge>
-                  </td>
-                  <td className="p-4">
-                    <div className="text-sm">
-                      <div className="text-[#1A1A1A] font-medium">{job.urls.total} total</div>
-                      <div className="text-[#6C757D]">
-                        <span className="text-[#4BB543]">{job.urls.success} success</span>, <span className="text-[#E63946]">{job.urls.failed} failed</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <Badge className={`${getStatusColor(job.status)} flex items-center gap-1 w-fit`}>
-                      {getStatusIcon(job.status)}
-                      {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                    </Badge>
-                  </td>
-                  <td className="p-4">
-                    <div className="space-y-2">
-                      <div className="text-sm text-[#1A1A1A] font-medium">
-                        {job.urls.total > 0 ? `${Math.round((job.urls.success + job.urls.failed) / job.urls.total * 100)}%` : '0%'} processed
-                      </div>
-                      <Progress 
-                        value={job.urls.total > 0 ? (job.urls.success + job.urls.failed) / job.urls.total * 100 : 0} 
-                        className="h-2 w-24"
-                      />
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <Button variant="ghost" size="sm" className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center">
+                    <div className="text-[#6C757D]">Loading jobs...</div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                jobs.map((job) => (
+                  <tr key={job.id} className="border-b border-[#E0E6ED] hover:bg-[#F7F9FC] transition-colors duration-200">
+                    <td className="p-4">
+                      <Checkbox
+                        checked={selectedJobs.includes(job.id)}
+                        onCheckedChange={(checked) => handleSelectJob(job.id, checked as boolean)}
+                        className="border-[#E0E6ED]"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <div>
+                        <Link 
+                          href={`/dashboard/manage-jobs/${job.id}`}
+                          className="font-medium text-[#1A1A1A] hover:text-[#1C2331] hover:underline"
+                        >
+                          {job.name}
+                        </Link>
+                        <p className="text-sm text-[#6C757D] mt-1">{generateJobId(job.id)}</p>
+                      </div>
+                    </td>
+                    <td className="p-4 text-[#1A1A1A]">{formatDate(job.created_at)}</td>
+                    <td className="p-4">
+                      <Badge className="bg-[#1C2331] text-white hover:bg-[#0d1b2a]">
+                        {job.schedule_type}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm">
+                        <div className="text-[#1A1A1A] font-medium">{job.total_urls} total</div>
+                        <div className="text-[#6C757D]">
+                          <span className="text-[#4BB543]">{job.successful_urls} success</span>, <span className="text-[#E63946]">{job.failed_urls} failed</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <Badge className={`${getStatusColor(job.status)} flex items-center gap-1 w-fit`}>
+                        {getStatusIcon(job.status)}
+                        {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-sm text-[#1A1A1A] font-medium">
+                          {job.total_urls > 0 ? `${Math.round(job.progress_percentage)}%` : '0%'} processed
+                        </div>
+                        <Progress 
+                          value={job.progress_percentage || 0} 
+                          className="h-2 w-24"
+                        />
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-white border-[#E0E6ED]">
+                          <DropdownMenuItem asChild>
+                            <Link 
+                              href={`/dashboard/manage-jobs/${job.id}`}
+                              className="flex items-center gap-2 cursor-pointer hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]"
+                            >
+                              <Eye className="h-4 w-4" />
+                              See details
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleRerunJob(job.id)}
+                            className="flex items-center gap-2 cursor-pointer hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]"
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                            Re-run
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteJob(job.id)}
+                            className="flex items-center gap-2 cursor-pointer text-[#E63946] hover:bg-[#fef2f2] focus:bg-[#fef2f2] focus:text-[#E63946]"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
-        {paginatedJobs.length === 0 && (
+        {!loading && jobs.length === 0 && (
           <div className="p-8 text-center">
             <Archive className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
             <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No jobs found</h3>
             <p className="text-[#6C757D]">
-              {filteredJobs.length === 0 && mockJobs.length > 0 
+              {searchTerm || statusFilter !== 'All Status' || scheduleFilter !== 'All Schedules'
                 ? "Try adjusting your filters to see more jobs."
                 : "You haven't created any indexing jobs yet."
               }
@@ -337,7 +474,7 @@ export default function ManageJobsPage() {
         {totalPages > 1 && (
           <div className="px-6 py-4 border-t border-[#E0E6ED] flex items-center justify-between">
             <div className="text-sm text-[#6C757D]">
-              Showing {startIndex + 1} to {Math.min(startIndex + jobsPerPage, filteredJobs.length)} of {filteredJobs.length} jobs
+              Showing {startIndex + 1} to {Math.min(startIndex + jobsPerPage, totalCount)} of {totalCount} jobs
             </div>
             <div className="flex items-center gap-2">
               <Button

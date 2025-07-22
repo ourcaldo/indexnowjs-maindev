@@ -1251,6 +1251,9 @@ video {
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
+.fill-current {
+  fill: currentColor;
+}
 .p-0 {
   padding: 0px;
 }
@@ -1399,6 +1402,9 @@ video {
 .tracking-tight {
   letter-spacing: -0.025em;
 }
+.tracking-widest {
+  letter-spacing: 0.1em;
+}
 .text-\[\#1A1A1A\] {
   --tw-text-opacity: 1;
   color: rgb(26 26 26 / var(--tw-text-opacity, 1));
@@ -1493,6 +1499,9 @@ video {
 }
 .opacity-70 {
   opacity: 0.7;
+}
+.opacity-60 {
+  opacity: 0.6;
 }
 .shadow-lg {
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -1718,6 +1727,11 @@ video {
   background-color: rgb(214 40 57 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-\[\#fef2f2\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 242 242 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:bg-accent:hover {
   background-color: var(--accent);
 }
@@ -1801,6 +1815,11 @@ video {
   background-color: rgb(247 249 252 / var(--tw-bg-opacity, 1));
 }
 
+.focus\:bg-\[\#fef2f2\]:focus {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 242 242 / var(--tw-bg-opacity, 1));
+}
+
 .focus\:bg-accent:focus {
   background-color: var(--accent);
 }
@@ -1808,6 +1827,11 @@ video {
 .focus\:text-\[\#1A1A1A\]:focus {
   --tw-text-opacity: 1;
   color: rgb(26 26 26 / var(--tw-text-opacity, 1));
+}
+
+.focus\:text-\[\#E63946\]:focus {
+  --tw-text-opacity: 1;
+  color: rgb(230 57 70 / var(--tw-text-opacity, 1));
 }
 
 .focus\:text-accent-foreground:focus {

@@ -373,9 +373,12 @@ export class DatabaseService {
     }
 
     // Calculate success rate
-    stats.success_rate = stats.total_urls_processed > 0 
-      ? parseFloat(((stats.total_urls_indexed / stats.total_urls_processed) * 100).toFixed(1))
-      : 0
+    const statsWithSuccessRate = {
+      ...stats,
+      success_rate: stats.total_urls_processed > 0 
+        ? parseFloat(((stats.total_urls_indexed / stats.total_urls_processed) * 100).toFixed(1))
+        : 0
+    }
 
     // Get recent activity
     const { data: recentJobs, error: recentError } = await supabase
@@ -386,7 +389,7 @@ export class DatabaseService {
       .limit(5)
 
     return {
-      stats,
+      stats: statsWithSuccessRate,
       recent_activity: recentJobs || [],
     }
   }
