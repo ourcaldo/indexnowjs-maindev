@@ -1,6 +1,6 @@
 import * as cron from 'node-cron';
 import { supabaseAdmin } from './supabase';
-import { SimpleJobProcessor } from './simple-job-processor';
+import { GoogleIndexingProcessor } from './google-indexing-processor';
 
 /**
  * Job Monitor Service
@@ -14,11 +14,11 @@ import { SimpleJobProcessor } from './simple-job-processor';
 export class JobMonitor {
   private static instance: JobMonitor;
   private isRunning = false;
-  private processor: SimpleJobProcessor;
+  private processor: GoogleIndexingProcessor;
   private cronJob: cron.ScheduledTask | null = null;
 
   constructor() {
-    this.processor = SimpleJobProcessor.getInstance();
+    this.processor = GoogleIndexingProcessor.getInstance();
   }
 
   static getInstance(): JobMonitor {
@@ -101,7 +101,7 @@ export class JobMonitor {
       for (const job of pendingJobs) {
         try {
           console.log(`Processing job ${job.id} (${job.name})`);
-          const result = await this.processor.processJob(job.id);
+          const result = await this.processor.processIndexingJob(job.id);
           
           if (result.success) {
             console.log(`✅ Job ${job.id} completed successfully`);
