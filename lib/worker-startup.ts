@@ -55,8 +55,11 @@ export function getBackgroundServicesStatus(): any {
 
 // Auto-start in production or development
 if (typeof window === 'undefined') { // Server-side only
-  // Add a small delay to ensure all modules are loaded
-  setTimeout(() => {
-    startBackgroundServices();
-  }, 1000);
+  // Use process.nextTick to ensure modules are loaded and avoid multiple instances
+  process.nextTick(() => {
+    if (!(global as any).backgroundServicesStarted) {
+      (global as any).backgroundServicesStarted = true;
+      startBackgroundServices();
+    }
+  });
 }

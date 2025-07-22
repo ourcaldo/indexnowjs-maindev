@@ -88,6 +88,7 @@ export class SimpleJobProcessor {
       const lockTime = new Date().toISOString();
       const lockId = `worker-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+      // Try to lock the job only if it's currently pending and not locked
       const { data, error } = await supabaseAdmin
         .from('indb_indexing_jobs')
         .update({
@@ -96,10 +97,21 @@ export class SimpleJobProcessor {
           status: 'running'
         })
         .eq('id', jobId)
-        .or('locked_at.is.null,status.neq.running')
+        .eq('status', 'pending')
+        .is('locked_at', null)
         .select();
 
-      return !error && data && data.length > 0;
+      if (error) {
+        console.error('Error locking job:', error);
+        return false;
+      }
+
+      const success = data && data.length > 0;
+      if (!success) {
+        console.log(`Job ${jobId} is already locked or not in pending status`);
+      }
+      
+      return success;
     } catch (error) {
       console.error('Error locking job:', error);
       return false;

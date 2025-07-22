@@ -62,6 +62,22 @@ export function JobProcessorTest() {
     }
   };
 
+  const restartWorker = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/system/restart-worker', {
+        method: 'POST'
+      });
+      const data = await response.json();
+      setResults(data);
+    } catch (error) {
+      console.error('Error restarting worker:', error);
+      setResults({ error: 'Failed to restart worker' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="bg-white border-[#E0E6ED]">
@@ -107,6 +123,16 @@ export function JobProcessorTest() {
             >
               <Activity className="h-4 w-4" />
               Worker Status
+            </Button>
+            
+            <Button
+              onClick={restartWorker}
+              disabled={loading}
+              variant="outline"
+              className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A] flex items-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Restart Worker
             </Button>
           </div>
 
