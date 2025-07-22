@@ -1,5 +1,5 @@
 import { supabaseAdmin } from './supabase';
-import { GoogleAuthService } from './google-auth';
+import { GoogleAuthService } from './google-auth-service';
 
 interface IndexingJob {
   id: string;
