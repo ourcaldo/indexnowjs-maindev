@@ -14,7 +14,8 @@ import {
   ChevronRight,
   LogOut,
   User,
-  Menu
+  Menu,
+  Activity
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -105,6 +106,12 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       href: '/dashboard/settings',
       icon: Settings,
       active: pathname === '/dashboard/settings'
+    },
+    {
+      label: 'Test Backend',
+      href: '/dashboard/test-backend',
+      icon: Activity,
+      active: pathname === '/dashboard/test-backend'
     }
   ]
 
