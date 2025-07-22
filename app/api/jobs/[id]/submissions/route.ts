@@ -1,14 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { authService } from '@/lib/auth';
+import { supabaseAdmin } from '@/lib/database';
+import { createClient } from '@supabase/supabase-js';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Get user from auth token
-    const { user, error: authError } = await authService.getUserFromRequest(request);
+    // Get auth token from header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.substring(7);
+    
+    // Create client with the user's token
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    // Set the auth token
+    await supabase.auth.setSession({ access_token: token, refresh_token: '' });
+    
+    // Get the user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

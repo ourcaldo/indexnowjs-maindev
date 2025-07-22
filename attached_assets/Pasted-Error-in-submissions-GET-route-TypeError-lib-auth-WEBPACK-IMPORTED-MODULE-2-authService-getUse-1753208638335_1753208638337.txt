@@ -1,0 +1,40 @@
+Error in submissions GET route: TypeError: _lib_auth__WEBPACK_IMPORTED_MODULE_2__.authService.getUserFromRequest is not a function
+    at GET (app/api/jobs/[id]/submissions/route.ts:11:57)
+   9 |   try {
+  10 |     // Get user from auth token
+> 11 |     const { user, error: authError } = await authService.getUserFromRequest(request);
+     |                                                         ^
+  12 |     if (authError || !user) {
+  13 |       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  14 |     }
+ GET /api/jobs/d3137839-c00b-48dc-99d4-8f81392f0cb9/submissions?page=1&limit=20 500 in 2664ms
+Error in job GET route: TypeError: _lib_auth__WEBPACK_IMPORTED_MODULE_2__.authService.getUserFromRequest is not a function
+    at GET (app/api/jobs/[id]/route.ts:11:57)
+   9 |   try {
+  10 |     // Get user from auth token
+> 11 |     const { user, error: authError } = await authService.getUserFromRequest(request);
+     |                                                         ^
+  12 |     if (authError || !user) {
+  13 |       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  14 |     }
+ GET /api/jobs/d3137839-c00b-48dc-99d4-8f81392f0cb9 500 in 2793ms
+Error in submissions GET route: TypeError: _lib_auth__WEBPACK_IMPORTED_MODULE_2__.authService.getUserFromRequest is not a function
+    at GET (app/api/jobs/[id]/submissions/route.ts:11:57)
+   9 |   try {
+  10 |     // Get user from auth token
+> 11 |     const { user, error: authError } = await authService.getUserFromRequest(request);
+     |                                                         ^
+  12 |     if (authError || !user) {
+  13 |       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  14 |     }
+ GET /api/jobs/d3137839-c00b-48dc-99d4-8f81392f0cb9/submissions?page=1&limit=20 500 in 79ms
+Error in job GET route: TypeError: _lib_auth__WEBPACK_IMPORTED_MODULE_2__.authService.getUserFromRequest is not a function
+    at GET (app/api/jobs/[id]/route.ts:11:57)
+   9 |   try {
+  10 |     // Get user from auth token
+> 11 |     const { user, error: authError } = await authService.getUserFromRequest(request);
+     |                                                         ^
+  12 |     if (authError || !user) {
+  13 |       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  14 |     }
+ GET /api/jobs/d3137839-c00b-48dc-99d4-8f81392f0cb9 500 in 82ms
