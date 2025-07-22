@@ -86,6 +86,12 @@ export async function PUT(
     const { id: jobId } = await params;
     const body = await request.json();
 
+    // Validate status value before updating
+    const validStatuses = ['pending', 'running', 'completed', 'failed', 'paused', 'cancelled'];
+    if (!validStatuses.includes(body.status)) {
+      return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
+    }
+
     // Update job status
     const { data: job, error } = await supabaseAdmin
       .from('indb_indexing_jobs')

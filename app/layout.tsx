@@ -2,6 +2,13 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
+// Initialize background services on server-side
+if (typeof window === 'undefined') {
+  import('../lib/worker-startup').then(() => {
+    console.log('Background services initialization module loaded');
+  });
+}
+
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {

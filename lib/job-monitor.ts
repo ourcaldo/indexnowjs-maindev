@@ -1,14 +1,24 @@
-import cron from 'node-cron';
+import * as cron from 'node-cron';
 import { supabaseAdmin } from './supabase';
-import { JobProcessor } from './job-processor';
+import { SimpleJobProcessor } from './simple-job-processor';
 
+/**
+ * Job Monitor Service
+ * 
+ * This service runs as a background worker that:
+ * 1. Monitors for pending jobs every minute
+ * 2. Automatically triggers processing for pending jobs
+ * 3. Handles scheduled jobs based on their next_run_at time
+ * 4. Ensures only one instance processes jobs to prevent conflicts
+ */
 export class JobMonitor {
   private static instance: JobMonitor;
-  private jobProcessor: JobProcessor;
   private isRunning = false;
+  private processor: SimpleJobProcessor;
+  private cronJob: cron.ScheduledTask | null = null;
 
   constructor() {
-    this.jobProcessor = JobProcessor.getInstance();
+    this.processor = SimpleJobProcessor.getInstance();
   }
 
   static getInstance(): JobMonitor {
@@ -18,6 +28,10 @@ export class JobMonitor {
     return JobMonitor.instance;
   }
 
+  /**
+   * Start the job monitor
+   * Runs every minute to check for pending jobs
+   */
   start(): void {
     if (this.isRunning) {
       console.log('Job monitor is already running');
@@ -27,192 +41,146 @@ export class JobMonitor {
     console.log('Starting job monitor...');
     this.isRunning = true;
 
-    // Monitor for pending jobs every minute
-    cron.schedule('* * * * *', async () => {
-      try {
-        await this.checkPendingJobs();
-      } catch (error) {
-        console.error('Error in job monitor:', error);
-      }
+    // Run every minute to check for pending jobs
+    this.cronJob = cron.schedule('* * * * *', async () => {
+      await this.checkAndProcessJobs();
+    }, {
+      timezone: 'UTC'
     });
 
-    // Monitor for scheduled jobs every minute
-    cron.schedule('* * * * *', async () => {
-      try {
-        await this.checkScheduledJobs();
-      } catch (error) {
-        console.error('Error checking scheduled jobs:', error);
-      }
-    });
-
-    // Clean up stale locks every 5 minutes
-    cron.schedule('*/5 * * * *', async () => {
-      try {
-        await this.cleanupStaleLocks();
-      } catch (error) {
-        console.error('Error cleaning up stale locks:', error);
-      }
-    });
-
-    console.log('Job monitor started successfully');
+    console.log('Job monitor started - checking for jobs every minute');
   }
 
+  /**
+   * Stop the job monitor
+   */
   stop(): void {
+    if (!this.isRunning) {
+      console.log('Job monitor is not running');
+      return;
+    }
+
+    console.log('Stopping job monitor...');
     this.isRunning = false;
+
+    if (this.cronJob) {
+      this.cronJob.destroy();
+      this.cronJob = null;
+    }
+
     console.log('Job monitor stopped');
   }
 
-  private async checkPendingJobs(): Promise<void> {
+  /**
+   * Check for pending jobs and process them
+   */
+  private async checkAndProcessJobs(): Promise<void> {
     try {
-      // Find pending jobs that are not locked
+      // Find pending jobs that are ready to run
       const { data: pendingJobs, error } = await supabaseAdmin
         .from('indb_indexing_jobs')
-        .select('id, name')
+        .select('id, name, user_id, next_run_at, schedule_type')
         .eq('status', 'pending')
         .is('locked_at', null)
-        .order('created_at')
-        .limit(5); // Process max 5 jobs per minute to avoid overwhelming
+        .or('next_run_at.is.null,next_run_at.lte.' + new Date().toISOString())
+        .limit(5); // Process max 5 jobs per minute to prevent overload
 
       if (error) {
         console.error('Error fetching pending jobs:', error);
         return;
       }
 
-      if (pendingJobs?.length > 0) {
-        console.log(`Found ${pendingJobs.length} pending jobs to process`);
-        
-        // Process jobs in parallel but with some delay to avoid race conditions
-        for (let i = 0; i < pendingJobs.length; i++) {
-          setTimeout(() => {
-            this.jobProcessor.processJob(pendingJobs[i].id);
-          }, i * 100); // 100ms delay between job starts
-        }
-      }
-    } catch (error) {
-      console.error('Error in checkPendingJobs:', error);
-    }
-  }
-
-  private async checkScheduledJobs(): Promise<void> {
-    try {
-      const now = new Date().toISOString();
-      
-      // Find scheduled jobs that are due to run
-      const { data: scheduledJobs, error } = await supabaseAdmin
-        .from('indb_indexing_jobs')
-        .select('id, name, schedule_type, cron_expression')
-        .eq('status', 'scheduled')
-        .lte('next_run_at', now)
-        .is('locked_at', null)
-        .order('next_run_at')
-        .limit(10);
-
-      if (error) {
-        console.error('Error fetching scheduled jobs:', error);
+      if (!pendingJobs || pendingJobs.length === 0) {
+        // No pending jobs found - this is normal
         return;
       }
 
-      if (scheduledJobs?.length > 0) {
-        console.log(`Found ${scheduledJobs.length} scheduled jobs ready to run`);
+      console.log(`Found ${pendingJobs.length} pending jobs to process`);
 
-        for (const job of scheduledJobs) {
-          try {
-            // Update job status to pending and calculate next run time
-            const nextRunAt = this.calculateNextRunTime(job.schedule_type, job.cron_expression);
+      // Process each job
+      for (const job of pendingJobs) {
+        try {
+          console.log(`Processing job ${job.id} (${job.name})`);
+          const result = await this.processor.processJob(job.id);
+          
+          if (result.success) {
+            console.log(`✅ Job ${job.id} completed successfully`);
             
-            await supabaseAdmin
-              .from('indb_indexing_jobs')
-              .update({
-                status: 'pending',
-                next_run_at: nextRunAt,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', job.id);
-
-            console.log(`Scheduled job ${job.name} (${job.id}) moved to pending`);
-          } catch (error) {
-            console.error(`Error updating scheduled job ${job.id}:`, error);
+            // Update next run time for recurring jobs
+            if (job.schedule_type && job.schedule_type !== 'one-time') {
+              await this.scheduleNextRun(job.id, job.schedule_type);
+            }
+          } else {
+            console.log(`❌ Job ${job.id} failed: ${result.error}`);
           }
+        } catch (error) {
+          console.error(`Error processing job ${job.id}:`, error);
         }
       }
     } catch (error) {
-      console.error('Error in checkScheduledJobs:', error);
+      console.error('Error in job monitor:', error);
     }
   }
 
-  private async cleanupStaleLocks(): Promise<void> {
+  /**
+   * Schedule the next run for recurring jobs
+   */
+  private async scheduleNextRun(jobId: string, scheduleType: string): Promise<void> {
     try {
-      // Clean up locks older than 30 minutes (assume stale)
-      const staleTime = new Date();
-      staleTime.setMinutes(staleTime.getMinutes() - 30);
+      const now = new Date();
+      let nextRun: Date;
 
-      const { data, error } = await supabaseAdmin
+      switch (scheduleType) {
+        case 'hourly':
+          nextRun = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
+          break;
+        case 'daily':
+          nextRun = new Date(now.getTime() + 24 * 60 * 60 * 1000); // +1 day
+          break;
+        case 'weekly':
+          nextRun = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // +1 week
+          break;
+        case 'monthly':
+          nextRun = new Date(now);
+          nextRun.setMonth(nextRun.getMonth() + 1); // +1 month
+          break;
+        default:
+          return; // one-time jobs don't get rescheduled
+      }
+
+      await supabaseAdmin
         .from('indb_indexing_jobs')
         .update({
-          locked_at: null,
-          locked_by: null,
-          status: 'failed',
-          error_message: 'Job lock timed out - process may have crashed'
+          status: 'pending',
+          next_run_at: nextRun.toISOString(),
+          updated_at: new Date().toISOString()
         })
-        .eq('status', 'running')
-        .not('locked_at', 'is', null)
-        .lt('locked_at', staleTime.toISOString())
-        .select('id, name');
+        .eq('id', jobId);
 
-      if (error) {
-        console.error('Error cleaning up stale locks:', error);
-        return;
-      }
-
-      if (data?.length > 0) {
-        console.log(`Cleaned up ${data.length} stale job locks`);
-        data.forEach(job => {
-          console.log(`  - Job ${job.name} (${job.id})`);
-        });
-      }
+      console.log(`📅 Job ${jobId} scheduled for next run at ${nextRun.toISOString()}`);
     } catch (error) {
-      console.error('Error in cleanupStaleLocks:', error);
+      console.error(`Error scheduling next run for job ${jobId}:`, error);
     }
   }
 
-  private calculateNextRunTime(scheduleType: string, cronExpression?: string): string | null {
-    const now = new Date();
-
-    switch (scheduleType) {
-      case 'hourly':
-        now.setHours(now.getHours() + 1);
-        return now.toISOString();
-        
-      case 'daily':
-        now.setDate(now.getDate() + 1);
-        return now.toISOString();
-        
-      case 'weekly':
-        now.setDate(now.getDate() + 7);
-        return now.toISOString();
-        
-      case 'monthly':
-        now.setMonth(now.getMonth() + 1);
-        return now.toISOString();
-        
-      case 'custom':
-        if (cronExpression) {
-          // For now, return next hour - implement proper cron parsing later
-          now.setHours(now.getHours() + 1);
-          return now.toISOString();
-        }
-        return null;
-        
-      case 'one-time':
-      default:
-        return null; // One-time jobs don't repeat
-    }
+  /**
+   * Get monitor status
+   */
+  getStatus(): { isRunning: boolean; nextCheck?: string } {
+    return {
+      isRunning: this.isRunning,
+      nextCheck: this.cronJob ? 'Every minute' : undefined
+    };
   }
 
-  // Manual trigger for testing
-  async triggerJobCheck(): Promise<void> {
-    console.log('Manually triggering job check...');
-    await this.checkPendingJobs();
-    await this.checkScheduledJobs();
+  /**
+   * Manually trigger job processing (for testing)
+   */
+  async triggerNow(): Promise<void> {
+    console.log('Manually triggering job processing...');
+    await this.checkAndProcessJobs();
   }
 }
+
+// Export singleton instance
+export const jobMonitor = JobMonitor.getInstance();

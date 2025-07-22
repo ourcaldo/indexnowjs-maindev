@@ -48,6 +48,20 @@ export function JobProcessorTest() {
     }
   };
 
+  const getWorkerStatus = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/system/worker-status');
+      const data = await response.json();
+      setSystemStatus(data);
+    } catch (error) {
+      console.error('Error getting worker status:', error);
+      setSystemStatus({ error: 'Failed to get worker status' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="bg-white border-[#E0E6ED]">
@@ -83,6 +97,16 @@ export function JobProcessorTest() {
             >
               <Activity className="h-4 w-4" />
               System Status
+            </Button>
+            
+            <Button
+              onClick={getWorkerStatus}
+              disabled={loading}
+              variant="outline"
+              className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A] flex items-center gap-2"
+            >
+              <Activity className="h-4 w-4" />
+              Worker Status
             </Button>
           </div>
 

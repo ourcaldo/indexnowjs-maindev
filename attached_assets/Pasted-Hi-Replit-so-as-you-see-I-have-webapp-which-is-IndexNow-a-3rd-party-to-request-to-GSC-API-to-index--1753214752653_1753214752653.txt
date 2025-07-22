@@ -1,0 +1,43 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+After that, I want you to help me to fix the API backend that handle Indexing jobs request (you do need to deep dive the codebase first to get to know how this webapp work).
+
+The problem is:
+1. Actually we didn't need to add the Trigger Jobs Processing "dashboard/test-backend" bcs I want a worker that monitoring for each minutes and it'll be automatcily in backend to get the pending jobs and trigger it. But, for this time, let's still use it for development and debugging.
+The problem is, when I click trigger jobs processing it's error with details:
+Processing Results:
+{
+  "error": "Unauthorized"
+}
+And for the system status check is normal and give valid respons:
+System Status:
+{
+  "system": "IndexNow Pro",
+  "timestamp": "2025-07-22T19:59:39.299Z",
+  "uptime": 1262.28160743,
+  "jobStats": {
+    "pending": 1,
+    "running": 0,
+    "completed": 0,
+    "failed": 0,
+    "total": 1
+  },
+  "database": "Supabase Connected",
+  "googleApi": "Available"
+}
+2. In manage jobs page and single jobs page, there's action button to Start/Pause the jobs and re-run the jobs. But, I think it's not work. When I click Start, it's still pending and when re-run is 501 Internal Error with this error:
+Error updating job: {
+  code: '23514',
+  details: 'Failing row contains (d3137839-c00b-48dc-99d4-8f81392f0cb9, 915f50e5-0902-466a-b1af-bdf19d789722, #Job-1, manual, retry, one-time, null, {"urls": ["https://nexjob.tech/"]}, 1, 0, 0, 0, 0.00, null, null, null, null, 2025-07-22 16:46:23.153+00, 2025-07-22 20:03:52.868902+00, null, null).',
+  hint: null,
+  message: 'new row for relation "indb_indexing_jobs" violates check constraint "indb_indexing_jobs_status_check"'
+}
+3. There's still no worker (like a cronjob) to monitor the pending jobs, this worker is crucial, bcs they will be monitor and get the pending jobs and trigger the job so the job can be processed.
+
+Please don't forget and you must read the replit.md to get current tables and column name.
