@@ -151,7 +151,7 @@ export default function ManageJobsPage() {
     });
   };
 
-  const generateJobId = (id: string) => `#job-${id}`;
+  const generateJobId = (id: string) => `#${id}`;
 
   // Pagination
   const totalPages = Math.ceil(totalCount / jobsPerPage);
@@ -424,10 +424,10 @@ export default function ManageJobsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-white border-[#E0E6ED]">
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">
                             <Link 
                               href={`/dashboard/manage-jobs/${job.id}`}
-                              className="flex items-center gap-2 cursor-pointer hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]"
+                              className="flex items-center gap-2 cursor-pointer"
                             >
                               <Eye className="h-4 w-4" />
                               See details

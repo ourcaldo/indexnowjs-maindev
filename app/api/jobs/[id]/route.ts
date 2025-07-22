@@ -1,69 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+import { authService } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const authorization = request.headers.get('authorization')
-    if (!authorization) {
-      return NextResponse.json(
-        { error: 'Authorization header required' },
-        { status: 401 }
-      )
-    }
-
-    const token = authorization.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    
+    // Get user from auth token
+    const { user, error: authError } = await authService.getUserFromRequest(request);
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch specific job
-    const { data: job, error: jobError } = await supabase
+    const jobId = params.id;
+
+    // Get job details
+    const { data: job, error } = await supabaseAdmin
       .from('indb_indexing_jobs')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', jobId)
       .eq('user_id', user.id)
-      .single()
+      .single();
 
-    if (jobError || !job) {
-      return NextResponse.json(
-        { error: 'Job not found' },
-        { status: 404 }
-      )
+    if (error) {
+      console.error('Error fetching job:', error);
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+      }
+      return NextResponse.json({ error: 'Failed to fetch job' }, { status: 500 });
     }
 
-    // Fetch URL submissions for this job
-    const { data: submissions, error: submissionsError } = await supabase
-      .from('indb_indexing_url_submissions')
-      .select('*')
-      .eq('job_id', params.id)
-      .order('created_at', { ascending: false })
-
-    if (submissionsError) {
-      return NextResponse.json(
-        { error: 'Failed to fetch submissions' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({
-      job,
-      submissions: submissions || [],
-    })
-
+    return NextResponse.json({ job });
   } catch (error) {
-    console.error('Job fetch error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Error in job GET route:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -72,53 +43,39 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await request.json()
-    const authorization = request.headers.get('authorization')
-    
-    if (!authorization) {
-      return NextResponse.json(
-        { error: 'Authorization header required' },
-        { status: 401 }
-      )
-    }
-
-    const token = authorization.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    
+    // Get user from auth token
+    const { user, error: authError } = await authService.getUserFromRequest(request);
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Update job
-    const { data: job, error: updateError } = await supabase
+    const jobId = params.id;
+    const body = await request.json();
+
+    // Update job status
+    const { data: job, error } = await supabaseAdmin
       .from('indb_indexing_jobs')
-      .update(body)
-      .eq('id', params.id)
+      .update({
+        status: body.status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', jobId)
       .eq('user_id', user.id)
       .select()
-      .single()
+      .single();
 
-    if (updateError || !job) {
-      return NextResponse.json(
-        { error: 'Failed to update job or job not found' },
-        { status: 404 }
-      )
+    if (error) {
+      console.error('Error updating job:', error);
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+      }
+      return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
     }
 
-    return NextResponse.json({
-      job,
-      message: 'Job updated successfully',
-    })
-
+    return NextResponse.json({ job });
   } catch (error) {
-    console.error('Job update error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Error in job PUT route:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -127,47 +84,29 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const authorization = request.headers.get('authorization')
-    if (!authorization) {
-      return NextResponse.json(
-        { error: 'Authorization header required' },
-        { status: 401 }
-      )
-    }
-
-    const token = authorization.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    
+    // Get user from auth token
+    const { user, error: authError } = await authService.getUserFromRequest(request);
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Delete job (URL submissions will be cascade deleted)
-    const { error: deleteError } = await supabase
+    const jobId = params.id;
+
+    // Delete job and related submissions
+    const { error } = await supabaseAdmin
       .from('indb_indexing_jobs')
       .delete()
-      .eq('id', params.id)
-      .eq('user_id', user.id)
+      .eq('id', jobId)
+      .eq('user_id', user.id);
 
-    if (deleteError) {
-      return NextResponse.json(
-        { error: 'Failed to delete job' },
-        { status: 500 }
-      )
+    if (error) {
+      console.error('Error deleting job:', error);
+      return NextResponse.json({ error: 'Failed to delete job' }, { status: 500 });
     }
 
-    return NextResponse.json({
-      message: 'Job deleted successfully',
-    })
-
+    return NextResponse.json({ message: 'Job deleted successfully' });
   } catch (error) {
-    console.error('Job delete error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Error in job DELETE route:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
