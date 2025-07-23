@@ -65,6 +65,19 @@ export default function Dashboard() {
     }
   });
 
+  // Listen for real-time dashboard stats updates
+  useEffect(() => {
+    const handleDashboardStatsUpdate = (event: any) => {
+      const { detail: newStats } = event;
+      setStats(prevStats => ({ ...prevStats, ...newStats }));
+    };
+
+    window.addEventListener('dashboard-stats-update', handleDashboardStatsUpdate);
+    return () => {
+      window.removeEventListener('dashboard-stats-update', handleDashboardStatsUpdate);
+    };
+  }, []);
+
   // Load dashboard data
   useEffect(() => {
     loadDashboardData();

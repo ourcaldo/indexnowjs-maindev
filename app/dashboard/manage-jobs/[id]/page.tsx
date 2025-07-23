@@ -155,6 +155,25 @@ export default function JobDetailsPage() {
     }
   });
 
+  // Listen for real-time URL submission updates
+  useEffect(() => {
+    const handleUrlSubmissionUpdate = (event: any) => {
+      const { detail: submission } = event;
+      if (submission.job_id === jobId) {
+        setSubmissions(prevSubmissions => 
+          prevSubmissions.map(sub => 
+            sub.id === submission.id ? { ...sub, ...submission } : sub
+          )
+        );
+      }
+    };
+
+    window.addEventListener('url-submission-update', handleUrlSubmissionUpdate);
+    return () => {
+      window.removeEventListener('url-submission-update', handleUrlSubmissionUpdate);
+    };
+  }, [jobId]);
+
   // Load job and submissions data
   useEffect(() => {
     loadJobData();

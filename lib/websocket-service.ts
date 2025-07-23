@@ -1,5 +1,6 @@
 import { Server } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
+import { supabaseAdmin } from './supabase';
 
 interface JobUpdate {
   jobId: string;
@@ -40,23 +41,41 @@ export class WebSocketService {
       verifyClient: async (info: any) => {
         try {
           const url = new URL(info.req.url!, 'http://localhost');
+          const token = url.searchParams.get('token');
           const userId = url.searchParams.get('userId');
           
-          if (!userId) {
-            console.log('WebSocket connection rejected: Missing userId');
+          if (!token || !userId) {
+            console.log('WebSocket connection rejected: Missing token or userId');
             return false;
           }
 
-          // For now, we'll verify userId format is UUID-like
-          // In production, you might want to verify against Supabase JWT token
-          const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          if (!uuidPattern.test(userId)) {
-            console.log('WebSocket connection rejected: Invalid userId format');
+          // Verify JWT token with Supabase
+          try {
+            const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+            
+            if (error || !user || user.id !== userId) {
+              console.log('WebSocket connection rejected: Invalid JWT token or userId mismatch');
+              return false;
+            }
+
+            // Verify user exists in our user profiles table
+            const { data: profile, error: profileError } = await supabaseAdmin
+              .from('indb_auth_user_profiles')
+              .select('id')
+              .eq('user_id', userId)
+              .single();
+
+            if (profileError || !profile) {
+              console.log('WebSocket connection rejected: User profile not found');
+              return false;
+            }
+
+            console.log(`WebSocket connection verified for user: ${userId}`);
+            return true;
+          } catch (authError) {
+            console.log('WebSocket connection rejected: Token verification failed', authError);
             return false;
           }
-
-          console.log(`WebSocket connection verified for user: ${userId}`);
-          return true;
         } catch (error) {
           console.error('WebSocket verification error:', error);
           return false;
@@ -164,6 +183,33 @@ export class WebSocketService {
         this.sendToClient(clientId, message);
       }
     });
+  }
+
+  // Broadcast real-time dashboard statistics
+  broadcastDashboardStats(userId: string, stats: any): void {
+    const message = {
+      type: 'dashboard_stats',
+      stats
+    };
+    this.broadcastToUser(userId, message);
+  }
+
+  // Broadcast URL submission updates
+  broadcastUrlSubmissionUpdate(userId: string, submission: any): void {
+    const message = {
+      type: 'url_submission_update',
+      submission
+    };
+    this.broadcastToUser(userId, message);
+  }
+
+  // Broadcast job list updates for manage jobs page
+  broadcastJobListUpdate(userId: string, jobs: any[]): void {
+    const message = {
+      type: 'job_list_update',
+      jobs
+    };
+    this.broadcastToUser(userId, message);
   }
 
   private sendToClient(clientId: string, message: any): void {

@@ -124,6 +124,19 @@ export default function ManageJobsPage() {
     }
   });
 
+  // Listen for real-time job list updates
+  useEffect(() => {
+    const handleJobListUpdate = (event: any) => {
+      const { detail: updatedJobs } = event;
+      setJobs(updatedJobs);
+    };
+
+    window.addEventListener('job-list-update', handleJobListUpdate);
+    return () => {
+      window.removeEventListener('job-list-update', handleJobListUpdate);
+    };
+  }, []);
+
   // Load jobs data
   useEffect(() => {
     loadJobs();

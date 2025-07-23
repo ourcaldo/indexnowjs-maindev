@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { authService, AuthUser } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 interface WebSocketMessage {
   type: string;
@@ -65,64 +66,109 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Create WebSocket connection
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws?userId=${user.id}${jobId ? `&jobId=${jobId}` : ''}`;
-    
-    console.log('🔌 Connecting to WebSocket:', wsUrl);
-    
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      console.log('✅ WebSocket connected');
-      setIsConnected(true);
-      
-      // Subscribe to specific job if provided
-      if (jobId) {
-        ws.send(JSON.stringify({
-          type: 'subscribe_job',
-          jobId: jobId
-        }));
-      }
-    };
-
-    ws.onmessage = (event) => {
+    const connectWebSocket = async () => {
       try {
-        const message: WebSocketMessage = JSON.parse(event.data);
-        console.log('📨 WebSocket message:', message);
+        // Get current JWT token for authentication
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        setLastMessage(message);
-
-        // Call specific handlers based on message type
-        if (message.type === 'job_update' || message.type === 'job_progress') {
-          onJobUpdate?.(message);
-          if (message.type === 'job_progress') {
-            onJobProgress?.(message);
-          }
-        } else if (message.type === 'job_completed') {
-          onJobCompleted?.(message);
-          onJobUpdate?.(message);
+        if (error || !session?.access_token) {
+          console.error('No valid session for WebSocket connection');
+          return;
         }
+
+        // Create WebSocket connection with JWT token
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws?userId=${user.id}&token=${session.access_token}${jobId ? `&jobId=${jobId}` : ''}`;
+        
+        console.log('🔌 Connecting to WebSocket with JWT authentication');
+        
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
+
+        ws.onopen = () => {
+          console.log('✅ WebSocket connected with JWT authentication');
+          setIsConnected(true);
+          
+          // Subscribe to specific job if provided
+          if (jobId) {
+            ws.send(JSON.stringify({
+              type: 'subscribe_job',
+              jobId: jobId
+            }));
+          }
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const message: WebSocketMessage = JSON.parse(event.data);
+            console.log('📨 WebSocket message received:', message);
+            
+            setLastMessage(message);
+
+            // Handle different message types
+            switch (message.type) {
+              case 'job_update':
+                onJobUpdate?.(message);
+                break;
+              case 'job_progress':
+                onJobProgress?.(message);
+                break;
+              case 'job_completed':
+                onJobCompleted?.(message);
+                break;
+              case 'connection':
+                console.log('WebSocket connection confirmed');
+                break;
+              case 'dashboard_stats':
+                // Handle real-time dashboard stats updates
+                if (message.stats) {
+                  window.dispatchEvent(new CustomEvent('dashboard-stats-update', { 
+                    detail: message.stats 
+                  }));
+                }
+                break;
+              case 'url_submission_update':
+                // Handle real-time URL submission updates
+                if (message.submission) {
+                  window.dispatchEvent(new CustomEvent('url-submission-update', { 
+                    detail: message.submission 
+                  }));
+                }
+                break;
+              case 'job_list_update':
+                // Handle real-time job list updates for manage jobs page
+                if (message.jobs) {
+                  window.dispatchEvent(new CustomEvent('job-list-update', { 
+                    detail: message.jobs 
+                  }));
+                }
+                break;
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+          }
+        };
+
+        ws.onclose = (event) => {
+          console.log('❌ WebSocket disconnected:', event.code, event.reason);
+          setIsConnected(false);
+        };
+
+        ws.onerror = (error) => {
+          console.error('❌ WebSocket error:', error);
+          setIsConnected(false);
+        };
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        console.error('Failed to establish WebSocket connection:', error);
       }
     };
 
-    ws.onclose = () => {
-      console.log('🔌 WebSocket disconnected');
-      setIsConnected(false);
-    };
+    connectWebSocket();
 
-    ws.onerror = (error) => {
-      console.error('❌ WebSocket error:', error);
-      setIsConnected(false);
-    };
-
-    // Cleanup on unmount
+    // Cleanup function
     return () => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.close();
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
       }
     };
   }, [user?.id, jobId, onJobUpdate, onJobCompleted, onJobProgress]);
