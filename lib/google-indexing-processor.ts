@@ -98,9 +98,7 @@ export class GoogleIndexingProcessor {
 
       // Mark job as completed
       await this.updateJobStatus(jobId, 'completed', { 
-        completed_at: new Date().toISOString(),
-        locked_at: null,
-        locked_by: null
+        completed_at: new Date().toISOString()
       });
 
       console.log(`✅ Indexing job ${jobId} completed successfully`);
@@ -395,13 +393,10 @@ export class GoogleIndexingProcessor {
       const { data, error } = await supabaseAdmin
         .from('indb_indexing_jobs')
         .update({
-          locked_at: lockTime,
-          locked_by: lockId,
           status: 'running'
         })
         .eq('id', jobId)
         .eq('status', 'pending')
-        .is('locked_at', null)
         .select();
 
       if (error) {
