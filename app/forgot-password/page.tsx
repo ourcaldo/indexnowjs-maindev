@@ -322,11 +322,26 @@ export default function ForgotPassword() {
           color: '#ffffff',
           position: 'relative'
         }}>
-          <DashboardPreview 
-            title="Get back to your indexing dashboard."
-            subtitle="Your analytics and performance data are waiting for you to return."
-            variant="forgot"
-          />
+          <div style={{
+            padding: '40px',
+            textAlign: 'center'
+          }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '600',
+              color: '#ffffff',
+              marginBottom: '16px'
+            }}>
+              Get back to your indexing dashboard.
+            </h2>
+            <p style={{
+              fontSize: '16px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              lineHeight: '1.5'
+            }}>
+              Your analytics and performance data are waiting for you to return.
+            </p>
+          </div>
         </div>
       )}
     </div>

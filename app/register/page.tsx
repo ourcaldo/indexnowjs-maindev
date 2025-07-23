@@ -529,11 +529,26 @@ export default function Register() {
           color: '#ffffff',
           position: 'relative'
         }}>
-          <DashboardPreview 
-            title="Join thousands of developers getting results."
-            subtitle="Create your account and start indexing your URLs instantly with powerful analytics."
-            variant="register"
-          />
+          <div style={{
+            padding: '40px',
+            textAlign: 'center'
+          }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '600',
+              color: '#ffffff',
+              marginBottom: '16px'
+            }}>
+              Join thousands of developers getting results.
+            </h2>
+            <p style={{
+              fontSize: '16px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              lineHeight: '1.5'
+            }}>
+              Create your account and start indexing your URLs instantly with powerful analytics.
+            </p>
+          </div>
         </div>
       )}
     </div>
