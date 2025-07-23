@@ -324,6 +324,9 @@ export class GoogleIndexingProcessor {
         } catch (error) {
           console.error(`❌ Failed to index ${submission.url}:`, error);
           
+          // Get the service account for this submission
+          const serviceAccount = serviceAccounts[processed % serviceAccounts.length];
+          
           // Update submission as failed
           await supabaseAdmin
             .from('indb_indexing_url_submissions')
@@ -331,12 +334,12 @@ export class GoogleIndexingProcessor {
               status: 'failed',
               error_message: error instanceof Error ? error.message : 'Indexing failed',
               retry_count: submission.retry_count + 1,
+              service_account_id: serviceAccount.id,
               updated_at: new Date().toISOString()
             })
             .eq('id', submission.id);
 
           // Update quota usage for the service account (still counts as a request attempt)
-          const serviceAccount = serviceAccounts[processed % serviceAccounts.length];
           await this.updateQuotaUsage(serviceAccount.id, false);
 
           failed++;

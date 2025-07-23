@@ -460,6 +460,11 @@ JWT_SECRET=[jwt-secret-key]
   - "Submitted" status now shows as "Success" in green color (#4BB543)
   - Replaced clock icon with green checkmark icon for successful submissions
   - Improved visual clarity in job detail page URL submissions table
+- **Fixed service_account_id NULL issue in URL submissions**:
+  - Identified and resolved bug where service_account_id was NULL in indb_indexing_url_submissions
+  - Updated Google indexing processor to properly set service_account_id for both successful and failed submissions
+  - Created fix API endpoint that retroactively updated 13 existing submissions with proper service account IDs
+  - All URL submissions now properly track which service account was used for each submission
 - **Enhanced job detail page with dynamic action buttons**:
   - Start button: Only visible when job status is "pending" (Green color)
   - Stop button: Only visible when job status is "running" (Red color)
