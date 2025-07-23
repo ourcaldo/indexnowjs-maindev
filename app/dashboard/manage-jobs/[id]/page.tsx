@@ -28,7 +28,7 @@ import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useSocketIO } from '@/hooks/useSocketIO';
 
 interface Job {
   id: string;
@@ -121,8 +121,8 @@ export default function JobDetailsPage() {
   const [totalSubmissions, setTotalSubmissions] = useState(0);
   const itemsPerPage = 20;
 
-  // WebSocket for real-time job updates
-  const { isConnected } = useWebSocket({
+  // Socket.io for real-time job updates
+  const { isConnected } = useSocketIO({
     jobId: jobId,
     onJobUpdate: (message) => {
       console.log('📨 Job update received on detail page:', message);

@@ -1,15 +1,11 @@
-import { Server } from 'http';
-import { WebSocketService } from '../lib/websocket-service';
 import { JobMonitor } from '../lib/job-monitor';
 
 export class BackgroundServices {
   private static instance: BackgroundServices;
-  private websocketService: WebSocketService;
   private jobMonitor: JobMonitor;
   private isInitialized = false;
 
   constructor() {
-    this.websocketService = WebSocketService.getInstance();
     this.jobMonitor = JobMonitor.getInstance();
   }
 
@@ -20,7 +16,7 @@ export class BackgroundServices {
     return BackgroundServices.instance;
   }
 
-  initialize(server: Server): void {
+  initialize(): void {
     if (this.isInitialized) {
       console.log('Background services already initialized');
       return;
@@ -28,10 +24,7 @@ export class BackgroundServices {
 
     console.log('Initializing background services...');
 
-    // Initialize WebSocket service
-    this.websocketService.initialize(server);
-
-    // Start job monitoring
+    // Start job monitoring (Socket.io is handled by Next.js API routes)
     this.jobMonitor.start();
 
     this.isInitialized = true;
@@ -51,8 +44,7 @@ export class BackgroundServices {
 
   getStatus() {
     return {
-      initialized: this.isInitialized,
-      websocketClients: this.websocketService.getConnectedClients()
+      initialized: this.isInitialized
     };
   }
 }
