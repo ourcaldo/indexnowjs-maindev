@@ -1,6 +1,6 @@
 import { supabaseAdmin } from './supabase';
 import { GoogleAuthService } from './google-auth-service';
-import { WebSocketService } from './websocket-service';
+import { SocketIOBroadcaster } from './socketio-broadcaster';
 import { JobLoggingService } from './job-logging-service';
 
 interface IndexingJob {
@@ -41,13 +41,13 @@ interface UrlSubmission {
 export class GoogleIndexingProcessor {
   private static instance: GoogleIndexingProcessor;
   private googleAuth: GoogleAuthService;
-  private websocketService: WebSocketService;
+  private socketBroadcaster: SocketIOBroadcaster;
   private jobLogger: JobLoggingService;
   private processingJobs = new Set<string>();
 
   constructor() {
     this.googleAuth = GoogleAuthService.getInstance();
-    this.websocketService = WebSocketService.getInstance();
+    this.socketBroadcaster = SocketIOBroadcaster.getInstance();
     this.jobLogger = JobLoggingService.getInstance();
   }
 
@@ -139,7 +139,7 @@ export class GoogleIndexingProcessor {
       });
 
       // Send real-time completion update
-      this.websocketService.broadcastJobUpdate(job.user_id, jobId, {
+      this.socketBroadcaster.broadcastJobUpdate(job.user_id, jobId, {
         status: 'completed',
         progress: {
           total_urls: finalJob?.total_urls || 0,
@@ -410,7 +410,7 @@ export class GoogleIndexingProcessor {
 
           // Broadcast real-time URL submission update
           if (updatedSubmission) {
-            this.websocketService.broadcastUrlStatusChange(job.user_id, job.id, updatedSubmission);
+            this.socketBroadcaster.broadcastUrlStatusChange(job.user_id, job.id, updatedSubmission);
           }
 
           // Update quota usage for the service account (-1 for successful request)
@@ -449,7 +449,7 @@ export class GoogleIndexingProcessor {
 
           // Broadcast real-time URL submission update
           if (failedSubmission) {
-            this.websocketService.broadcastUrlStatusChange(job.user_id, job.id, failedSubmission);
+            this.socketBroadcaster.broadcastUrlStatusChange(job.user_id, job.id, failedSubmission);
           }
 
           // Update quota usage for the service account (still counts as a request attempt)
@@ -478,8 +478,8 @@ export class GoogleIndexingProcessor {
           await this.jobLogger.logProgressUpdate(job.id, progressPercentage, processed, submissions.length);
         }
 
-        // Send real-time progress update via WebSocket
-        this.websocketService.broadcastJobUpdate(job.user_id, job.id, {
+        // Send real-time progress update via Socket.io
+        this.socketBroadcaster.broadcastJobUpdate(job.user_id, job.id, {
           status: 'running',
           progress: {
             total_urls: submissions.length,
@@ -491,7 +491,7 @@ export class GoogleIndexingProcessor {
         });
 
         // Send enhanced progress broadcast with current URL info
-        this.websocketService.broadcastJobProgress(job.user_id, job.id, {
+        this.socketBroadcaster.broadcastJobProgress(job.user_id, job.id, {
           total_urls: submissions.length,
           processed_urls: processed,
           successful_urls: successful,
@@ -619,7 +619,7 @@ export class GoogleIndexingProcessor {
         // Get user_id from the job data
         const job = await this.getJobDetails(jobId);
         if (job) {
-          this.websocketService.broadcastJobUpdate(job.user_id, jobId, {
+          this.socketBroadcaster.broadcastJobUpdate(job.user_id, jobId, {
             status: 'running',
             progress: {
               total_urls: job.total_urls,

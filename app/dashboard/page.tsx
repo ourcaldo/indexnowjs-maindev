@@ -2,7 +2,7 @@
 
 import { PlusIcon, BellIcon, TrendingUpIcon, CalendarIcon, CheckCircleIcon, Database } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { useSocketIO } from '@/hooks/useSocketIO'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
@@ -40,8 +40,8 @@ export default function Dashboard() {
   const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // WebSocket for real-time updates
-  const { isConnected } = useWebSocket({
+  // Socket.io for real-time updates
+  const { isConnected } = useSocketIO({
     onJobUpdate: (message) => {
       // Update job status in real-time
       setRecentJobs(prevJobs => 

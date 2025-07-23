@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useSocketIO } from '@/hooks/useSocketIO';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -91,8 +91,8 @@ export default function ManageJobsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const jobsPerPage = 20;
 
-  // WebSocket for real-time updates
-  const { isConnected } = useWebSocket({
+  // Socket.io for real-time updates
+  const { isConnected } = useSocketIO({
     onJobUpdate: (message) => {
       console.log('📨 Job update received:', message);
       // Update the specific job in the list

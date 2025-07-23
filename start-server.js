@@ -1,14 +1,17 @@
-// Replit-compatible Next.js launcher with WebSocket support
-import { spawn } from 'child_process';
+#!/usr/bin/env node
 
-const port = process.env.PORT || '5000';
+// Custom server launcher for IndexNow Pro with WebSocket support
+// This script ensures the WebSocket server is properly initialized
+
+const { spawn } = require('child_process');
+const path = require('path');
 
 console.log('🚀 Starting IndexNow Pro with WebSocket support...');
 
-// Use the custom server with WebSocket support instead of default Next.js dev server
+// Start the custom server with tsx
 const serverProcess = spawn('npx', ['tsx', 'server/custom-server.ts'], {
   stdio: 'inherit',
-  env: { ...process.env, PORT: port },
+  env: { ...process.env },
   cwd: process.cwd()
 });
 
