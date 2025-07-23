@@ -102,10 +102,11 @@ export default function ManageJobsPage() {
             return {
               ...job,
               status: (message.status as Job['status']) || job.status,
-              progress_percentage: message.progress !== undefined ? message.progress : job.progress_percentage,
-              processed_urls: message.processedUrls || job.processed_urls,
-              successful_urls: message.successfulUrls || job.successful_urls,
-              failed_urls: message.failedUrls || job.failed_urls,
+              progress_percentage: message.progress?.progress_percentage ?? job.progress_percentage,
+              processed_urls: message.progress?.processed_urls ?? job.processed_urls,
+              successful_urls: message.progress?.successful_urls ?? job.successful_urls,
+              failed_urls: message.progress?.failed_urls ?? job.failed_urls,
+              total_urls: message.progress?.total_urls ?? job.total_urls,
               updated_at: new Date().toISOString()
             };
           }

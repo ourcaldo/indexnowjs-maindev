@@ -5,11 +5,15 @@ interface WebSocketMessage {
   type: string;
   jobId?: string;
   status?: string;
-  progress?: number;
-  processedUrls?: number;
-  successfulUrls?: number;
-  failedUrls?: number;
-  totalUrls?: number;
+  progress?: {
+    total_urls: number;
+    processed_urls: number;
+    successful_urls: number;
+    failed_urls: number;
+    progress_percentage: number;
+  };
+  current_url?: string;
+  error_message?: string;
   completedAt?: string;
   [key: string]: any;
 }

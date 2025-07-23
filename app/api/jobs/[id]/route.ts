@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/database';
 import { createClient } from '@supabase/supabase-js';
+import { JobLoggingService } from '@/lib/job-logging-service';
 
 export async function GET(
   request: NextRequest,
@@ -118,6 +119,20 @@ export async function PUT(
       updateData.completed_at = null;
       updateData.error_message = null;
 
+      // Log job retry action
+      const jobLogger = JobLoggingService.getInstance();
+      await jobLogger.logJobEvent({
+        job_id: jobId,
+        level: 'INFO',
+        message: 'Job marked for retry - resetting progress and clearing submissions',
+        metadata: {
+          event_type: 'job_retry',
+          user_id: user.id,
+          triggered_by: 'api_endpoint',
+          reset_fields: ['progress_percentage', 'processed_urls', 'successful_urls', 'failed_urls', 'started_at', 'completed_at', 'error_message']
+        }
+      });
+
       // Delete existing URL submissions for this job so it can be reprocessed
       await supabaseAdmin
         .from('indb_indexing_url_submissions')
@@ -178,6 +193,19 @@ export async function DELETE(
     }
 
     const { id: jobId } = await params;
+
+    // Log job deletion
+    const jobLogger = JobLoggingService.getInstance();
+    await jobLogger.logJobEvent({
+      job_id: jobId,
+      level: 'INFO',
+      message: 'Job deleted by user',
+      metadata: {
+        event_type: 'job_deleted',
+        user_id: user.id,
+        triggered_by: 'api_endpoint'
+      }
+    });
 
     // Delete job and related submissions
     const { error } = await supabaseAdmin

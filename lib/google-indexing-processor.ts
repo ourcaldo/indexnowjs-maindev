@@ -1,6 +1,7 @@
 import { supabaseAdmin } from './supabase';
 import { GoogleAuthService } from './google-auth-service';
 import { WebSocketService } from './websocket-service';
+import { JobLoggingService } from './job-logging-service';
 
 interface IndexingJob {
   id: string;
@@ -14,6 +15,10 @@ interface IndexingJob {
   successful_urls: number;
   failed_urls: number;
   progress_percentage: number;
+  started_at?: string;
+  completed_at?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface UrlSubmission {
@@ -37,11 +42,13 @@ export class GoogleIndexingProcessor {
   private static instance: GoogleIndexingProcessor;
   private googleAuth: GoogleAuthService;
   private websocketService: WebSocketService;
+  private jobLogger: JobLoggingService;
   private processingJobs = new Set<string>();
 
   constructor() {
     this.googleAuth = GoogleAuthService.getInstance();
     this.websocketService = WebSocketService.getInstance();
+    this.jobLogger = JobLoggingService.getInstance();
   }
 
   static getInstance(): GoogleIndexingProcessor {
@@ -76,6 +83,9 @@ export class GoogleIndexingProcessor {
         return { success: false, error: 'Job not found' };
       }
 
+      // Log job start
+      await this.jobLogger.logJobStarted(jobId, job.name, job.total_urls || 0);
+
       // Update job status to running
       await this.updateJobStatus(jobId, 'running', { 
         started_at: new Date().toISOString(),
@@ -93,21 +103,51 @@ export class GoogleIndexingProcessor {
 
       console.log(`📋 Found ${urls.length} URLs to process`);
 
+      // Log URL extraction
+      await this.jobLogger.logJobEvent({
+        job_id: jobId,
+        level: 'INFO',
+        message: `Found ${urls.length} URLs to process`,
+        metadata: {
+          event_type: 'urls_extracted',
+          url_count: urls.length,
+          job_type: job.type
+        }
+      });
+
       // Create URL submissions for tracking
       await this.createUrlSubmissionsForJob(jobId, urls);
 
       // Process all URLs through Google's Indexing API
       await this.processUrlSubmissionsWithGoogleAPI(job);
 
+      // Get final stats
+      const finalJob = await this.getJobDetails(jobId);
+      const processingTimeMs = finalJob?.started_at ? new Date().getTime() - new Date(finalJob.started_at).getTime() : undefined;
+
       // Mark job as completed
       await this.updateJobStatus(jobId, 'completed', { 
         completed_at: new Date().toISOString()
       });
 
+      // Log job completion
+      await this.jobLogger.logJobCompleted(jobId, job.name, {
+        total_urls: finalJob?.total_urls || 0,
+        successful_urls: finalJob?.successful_urls || 0,
+        failed_urls: finalJob?.failed_urls || 0,
+        processing_time_ms: processingTimeMs
+      });
+
       // Send real-time completion update
       this.websocketService.broadcastJobUpdate(job.user_id, jobId, {
         status: 'completed',
-        progress: 100
+        progress: {
+          total_urls: finalJob?.total_urls || 0,
+          processed_urls: finalJob?.processed_urls || 0,
+          successful_urls: finalJob?.successful_urls || 0,
+          failed_urls: finalJob?.failed_urls || 0,
+          progress_percentage: 100
+        }
       });
 
       console.log(`✅ Indexing job ${jobId} completed successfully`);
@@ -115,6 +155,17 @@ export class GoogleIndexingProcessor {
 
     } catch (error) {
       console.error(`❌ Indexing job ${jobId} failed:`, error);
+      
+      // Get job details for logging
+      const job = await this.getJobDetails(jobId);
+      
+      // Log job failure
+      if (job) {
+        await this.jobLogger.logJobFailed(jobId, job.name, error instanceof Error ? error.message : 'Unknown error', {
+          error_type: error instanceof Error ? error.constructor.name : 'UnknownError',
+          stack_trace: error instanceof Error ? error.stack : undefined
+        });
+      }
       
       // Mark job as failed
       await this.updateJobStatus(jobId, 'failed', { 
@@ -294,15 +345,24 @@ export class GoogleIndexingProcessor {
           // Round-robin service account selection for load balancing
           const serviceAccount = serviceAccounts[processed % serviceAccounts.length];
           
+          // Log service account usage
+          await this.jobLogger.logServiceAccountUsage(job.id, serviceAccount.email, 'selected_for_url_processing');
+          
           // Get access token for Google API
           const accessToken = await this.googleAuth.getAccessToken(serviceAccount.id);
           if (!accessToken) {
             console.log(`⚠️ Skipping service account ${serviceAccount.id} - no valid access token (likely missing credentials)`);
+            await this.jobLogger.logWarning(job.id, `Skipping service account ${serviceAccount.email} - no valid access token`, {
+              service_account_id: serviceAccount.id,
+              service_account_email: serviceAccount.email
+            });
             continue; // Skip this service account and try the next one
           }
 
           // Submit URL to Google's Indexing API
+          const startTime = Date.now();
           await this.submitUrlToGoogleIndexingAPI(submission.url, accessToken);
+          const responseTime = Date.now() - startTime;
           
           // Update submission as successful
           await supabaseAdmin
@@ -318,6 +378,11 @@ export class GoogleIndexingProcessor {
           // Update quota usage for the service account (-1 for successful request)
           await this.updateQuotaUsage(serviceAccount.id, true);
 
+          // Log successful URL processing
+          await this.jobLogger.logUrlProcessed(job.id, submission.url, true, undefined, responseTime);
+          const remainingQuota = await this.getRemainingQuota(serviceAccount.id);
+          await this.jobLogger.logQuotaUsage(job.id, serviceAccount.id, remainingQuota);
+
           successful++;
           console.log(`✅ Successfully indexed: ${submission.url}`);
 
@@ -326,6 +391,9 @@ export class GoogleIndexingProcessor {
           
           // Get the service account for this submission
           const serviceAccount = serviceAccounts[processed % serviceAccounts.length];
+          
+          // Log failed URL processing
+          await this.jobLogger.logUrlProcessed(job.id, submission.url, false, error instanceof Error ? error.message : 'Unknown error');
           
           // Update submission as failed
           await supabaseAdmin
@@ -360,10 +428,21 @@ export class GoogleIndexingProcessor {
           })
           .eq('id', job.id);
 
+        // Log progress update every 10 processed URLs or on completion
+        if (processed % 10 === 0 || processed === submissions.length) {
+          await this.jobLogger.logProgressUpdate(job.id, progressPercentage, processed, submissions.length);
+        }
+
         // Send real-time progress update via WebSocket
         this.websocketService.broadcastJobUpdate(job.user_id, job.id, {
           status: 'running',
-          progress: progressPercentage
+          progress: {
+            total_urls: submissions.length,
+            processed_urls: processed,
+            successful_urls: successful,
+            failed_urls: failed,
+            progress_percentage: progressPercentage
+          }
         });
 
         // Respect Google API rate limits
@@ -488,7 +567,13 @@ export class GoogleIndexingProcessor {
         if (job) {
           this.websocketService.broadcastJobUpdate(job.user_id, jobId, {
             status: 'running',
-            progress: 0
+            progress: {
+              total_urls: job.total_urls,
+              processed_urls: 0,
+              successful_urls: 0,
+              failed_urls: 0,
+              progress_percentage: 0
+            }
           });
         }
       }
@@ -543,6 +628,38 @@ export class GoogleIndexingProcessor {
         .eq('id', jobId);
     } catch (error) {
       console.error('Error updating job status:', error);
+    }
+  }
+
+  /**
+   * Get remaining quota for a service account
+   */
+  private async getRemainingQuota(serviceAccountId: string): Promise<number> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Get service account quota limit
+      const { data: serviceAccount } = await supabaseAdmin
+        .from('indb_google_service_accounts')
+        .select('daily_quota_limit')
+        .eq('id', serviceAccountId)
+        .single();
+
+      const dailyLimit = serviceAccount?.daily_quota_limit || 200; // Default Google API limit
+
+      // Get current usage
+      const { data: usage } = await supabaseAdmin
+        .from('indb_google_quota_usage')
+        .select('requests_made')
+        .eq('service_account_id', serviceAccountId)
+        .eq('date', today)
+        .single();
+
+      const usedRequests = usage?.requests_made || 0;
+      return Math.max(0, dailyLimit - usedRequests);
+    } catch (error) {
+      console.error('Error getting remaining quota:', error);
+      return 0;
     }
   }
 }

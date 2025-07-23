@@ -28,6 +28,7 @@ import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface Job {
   id: string;
@@ -119,6 +120,40 @@ export default function JobDetailsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalSubmissions, setTotalSubmissions] = useState(0);
   const itemsPerPage = 20;
+
+  // WebSocket for real-time job updates
+  const { isConnected } = useWebSocket({
+    jobId: jobId,
+    onJobUpdate: (message) => {
+      console.log('📨 Job update received on detail page:', message);
+      // Update job data with real-time progress
+      if (job && job.id === message.jobId) {
+        setJob(prevJob => ({
+          ...prevJob!,
+          status: (message.status as Job['status']) || prevJob!.status,
+          progress_percentage: message.progress?.progress_percentage ?? prevJob!.progress_percentage,
+          processed_urls: message.progress?.processed_urls ?? prevJob!.processed_urls,
+          successful_urls: message.progress?.successful_urls ?? prevJob!.successful_urls,
+          failed_urls: message.progress?.failed_urls ?? prevJob!.failed_urls,
+          total_urls: message.progress?.total_urls ?? prevJob!.total_urls,
+          updated_at: new Date().toISOString()
+        }));
+      }
+      // Reload submissions to show latest status
+      loadSubmissions();
+    },
+    onJobCompleted: (message) => {
+      console.log('✅ Job completed on detail page:', message);
+      addToast({
+        title: 'Job Completed',
+        description: `${job?.name || 'Job'} completed successfully!`,
+        type: 'success'
+      });
+      // Reload job data and submissions to get final state
+      loadJobData();
+      loadSubmissions();
+    }
+  });
 
   // Load job and submissions data
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import { createClient } from '@supabase/supabase-js'
+import { JobLoggingService } from '@/lib/job-logging-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -216,6 +217,22 @@ export async function POST(request: NextRequest) {
       console.error('Error creating job:', error)
       return NextResponse.json({ error: 'Failed to create job' }, { status: 500 })
     }
+
+    // Log job creation
+    const jobLogger = JobLoggingService.getInstance();
+    await jobLogger.logJobEvent({
+      job_id: data.id,
+      level: 'INFO',
+      message: `Job created: ${data.name}`,
+      metadata: {
+        event_type: 'job_created',
+        user_id: user.id,
+        job_type: data.type,
+        schedule_type: data.schedule_type,
+        total_urls: data.total_urls,
+        created_via: 'api_endpoint'
+      }
+    });
 
     return NextResponse.json({ job: data })
   } catch (error) {
