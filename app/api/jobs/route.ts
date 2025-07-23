@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Check for duplicates (no limit on URL count per user request)
-      const uniqueUrls = Array.from(new Set(sanitizedUrls))
+      const uniqueUrls = [...new Set(sanitizedUrls)]
     }
 
     if (type === 'sitemap') {
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
 
     // Create the job with sanitized data
     const processedUrls = type === 'manual' 
-      ? Array.from(new Set(urls.map((url: string) => sanitizeInput(url)).filter((url: string) => url.trim())))
+      ? [...new Set(urls.map(url => sanitizeInput(url)).filter(url => url.trim()))]
       : []
       
     const jobData = {
