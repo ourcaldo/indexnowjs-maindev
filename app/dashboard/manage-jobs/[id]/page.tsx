@@ -239,14 +239,23 @@ export default function JobDetailsPage() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ 
-            status: action === 'resume' ? 'pending' : action === 'pause' ? 'paused' : action === 'retry' ? 'pending' : action 
+            status: action === 'start' ? 'pending' : 
+                   action === 'stop' ? 'cancelled' : 
+                   action === 'resume' ? 'pending' : 
+                   action === 'pause' ? 'paused' : 
+                   action === 'retry' ? 'pending' : action 
           })
         });
 
         if (response.ok) {
+          const actionMsg = action === 'start' ? 'started' : 
+                           action === 'stop' ? 'stopped' : 
+                           action === 'pause' ? 'paused' : 
+                           action === 'resume' ? 'resumed' : 
+                           action === 'retry' ? 'restarted' : `${action}d`;
           addToast({
             title: 'Success',
-            description: `Job ${action}d successfully`,
+            description: `Job ${actionMsg} successfully`,
             type: 'success'
           });
           loadJobData(); // Reload job data
@@ -259,7 +268,12 @@ export default function JobDetailsPage() {
         }
       }
     } catch (error) {
-      console.error(`Error ${action}ing job:`, error);
+      const actionMsg = action === 'start' ? 'starting' : 
+                       action === 'stop' ? 'stopping' : 
+                       action === 'pause' ? 'pausing' : 
+                       action === 'resume' ? 'resuming' : 
+                       action === 'retry' ? 'restarting' : `${action}ing`;
+      console.error(`Error ${actionMsg} job:`, error);
       addToast({
         title: 'Error',
         description: `Failed to ${action} job`,
@@ -311,17 +325,29 @@ export default function JobDetailsPage() {
           <p className="text-[#1A1A1A] mt-1">Job ID: #{job.id}</p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Start/Resume or Pause button */}
-          {(job.status === 'paused' || job.status === 'pending') && (
+          {/* Dynamic Start/Stop button */}
+          {job.status === 'pending' && (
             <Button 
               size="sm"
-              onClick={() => handleJobAction('resume')}
-              className="bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:text-white"
+              onClick={() => handleJobAction('start')}
+              className="bg-[#4BB543] text-white hover:bg-[#4BB543]/90 hover:text-white"
             >
               <Play className="h-4 w-4 mr-2" />
-              {job.status === 'paused' ? 'Resume Job' : 'Start Job'}
+              Start Job
             </Button>
           )}
+          {job.status === 'running' && (
+            <Button 
+              size="sm"
+              onClick={() => handleJobAction('stop')}
+              className="bg-[#E63946] text-white hover:bg-[#E63946]/90 hover:text-white"
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Stop Job
+            </Button>
+          )}
+          
+          {/* Dynamic Pause/Resume button */}
           {job.status === 'running' && (
             <Button 
               size="sm"
@@ -332,19 +358,31 @@ export default function JobDetailsPage() {
               Pause Job
             </Button>
           )}
+          {job.status === 'paused' && (
+            <Button 
+              size="sm"
+              onClick={() => handleJobAction('resume')}
+              className="bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:text-white"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Resume Job
+            </Button>
+          )}
           
-          {/* Re-run Job button */}
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => handleJobAction('retry')}
-            className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A]"
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Re-run Job
-          </Button>
+          {/* Re-run Job button - only for completed jobs */}
+          {job.status === 'completed' && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleJobAction('retry')}
+              className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A]"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Re-run Job
+            </Button>
+          )}
           
-          {/* Delete Job button */}
+          {/* Delete Job button - always visible */}
           <Button 
             variant="outline" 
             size="sm"

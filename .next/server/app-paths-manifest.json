@@ -1,9 +1,8 @@
 {
-  "/api/jobs/[id]/route": "app/api/jobs/[id]/route.js",
-  "/api/jobs/[id]/submissions/route": "app/api/jobs/[id]/submissions/route.js",
-  "/dashboard/indexnow/page": "app/dashboard/indexnow/page.js",
-  "/dashboard/manage-jobs/page": "app/dashboard/manage-jobs/page.js",
+  "/api/service-accounts/route": "app/api/service-accounts/route.js",
+  "/api/user/profile/route": "app/api/user/profile/route.js",
+  "/api/user/settings/route": "app/api/user/settings/route.js",
+  "/dashboard/manage-jobs/[id]/page": "app/dashboard/manage-jobs/[id]/page.js",
   "/dashboard/settings/page": "app/dashboard/settings/page.js",
-  "/dashboard/test-backend/page": "app/dashboard/test-backend/page.js",
-  "/dashboard/manage-jobs/[id]/page": "app/dashboard/manage-jobs/[id]/page.js"
+  "/dashboard/manage-jobs/page": "app/dashboard/manage-jobs/page.js"
 }

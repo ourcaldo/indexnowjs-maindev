@@ -450,6 +450,14 @@ JWT_SECRET=[jwt-secret-key]
   - Resolved status type compatibility issues in job updates
 - All core functionality now working: authentication, job management, WebSocket real-time updates
 - Background services running smoothly with job monitoring active
+- **Enhanced job detail page with dynamic action buttons**:
+  - Start button: Only visible when job status is "pending" (Green color)
+  - Stop button: Only visible when job status is "running" (Red color)
+  - Pause button: Only visible when job status is "running" (Amber color)
+  - Resume button: Only visible when job status is "paused" (Dark color)
+  - Re-run button: Only visible when job status is "completed" (Outline style)
+  - Delete button: Always visible (Red outline)
+  - Updated action handling logic to support start/stop/pause/resume/retry operations
 
 ### 2025-01-21: Migration Complete & Job Detail Pagination + Color Fixes
 - Successfully completed migration from Replit Agent to standard Replit environment

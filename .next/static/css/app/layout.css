@@ -1725,9 +1725,17 @@ video {
   background-color: rgb(13 27 42 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-\[\#4BB543\]\/90:hover {
+  background-color: rgb(75 181 67 / 0.9);
+}
+
 .hover\:bg-\[\#E63946\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(230 57 70 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-\[\#E63946\]\/90:hover {
+  background-color: rgb(230 57 70 / 0.9);
 }
 
 .hover\:bg-\[\#F0A202\]\/90:hover {
