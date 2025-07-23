@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAuth } from '@/lib/auth-context';
+import { authService, AuthUser } from '@/lib/auth';
 
 interface WebSocketMessage {
   type: string;
@@ -23,10 +23,40 @@ interface UseWebSocketOptions {
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
   const { jobId, onJobUpdate, onJobCompleted, onJobProgress } = options;
-  const { user } = useSupabaseUser();
+  const [user, setUser] = useState<AuthUser | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
+
+  // Effect to get current user and set up auth listener
+  useEffect(() => {
+    let isMounted = true;
+
+    const getCurrentUser = async () => {
+      try {
+        const currentUser = await authService.getCurrentUser();
+        if (isMounted) {
+          setUser(currentUser);
+        }
+      } catch (error) {
+        console.error('Error getting current user:', error);
+      }
+    };
+
+    getCurrentUser();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = authService.onAuthStateChange((authUser) => {
+      if (isMounted) {
+        setUser(authUser);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (!user?.id) return;
