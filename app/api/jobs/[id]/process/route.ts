@@ -67,17 +67,20 @@ export async function POST(
 
 async function createUrlSubmissions(job: any) {
   try {
-    // Check if submissions already exist
+    // ALWAYS create new submissions for each job run to preserve history
+    // This ensures that when a job is re-run, we keep all historical submissions
+    console.log(`Creating new URL submissions for job ${job.id} (preserving history)`);
+    
+    // Get current run count to track job runs
     const { data: existingSubmissions } = await supabaseAdmin
       .from('indb_indexing_url_submissions')
       .select('id')
-      .eq('job_id', job.id)
-      .limit(1);
-
-    if (existingSubmissions && existingSubmissions.length > 0) {
-      console.log(`Submissions already exist for job ${job.id}`);
-      return;
-    }
+      .eq('job_id', job.id);
+      
+    const runCount = (existingSubmissions?.length || 0) > 0 ? 
+      Math.floor((existingSubmissions?.length || 0) / (job.source_data?.urls?.length || 1)) + 1 : 1;
+    
+    console.log(`This is run #${runCount} for job ${job.id}`);
 
     let urls: string[] = [];
 
@@ -93,14 +96,15 @@ async function createUrlSubmissions(job: any) {
       return;
     }
 
-    // Create URL submissions
-    const submissions = urls.map(url => ({
+    // Create URL submissions with run metadata for history tracking
+    const submissions = urls.map((url, index) => ({
       job_id: job.id,
       url,
       status: 'pending',
       retry_count: 0,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      response_data: { run_number: runCount, batch_index: index } // Track which run this belongs to
     }));
 
     const { error: insertError } = await supabaseAdmin
@@ -112,16 +116,20 @@ async function createUrlSubmissions(job: any) {
       throw insertError;
     }
 
-    // Update job total_urls count
+    // Update job total_urls count (only for current run URLs, not cumulative)
     await supabaseAdmin
       .from('indb_indexing_jobs')
       .update({
         total_urls: urls.length,
+        processed_urls: 0, // Reset progress for new run
+        successful_urls: 0,
+        failed_urls: 0,
+        progress_percentage: 0,
         updated_at: new Date().toISOString()
       })
       .eq('id', job.id);
 
-    console.log(`Created ${submissions.length} URL submissions for job ${job.id}`);
+    console.log(`Created ${submissions.length} new URL submissions for job ${job.id} (run #${runCount})`);
 
   } catch (error) {
     console.error('Error in createUrlSubmissions:', error);

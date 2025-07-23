@@ -167,6 +167,8 @@ export class WebSocketService {
       ...update
     };
 
+    console.log(`📡 Broadcasting job update for job ${jobId}:`, update);
+
     // Send to all clients of this user who are subscribed to this job
     this.clients.forEach((client, clientId) => {
       if (client.userId === userId && 
@@ -175,6 +177,20 @@ export class WebSocketService {
         this.sendToClient(clientId, message);
       }
     });
+  }
+
+  // Enhanced job progress broadcast with detailed submission info
+  broadcastJobProgress(userId: string, jobId: string, progress: any, currentUrl?: string): void {
+    const message = {
+      type: 'job_progress_detailed',
+      jobId,
+      progress,
+      current_url: currentUrl,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log(`📡 Broadcasting detailed job progress for job ${jobId}:`, progress);
+    this.broadcastToUser(userId, message);
   }
 
   broadcastToUser(userId: string, message: any): void {
@@ -200,6 +216,18 @@ export class WebSocketService {
       type: 'url_submission_update',
       submission
     };
+    console.log(`📡 Broadcasting URL submission update to user ${userId}:`, submission);
+    this.broadcastToUser(userId, message);
+  }
+
+  // Broadcast individual URL status change with enhanced tracking
+  broadcastUrlStatusChange(userId: string, jobId: string, urlSubmission: any): void {
+    const message = {
+      type: 'url_status_change',
+      jobId,
+      submission: urlSubmission
+    };
+    console.log(`📡 Broadcasting URL status change for job ${jobId}:`, urlSubmission);
     this.broadcastToUser(userId, message);
   }
 

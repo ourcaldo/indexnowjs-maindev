@@ -139,8 +139,10 @@ export default function JobDetailsPage() {
           updated_at: new Date().toISOString()
         }));
       }
-      // Reload submissions to show latest status
-      loadSubmissions();
+      // Trigger real-time submission reload
+      window.dispatchEvent(new CustomEvent('job-progress-update', { 
+        detail: { jobId: message.jobId, reloadSubmissions: true } 
+      }));
     },
     onJobCompleted: (message) => {
       console.log('✅ Job completed on detail page:', message);
@@ -149,9 +151,11 @@ export default function JobDetailsPage() {
         description: `${job?.name || 'Job'} completed successfully!`,
         type: 'success'
       });
-      // Reload job data and submissions to get final state
+      // Reload job data and trigger submission reload
       loadJobData();
-      loadSubmissions();
+      window.dispatchEvent(new CustomEvent('job-progress-update', { 
+        detail: { jobId: message.jobId, reloadSubmissions: true } 
+      }));
     }
   });
 
@@ -160,17 +164,74 @@ export default function JobDetailsPage() {
     const handleUrlSubmissionUpdate = (event: any) => {
       const { detail: submission } = event;
       if (submission.job_id === jobId) {
-        setSubmissions(prevSubmissions => 
-          prevSubmissions.map(sub => 
-            sub.id === submission.id ? { ...sub, ...submission } : sub
-          )
-        );
+        console.log('📨 Real-time URL submission update:', submission);
+        
+        setSubmissions(prevSubmissions => {
+          // Check if this submission already exists
+          const existingIndex = prevSubmissions.findIndex(sub => sub.id === submission.id);
+          
+          if (existingIndex >= 0) {
+            // Update existing submission
+            const updated = [...prevSubmissions];
+            updated[existingIndex] = { ...updated[existingIndex], ...submission };
+            return updated;
+          } else {
+            // Add new submission at the beginning (latest first)
+            return [submission, ...prevSubmissions];
+          }
+        });
+      }
+    };
+
+    // Listen for job-specific updates that might require reloading submissions
+    const handleJobProgressUpdate = (event: any) => {
+      const { detail: data } = event;
+      if (data.jobId === jobId && data.reloadSubmissions) {
+        console.log('🔄 Reloading submissions due to job progress update');
+        loadSubmissions();
+      }
+    };
+
+    // Handle real-time URL status changes
+    const handleUrlStatusChange = (event: any) => {
+      const { detail: data } = event;
+      if (data.jobId === jobId && data.submission) {
+        console.log('📨 Real-time URL status change:', data.submission);
+        setSubmissions(prevSubmissions => {
+          const existingIndex = prevSubmissions.findIndex(sub => sub.id === data.submission.id);
+          
+          if (existingIndex >= 0) {
+            // Update existing submission
+            const updated = [...prevSubmissions];
+            updated[existingIndex] = { ...updated[existingIndex], ...data.submission };
+            return updated;
+          } else {
+            // Add new submission at the beginning (latest first)
+            return [data.submission, ...prevSubmissions];
+          }
+        });
+      }
+    };
+
+    // Handle detailed job progress updates
+    const handleDetailedProgress = (event: any) => {
+      const { detail: progressData } = event;
+      if (progressData.jobId === jobId) {
+        console.log('📊 Detailed progress update:', progressData);
+        // Additional progress handling can be added here
       }
     };
 
     window.addEventListener('url-submission-update', handleUrlSubmissionUpdate);
+    window.addEventListener('job-progress-update', handleJobProgressUpdate);
+    window.addEventListener('url-status-change', handleUrlStatusChange);
+    window.addEventListener('job-progress-detailed', handleDetailedProgress);
+    
     return () => {
       window.removeEventListener('url-submission-update', handleUrlSubmissionUpdate);
+      window.removeEventListener('job-progress-update', handleJobProgressUpdate);
+      window.removeEventListener('url-status-change', handleUrlStatusChange);
+      window.removeEventListener('job-progress-detailed', handleDetailedProgress);
     };
   }, [jobId]);
 

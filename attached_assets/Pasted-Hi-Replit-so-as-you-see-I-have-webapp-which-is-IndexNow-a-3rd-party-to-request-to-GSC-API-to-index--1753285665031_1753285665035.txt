@@ -1,0 +1,18 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md please also read that.
+
+Then, before I ask you to enhance and fix about the P1.3 with these commands
+''''
+ I need your help to fix the P1.3 which is related to websocket, beside that I also want you to make sure that everything in the dashboard is do realtime, from status and progress change, the submission history url change and everything must be realtime with the websocket.
+'''
+ 
+Then, you do made a changes, but it's not perfect, an error/bug is appear and you need to fix it. The bug is:
+1. In single job details page, before you do made a changes, it's show all url submission history. For example, if I re-run a jobs 20 times, then all history of that submission will be displayed. But, the current is not, which is when I re-run the jobs, it's somehow deleted/reset the history which just show the latest submission and I don't like it. I want the old version which is show all the history with ordering from latest date to the oldest date. Actually the data records in database still normal, so we can still the submission from the table for that jobId then show it all (please read the replit.md to get to know about the tables and column)
+2. This app also use websocket to provide realtime changes in dashboard, but actually it's not. Some data is already realtime, but there's also data that still need to reload the page to refflect it. For example, the status on single job detail and url submission history. Which I want all of that must be realtime, which is like jobs is triggred -> updates status from pending to on process -> Backend process url 1 -> success -> update to url submission history, progress, etc -> process url 2 -> update submission history, progress, etc -> and so-on until backend process it all and change the status to completed and reflected to the status jobs. So, each proccess will be reflect the dashboard, and I didn't need to reload the page, to see the update. You also need to check in other part in manage jobs page and single job page detail (LET'S FOCUS ON THIS 2 PAGE FIRST) so this page will always show realtime data.

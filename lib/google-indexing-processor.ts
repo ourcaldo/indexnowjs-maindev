@@ -365,7 +365,7 @@ export class GoogleIndexingProcessor {
           const responseTime = Date.now() - startTime;
           
           // Update submission as successful
-          await supabaseAdmin
+          const { data: updatedSubmission } = await supabaseAdmin
             .from('indb_indexing_url_submissions')
             .update({
               status: 'submitted',
@@ -373,7 +373,14 @@ export class GoogleIndexingProcessor {
               service_account_id: serviceAccount.id,
               updated_at: new Date().toISOString()
             })
-            .eq('id', submission.id);
+            .eq('id', submission.id)
+            .select()
+            .single();
+
+          // Broadcast real-time URL submission update
+          if (updatedSubmission) {
+            this.websocketService.broadcastUrlStatusChange(job.user_id, job.id, updatedSubmission);
+          }
 
           // Update quota usage for the service account (-1 for successful request)
           await this.updateQuotaUsage(serviceAccount.id, true);
@@ -396,7 +403,7 @@ export class GoogleIndexingProcessor {
           await this.jobLogger.logUrlProcessed(job.id, submission.url, false, error instanceof Error ? error.message : 'Unknown error');
           
           // Update submission as failed
-          await supabaseAdmin
+          const { data: failedSubmission } = await supabaseAdmin
             .from('indb_indexing_url_submissions')
             .update({
               status: 'failed',
@@ -405,7 +412,14 @@ export class GoogleIndexingProcessor {
               service_account_id: serviceAccount.id,
               updated_at: new Date().toISOString()
             })
-            .eq('id', submission.id);
+            .eq('id', submission.id)
+            .select()
+            .single();
+
+          // Broadcast real-time URL submission update
+          if (failedSubmission) {
+            this.websocketService.broadcastUrlStatusChange(job.user_id, job.id, failedSubmission);
+          }
 
           // Update quota usage for the service account (still counts as a request attempt)
           await this.updateQuotaUsage(serviceAccount.id, false);
@@ -444,6 +458,15 @@ export class GoogleIndexingProcessor {
             progress_percentage: progressPercentage
           }
         });
+
+        // Send enhanced progress broadcast with current URL info
+        this.websocketService.broadcastJobProgress(job.user_id, job.id, {
+          total_urls: submissions.length,
+          processed_urls: processed,
+          successful_urls: successful,
+          failed_urls: failed,
+          progress_percentage: progressPercentage
+        }, submissions[processed - 1]?.url);
 
         // Respect Google API rate limits
         await new Promise(resolve => setTimeout(resolve, 100));

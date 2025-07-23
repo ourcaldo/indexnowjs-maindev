@@ -113,6 +113,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
               case 'job_progress':
                 onJobProgress?.(message);
                 break;
+              case 'job_progress_detailed':
+                // Handle enhanced job progress updates
+                onJobProgress?.(message);
+                window.dispatchEvent(new CustomEvent('job-progress-detailed', { 
+                  detail: message 
+                }));
+                break;
               case 'job_completed':
                 onJobCompleted?.(message);
                 break;
@@ -132,6 +139,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
                 if (message.submission) {
                   window.dispatchEvent(new CustomEvent('url-submission-update', { 
                     detail: message.submission 
+                  }));
+                }
+                break;
+              case 'url_status_change':
+                // Handle individual URL status changes
+                if (message.submission) {
+                  window.dispatchEvent(new CustomEvent('url-status-change', { 
+                    detail: { jobId: message.jobId, submission: message.submission }
                   }));
                 }
                 break;
