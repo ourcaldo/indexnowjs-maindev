@@ -92,13 +92,43 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
     }
 
-    // Update job status
+    // Check if this is a retry/re-run action (job was completed/failed and now setting to pending)
+    const { data: currentJob } = await supabaseAdmin
+      .from('indb_indexing_jobs')
+      .select('status')
+      .eq('id', jobId)
+      .eq('user_id', user.id)
+      .single();
+
+    const isRetry = (currentJob?.status === 'completed' || currentJob?.status === 'failed') && body.status === 'pending';
+
+    // Prepare update data
+    const updateData: any = {
+      status: body.status,
+      updated_at: new Date().toISOString()
+    };
+
+    // If this is a retry, reset progress and processed counts
+    if (isRetry) {
+      updateData.progress_percentage = 0;
+      updateData.processed_urls = 0;
+      updateData.successful_urls = 0;
+      updateData.failed_urls = 0;
+      updateData.started_at = null;
+      updateData.completed_at = null;
+      updateData.error_message = null;
+
+      // Delete existing URL submissions for this job so it can be reprocessed
+      await supabaseAdmin
+        .from('indb_indexing_url_submissions')
+        .delete()
+        .eq('job_id', jobId);
+    }
+
+    // Update job status and progress if needed
     const { data: job, error } = await supabaseAdmin
       .from('indb_indexing_jobs')
-      .update({
-        status: body.status,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', jobId)
       .eq('user_id', user.id)
       .select()
