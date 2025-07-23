@@ -1,6 +1,1 @@
-{
-  "/api/jobs/[id]/route": "app/api/jobs/[id]/route.js",
-  "/api/jobs/[id]/submissions/route": "app/api/jobs/[id]/submissions/route.js",
-  "/page": "app/page.js",
-  "/dashboard/manage-jobs/[id]/page": "app/dashboard/manage-jobs/[id]/page.js"
-}
+{}
