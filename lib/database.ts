@@ -390,7 +390,7 @@ export class DatabaseService {
 
     return {
       stats: statsWithSuccessRate,
-      recent_activity: recentJobs || [],
+      recent_activity: (recentJobs || []) as any[],
     }
   }
 

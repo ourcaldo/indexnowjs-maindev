@@ -107,8 +107,7 @@ export class GoogleIndexingProcessor {
       // Send real-time completion update
       this.websocketService.broadcastJobUpdate(job.user_id, jobId, {
         status: 'completed',
-        progress: 100,
-        completedAt: new Date().toISOString()
+        progress: 100
       });
 
       console.log(`✅ Indexing job ${jobId} completed successfully`);
@@ -316,6 +315,9 @@ export class GoogleIndexingProcessor {
             })
             .eq('id', submission.id);
 
+          // Update quota usage for the service account (-1 for successful request)
+          await this.updateQuotaUsage(serviceAccount.id, true);
+
           successful++;
           console.log(`✅ Successfully indexed: ${submission.url}`);
 
@@ -332,6 +334,10 @@ export class GoogleIndexingProcessor {
               updated_at: new Date().toISOString()
             })
             .eq('id', submission.id);
+
+          // Update quota usage for the service account (still counts as a request attempt)
+          const serviceAccount = serviceAccounts[processed % serviceAccounts.length];
+          await this.updateQuotaUsage(serviceAccount.id, false);
 
           failed++;
         }
@@ -353,11 +359,8 @@ export class GoogleIndexingProcessor {
 
         // Send real-time progress update via WebSocket
         this.websocketService.broadcastJobUpdate(job.user_id, job.id, {
-          progress: progressPercentage,
-          processedUrls: processed,
-          successfulUrls: successful,
-          failedUrls: failed,
-          totalUrls: submissions.length
+          status: 'running',
+          progress: progressPercentage
         });
 
         // Respect Google API rate limits
@@ -402,6 +405,63 @@ export class GoogleIndexingProcessor {
   }
 
   /**
+   * Update quota usage for a service account
+   */
+  private async updateQuotaUsage(serviceAccountId: string, successful: boolean): Promise<void> {
+    try {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      // Get current quota usage for today
+      const { data: currentUsage, error: fetchError } = await supabaseAdmin
+        .from('indb_google_quota_usage')
+        .select('*')
+        .eq('service_account_id', serviceAccountId)
+        .eq('date', today)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('Error fetching current quota usage:', fetchError);
+        return;
+      }
+
+      // Calculate new usage numbers
+      const currentRequestsMade = currentUsage?.requests_made || 0;
+      const currentRequestsSuccessful = currentUsage?.requests_successful || 0;
+      const currentRequestsFailed = currentUsage?.requests_failed || 0;
+
+      const updatedUsage = {
+        service_account_id: serviceAccountId,
+        date: today,
+        requests_made: currentRequestsMade + 1,
+        requests_successful: successful ? currentRequestsSuccessful + 1 : currentRequestsSuccessful,
+        requests_failed: successful ? currentRequestsFailed : currentRequestsFailed + 1,
+        last_request_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // If record doesn't exist, add created_at
+      if (!currentUsage) {
+        (updatedUsage as any).created_at = new Date().toISOString();
+      }
+
+      // Upsert quota usage record
+      const { error: upsertError } = await supabaseAdmin
+        .from('indb_google_quota_usage')
+        .upsert(updatedUsage, {
+          onConflict: 'service_account_id,date'
+        });
+
+      if (upsertError) {
+        console.error('Error updating quota usage:', upsertError);
+      } else {
+        console.log(`📊 Updated quota for service account ${serviceAccountId}: ${updatedUsage.requests_made} requests (${updatedUsage.requests_successful} successful, ${updatedUsage.requests_failed} failed)`);
+      }
+    } catch (error) {
+      console.error('Error in updateQuotaUsage:', error);
+    }
+  }
+
+  /**
    * Lock job to prevent concurrent processing
    */
   private async lockJobForProcessing(jobId: string): Promise<boolean> {
@@ -424,7 +484,8 @@ export class GoogleIndexingProcessor {
         const job = await this.getJobDetails(jobId);
         if (job) {
           this.websocketService.broadcastJobUpdate(job.user_id, jobId, {
-            status: 'running'
+            status: 'running',
+            progress: 0
           });
         }
       }

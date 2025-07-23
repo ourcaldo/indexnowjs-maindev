@@ -450,6 +450,12 @@ JWT_SECRET=[jwt-secret-key]
   - Resolved status type compatibility issues in job updates
 - All core functionality now working: authentication, job management, WebSocket real-time updates
 - Background services running smoothly with job monitoring active
+- **Fixed quota tracking system for Google API requests**:
+  - Added automatic quota updates for every successful URL submission
+  - Each successful Google API request now decreases service account quota by -1
+  - Failed requests also counted to prevent quota abuse
+  - Proper tracking in indb_google_quota_usage table with real-time updates
+  - Service account quota displays now show accurate remaining quotas
 - **Enhanced job detail page with dynamic action buttons**:
   - Start button: Only visible when job status is "pending" (Green color)
   - Stop button: Only visible when job status is "running" (Red color)
