@@ -300,8 +300,8 @@ export default function ForgotPassword() {
                   textDecoration: 'none',
                   fontWeight: '500'
                 }}
-                onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.textDecoration = 'underline'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.textDecoration = 'none'}
               >
                 ← Back to Login
               </button>

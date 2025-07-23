@@ -129,6 +129,7 @@ const slides = [
 
 export default function DashboardPreview({ title, subtitle, variant = 'login' }: DashboardPreviewProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -136,6 +137,17 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
     }, 4000) // 4 seconds per slide
 
     return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkIfMobile()
+    window.addEventListener('resize', checkIfMobile)
+    
+    return () => window.removeEventListener('resize', checkIfMobile)
   }, [])
 
   const currentData = slides[currentSlide]
@@ -166,9 +178,16 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
   const styles = getVariantStyles()
 
   return (
-    <div style={{ maxWidth: '500px', width: '100%' }}>
+    <div style={{ 
+      maxWidth: isMobile ? '100%' : '500px', 
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: isMobile ? 'center' : 'flex-start',
+      textAlign: isMobile ? 'center' : 'left'
+    }}>
       <h2 style={{
-        fontSize: '36px',
+        fontSize: isMobile ? '28px' : '36px',
         fontWeight: '700',
         lineHeight: '1.2',
         marginBottom: '24px'
@@ -176,7 +195,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
         {styles.title}
       </h2>
       <p style={{
-        fontSize: '18px',
+        fontSize: isMobile ? '16px' : '18px',
         color: '#d1d5db',
         marginBottom: '40px',
         lineHeight: '1.6'
@@ -188,28 +207,30 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '16px',
-        padding: '32px',
+        padding: isMobile ? '20px' : '32px',
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
         position: 'relative',
-        opacity: styles.opacity
+        opacity: styles.opacity,
+        width: '100%',
+        maxWidth: isMobile ? '350px' : '500px'
       }}>
         {/* Header Stats */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '16px',
-          marginBottom: '32px'
+          gridTemplateColumns: isMobile ? 'repeat(1, 1fr)' : 'repeat(3, 1fr)',
+          gap: isMobile ? '12px' : '16px',
+          marginBottom: isMobile ? '24px' : '32px'
         }}>
           {currentData.stats.map((stat, idx) => (
             <div key={idx} style={{
               backgroundColor: stat.bg,
               borderRadius: '12px',
-              padding: '20px',
+              padding: isMobile ? '16px' : '20px',
               textAlign: 'center',
               border: stat.border ? `1px solid ${stat.border}` : 'none'
             }}>
               <div style={{
-                fontSize: '28px',
+                fontSize: isMobile ? '24px' : '28px',
                 fontWeight: '800',
                 color: stat.color,
                 marginBottom: '4px'
@@ -217,7 +238,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
                 {stat.value}
               </div>
               <div style={{
-                fontSize: '12px',
+                fontSize: isMobile ? '11px' : '12px',
                 color: stat.color === '#1a1a1a' ? '#6b7280' : stat.color,
                 fontWeight: '500'
               }}>
@@ -231,8 +252,8 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
         <div style={{
           backgroundColor: '#fafafa',
           borderRadius: '12px',
-          padding: '24px',
-          marginBottom: '24px'
+          padding: isMobile ? '16px' : '24px',
+          marginBottom: isMobile ? '16px' : '24px'
         }}>
           <div style={{
             display: 'flex',
@@ -241,7 +262,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
             marginBottom: '20px'
           }}>
             <h3 style={{
-              fontSize: '16px',
+              fontSize: isMobile ? '14px' : '16px',
               fontWeight: '600',
               color: '#1a1a1a',
               margin: 0
@@ -262,8 +283,8 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
             display: 'flex',
             alignItems: 'end',
             justifyContent: 'space-between',
-            height: '80px',
-            gap: '8px'
+            height: isMobile ? '60px' : '80px',
+            gap: isMobile ? '6px' : '8px'
           }}>
             {currentData.chartData.map((bar, idx) => (
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
@@ -309,14 +330,14 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
         {/* Bottom Metrics */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '16px'
+          gridTemplateColumns: isMobile ? 'repeat(1, 1fr)' : 'repeat(2, 1fr)',
+          gap: isMobile ? '12px' : '16px'
         }}>
           {currentData.bottomMetrics.map((metric, idx) => (
             <div key={idx} style={{
               backgroundColor: metric.bg,
               borderRadius: '10px',
-              padding: '16px',
+              padding: isMobile ? '12px' : '16px',
               border: `1px solid ${metric.border}`
             }}>
               <div style={{
@@ -326,7 +347,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
               }}>
                 <div>
                   <div style={{
-                    fontSize: '20px',
+                    fontSize: isMobile ? '18px' : '20px',
                     fontWeight: '700',
                     color: metric.color,
                     marginBottom: '2px'
@@ -334,7 +355,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
                     {metric.value}
                   </div>
                   <div style={{
-                    fontSize: '11px',
+                    fontSize: isMobile ? '10px' : '11px',
                     color: metric.color,
                     fontWeight: '500'
                   }}>

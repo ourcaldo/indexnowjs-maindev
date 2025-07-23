@@ -507,8 +507,8 @@ export default function Register() {
                   textDecoration: 'none',
                   fontWeight: '500'
                 }}
-                onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.textDecoration = 'underline'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.textDecoration = 'none'}
               >
                 Sign In Instead.
               </button>
