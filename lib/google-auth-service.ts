@@ -149,6 +149,12 @@ export class GoogleAuthService {
    */
   private async generateNewAccessToken(serviceAccount: ServiceAccount): Promise<{ access_token: string; expires_in: number } | null> {
     try {
+      // Check if credentials are empty (after reset)
+      if (!serviceAccount.encrypted_credentials || serviceAccount.encrypted_credentials.trim() === '') {
+        console.error('❌ Service account has no encrypted credentials. Please re-upload service account JSON file.');
+        throw new Error('Service account credentials are missing. Please re-upload the service account JSON file in Settings.');
+      }
+
       // Decrypt service account credentials
       const credentialsJson = EncryptionService.decrypt(serviceAccount.encrypted_credentials);
       const credentials: ServiceAccountCredentials = JSON.parse(credentialsJson);
