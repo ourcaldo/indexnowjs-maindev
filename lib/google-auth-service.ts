@@ -171,9 +171,31 @@ export class GoogleAuthService {
     try {
       console.log('🔄 Starting generateNewAccessToken process...');
       
-      // Check if credentials are empty (after reset)
-      if (!serviceAccount.encrypted_credentials || serviceAccount.encrypted_credentials.trim() === '') {
-        console.log('⚠️ Service account has no encrypted credentials. Skipping...');
+      // Check if credentials are empty or corrupted (too long indicates corruption)
+      if (!serviceAccount.encrypted_credentials || 
+          serviceAccount.encrypted_credentials.trim() === '' ||
+          serviceAccount.encrypted_credentials.length > 3000) {
+        
+        if (serviceAccount.encrypted_credentials && serviceAccount.encrypted_credentials.length > 3000) {
+          console.log(`⚠️ Service account ${serviceAccount.id} has corrupted credentials (${serviceAccount.encrypted_credentials.length} chars). Clearing...`);
+          
+          // Auto-clear corrupted credentials
+          await supabaseAdmin
+            .from('indb_google_service_accounts')
+            .update({
+              encrypted_credentials: '',
+              encrypted_access_token: null,
+              access_token_expires_at: null,
+              is_active: false,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', serviceAccount.id);
+            
+          console.log(`✅ Cleared corrupted credentials for service account ${serviceAccount.id}`);
+        } else {
+          console.log('⚠️ Service account has no encrypted credentials. Skipping...');
+        }
+        
         return null;
       }
 

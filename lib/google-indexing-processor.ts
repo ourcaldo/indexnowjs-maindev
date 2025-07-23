@@ -290,7 +290,8 @@ export class GoogleIndexingProcessor {
           // Get access token for Google API
           const accessToken = await this.googleAuth.getAccessToken(serviceAccount.id);
           if (!accessToken) {
-            throw new Error('Failed to obtain Google API access token');
+            console.log(`⚠️ Skipping service account ${serviceAccount.id} - no valid access token (likely missing credentials)`);
+            continue; // Skip this service account and try the next one
           }
 
           // Submit URL to Google's Indexing API

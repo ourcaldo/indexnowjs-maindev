@@ -1,10 +1,4 @@
 {
-  "/api/service-accounts/[id]/route": "app/api/service-accounts/[id]/route.js",
-  "/api/service-accounts/route": "app/api/service-accounts/route.js",
-  "/api/clear-all-service-accounts/route": "app/api/clear-all-service-accounts/route.js",
-  "/api/user/profile/route": "app/api/user/profile/route.js",
-  "/api/user/settings/route": "app/api/user/settings/route.js",
-  "/api/test-fresh-encrypt/route": "app/api/test-fresh-encrypt/route.js",
-  "/api/debug-auth/route": "app/api/debug-auth/route.js",
+  "/api/encryption-debug/route": "app/api/encryption-debug/route.js",
   "/page": "app/page.js"
 }

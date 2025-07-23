@@ -25,37 +25,8 @@ const createServiceAccountSchema = z.object({
   credentials: googleServiceAccountSchema,
 })
 
-// Encryption function using modern crypto methods
-function encryptCredentials(credentials: any): string {
-  const key = process.env.ENCRYPTION_KEY || 'default-32-character-encryption-key'
-  const algorithm = 'aes-256-cbc'
-  const iv = crypto.randomBytes(16)
-  
-  // Create proper key from string
-  const keyBuffer = crypto.scryptSync(key, 'salt', 32)
-  const cipher = crypto.createCipheriv(algorithm, keyBuffer, iv)
-  
-  let encrypted = cipher.update(JSON.stringify(credentials), 'utf8', 'hex')
-  encrypted += cipher.final('hex')
-  
-  return `${iv.toString('hex')}:${encrypted}`
-}
-
-function decryptCredentials(encryptedData: string): any {
-  const key = process.env.ENCRYPTION_KEY || 'default-32-character-encryption-key'
-  const algorithm = 'aes-256-cbc'
-  const [ivHex, encrypted] = encryptedData.split(':')
-  
-  // Create proper key from string
-  const keyBuffer = crypto.scryptSync(key, 'salt', 32)
-  const iv = Buffer.from(ivHex, 'hex')
-  const decipher = crypto.createDecipheriv(algorithm, keyBuffer, iv)
-  
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8')
-  decrypted += decipher.final('utf8')
-  
-  return JSON.parse(decrypted)
-}
+// Use the same EncryptionService as the main system
+import { EncryptionService } from '@/lib/encryption'
 
 export async function GET(request: NextRequest) {
   try {
@@ -176,8 +147,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Encrypt the credentials
-    const encryptedCredentials = encryptCredentials(credentials)
+    // Encrypt the credentials using the same system as main application
+    const encryptedCredentials = EncryptionService.encrypt(JSON.stringify(credentials))
 
     // Create service account using admin client
     const { data: serviceAccount, error: accountError } = await supabaseAdmin!
