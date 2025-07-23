@@ -1,4 +1,6 @@
 {
-  "/api/encryption-status/route": "app/api/encryption-status/route.js",
+  "/api/debug-auth/route": "app/api/debug-auth/route.js",
+  "/api/raw-decrypt-test/route": "app/api/raw-decrypt-test/route.js",
+  "/api/fix-service-account/route": "app/api/fix-service-account/route.js",
   "/page": "app/page.js"
 }

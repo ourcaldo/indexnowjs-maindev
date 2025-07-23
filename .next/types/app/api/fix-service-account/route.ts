@@ -1,8 +1,8 @@
-// File: /home/runner/workspace/app/api/encryption-status/route.ts
-import * as entry from '../../../../../app/api/encryption-status/route.js'
+// File: /home/runner/workspace/app/api/fix-service-account/route.ts
+import * as entry from '../../../../../app/api/fix-service-account/route.js'
 import type { NextRequest } from 'next/server.js'
 
-type TEntry = typeof import('../../../../../app/api/encryption-status/route.js')
+type TEntry = typeof import('../../../../../app/api/fix-service-account/route.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }
