@@ -1,8 +1,9 @@
 {
-  "/api/jobs/route": "app/api/jobs/route.js",
-  "/dashboard/page": "app/dashboard/page.js",
+  "/api/jobs/[id]/route": "app/api/jobs/[id]/route.js",
+  "/api/jobs/[id]/submissions/route": "app/api/jobs/[id]/submissions/route.js",
   "/dashboard/indexnow/page": "app/dashboard/indexnow/page.js",
   "/dashboard/manage-jobs/page": "app/dashboard/manage-jobs/page.js",
   "/dashboard/settings/page": "app/dashboard/settings/page.js",
-  "/dashboard/test-backend/page": "app/dashboard/test-backend/page.js"
+  "/dashboard/test-backend/page": "app/dashboard/test-backend/page.js",
+  "/dashboard/manage-jobs/[id]/page": "app/dashboard/manage-jobs/[id]/page.js"
 }

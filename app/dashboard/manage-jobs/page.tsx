@@ -101,7 +101,7 @@ export default function ManageJobsPage() {
           if (job.id === message.jobId) {
             return {
               ...job,
-              status: message.status || job.status,
+              status: (message.status as Job['status']) || job.status,
               progress_percentage: message.progress !== undefined ? message.progress : job.progress_percentage,
               processed_urls: message.processedUrls || job.processed_urls,
               successful_urls: message.successfulUrls || job.successful_urls,

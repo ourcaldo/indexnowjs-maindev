@@ -239,7 +239,7 @@ export default function JobDetailsPage() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ 
-            status: action === 'resume' ? 'pending' : action === 'pause' ? 'paused' : action === 'rerun' ? 'pending' : action 
+            status: action === 'resume' ? 'pending' : action === 'pause' ? 'paused' : action === 'retry' ? 'pending' : action 
           })
         });
 

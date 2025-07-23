@@ -434,6 +434,23 @@ JWT_SECRET=[jwt-secret-key]
 - Background services running smoothly with job monitor active every minute
 - All components working correctly, ready for fresh service account upload
 
+### 2025-01-23: Migration Complete & Critical Bug Fixes
+- **Successfully migrated from Replit Agent to standard Replit environment**
+- **Fixed critical useSupabaseUser error in WebSocket hook**:
+  - Replaced non-existent `useSupabaseUser()` hook with proper `authService` implementation
+  - Fixed import from non-existent `@/lib/auth-context` to correct `@/lib/auth`
+  - Implemented proper authentication state management using `authService.getCurrentUser()` and `authService.onAuthStateChange()`
+  - Added proper cleanup and component unmount handling
+- **Fixed 400 Bad Request error when re-running jobs**:
+  - Root cause: Job detail page was sending action='retry' but API only accepts specific status values
+  - Fixed action mapping to send 'pending' status for retry actions instead of 'retry'
+  - Updated API validation to properly handle job status updates
+- **Fixed TypeScript errors in manage-jobs page**:
+  - Added proper type casting for WebSocket message status to ensure type safety
+  - Resolved status type compatibility issues in job updates
+- All core functionality now working: authentication, job management, WebSocket real-time updates
+- Background services running smoothly with job monitoring active
+
 ### 2025-01-21: Migration Complete & Job Detail Pagination + Color Fixes
 - Successfully completed migration from Replit Agent to standard Replit environment
 - Fixed job detail page color scheme issues using proper project colors from replit.md:
