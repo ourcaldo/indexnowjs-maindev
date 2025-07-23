@@ -253,21 +253,48 @@ export class GoogleIndexingProcessor {
 
   /**
    * Create URL submission records for tracking individual URL processing
+   * PRESERVES HISTORY: Always adds new submissions, never deletes old ones
    */
   private async createUrlSubmissionsForJob(jobId: string, urls: string[]): Promise<void> {
     try {
-      console.log(`📊 Creating ${urls.length} URL submission records`);
+      console.log(`📊 Creating ${urls.length} URL submission records (PRESERVING HISTORY)`);
       
-      const submissions = urls.map(url => ({
+      // Get count of existing runs for this job to track run number
+      const { data: existingSubmissions, error: countError } = await supabaseAdmin
+        .from('indb_indexing_url_submissions')
+        .select('response_data')
+        .eq('job_id', jobId);
+
+      if (countError) {
+        console.warn('Warning: Could not count existing submissions, continuing with run_number = 1');
+      }
+
+      // Calculate run number based on existing submissions
+      let runNumber = 1;
+      if (existingSubmissions && existingSubmissions.length > 0) {
+        const existingRunNumbers = existingSubmissions
+          .map(sub => sub.response_data?.run_number || 1)
+          .filter(num => typeof num === 'number');
+        runNumber = existingRunNumbers.length > 0 ? Math.max(...existingRunNumbers) + 1 : 1;
+      }
+
+      console.log(`🔄 Creating submissions for run #${runNumber} (preserving ${existingSubmissions?.length || 0} historical records)`);
+      
+      const submissions = urls.map((url, index) => ({
         job_id: jobId,
         url: url,
         status: 'pending',
         retry_count: 0,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        response_data: { 
+          run_number: runNumber, 
+          batch_index: index,
+          created_at: new Date().toISOString()
+        }
       }));
 
-      // Insert submissions in batches to avoid database limits
+      // CRITICAL: INSERT only - NEVER delete or update existing submissions
       const batchSize = 100;
       for (let i = 0; i < submissions.length; i += batchSize) {
         const batch = submissions.slice(i, i + batchSize);
@@ -280,16 +307,20 @@ export class GoogleIndexingProcessor {
         }
       }
 
-      // Update job with total URL count
+      // Update job with current run info (reset progress for new run)
       await supabaseAdmin
         .from('indb_indexing_jobs')
         .update({ 
           total_urls: urls.length,
+          processed_urls: 0,
+          successful_urls: 0,
+          failed_urls: 0,
+          progress_percentage: 0,
           updated_at: new Date().toISOString()
         })
         .eq('id', jobId);
 
-      console.log(`✅ Created ${urls.length} URL submission records`);
+      console.log(`✅ Created ${urls.length} NEW URL submission records for run #${runNumber} (total history preserved)`);
     } catch (error) {
       console.error('Error creating URL submissions:', error);
       throw error;

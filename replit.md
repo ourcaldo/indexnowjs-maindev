@@ -385,6 +385,29 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### 2025-01-23: CRITICAL FIX - URL Submission History Preservation Issue Resolved
+
+**✅ MAJOR BUG FIX: URL Submission History Preservation**
+- **Root Cause Found**: `app/api/jobs/[id]/route.ts` line 136-140 contained DELETE operation that was destroying all URL submission history on job retry
+- **Critical Fix Applied**: Removed DELETE operation that was clearing `indb_indexing_url_submissions` table on job re-runs
+- **History Preservation Confirmed**: System now correctly preserves ALL URL submission records across multiple job runs
+- **Run Tracking Enhanced**: Each job run creates new submissions with incremented `run_number` (1, 2, 3, etc.) in `response_data`
+- **Complete Audit Trail**: Users can now see full history of every job execution with individual URL submission records
+- **Database Verification**: Confirmed system creates new submissions while preserving historical ones (tested with multiple job runs)
+
+**Enhanced Real-Time WebSocket System**:
+- **Fixed WebSocket authentication and connection handling**
+- **Added comprehensive real-time progress broadcasting**
+- **Individual URL status change notifications working correctly**
+- **Cross-component synchronization via custom events**
+
+**Technical Details**:
+- Eliminated destructive DELETE operation in retry flow
+- Enhanced `createUrlSubmissionsForJob()` method with history preservation logic
+- Added run metadata tracking with `run_number` and `batch_index` fields
+- Comprehensive logging for debugging and audit purposes
+- Background worker and job monitor now preserve complete submission history
+
 ### 2025-01-23: Complete Migration & P1.3 WebSocket Issues Resolution
 - **Successfully completed migration from Replit Agent to standard Replit environment**
 - **✅ FIXED P1.3 URL Submission History Issue**: 

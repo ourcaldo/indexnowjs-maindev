@@ -11,7 +11,7 @@ async function debugJob() {
   
   console.log('🔍 Debugging job submissions for:', jobId);
   
-  // Get all submissions
+  // Get ALL submissions for this job (not limited)
   const { data: submissions, error } = await supabase
     .from('indb_indexing_url_submissions')
     .select('*')
@@ -23,16 +23,37 @@ async function debugJob() {
     return;
   }
 
-  console.log(`📊 Total submissions: ${submissions?.length || 0}`);
+  console.log(`📊 TOTAL SUBMISSIONS FOUND: ${submissions?.length || 0}`);
+  console.log(`📅 Database query executed at: ${new Date().toISOString()}`);
   
-  submissions?.forEach((sub, index) => {
-    console.log(`\n${index + 1}. ${sub.id}`);
-    console.log(`   URL: ${sub.url}`);
-    console.log(`   Status: ${sub.status}`);
-    console.log(`   Created: ${sub.created_at}`);
-    console.log(`   Submitted: ${sub.submitted_at}`);
-    console.log(`   Response Data:`, JSON.stringify(sub.response_data, null, 2));
-  });
+  if (submissions && submissions.length > 0) {
+    console.log('\n🔍 DETAILED SUBMISSION ANALYSIS:');
+    
+    // Group by creation time to detect patterns
+    const groupedByHour = {};
+    submissions?.forEach((sub, index) => {
+      const hour = sub.created_at.substring(0, 13); // YYYY-MM-DDTHH
+      if (!groupedByHour[hour]) {
+        groupedByHour[hour] = [];
+      }
+      groupedByHour[hour].push(sub);
+      
+      console.log(`\n${index + 1}. ID: ${sub.id}`);
+      console.log(`   URL: ${sub.url}`);
+      console.log(`   Status: ${sub.status}`);
+      console.log(`   Created: ${sub.created_at}`);
+      console.log(`   Submitted: ${sub.submitted_at || 'NOT_SUBMITTED'}`);
+      console.log(`   Response Data:`, JSON.stringify(sub.response_data, null, 2));
+      console.log(`   Service Account ID: ${sub.service_account_id || 'NOT_SET'}`);
+    });
+    
+    console.log('\n📊 SUBMISSIONS BY HOUR:');
+    Object.keys(groupedByHour).forEach(hour => {
+      console.log(`   ${hour}: ${groupedByHour[hour].length} submissions`);
+    });
+  } else {
+    console.log('\n⚠️ NO SUBMISSIONS FOUND - THIS IS THE PROBLEM!');
+  }
 
   // Check job status
   const { data: job } = await supabase
@@ -41,13 +62,31 @@ async function debugJob() {
     .eq('id', jobId)
     .single();
 
-  console.log('\n📋 Job Status:');
+  console.log('\n📋 JOB STATUS:');
   console.log(`   Status: ${job?.status}`);
   console.log(`   Progress: ${job?.progress_percentage}%`);
   console.log(`   Total URLs: ${job?.total_urls}`);
   console.log(`   Processed: ${job?.processed_urls}`);
   console.log(`   Successful: ${job?.successful_urls}`);
   console.log(`   Failed: ${job?.failed_urls}`);
+  console.log(`   Created: ${job?.created_at}`);
+  console.log(`   Started: ${job?.started_at}`);
+  console.log(`   Completed: ${job?.completed_at}`);
+  
+  // Check if there are submissions for OTHER jobs (to verify DB is working)
+  const { data: allSubmissions } = await supabase
+    .from('indb_indexing_url_submissions')
+    .select('job_id, created_at')
+    .limit(10);
+    
+  console.log('\n🔍 OTHER SUBMISSIONS IN DATABASE:');
+  if (allSubmissions && allSubmissions.length > 0) {
+    allSubmissions.forEach(sub => {
+      console.log(`   Job: ${sub.job_id}, Created: ${sub.created_at}`);
+    });
+  } else {
+    console.log('   NO SUBMISSIONS IN ENTIRE DATABASE!');
+  }
 }
 
 debugJob().catch(console.error);

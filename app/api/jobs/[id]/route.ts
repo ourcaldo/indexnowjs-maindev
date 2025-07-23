@@ -124,20 +124,19 @@ export async function PUT(
       await jobLogger.logJobEvent({
         job_id: jobId,
         level: 'INFO',
-        message: 'Job marked for retry - resetting progress and clearing submissions',
+        message: 'Job marked for retry - preserving URL submission history',
         metadata: {
           event_type: 'job_retry',
           user_id: user.id,
           triggered_by: 'api_endpoint',
-          reset_fields: ['progress_percentage', 'processed_urls', 'successful_urls', 'failed_urls', 'started_at', 'completed_at', 'error_message']
+          reset_fields: ['progress_percentage', 'processed_urls', 'successful_urls', 'failed_urls', 'started_at', 'completed_at', 'error_message'],
+          preservation_note: 'URL submissions preserved for audit trail'
         }
       });
 
-      // Delete existing URL submissions for this job so it can be reprocessed
-      await supabaseAdmin
-        .from('indb_indexing_url_submissions')
-        .delete()
-        .eq('job_id', jobId);
+      // CRITICAL: NEVER DELETE URL SUBMISSIONS - PRESERVE HISTORY
+      // Old URL submissions remain in database for complete audit trail
+      // New submissions will be created with incremented run_number
     }
 
     // Update job status and progress if needed
