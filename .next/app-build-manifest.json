@@ -11,20 +11,40 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
+    "/api/service-accounts/[id]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/service-accounts/[id]/route.js"
+    ],
+    "/api/service-accounts/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/service-accounts/route.js"
+    ],
+    "/api/clear-all-service-accounts/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/clear-all-service-accounts/route.js"
+    ],
+    "/api/user/profile/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/user/profile/route.js"
+    ],
+    "/api/user/settings/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/user/settings/route.js"
+    ],
+    "/api/test-fresh-encrypt/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/test-fresh-encrypt/route.js"
+    ],
     "/api/debug-auth/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/debug-auth/route.js"
-    ],
-    "/api/raw-decrypt-test/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/raw-decrypt-test/route.js"
-    ],
-    "/api/fix-service-account/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/fix-service-account/route.js"
     ]
   }
 }
