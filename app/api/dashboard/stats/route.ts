@@ -1,94 +1,91 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
-    const authorization = request.headers.get('authorization')
-    if (!authorization) {
-      return NextResponse.json(
-        { error: 'Authorization header required' },
-        { status: 401 }
-      )
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Missing or invalid authorization header' }, { status: 401 });
     }
 
-    const token = authorization.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      )
+    const token = authHeader.substring(7);
+    let userId: string;
+
+    try {
+      // For now, extract userId from token (simplified approach)
+      // In production, you might want to verify with Supabase
+      const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+      if (error || !user) {
+        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      }
+      userId = user.id;
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // Get basic job statistics
-    const { data: jobStats, error: jobStatsError } = await supabase
-      .from('indb_indexing_jobs')
-      .select('status, total_urls, processed_urls, successful_urls, failed_urls')
-      .eq('user_id', user.id)
-
-    if (jobStatsError) {
-      return NextResponse.json(
-        { error: 'Failed to fetch job statistics' },
-        { status: 500 }
-      )
-    }
-
-    // Calculate aggregated stats
+    // Calculate dashboard statistics
     const stats = {
-      total_jobs: jobStats?.length || 0,
-      active_jobs: jobStats?.filter(j => j.status === 'running').length || 0,
-      completed_jobs: jobStats?.filter(j => j.status === 'completed').length || 0,
-      failed_jobs: jobStats?.filter(j => j.status === 'failed').length || 0,
-      pending_jobs: jobStats?.filter(j => j.status === 'pending').length || 0,
-      total_urls_indexed: jobStats?.reduce((sum, job) => sum + (job.successful_urls || 0), 0) || 0,
-      total_urls_failed: jobStats?.reduce((sum, job) => sum + (job.failed_urls || 0), 0) || 0,
-      total_urls_processed: jobStats?.reduce((sum, job) => sum + (job.processed_urls || 0), 0) || 0,
-      total_urls_submitted: jobStats?.reduce((sum, job) => sum + (job.total_urls || 0), 0) || 0,
+      totalUrlsIndexed: 0,
+      activeJobs: 0,
+      scheduledJobs: 0,
+      successRate: 0,
+      quotaUsed: 0,
+      quotaLimit: 200
+    };
+
+    // Get total URLs successfully indexed
+    const { data: successfulSubmissions } = await supabaseAdmin
+      .from('indb_indexing_url_submissions')
+      .select('count')
+      .eq('status', 'submitted')
+      .eq('job_id', supabaseAdmin.from('indb_indexing_jobs').select('id').eq('user_id', userId))
+      .single();
+
+    if (successfulSubmissions) {
+      stats.totalUrlsIndexed = successfulSubmissions.count || 0;
+    }
+
+    // Get active and scheduled jobs
+    const { data: jobs } = await supabaseAdmin
+      .from('indb_indexing_jobs')
+      .select('status, schedule_type')
+      .eq('user_id', userId);
+
+    if (jobs) {
+      stats.activeJobs = jobs.filter(job => job.status === 'running').length;
+      stats.scheduledJobs = jobs.filter(job => 
+        job.schedule_type !== 'one-time' && 
+        (job.status === 'pending' || job.status === 'paused')
+      ).length;
     }
 
     // Calculate success rate
-    const success_rate = stats.total_urls_processed > 0 
-      ? ((stats.total_urls_indexed / stats.total_urls_processed) * 100).toFixed(1)
-      : '0.0'
+    const { data: allSubmissions } = await supabaseAdmin
+      .from('indb_indexing_url_submissions')
+      .select('status')
+      .eq('job_id', supabaseAdmin.from('indb_indexing_jobs').select('id').eq('user_id', userId));
+
+    if (allSubmissions && allSubmissions.length > 0) {
+      const successful = allSubmissions.filter(sub => sub.status === 'submitted').length;
+      stats.successRate = (successful / allSubmissions.length) * 100;
+    }
 
     // Get quota usage from service accounts
-    const today = new Date().toISOString().split('T')[0]
-    const { data: quotaData, error: quotaError } = await supabase
+    const { data: quotaUsage } = await supabaseAdmin
       .from('indb_google_quota_usage')
       .select('requests_made')
-      .eq('date', today)
-      .in('service_account_id', 
-        supabase
-          .from('indb_google_service_accounts')
-          .select('id')
-          .eq('user_id', user.id)
-      )
+      .eq('service_account_id', supabaseAdmin.from('indb_google_service_accounts').select('id').eq('user_id', userId))
+      .eq('date', new Date().toISOString().split('T')[0]);
 
-    const total_quota_used = quotaData?.reduce((sum, usage) => sum + (usage.requests_made || 0), 0) || 0
+    if (quotaUsage) {
+      stats.quotaUsed = quotaUsage.reduce((total, usage) => total + (usage.requests_made || 0), 0);
+    }
 
-    // Get recent activity (last 5 jobs)
-    const { data: recentJobs, error: recentJobsError } = await supabase
-      .from('indb_indexing_jobs')
-      .select('id, name, status, successful_urls, total_urls, created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(5)
-
-    return NextResponse.json({
-      stats: {
-        ...stats,
-        success_rate: parseFloat(success_rate),
-        quota_usage: total_quota_used,
-      },
-      recent_activity: recentJobs || [],
-    })
+    return NextResponse.json(stats);
 
   } catch (error) {
-    console.error('Dashboard stats error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Error fetching dashboard stats:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

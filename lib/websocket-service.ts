@@ -37,9 +37,30 @@ export class WebSocketService {
     this.wss = new WebSocketServer({ 
       server, 
       path: '/ws',
-      verifyClient: (info: any) => {
-        // Basic verification - you might want to add JWT verification here
-        return true;
+      verifyClient: async (info: any) => {
+        try {
+          const url = new URL(info.req.url!, 'http://localhost');
+          const userId = url.searchParams.get('userId');
+          
+          if (!userId) {
+            console.log('WebSocket connection rejected: Missing userId');
+            return false;
+          }
+
+          // For now, we'll verify userId format is UUID-like
+          // In production, you might want to verify against Supabase JWT token
+          const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          if (!uuidPattern.test(userId)) {
+            console.log('WebSocket connection rejected: Invalid userId format');
+            return false;
+          }
+
+          console.log(`WebSocket connection verified for user: ${userId}`);
+          return true;
+        } catch (error) {
+          console.error('WebSocket verification error:', error);
+          return false;
+        }
       }
     });
 

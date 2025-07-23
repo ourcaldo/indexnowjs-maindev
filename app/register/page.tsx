@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { authService } from "@/lib/auth"
 
-import DashboardPreview from '../components/DashboardPreview'
+// import DashboardPreview from '../components/DashboardPreview'
 
 export default function Register() {
   const router = useRouter()
@@ -145,11 +145,26 @@ export default function Register() {
             </span>
           </div>
           
-          <DashboardPreview 
-            title="Join thousands of developers getting results."
-            subtitle="Create your account and start indexing your URLs instantly with powerful analytics."
-            variant="register"
-          />
+          <div style={{
+            padding: '40px',
+            textAlign: 'center'
+          }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '600',
+              color: '#ffffff',
+              marginBottom: '16px'
+            }}>
+              Join thousands of developers getting results.
+            </h2>
+            <p style={{
+              fontSize: '16px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              lineHeight: '1.5'
+            }}>
+              Create your account and start indexing your URLs instantly with powerful analytics.
+            </p>
+          </div>
         </div>
       )}
 

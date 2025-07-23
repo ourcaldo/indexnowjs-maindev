@@ -1,8 +1,150 @@
 'use client'
 
 import { PlusIcon, BellIcon, TrendingUpIcon, CalendarIcon, CheckCircleIcon, Database } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useWebSocket } from '@/hooks/useWebSocket'
+import { authService } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
+
+interface DashboardStats {
+  totalUrlsIndexed: number;
+  activeJobs: number;
+  scheduledJobs: number;
+  successRate: number;
+  quotaUsed: number;
+  quotaLimit: number;
+}
+
+interface RecentJob {
+  id: string;
+  name: string;
+  created_at: string;
+  schedule_type: string;
+  total_urls: number;
+  successful_urls: number;
+  failed_urls: number;
+  status: string;
+  progress_percentage: number;
+  processed_urls: number;
+}
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUrlsIndexed: 0,
+    activeJobs: 0,
+    scheduledJobs: 0,
+    successRate: 0,
+    quotaUsed: 0,
+    quotaLimit: 200
+  });
+  const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // WebSocket for real-time updates
+  const { isConnected } = useWebSocket({
+    onJobUpdate: (message) => {
+      // Update job status in real-time
+      setRecentJobs(prevJobs => 
+        prevJobs.map(job => {
+          if (job.id === message.jobId) {
+            return {
+              ...job,
+              status: message.status || job.status,
+              progress_percentage: message.progress?.progress_percentage ?? job.progress_percentage,
+              processed_urls: message.progress?.processed_urls ?? job.processed_urls,
+              successful_urls: message.progress?.successful_urls ?? job.successful_urls,
+              failed_urls: message.progress?.failed_urls ?? job.failed_urls
+            };
+          }
+          return job;
+        })
+      );
+      
+      // Update stats based on job updates
+      loadDashboardStats();
+    }
+  });
+
+  // Load dashboard data
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      await Promise.all([
+        loadDashboardStats(),
+        loadRecentJobs()
+      ]);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadDashboardStats = async () => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch('/api/dashboard/stats', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error);
+    }
+  };
+
+  const loadRecentJobs = async () => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch('/api/jobs?limit=5&page=1', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setRecentJobs(data.jobs || []);
+      }
+    } catch (error) {
+      console.error('Error loading recent jobs:', error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
+  };
+
+  const getStatusBadgeStyle = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return { backgroundColor: '#4BB543', color: '#FFFFFF' };
+      case 'running':
+        return { backgroundColor: '#3D8BFF', color: '#FFFFFF' };
+      case 'failed':
+        return { backgroundColor: '#E63946', color: '#FFFFFF' };
+      case 'paused':
+        return { backgroundColor: '#F0A202', color: '#FFFFFF' };
+      default:
+        return { backgroundColor: '#6C757D', color: '#FFFFFF' };
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -32,8 +174,12 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium" style={{color: '#6C757D'}}>Total URLs Indexed</p>
-              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>79</p>
-              <p className="text-sm font-semibold mt-1" style={{color: '#4BB543'}}>+12% from last week</p>
+              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>
+                {loading ? '...' : stats.totalUrlsIndexed.toLocaleString()}
+              </p>
+              <p className="text-sm font-semibold mt-1" style={{color: stats.totalUrlsIndexed > 0 ? '#4BB543' : '#6C757D'}}>
+                {stats.totalUrlsIndexed > 0 ? 'Successfully indexed' : 'No URLs indexed yet'}
+              </p>
             </div>
             <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
               <TrendingUpIcon className="w-6 h-6 text-white" />
@@ -45,8 +191,12 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium" style={{color: '#6C757D'}}>Active Jobs</p>
-              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>0</p>
-              <p className="text-sm font-semibold mt-1" style={{color: '#F0A202'}}>3 scheduled</p>
+              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>
+                {loading ? '...' : stats.activeJobs}
+              </p>
+              <p className="text-sm font-semibold mt-1" style={{color: stats.scheduledJobs > 0 ? '#F0A202' : '#6C757D'}}>
+                {stats.scheduledJobs} scheduled
+              </p>
             </div>
             <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{backgroundColor: '#0d1b2a'}}>
               <CalendarIcon className="w-6 h-6 text-white" />
@@ -58,8 +208,12 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium" style={{color: '#6C757D'}}>Success Rate</p>
-              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>60.3%</p>
-              <p className="text-sm font-semibold mt-1" style={{color: '#4BB543'}}>Excellent</p>
+              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>
+                {loading ? '...' : `${stats.successRate.toFixed(1)}%`}
+              </p>
+              <p className="text-sm font-semibold mt-1" style={{color: stats.successRate >= 70 ? '#4BB543' : stats.successRate >= 50 ? '#F0A202' : '#E63946'}}>
+                {stats.successRate >= 70 ? 'Excellent' : stats.successRate >= 50 ? 'Good' : 'Needs improvement'}
+              </p>
             </div>
             <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{backgroundColor: '#22333b'}}>
               <CheckCircleIcon className="w-6 h-6 text-white" />
@@ -71,8 +225,12 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium" style={{color: '#6C757D'}}>API Quota Used</p>
-              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>195</p>
-              <p className="text-sm font-semibold mt-1" style={{color: '#E63946'}}>of 200 daily limit</p>
+              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>
+                {loading ? '...' : stats.quotaUsed}
+              </p>
+              <p className="text-sm font-semibold mt-1" style={{color: stats.quotaUsed >= stats.quotaLimit * 0.9 ? '#E63946' : stats.quotaUsed >= stats.quotaLimit * 0.7 ? '#F0A202' : '#4BB543'}}>
+                of {stats.quotaLimit} daily limit
+              </p>
             </div>
             <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1E1E1E'}}>
               <Database className="w-6 h-6 text-white" />
@@ -196,71 +354,82 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              <tr 
-                className="transition-colors" 
-                style={{borderBottom: '1px solid #F7F9FC'}}
-                onMouseEnter={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = '#F7F9FC'}
-                onMouseLeave={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = 'transparent'}
-              >
-                <td className="py-3 px-4 font-bold" style={{color: '#1A1A1A'}}>#Job-1753025054083-857</td>
-                <td className="py-3 px-4" style={{color: '#6C757D'}}>20/7/2025, 22.24.42</td>
-                <td className="py-3 px-4">
-                  <span className="text-xs px-2 py-1 rounded-full font-medium" style={{backgroundColor: '#1C2331', color: '#FFFFFF'}}>one-time</span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="font-semibold" style={{color: '#1A1A1A'}}>100 total</div>
-                  <div className="text-xs" style={{color: '#6C757D'}}>0 success, 0 failed</div>
-                </td>
-                <td className="py-3 px-4">
-                  <span className="text-xs px-2 py-1 rounded-full font-medium" style={{backgroundColor: '#F0A202', color: '#FFFFFF'}}>Paused</span>
-                </td>
-                <td className="py-3 px-4 font-semibold" style={{color: '#1A1A1A'}}>0/100 processed</td>
-                <td className="py-3 px-4">
-                  <button 
-                    className="transition-colors" 
-                    style={{color: '#6C757D'}}
-                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#1A1A1A'}
-                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#6C757D'}
-                  >
-                    ...
-                  </button>
-                </td>
-              </tr>
-              <tr 
-                className="transition-colors" 
-                style={{borderBottom: '1px solid #F7F9FC'}}
-                onMouseEnter={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = '#F7F9FC'}
-                onMouseLeave={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = 'transparent'}
-              >
-                <td className="py-3 px-4 font-bold" style={{color: '#1A1A1A'}}>#Job-22</td>
-                <td className="py-3 px-4" style={{color: '#6C757D'}}>18/7/2025, 13.02.11</td>
-                <td className="py-3 px-4">
-                  <span className="text-xs px-2 py-1 rounded-full font-medium" style={{backgroundColor: '#1C2331', color: '#FFFFFF'}}>one-time</span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="font-semibold" style={{color: '#1A1A1A'}}>1 total</div>
-                  <div className="text-xs font-medium" style={{color: '#E63946'}}>0 success, 1 failed</div>
-                </td>
-                <td className="py-3 px-4">
-                  <span className="text-xs px-2 py-1 rounded-full font-medium" style={{backgroundColor: '#4BB543', color: '#FFFFFF'}}>Completed</span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="w-full rounded-full h-2" style={{backgroundColor: '#E0E6ED'}}>
-                    <div className="h-2 rounded-full" style={{width: '100%', backgroundColor: '#4BB543'}}></div>
-                  </div>
-                  <span className="text-xs font-medium mt-1" style={{color: '#4BB543'}}>1/1 processed</span>
-                </td>
-                <td className="py-3 px-4">
-                  <button 
-                    className="transition-colors" 
-                    style={{color: '#6C757D'}}
-                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#1A1A1A'}
-                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#6C757D'}
-                  >
-                    ...
-                  </button>
-                </td>
-              </tr>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center" style={{color: '#6C757D'}}>
+                    Loading recent jobs...
+                  </td>
+                </tr>
+              ) : recentJobs.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center" style={{color: '#6C757D'}}>
+                    No jobs found. Create your first indexing job to get started.
+                  </td>
+                </tr>
+              ) : recentJobs.map((job) => (
+                <tr 
+                  key={job.id}
+                  className="transition-colors" 
+                  style={{borderBottom: '1px solid #F7F9FC'}}
+                  onMouseEnter={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = '#F7F9FC'}
+                  onMouseLeave={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = 'transparent'}
+                >
+                  <td className="py-3 px-4 font-bold" style={{color: '#1A1A1A'}}>
+                    #{job.id.slice(-12)}
+                  </td>
+                  <td className="py-3 px-4" style={{color: '#6C757D'}}>
+                    {formatDate(job.created_at)}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="text-xs px-2 py-1 rounded-full font-medium" style={{backgroundColor: '#1C2331', color: '#FFFFFF'}}>
+                      {job.schedule_type}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="font-semibold" style={{color: '#1A1A1A'}}>
+                      {job.total_urls} total
+                    </div>
+                    <div className="text-xs" style={{color: job.successful_urls > 0 ? '#4BB543' : job.failed_urls > 0 ? '#E63946' : '#6C757D'}}>
+                      {job.successful_urls} success, {job.failed_urls} failed
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span 
+                      className="text-xs px-2 py-1 rounded-full font-medium" 
+                      style={getStatusBadgeStyle(job.status)}
+                    >
+                      {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    {job.status === 'completed' ? (
+                      <div>
+                        <div className="w-full rounded-full h-2" style={{backgroundColor: '#E0E6ED'}}>
+                          <div className="h-2 rounded-full" style={{width: '100%', backgroundColor: '#4BB543'}}></div>
+                        </div>
+                        <span className="text-xs font-medium mt-1" style={{color: '#4BB543'}}>
+                          {job.processed_urls}/{job.total_urls} processed
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="font-semibold" style={{color: '#1A1A1A'}}>
+                        {job.processed_urls}/{job.total_urls} processed
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <button 
+                      className="transition-colors" 
+                      style={{color: '#6C757D'}}
+                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#1A1A1A'}
+                      onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#6C757D'}
+                      onClick={() => window.location.href = `/dashboard/manage-jobs/${job.id}`}
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

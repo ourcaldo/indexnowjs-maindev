@@ -3,9 +3,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { account } from "@/lib/appwrite"
-
-import DashboardPreview from '../components/DashboardPreview'
+import { authService } from "@/lib/auth"
 
 export default function ForgotPassword() {
   const router = useRouter()
@@ -32,7 +30,7 @@ export default function ForgotPassword() {
     setError("")
     
     try {
-      await account.createRecovery(email, `${window.location.origin}/reset-password`)
+      await authService.resetPassword(email)
       setSuccess(true)
     } catch (error: any) {
       setError(error.message || "Failed to send recovery email")
@@ -137,11 +135,26 @@ export default function ForgotPassword() {
             </span>
           </div>
           
-          <DashboardPreview 
-            title="Get back to your indexing dashboard."
-            subtitle="Your analytics and performance data are waiting for you to return."
-            variant="forgot"
-          />
+          <div style={{
+            padding: '40px',
+            textAlign: 'center'
+          }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '600',
+              color: '#ffffff',
+              marginBottom: '16px'
+            }}>
+              Get back to your indexing dashboard.
+            </h2>
+            <p style={{
+              fontSize: '16px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              lineHeight: '1.5'
+            }}>
+              Your analytics and performance data are waiting for you to return.
+            </p>
+          </div>
         </div>
       )}
 
