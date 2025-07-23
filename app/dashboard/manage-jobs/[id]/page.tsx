@@ -127,35 +127,75 @@ export default function JobDetailsPage() {
     onJobUpdate: (message) => {
       console.log('📨 Job update received on detail page:', message);
       // Update job data with real-time progress
-      if (job && job.id === message.jobId) {
-        setJob(prevJob => ({
-          ...prevJob!,
-          status: (message.status as Job['status']) || prevJob!.status,
-          progress_percentage: message.progress?.progress_percentage ?? prevJob!.progress_percentage,
-          processed_urls: message.progress?.processed_urls ?? prevJob!.processed_urls,
-          successful_urls: message.progress?.successful_urls ?? prevJob!.successful_urls,
-          failed_urls: message.progress?.failed_urls ?? prevJob!.failed_urls,
-          total_urls: message.progress?.total_urls ?? prevJob!.total_urls,
-          updated_at: new Date().toISOString()
-        }));
+      if (message.jobId === jobId) {
+        setJob(prevJob => {
+          if (!prevJob) return prevJob;
+          
+          console.log('🔄 Updating job state with:', message);
+          return {
+            ...prevJob,
+            status: (message.status as Job['status']) || prevJob.status,
+            progress_percentage: message.progress?.progress_percentage ?? prevJob.progress_percentage,
+            processed_urls: message.progress?.processed_urls ?? prevJob.processed_urls,
+            successful_urls: message.progress?.successful_urls ?? prevJob.successful_urls,
+            failed_urls: message.progress?.failed_urls ?? prevJob.failed_urls,
+            total_urls: message.progress?.total_urls ?? prevJob.total_urls,
+            updated_at: new Date().toISOString()
+          };
+        });
+        
+        // Force component re-render by triggering a state update
+        setTimeout(() => {
+          console.log('🔄 Reloading submissions after job update');
+          loadSubmissions();
+        }, 100);
       }
-      // Trigger real-time submission reload
-      window.dispatchEvent(new CustomEvent('job-progress-update', { 
-        detail: { jobId: message.jobId, reloadSubmissions: true } 
-      }));
+    },
+    onJobProgress: (message) => {
+      console.log('📊 Job progress received on detail page:', message);
+      if (message.jobId === jobId && message.progress) {
+        setJob(prevJob => {
+          if (!prevJob) return prevJob;
+          
+          return {
+            ...prevJob,
+            progress_percentage: message.progress.progress_percentage ?? prevJob.progress_percentage,
+            processed_urls: message.progress.processed_urls ?? prevJob.processed_urls,
+            successful_urls: message.progress.successful_urls ?? prevJob.successful_urls,
+            failed_urls: message.progress.failed_urls ?? prevJob.failed_urls,
+            total_urls: message.progress.total_urls ?? prevJob.total_urls,
+            updated_at: new Date().toISOString()
+          };
+        });
+      }
     },
     onJobCompleted: (message) => {
       console.log('✅ Job completed on detail page:', message);
-      addToast({
-        title: 'Job Completed',
-        description: `${job?.name || 'Job'} completed successfully!`,
-        type: 'success'
-      });
-      // Reload job data and trigger submission reload
-      loadJobData();
-      window.dispatchEvent(new CustomEvent('job-progress-update', { 
-        detail: { jobId: message.jobId, reloadSubmissions: true } 
-      }));
+      if (message.jobId === jobId) {
+        addToast({
+          title: 'Job Completed',
+          description: `${job?.name || 'Job'} completed successfully!`,
+          type: 'success'
+        });
+        
+        // Update job status to completed immediately
+        setJob(prevJob => {
+          if (!prevJob) return prevJob;
+          return {
+            ...prevJob,
+            status: 'completed',
+            progress_percentage: 100,
+            completed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        });
+        
+        // Reload data after a short delay
+        setTimeout(() => {
+          loadJobData();
+          loadSubmissions();
+        }, 200);
+      }
     }
   });
 

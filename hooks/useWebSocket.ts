@@ -95,7 +95,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
               type: 'subscribe_job',
               jobId: jobId
             }));
+            console.log(`📡 Subscribed to job updates for job: ${jobId}`);
           }
+          
+          // Send a ping to confirm connection
+          ws.send(JSON.stringify({ type: 'ping' }));
         };
 
         ws.onmessage = (event) => {
@@ -172,6 +176,19 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         ws.onerror = (error) => {
           console.error('❌ WebSocket error:', error);
           setIsConnected(false);
+        };
+
+        ws.onclose = (event) => {
+          console.log(`🔌 WebSocket closed: ${event.code} - ${event.reason}`);
+          setIsConnected(false);
+          
+          // Attempt to reconnect after a delay if not intentionally closed
+          if (event.code !== 1000) {
+            setTimeout(() => {
+              console.log('🔄 Attempting WebSocket reconnection...');
+              connectWebSocket();
+            }, 3000);
+          }
         };
       } catch (error) {
         console.error('Failed to establish WebSocket connection:', error);
