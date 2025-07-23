@@ -171,48 +171,32 @@ export class GoogleAuthService {
     try {
       console.log('🔄 Starting generateNewAccessToken process...');
       
-      // Check if credentials are empty or corrupted (too long indicates corruption)
-      if (!serviceAccount.encrypted_credentials || 
-          serviceAccount.encrypted_credentials.trim() === '' ||
-          serviceAccount.encrypted_credentials.length > 3000) {
-        
-        if (serviceAccount.encrypted_credentials && serviceAccount.encrypted_credentials.length > 3000) {
-          console.log(`⚠️ Service account ${serviceAccount.id} has corrupted credentials (${serviceAccount.encrypted_credentials.length} chars). Clearing...`);
-          
-          // Auto-clear corrupted credentials
-          await supabaseAdmin
-            .from('indb_google_service_accounts')
-            .update({
-              encrypted_credentials: '',
-              encrypted_access_token: null,
-              access_token_expires_at: null,
-              is_active: false,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', serviceAccount.id);
-            
-          console.log(`✅ Cleared corrupted credentials for service account ${serviceAccount.id}`);
-        } else {
-          console.log('⚠️ Service account has no encrypted credentials. Skipping...');
-        }
-        
+      // Check if credentials are empty 
+      if (!serviceAccount.encrypted_credentials || serviceAccount.encrypted_credentials.trim() === '') {
+        console.log('⚠️ Service account has no encrypted credentials. Skipping...');
         return null;
       }
 
       console.log('🔐 DEBUG - About to decrypt credentials...');
+      console.log('- Encrypted data length:', serviceAccount.encrypted_credentials.length);
       console.log('- Encrypted data to decrypt:', serviceAccount.encrypted_credentials.substring(0, 100) + '...');
       
-      // Decrypt service account credentials
+      // Decrypt service account credentials - FORCE DECRYPTION ATTEMPT
       let credentialsJson: string;
       try {
+        console.log('🔓 FORCING DECRYPTION ATTEMPT...');
         credentialsJson = EncryptionService.decrypt(serviceAccount.encrypted_credentials);
-        console.log('✅ DEBUG - Decryption successful!');
+        console.log('✅ DEBUG - DECRYPTION SUCCESSFUL!');
         console.log('- Decrypted JSON length:', credentialsJson.length);
-        console.log('- Decrypted JSON preview (first 200 chars):', credentialsJson.substring(0, 200) + '...');
+        console.log('- Decrypted JSON preview (first 500 chars):', credentialsJson.substring(0, 500));
+        console.log('- Full decrypted JSON:', credentialsJson);
       } catch (decryptError) {
-        console.error('❌ DEBUG - Decryption failed:', decryptError);
+        console.error('❌ DEBUG - DECRYPTION FAILED:', decryptError);
         console.error('- Error type:', decryptError instanceof Error ? decryptError.name : typeof decryptError);
         console.error('- Error message:', decryptError instanceof Error ? decryptError.message : String(decryptError));
+        console.error('- Error stack:', decryptError instanceof Error ? decryptError.stack : 'No stack');
+        
+        // DO NOT CLEAR ANYTHING - just fail and show the error
         throw decryptError;
       }
 

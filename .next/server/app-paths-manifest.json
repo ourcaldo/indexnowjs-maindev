@@ -1,4 +1,8 @@
 {
-  "/api/encryption-debug/route": "app/api/encryption-debug/route.js",
-  "/page": "app/page.js"
+  "/api/service-accounts/route": "app/api/service-accounts/route.js",
+  "/api/user/profile/route": "app/api/user/profile/route.js",
+  "/api/jobs/[id]/route": "app/api/jobs/[id]/route.js",
+  "/api/user/settings/route": "app/api/user/settings/route.js",
+  "/page": "app/page.js",
+  "/dashboard/settings/page": "app/dashboard/settings/page.js"
 }
