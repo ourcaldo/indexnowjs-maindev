@@ -231,8 +231,8 @@ export default function IndexNowPage() {
         return
       }
 
-      // Check for duplicate URLs
-      const uniqueUrls = [...new Set(validUrls)]
+      // Check for duplicate URLs  
+      const uniqueUrls = Array.from(new Set(validUrls))
       if (uniqueUrls.length !== validUrls.length) {
         addToast({
           title: 'Warning',
