@@ -1,5 +1,6 @@
 import { supabaseAdmin } from './supabase';
 import { GoogleAuthService } from './google-auth-service';
+import { WebSocketService } from './websocket-service';
 
 interface IndexingJob {
   id: string;
@@ -35,10 +36,12 @@ interface UrlSubmission {
 export class GoogleIndexingProcessor {
   private static instance: GoogleIndexingProcessor;
   private googleAuth: GoogleAuthService;
+  private websocketService: WebSocketService;
   private processingJobs = new Set<string>();
 
   constructor() {
     this.googleAuth = GoogleAuthService.getInstance();
+    this.websocketService = WebSocketService.getInstance();
   }
 
   static getInstance(): GoogleIndexingProcessor {
@@ -99,6 +102,13 @@ export class GoogleIndexingProcessor {
       // Mark job as completed
       await this.updateJobStatus(jobId, 'completed', { 
         completed_at: new Date().toISOString()
+      });
+
+      // Send real-time completion update
+      this.websocketService.broadcastJobUpdate(job.user_id, jobId, {
+        status: 'completed',
+        progress: 100,
+        completedAt: new Date().toISOString()
       });
 
       console.log(`✅ Indexing job ${jobId} completed successfully`);
@@ -341,6 +351,15 @@ export class GoogleIndexingProcessor {
           })
           .eq('id', job.id);
 
+        // Send real-time progress update via WebSocket
+        this.websocketService.broadcastJobUpdate(job.user_id, job.id, {
+          progress: progressPercentage,
+          processedUrls: processed,
+          successfulUrls: successful,
+          failedUrls: failed,
+          totalUrls: submissions.length
+        });
+
         // Respect Google API rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
       }
@@ -398,6 +417,17 @@ export class GoogleIndexingProcessor {
         .eq('id', jobId)
         .eq('status', 'pending')
         .select();
+
+      // Send real-time status update
+      if (data && data.length > 0) {
+        // Get user_id from the job data
+        const job = await this.getJobDetails(jobId);
+        if (job) {
+          this.websocketService.broadcastJobUpdate(job.user_id, jobId, {
+            status: 'running'
+          });
+        }
+      }
 
       if (error) {
         console.error('Error locking job:', error);

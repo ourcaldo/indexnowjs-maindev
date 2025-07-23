@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -89,6 +90,38 @@ export default function ManageJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const jobsPerPage = 20;
+
+  // WebSocket for real-time updates
+  const { isConnected } = useWebSocket({
+    onJobUpdate: (message) => {
+      console.log('📨 Job update received:', message);
+      // Update the specific job in the list
+      setJobs(prevJobs => 
+        prevJobs.map(job => {
+          if (job.id === message.jobId) {
+            return {
+              ...job,
+              status: message.status || job.status,
+              progress_percentage: message.progress !== undefined ? message.progress : job.progress_percentage,
+              processed_urls: message.processedUrls || job.processed_urls,
+              successful_urls: message.successfulUrls || job.successful_urls,
+              failed_urls: message.failedUrls || job.failed_urls,
+              updated_at: new Date().toISOString()
+            };
+          }
+          return job;
+        })
+      );
+    },
+    onJobCompleted: (message) => {
+      console.log('✅ Job completed:', message);
+      addToast({
+        title: 'Job Completed',
+        description: `Job completed successfully!`,
+        type: 'success'
+      });
+    }
+  });
 
   // Load jobs data
   useEffect(() => {
