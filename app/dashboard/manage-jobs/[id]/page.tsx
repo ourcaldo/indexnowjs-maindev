@@ -65,6 +65,7 @@ interface URLSubmission {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'success':
+    case 'submitted':
       return 'bg-[#4BB543] text-white';
     case 'failed':
       return 'bg-[#E63946] text-white';
@@ -86,6 +87,7 @@ const getStatusColor = (status: string) => {
 const getStatusIcon = (status: string) => {
   switch (status) {
     case 'success':
+    case 'submitted':
     case 'completed':
       return <CheckCircle2 className="h-3 w-3" />;
     case 'failed':
@@ -571,6 +573,7 @@ export default function JobDetailsPage() {
                         <Badge className={`${getStatusColor(submission.status)} flex items-center gap-1 w-fit`}>
                           {getStatusIcon(submission.status)}
                           {submission.status === 'quota_exceeded' ? 'Quota Exceeded' : 
+                           submission.status === 'submitted' ? 'Success' :
                            submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
                         </Badge>
                       </td>

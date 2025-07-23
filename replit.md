@@ -456,6 +456,10 @@ JWT_SECRET=[jwt-secret-key]
   - Failed requests also counted to prevent quota abuse
   - Proper tracking in indb_google_quota_usage table with real-time updates
   - Service account quota displays now show accurate remaining quotas
+- **Updated URL submission status display**:
+  - "Submitted" status now shows as "Success" in green color (#4BB543)
+  - Replaced clock icon with green checkmark icon for successful submissions
+  - Improved visual clarity in job detail page URL submissions table
 - **Enhanced job detail page with dynamic action buttons**:
   - Start button: Only visible when job status is "pending" (Green color)
   - Stop button: Only visible when job status is "running" (Red color)
