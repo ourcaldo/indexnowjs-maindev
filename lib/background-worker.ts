@@ -37,10 +37,10 @@ export class BackgroundWorker {
       this.isStarted = true;
       console.log('✅ Background worker started successfully');
       
-      // Log status every 15 minutes (reduced frequency)
+      // Log status every 5 minutes
       setInterval(() => {
         this.logStatus();
-      }, 15 * 60 * 1000);
+      }, 5 * 60 * 1000);
       
     } catch (error) {
       console.error('❌ Failed to start background worker:', error);

@@ -49,7 +49,7 @@ export class SocketIOBroadcaster {
       ...update
     };
 
-    // Broadcasting job update (logging reduced)
+    console.log(`📡 Broadcasting job update for job ${jobId}:`, update);
 
     // For completion status, add a small delay to ensure clients are connected
     const broadcastDelay = update.status === 'completed' ? 1000 : 0;
@@ -65,7 +65,9 @@ export class SocketIOBroadcaster {
         }
       });
       
-      // Completion broadcast sent (logging reduced)
+      if (update.status === 'completed') {
+        console.log(`✅ Completion broadcast sent for job ${jobId} after delay`);
+      }
     }, broadcastDelay);
   }
 
@@ -85,7 +87,7 @@ export class SocketIOBroadcaster {
       timestamp: new Date().toISOString()
     };
 
-    // Broadcasting job progress (logging reduced)
+    console.log(`📡 Broadcasting job progress for job ${jobId}:`, progress);
     
     // Send to specific job room
     io.to(`job-${jobId}`).emit('job_progress', message);

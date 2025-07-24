@@ -4,9 +4,7 @@ import { SocketIOBroadcaster } from '../../lib/socketio-broadcaster'
 
 const SocketHandler = (req, res) => {
   if (res.socket.server.io) {
-    // Reduced logging for existing WebSocket server
-    res.end()
-    return
+    console.log('WebSocket server is already running')
   } else {
     console.log('Initializing WebSocket server with Socket.io')
     
@@ -87,22 +85,9 @@ const SocketHandler = (req, res) => {
         clientId: socket.id
       })
 
-      // Handle job subscription with duplicate prevention
+      // Handle job subscription
       socket.on('subscribe_job', (data) => {
         const jobRoom = `job-${data.jobId}`
-        
-        // Check if already subscribed to this job
-        if (socket.currentJobId === data.jobId) {
-          // Already subscribed, just send confirmation
-          socket.emit('subscribed', { jobId: data.jobId })
-          return;
-        }
-        
-        // Unsubscribe from previous job if any
-        if (socket.currentJobId) {
-          socket.leave(`job-${socket.currentJobId}`)
-        }
-        
         socket.join(jobRoom)
         socket.currentJobId = data.jobId
         console.log(`📡 Client ${socket.id} subscribed to job: ${data.jobId}`)
