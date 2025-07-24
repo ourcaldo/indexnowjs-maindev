@@ -212,6 +212,9 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
           return;
         }
 
+        // Initialize Socket.io endpoint to ensure server is running
+        await fetch('/api/socket');
+
         // Register this hook as a subscriber
         socketManager.addSubscriber(hookId.current);
 

@@ -1,5 +1,6 @@
 import { Server } from 'socket.io'
 import { supabaseAdmin } from '../../lib/supabase'
+import { SocketIOBroadcaster } from '../../lib/socketio-broadcaster'
 
 const SocketHandler = (req, res) => {
   if (res.socket.server.io) {
@@ -30,6 +31,13 @@ const SocketHandler = (req, res) => {
     })
     
     res.socket.server.io = io
+    
+    // Connect the broadcaster to this Socket.IO instance
+    const broadcaster = SocketIOBroadcaster.getInstance()
+    broadcaster.setIO(io)
+    
+    // Also set it globally for background worker access
+    global.socketIo = io
 
     // Authentication middleware
     io.use(async (socket, next) => {

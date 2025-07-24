@@ -71,22 +71,22 @@ export class SocketIOBroadcaster {
     }
 
     const message = {
-      type: 'job_progress_detailed',
+      type: 'job_progress',
       jobId,
       progress,
       current_url: currentUrl,
       timestamp: new Date().toISOString()
     };
 
-    console.log(`📡 Broadcasting detailed job progress for job ${jobId}:`, progress);
+    console.log(`📡 Broadcasting job progress for job ${jobId}:`, progress);
     
     // Send to specific job room
-    io.to(`job-${jobId}`).emit('job_progress_detailed', message);
+    io.to(`job-${jobId}`).emit('job_progress', message);
     
     // Send to all connections from this user
     io.sockets.sockets.forEach((socket: any) => {
       if (socket.userId === userId) {
-        socket.emit('job_progress_detailed', message);
+        socket.emit('job_progress', message);
       }
     });
   }
