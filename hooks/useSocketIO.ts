@@ -241,6 +241,7 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
 
     let isMounted = true;
     const currentHookId = hookId.current;
+    let currentSubscribedJobId: string | null = null;
 
     const connectSocket = async () => {
       try {
@@ -276,9 +277,15 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
           if (isMounted) {
             setIsConnected(true);
             
-            // Subscribe to specific job if provided (check if not already subscribed)
-            if (jobId && (socket as any).currentJobId !== jobId) {
+            // Subscribe to specific job if provided and not already subscribed
+            if (jobId && currentSubscribedJobId !== jobId) {
+              // Unsubscribe from previous job if any
+              if (currentSubscribedJobId) {
+                socket.emit('unsubscribe_job', { jobId: currentSubscribedJobId });
+              }
+              
               socket.emit('subscribe_job', { jobId });
+              currentSubscribedJobId = jobId;
               console.log(`📡 Subscribed to job updates for job: ${jobId}`);
             }
           }
@@ -293,24 +300,21 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
         const handleJobUpdate = (message: SocketMessage) => {
           if (isMounted) {
             console.log('📨 Job update received:', message);
-            setLastMessage(message);
-            onJobUpdate?.(message);
+            setLastMessage({ ...message, type: 'job_update' });
           }
         };
 
         const handleJobProgress = (message: SocketMessage) => {
           if (isMounted) {
             console.log('📊 Job progress received:', message);
-            setLastMessage(message);
-            onJobProgress?.(message);
+            setLastMessage({ ...message, type: 'job_progress' });
           }
         };
 
         const handleJobCompleted = (message: SocketMessage) => {
           if (isMounted) {
             console.log('✅ Job completed:', message);
-            setLastMessage(message);
-            onJobCompleted?.(message);
+            setLastMessage({ ...message, type: 'job_completed' });
           }
         };
 
@@ -328,6 +332,12 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
 
         // Cleanup function
         return () => {
+          // Unsubscribe from current job before cleanup
+          if (currentSubscribedJobId) {
+            socket.emit('unsubscribe_job', { jobId: currentSubscribedJobId });
+            currentSubscribedJobId = null;
+          }
+          
           socket.off('connect', handleConnect);
           socket.off('disconnect', handleDisconnect);
           socket.off('job_update', handleJobUpdate);
@@ -347,7 +357,21 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
       // Unregister this hook as a subscriber
       socketManager.removeSubscriber(currentHookId);
     };
-  }, [user?.id, jobId, onJobUpdate, onJobCompleted, onJobProgress]);
+  }, [user?.id, jobId]); // Removed callback dependencies to prevent re-subscription
+
+  // Separate effect to handle callback changes without re-subscription
+  useEffect(() => {
+    if (socketRef.current && lastMessage) {
+      // Handle callback invocations based on message type
+      if (lastMessage.type === 'job_update' && onJobUpdate) {
+        onJobUpdate(lastMessage);
+      } else if (lastMessage.type === 'job_progress' && onJobProgress) {
+        onJobProgress(lastMessage);
+      } else if (lastMessage.type === 'job_completed' && onJobCompleted) {
+        onJobCompleted(lastMessage);
+      }
+    }
+  }, [lastMessage, onJobUpdate, onJobProgress, onJobCompleted]);
 
   // Send message to Socket.io
   const sendMessage = (event: string, data: any) => {

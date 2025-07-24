@@ -88,20 +88,36 @@ const SocketHandler = (req, res) => {
       // Handle job subscription
       socket.on('subscribe_job', (data) => {
         const jobRoom = `job-${data.jobId}`
-        socket.join(jobRoom)
-        socket.currentJobId = data.jobId
-        console.log(`📡 Client ${socket.id} subscribed to job: ${data.jobId}`)
-        socket.emit('subscribed', { jobId: data.jobId })
+        
+        // Only subscribe if not already subscribed to this job
+        if (socket.currentJobId !== data.jobId) {
+          // Unsubscribe from previous job if any
+          if (socket.currentJobId) {
+            socket.leave(`job-${socket.currentJobId}`)
+          }
+          
+          socket.join(jobRoom)
+          socket.currentJobId = data.jobId
+          console.log(`📡 Client ${socket.id} subscribed to job: ${data.jobId}`)
+          socket.emit('subscribed', { jobId: data.jobId })
+        }
+        // If already subscribed, just send confirmation without logging
+        else {
+          socket.emit('subscribed', { jobId: data.jobId })
+        }
       })
       
       // Handle job unsubscription
       socket.on('unsubscribe_job', (data) => {
-        if (socket.currentJobId) {
-          const jobRoom = `job-${socket.currentJobId}`
+        const targetJobId = data.jobId || socket.currentJobId
+        if (targetJobId) {
+          const jobRoom = `job-${targetJobId}`
           socket.leave(jobRoom)
-          console.log(`📡 Client ${socket.id} unsubscribed from job: ${socket.currentJobId}`)
-          socket.currentJobId = null
-          socket.emit('unsubscribed')
+          console.log(`📡 Client ${socket.id} unsubscribed from job: ${targetJobId}`)
+          if (socket.currentJobId === targetJobId) {
+            socket.currentJobId = null
+          }
+          socket.emit('unsubscribed', { jobId: targetJobId })
         }
       })
 
