@@ -441,24 +441,28 @@ SELECT * FROM recent_jobs_with_stats LIMIT 5;
 -- ORDER BY mean_exec_time DESC
 -- LIMIT 10;
 
--- Check table statistics (simplified)
+-- Check table statistics
 SELECT 
     relname as tablename,
     seq_scan,
+    seq_tup_read,
     idx_scan,
+    idx_tup_fetch,
     n_tup_ins,
-    n_tup_upd
+    n_tup_upd,
+    n_tup_del
 FROM pg_stat_user_tables 
 WHERE relname LIKE 'indb_%'
 ORDER BY seq_scan DESC;
 
--- Check index usage (simplified - may need adjustment based on actual Supabase columns)
+-- Check index usage
 SELECT 
-    indexname,
+    indexrelname,
     idx_scan,
-    idx_tup_read
+    idx_tup_read,
+    idx_tup_fetch
 FROM pg_stat_user_indexes 
-WHERE indexname LIKE 'idx_%'
+WHERE indexrelname LIKE 'idx_%'
 ORDER BY idx_scan DESC;
 
 -- ================================================================================
