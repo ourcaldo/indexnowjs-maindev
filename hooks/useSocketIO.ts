@@ -282,10 +282,8 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
 
         // Initialize Socket.io endpoint to ensure server is running (only once globally)
         if (!socketManager.isEndpointInitialized()) {
-          console.log('🔌 Initializing Socket.io endpoint...');
           await fetch('/api/socket');
           socketManager.setEndpointInitialized(true);
-          console.log('✅ Socket.io endpoint initialized');
         }
 
         // Register this hook as a subscriber (avoid duplicates)
@@ -310,7 +308,6 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
             if (jobId && !socketManager.isJobSubscribed(jobId)) {
               socket.emit('subscribe_job', { jobId });
               socketManager.addJobSubscription(jobId);
-              console.log(`📡 Subscribed to job updates for job: ${jobId}`);
             }
           }
         };
@@ -323,7 +320,6 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
 
         const handleJobUpdate = (message: SocketMessage) => {
           if (isMounted) {
-            console.log('📨 Job update received:', message);
             setLastMessage(message);
             onJobUpdate?.(message);
           }
@@ -331,7 +327,6 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
 
         const handleJobProgress = (message: SocketMessage) => {
           if (isMounted) {
-            console.log('📊 Job progress received:', message);
             setLastMessage(message);
             onJobProgress?.(message);
           }
@@ -339,7 +334,6 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
 
         const handleJobCompleted = (message: SocketMessage) => {
           if (isMounted) {
-            console.log('✅ Job completed:', message);
             setLastMessage(message);
             onJobCompleted?.(message);
           }
@@ -381,7 +375,6 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
       // Remove job subscription if this was the subscribing hook
       if (jobId && socketManager.isJobSubscribed(jobId)) {
         socketManager.removeJobSubscription(jobId);
-        console.log(`📤 Removed job subscription for: ${jobId}`);
       }
     };
   }, [user?.id, jobId, onJobUpdate, onJobCompleted, onJobProgress]);
