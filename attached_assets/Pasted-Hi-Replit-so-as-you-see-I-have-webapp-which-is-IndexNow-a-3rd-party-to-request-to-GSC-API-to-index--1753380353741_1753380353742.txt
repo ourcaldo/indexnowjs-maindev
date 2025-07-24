@@ -1,0 +1,29 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and we're already solved few of it's. Now, I need you to move on to another part a while.
+
+As we already have dashboard for user (role: user), now I need you to make dashboard for admin to manage the full site. The admin dashboard is have url /backend/admin/. This dashboard is only can be accessed when user have role super_admin.
+
+After login, on the main page is have analytics dashbord you can use tables that already we created in Supabase to give abalytics information for the information please see on replit.md and read all the tables and column
+
+After that the menu sidebar is:
+1. User Management: List all users, view detailed user profiles, see account status (active, suspended, unverified), and actions to suspend, reset password, and edit user data.
+2. Activity Logs: Track backend events, user actions (logins, changes, API calls), and system warnings or errors for audits and debugging.
+3. Settings, which have submenu settings
+3.1. Site settings: to manage site from the site name, site description, logo, icon, favicon, and all related to site settings
+3.2. Payments Gateway: Which admin can manage, add and edit payment gateway, make default payment gateway is bank transfer
+3.3. Package: Which admin can manage package of the, default is have 3 which is Free, Premium, Pro. Feature is to set price, feature detail
+4. CMS, which admin can manage by add, edit, delete the content. CMS have submenu which is:
+4.1 Post: to add post
+4.2 Pages: to add pages
+
+Before you made that, please keep in mind that:
+1. The design is similar for user dashboard, which you have to use color scheme/pallete for this own project (please read it on replit.md)
+2. You can found and use all the database tables and column name in replit.md. But, you may need to make new tables and column and RLS to support this enhancement. Before you made, please read the replit.md how to naming the tables which must use prefix and collections. Again, collections is like group (see example on the replit).
+3. Still related to poin 2, if you need to make tables, give me the SQL queries for me to run on Supabase SQL Editor
