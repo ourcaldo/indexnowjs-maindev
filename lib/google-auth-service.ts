@@ -68,25 +68,7 @@ export class GoogleAuthService {
         return null;
       }
 
-      // DEBUG: Log encrypted data info
-      console.log('🔍 DEBUG - Service Account Data:');
-      console.log('- ID:', serviceAccount.id);
-      console.log('- Name:', serviceAccount.name);
-      console.log('- Email:', serviceAccount.email);
-      console.log('- Is Active:', serviceAccount.is_active);
-      console.log('- Encrypted Credentials Length:', serviceAccount.encrypted_credentials?.length || 0);
-      console.log('- Encrypted Credentials Preview:', serviceAccount.encrypted_credentials?.substring(0, 100) + '...');
-      console.log('- Current ENCRYPTION_KEY:', process.env.ENCRYPTION_KEY?.substring(0, 8) + '...');
-      
-      // Check format
-      const parts = serviceAccount.encrypted_credentials?.split(':');
-      console.log('- Encrypted Format Parts:', parts?.length || 0);
-      if (parts && parts.length === 2) {
-        console.log('- IV Length (hex):', parts[0].length);
-        console.log('- Encrypted Data Length (hex):', parts[1].length);
-        console.log('- IV (first 16 chars):', parts[0].substring(0, 16));
-        console.log('- Encrypted Data (first 32 chars):', parts[1].substring(0, 32));
-      }
+      // Service account validation (debug logging removed)
 
       // Check if we have a valid cached token
       const cachedToken = await this.getCachedAccessToken(serviceAccount);
@@ -169,7 +151,7 @@ export class GoogleAuthService {
    */
   private async generateNewAccessToken(serviceAccount: ServiceAccount): Promise<{ access_token: string; expires_in: number } | null> {
     try {
-      console.log('🔄 Starting generateNewAccessToken process...');
+      // Generate new access token process
       
       // Check if credentials are empty 
       if (!serviceAccount.encrypted_credentials || serviceAccount.encrypted_credentials.trim() === '') {
@@ -177,86 +159,35 @@ export class GoogleAuthService {
         return null;
       }
 
-      console.log('🔐 DEBUG - About to decrypt credentials...');
-      console.log('- Encrypted data length:', serviceAccount.encrypted_credentials.length);
-      console.log('- Encrypted data to decrypt:', serviceAccount.encrypted_credentials.substring(0, 100) + '...');
-      
-      // Decrypt service account credentials - FORCE DECRYPTION ATTEMPT
+      // Decrypt service account credentials
       let credentialsJson: string;
       try {
-        console.log('🔓 FORCING DECRYPTION ATTEMPT...');
         credentialsJson = EncryptionService.decrypt(serviceAccount.encrypted_credentials);
-        console.log('✅ DEBUG - DECRYPTION SUCCESSFUL!');
-        console.log('- Decrypted JSON length:', credentialsJson.length);
-        console.log('- Decrypted JSON preview (first 500 chars):', credentialsJson.substring(0, 500));
-        console.log('- Full decrypted JSON:', credentialsJson);
       } catch (decryptError) {
-        console.error('❌ DEBUG - DECRYPTION FAILED:', decryptError);
-        console.error('- Error type:', decryptError instanceof Error ? decryptError.name : typeof decryptError);
-        console.error('- Error message:', decryptError instanceof Error ? decryptError.message : String(decryptError));
-        console.error('- Error stack:', decryptError instanceof Error ? decryptError.stack : 'No stack');
-        
-        // DO NOT CLEAR ANYTHING - just fail and show the error
         throw decryptError;
       }
 
-      console.log('📋 DEBUG - Parsing JSON credentials...');
+      // Parse JSON credentials
       let credentials: ServiceAccountCredentials;
       try {
         credentials = JSON.parse(credentialsJson);
-        console.log('✅ DEBUG - JSON parsing successful!');
-        console.log('- Service account type:', credentials.type);
-        console.log('- Project ID:', credentials.project_id);
-        console.log('- Client email:', credentials.client_email);
-        console.log('- Private key preview:', credentials.private_key?.substring(0, 50) + '...');
       } catch (parseError) {
-        console.error('❌ DEBUG - JSON parsing failed:', parseError);
-        console.error('- Raw decrypted data:', credentialsJson);
         throw parseError;
       }
 
-      console.log('🔐 DEBUG - Creating JWT with service account credentials...');
-      console.log('- Email for JWT:', credentials.client_email);
-      console.log('- Private key starts with:', credentials.private_key?.substring(0, 30));
-      console.log('- Scopes:', [GoogleAuthService.INDEXING_SCOPE]);
-      
       // Create JWT client
-      let jwtClient: JWT;
-      try {
-        jwtClient = new JWT({
-          email: credentials.client_email,
-          key: credentials.private_key,
-          scopes: [GoogleAuthService.INDEXING_SCOPE]
-        });
-        console.log('✅ DEBUG - JWT client created successfully');
-      } catch (jwtError) {
-        console.error('❌ DEBUG - JWT client creation failed:', jwtError);
-        throw jwtError;
-      }
+      const jwtClient = new JWT({
+        email: credentials.client_email,
+        key: credentials.private_key,
+        scopes: [GoogleAuthService.INDEXING_SCOPE]
+      });
 
-      console.log('🌐 DEBUG - Requesting access token from Google...');
-      // Get access token
-      let tokenResponse;
-      try {
-        tokenResponse = await jwtClient.authorize();
-        console.log('✅ DEBUG - Google authorization successful!');
-        console.log('- Token type:', typeof tokenResponse.access_token);
-        console.log('- Token length:', tokenResponse.access_token?.length || 0);
-        console.log('- Token preview:', tokenResponse.access_token?.substring(0, 20) + '...');
-        console.log('- Expires in:', tokenResponse.expiry_date);
-      } catch (authError) {
-        console.error('❌ DEBUG - Google authorization failed:', authError);
-        console.error('- Error details:', authError instanceof Error ? authError.message : String(authError));
-        throw authError;
-      }
+      // Get access token from Google
+      const tokenResponse = await jwtClient.authorize();
       
       if (!tokenResponse.access_token) {
-        console.error('❌ DEBUG - No access token received from Google');
-        console.error('- Response:', tokenResponse);
         throw new Error('No access token received from Google');
       }
-
-      console.log('✅ Successfully obtained access token from Google');
       
       return {
         access_token: tokenResponse.access_token,

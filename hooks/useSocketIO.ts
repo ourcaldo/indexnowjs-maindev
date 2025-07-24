@@ -36,6 +36,8 @@ class SocketManager {
   private subscribers = new Set<string>();
   private lastUserId: string | null = null;
   private isInitialized = false;
+  private subscribedJobs = new Set<string>();
+  private endpointInitialized = false;
 
   static getInstance(): SocketManager {
     if (!SocketManager.instance) {
@@ -160,6 +162,7 @@ class SocketManager {
       this.isConnecting = false;
       this.connectionPromise = null;
       this.subscribers.clear();
+      this.subscribedJobs.clear();
     }
   }
 
@@ -193,6 +196,31 @@ class SocketManager {
         }
       }, 5000);
     }
+  }
+
+  // Track job subscriptions to prevent duplicates
+  isJobSubscribed(jobId: string): boolean {
+    return this.subscribedJobs.has(jobId);
+  }
+
+  addJobSubscription(jobId: string) {
+    this.subscribedJobs.add(jobId);
+  }
+
+  removeJobSubscription(jobId: string) {
+    this.subscribedJobs.delete(jobId);
+  }
+
+  clearJobSubscriptions() {
+    this.subscribedJobs.clear();
+  }
+
+  isEndpointInitialized(): boolean {
+    return this.endpointInitialized;
+  }
+
+  setEndpointInitialized(value: boolean) {
+    this.endpointInitialized = value;
   }
 }
 
@@ -253,9 +281,11 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
         }
 
         // Initialize Socket.io endpoint to ensure server is running (only once globally)
-        if (!(socketManager as any).isInitialized) {
+        if (!socketManager.isEndpointInitialized()) {
+          console.log('🔌 Initializing Socket.io endpoint...');
           await fetch('/api/socket');
-          (socketManager as any).isInitialized = true;
+          socketManager.setEndpointInitialized(true);
+          console.log('✅ Socket.io endpoint initialized');
         }
 
         // Register this hook as a subscriber (avoid duplicates)
@@ -276,9 +306,10 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
           if (isMounted) {
             setIsConnected(true);
             
-            // Subscribe to specific job if provided (check if not already subscribed)
-            if (jobId && (socket as any).currentJobId !== jobId) {
+            // Subscribe to specific job if provided (prevent duplicate subscriptions)
+            if (jobId && !socketManager.isJobSubscribed(jobId)) {
               socket.emit('subscribe_job', { jobId });
+              socketManager.addJobSubscription(jobId);
               console.log(`📡 Subscribed to job updates for job: ${jobId}`);
             }
           }
@@ -346,6 +377,12 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
       isMounted = false;
       // Unregister this hook as a subscriber
       socketManager.removeSubscriber(currentHookId);
+      
+      // Remove job subscription if this was the subscribing hook
+      if (jobId && socketManager.isJobSubscribed(jobId)) {
+        socketManager.removeJobSubscription(jobId);
+        console.log(`📤 Removed job subscription for: ${jobId}`);
+      }
     };
   }, [user?.id, jobId, onJobUpdate, onJobCompleted, onJobProgress]);
 

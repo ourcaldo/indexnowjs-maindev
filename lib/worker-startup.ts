@@ -11,7 +11,7 @@ let isStarted = false;
 
 export function startBackgroundServices(): void {
   if (isStarted) {
-    console.log('Background services already started');
+    // Reduced logging - only show detailed status during debug
     return;
   }
 

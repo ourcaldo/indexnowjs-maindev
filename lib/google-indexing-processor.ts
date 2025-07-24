@@ -75,8 +75,6 @@ export class GoogleIndexingProcessor {
       }
 
       this.processingJobs.add(jobId);
-      console.log(`🚀 Starting indexing job ${jobId}`);
-      
       // Get job details
       const job = await this.getJobDetails(jobId);
       if (!job) {
@@ -100,8 +98,6 @@ export class GoogleIndexingProcessor {
       if (urls.length === 0) {
         throw new Error('No URLs found to process in job source data');
       }
-
-      console.log(`📋 Found ${urls.length} URLs to process`);
 
       // Log URL extraction
       await this.jobLogger.logJobEvent({
