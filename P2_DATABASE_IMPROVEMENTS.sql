@@ -433,15 +433,15 @@ SELECT * FROM recent_jobs_with_stats LIMIT 5;
 -- ================================================================================
 
 -- Monitor slow queries (run periodically to check performance)
+-- Note: pg_stat_statements extension needs to be enabled for this to work
 SELECT 
     query,
     calls,
-    total_time,
-    mean_time,
+    mean_exec_time,
     rows
 FROM pg_stat_statements 
 WHERE query LIKE '%indb_%'
-ORDER BY total_time DESC
+ORDER BY mean_exec_time DESC
 LIMIT 10;
 
 -- Check index usage
