@@ -34,6 +34,8 @@ class SocketManager {
   private isConnecting = false;
   private connectionPromise: Promise<Socket> | null = null;
   private subscribers = new Set<string>();
+  private lastUserId: string | null = null;
+  private isInitialized = false;
 
   static getInstance(): SocketManager {
     if (!SocketManager.instance) {
@@ -43,19 +45,28 @@ class SocketManager {
   }
 
   async getConnection(userId: string, token: string): Promise<Socket> {
-    // If we already have a valid connection, return it immediately
-    if (this.socket && this.socket.connected) {
-      console.log('🔄 Reusing existing Socket.io connection');
+    // If we already have a valid connection for the same user, return it immediately
+    if (this.socket && this.socket.connected && this.lastUserId === userId) {
+      console.log('🔄 Reusing existing Socket.io connection for user:', userId);
       return this.socket;
     }
 
-    // If we're already connecting, wait for the existing connection attempt
-    if (this.connectionPromise) {
+    // If user changed, disconnect old connection
+    if (this.socket && this.lastUserId && this.lastUserId !== userId) {
+      console.log('👤 User changed, disconnecting old connection');
+      this.socket.disconnect();
+      this.socket = null;
+      this.connectionPromise = null;
+    }
+
+    // If we're already connecting for this user, wait for the existing connection attempt
+    if (this.connectionPromise && this.lastUserId === userId) {
       console.log('⏳ Waiting for existing connection attempt');
       return this.connectionPromise;
     }
 
     // Create new connection promise
+    this.lastUserId = userId;
     this.connectionPromise = this.createConnection(userId, token);
     return this.connectionPromise;
   }
@@ -156,6 +167,18 @@ class SocketManager {
     this.subscribers.add(id);
   }
 
+  hasSubscriber(id: string): boolean {
+    return this.subscribers.has(id);
+  }
+
+  isConnected(): boolean {
+    return this.socket?.connected || false;
+  }
+
+  setInitialized(value: boolean): void {
+    this.isInitialized = value;
+  }
+
   removeSubscriber(id: string) {
     this.subscribers.delete(id);
     console.log(`📤 Hook ${id} unsubscribed. Active subscribers: ${this.subscribers.size}`);
@@ -217,6 +240,7 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
     if (!user?.id) return;
 
     let isMounted = true;
+    const currentHookId = hookId.current;
 
     const connectSocket = async () => {
       try {
@@ -228,11 +252,16 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
           return;
         }
 
-        // Initialize Socket.io endpoint to ensure server is running
-        await fetch('/api/socket');
+        // Initialize Socket.io endpoint to ensure server is running (only once globally)
+        if (!(socketManager as any).isInitialized) {
+          await fetch('/api/socket');
+          (socketManager as any).isInitialized = true;
+        }
 
-        // Register this hook as a subscriber
-        socketManager.addSubscriber(hookId.current);
+        // Register this hook as a subscriber (avoid duplicates)
+        if (!socketManager.hasSubscriber(currentHookId)) {
+          socketManager.addSubscriber(currentHookId);
+        }
 
         // Get shared socket connection (singleton pattern)
         const socket = await socketManager.getConnection(user.id, session.access_token);
@@ -247,8 +276,8 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
           if (isMounted) {
             setIsConnected(true);
             
-            // Subscribe to specific job if provided
-            if (jobId) {
+            // Subscribe to specific job if provided (check if not already subscribed)
+            if (jobId && (socket as any).currentJobId !== jobId) {
               socket.emit('subscribe_job', { jobId });
               console.log(`📡 Subscribed to job updates for job: ${jobId}`);
             }
@@ -316,7 +345,7 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
     return () => {
       isMounted = false;
       // Unregister this hook as a subscriber
-      socketManager.removeSubscriber(hookId.current);
+      socketManager.removeSubscriber(currentHookId);
     };
   }, [user?.id, jobId, onJobUpdate, onJobCompleted, onJobProgress]);
 

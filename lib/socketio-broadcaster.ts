@@ -35,7 +35,7 @@ export class SocketIOBroadcaster {
     return this.io || (global as any).socketIo || null;
   }
 
-  // Broadcast job updates
+  // Broadcast job updates with delay for completion status
   broadcastJobUpdate(userId: string, jobId: string, update: Omit<JobUpdate, 'jobId'>): void {
     const io = this.getIO();
     if (!io) {
@@ -51,15 +51,24 @@ export class SocketIOBroadcaster {
 
     console.log(`📡 Broadcasting job update for job ${jobId}:`, update);
 
-    // Send to specific job room
-    io.to(`job-${jobId}`).emit('job_update', message);
+    // For completion status, add a small delay to ensure clients are connected
+    const broadcastDelay = update.status === 'completed' ? 1000 : 0;
     
-    // Send to all connections from this user
-    io.sockets.sockets.forEach((socket: any) => {
-      if (socket.userId === userId) {
-        socket.emit('job_update', message);
+    setTimeout(() => {
+      // Send to specific job room
+      io.to(`job-${jobId}`).emit('job_update', message);
+      
+      // Send to all connections from this user
+      io.sockets.sockets.forEach((socket: any) => {
+        if (socket.userId === userId) {
+          socket.emit('job_update', message);
+        }
+      });
+      
+      if (update.status === 'completed') {
+        console.log(`✅ Completion broadcast sent for job ${jobId} after delay`);
       }
-    });
+    }, broadcastDelay);
   }
 
   // Enhanced job progress broadcast
