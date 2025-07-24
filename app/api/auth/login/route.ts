@@ -1,22 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { loginSchema } from '@/shared/schema'
+import { 
+  publicApiRouteWrapper,
+  validateRequest,
+  createApiResponse,
+  createErrorResponse
+} from '@/lib/api-middleware'
+import { 
+  ErrorHandlingService, 
+  ErrorType, 
+  ErrorSeverity, 
+  logger 
+} from '@/lib/error-handling'
 
-export async function POST(request: NextRequest) {
+export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint: string) => {
+  // Validate request body
+  const validationResult = await validateRequest(
+    request,
+    loginSchema,
+    undefined,
+    endpoint
+  )
+
+  if (!validationResult.success) {
+    return createErrorResponse(validationResult.error)
+  }
+
+  const { email, password } = validationResult.data as { email: string; password: string }
+
   try {
-    const body = await request.json()
-    
-    // Validate input
-    const result = loginSchema.safeParse(body)
-    if (!result.success) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: result.error.errors },
-        { status: 400 }
-      )
-    }
-
-    const { email, password } = result.data
-
     // Authenticate with Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -24,23 +37,51 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 401 }
+      // Log authentication failure
+      const authError = await ErrorHandlingService.createError(
+        ErrorType.AUTHENTICATION,
+        `Login failed for ${email}: ${error.message}`,
+        {
+          severity: ErrorSeverity.MEDIUM,
+          endpoint,
+          statusCode: 401,
+          userMessageKey: 'invalid_credentials',
+          metadata: { 
+            email,
+            errorCode: error.code || 'unknown',
+            attempt: 'password_login'
+          }
+        }
       )
+      return createErrorResponse(authError)
     }
 
+    // Log successful authentication
+    logger.info({
+      userId: data.user?.id,
+      email: data.user?.email,
+      endpoint,
+      loginMethod: 'password'
+    }, 'User logged in successfully')
+
     // Return user data and session
-    return NextResponse.json({
+    return createApiResponse({
       user: data.user,
       session: data.session,
     })
 
   } catch (error) {
-    console.error('Login error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    const systemError = await ErrorHandlingService.createError(
+      ErrorType.SYSTEM,
+      error as Error,
+      {
+        severity: ErrorSeverity.HIGH,
+        endpoint,
+        statusCode: 500,
+        userMessageKey: 'default',
+        metadata: { operation: 'user_login' }
+      }
     )
+    return createErrorResponse(systemError)
   }
-}
+})
