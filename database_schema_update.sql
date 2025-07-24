@@ -42,8 +42,8 @@ CREATE INDEX IF NOT EXISTS idx_indb_system_error_logs_status_code ON indb_system
 -- Create composite index for common queries
 CREATE INDEX IF NOT EXISTS idx_indb_system_error_logs_user_severity_date ON indb_system_error_logs(user_id, severity, created_at DESC);
 
--- Create the error analytics view for dashboard reporting
-CREATE OR REPLACE VIEW indb_error_analytics AS
+-- Create the error analytics view for dashboard reporting (following analytics collection naming)
+CREATE OR REPLACE VIEW indb_analytics_error_stats AS
 SELECT 
   DATE(created_at) as error_date,
   user_id,
@@ -148,7 +148,7 @@ GRANT UPDATE ON indb_system_error_logs TO service_role;
 GRANT DELETE ON indb_system_error_logs TO service_role;
 
 -- Grant permissions on the analytics view
-GRANT SELECT ON indb_error_analytics TO authenticated;
+GRANT SELECT ON indb_analytics_error_stats TO authenticated;
 
 -- ========================================
 -- IMPORTANT NOTES FOR IMPLEMENTATION

@@ -31,7 +31,7 @@ Implemented 10 distinct error types:
 
 ### 4. Database Error Tracking ✅
 - **Table**: `indb_system_error_logs` with comprehensive error metadata
-- **Analytics View**: `indb_error_analytics` for dashboard reporting
+- **Analytics View**: `indb_analytics_error_stats` for dashboard reporting
 - **RLS Policies**: Users can only see their own errors
 - **Auto-cleanup**: Function to clean old low/medium severity errors after 90 days
 - **Performance Indexes**: Optimized for fast querying even with large datasets
