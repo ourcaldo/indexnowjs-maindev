@@ -8,7 +8,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:5000', '*.replit.dev', '*.replit.app']
+      allowedOrigins: ['localhost:5000', '*.replit.dev', '*.replit.app', '*.replit.co']
     }
   },
   async headers() {
