@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { requireSuperAdminAuth } from '@/lib/admin-auth'
+import { requireServerSuperAdminAuth } from '@/lib/server-auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    await requireSuperAdminAuth()
+    await requireServerSuperAdminAuth()
 
     // Fetch dashboard stats from the view
     const { data: stats, error: statsError } = await supabaseAdmin

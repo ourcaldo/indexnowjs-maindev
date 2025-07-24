@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireSuperAdminAuth } from '@/lib/admin-auth'
+import { requireServerSuperAdminAuth } from '@/lib/server-auth'
 import { supabaseAdmin } from '@/lib/database'
 
 export async function GET(request: NextRequest) {
   try {
-    await requireSuperAdminAuth()
+    await requireServerSuperAdminAuth()
 
     const { data: posts, error } = await supabaseAdmin
       .from('indb_cms_posts')
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const adminUser = await requireSuperAdminAuth()
+    const adminUser = await requireServerSuperAdminAuth()
     const body = await request.json()
 
     if (!adminUser) {

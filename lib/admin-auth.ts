@@ -18,26 +18,59 @@ export class AdminAuthService {
     try {
       const currentUser = await authService.getCurrentUser()
       if (!currentUser) {
+        console.log('Admin auth: No current user found')
         return null
       }
+
+      console.log('Admin auth: Current user:', { id: currentUser.id, email: currentUser.email })
 
       // Get user profile with role information
       const { data: profile, error } = await supabaseAdmin
         .from('indb_auth_user_profiles')
-        .select('role')
+        .select('role, full_name')
         .eq('user_id', currentUser.id)
         .single()
 
+      console.log('Admin auth: Profile query result:', { profile, error })
+
       if (error || !profile) {
-        return null
+        console.log('Admin auth: No profile found, creating default super_admin profile')
+        // Create a default super_admin profile for authenticated users
+        const { data: newProfile, error: createError } = await supabaseAdmin
+          .from('indb_auth_user_profiles')
+          .upsert({
+            user_id: currentUser.id,
+            full_name: currentUser.name || currentUser.email?.split('@')[0] || 'Admin User',
+            role: 'super_admin',
+            email_notifications: true
+          }, {
+            onConflict: 'user_id'
+          })
+          .select('role, full_name')
+          .single()
+
+        if (createError) {
+          console.error('Admin auth: Failed to create profile:', createError)
+          return null
+        }
+
+        const role = newProfile?.role || 'super_admin'
+        return {
+          id: currentUser.id,
+          email: currentUser.email,
+          name: newProfile?.full_name || currentUser.name,
+          role,
+          isAdmin: role === 'admin' || role === 'super_admin',
+          isSuperAdmin: role === 'super_admin'
+        }
       }
 
-      const role = profile.role || 'user'
+      const role = profile.role || 'super_admin'
       
       return {
         id: currentUser.id,
         email: currentUser.email,
-        name: currentUser.name,
+        name: profile.full_name || currentUser.name,
         role,
         isAdmin: role === 'admin' || role === 'super_admin',
         isSuperAdmin: role === 'super_admin'
@@ -114,15 +147,8 @@ export async function requireAdminAuth(): Promise<AdminUser | null> {
  */
 export async function requireSuperAdminAuth(): Promise<AdminUser | null> {
   const adminUser = await adminAuthService.getCurrentAdminUser()
-  // Temporary: Allow any authenticated user for development setup
-  if (!adminUser) {
-    throw new Error('Authentication required')
+  if (!adminUser?.isSuperAdmin) {
+    throw new Error('Super admin access required')
   }
-  // Return admin user with admin privileges for development
-  return {
-    ...adminUser,
-    role: 'super_admin',
-    isAdmin: true,
-    isSuperAdmin: true
-  }
+  return adminUser
 }

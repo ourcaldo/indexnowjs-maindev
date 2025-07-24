@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { requireSuperAdminAuth, adminAuthService } from '@/lib/admin-auth'
+import { requireServerSuperAdminAuth, adminAuthService } from '@/lib/server-auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    await requireSuperAdminAuth()
+    await requireServerSuperAdminAuth()
 
     const searchParams = request.nextUrl.searchParams
     const days = parseInt(searchParams.get('days') || '7')
