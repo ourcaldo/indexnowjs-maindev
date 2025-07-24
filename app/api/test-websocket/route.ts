@@ -4,7 +4,7 @@ import { SocketIOBroadcaster } from '@/lib/socketio-broadcaster';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, jobId, testType } = body;
+    const { userId, jobId, testType, status: requestStatus } = body;
 
     if (!userId || !jobId) {
       return NextResponse.json(
@@ -18,14 +18,15 @@ export async function POST(request: NextRequest) {
     // Test different types of broadcasts
     switch (testType) {
       case 'job_update':
+        const status = requestStatus || 'running';
         broadcaster.broadcastJobUpdate(userId, jobId, {
-          status: 'running',
+          status: status,
           progress: {
             total_urls: 100,
-            processed_urls: 50,
-            successful_urls: 45,
-            failed_urls: 5,
-            progress_percentage: 50
+            processed_urls: status === 'completed' ? 100 : 50,
+            successful_urls: status === 'completed' ? 95 : 45,
+            failed_urls: status === 'completed' ? 5 : 5,
+            progress_percentage: status === 'completed' ? 100 : 50
           },
           current_url: 'https://test-url.com'
         });

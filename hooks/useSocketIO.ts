@@ -45,11 +45,13 @@ class SocketManager {
   async getConnection(userId: string, token: string): Promise<Socket> {
     // If we already have a valid connection, return it immediately
     if (this.socket && this.socket.connected) {
+      console.log('🔄 Reusing existing Socket.io connection');
       return this.socket;
     }
 
     // If we're already connecting, wait for the existing connection attempt
     if (this.connectionPromise) {
+      console.log('⏳ Waiting for existing connection attempt');
       return this.connectionPromise;
     }
 
@@ -106,6 +108,12 @@ class SocketManager {
       console.log(`❌ Socket.io disconnected: ${reason}`);
       this.isConnecting = false;
       this.connectionPromise = null;
+      
+      // Don't immediately reconnect if it was a deliberate disconnect
+      if (reason === 'io client disconnect' || reason === 'io server disconnect') {
+        console.log('🔌 Connection was deliberately closed, not reconnecting');
+        this.socket = null;
+      }
     });
 
     socket.on('connect_error', (error: any) => {
@@ -150,9 +158,17 @@ class SocketManager {
 
   removeSubscriber(id: string) {
     this.subscribers.delete(id);
-    // If no more subscribers, disconnect
+    console.log(`📤 Hook ${id} unsubscribed. Active subscribers: ${this.subscribers.size}`);
+    
+    // Keep connection alive if there are any subscribers, disconnect after delay if none
     if (this.subscribers.size === 0) {
-      this.disconnect();
+      console.log('🔌 No more subscribers, scheduling disconnect in 5 seconds');
+      setTimeout(() => {
+        if (this.subscribers.size === 0 && this.socket) {
+          console.log('🔌 Disconnecting Socket.io after timeout');
+          this.disconnect();
+        }
+      }, 5000);
     }
   }
 }
