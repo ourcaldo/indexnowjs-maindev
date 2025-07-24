@@ -125,7 +125,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             } text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]`}
           >
             <div className="flex items-center">
-              <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5`} />
+              <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-6 w-6 flex-shrink-0`} />
               {!isCollapsed && <span>{item.label}</span>}
             </div>
             {!isCollapsed && (
@@ -153,7 +153,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]'
         }`}
       >
-        <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5`} />
+        <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-6 w-6 flex-shrink-0`} />
         {!isCollapsed && <span>{item.label}</span>}
       </a>
     )
@@ -167,7 +167,9 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
       } hidden md:block`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#E0E6ED]">
+          <div className={`flex items-center p-4 border-b border-[#E0E6ED] ${
+            isCollapsed ? 'justify-center flex-col space-y-2' : 'justify-between'
+          }`}>
             <div className="flex items-center">
               <Shield className="h-8 w-8 text-[#1C2331]" />
               {!isCollapsed && (
@@ -177,14 +179,13 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 </div>
               )}
             </div>
-            {!isCollapsed && (
-              <button 
-                onClick={onCollapse}
-                className="p-1.5 rounded-md hover:bg-[#F7F9FC] text-[#6C757D]"
-              >
-                <Menu className="h-4 w-4" />
-              </button>
-            )}
+            {/* Always show hamburger button */}
+            <button 
+              onClick={onCollapse}
+              className="p-1.5 rounded-md hover:bg-[#F7F9FC] text-[#6C757D] transition-colors"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Navigation */}
@@ -205,7 +206,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
               onClick={handleLogout}
               className="w-full flex items-center p-2 text-sm font-medium text-[#E63946] rounded-lg hover:bg-[#F7F9FC] transition-colors"
             >
-              <LogOut className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-4 w-4`} />
+              <LogOut className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-6 w-6 flex-shrink-0`} />
               {!isCollapsed && <span>Logout</span>}
             </button>
           </div>

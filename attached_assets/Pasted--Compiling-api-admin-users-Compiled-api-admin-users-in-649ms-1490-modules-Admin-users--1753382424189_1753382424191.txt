@@ -1,0 +1,103 @@
+○ Compiling /api/admin/users ...
+ ✓ Compiled /api/admin/users in 649ms (1490 modules)
+Admin users API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:118:10)
+    at async GET (app/api/admin/users/route.ts:8:4)
+  116 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  117 |   if (!adminUser?.isSuperAdmin) {
+> 118 |     throw new Error('Super admin access required')
+      |          ^
+  119 |   }
+  120 |   return adminUser
+  121 | }
+ GET /api/admin/users 403 in 1183ms
+Admin users API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:118:10)
+    at async GET (app/api/admin/users/route.ts:8:4)
+  116 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  117 |   if (!adminUser?.isSuperAdmin) {
+> 118 |     throw new Error('Super admin access required')
+      |          ^
+  119 |   }
+  120 |   return adminUser
+  121 | }
+ GET /api/admin/users 403 in 140ms
+ ○ Compiling /backend/admin/activity ...
+ ✓ Compiled /backend/admin/activity in 1567ms (1496 modules)
+ GET /backend/admin/activity 200 in 1881ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ○ Compiling /api/admin/activity ...
+ ✓ Compiled /api/admin/activity in 569ms (1498 modules)
+Admin activity logs API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:118:10)
+    at async GET (app/api/admin/activity/route.ts:8:4)
+  116 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  117 |   if (!adminUser?.isSuperAdmin) {
+> 118 |     throw new Error('Super admin access required')
+      |          ^
+  119 |   }
+  120 |   return adminUser
+  121 | }
+ GET /api/admin/activity?days=7 403 in 731ms
+Admin activity logs API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:118:10)
+    at async GET (app/api/admin/activity/route.ts:8:4)
+  116 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  117 |   if (!adminUser?.isSuperAdmin) {
+> 118 |     throw new Error('Super admin access required')
+      |          ^
+  119 |   }
+  120 |   return adminUser
+  121 | }
+ GET /api/admin/activity?days=7 403 in 89ms
+ ✓ Compiled /backend/admin/settings/site in 481ms (1511 modules)
+ GET /backend/admin/settings/site 200 in 702ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ✓ Compiled /api/admin/settings/site in 433ms (1513 modules)
+Admin site settings API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:118:10)
+    at async GET (app/api/admin/settings/site/route.ts:8:4)
+  116 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  117 |   if (!adminUser?.isSuperAdmin) {
+> 118 |     throw new Error('Super admin access required')
+      |          ^
+  119 |   }
+  120 |   return adminUser
+  121 | }
+ GET /api/admin/settings/site 403 in 575ms
+Admin site settings API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:118:10)
+    at async GET (app/api/admin/settings/site/route.ts:8:4)
+  116 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  117 |   if (!adminUser?.isSuperAdmin) {
+> 118 |     throw new Error('Super admin access required')
+      |          ^
+  119 |   }
+  120 |   return adminUser
+  121 | }
+ GET /api/admin/settings/site 403 in 96ms
+📊 Background Worker Status: { isStarted: true, jobMonitor: true, uptime: '20 minutes' }
+ GET /backend/admin 200 in 287ms
+ GET /backend/admin/settings/site 200 in 54ms
+Admin site settings API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:118:10)
+    at async GET (app/api/admin/settings/site/route.ts:8:4)
+  116 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  117 |   if (!adminUser?.isSuperAdmin) {
+> 118 |     throw new Error('Super admin access required')
+      |          ^
+  119 |   }
+  120 |   return adminUser
+  121 | }
+ GET /api/admin/settings/site 403 in 269ms
+Admin site settings API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:118:10)
+    at async GET (app/api/admin/settings/site/route.ts:8:4)
+  116 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  117 |   if (!adminUser?.isSuperAdmin) {
+> 118 |     throw new Error('Super admin access required')
+      |          ^
+  119 |   }
+  120 |   return adminUser
+  121 | }
+ GET /api/admin/settings/site 403 in 179ms
