@@ -82,9 +82,22 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
 
         console.log('🔌 Connecting to Socket.io with JWT authentication');
         
-        // Create Socket.io connection
+        // Create Socket.io connection with WebSocket-only transport
         const socket = io({
           path: '/api/socketio',
+          // Force WebSocket-only transport, disable polling completely
+          transports: ['websocket'],
+          // Additional WebSocket-only settings
+          upgrade: false,
+          rememberUpgrade: false,
+          // Connection timeout settings
+          timeout: 20000,
+          // Reconnection settings
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionAttempts: 5,
+          // Force WebSocket protocol
+          forceNew: true,
           auth: {
             token: session.access_token,
             userId: user.id
@@ -99,7 +112,7 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
         socketRef.current = socket;
 
         socket.on('connect', () => {
-          console.log('✅ Socket.io connected with JWT authentication');
+          console.log('✅ Socket.io connected via WebSocket (no polling)', (socket as any).io?.engine?.transport?.name || 'websocket');
           setIsConnected(true);
           
           // Subscribe to specific job if provided
@@ -199,8 +212,18 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
         });
 
         socket.on('connect_error', (error) => {
-          console.error('❌ Socket.io connection error:', error);
+          console.error('❌ Socket.io WebSocket connection error:', error);
           setIsConnected(false);
+        });
+
+        // Log transport upgrade (should not happen in WebSocket-only mode)
+        socket.on('upgrade', () => {
+          console.log('🔄 Socket.io transport upgraded to:', (socket as any).io?.engine?.transport?.name || 'unknown');
+        });
+
+        // Log when transport changes  
+        (socket as any).io?.on('upgrade', (transport: any) => {
+          console.log('🔄 Socket.io transport changed to:', transport.name);
         });
 
       } catch (error) {

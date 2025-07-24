@@ -10,10 +10,23 @@ const SocketHandler = (req, res) => {
     const io = new Server(res.socket.server, {
       path: '/api/socketio',
       addTrailingSlash: false,
+      // Force WebSocket-only transport, completely disable polling
+      transports: ['websocket'],
+      // Disable all polling-related features
+      upgrade: false,
+      allowUpgrades: false,
+      rememberUpgrade: false,
+      // WebSocket-specific settings
+      pingTimeout: 60000,
+      pingInterval: 25000,
+      // Enhanced CORS for WebSocket
       cors: {
         origin: ["http://localhost:5000", "https://*.replit.dev", "https://*.replit.app"],
-        methods: ["GET", "POST"]
-      }
+        methods: ["GET", "POST"],
+        credentials: true
+      },
+      // Disable HTTP long-polling fallback
+      allowEIO3: false
     })
     
     res.socket.server.io = io

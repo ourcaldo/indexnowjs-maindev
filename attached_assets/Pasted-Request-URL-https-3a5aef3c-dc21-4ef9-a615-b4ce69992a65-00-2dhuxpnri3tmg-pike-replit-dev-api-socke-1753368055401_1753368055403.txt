@@ -1,0 +1,54 @@
+Request URL
+https://3a5aef3c-dc21-4ef9-a615-b4ce69992a65-00-2dhuxpnri3tmg.pike.replit.dev/api/socketio/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5MTVmNTBlNS0wOTAyLTQ2NmEtYjFhZi1iZGYxOWQ3ODk3MjIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzUzMzY5NjQyLCJpYXQiOjE3NTMzNjYwNDIsImVtYWlsIjoiYWxkb2RrcmlzQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzUzMzY2MDQyfV0sInNlc3Npb25faWQiOiJjYzE3Y2VkNS04NDZmLTQ2N2UtOWRmNy04MDQ5MjIzZTc3ZDAiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.3ZpBDjh43CaPvVkPxyuSE5vE_GlPUzyRrDjGuspYnEw&userId=915f50e5-0902-466a-b1af-bdf19d789722&EIO=4&transport=polling&t=i04a1pkb&sid=yX1YYj1-rlL_E_GqAACH
+Request Method
+GET
+Status Code
+200 OK
+Remote Address
+34.93.221.142:443
+Referrer Policy
+strict-origin-when-cross-origin
+cache-control
+no-store
+content-length
+32
+content-type
+text/plain; charset=UTF-8
+date
+Thu, 24 Jul 2025 14:39:04 GMT
+replit-cluster
+pike
+vary
+Origin
+x-robots-tag
+none, noindex, noarchive, nofollow, nositelinkssearchbox, noimageindex
+x-robots-tag
+none, noindex, noarchive, nofollow, nositelinkssearchbox, noimageindex
+accept
+*/*
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+en-US,en;q=0.9,id;q=0.8,ms;q=0.7,la;q=0.6,da;q=0.5
+connection
+keep-alive
+cookie
+zero-chakra-ui-color-mode=light-zero; AMP_MKTG_8f1ede8e9c=JTdCJTIycmVmZXJyZXIlMjIlM0ElMjJodHRwcyUzQSUyRiUyRnJlcGxpdC5jb20lMkYlMjIlMkMlMjJyZWZlcnJpbmdfZG9tYWluJTIyJTNBJTIycmVwbGl0LmNvbSUyMiU3RA==; __next_hmr_refresh_hash__=5d1715b8dcda7e48446918f6db9a9287633457081244afec; AMP_8f1ede8e9c=JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjI5ZDkyMjYxMC03YzA2LTQyZDUtYTdjMC04NzNjYjcyMWE1ZDAlMjIlMkMlMjJ1c2VySWQlMjIlM0ElMjI4NjdmMGYwNS00YjM3LTQ4YzQtYmRkNi05ODZlYjE5ZjdmNjAlMjIlMkMlMjJzZXNzaW9uSWQlMjIlM0ExNzUzMzY2MDMwOTQ3JTJDJTIyb3B0T3V0JTIyJTNBZmFsc2UlMkMlMjJsYXN0RXZlbnRUaW1lJTIyJTNBMTc1MzM2NzMxMjc2MyUyQyUyMmxhc3RFdmVudElkJTIyJTNBNiU3RA==
+host
+3a5aef3c-dc21-4ef9-a615-b4ce69992a65-00-2dhuxpnri3tmg.pike.replit.dev
+referer
+https://3a5aef3c-dc21-4ef9-a615-b4ce69992a65-00-2dhuxpnri3tmg.pike.replit.dev/dashboard
+sec-ch-ua
+"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-origin
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
