@@ -396,12 +396,12 @@ END $$;
 -- Check if indexes were created successfully
 SELECT 
     schemaname,
-    indexname,
+    indexrelname as indexname,
     indexdef
 FROM pg_indexes 
 WHERE schemaname = 'public'
-    AND indexname LIKE 'idx_%'
-ORDER BY indexname;
+    AND indexrelname LIKE 'idx_%'
+ORDER BY indexrelname;
 
 -- Check RLS policies
 SELECT 
@@ -432,26 +432,43 @@ SELECT * FROM recent_jobs_with_stats LIMIT 5;
 
 -- Monitor slow queries (run periodically to check performance)
 -- Note: pg_stat_statements extension needs to be enabled for this to work
+-- This query is optional and may not work if extension is not installed
+-- SELECT 
+--     query,
+--     calls,
+--     mean_exec_time,
+--     rows
+-- FROM pg_stat_statements 
+-- WHERE query LIKE '%indb_%'
+-- ORDER BY mean_exec_time DESC
+-- LIMIT 10;
+
+-- Alternative: Check table statistics (always available)
 SELECT 
-    query,
-    calls,
-    mean_exec_time,
-    rows
-FROM pg_stat_statements 
-WHERE query LIKE '%indb_%'
-ORDER BY mean_exec_time DESC
-LIMIT 10;
+    schemaname,
+    relname as tablename,
+    seq_scan,
+    seq_tup_read,
+    idx_scan,
+    idx_tup_fetch,
+    n_tup_ins,
+    n_tup_upd,
+    n_tup_del
+FROM pg_stat_user_tables 
+WHERE schemaname = 'public'
+    AND relname LIKE 'indb_%'
+ORDER BY seq_scan DESC;
 
 -- Check index usage
 SELECT 
     schemaname,
-    indexname,
+    indexrelname as indexname,
     idx_scan,
     idx_tup_read,
     idx_tup_fetch
 FROM pg_stat_user_indexes 
 WHERE schemaname = 'public'
-    AND indexname LIKE 'idx_%'
+    AND indexrelname LIKE 'idx_%'
 ORDER BY idx_scan DESC;
 
 -- ================================================================================
