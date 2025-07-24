@@ -396,25 +396,23 @@ END $$;
 -- Check if indexes were created successfully
 SELECT 
     schemaname,
-    indexrelname as indexname,
+    tablename,
+    indexname,
     indexdef
 FROM pg_indexes 
 WHERE schemaname = 'public'
-    AND indexrelname LIKE 'idx_%'
-ORDER BY indexrelname;
+    AND indexname LIKE 'idx_%'
+ORDER BY tablename, indexname;
 
 -- Check RLS policies
 SELECT 
-    schemaname,
     policyname,
-    permissive,
-    roles,
+    tablename,
     cmd,
-    qual,
-    with_check
+    qual
 FROM pg_policies 
-WHERE schemaname = 'public'
-ORDER BY policyname;
+WHERE tablename LIKE 'indb_%'
+ORDER BY tablename, policyname;
 
 -- Test dashboard stats view
 SELECT * FROM user_dashboard_stats LIMIT 5;
@@ -443,32 +441,24 @@ SELECT * FROM recent_jobs_with_stats LIMIT 5;
 -- ORDER BY mean_exec_time DESC
 -- LIMIT 10;
 
--- Alternative: Check table statistics (always available)
+-- Check table statistics (simplified)
 SELECT 
-    schemaname,
     relname as tablename,
     seq_scan,
-    seq_tup_read,
     idx_scan,
-    idx_tup_fetch,
     n_tup_ins,
-    n_tup_upd,
-    n_tup_del
+    n_tup_upd
 FROM pg_stat_user_tables 
-WHERE schemaname = 'public'
-    AND relname LIKE 'indb_%'
+WHERE relname LIKE 'indb_%'
 ORDER BY seq_scan DESC;
 
--- Check index usage
+-- Check index usage (simplified - may need adjustment based on actual Supabase columns)
 SELECT 
-    schemaname,
-    indexrelname as indexname,
+    indexname,
     idx_scan,
-    idx_tup_read,
-    idx_tup_fetch
+    idx_tup_read
 FROM pg_stat_user_indexes 
-WHERE schemaname = 'public'
-    AND indexrelname LIKE 'idx_%'
+WHERE indexname LIKE 'idx_%'
 ORDER BY idx_scan DESC;
 
 -- ================================================================================
