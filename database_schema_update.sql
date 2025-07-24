@@ -60,6 +60,11 @@ ORDER BY error_date DESC, error_count DESC;
 -- Create RLS policies for error logs (users can only see their own errors)
 ALTER TABLE indb_system_error_logs ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist, then recreate
+DROP POLICY IF EXISTS "Users can view own error logs" ON indb_system_error_logs;
+DROP POLICY IF EXISTS "System can insert error logs" ON indb_system_error_logs;
+DROP POLICY IF EXISTS "System can update error logs" ON indb_system_error_logs;
+
 -- Policy: Users can only see their own error logs
 CREATE POLICY "Users can view own error logs" ON indb_system_error_logs
   FOR SELECT USING (auth.uid() = user_id);
@@ -100,6 +105,8 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Drop trigger if exists, then recreate
+DROP TRIGGER IF EXISTS update_indb_system_error_logs_updated_at ON indb_system_error_logs;
 CREATE TRIGGER update_indb_system_error_logs_updated_at 
     BEFORE UPDATE ON indb_system_error_logs 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -155,6 +162,8 @@ GRANT SELECT ON indb_analytics_error_stats TO authenticated;
 -- ========================================
 
 /*
+FIXED VERSION - This SQL script can now be run multiple times safely.
+
 After running this SQL schema update:
 
 1. The error handling system will have comprehensive database support
@@ -164,6 +173,12 @@ After running this SQL schema update:
 5. Analytics view provides insights into error patterns
 6. Automatic cleanup prevents database bloat
 7. Performance indexes ensure fast queries even with large datasets
+
+Table naming follows replit.md convention:
+- indb_system_error_logs (system collection)
+- indb_analytics_error_stats (analytics collection)
+
+This script uses IF NOT EXISTS, DROP IF EXISTS patterns to prevent conflicts.
 
 Next steps in the application:
 - Replace all console.log statements with structured logging
