@@ -27,14 +27,146 @@ interface UseSocketIOOptions {
   onJobProgress?: (message: SocketMessage) => void;
 }
 
+// Singleton WebSocket connection manager to prevent multiple connections
+class SocketManager {
+  private static instance: SocketManager;
+  private socket: Socket | null = null;
+  private isConnecting = false;
+  private connectionPromise: Promise<Socket> | null = null;
+  private subscribers = new Set<string>();
+
+  static getInstance(): SocketManager {
+    if (!SocketManager.instance) {
+      SocketManager.instance = new SocketManager();
+    }
+    return SocketManager.instance;
+  }
+
+  async getConnection(userId: string, token: string): Promise<Socket> {
+    // If we already have a valid connection, return it immediately
+    if (this.socket && this.socket.connected) {
+      return this.socket;
+    }
+
+    // If we're already connecting, wait for the existing connection attempt
+    if (this.connectionPromise) {
+      return this.connectionPromise;
+    }
+
+    // Create new connection promise
+    this.connectionPromise = this.createConnection(userId, token);
+    return this.connectionPromise;
+  }
+
+  private async createConnection(userId: string, token: string): Promise<Socket> {
+    // Cleanup existing socket if any
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+
+    console.log('🔌 Creating Socket.io connection with WebSocket-only transport');
+    
+    // Create Socket.io connection with WebSocket-only transport - NO POLLING
+    const socket = io({
+      path: '/api/socketio',
+      // CRITICAL: Force WebSocket-only transport to eliminate polling
+      transports: ['websocket'],
+      // Disable all polling-related features
+      upgrade: false,
+      rememberUpgrade: false,
+      // Connection settings
+      timeout: 20000,
+      // Reconnection settings
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+      // IMPORTANT: Do NOT force new connection to reuse existing ones
+      forceNew: false,
+      // Authentication
+      auth: {
+        token,
+        userId
+      },
+      query: {
+        token,
+        userId
+      }
+    });
+
+    this.socket = socket;
+
+    // Setup connection handlers
+    socket.on('connect', () => {
+      console.log('✅ Socket.io connected via WebSocket-only (transport:', (socket as any).io?.engine?.transport?.name || 'websocket', ')');
+      this.isConnecting = false;
+    });
+
+    socket.on('disconnect', (reason: string) => {
+      console.log(`❌ Socket.io disconnected: ${reason}`);
+      this.isConnecting = false;
+      this.connectionPromise = null;
+    });
+
+    socket.on('connect_error', (error: any) => {
+      console.error('❌ Socket.io connection error:', error);
+      this.isConnecting = false;
+      this.connectionPromise = null;
+    });
+
+    // Wait for connection to establish
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Connection timeout'));
+      }, 20000);
+
+      socket.once('connect', () => {
+        clearTimeout(timeout);
+        this.connectionPromise = null;
+        resolve(socket);
+      });
+
+      socket.once('connect_error', (error) => {
+        clearTimeout(timeout);
+        this.connectionPromise = null;
+        reject(error);
+      });
+    });
+  }
+
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+      this.isConnecting = false;
+      this.connectionPromise = null;
+      this.subscribers.clear();
+    }
+  }
+
+  addSubscriber(id: string) {
+    this.subscribers.add(id);
+  }
+
+  removeSubscriber(id: string) {
+    this.subscribers.delete(id);
+    // If no more subscribers, disconnect
+    if (this.subscribers.size === 0) {
+      this.disconnect();
+    }
+  }
+}
+
 export function useSocketIO(options: UseSocketIOOptions = {}) {
   const { jobId, onJobUpdate, onJobCompleted, onJobProgress } = options;
   const [user, setUser] = useState<AuthUser | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<SocketMessage | null>(null);
+  const hookId = useRef(Math.random().toString(36).substr(2, 9));
+  const socketManager = SocketManager.getInstance();
 
-  // Effect to get current user and set up auth listener
+  // Get current user once
   useEffect(() => {
     let isMounted = true;
 
@@ -64,8 +196,11 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
     };
   }, []);
 
+  // Single effect for socket connection management
   useEffect(() => {
     if (!user?.id) return;
+
+    let isMounted = true;
 
     const connectSocket = async () => {
       try {
@@ -77,168 +212,92 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
           return;
         }
 
-        // Initialize Socket.io endpoint first
-        await fetch('/api/socket');
+        // Register this hook as a subscriber
+        socketManager.addSubscriber(hookId.current);
 
-        console.log('🔌 Connecting to Socket.io with JWT authentication');
+        // Get shared socket connection (singleton pattern)
+        const socket = await socketManager.getConnection(user.id, session.access_token);
         
-        // Create Socket.io connection with WebSocket-only transport
-        const socket = io({
-          path: '/api/socketio',
-          // Force WebSocket-only transport, disable polling completely
-          transports: ['websocket'],
-          // Additional WebSocket-only settings
-          upgrade: false,
-          rememberUpgrade: false,
-          // Connection timeout settings
-          timeout: 20000,
-          // Reconnection settings
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionAttempts: 5,
-          // Force WebSocket protocol
-          forceNew: true,
-          auth: {
-            token: session.access_token,
-            userId: user.id
-          },
-          query: {
-            token: session.access_token,
-            userId: user.id,
-            ...(jobId && { jobId })
-          }
-        });
+        if (!isMounted) return;
 
         socketRef.current = socket;
+        setIsConnected(socket.connected);
 
-        socket.on('connect', () => {
-          console.log('✅ Socket.io connected via WebSocket (no polling)', (socket as any).io?.engine?.transport?.name || 'websocket');
-          setIsConnected(true);
-          
-          // Subscribe to specific job if provided
-          if (jobId) {
-            socket.emit('subscribe_job', { jobId });
-            console.log(`📡 Subscribed to job updates for job: ${jobId}`);
+        // Setup event handlers for this specific hook instance
+        const handleConnect = () => {
+          if (isMounted) {
+            setIsConnected(true);
+            
+            // Subscribe to specific job if provided
+            if (jobId) {
+              socket.emit('subscribe_job', { jobId });
+              console.log(`📡 Subscribed to job updates for job: ${jobId}`);
+            }
           }
-          
-          // Send a ping to confirm connection
-          socket.emit('ping');
-        });
+        };
 
-        socket.on('connection', (data) => {
-          console.log('Socket.io connection confirmed:', data);
-        });
-
-        socket.on('subscribed', (data) => {
-          console.log(`✅ Successfully subscribed to job: ${data.jobId}`);
-        });
-
-        socket.on('unsubscribed', () => {
-          console.log('✅ Successfully unsubscribed from job updates');
-        });
-
-        socket.on('pong', () => {
-          console.log('📡 Socket.io connection active (pong received)');
-        });
-
-        // Handle job updates
-        socket.on('job_update', (message: SocketMessage) => {
-          console.log('📨 Job update received:', message);
-          setLastMessage(message);
-          onJobUpdate?.(message);
-        });
-
-        socket.on('job_progress', (message: SocketMessage) => {
-          console.log('📊 Job progress received:', message);
-          setLastMessage(message);
-          onJobProgress?.(message);
-        });
-
-        socket.on('job_progress_detailed', (message: SocketMessage) => {
-          console.log('📊 Detailed job progress received:', message);
-          setLastMessage(message);
-          onJobProgress?.(message);
-          // Dispatch custom event for enhanced progress tracking
-          window.dispatchEvent(new CustomEvent('job-progress-detailed', { 
-            detail: message 
-          }));
-        });
-
-        socket.on('job_completed', (message: SocketMessage) => {
-          console.log('✅ Job completed:', message);
-          setLastMessage(message);
-          onJobCompleted?.(message);
-        });
-
-        socket.on('dashboard_stats', (message: any) => {
-          console.log('📊 Dashboard stats update:', message);
-          if (message.stats) {
-            window.dispatchEvent(new CustomEvent('dashboard-stats-update', { 
-              detail: message.stats 
-            }));
+        const handleDisconnect = () => {
+          if (isMounted) {
+            setIsConnected(false);
           }
-        });
+        };
 
-        socket.on('url_submission_update', (message: any) => {
-          console.log('🔗 URL submission update:', message);
-          if (message.submission) {
-            window.dispatchEvent(new CustomEvent('url-submission-update', { 
-              detail: message.submission 
-            }));
+        const handleJobUpdate = (message: SocketMessage) => {
+          if (isMounted) {
+            console.log('📨 Job update received:', message);
+            setLastMessage(message);
+            onJobUpdate?.(message);
           }
-        });
+        };
 
-        socket.on('url_status_change', (message: any) => {
-          console.log('🔄 URL status change:', message);
-          if (message.submission) {
-            window.dispatchEvent(new CustomEvent('url-status-change', { 
-              detail: { jobId: message.jobId, submission: message.submission }
-            }));
+        const handleJobProgress = (message: SocketMessage) => {
+          if (isMounted) {
+            console.log('📊 Job progress received:', message);
+            setLastMessage(message);
+            onJobProgress?.(message);
           }
-        });
+        };
 
-        socket.on('job_list_update', (message: any) => {
-          console.log('📋 Job list update:', message);
-          if (message.jobs) {
-            window.dispatchEvent(new CustomEvent('job-list-update', { 
-              detail: message.jobs 
-            }));
+        const handleJobCompleted = (message: SocketMessage) => {
+          if (isMounted) {
+            console.log('✅ Job completed:', message);
+            setLastMessage(message);
+            onJobCompleted?.(message);
           }
-        });
+        };
 
-        socket.on('disconnect', (reason) => {
-          console.log('❌ Socket.io disconnected:', reason);
-          setIsConnected(false);
-        });
+        // Attach event listeners
+        socket.on('connect', handleConnect);
+        socket.on('disconnect', handleDisconnect);
+        socket.on('job_update', handleJobUpdate);
+        socket.on('job_progress', handleJobProgress);
+        socket.on('job_completed', handleJobCompleted);
 
-        socket.on('connect_error', (error) => {
-          console.error('❌ Socket.io WebSocket connection error:', error);
-          setIsConnected(false);
-        });
+        // If already connected, trigger connect handler
+        if (socket.connected) {
+          handleConnect();
+        }
 
-        // Log transport upgrade (should not happen in WebSocket-only mode)
-        socket.on('upgrade', () => {
-          console.log('🔄 Socket.io transport upgraded to:', (socket as any).io?.engine?.transport?.name || 'unknown');
-        });
-
-        // Log when transport changes  
-        (socket as any).io?.on('upgrade', (transport: any) => {
-          console.log('🔄 Socket.io transport changed to:', transport.name);
-        });
+        // Cleanup function
+        return () => {
+          socket.off('connect', handleConnect);
+          socket.off('disconnect', handleDisconnect);
+          socket.off('job_update', handleJobUpdate);
+          socket.off('job_progress', handleJobProgress);
+          socket.off('job_completed', handleJobCompleted);
+        };
 
       } catch (error) {
-        console.error('Failed to establish Socket.io connection:', error);
+        console.error('Failed to connect Socket.io:', error);
       }
     };
 
     connectSocket();
 
-    // Cleanup function
     return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
+      isMounted = false;
+      // Unregister this hook as a subscriber
+      socketManager.removeSubscriber(hookId.current);
     };
   }, [user?.id, jobId, onJobUpdate, onJobCompleted, onJobProgress]);
 
