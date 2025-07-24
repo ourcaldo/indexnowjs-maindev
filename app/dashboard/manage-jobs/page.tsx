@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSocketIO } from '@/hooks/useSocketIO';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -91,37 +91,42 @@ export default function ManageJobsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const jobsPerPage = 20;
 
+  // Memoized callback functions to prevent infinite re-renders
+  const handleJobUpdate = useCallback((message: any) => {
+    console.log('📨 Job update received:', message);
+    // Update the specific job in the list
+    setJobs(prevJobs => 
+      prevJobs.map(job => {
+        if (job.id === message.jobId) {
+          return {
+            ...job,
+            status: (message.status as Job['status']) || job.status,
+            progress_percentage: message.progress?.progress_percentage ?? job.progress_percentage,
+            processed_urls: message.progress?.processed_urls ?? job.processed_urls,
+            successful_urls: message.progress?.successful_urls ?? job.successful_urls,
+            failed_urls: message.progress?.failed_urls ?? job.failed_urls,
+            total_urls: message.progress?.total_urls ?? job.total_urls,
+            updated_at: new Date().toISOString()
+          };
+        }
+        return job;
+      })
+    );
+  }, []);
+
+  const handleJobCompleted = useCallback((message: any) => {
+    console.log('✅ Job completed:', message);
+    addToast({
+      title: 'Job Completed',
+      description: `Job completed successfully!`,
+      type: 'success'
+    });
+  }, [addToast]);
+
   // Socket.io for real-time updates
   const { isConnected } = useSocketIO({
-    onJobUpdate: (message) => {
-      console.log('📨 Job update received:', message);
-      // Update the specific job in the list
-      setJobs(prevJobs => 
-        prevJobs.map(job => {
-          if (job.id === message.jobId) {
-            return {
-              ...job,
-              status: (message.status as Job['status']) || job.status,
-              progress_percentage: message.progress?.progress_percentage ?? job.progress_percentage,
-              processed_urls: message.progress?.processed_urls ?? job.processed_urls,
-              successful_urls: message.progress?.successful_urls ?? job.successful_urls,
-              failed_urls: message.progress?.failed_urls ?? job.failed_urls,
-              total_urls: message.progress?.total_urls ?? job.total_urls,
-              updated_at: new Date().toISOString()
-            };
-          }
-          return job;
-        })
-      );
-    },
-    onJobCompleted: (message) => {
-      console.log('✅ Job completed:', message);
-      addToast({
-        title: 'Job Completed',
-        description: `Job completed successfully!`,
-        type: 'success'
-      });
-    }
+    onJobUpdate: handleJobUpdate,
+    onJobCompleted: handleJobCompleted
   });
 
   // Listen for real-time job list updates
@@ -137,12 +142,8 @@ export default function ManageJobsPage() {
     };
   }, []);
 
-  // Load jobs data
-  useEffect(() => {
-    loadJobs();
-  }, [currentPage, searchTerm, statusFilter, scheduleFilter]);
-
-  const loadJobs = async () => {
+  // Memoized loadJobs function to prevent unnecessary re-renders
+  const loadJobs = useCallback(async () => {
     try {
       setLoading(true);
       const user = await authService.getCurrentUser();
@@ -184,7 +185,12 @@ export default function ManageJobsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchTerm, statusFilter, scheduleFilter, addToast]);
+
+  // Load jobs data
+  useEffect(() => {
+    loadJobs();
+  }, [loadJobs]);
 
   // Helper functions
   const formatDate = (dateString: string) => {

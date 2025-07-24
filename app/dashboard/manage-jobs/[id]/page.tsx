@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -121,82 +121,77 @@ export default function JobDetailsPage() {
   const [totalSubmissions, setTotalSubmissions] = useState(0);
   const itemsPerPage = 20;
 
+  // Memoized callback functions to prevent infinite re-renders
+  const handleJobUpdate = useCallback((message: any) => {
+    console.log('📨 Job update received on detail page:', message);
+    // Update job data with real-time progress
+    if (message.jobId === jobId) {
+      setJob(prevJob => {
+        if (!prevJob) return prevJob;
+        
+        console.log('🔄 Updating job state with:', message);
+        return {
+          ...prevJob,
+          status: (message.status as Job['status']) || prevJob.status,
+          progress_percentage: message.progress?.progress_percentage ?? prevJob.progress_percentage,
+          processed_urls: message.progress?.processed_urls ?? prevJob.processed_urls,
+          successful_urls: message.progress?.successful_urls ?? prevJob.successful_urls,
+          failed_urls: message.progress?.failed_urls ?? prevJob.failed_urls,
+          total_urls: message.progress?.total_urls ?? prevJob.total_urls,
+          updated_at: new Date().toISOString()
+        };
+      });
+    }
+  }, [jobId]);
+
+  const handleJobProgress = useCallback((message: any) => {
+    console.log('📊 Job progress received on detail page:', message);
+    if (message.jobId === jobId && message.progress) {
+      setJob(prevJob => {
+        if (!prevJob) return prevJob;
+        
+        return {
+          ...prevJob,
+          progress_percentage: message.progress.progress_percentage ?? prevJob.progress_percentage,
+          processed_urls: message.progress.processed_urls ?? prevJob.processed_urls,
+          successful_urls: message.progress.successful_urls ?? prevJob.successful_urls,
+          failed_urls: message.progress.failed_urls ?? prevJob.failed_urls,
+          total_urls: message.progress.total_urls ?? prevJob.total_urls,
+          updated_at: new Date().toISOString()
+        };
+      });
+    }
+  }, [jobId]);
+
+  const handleJobCompleted = useCallback((message: any) => {
+    console.log('✅ Job completed on detail page:', message);
+    if (message.jobId === jobId) {
+      addToast({
+        title: 'Job Completed',
+        description: `Job completed successfully!`,
+        type: 'success'
+      });
+      
+      // Update job status to completed immediately
+      setJob(prevJob => {
+        if (!prevJob) return prevJob;
+        return {
+          ...prevJob,
+          status: 'completed',
+          progress_percentage: 100,
+          completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      });
+    }
+  }, [jobId, addToast]);
+
   // Socket.io for real-time job updates
   const { isConnected } = useSocketIO({
     jobId: jobId,
-    onJobUpdate: (message) => {
-      console.log('📨 Job update received on detail page:', message);
-      // Update job data with real-time progress
-      if (message.jobId === jobId) {
-        setJob(prevJob => {
-          if (!prevJob) return prevJob;
-          
-          console.log('🔄 Updating job state with:', message);
-          return {
-            ...prevJob,
-            status: (message.status as Job['status']) || prevJob.status,
-            progress_percentage: message.progress?.progress_percentage ?? prevJob.progress_percentage,
-            processed_urls: message.progress?.processed_urls ?? prevJob.processed_urls,
-            successful_urls: message.progress?.successful_urls ?? prevJob.successful_urls,
-            failed_urls: message.progress?.failed_urls ?? prevJob.failed_urls,
-            total_urls: message.progress?.total_urls ?? prevJob.total_urls,
-            updated_at: new Date().toISOString()
-          };
-        });
-        
-        // Force component re-render by triggering a state update
-        setTimeout(() => {
-          console.log('🔄 Reloading submissions after job update');
-          loadSubmissions();
-        }, 100);
-      }
-    },
-    onJobProgress: (message) => {
-      console.log('📊 Job progress received on detail page:', message);
-      if (message.jobId === jobId && message.progress) {
-        setJob(prevJob => {
-          if (!prevJob) return prevJob;
-          
-          return {
-            ...prevJob,
-            progress_percentage: message.progress.progress_percentage ?? prevJob.progress_percentage,
-            processed_urls: message.progress.processed_urls ?? prevJob.processed_urls,
-            successful_urls: message.progress.successful_urls ?? prevJob.successful_urls,
-            failed_urls: message.progress.failed_urls ?? prevJob.failed_urls,
-            total_urls: message.progress.total_urls ?? prevJob.total_urls,
-            updated_at: new Date().toISOString()
-          };
-        });
-      }
-    },
-    onJobCompleted: (message) => {
-      console.log('✅ Job completed on detail page:', message);
-      if (message.jobId === jobId) {
-        addToast({
-          title: 'Job Completed',
-          description: `${job?.name || 'Job'} completed successfully!`,
-          type: 'success'
-        });
-        
-        // Update job status to completed immediately
-        setJob(prevJob => {
-          if (!prevJob) return prevJob;
-          return {
-            ...prevJob,
-            status: 'completed',
-            progress_percentage: 100,
-            completed_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        });
-        
-        // Reload data after a short delay
-        setTimeout(() => {
-          loadJobData();
-          loadSubmissions();
-        }, 200);
-      }
-    }
+    onJobUpdate: handleJobUpdate,
+    onJobProgress: handleJobProgress,
+    onJobCompleted: handleJobCompleted
   });
 
   // Listen for real-time URL submission updates
@@ -228,7 +223,10 @@ export default function JobDetailsPage() {
       const { detail: data } = event;
       if (data.jobId === jobId && data.reloadSubmissions) {
         console.log('🔄 Reloading submissions due to job progress update');
-        loadSubmissions();
+        // Using the memoized loadSubmissions function
+        if (loadSubmissions) {
+          loadSubmissions();
+        }
       }
     };
 
@@ -275,13 +273,8 @@ export default function JobDetailsPage() {
     };
   }, [jobId]);
 
-  // Load job and submissions data
-  useEffect(() => {
-    loadJobData();
-    loadSubmissions();
-  }, [jobId, currentPage]);
-
-  const loadJobData = async () => {
+  // Memoized load functions to prevent unnecessary re-renders
+  const loadJobData = useCallback(async () => {
     try {
       const user = await authService.getCurrentUser();
       if (!user) return;
@@ -313,9 +306,9 @@ export default function JobDetailsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jobId, addToast]);
 
-  const loadSubmissions = async () => {
+  const loadSubmissions = useCallback(async () => {
     try {
       const user = await authService.getCurrentUser();
       if (!user) return;
@@ -340,7 +333,13 @@ export default function JobDetailsPage() {
     } catch (error) {
       console.error('Error loading submissions:', error);
     }
-  };
+  }, [jobId, currentPage, itemsPerPage]);
+
+  // Load job and submissions data
+  useEffect(() => {
+    loadJobData();
+    loadSubmissions();
+  }, [loadJobData, loadSubmissions]);
 
   // Helper functions
   const formatDate = (dateString: string) => {
