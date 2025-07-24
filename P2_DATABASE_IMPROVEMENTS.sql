@@ -79,123 +79,235 @@ ALTER TABLE indb_notifications_email_queue ENABLE ROW LEVEL SECURITY;
 ALTER TABLE indb_analytics_daily_stats ENABLE ROW LEVEL SECURITY;
 
 -- User Profiles: Users can only access their own profile
-CREATE POLICY "Users can view own profile" ON indb_auth_user_profiles
-    FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own profile' AND tablename = 'indb_auth_user_profiles') THEN
+        CREATE POLICY "Users can view own profile" ON indb_auth_user_profiles
+            FOR SELECT USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can update own profile" ON indb_auth_user_profiles
-    FOR UPDATE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update own profile' AND tablename = 'indb_auth_user_profiles') THEN
+        CREATE POLICY "Users can update own profile" ON indb_auth_user_profiles
+            FOR UPDATE USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can insert own profile" ON indb_auth_user_profiles
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert own profile' AND tablename = 'indb_auth_user_profiles') THEN
+        CREATE POLICY "Users can insert own profile" ON indb_auth_user_profiles
+            FOR INSERT WITH CHECK (auth.uid() = user_id);
+    END IF;
+END $$;
 
 -- User Settings: Users can only access their own settings
-CREATE POLICY "Users can view own settings" ON indb_auth_user_settings
-    FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own settings' AND tablename = 'indb_auth_user_settings') THEN
+        CREATE POLICY "Users can view own settings" ON indb_auth_user_settings
+            FOR SELECT USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can update own settings" ON indb_auth_user_settings
-    FOR UPDATE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update own settings' AND tablename = 'indb_auth_user_settings') THEN
+        CREATE POLICY "Users can update own settings" ON indb_auth_user_settings
+            FOR UPDATE USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can insert own settings" ON indb_auth_user_settings
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert own settings' AND tablename = 'indb_auth_user_settings') THEN
+        CREATE POLICY "Users can insert own settings" ON indb_auth_user_settings
+            FOR INSERT WITH CHECK (auth.uid() = user_id);
+    END IF;
+END $$;
 
 -- Service Accounts: Users can only access their own service accounts
-CREATE POLICY "Users can view own service accounts" ON indb_google_service_accounts
-    FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own service accounts' AND tablename = 'indb_google_service_accounts') THEN
+        CREATE POLICY "Users can view own service accounts" ON indb_google_service_accounts
+            FOR SELECT USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can update own service accounts" ON indb_google_service_accounts
-    FOR UPDATE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update own service accounts' AND tablename = 'indb_google_service_accounts') THEN
+        CREATE POLICY "Users can update own service accounts" ON indb_google_service_accounts
+            FOR UPDATE USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can insert own service accounts" ON indb_google_service_accounts
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert own service accounts' AND tablename = 'indb_google_service_accounts') THEN
+        CREATE POLICY "Users can insert own service accounts" ON indb_google_service_accounts
+            FOR INSERT WITH CHECK (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can delete own service accounts" ON indb_google_service_accounts
-    FOR DELETE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can delete own service accounts' AND tablename = 'indb_google_service_accounts') THEN
+        CREATE POLICY "Users can delete own service accounts" ON indb_google_service_accounts
+            FOR DELETE USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
 -- Indexing Jobs: Users can only access their own jobs
-CREATE POLICY "Users can view own jobs" ON indb_indexing_jobs
-    FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own jobs' AND tablename = 'indb_indexing_jobs') THEN
+        CREATE POLICY "Users can view own jobs" ON indb_indexing_jobs
+            FOR SELECT USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can update own jobs" ON indb_indexing_jobs
-    FOR UPDATE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update own jobs' AND tablename = 'indb_indexing_jobs') THEN
+        CREATE POLICY "Users can update own jobs" ON indb_indexing_jobs
+            FOR UPDATE USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can insert own jobs" ON indb_indexing_jobs
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert own jobs' AND tablename = 'indb_indexing_jobs') THEN
+        CREATE POLICY "Users can insert own jobs" ON indb_indexing_jobs
+            FOR INSERT WITH CHECK (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can delete own jobs" ON indb_indexing_jobs
-    FOR DELETE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can delete own jobs' AND tablename = 'indb_indexing_jobs') THEN
+        CREATE POLICY "Users can delete own jobs" ON indb_indexing_jobs
+            FOR DELETE USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
 -- Job Logs: Users can only view logs for their own jobs
-CREATE POLICY "Users can view own job logs" ON indb_indexing_job_logs
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM indb_indexing_jobs 
-            WHERE indb_indexing_jobs.id = indb_indexing_job_logs.job_id 
-            AND indb_indexing_jobs.user_id = auth.uid()
-        )
-    );
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own job logs' AND tablename = 'indb_indexing_job_logs') THEN
+        CREATE POLICY "Users can view own job logs" ON indb_indexing_job_logs
+            FOR SELECT USING (
+                EXISTS (
+                    SELECT 1 FROM indb_indexing_jobs 
+                    WHERE indb_indexing_jobs.id = indb_indexing_job_logs.job_id 
+                    AND indb_indexing_jobs.user_id = auth.uid()
+                )
+            );
+    END IF;
+END $$;
 
-CREATE POLICY "System can insert job logs" ON indb_indexing_job_logs
-    FOR INSERT WITH CHECK (true); -- System service can insert logs
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'System can insert job logs' AND tablename = 'indb_indexing_job_logs') THEN
+        CREATE POLICY "System can insert job logs" ON indb_indexing_job_logs
+            FOR INSERT WITH CHECK (true); -- System service can insert logs
+    END IF;
+END $$;
 
 -- URL Submissions: Users can only view submissions for their own jobs
-CREATE POLICY "Users can view own url submissions" ON indb_indexing_url_submissions
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM indb_indexing_jobs 
-            WHERE indb_indexing_jobs.id = indb_indexing_url_submissions.job_id 
-            AND indb_indexing_jobs.user_id = auth.uid()
-        )
-    );
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own url submissions' AND tablename = 'indb_indexing_url_submissions') THEN
+        CREATE POLICY "Users can view own url submissions" ON indb_indexing_url_submissions
+            FOR SELECT USING (
+                EXISTS (
+                    SELECT 1 FROM indb_indexing_jobs 
+                    WHERE indb_indexing_jobs.id = indb_indexing_url_submissions.job_id 
+                    AND indb_indexing_jobs.user_id = auth.uid()
+                )
+            );
+    END IF;
+END $$;
 
-CREATE POLICY "System can manage url submissions" ON indb_indexing_url_submissions
-    FOR ALL WITH CHECK (true); -- System service can manage submissions
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'System can manage url submissions' AND tablename = 'indb_indexing_url_submissions') THEN
+        CREATE POLICY "System can manage url submissions" ON indb_indexing_url_submissions
+            FOR ALL WITH CHECK (true); -- System service can manage submissions
+    END IF;
+END $$;
 
 -- Quota Usage: Users can only view quota for their own service accounts
-CREATE POLICY "Users can view own quota usage" ON indb_google_quota_usage
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM indb_google_service_accounts 
-            WHERE indb_google_service_accounts.id = indb_google_quota_usage.service_account_id 
-            AND indb_google_service_accounts.user_id = auth.uid()
-        )
-    );
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own quota usage' AND tablename = 'indb_google_quota_usage') THEN
+        CREATE POLICY "Users can view own quota usage" ON indb_google_quota_usage
+            FOR SELECT USING (
+                EXISTS (
+                    SELECT 1 FROM indb_google_service_accounts 
+                    WHERE indb_google_service_accounts.id = indb_google_quota_usage.service_account_id 
+                    AND indb_google_service_accounts.user_id = auth.uid()
+                )
+            );
+    END IF;
+END $$;
 
-CREATE POLICY "System can manage quota usage" ON indb_google_quota_usage
-    FOR ALL WITH CHECK (true); -- System service can manage quota
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'System can manage quota usage' AND tablename = 'indb_google_quota_usage') THEN
+        CREATE POLICY "System can manage quota usage" ON indb_google_quota_usage
+            FOR ALL WITH CHECK (true); -- System service can manage quota
+    END IF;
+END $$;
 
 -- Quota Alerts: Users can only view alerts for their own service accounts
-CREATE POLICY "Users can view own quota alerts" ON indb_google_quota_alerts
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM indb_google_service_accounts 
-            WHERE indb_google_service_accounts.id = indb_google_quota_alerts.service_account_id 
-            AND indb_google_service_accounts.user_id = auth.uid()
-        )
-    );
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own quota alerts' AND tablename = 'indb_google_quota_alerts') THEN
+        CREATE POLICY "Users can view own quota alerts" ON indb_google_quota_alerts
+            FOR SELECT USING (
+                EXISTS (
+                    SELECT 1 FROM indb_google_service_accounts 
+                    WHERE indb_google_service_accounts.id = indb_google_quota_alerts.service_account_id 
+                    AND indb_google_service_accounts.user_id = auth.uid()
+                )
+            );
+    END IF;
+END $$;
 
 -- Dashboard Notifications: Users can only view their own notifications
-CREATE POLICY "Users can view own notifications" ON indb_notifications_dashboard
-    FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own notifications' AND tablename = 'indb_notifications_dashboard') THEN
+        CREATE POLICY "Users can view own notifications" ON indb_notifications_dashboard
+            FOR SELECT USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "Users can update own notifications" ON indb_notifications_dashboard
-    FOR UPDATE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update own notifications' AND tablename = 'indb_notifications_dashboard') THEN
+        CREATE POLICY "Users can update own notifications" ON indb_notifications_dashboard
+            FOR UPDATE USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "System can insert notifications" ON indb_notifications_dashboard
-    FOR INSERT WITH CHECK (true); -- System can create notifications
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'System can insert notifications' AND tablename = 'indb_notifications_dashboard') THEN
+        CREATE POLICY "System can insert notifications" ON indb_notifications_dashboard
+            FOR INSERT WITH CHECK (true); -- System can create notifications
+    END IF;
+END $$;
 
 -- Email Queue: Users can only view their own emails
-CREATE POLICY "Users can view own emails" ON indb_notifications_email_queue
-    FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own emails' AND tablename = 'indb_notifications_email_queue') THEN
+        CREATE POLICY "Users can view own emails" ON indb_notifications_email_queue
+            FOR SELECT USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "System can manage email queue" ON indb_notifications_email_queue
-    FOR ALL WITH CHECK (true); -- System service can manage email queue
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'System can manage email queue' AND tablename = 'indb_notifications_email_queue') THEN
+        CREATE POLICY "System can manage email queue" ON indb_notifications_email_queue
+            FOR ALL WITH CHECK (true); -- System service can manage email queue
+    END IF;
+END $$;
 
 -- Analytics: Users can only view their own analytics
-CREATE POLICY "Users can view own analytics" ON indb_analytics_daily_stats
-    FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own analytics' AND tablename = 'indb_analytics_daily_stats') THEN
+        CREATE POLICY "Users can view own analytics" ON indb_analytics_daily_stats
+            FOR SELECT USING (auth.uid() = user_id);
+    END IF;
+END $$;
 
-CREATE POLICY "System can manage analytics" ON indb_analytics_daily_stats
-    FOR ALL WITH CHECK (true); -- System service can manage analytics
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'System can manage analytics' AND tablename = 'indb_analytics_daily_stats') THEN
+        CREATE POLICY "System can manage analytics" ON indb_analytics_daily_stats
+            FOR ALL WITH CHECK (true); -- System service can manage analytics
+    END IF;
+END $$;
 
 -- ================================================================================
 -- P2.1: PERFORMANCE OPTIMIZATION VIEWS
