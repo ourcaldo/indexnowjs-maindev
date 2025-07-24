@@ -396,18 +396,16 @@ END $$;
 -- Check if indexes were created successfully
 SELECT 
     schemaname,
-    tablename,
     indexname,
     indexdef
 FROM pg_indexes 
-WHERE tablename LIKE 'indb_%' 
+WHERE schemaname = 'public'
     AND indexname LIKE 'idx_%'
-ORDER BY tablename, indexname;
+ORDER BY indexname;
 
 -- Check RLS policies
 SELECT 
     schemaname,
-    tablename,
     policyname,
     permissive,
     roles,
@@ -415,8 +413,8 @@ SELECT
     qual,
     with_check
 FROM pg_policies 
-WHERE tablename LIKE 'indb_%'
-ORDER BY tablename, policyname;
+WHERE schemaname = 'public'
+ORDER BY policyname;
 
 -- Test dashboard stats view
 SELECT * FROM user_dashboard_stats LIMIT 5;
@@ -447,13 +445,13 @@ LIMIT 10;
 -- Check index usage
 SELECT 
     schemaname,
-    tablename,
     indexname,
     idx_scan,
     idx_tup_read,
     idx_tup_fetch
 FROM pg_stat_user_indexes 
-WHERE tablename LIKE 'indb_%'
+WHERE schemaname = 'public'
+    AND indexname LIKE 'idx_%'
 ORDER BY idx_scan DESC;
 
 -- ================================================================================
