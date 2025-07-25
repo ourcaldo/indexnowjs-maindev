@@ -1,0 +1,201 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, I ask you to enhance the activity log in admin dashboard with this command:
+'''
+Thanks, now I need you to enhance the activity logs in admin dashboard which have this error when I access it.
+
+ ○ Compiling /api/admin/activity ...
+ ⨯ ./app/api/admin/activity/route.ts:3:1
+Module not found: Can't resolve '@/lib/server-auth'
+  1 | import { NextRequest, NextResponse } from 'next/server'
+  2 | import { supabaseAdmin } from '@/lib/supabase'
+> 3 | import { requireServerSuperAdminAuth } from '@/lib/server-auth'
+    | ^
+  4 |
+  5 | export async function GET(request: NextRequest) {
+  6 |   try {
+
+https://nextjs.org/docs/messages/module-not-found
+ ⨯ ./app/api/admin/activity/route.ts:3:1
+Module not found: Can't resolve '@/lib/server-auth'
+  1 | import { NextRequest, NextResponse } from 'next/server'
+  2 | import { supabaseAdmin } from '@/lib/supabase'
+> 3 | import { requireServerSuperAdminAuth } from '@/lib/server-auth'
+    | ^
+  4 |
+  5 | export async function GET(request: NextRequest) {
+  6 |   try {
+
+https://nextjs.org/docs/messages/module-not-found
+ ⨯ ./app/api/admin/activity/route.ts:3:1
+Module not found: Can't resolve '@/lib/server-auth'
+  1 | import { NextRequest, NextResponse } from 'next/server'
+  2 | import { supabaseAdmin } from '@/lib/supabase'
+> 3 | import { requireServerSuperAdminAuth } from '@/lib/server-auth'
+    | ^
+  4 |
+  5 | export async function GET(request: NextRequest) {
+  6 |   try {
+
+https://nextjs.org/docs/messages/module-not-found
+ GET /api/admin/activity?days=7 500 in 14922ms
+ GET /backend/admin/activity 500 in 18ms
+ GET /_next/static/webpack/d66907eb4019f84f.webpack.hot-update.json 500 in 11ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /api/admin/activity?days=7 500 in 19ms
+ GET /backend/admin/activity 500 in 14ms
+ GET /backend/admin/activity 500 in 19ms
+
+ At the first place, I ask you to make the activity logs like this: "Activity Logs: Track backend events, user actions (logins, changes, API calls), and system warnings or errors for audits and debugging."
+
+But, the actual you're just make the activity log for the admin user, which what admin super do while in admin dashboard. 
+
+So, I need you to change, fix and enhance it. I want you to make sure that the activity logs is record all user and all activity which also display the user name and also have single activity detail when we click it will have single page (when user is clicked, it's redirected to single user detail, we already have this single page under user management but didn't have the feature to track the user activity yet, just feature like change info for user) to track all activity from latest date to oldest date and all matter information, use this structure:
+[current setting page in single user details]
+[all matter information first - i give you the permission to design best UX and UI as long still use this project own color scheme (read replit.md)].
+-- Including IP, device and other all matters information
+[the like-table of activity log of the user from latest to oldest
+
+So, the main page is just like manage jobs page in dashboard user while it's display latest jobs. In activity page, it's have to display activity from all user from latest to oldest. With this information that you need to display:
+1. Timestamp
+2. user
+3. Action/events
+4. IP
+5. and other kind of information that matter if need, but don't too much (place it in single user info if it's needed)
+
+And as before you made the tables with name "indb_admin_activity_logs" we need to change the tables name to other, please read the replit.md to get to know how to naming a tables in correct way using prefix and collections name.
+The current structure tables for "indb_admin_activity_logs" is:
+INSERT INTO "public"."indb_admin_activity_logs" ("id", "admin_id", "action_type", "action_description", "target_type", "target_id", "ip_address", "user_agent", "metadata", "created_at") VALUES ('1538faa7-f2ac-474e-9672-5550426cbfaa', '915f50e5-0902-466a-b1af-bdf19d789722', 'user_management', 'Viewed users list', 'users', null, null, null, '{"count": 1}', '2025-07-25 06:45:11.835497+00');
+
+If we need to change it, please give the SQL queries for me to run in Supabase SQL Editor
+
+'''
+
+Then you made a changes and give this SQL that I also already run it.
+-- Activity Logs Migration: Rename table and create comprehensive activity tracking
+-- Run this in Supabase SQL Editor
+
+-- 1. Create new comprehensive activity logs table following collections naming convention
+-- Using "security" collection for activity tracking: indb_security_activity_logs
+
+CREATE TABLE IF NOT EXISTS public.indb_security_activity_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    event_type TEXT NOT NULL, -- login, logout, create_job, update_profile, api_call, etc.
+    action_description TEXT NOT NULL,
+    target_type TEXT, -- jobs, service_accounts, users, settings, etc.
+    target_id UUID, -- ID of the target resource
+    ip_address INET,
+    user_agent TEXT,
+    device_info JSONB, -- Browser, OS, device type information
+    location_data JSONB, -- City, country if available
+    success BOOLEAN DEFAULT true,
+    error_message TEXT,
+    metadata JSONB, -- Additional context data
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_security_activity_logs_user_id ON public.indb_security_activity_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_security_activity_logs_created_at ON public.indb_security_activity_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_security_activity_logs_event_type ON public.indb_security_activity_logs(event_type);
+CREATE INDEX IF NOT EXISTS idx_security_activity_logs_target_type ON public.indb_security_activity_logs(target_type);
+
+-- 3. Migrate existing data from old table to new table if exists
+INSERT INTO public.indb_security_activity_logs (
+    id, user_id, event_type, action_description, target_type, target_id, 
+    ip_address, user_agent, metadata, created_at
+)
+SELECT 
+    id,
+    admin_id as user_id,
+    action_type as event_type,
+    action_description,
+    target_type,
+    target_id,
+    ip_address,
+    user_agent,
+    metadata,
+    created_at
+FROM public.indb_admin_activity_logs
+WHERE EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'indb_admin_activity_logs');
+
+-- 4. Create RLS policies for the new table
+ALTER TABLE public.indb_security_activity_logs ENABLE ROW LEVEL SECURITY;
+
+-- Users can only see their own activity logs
+CREATE POLICY "Users can view own activity logs" ON public.indb_security_activity_logs
+    FOR SELECT USING (auth.uid() = user_id);
+
+-- Service role can manage all activity logs
+CREATE POLICY "Service role full access" ON public.indb_security_activity_logs
+    FOR ALL USING (auth.role() = 'service_role');
+
+-- 5. Drop old table after migration (uncomment if you want to remove old table)
+DROP TABLE IF EXISTS public.indb_admin_activity_logs;
+
+-- 6. Grant necessary permissions
+GRANT ALL ON public.indb_security_activity_logs TO service_role;
+GRANT SELECT ON public.indb_security_activity_logs TO authenticated;
+
+-- 7. Create a function to log activity automatically
+CREATE OR REPLACE FUNCTION public.log_user_activity(
+    p_user_id UUID,
+    p_event_type TEXT,
+    p_action_description TEXT,
+    p_target_type TEXT DEFAULT NULL,
+    p_target_id UUID DEFAULT NULL,
+    p_ip_address INET DEFAULT NULL,
+    p_user_agent TEXT DEFAULT NULL,
+    p_device_info JSONB DEFAULT NULL,
+    p_location_data JSONB DEFAULT NULL,
+    p_success BOOLEAN DEFAULT true,
+    p_error_message TEXT DEFAULT NULL,
+    p_metadata JSONB DEFAULT NULL
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    activity_id UUID;
+BEGIN
+    INSERT INTO public.indb_security_activity_logs (
+        user_id, event_type, action_description, target_type, target_id,
+        ip_address, user_agent, device_info, location_data, success,
+        error_message, metadata
+    ) VALUES (
+        p_user_id, p_event_type, p_action_description, p_target_type, p_target_id,
+        p_ip_address, p_user_agent, p_device_info, p_location_data, p_success,
+        p_error_message, p_metadata
+    ) RETURNING id INTO activity_id;
+    
+    RETURN activity_id;
+END;
+$$;
+
+-- Grant execute permission on the function
+GRANT EXECUTE ON FUNCTION public.log_user_activity TO service_role;
+GRANT EXECUTE ON FUNCTION public.log_user_activity TO authenticated;
+
+'''
+
+But now after you made that, I quite not like it. Please see my feedback:
+1. In latest activity there's no header and numbering even though I ask for ordering latest date, I need numbering
+2. I don't quite like the design
+3. The event type, I don't quite like it
+4. The icon device, it's too simple, and didn't have a text which I don't like it.
+5. Not symetrical, the timestap is on up, the other is center
+6. When I click the user, it's do redirected to single user detail page, but it's doesn't have activity history dedicated for that user under the current content of single detail user.
+
+Overall, I didn't quite like the current design, which lack for UX. So help me to redesign it as I said, I give you permission to make the layout but still use color scheme in replit.md
