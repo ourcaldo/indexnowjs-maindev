@@ -44,6 +44,27 @@ interface UserProfile {
   created_at: string
   updated_at: string
   phone_number: string | null
+  package_id?: string
+  subscribed_at?: string
+  expires_at?: string
+  daily_quota_used?: number
+  daily_quota_reset_date?: string
+  package?: {
+    id: string
+    name: string
+    slug: string
+    description: string
+    price: number
+    currency: string
+    billing_period: string
+    features: string[]
+    quota_limits: {
+      service_accounts: number
+      daily_urls: number
+      concurrent_jobs: number
+    }
+    is_active: boolean
+  }
   email?: string
   email_confirmed_at?: string
   last_sign_in_at?: string
@@ -536,6 +557,200 @@ export default function UserDetail() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Package Subscription Information */}
+      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
+            <Zap className="h-5 w-5 text-[#3D8BFF]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-[#1A1A1A]">Package Subscription</h3>
+            <p className="text-sm text-[#6C757D]">Current subscription plan and quota details</p>
+          </div>
+        </div>
+
+        {user.package ? (
+          <div className="space-y-6">
+            {/* Current Package Info */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-[#1A1A1A]">Current Plan</h4>
+                  <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${
+                    user.package.slug === 'free' ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20' :
+                    user.package.slug === 'premium' ? 'bg-[#3D8BFF]/10 text-[#3D8BFF] border-[#3D8BFF]/20' :
+                    user.package.slug === 'pro' ? 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20' :
+                    'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                  }`}>
+                    {user.package.name}
+                  </span>
+                </div>
+                
+                <div className="bg-[#F7F9FC] rounded-lg p-4">
+                  <p className="text-sm text-[#6C757D] mb-2">{user.package.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-[#1A1A1A]">
+                      {user.package.price === 0 ? 'Free' : `${user.package.currency} ${user.package.price.toLocaleString()}`}
+                    </span>
+                    <span className="text-sm text-[#6C757D]">
+                      per {user.package.billing_period}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Package Features */}
+                <div>
+                  <h5 className="font-medium text-[#1A1A1A] mb-2">Features</h5>
+                  <ul className="space-y-1">
+                    {user.package.features.map((feature: string, index: number) => (
+                      <li key={index} className="flex items-center space-x-2 text-sm text-[#6C757D]">
+                        <CheckCircle className="h-4 w-4 text-[#4BB543]" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium text-[#1A1A1A]">Subscription Details</h4>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="h-4 w-4 text-[#6C757D]" />
+                    <div>
+                      <p className="text-xs text-[#6C757D] uppercase tracking-wide">Subscribed</p>
+                      <p className="text-sm text-[#1A1A1A]">
+                        {user.subscribed_at ? new Date(user.subscribed_at).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="h-4 w-4 text-[#6C757D]" />
+                    <div>
+                      <p className="text-xs text-[#6C757D] uppercase tracking-wide">Expires</p>
+                      <p className="text-sm text-[#1A1A1A]">
+                        {user.expires_at ? (
+                          user.package.slug === 'free' ? 'Never' : new Date(user.expires_at).toLocaleDateString()
+                        ) : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <Zap className="h-4 w-4 text-[#6C757D]" />
+                    <div>
+                      <p className="text-xs text-[#6C757D] uppercase tracking-wide">Status</p>
+                      <p className="text-sm text-[#1A1A1A]">
+                        {user.expires_at && new Date(user.expires_at) > new Date() ? (
+                          <span className="text-[#4BB543]">Active</span>
+                        ) : user.package.slug === 'free' ? (
+                          <span className="text-[#4BB543]">Active</span>
+                        ) : (
+                          <span className="text-[#E63946]">Expired</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quota Information */}
+            <div className="border-t border-[#E0E6ED] pt-6">
+              <h4 className="font-medium text-[#1A1A1A] mb-4">Quota Limits & Usage</h4>
+              
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-[#F7F9FC] rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-[#6C757D]">Daily URLs</span>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-[#1A1A1A]">
+                        {user.daily_quota_used || 0}
+                      </p>
+                      <p className="text-xs text-[#6C757D]">
+                        / {user.package.quota_limits.daily_urls === -1 ? '∞' : user.package.quota_limits.daily_urls}
+                      </p>
+                    </div>
+                  </div>
+                  {user.package.quota_limits.daily_urls !== -1 && (
+                    <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                      <div 
+                        className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${Math.min(100, ((user.daily_quota_used || 0) / user.package.quota_limits.daily_urls) * 100)}%` 
+                        }}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-[#F7F9FC] rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-[#6C757D]">Service Accounts</span>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-[#1A1A1A]">-</p>
+                      <p className="text-xs text-[#6C757D]">
+                        / {user.package.quota_limits.service_accounts === -1 ? '∞' : user.package.quota_limits.service_accounts}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#F7F9FC] rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-[#6C757D]">Concurrent Jobs</span>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-[#1A1A1A]">-</p>
+                      <p className="text-xs text-[#6C757D]">
+                        / {user.package.quota_limits.concurrent_jobs === -1 ? '∞' : user.package.quota_limits.concurrent_jobs}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center space-x-3">
+                <Clock className="h-4 w-4 text-[#6C757D]" />
+                <div>
+                  <p className="text-xs text-[#6C757D] uppercase tracking-wide">Quota Reset</p>
+                  <p className="text-sm text-[#1A1A1A]">
+                    {user.daily_quota_reset_date ? new Date(user.daily_quota_reset_date).toLocaleDateString() : 'Daily'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Package Management Actions */}
+            {!editMode && (
+              <div className="flex items-center space-x-3 pt-4 border-t border-[#E0E6ED]">
+                <button className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm">
+                  Change Package
+                </button>
+                <button className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm">
+                  Reset Quota
+                </button>
+                <button className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm">
+                  Extend Subscription
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="w-12 h-12 bg-[#6C757D]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="h-6 w-6 text-[#6C757D]" />
+            </div>
+            <h4 className="font-medium text-[#1A1A1A] mb-2">No Package Assigned</h4>
+            <p className="text-sm text-[#6C757D] mb-4">This user doesn't have a subscription package assigned.</p>
+            <button className="px-4 py-2 bg-[#3D8BFF] text-white rounded-lg hover:bg-[#3D8BFF]/90 transition-colors text-sm">
+              Assign Package
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Admin Actions */}

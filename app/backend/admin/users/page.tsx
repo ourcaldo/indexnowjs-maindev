@@ -255,7 +255,6 @@ export default function UserManagement() {
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">User</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Role</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Package</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Daily Quota</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Status</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Joined</th>
                 <th className="text-right py-3 px-4 font-medium text-[#1A1A1A]">Actions</th>
@@ -298,22 +297,6 @@ export default function UserManagement() {
                       }`}>
                         {user.package?.name || 'No Package'}
                       </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="text-sm">
-                        <span className="font-medium text-[#1A1A1A]">
-                          {user.daily_quota_used || 0}
-                        </span>
-                        <span className="text-[#6C757D]">
-                          /{user.package?.quota_limits?.daily_urls === -1 ? '∞' : user.package?.quota_limits?.daily_urls || 0}
-                        </span>
-                      </div>
-                      {user.package?.quota_limits?.daily_urls !== -1 && user.daily_quota_used && user.package?.quota_limits?.daily_urls && 
-                       user.daily_quota_used >= user.package.quota_limits.daily_urls && (
-                        <AlertTriangle className="h-4 w-4 text-[#E63946]" />
-                      )}
                     </div>
                   </td>
                   <td className="py-4 px-4">

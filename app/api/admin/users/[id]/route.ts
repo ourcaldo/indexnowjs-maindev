@@ -20,10 +20,24 @@ export async function GET(
 
     const { id: userId } = await params
 
-    // Get user profile from our custom table
+    // Get user profile from our custom table with package information
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('indb_auth_user_profiles')
-      .select('*')
+      .select(`
+        *,
+        package:indb_payment_packages(
+          id,
+          name,
+          slug,
+          description,
+          price,
+          currency,
+          billing_period,
+          features,
+          quota_limits,
+          is_active
+        )
+      `)
       .eq('user_id', userId)
       .single()
 

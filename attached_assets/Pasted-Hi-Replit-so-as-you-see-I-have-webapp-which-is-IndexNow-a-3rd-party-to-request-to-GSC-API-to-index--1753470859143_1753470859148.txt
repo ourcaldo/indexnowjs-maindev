@@ -1,0 +1,33 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, I ask you to enhance the packages
+
+My command is:
+'''
+Good, thanks for helping me out. Now, as before we didn't set the package for user. I want you to set default user when sign up is have free plan.
+
+And I want you to also display the package in user management (admin dashboard) and in single user detail page.
+
+This is the current column for tables "indb_auth_user_profiles" INSERT INTO "public"."indb_auth_user_profiles" ("id", "user_id", "full_name", "role", "email_notifications", "created_at", "updated_at", "phone_number") VALUES ('7ed3a4e9-dcc6-47f2-92a8-8f16c8c1ed6f', '915f50e5-0902-466a-b1af-bdf19d789722', 'aldodkris', 'super_admin', 'false', '2025-07-22 12:49:18.341865+00', '2025-07-24 18:35:20.93757+00', '');
+
+After that, I need you to set the default daily quota same us packages that user subscribed.
+
+For example, if user subscribe to free plan, even though user add a service account that have daily quota usage 200 each day, as the quota to use IndexNow is 50, then it's only can make 50 IndexNow which is 50 urls. If it's already have limit, add a notificion in every page that user open, notification like when all daily quota is used and jobs will be paused.
+
+As in the current tables isn't have the package, subscribe timestamp and expired, then you may need to create it, just give the SQL queries to me
+'''
+
+After you do make a changes, there's some improvement that we need to do:
+1. In admin dashboard (user management menu), I already see the package of user and the daily quota, please just delete the view of daily quota, bcs the information is doesn't matter for admin. Also, fyi for daily quota is have also have bit of error which it's show 0/50 0 (that too small space, so its like 0/500), just let you know about that to make sure the limit packages is correct for the user.
+2. Then in single user detail page, I still doesn't see the information about the package that user subscribe, the subscribe time, period, expired and other information that matters. Don't forget, that super_admin freely to edit the information
+3. In the user dashboard, I need your help to make a new section in main dashboard to say hello to user like "Hi, {name}!" and show their packages and daily limits. In some part of the page which relevan, please also display the package and their remaining quota/total quota.

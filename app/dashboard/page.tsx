@@ -28,6 +28,26 @@ interface RecentJob {
   processed_urls: number;
 }
 
+interface UserProfile {
+  full_name: string | null;
+  email: string;
+  package?: {
+    name: string;
+    slug: string;
+    description: string;
+    price: number;
+    currency: string;
+    billing_period: string;
+    quota_limits: {
+      daily_urls: number;
+      service_accounts: number;
+      concurrent_jobs: number;
+    };
+  };
+  daily_quota_used?: number;
+  expires_at?: string;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalUrlsIndexed: 0,
@@ -38,6 +58,7 @@ export default function Dashboard() {
     quotaLimit: 200
   });
   const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Socket.io for real-time updates
@@ -88,12 +109,34 @@ export default function Dashboard() {
       setLoading(true);
       await Promise.all([
         loadDashboardStats(),
-        loadRecentJobs()
+        loadRecentJobs(),
+        loadUserProfile()
       ]);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUserProfile = async () => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch('/api/user/profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserProfile(data.profile);
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
     }
   };
 
@@ -180,6 +223,137 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {/* User Greeting & Package Information */}
+      {userProfile && (
+        <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="w-12 h-12 bg-[#3D8BFF]/10 rounded-full flex items-center justify-center">
+                  <span className="text-lg font-bold text-[#3D8BFF]">
+                    {userProfile.full_name?.charAt(0) || userProfile.email?.charAt(0) || 'U'}
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-[#1A1A1A]">
+                    Welcome back, {userProfile.full_name || 'User'}!
+                  </h2>
+                  <p className="text-[#6C757D]">
+                    {new Date().getHours() < 12 ? 'Good morning' : 
+                     new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}! 
+                    Ready to boost your SEO today?
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {userProfile.package && (
+              <div className="text-right">
+                <div className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${
+                  userProfile.package.slug === 'free' ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20' :
+                  userProfile.package.slug === 'premium' ? 'bg-[#3D8BFF]/10 text-[#3D8BFF] border-[#3D8BFF]/20' :
+                  userProfile.package.slug === 'pro' ? 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20' :
+                  'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                }`}>
+                  {userProfile.package.name}
+                </div>
+                <p className="text-xs text-[#6C757D] mt-1">
+                  {userProfile.package.price === 0 ? 'Free Plan' : 
+                   `${userProfile.package.currency} ${userProfile.package.price.toLocaleString()}/${userProfile.package.billing_period}`}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Package Quota Overview */}
+          {userProfile.package && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-[#E0E6ED]">
+              <div className="bg-[#F7F9FC] rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-[#6C757D]">Daily URLs</p>
+                    <p className="text-lg font-bold text-[#1A1A1A]">
+                      {userProfile.daily_quota_used || 0} / {
+                        userProfile.package.quota_limits.daily_urls === -1 ? '∞' : 
+                        userProfile.package.quota_limits.daily_urls
+                      }
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-[#3D8BFF]/10 flex items-center justify-center">
+                    <TrendingUpIcon className="w-4 h-4 text-[#3D8BFF]" />
+                  </div>
+                </div>
+                {userProfile.package.quota_limits.daily_urls !== -1 && (
+                  <div className="mt-2">
+                    <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                      <div 
+                        className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${Math.min(100, ((userProfile.daily_quota_used || 0) / userProfile.package.quota_limits.daily_urls) * 100)}%` 
+                        }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-[#6C757D] mt-1">
+                      {Math.max(0, userProfile.package.quota_limits.daily_urls - (userProfile.daily_quota_used || 0))} remaining today
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-[#F7F9FC] rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-[#6C757D]">Service Accounts</p>
+                    <p className="text-lg font-bold text-[#1A1A1A]">
+                      - / {userProfile.package.quota_limits.service_accounts === -1 ? '∞' : userProfile.package.quota_limits.service_accounts}
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-[#4BB543]/10 flex items-center justify-center">
+                    <Database className="w-4 h-4 text-[#4BB543]" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#F7F9FC] rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-[#6C757D]">Concurrent Jobs</p>
+                    <p className="text-lg font-bold text-[#1A1A1A]">
+                      - / {userProfile.package.quota_limits.concurrent_jobs === -1 ? '∞' : userProfile.package.quota_limits.concurrent_jobs}
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-[#F0A202]/10 flex items-center justify-center">
+                    <CalendarIcon className="w-4 h-4 text-[#F0A202]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Subscription Status */}
+          {userProfile.package && userProfile.expires_at && userProfile.package.slug !== 'free' && (
+            <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className={`w-2 h-2 rounded-full ${
+                    new Date(userProfile.expires_at) > new Date() ? 'bg-[#4BB543]' : 'bg-[#E63946]'
+                  }`}></div>
+                  <span className="text-sm text-[#6C757D]">
+                    Subscription {new Date(userProfile.expires_at) > new Date() ? 'active' : 'expired'} • 
+                    Expires {new Date(userProfile.expires_at).toLocaleDateString()}
+                  </span>
+                </div>
+                {new Date(userProfile.expires_at) <= new Date() && (
+                  <button className="px-3 py-1 bg-[#3D8BFF] text-white rounded-lg text-sm hover:bg-[#3D8BFF]/90 transition-colors">
+                    Renew Now
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

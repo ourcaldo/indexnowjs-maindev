@@ -110,6 +110,12 @@ export class QuotaService {
         return false
       }
 
+      // Get current quota info to update properly
+      const quotaInfo = await this.getUserQuota(userId)
+      if (!quotaInfo) {
+        return false
+      }
+
       // Update the quota usage - using a simple SQL update since RPC might not exist
       const { error } = await supabaseAdmin
         .from('indb_auth_user_profiles')
