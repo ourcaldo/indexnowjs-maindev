@@ -13,16 +13,35 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100')
     const page = parseInt(searchParams.get('page') || '1')
     const offset = (page - 1) * limit
+    const userId = searchParams.get('user') || null
+    const searchTerm = searchParams.get('search') || ''
+    const eventType = searchParams.get('event_type') || 'all'
 
     // Calculate date filter
     const dateFilter = new Date()
     dateFilter.setDate(dateFilter.getDate() - days)
 
-    // Fetch activity logs from the new security collection table
-    const { data: logs, error } = await supabaseAdmin
+    // Build query with filters
+    let query = supabaseAdmin
       .from('indb_security_activity_logs')
       .select('*')
       .gte('created_at', dateFilter.toISOString())
+
+    // Apply filters
+    if (userId) {
+      query = query.eq('user_id', userId)
+    }
+
+    if (eventType !== 'all') {
+      query = query.eq('event_type', eventType)
+    }
+
+    if (searchTerm) {
+      query = query.or(`action_description.ilike.%${searchTerm}%,user_agent.ilike.%${searchTerm}%`)
+    }
+
+    // Apply pagination and ordering
+    const { data: logs, error } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireSuperAdminAuth } from '@/lib/admin-auth'
-import { ActivityLogger } from '@/lib/activity-logger'
 
 export async function GET(
   request: NextRequest,
@@ -17,22 +16,21 @@ export async function GET(
     const page = parseInt(searchParams.get('page') || '1')
     const offset = (page - 1) * limit
 
-    // Verify user exists
-    const { data: userProfile, error: userError } = await supabaseAdmin
-      .from('indb_auth_user_profiles')
-      .select('full_name, user_id')
+    // Fetch user's activity logs
+    const { data: logs, error } = await supabaseAdmin
+      .from('indb_security_activity_logs')
+      .select('*')
       .eq('user_id', userId)
-      .single()
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
 
-    if (userError || !userProfile) {
+    if (error) {
+      console.error('Error fetching user activity logs:', error)
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'Failed to fetch user activity logs' },
+        { status: 500 }
       )
     }
-
-    // Get user activity logs
-    const logs = await ActivityLogger.getUserActivityLogs(userId, limit, offset)
 
     // Get total count for pagination
     const { count, error: countError } = await supabaseAdmin
@@ -40,12 +38,32 @@ export async function GET(
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
 
+    // Get user profile for context
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select('full_name, user_id')
+      .eq('user_id', userId)
+      .single()
+
+    let userEmail = null
+    if (!profileError && userProfile) {
+      try {
+        const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(userProfile.user_id)
+        if (!authError && authUser?.user) {
+          userEmail = authUser.user.email
+        }
+      } catch (authFetchError) {
+        console.error(`Failed to fetch auth data for user ${userId}:`, authFetchError)
+      }
+    }
+
     return NextResponse.json({ 
       success: true, 
-      logs,
+      logs: logs || [],
       user: {
         id: userId,
-        name: userProfile.full_name,
+        name: userProfile?.full_name || 'Unknown User',
+        email: userEmail || 'Unknown Email'
       },
       pagination: {
         page,

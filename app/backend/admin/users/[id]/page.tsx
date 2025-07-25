@@ -18,8 +18,22 @@ import {
   Save,
   X,
   Eye,
-  EyeOff
+  EyeOff,
+  Activity,
+  Clock,
+  LogIn,
+  LogOut,
+  Settings,
+  Zap,
+  Server,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Globe,
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react'
+import Link from 'next/link'
 
 interface UserProfile {
   id: string
@@ -41,6 +55,17 @@ interface UserActions {
   editData: boolean
 }
 
+interface ActivityLog {
+  id: string
+  event_type: string
+  action_description: string
+  success: boolean
+  created_at: string
+  ip_address?: string
+  user_agent?: string
+  error_message?: string
+}
+
 export default function UserDetail() {
   const params = useParams()
   const router = useRouter()
@@ -57,6 +82,10 @@ export default function UserDetail() {
   const [newPassword, setNewPassword] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   
+  // Activity logs state
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
+  const [activityLoading, setActivityLoading] = useState(false)
+  
   // Edit form state
   const [editForm, setEditForm] = useState({
     full_name: '',
@@ -68,8 +97,26 @@ export default function UserDetail() {
   useEffect(() => {
     if (userId) {
       fetchUser()
+      fetchUserActivity()
     }
   }, [userId])
+
+  const fetchUserActivity = async () => {
+    try {
+      setActivityLoading(true)
+      const response = await fetch(`/api/admin/users/${userId}/activity?limit=10`, {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setActivityLogs(data.logs || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch user activity:', error)
+    } finally {
+      setActivityLoading(false)
+    }
+  }
 
   const fetchUser = async () => {
     try {
@@ -105,6 +152,7 @@ export default function UserDetail() {
 
       if (response.ok) {
         await fetchUser() // Refresh user data
+        await fetchUserActivity() // Refresh activity logs
       }
     } catch (error) {
       console.error('Failed to suspend user:', error)
@@ -126,6 +174,7 @@ export default function UserDetail() {
       if (response.ok) {
         const data = await response.json()
         setNewPassword(data.newPassword)
+        await fetchUserActivity() // Refresh activity logs
       }
     } catch (error) {
       console.error('Failed to reset password:', error)
@@ -150,6 +199,7 @@ export default function UserDetail() {
 
       if (response.ok) {
         await fetchUser() // Refresh user data
+        await fetchUserActivity() // Refresh activity logs
         setEditMode(false)
       }
     } catch (error) {
@@ -178,6 +228,52 @@ export default function UserDetail() {
     } else {
       return <AlertTriangle className="h-5 w-5 text-[#F0A202]" />
     }
+  }
+
+  // Helper functions for activity display
+  const getEventIcon = (eventType: string) => {
+    const icons = {
+      login: LogIn,
+      logout: LogOut,
+      register: User,
+      job_create: Zap,
+      job_update: Settings,
+      job_delete: XCircle,
+      job_start: CheckCircle,
+      service_account_add: Shield,
+      service_account_delete: XCircle,
+      profile_update: User,
+      admin_login: Shield,
+      user_management: Settings,
+      api_call: Server,
+      settings_change: Settings
+    }
+    
+    return icons[eventType as keyof typeof icons] || Activity
+  }
+
+  const getDeviceInfo = (userAgent?: string) => {
+    if (!userAgent) return { icon: Monitor, text: 'Desktop' }
+    
+    const ua = userAgent.toLowerCase()
+    
+    if (ua.includes('mobile') || ua.includes('iphone')) {
+      return { icon: Smartphone, text: 'Mobile' }
+    }
+    if (ua.includes('tablet') || ua.includes('ipad')) {
+      return { icon: Tablet, text: 'Tablet' }
+    }
+    
+    return { icon: Monitor, text: 'Desktop' }
+  }
+
+  const formatActivityDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   if (loading) {
@@ -493,6 +589,121 @@ export default function UserDetail() {
           </div>
         </div>
       )}
+
+      {/* User Activity History */}
+      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
+              <Activity className="h-5 w-5 text-[#3D8BFF]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-[#1A1A1A]">Recent Activity</h3>
+              <p className="text-sm text-[#6C757D]">Latest user activities and events</p>
+            </div>
+          </div>
+          {activityLogs.length > 0 && (
+            <Link 
+              href={`/backend/admin/activity?user=${userId}`}
+              className="flex items-center gap-2 text-[#3D8BFF] hover:text-[#1A1A1A] transition-colors text-sm font-medium"
+            >
+              View All Activity
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
+
+        {activityLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#3D8BFF]"></div>
+          </div>
+        ) : activityLogs.length === 0 ? (
+          <div className="text-center py-8">
+            <Activity className="h-12 w-12 text-[#6C757D] mx-auto mb-4 opacity-50" />
+            <h4 className="text-lg font-medium text-[#1A1A1A] mb-2">No Recent Activity</h4>
+            <p className="text-[#6C757D]">This user hasn't performed any tracked activities yet</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {activityLogs.map((log, index) => {
+              const EventIcon = getEventIcon(log.event_type)
+              const deviceInfo = getDeviceInfo(log.user_agent)
+              const DeviceIcon = deviceInfo.icon
+              
+              return (
+                <div 
+                  key={log.id}
+                  className="border border-[#E0E6ED] rounded-lg p-4 hover:bg-[#F7F9FC] transition-colors"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Timeline dot */}
+                    <div className="flex flex-col items-center">
+                      <div className={`p-2 rounded-lg ${log.success ? 'bg-[#4BB543]/10' : 'bg-[#E63946]/10'}`}>
+                        <EventIcon className={`h-4 w-4 ${log.success ? 'text-[#4BB543]' : 'text-[#E63946]'}`} />
+                      </div>
+                      {index < activityLogs.length - 1 && (
+                        <div className="w-px h-8 bg-[#E0E6ED] mt-2"></div>
+                      )}
+                    </div>
+
+                    {/* Activity content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="text-[#1A1A1A] text-sm font-medium">
+                            {log.action_description}
+                          </p>
+                          
+                          <div className="flex items-center gap-4 mt-2">
+                            <div className="flex items-center gap-1 text-[#6C757D] text-xs">
+                              <Clock className="h-3 w-3" />
+                              <span>{formatActivityDate(log.created_at)}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 text-[#6C757D] text-xs">
+                              <DeviceIcon className="h-3 w-3" />
+                              <span>{deviceInfo.text}</span>
+                            </div>
+                            
+                            {log.ip_address && (
+                              <div className="flex items-center gap-1 text-[#6C757D] text-xs">
+                                <Globe className="h-3 w-3" />
+                                <span className="font-mono">{log.ip_address}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {log.error_message && (
+                            <div className="mt-2 text-xs text-[#E63946] bg-[#E63946]/5 px-2 py-1 rounded">
+                              <strong>Error:</strong> {log.error_message}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-4">
+                          <div className={`px-2 py-1 rounded text-xs font-medium ${
+                            log.success 
+                              ? 'bg-[#4BB543]/10 text-[#4BB543]' 
+                              : 'bg-[#E63946]/10 text-[#E63946]'
+                          }`}>
+                            {log.success ? 'Success' : 'Failed'}
+                          </div>
+                          
+                          <Link href={`/backend/admin/activity/${log.id}`}>
+                            <button className="p-1 text-[#6C757D] hover:text-[#3D8BFF] rounded transition-colors">
+                              <ExternalLink className="h-4 w-4" />
+                            </button>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

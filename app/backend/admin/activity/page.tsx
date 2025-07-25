@@ -11,19 +11,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { 
-  Calendar,
   Activity,
   Clock,
   User,
   Search,
-  Filter,
   ChevronLeft,
   ChevronRight,
   Eye,
   Monitor,
   MapPin,
-  Smartphone
+  Smartphone,
+  Tablet,
+  Globe,
+  CheckCircle,
+  XCircle,
+  LogIn,
+  LogOut,
+  Settings,
+  FileText,
+  Server,
+  Shield,
+  Zap
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
@@ -116,31 +133,102 @@ export default function ActivityLogsPage() {
   }
 
   const getEventTypeBadge = (eventType: string, success: boolean) => {
-    const colors = {
-      login: success ? 'bg-[#4BB543]/10 text-[#4BB543]' : 'bg-[#E63946]/10 text-[#E63946]',
-      logout: 'bg-[#6C757D]/10 text-[#6C757D]',
-      job_create: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
-      job_update: 'bg-[#F0A202]/10 text-[#F0A202]',
-      job_delete: 'bg-[#E63946]/10 text-[#E63946]',
-      service_account_add: 'bg-[#4BB543]/10 text-[#4BB543]',
-      service_account_delete: 'bg-[#E63946]/10 text-[#E63946]',
-      profile_update: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
-      admin_login: 'bg-[#F0A202]/10 text-[#F0A202]',
-      user_management: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
-      api_call: 'bg-[#6C757D]/10 text-[#6C757D]'
+    const eventConfig = {
+      login: { 
+        color: success ? 'bg-[#4BB543]/10 text-[#4BB543]' : 'bg-[#E63946]/10 text-[#E63946]',
+        icon: LogIn,
+        label: 'Sign In'
+      },
+      logout: { 
+        color: 'bg-[#6C757D]/10 text-[#6C757D]',
+        icon: LogOut,
+        label: 'Sign Out'
+      },
+      register: { 
+        color: success ? 'bg-[#4BB543]/10 text-[#4BB543]' : 'bg-[#E63946]/10 text-[#E63946]',
+        icon: User,
+        label: 'Registration'
+      },
+      job_create: { 
+        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        icon: Zap,
+        label: 'Job Created'
+      },
+      job_update: { 
+        color: 'bg-[#F0A202]/10 text-[#F0A202]',
+        icon: Settings,
+        label: 'Job Updated'
+      },
+      job_delete: { 
+        color: 'bg-[#E63946]/10 text-[#E63946]',
+        icon: XCircle,
+        label: 'Job Deleted'
+      },
+      job_start: { 
+        color: 'bg-[#4BB543]/10 text-[#4BB543]',
+        icon: CheckCircle,
+        label: 'Job Started'
+      },
+      service_account_add: { 
+        color: 'bg-[#4BB543]/10 text-[#4BB543]',
+        icon: Shield,
+        label: 'Service Added'
+      },
+      service_account_delete: { 
+        color: 'bg-[#E63946]/10 text-[#E63946]',
+        icon: XCircle,
+        label: 'Service Removed'
+      },
+      profile_update: { 
+        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        icon: User,
+        label: 'Profile Updated'
+      },
+      admin_login: { 
+        color: 'bg-[#F0A202]/10 text-[#F0A202]',
+        icon: Shield,
+        label: 'Admin Access'
+      },
+      user_management: { 
+        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        icon: Settings,
+        label: 'User Management'
+      },
+      api_call: { 
+        color: 'bg-[#6C757D]/10 text-[#6C757D]',
+        icon: Server,
+        label: 'API Call'
+      },
+      settings_change: { 
+        color: 'bg-[#F0A202]/10 text-[#F0A202]',
+        icon: Settings,
+        label: 'Settings Changed'
+      }
     }
     
-    return colors[eventType as keyof typeof colors] || 'bg-[#6C757D]/10 text-[#6C757D]'
+    return eventConfig[eventType as keyof typeof eventConfig] || {
+      color: 'bg-[#6C757D]/10 text-[#6C757D]',
+      icon: Activity,
+      label: eventType.replace('_', ' ').toUpperCase()
+    }
   }
 
-  const getDeviceIcon = (userAgent?: string) => {
-    if (!userAgent) return <Monitor className="h-4 w-4" />
+  const getDeviceInfo = (userAgent?: string) => {
+    if (!userAgent) return { icon: Monitor, text: 'Desktop' }
     
-    if (userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone')) {
-      return <Smartphone className="h-4 w-4" />
+    const ua = userAgent.toLowerCase()
+    
+    if (ua.includes('mobile') || ua.includes('iphone')) {
+      return { icon: Smartphone, text: 'Mobile' }
+    }
+    if (ua.includes('tablet') || ua.includes('ipad')) {
+      return { icon: Tablet, text: 'Tablet' }
+    }
+    if (ua.includes('android')) {
+      return ua.includes('mobile') ? { icon: Smartphone, text: 'Mobile' } : { icon: Tablet, text: 'Tablet' }
     }
     
-    return <Monitor className="h-4 w-4" />
+    return { icon: Monitor, text: 'Desktop' }
   }
 
   if (loading) {
@@ -302,97 +390,163 @@ export default function ActivityLogsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              Recent Activity ({filteredLogs.length} entries)
+              User Activity Logs
             </CardTitle>
+            <p className="text-[#6C757D] text-sm mt-2">
+              Showing {filteredLogs.length} activities from all users (latest first)
+            </p>
           </CardHeader>
           <CardContent>
             {filteredLogs.length === 0 ? (
-              <div className="text-center py-8">
-                <Activity className="h-12 w-12 text-[#6C757D] mx-auto mb-4 opacity-50" />
-                <p className="text-[#6C757D]">No activity logs found</p>
+              <div className="text-center py-12">
+                <Activity className="h-16 w-16 text-[#6C757D] mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No activity logs found</h3>
+                <p className="text-[#6C757D]">No user activities match your current filters</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {filteredLogs.map((log) => (
-                  <div 
-                    key={log.id} 
-                    className="border border-[#E0E6ED] rounded-lg p-4 hover:bg-[#FFFFFF] cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4 flex-1">
-                        {/* Timestamp */}
-                        <div className="flex items-center gap-2 min-w-[140px]">
-                          <Clock className="h-4 w-4 text-[#6C757D]" />
-                          <span className="text-[#1A1A1A] text-sm font-medium">
-                            {formatDate(log.created_at)}
-                          </span>
-                        </div>
-
-                        {/* User Info */}
-                        <div className="flex items-center gap-2 min-w-[200px]">
-                          <User className="h-4 w-4 text-[#6C757D]" />
-                          <div>
+              <div className="border border-[#E0E6ED] rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-[#F7F9FC] hover:bg-[#F7F9FC]">
+                      <TableHead className="w-16 text-[#1A1A1A] font-semibold">#</TableHead>
+                      <TableHead className="text-[#1A1A1A] font-semibold">Timestamp</TableHead>
+                      <TableHead className="text-[#1A1A1A] font-semibold">User</TableHead>
+                      <TableHead className="text-[#1A1A1A] font-semibold">Action/Event</TableHead>
+                      <TableHead className="text-[#1A1A1A] font-semibold">Device & IP</TableHead>
+                      <TableHead className="text-[#1A1A1A] font-semibold">Status</TableHead>
+                      <TableHead className="w-16 text-[#1A1A1A] font-semibold">Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLogs.map((log, index) => {
+                      const eventConfig = getEventTypeBadge(log.event_type, log.success)
+                      const deviceInfo = getDeviceInfo(log.user_agent)
+                      const IconComponent = eventConfig.icon
+                      const DeviceIcon = deviceInfo.icon
+                      
+                      return (
+                        <TableRow 
+                          key={log.id}
+                          className="hover:bg-[#F7F9FC] border-b border-[#E0E6ED]"
+                        >
+                          {/* Row Number */}
+                          <TableCell className="text-center text-[#6C757D] font-mono text-sm">
+                            {(currentPage - 1) * 50 + index + 1}
+                          </TableCell>
+                          
+                          {/* Timestamp */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-[#6C757D] flex-shrink-0" />
+                              <div>
+                                <div className="text-[#1A1A1A] text-sm font-medium">
+                                  {formatDate(log.created_at)}
+                                </div>
+                                <div className="text-[#6C757D] text-xs">
+                                  {new Date(log.created_at).toLocaleTimeString('en-US', { 
+                                    hour12: false, 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          
+                          {/* User Info */}
+                          <TableCell>
                             <Link 
                               href={`/backend/admin/users/${log.user_id}`}
-                              className="text-[#1A1A1A] font-medium text-sm hover:text-[#3D8BFF] transition-colors"
+                              className="block hover:bg-[#F7F9FC] p-1 rounded transition-colors"
                             >
-                              {log.user_name}
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-[#6C757D] flex-shrink-0" />
+                                <div>
+                                  <div className="text-[#1A1A1A] font-medium text-sm hover:text-[#3D8BFF] transition-colors">
+                                    {log.user_name}
+                                  </div>
+                                  <div className="text-[#6C757D] text-xs">
+                                    {log.user_email}
+                                  </div>
+                                </div>
+                              </div>
                             </Link>
-                            <div className="text-[#6C757D] text-xs">
-                              {log.user_email}
+                          </TableCell>
+                          
+                          {/* Event/Action */}
+                          <TableCell>
+                            <div className="flex items-start gap-3">
+                              <div className="p-1.5 rounded-md" style={{ backgroundColor: eventConfig.color.split(' ')[0].replace('bg-', '').replace('/10', '') + '1A' }}>
+                                <IconComponent className="h-4 w-4" style={{ color: eventConfig.color.split(' ')[1].replace('text-', '') }} />
+                              </div>
+                              <div className="flex-1">
+                                <Badge className={`${eventConfig.color} border-0 text-xs mb-1`}>
+                                  {eventConfig.label}
+                                </Badge>
+                                <div className="text-[#1A1A1A] text-sm">
+                                  {log.action_description}
+                                </div>
+                                {log.error_message && (
+                                  <div className="text-[#E63946] text-xs mt-1 bg-[#E63946]/5 px-2 py-1 rounded">
+                                    <strong>Error:</strong> {log.error_message}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Event/Action */}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge className={`${getEventTypeBadge(log.event_type, log.success)} border-0 text-xs`}>
-                              {log.event_type.replace('_', ' ').toUpperCase()}
-                            </Badge>
-                            {!log.success && (
-                              <Badge className="bg-[#E63946]/10 text-[#E63946] border-0 text-xs">
-                                FAILED
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-[#1A1A1A] text-sm">
-                            {log.action_description}
-                          </p>
-                          {log.error_message && (
-                            <p className="text-[#E63946] text-xs mt-1">
-                              Error: {log.error_message}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* IP and Device */}
-                        <div className="flex items-center gap-4 min-w-[180px] text-[#6C757D] text-xs">
-                          {log.ip_address && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              <span className="font-mono">{log.ip_address}</span>
+                          </TableCell>
+                          
+                          {/* Device & IP */}
+                          <TableCell>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-[#6C757D] text-sm">
+                                <DeviceIcon className="h-4 w-4 flex-shrink-0" />
+                                <span className="font-medium">{deviceInfo.text}</span>
+                              </div>
+                              {log.ip_address && (
+                                <div className="flex items-center gap-2 text-[#6C757D] text-xs">
+                                  <Globe className="h-3 w-3 flex-shrink-0" />
+                                  <span className="font-mono bg-[#F7F9FC] px-1.5 py-0.5 rounded">
+                                    {log.ip_address}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                          )}
-                          <div className="flex items-center gap-1">
-                            {getDeviceIcon(log.user_agent)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* View Details Button */}
-                      <Link href={`/backend/admin/activity/${log.id}`}>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:bg-[#F7F9FC]"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                          </TableCell>
+                          
+                          {/* Status */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {log.success ? (
+                                <>
+                                  <CheckCircle className="h-4 w-4 text-[#4BB543]" />
+                                  <span className="text-[#4BB543] text-sm font-medium">Success</span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="h-4 w-4 text-[#E63946]" />
+                                  <span className="text-[#E63946] text-sm font-medium">Failed</span>
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                          
+                          {/* View Details */}
+                          <TableCell>
+                            <Link href={`/backend/admin/activity/${log.id}`}>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-[#3D8BFF]/10 hover:text-[#3D8BFF]"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
               </div>
             )}
 
