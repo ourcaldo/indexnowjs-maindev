@@ -146,7 +146,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
               <img 
                 src={logoUrl} 
                 alt={`${siteName} Logo`}
-                className="h-8 w-auto max-w-[120px]"
+                className="h-10 w-auto max-w-[160px] sm:h-12 sm:max-w-[180px]"
               />
             ) : (
               <div className="flex items-center">
@@ -343,7 +343,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                 <img 
                   src={logoUrl} 
                   alt={`${siteName} Logo`}
-                  className="h-8 w-auto max-w-[180px]"
+                  className="h-10 w-auto max-w-[200px] lg:h-12 lg:max-w-[220px]"
                 />
               ) : (
                 <div className="flex items-center">
