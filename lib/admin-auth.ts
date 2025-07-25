@@ -32,10 +32,65 @@ export class AdminAuthService {
         .single()
 
       console.log('Admin auth: Profile query result:', { profile, error })
+      
+      // If profile exists, return it immediately
+      if (profile && !error) {
+        console.log('Admin auth: Found existing profile:', profile)
+        const role = profile.role || 'user'
+        return {
+          id: currentUser.id,
+          email: currentUser.email,
+          name: profile.full_name || currentUser.name,
+          role,
+          isAdmin: role === 'admin' || role === 'super_admin',
+          isSuperAdmin: role === 'super_admin'
+        }
+      }
 
-      if (error || !profile) {
+      if (error) {
+        console.error('Admin auth: Database error fetching profile:', error)
+        // If there's a database error, try to create/upsert the profile
+        if (error.code === 'PGRST116' || !profile) {
+          console.log('Admin auth: No profile found, creating default super_admin profile')
+          const { data: newProfile, error: createError } = await supabaseAdmin
+            .from('indb_auth_user_profiles')
+            .upsert({
+              user_id: currentUser.id,
+              full_name: currentUser.name || currentUser.email?.split('@')[0] || 'Admin User',
+              role: 'super_admin',
+              email_notifications: true
+            }, {
+              onConflict: 'user_id'
+            })
+            .select('role, full_name')
+            .single()
+
+          if (createError) {
+            console.error('Admin auth: Failed to create profile - Error:', createError)
+            console.error('Admin auth: Error details:', {
+              message: createError.message,
+              details: createError.details,
+              code: createError.code,
+              hint: createError.hint
+            })
+            return null
+          }
+
+          const role = newProfile?.role || 'super_admin'
+          return {
+            id: currentUser.id,
+            email: currentUser.email,
+            name: newProfile?.full_name || currentUser.name,
+            role,
+            isAdmin: role === 'admin' || role === 'super_admin',
+            isSuperAdmin: role === 'super_admin'
+          }
+        }
+        return null
+      }
+
+      if (!profile) {
         console.log('Admin auth: No profile found, creating default super_admin profile')
-        // Create a default super_admin profile for authenticated users
         const { data: newProfile, error: createError } = await supabaseAdmin
           .from('indb_auth_user_profiles')
           .upsert({
