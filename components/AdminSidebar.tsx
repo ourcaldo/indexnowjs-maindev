@@ -182,7 +182,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 <img 
                   src={logoUrl} 
                   alt={`${siteName} Admin Logo`}
-                  className="h-10 w-auto max-w-[200px] lg:h-12 lg:max-w-[220px]"
+                  className="h-20 w-auto max-w-[400px] lg:h-24 lg:max-w-[440px]"
                 />
               ) : logoUrl && isCollapsed ? (
                 <img 
@@ -248,7 +248,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 <img 
                   src={logoUrl} 
                   alt={`${siteName} Admin Logo`}
-                  className="h-10 w-auto max-w-[160px] sm:h-12 sm:max-w-[180px]"
+                  className="h-20 w-auto max-w-[320px] sm:h-24 sm:max-w-[360px]"
                 />
               ) : (
                 <div className="flex items-center">

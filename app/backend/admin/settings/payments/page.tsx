@@ -134,6 +134,16 @@ export default function PaymentGateways() {
       setFormData(prev => ({ ...prev, [field]: value }))
     }
 
+    const updateConfigurationField = (field: string, value: any) => {
+      setFormData(prev => ({
+        ...prev,
+        configuration: {
+          ...prev.configuration,
+          [field]: value
+        }
+      }))
+    }
+
     return (
       <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -170,6 +180,61 @@ export default function PaymentGateways() {
             />
           </div>
 
+          {/* Bank Transfer Configuration */}
+          {formData.slug === 'bank_transfer' && (
+            <>
+              <div className="md:col-span-2">
+                <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
+                  Bank Transfer Configuration
+                </h3>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Bank Name</label>
+                <input
+                  type="text"
+                  value={formData.configuration?.bank_name || ''}
+                  onChange={(e) => updateConfigurationField('bank_name', e.target.value)}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="Bank Central Asia"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Bank Code</label>
+                <input
+                  type="text"
+                  value={formData.configuration?.bank_code || ''}
+                  onChange={(e) => updateConfigurationField('bank_code', e.target.value)}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="014"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Account Name</label>
+                <input
+                  type="text"
+                  value={formData.configuration?.account_name || ''}
+                  onChange={(e) => updateConfigurationField('account_name', e.target.value)}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="PT. IndexNow Pro"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Account Number</label>
+                <input
+                  type="text"
+                  value={formData.configuration?.account_number || ''}
+                  onChange={(e) => updateConfigurationField('account_number', e.target.value)}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="1234567890"
+                />
+              </div>
+            </>
+          )}
+
           <div className="flex items-center space-x-4">
             <label className="flex items-center">
               <input
@@ -186,7 +251,7 @@ export default function PaymentGateways() {
                 type="checkbox"
                 checked={formData.is_default || false}
                 onChange={(e) => updateField('is_default', e.target.checked)}
-                className="rounded border-[#E0E6ED] text-[#3D8BFF] focus:ring-[#3D8BFF]"
+                className="rounded border-[#E0E6ED] text-[#3D8BFF] focus:border-transparent"
               />
               <span className="ml-2 text-sm text-[#1A1A1A]">Default</span>
             </label>
@@ -297,6 +362,19 @@ export default function PaymentGateways() {
                       </div>
                       <p className="text-sm text-[#6C757D] mt-1">{gateway.description}</p>
                       <p className="text-xs text-[#6C757D] mt-1">Slug: {gateway.slug}</p>
+                      {gateway.slug === 'bank_transfer' && gateway.configuration && (
+                        <div className="mt-2 text-xs text-[#6C757D] space-y-1">
+                          {gateway.configuration.bank_name && (
+                            <p><strong>Bank:</strong> {gateway.configuration.bank_name}</p>
+                          )}
+                          {gateway.configuration.account_name && (
+                            <p><strong>Account:</strong> {gateway.configuration.account_name}</p>
+                          )}
+                          {gateway.configuration.account_number && (
+                            <p><strong>Number:</strong> {gateway.configuration.account_number}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">

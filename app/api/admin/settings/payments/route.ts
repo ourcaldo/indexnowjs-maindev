@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireServerSuperAdminAuth } from '@/lib/server-auth'
+import { requireSuperAdminAuth } from '@/lib/admin-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    await requireServerSuperAdminAuth(request)
+    await requireSuperAdminAuth(request)
 
     const { data: gateways, error } = await supabaseAdmin
       .from('indb_payment_gateways')
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireServerSuperAdminAuth(request)
+    await requireSuperAdminAuth(request)
     const body = await request.json()
 
     // If setting as default, remove default from other gateways
