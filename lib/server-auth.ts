@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { supabaseAdmin } from './database'
+import { supabaseAdmin } from './supabase'
 
 export interface ServerAdminUser {
   id: string

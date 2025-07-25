@@ -1,6 +1,6 @@
 import pino from 'pino'
 import { v4 as uuidv4 } from 'uuid'
-import { supabaseAdmin } from '@/lib/database'
+import { supabaseAdmin } from '@/lib/supabase'
 
 // Configure Pino logger with structured logging
 export const logger = pino({
