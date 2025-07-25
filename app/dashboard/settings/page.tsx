@@ -99,11 +99,11 @@ export default function SettingsPage() {
       
       if (profileResponse.ok) {
         const profileData = await profileResponse.json()
-        setUserProfile(profileData.user.profile)
+        setUserProfile(profileData.profile)
         setProfileForm({
-          full_name: profileData.user.profile.full_name || '',
-          phone_number: profileData.user.profile.phone_number || '',
-          email_notifications: profileData.user.profile.email_notifications || false
+          full_name: profileData.profile.full_name || '',
+          phone_number: profileData.profile.phone_number || '',
+          email_notifications: profileData.profile.email_notifications || false
         })
       } else if (profileResponse.status === 404) {
         // Profile doesn't exist, create default values

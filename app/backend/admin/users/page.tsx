@@ -313,11 +313,6 @@ export default function UserManagement() {
                     </span>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="text-sm text-[#6C757D]">
-                      {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Never'}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
                     <div className="flex items-center justify-end space-x-2">
                       <button 
                         onClick={(e) => {

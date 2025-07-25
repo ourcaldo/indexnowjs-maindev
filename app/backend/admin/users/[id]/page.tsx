@@ -74,6 +74,9 @@ interface UserActions {
   suspend: boolean
   resetPassword: boolean
   editData: boolean
+  resetQuota: boolean
+  changePackage: boolean
+  extendSubscription: boolean
 }
 
 interface ActivityLog {
@@ -128,7 +131,10 @@ export default function UserDetail() {
   const [actionLoading, setActionLoading] = useState<UserActions>({
     suspend: false,
     resetPassword: false,
-    editData: false
+    editData: false,
+    resetQuota: false,
+    changePackage: false,
+    extendSubscription: false
   })
   const [editMode, setEditMode] = useState(false)
   const [newPassword, setNewPassword] = useState<string | null>(null)
@@ -281,6 +287,72 @@ export default function UserDetail() {
       console.error('Failed to update user:', error)
     } finally {
       setActionLoading(prev => ({ ...prev, editData: false }))
+    }
+  }
+
+  const handleResetQuota = async () => {
+    if (!confirm('Are you sure you want to reset this user\'s daily quota? This will reset their usage to 0.')) {
+      return
+    }
+
+    try {
+      setActionLoading(prev => ({ ...prev, resetQuota: true }))
+      
+      const response = await fetch(`/api/admin/users/${userId}/reset-quota`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
+
+      if (response.ok) {
+        await fetchUser() // Refresh user data
+        alert('User quota has been successfully reset.')
+      } else {
+        alert('Failed to reset quota. Please try again.')
+      }
+    } catch (error) {
+      console.error('Failed to reset quota:', error)
+      alert('An error occurred while resetting quota.')
+    } finally {
+      setActionLoading(prev => ({ ...prev, resetQuota: false }))
+    }
+  }
+
+  const handleChangePackage = async () => {
+    // For now, show a coming soon message
+    alert('Package change functionality coming soon!')
+  }
+
+  const handleExtendSubscription = async () => {
+    if (!confirm('Are you sure you want to extend this user\'s subscription by 30 days?')) {
+      return
+    }
+
+    try {
+      setActionLoading(prev => ({ ...prev, extendSubscription: true }))
+      
+      const response = await fetch(`/api/admin/users/${userId}/extend-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ days: 30 }),
+      })
+
+      if (response.ok) {
+        await fetchUser() // Refresh user data
+        alert('Subscription has been extended by 30 days.')
+      } else {
+        alert('Failed to extend subscription. Please try again.')
+      }
+    } catch (error) {
+      console.error('Failed to extend subscription:', error)
+      alert('An error occurred while extending subscription.')
+    } finally {
+      setActionLoading(prev => ({ ...prev, extendSubscription: false }))
     }
   }
 
@@ -727,14 +799,26 @@ export default function UserDetail() {
             {/* Package Management Actions */}
             {!editMode && (
               <div className="flex items-center space-x-3 pt-4 border-t border-[#E0E6ED]">
-                <button className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm">
-                  Change Package
+                <button 
+                  onClick={handleChangePackage}
+                  disabled={actionLoading.changePackage}
+                  className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm disabled:opacity-50"
+                >
+                  {actionLoading.changePackage ? 'Processing...' : 'Change Package'}
                 </button>
-                <button className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm">
-                  Reset Quota
+                <button 
+                  onClick={handleResetQuota}
+                  disabled={actionLoading.resetQuota}
+                  className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm disabled:opacity-50"
+                >
+                  {actionLoading.resetQuota ? 'Resetting...' : 'Reset Quota'}
                 </button>
-                <button className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm">
-                  Extend Subscription
+                <button 
+                  onClick={handleExtendSubscription}
+                  disabled={actionLoading.extendSubscription}
+                  className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors text-sm disabled:opacity-50"
+                >
+                  {actionLoading.extendSubscription ? 'Extending...' : 'Extend Subscription'}
                 </button>
               </div>
             )}
