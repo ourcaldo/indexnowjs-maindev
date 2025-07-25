@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { requireServerSuperAdminAuth } from '@/lib/server-auth'
-import { adminAuthService } from '@/lib/admin-auth'
+import { requireSuperAdminAuth, adminAuthService } from '@/lib/admin-auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    const adminUser = await requireServerSuperAdminAuth(request)
+    const adminUser = await requireSuperAdminAuth(request)
 
     // Fetch user profiles - we'll get auth data separately via RPC or admin API
     const { data: profiles, error: profilesError } = await supabaseAdmin
