@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { requireServerSuperAdminAuth } from '@/lib/server-auth'
+import { requireSuperAdminAuth } from '@/lib/admin-auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    await requireServerSuperAdminAuth(request)
+    await requireSuperAdminAuth(request)
 
     // Fetch site settings
     const { data: settings, error } = await supabaseAdmin
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     // Verify super admin authentication
-    const adminUser = await requireServerSuperAdminAuth(request)
+    const adminUser = await requireSuperAdminAuth(request)
 
     const body = await request.json()
     const {
