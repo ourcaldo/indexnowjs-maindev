@@ -43,35 +43,26 @@ export class QuotaService {
       const dailyLimit = packageData?.quota_limits?.daily_urls || 0
       const isUnlimited = dailyLimit === -1
       
-      // Get real quota usage from user_quota_summary table
-      let dailyQuotaUsed = 0
-      const { data: quotaSummary } = await supabaseAdmin
-        .from('user_quota_summary')
-        .select('total_quota_used')
-        .eq('user_id', userId)
-        .single()
-
-      if (quotaSummary) {
-        dailyQuotaUsed = parseInt(quotaSummary.total_quota_used) || 0
-      } else {
-        // Fallback: Calculate from indb_google_quota_usage for today
-        const today = new Date().toISOString().split('T')[0]
-        const { data: quotaUsage } = await supabaseAdmin
-          .from('indb_google_quota_usage')
-          .select(`
-            requests_successful,
-            indb_google_service_accounts!inner(user_id)
-          `)
-          .eq('date', today)
-          .eq('indb_google_service_accounts.user_id', userId)
-
-        if (quotaUsage && quotaUsage.length > 0) {
-          dailyQuotaUsed = quotaUsage.reduce((total, usage) => total + (usage.requests_successful || 0), 0)
-        }
-      }
+      // Get real quota usage directly from user profile (most accurate)
+      let dailyQuotaUsed = profile.daily_quota_used || 0
       
       // Reset quota if it's a new day
-      await this.resetQuotaIfNeeded(userId)
+      const today = new Date().toISOString().split('T')[0]
+      const resetDate = profile.daily_quota_reset_date
+      
+      if (resetDate !== today) {
+        // Reset quota for new day
+        await supabaseAdmin
+          .from('indb_auth_user_profiles')
+          .update({
+            daily_quota_used: 0,
+            daily_quota_reset_date: today,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+        
+        dailyQuotaUsed = 0
+      }
 
       return {
         user_id: userId,
@@ -128,41 +119,12 @@ export class QuotaService {
   }
 
   /**
-   * Consume quota when URLs are submitted
+   * Consume quota when URLs are submitted (DEPRECATED - Use GoogleIndexingProcessor.updateUserQuotaConsumption instead)
+   * This method is kept for backward compatibility but quota consumption now happens during actual processing
    */
   static async consumeQuota(userId: string, urlCount: number): Promise<boolean> {
-    try {
-      // Check if user can submit these URLs first
-      const quotaCheck = await this.canSubmitUrls(userId, urlCount)
-      if (!quotaCheck.canSubmit) {
-        return false
-      }
-
-      // Get current quota info to update properly
-      const quotaInfo = await this.getUserQuota(userId)
-      if (!quotaInfo) {
-        return false
-      }
-
-      // Update the quota usage - using a simple SQL update since RPC might not exist
-      const { error } = await supabaseAdmin
-        .from('indb_auth_user_profiles')
-        .update({
-          daily_quota_used: quotaInfo.daily_quota_used + urlCount,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-
-      if (error) {
-        console.error('Failed to consume quota:', error)
-        return false
-      }
-
-      return true
-    } catch (error) {
-      console.error('Error consuming quota:', error)
-      return false
-    }
+    console.warn('QuotaService.consumeQuota is deprecated. Quota consumption now happens during actual URL processing.')
+    return true // Always return true since quota is consumed during processing
   }
 
   /**

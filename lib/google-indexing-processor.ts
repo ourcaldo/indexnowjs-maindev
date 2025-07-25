@@ -416,6 +416,9 @@ export class GoogleIndexingProcessor {
           // Update quota usage for the service account (-1 for successful request)
           await this.updateQuotaUsage(serviceAccount.id, true);
 
+          // CRITICAL: Update user's daily quota consumption
+          await this.updateUserQuotaConsumption(job.user_id, 1);
+
           // Log successful URL processing
           await this.jobLogger.logUrlProcessed(job.id, submission.url, true, undefined, responseTime);
           const remainingQuota = await this.getRemainingQuota(serviceAccount.id);
@@ -454,6 +457,9 @@ export class GoogleIndexingProcessor {
 
           // Update quota usage for the service account (still counts as a request attempt)
           await this.updateQuotaUsage(serviceAccount.id, false);
+
+          // CRITICAL: Update user's daily quota consumption (failed requests still consume quota)
+          await this.updateUserQuotaConsumption(job.user_id, 1);
 
           failed++;
         }
@@ -682,6 +688,56 @@ export class GoogleIndexingProcessor {
         .eq('id', jobId);
     } catch (error) {
       console.error('Error updating job status:', error);
+    }
+  }
+
+  /**
+   * Update user's daily quota consumption in user profiles table
+   */
+  private async updateUserQuotaConsumption(userId: string, urlCount: number): Promise<void> {
+    try {
+      // Get current user quota
+      const { data: profile, error: fetchError } = await supabaseAdmin
+        .from('indb_auth_user_profiles')
+        .select('daily_quota_used, daily_quota_reset_date')
+        .eq('user_id', userId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching user profile for quota update:', fetchError);
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const currentQuotaUsed = profile?.daily_quota_used || 0;
+      const resetDate = profile?.daily_quota_reset_date;
+
+      // Reset quota if it's a new day
+      let updatedQuotaUsed = currentQuotaUsed;
+      if (resetDate !== today) {
+        updatedQuotaUsed = 0; // Reset for new day
+      }
+
+      // Add the consumed URLs
+      updatedQuotaUsed += urlCount;
+
+      // Update user's quota consumption
+      const { error: updateError } = await supabaseAdmin
+        .from('indb_auth_user_profiles')
+        .update({
+          daily_quota_used: updatedQuotaUsed,
+          daily_quota_reset_date: today,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (updateError) {
+        console.error('Error updating user quota consumption:', updateError);
+      } else {
+        console.log(`📊 Updated user ${userId} quota: ${updatedQuotaUsed} URLs used today`);
+      }
+    } catch (error) {
+      console.error('Error in updateUserQuotaConsumption:', error);
     }
   }
 
