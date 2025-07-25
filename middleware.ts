@@ -5,9 +5,14 @@ import { adminMiddleware } from './app/backend/admin/middleware'
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Handle admin routes with dedicated middleware
-  if (pathname.startsWith('/backend/admin')) {
+  // Handle admin routes with dedicated middleware, except login page
+  if (pathname.startsWith('/backend/admin') && pathname !== '/backend/admin/login') {
     return adminMiddleware(request)
+  }
+  
+  // Allow login page to bypass admin middleware completely
+  if (pathname === '/backend/admin/login') {
+    return NextResponse.next()
   }
 
   // Handle regular routes

@@ -16,6 +16,12 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const router = useRouter()
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
+
+  // Skip admin layout for login page
+  if (pathname === '/backend/admin/login') {
+    return <>{children}</>
+  }
 
   useEffect(() => {
     checkAdminAccess()

@@ -3,11 +3,6 @@ export default function AdminLoginLayout({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <html lang="en">
-      <body className="bg-[#F7F9FC]">
-        {children}
-      </body>
-    </html>
-  )
+  // This layout bypasses the admin sidebar layout completely
+  return children
 }

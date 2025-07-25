@@ -34,24 +34,26 @@ export async function adminMiddleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
-    // Verify admin role
-    const roleResponse = await fetch(`${request.nextUrl.origin}/api/admin/verify-role`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || ''
-      },
-      body: JSON.stringify({ userId: user.id })
-    })
+    // Direct database check for admin role (avoiding fetch in middleware)
+    try {
+      const { createClient } = require('@supabase/supabase-js')
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('indb_auth_user_profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
 
-    if (!roleResponse.ok) {
-      const loginUrl = new URL('/backend/admin/login', request.url)
-      return NextResponse.redirect(loginUrl)
-    }
-
-    const roleData = await roleResponse.json()
-    
-    if (!roleData.success || (!roleData.isAdmin && !roleData.isSuperAdmin)) {
+      if (profileError || !profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
+        const loginUrl = new URL('/backend/admin/login', request.url)
+        return NextResponse.redirect(loginUrl)
+      }
+    } catch (dbError) {
+      console.error('Database check error:', dbError)
       const loginUrl = new URL('/backend/admin/login', request.url)
       return NextResponse.redirect(loginUrl)
     }
