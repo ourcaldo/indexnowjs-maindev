@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp, AlertTriangle, Package } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface QuotaInfo {
@@ -82,6 +82,53 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
     if (progressPercentage >= 100) return '#E63946' // Red when exhausted
     if (progressPercentage >= 90) return '#F0A202' // Amber when close
     return '#3D8BFF' // Blue when normal
+  }
+
+  // Show quota exhausted card if over limit
+  const showQuotaExhausted = !isUnlimited && !loading && displayQuotaUsed >= displayQuotaLimit
+
+  if (showQuotaExhausted) {
+    return (
+      <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
+        <div className="bg-[#F0A202] text-white rounded-lg p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start space-x-3">
+              <div className="mt-0.5">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold">Daily Limit Reached</h3>
+                <p className="text-xs mt-1 opacity-90">
+                  You've reached your daily limit of {displayQuotaLimit.toLocaleString()} URLs. All active jobs have been stopped and will resume tomorrow automatically.
+                </p>
+                
+                {/* Progress Bar */}
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span>Daily Usage</span>
+                    <span>{displayQuotaUsed.toLocaleString()}/{displayQuotaLimit.toLocaleString()}</span>
+                  </div>
+                  <div className="w-full bg-white/20 rounded-full h-2">
+                    <div 
+                      className="bg-white rounded-full h-2 transition-all duration-300"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Upgrade CTA */}
+                <div className="mt-3 pt-3 border-t border-white/20">
+                  <div className="flex items-center space-x-2 text-xs">
+                    <Package className="h-4 w-4" />
+                    <span>Upgrade for higher daily limits and continuous processing</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

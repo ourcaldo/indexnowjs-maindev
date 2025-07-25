@@ -89,9 +89,8 @@ export default function QuotaNotification() {
     setDismissed(true)
   }
 
-  if (!quotaInfo || !showNotification || quotaInfo.is_unlimited) {
-    return null
-  }
+  // Don't show floating notification - integrated into QuotaCard instead
+  return null
 
   const progressPercentage = Math.min((quotaInfo.daily_quota_used / quotaInfo.daily_quota_limit) * 100, 100)
 
@@ -109,54 +108,49 @@ export default function QuotaNotification() {
 
   return (
     <div className="fixed top-4 right-4 z-50 max-w-md">
-      <div className={`${bgColor} text-white rounded-lg border ${borderColor} shadow-lg`}>
-        <div className="p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start space-x-3">
-              <div className="mt-0.5">
-                <IconComponent className="h-5 w-5" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold">{title}</h3>
-                <p className="text-xs mt-1 opacity-90">
-                  {message}
-                </p>
-                
-                {/* Progress Bar */}
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span>Daily Usage</span>
-                    <span>{quotaInfo.daily_quota_used}/{quotaInfo.daily_quota_limit}</span>
-                  </div>
-                  <div className="w-full bg-white/20 rounded-full h-2">
-                    <div 
-                      className="bg-white rounded-full h-2 transition-all duration-300"
-                      style={{ width: `${progressPercentage}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Upgrade CTA */}
-                <div className="mt-3 pt-3 border-t border-white/20">
-                  <div className="flex items-center space-x-2 text-xs">
-                    <Package className="h-4 w-4" />
-                    <span>
-                      {isDailyLimit 
-                        ? 'Upgrade for higher daily limits and continuous processing'
-                        : 'Upgrade to Premium or Pro for higher limits'
-                      }
-                    </span>
-                  </div>
-                </div>
+      <div className={`rounded-lg shadow-lg border-l-4 p-4 ${
+        isDailyLimit 
+          ? 'bg-[#E63946]/10 border-[#E63946] border-l-[#E63946]'
+          : 'bg-[#F0A202]/10 border-[#F0A202] border-l-[#F0A202]'
+      }`}>
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-3">
+            <div className={`p-1 rounded ${
+              isDailyLimit ? 'bg-[#E63946]/20' : 'bg-[#F0A202]/20'
+            }`}>
+              <IconComponent className={`h-5 w-5 ${
+                isDailyLimit ? 'text-[#E63946]' : 'text-[#F0A202]'
+              }`} />
+            </div>
+            <div className="flex-1">
+              <h4 className={`font-semibold text-sm ${
+                isDailyLimit ? 'text-[#E63946]' : 'text-[#F0A202]'
+              }`}>
+                {title}
+              </h4>
+              <p className="text-[#1A1A1A] text-sm mt-1">
+                {isDailyLimit 
+                  ? `You've used ${quotaInfo.daily_quota_used} URLs from your ${quotaInfo.daily_quota_limit} daily limit for the ${quotaInfo.package_name} plan.`
+                  : `You've used ${quotaInfo.daily_quota_used} of ${quotaInfo.daily_quota_limit} URLs in your ${quotaInfo.package_name} plan.`
+                }
+              </p>
+              <div className="mt-2 flex items-center space-x-2 text-xs text-[#6C757D]">
+                <Package className="h-3 w-3" />
+                <span>
+                  {isDailyLimit 
+                    ? 'Upgrade your plan to submit more URLs today'
+                    : 'Upgrade to Premium or Pro for higher limits'
+                  }
+                </span>
               </div>
             </div>
-            <button
-              onClick={handleDismiss}
-              className="ml-2 p-1 hover:bg-white/20 rounded transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
+          <button
+            onClick={handleDismiss}
+            className="ml-2 p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            <X className="h-4 w-4 text-[#6C757D]" />
+          </button>
         </div>
       </div>
     </div>

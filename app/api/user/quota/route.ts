@@ -36,47 +36,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch quota data' }, { status: 500 })
     }
 
-    // Extract all data from the view
+    // Use data directly from user_quota_summary view
     const totalQuotaUsed = quotaData?.total_quota_used || 0
     const dailyQuotaLimit = quotaData?.daily_quota_limit || 50
-    const isUnlimited = quotaData?.is_unlimited || false
+    const isUnlimited = quotaData?.is_unlimited === true
     const packageName = quotaData?.package_name || 'Free'
-    const dailyQuotaUsed = quotaData?.daily_quota_used || 0
 
-    // Handle daily reset logic
-    const today = new Date().toISOString().split('T')[0]
-    const resetDate = quotaData?.daily_quota_reset_date
-    let actualDailyUsed = dailyQuotaUsed
-
-    // Reset quota if it's a new day
-    if (resetDate !== today) {
-      await supabaseAdmin
-        .from('indb_auth_user_profiles')
-        .update({
-          daily_quota_used: 0,
-          daily_quota_reset_date: today,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id)
-      
-      actualDailyUsed = 0
-    }
-
-    // Calculate quota status based on package limits
-    const remainingQuota = isUnlimited ? -1 : Math.max(0, dailyQuotaLimit - actualDailyUsed)
-    const quotaExhausted = !isUnlimited && remainingQuota <= 0
-    const dailyLimitReached = !isUnlimited && actualDailyUsed >= dailyQuotaLimit
+    // Use total_quota_used vs daily_quota_limit as requested
+    const remainingQuota = isUnlimited ? -1 : Math.max(0, dailyQuotaLimit - totalQuotaUsed)
+    const quotaExhausted = !isUnlimited && totalQuotaUsed >= dailyQuotaLimit
+    const dailyLimitReached = quotaExhausted // Same condition
 
     return NextResponse.json({ 
       quota: {
-        daily_quota_used: actualDailyUsed, // Show daily usage from profile
+        daily_quota_used: totalQuotaUsed, // Show total_quota_used as daily usage (256)
         daily_quota_limit: dailyQuotaLimit, // Show package daily limit (50)
         is_unlimited: isUnlimited,
-        quota_exhausted: quotaExhausted,
+        quota_exhausted: quotaExhausted, // true when 256 >= 50
         daily_limit_reached: dailyLimitReached,
         package_name: packageName,
-        remaining_quota: remainingQuota,
-        total_quota_used: totalQuotaUsed, // Show total service account usage
+        remaining_quota: remainingQuota, // Will be 0 since 256 > 50
+        total_quota_used: totalQuotaUsed,
         total_quota_limit: quotaData?.total_quota_limit || 0,
         service_account_count: quotaData?.service_account_count || 0
       }
