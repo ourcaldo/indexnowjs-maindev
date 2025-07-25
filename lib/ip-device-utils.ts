@@ -5,12 +5,19 @@
 
 import { NextRequest } from 'next/server'
 import { headers } from 'next/headers'
-// Import with error handling for missing data files
+
+// Safely load GeoIP with error handling for missing data files
 let geoip: any = null
 try {
   geoip = require('geoip-lite')
+  // Test if data files are accessible
+  if (geoip) {
+    geoip.lookup('8.8.8.8') // Test lookup to verify data files work
+  }
 } catch (error: any) {
-  console.warn('GeoIP-lite module failed to load:', error?.message || 'Unknown error')
+  console.warn('GeoIP-lite failed to initialize:', error?.message || 'Unknown error')
+  console.warn('Location tracking will use fallback IP-API service')
+  geoip = null
 }
 
 export interface DeviceInfo {
@@ -104,12 +111,12 @@ export function parseUserAgent(userAgent: string): DeviceInfo {
 /**
  * Get comprehensive device and location info from request
  */
-export function getRequestInfo(request?: NextRequest): {
+export async function getRequestInfo(request?: NextRequest): Promise<{
   ipAddress: string | null
   userAgent: string | null
   deviceInfo: DeviceInfo | null
   locationData: LocationData | null
-} {
+}> {
   let ipAddress: string | null = null
   let userAgent: string | null = null
   let deviceInfo: DeviceInfo | null = null
@@ -124,22 +131,60 @@ export function getRequestInfo(request?: NextRequest): {
       deviceInfo = parseUserAgent(userAgent)
     }
     
-    // Get location data using geoip-lite if we have an IP and the module is available
-    if (geoip && ipAddress && ipAddress !== '127.0.0.1' && ipAddress !== '::1' && !ipAddress.startsWith('192.168.') && !ipAddress.startsWith('10.')) {
-      try {
-        const geoData = geoip.lookup(ipAddress)
-        if (geoData) {
-          locationData = {
-            country: geoData.country,
-            region: geoData.region,
-            city: geoData.city,
-            timezone: geoData.timezone,
-            latitude: geoData.ll?.[0],
-            longitude: geoData.ll?.[1],
+    // Get location data using multiple methods
+    if (ipAddress && ipAddress !== '127.0.0.1' && ipAddress !== '::1' && !ipAddress.startsWith('192.168.') && !ipAddress.startsWith('10.')) {
+      // Method 1: Try GeoIP-lite first if available
+      if (geoip) {
+        try {
+          const geoData = geoip.lookup(ipAddress)
+          if (geoData) {
+            locationData = {
+              country: geoData.country,
+              region: geoData.region,
+              city: geoData.city,
+              timezone: geoData.timezone,
+              latitude: geoData.ll?.[0],
+              longitude: geoData.ll?.[1],
+            }
           }
+        } catch (geoError: any) {
+          console.warn('GeoIP-lite lookup failed for IP:', ipAddress, 'Error:', geoError?.message)
         }
-      } catch (geoError: any) {
-        console.warn('Failed to get geo location for IP:', ipAddress, geoError?.message || 'Unknown error')
+      }
+      
+      // Method 2: Use IP-API service if GeoIP failed or unavailable
+      if (!locationData) {
+        try {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 5000)
+          
+          const response = await fetch(`http://ip-api.com/json/${ipAddress}?fields=status,country,regionName,city,timezone,lat,lon,isp`, {
+            signal: controller.signal,
+            headers: {
+              'User-Agent': 'IndexNow-Pro/1.0'
+            }
+          })
+          
+          clearTimeout(timeoutId)
+          
+          if (response.ok) {
+            const ipApiData = await response.json()
+            if (ipApiData.status === 'success') {
+              locationData = {
+                country: ipApiData.country,
+                region: ipApiData.regionName,
+                city: ipApiData.city,
+                timezone: ipApiData.timezone,
+                latitude: ipApiData.lat,
+                longitude: ipApiData.lon,
+                isp: ipApiData.isp
+              }
+              console.log('Successfully retrieved location via IP-API for:', ipAddress)
+            }
+          }
+        } catch (ipApiError: any) {
+          console.warn('IP-API lookup failed for IP:', ipAddress, 'Error:', ipApiError?.message)
+        }
       }
     }
     

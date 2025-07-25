@@ -108,7 +108,7 @@ export class ActivityLogger {
       let { ipAddress, userAgent, deviceInfo, locationData } = data
       
       if (data.request && (!ipAddress || !userAgent || !deviceInfo)) {
-        const requestInfo = getRequestInfo(data.request)
+        const requestInfo = await getRequestInfo(data.request)
         ipAddress = ipAddress || requestInfo.ipAddress || undefined
         userAgent = userAgent || requestInfo.userAgent || undefined
         deviceInfo = deviceInfo || requestInfo.deviceInfo || undefined
