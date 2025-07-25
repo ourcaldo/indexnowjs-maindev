@@ -40,7 +40,8 @@ import {
   FileText,
   Server,
   Shield,
-  Zap
+  Zap,
+  Key
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
@@ -203,6 +204,41 @@ export default function ActivityLogsPage() {
         color: 'bg-[#F0A202]/10 text-[#F0A202]',
         icon: Settings,
         label: 'Settings Changed'
+      },
+      user_password_reset: {
+        color: 'bg-[#E63946]/10 text-[#E63946]',
+        icon: Key,
+        label: 'Password Reset'
+      },
+      user_profile_update: {
+        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        icon: User,
+        label: 'Profile Updated'
+      },
+      user_role_change: {
+        color: 'bg-[#F0A202]/10 text-[#F0A202]',
+        icon: Shield,
+        label: 'Role Changed'
+      },
+      user_security_view: {
+        color: 'bg-[#6C757D]/10 text-[#6C757D]',
+        icon: Shield,
+        label: 'Security Analysis'
+      },
+      user_activity_view: {
+        color: 'bg-[#6C757D]/10 text-[#6C757D]',
+        icon: Activity,
+        label: 'Activity Review'
+      },
+      page_view: {
+        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        icon: Globe,
+        label: 'Page Visit'
+      },
+      dashboard_view: {
+        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        icon: Monitor,
+        label: 'Dashboard'
       }
     }
     
@@ -435,14 +471,14 @@ export default function ActivityLogsPage() {
                           </TableCell>
                           
                           {/* Timestamp */}
-                          <TableCell className="text-center">
+                          <TableCell className="text-left">
                             <div className="text-[#1A1A1A] text-sm font-medium">
                               {formatDate(log.created_at)}
                             </div>
                           </TableCell>
                           
                           {/* User Info */}
-                          <TableCell className="text-center">
+                          <TableCell className="text-left">
                             <Link 
                               href={`/backend/admin/users/${log.user_id}`}
                               className="hover:text-[#3D8BFF] transition-colors"
@@ -457,7 +493,7 @@ export default function ActivityLogsPage() {
                           </TableCell>
                           
                           {/* Event/Action */}
-                          <TableCell className="text-center">
+                          <TableCell className="text-left">
                             <Badge className={`${eventConfig.color} border-0 text-xs mb-1`}>
                               {eventConfig.label}
                             </Badge>

@@ -80,7 +80,17 @@ export const ActivityEventTypes = {
   USER_SUSPEND: 'user_suspend',
   USER_UNSUSPEND: 'user_unsuspend',
   USER_PASSWORD_RESET: 'user_password_reset',
+  USER_PROFILE_UPDATE: 'user_profile_update',
+  USER_ROLE_CHANGE: 'user_role_change',
   ADMIN_SETTINGS: 'admin_settings',
+  
+  // Page Views & Navigation
+  PAGE_VIEW: 'page_view',
+  DASHBOARD_VIEW: 'dashboard_view',
+  SETTINGS_VIEW: 'settings_view',
+  ADMIN_PANEL_ACCESS: 'admin_panel_access',
+  USER_SECURITY_VIEW: 'user_security_view',
+  USER_ACTIVITY_VIEW: 'user_activity_view',
   
   // System Events
   ERROR_OCCURRED: 'error_occurred',
@@ -278,11 +288,67 @@ export class ActivityLogger {
   static async logUserDashboardActivity(userId: string, action: string, details?: string, request?: NextRequest, metadata?: Record<string, any>) {
     return this.logActivity({
       userId,
-      eventType: 'dashboard_activity',
+      eventType: ActivityEventTypes.DASHBOARD_VIEW,
       actionDescription: details ? `${action}: ${details}` : action,
       request,
       metadata: {
         userDashboard: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log page view activities
+   */
+  static async logPageView(userId: string, pagePath: string, pageTitle?: string, request?: NextRequest, metadata?: Record<string, any>) {
+    return this.logActivity({
+      userId,
+      eventType: ActivityEventTypes.PAGE_VIEW,
+      actionDescription: `Visited ${pageTitle || pagePath}`,
+      request,
+      metadata: {
+        pagePath,
+        pageTitle,
+        pageView: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log admin actions with specific event types
+   */
+  static async logAdminAction(userId: string, action: string, targetUserId?: string, actionDescription?: string, request?: NextRequest, metadata?: Record<string, any>) {
+    let eventType = ActivityEventTypes.USER_MANAGEMENT
+    
+    // Map specific actions to event types
+    if (action.includes('password') || action.includes('reset')) {
+      eventType = ActivityEventTypes.USER_PASSWORD_RESET
+    } else if (action.includes('suspend')) {
+      eventType = ActivityEventTypes.USER_SUSPEND
+    } else if (action.includes('unsuspend')) {
+      eventType = ActivityEventTypes.USER_UNSUSPEND
+    } else if (action.includes('profile') || action.includes('update')) {
+      eventType = ActivityEventTypes.USER_PROFILE_UPDATE
+    } else if (action.includes('role')) {
+      eventType = ActivityEventTypes.USER_ROLE_CHANGE
+    } else if (action.includes('security')) {
+      eventType = ActivityEventTypes.USER_SECURITY_VIEW
+    } else if (action.includes('activity')) {
+      eventType = ActivityEventTypes.USER_ACTIVITY_VIEW
+    }
+
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription: actionDescription || `Admin action: ${action}`,
+      targetType: targetUserId ? 'user' : undefined,
+      targetId: targetUserId,
+      request,
+      metadata: {
+        adminAction: true,
+        action,
         ...metadata
       }
     })

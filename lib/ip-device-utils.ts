@@ -5,6 +5,7 @@
 
 import { NextRequest } from 'next/server'
 import { headers } from 'next/headers'
+import geoip from 'geoip-lite'
 
 export interface DeviceInfo {
   type: 'mobile' | 'tablet' | 'desktop'
@@ -18,6 +19,9 @@ export interface LocationData {
   region?: string
   city?: string
   timezone?: string
+  latitude?: number
+  longitude?: number
+  isp?: string
 }
 
 /**
@@ -114,18 +118,39 @@ export function getRequestInfo(request?: NextRequest): {
       deviceInfo = parseUserAgent(userAgent)
     }
     
-    // Extract location from headers if available (from CDN/proxy)
-    const country = request.headers.get('cf-ipcountry') || request.headers.get('x-country-code')
-    const region = request.headers.get('cf-region') || request.headers.get('x-region')
-    const city = request.headers.get('cf-ipcity') || request.headers.get('x-city')
-    const timezone = request.headers.get('cf-timezone') || request.headers.get('x-timezone')
+    // Get location data using geoip-lite if we have an IP
+    if (ipAddress && ipAddress !== '127.0.0.1' && ipAddress !== '::1' && !ipAddress.startsWith('192.168.') && !ipAddress.startsWith('10.')) {
+      try {
+        const geoData = geoip.lookup(ipAddress)
+        if (geoData) {
+          locationData = {
+            country: geoData.country,
+            region: geoData.region,
+            city: geoData.city,
+            timezone: geoData.timezone,
+            latitude: geoData.ll?.[0],
+            longitude: geoData.ll?.[1],
+          }
+        }
+      } catch (geoError) {
+        console.warn('Failed to get geo location for IP:', ipAddress, geoError)
+      }
+    }
     
-    if (country || region || city || timezone) {
-      locationData = { 
-        country: country || undefined, 
-        region: region || undefined, 
-        city: city || undefined, 
-        timezone: timezone || undefined 
+    // Fallback: Extract location from headers if available (from CDN/proxy)
+    if (!locationData) {
+      const country = request.headers.get('cf-ipcountry') || request.headers.get('x-country-code')
+      const region = request.headers.get('cf-region') || request.headers.get('x-region')
+      const city = request.headers.get('cf-ipcity') || request.headers.get('x-city')
+      const timezone = request.headers.get('cf-timezone') || request.headers.get('x-timezone')
+      
+      if (country || region || city || timezone) {
+        locationData = { 
+          country: country || undefined, 
+          region: region || undefined, 
+          city: city || undefined, 
+          timezone: timezone || undefined 
+        }
       }
     }
   } else {

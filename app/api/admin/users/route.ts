@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireSuperAdminAuth, adminAuthService } from '@/lib/admin-auth'
+import { ActivityLogger } from '@/lib/activity-logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,20 +60,27 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Log admin activity using the authenticated admin user
-    try {
-      await supabaseAdmin
-        .from('indb_admin_activity_logs')
-        .insert({
-          admin_id: adminUser.id,
-          action_type: 'user_management',
-          action_description: 'Viewed users list',
-          target_type: 'users',
-          metadata: { count: usersWithAuthData.length }
-        })
-    } catch (logError) {
-      console.error('Failed to log admin activity:', logError)
-      // Don't fail the request if logging fails
+    // Log admin activity using enhanced tracking
+    if (adminUser) {
+      try {
+        await ActivityLogger.logAdminAction(
+          adminUser.id,
+          'user_list_view',
+          undefined,
+          `Viewed users list (${usersWithAuthData.length} users)`,
+          request,
+          { 
+            userListView: true,
+            totalUsers: usersWithAuthData.length,
+            activeUsers: usersWithAuthData.filter(u => u.role === 'user').length,
+            adminUsers: usersWithAuthData.filter(u => u.role === 'admin').length,
+            superAdminUsers: usersWithAuthData.filter(u => u.role === 'super_admin').length
+          }
+        )
+      } catch (logError) {
+        console.error('Failed to log admin activity:', logError)
+        // Don't fail the request if logging fails
+      }
     }
 
     return NextResponse.json({ 

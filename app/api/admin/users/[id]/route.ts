@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireSuperAdminAuth } from '@/lib/admin-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { ActivityLogger } from '@/lib/activity-logger'
 
 // GET /api/admin/users/[id] - Get individual user details
 export async function GET(
@@ -49,18 +50,21 @@ export async function GET(
       last_sign_in_at: authUser.user?.last_sign_in_at || null,
     }
 
-    // Log admin activity
+    // Log admin activity with enhanced tracking
     try {
-      await supabaseAdmin
-        .from('indb_admin_activity_logs')
-        .insert({
-          admin_id: adminUser.id,
-          action_type: 'user_management',
-          action_description: `Viewed user details for ${profile.full_name || authUser.user?.email}`,
-          target_type: 'user',
-          target_id: userId,
-          metadata: { user_role: profile.role }
-        })
+      await ActivityLogger.logAdminAction(
+        adminUser.id,
+        'user_profile_view',
+        userId,
+        `Viewed detailed profile for ${profile.full_name || authUser.user?.email || 'User'}`,
+        request,
+        { 
+          profileView: true,
+          userRole: profile.role,
+          userEmail: authUser.user?.email,
+          lastSignIn: authUser.user?.last_sign_in_at
+        }
+      )
     } catch (logError) {
       console.error('Failed to log admin activity:', logError)
     }
@@ -128,21 +132,22 @@ export async function PATCH(
       )
     }
 
-    // Log admin activity
+    // Log admin activity with enhanced details
     try {
-      await supabaseAdmin
-        .from('indb_admin_activity_logs')
-        .insert({
-          admin_id: adminUser.id,
-          action_type: 'user_management',
-          action_description: `Updated user profile for ${full_name || userId}`,
-          target_type: 'user',
-          target_id: userId,
-          metadata: { 
-            updated_fields: { full_name, role, email_notifications, phone_number },
-            new_role: role
-          }
-        })
+      await ActivityLogger.logAdminAction(
+        adminUser.id,
+        'profile_update',
+        userId,
+        `Updated profile for ${full_name || 'User'} - Role: ${role}`,
+        request,
+        { 
+          profileUpdate: true,
+          updatedFields: { full_name, role, email_notifications, phone_number },
+          newRole: role,
+          previousRole: currentProfile.role,
+          roleChanged: currentProfile.role !== role
+        }
+      )
     } catch (logError) {
       console.error('Failed to log admin activity:', logError)
     }

@@ -98,13 +98,26 @@ export async function GET(
       totalLoginAttempts
     )
 
-    // Log admin action
-    await ActivityLogger.logAdminActivity(
+    // Calculate risk level for logging
+    const riskLevel = securityScore >= 80 ? 'low' : securityScore >= 60 ? 'medium' : 'high'
+
+    // Log admin action with enhanced details
+    await ActivityLogger.logAdminAction(
       adminUser.id,
-      'user_security_view',
+      'security_analysis',
       userId,
-      `Viewed security information for user ${userId}`,
-      request
+      `Analyzed security profile for user ${userId} - Risk Level: ${riskLevel}`,
+      request,
+      { 
+        securityAnalysis: true, 
+        riskLevel, 
+        securityScore: Math.round(securityScore * 100) / 100,
+        uniqueIPs: Array.from(ipAddresses).length,
+        uniqueDevices: devices.size,
+        uniqueLocations: locations.size,
+        loginAttempts: totalLoginAttempts,
+        failedAttempts: failedLoginAttempts
+      }
     )
 
     return NextResponse.json({

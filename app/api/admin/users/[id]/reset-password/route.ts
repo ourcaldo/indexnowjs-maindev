@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireSuperAdminAuth } from '@/lib/admin-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { ActivityLogger } from '@/lib/activity-logger'
 
 // POST /api/admin/users/[id]/reset-password - Generate new password for user
 export async function POST(
@@ -68,21 +69,21 @@ export async function POST(
       )
     }
 
-    // Log admin activity (without including the actual password)
+    // Log admin activity with enhanced details (without including the actual password)
     try {
-      await supabaseAdmin
-        .from('indb_admin_activity_logs')
-        .insert({
-          admin_id: adminUser.id,
-          action_type: 'user_management',
-          action_description: `Reset password for user ${currentUser.full_name || userId}`,
-          target_type: 'user',
-          target_id: userId,
-          metadata: { 
-            user_role: currentUser.role,
-            password_length: newPassword.length
-          }
-        })
+      await ActivityLogger.logAdminAction(
+        adminUser.id,
+        'password_reset',
+        userId,
+        `Generated new password for ${currentUser.full_name || 'User'} (${newPassword.length} chars)`,
+        request,
+        { 
+          passwordReset: true,
+          userRole: currentUser.role,
+          passwordLength: newPassword.length,
+          adminInitiated: true
+        }
+      )
     } catch (logError) {
       console.error('Failed to log admin activity:', logError)
     }

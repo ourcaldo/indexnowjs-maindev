@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireSuperAdminAuth } from '@/lib/admin-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { ActivityLogger } from '@/lib/activity-logger'
 
 // PATCH /api/admin/users/[id]/suspend - Suspend/unsuspend user
 export async function PATCH(
@@ -60,22 +61,22 @@ export async function PATCH(
       )
     }
 
-    // Log admin activity
+    // Log admin activity with enhanced details
     try {
-      await supabaseAdmin
-        .from('indb_admin_activity_logs')
-        .insert({
-          admin_id: adminUser.id,
-          action_type: 'user_management',
-          action_description: `${action === 'ban' ? 'Suspended' : 'Unsuspended'} user ${currentUser.full_name || userId}`,
-          target_type: 'user',
-          target_id: userId,
-          metadata: { 
-            action,
-            user_role: currentUser.role,
-            previous_status: isBanned ? 'suspended' : 'active'
-          }
-        })
+      await ActivityLogger.logAdminAction(
+        adminUser.id,
+        action === 'ban' ? 'suspend' : 'unsuspend',
+        userId,
+        `${action === 'ban' ? 'Suspended' : 'Unsuspended'} user ${currentUser.full_name || 'User'}`,
+        request,
+        { 
+          suspensionAction: true,
+          action,
+          userRole: currentUser.role,
+          previousStatus: isBanned ? 'suspended' : 'active',
+          newStatus: action === 'ban' ? 'suspended' : 'active'
+        }
+      )
     } catch (logError) {
       console.error('Failed to log admin activity:', logError)
     }
