@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { adminAuthService, AdminUser } from '@/lib/admin-auth'
 import { AdminSidebar } from '@/components/AdminSidebar'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
@@ -16,28 +16,42 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+
+  // Check if we're on the login page
+  const isLoginPage = pathname === '/backend/admin/login'
 
   useEffect(() => {
+    // Skip auth check for login page
+    if (isLoginPage) {
+      setIsLoading(false)
+      return
+    }
     checkAdminAccess()
-  }, [])
+  }, [router, isLoginPage])
 
   const checkAdminAccess = async () => {
     try {
       const user = await adminAuthService.getCurrentAdminUser()
       
       if (!user?.isSuperAdmin) {
-        // Redirect to regular dashboard if not super admin
-        router.push('/dashboard')
+        // Redirect to admin login if not authenticated or not super admin
+        router.push('/backend/admin/login')
         return
       }
 
       setAdminUser(user)
     } catch (error) {
       console.error('Admin access check failed:', error)
-      router.push('/dashboard')
+      router.push('/backend/admin/login')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // For login page, render without sidebar
+  if (isLoginPage) {
+    return children
   }
 
   if (isLoading) {

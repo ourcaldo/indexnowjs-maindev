@@ -1,0 +1,155 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, I ask you to enhance the admin dashboard by making a login page stand-alone for the admin password, so it's not using login page for user dashboard. But, after you edit it, it's have some error that you need to fix, which is:
+1. On the login page of admin dashboard, I see sidebar menu which I its appear? I'm not even login yet (see img 1), before you already fix this, but it's make the admin dashboard doesn't have sidebar, then you change the code again and it's back like this.
+2. Second, you need to find and fix an error related to this log (the log also appear on console log which you can see it)
+ GET /api/dashboard/stats 200 in 1538ms
+ ✓ Compiled /api/service-accounts in 955ms (1566 modules)
+[Error: Cannot find module '/home/runner/workspace/.next/server/vendor-chunks/lib/worker.js'] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+ ⨯ uncaughtException: [Error: Cannot find module '/home/runner/workspace/.next/server/vendor-chunks/lib/worker.js'] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+ ⨯ uncaughtException:  [Error: Cannot find module '/home/runner/workspace/.next/server/vendor-chunks/lib/worker.js'] {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+[Error: the worker thread exited]
+ ⨯ uncaughtException: [Error: the worker thread exited]
+ ⨯ uncaughtException:  [Error: the worker thread exited]
+Error: the worker has exited
+    at authenticateRequest (lib/api-middleware.ts:46:11)
+    at async eval (lib/api-middleware.ts:215:25)
+  44 |
+  45 |     // Log successful authentication
+> 46 |     logger.debug({
+     |           ^
+  47 |       userId: user.id,
+  48 |       email: user.email,
+  49 |       endpoint,
+ ⨯ uncaughtException: Error: the worker has exited
+    at authenticateRequest (lib/api-middleware.ts:46:11)
+    at async eval (lib/api-middleware.ts:215:25)
+  44 |
+  45 |     // Log successful authentication
+> 46 |     logger.debug({
+     |           ^
+  47 |       userId: user.id,
+  48 |       email: user.email,
+  49 |       endpoint,
+ ⨯ uncaughtException:  Error: the worker has exited
+    at authenticateRequest (lib/api-middleware.ts:46:11)
+    at async eval (lib/api-middleware.ts:215:25)
+  44 |
+  45 |     // Log successful authentication
+> 46 |     logger.debug({
+     |           ^
+  47 |       userId: user.id,
+  48 |       email: user.email,
+  49 |       endpoint,
+ GET /api/service-accounts 200 in 1797ms
+Error: the worker has exited
+    at eval (app/api/service-accounts/route.ts:103:9)
+    at async eval (lib/api-middleware.ts:221:13)
+  101 |   }
+  102 |
+> 103 |   logger.info({
+      |         ^
+  104 |     userId: auth.userId,
+  105 |     accountCount: quotaResult.data.length,
+  106 |     endpoint
+ ⨯ uncaughtException: Error: the worker has exited
+    at eval (app/api/service-accounts/route.ts:103:9)
+    at async eval (lib/api-middleware.ts:221:13)
+  101 |   }
+  102 |
+> 103 |   logger.info({
+      |         ^
+  104 |     userId: auth.userId,
+  105 |     accountCount: quotaResult.data.length,
+  106 |     endpoint
+ ⨯ uncaughtException:  Error: the worker has exited
+    at eval (app/api/service-accounts/route.ts:103:9)
+    at async eval (lib/api-middleware.ts:221:13)
+  101 |   }
+  102 |
+> 103 |   logger.info({
+      |         ^
+  104 |     userId: auth.userId,
+  105 |     accountCount: quotaResult.data.length,
+  106 |     endpoint
+Error: the worker has exited
+    at authenticateRequest (lib/api-middleware.ts:46:11)
+    at async eval (lib/api-middleware.ts:215:25)
+  44 |
+  45 |     // Log successful authentication
+> 46 |     logger.debug({
+     |           ^
+  47 |       userId: user.id,
+  48 |       email: user.email,
+  49 |       endpoint,
+ ⨯ uncaughtException: Error: the worker has exited
+    at authenticateRequest (lib/api-middleware.ts:46:11)
+    at async eval (lib/api-middleware.ts:215:25)
+  44 |
+  45 |     // Log successful authentication
+> 46 |     logger.debug({
+     |           ^
+  47 |       userId: user.id,
+  48 |       email: user.email,
+  49 |       endpoint,
+ ⨯ uncaughtException:  Error: the worker has exited
+    at authenticateRequest (lib/api-middleware.ts:46:11)
+    at async eval (lib/api-middleware.ts:215:25)
+  44 |
+  45 |     // Log successful authentication
+> 46 |     logger.debug({
+     |           ^
+  47 |       userId: user.id,
+  48 |       email: user.email,
+  49 |       endpoint,
+ GET /api/service-accounts 200 in 567ms
+Error: the worker has exited
+    at eval (app/api/service-accounts/route.ts:103:9)
+    at async eval (lib/api-middleware.ts:221:13)
+  101 |   }
+  102 |
+> 103 |   logger.info({
+      |         ^
+  104 |     userId: auth.userId,
+  105 |     accountCount: quotaResult.data.length,
+  106 |     endpoint
+ ⨯ uncaughtException: Error: the worker has exited
+    at eval (app/api/service-accounts/route.ts:103:9)
+    at async eval (lib/api-middleware.ts:221:13)
+  101 |   }
+  102 |
+> 103 |   logger.info({
+      |         ^
+  104 |     userId: auth.userId,
+  105 |     accountCount: quotaResult.data.length,
+  106 |     endpoint
+ ⨯ uncaughtException:  Error: the worker has exited
+    at eval (app/api/service-accounts/route.ts:103:9)
+    at async eval (lib/api-middleware.ts:221:13)
+  101 |   }
+  102 |
+> 103 |   logger.info({
+      |         ^
+  104 |     userId: auth.userId,
+  105 |     accountCount: quotaResult.data.length,
+  106 |     endpoint
+ ○ Compiling /api/user/profile ...

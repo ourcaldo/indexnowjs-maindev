@@ -43,12 +43,7 @@ export async function authenticateRequest(
     }
 
     // Log successful authentication
-    logger.debug({
-      userId: user.id,
-      email: user.email,
-      endpoint,
-      method
-    }, 'User authenticated successfully')
+    console.log(`[DEBUG] User authenticated successfully: ${user.email} | Endpoint: ${endpoint} | Method: ${method}`)
 
     return { 
       success: true, 

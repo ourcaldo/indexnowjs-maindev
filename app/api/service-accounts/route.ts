@@ -100,11 +100,7 @@ export const GET = apiRouteWrapper(async (request: NextRequest, auth: Authentica
     return createErrorResponse(quotaResult.error)
   }
 
-  logger.info({
-    userId: auth.userId,
-    accountCount: quotaResult.data.length,
-    endpoint
-  }, 'Service accounts fetched successfully')
+  console.log(`[INFO] Service accounts fetched successfully: User ${auth.userId} | Count: ${quotaResult.data.length} | Endpoint: ${endpoint}`)
 
   return createApiResponse({
     service_accounts: quotaResult.data,
