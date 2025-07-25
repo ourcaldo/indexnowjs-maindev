@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
 // Simple Button component using new color palette
 const Button = ({ children, className = '', variant = 'ghost', size = 'sm', onClick, ...props }: any) => {
@@ -63,6 +64,10 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   const pathname = usePathname()
   const router = useRouter()
   const [indexNowExpanded, setIndexNowExpanded] = useState(true)
+  
+  // Site settings hooks
+  const siteName = useSiteName()
+  const logoUrl = useSiteLogo(!isCollapsed) // Full logo when expanded, icon when collapsed
 
   const handleLogout = async () => {
     try {
@@ -137,10 +142,20 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
         {/* Mobile Header with Close Button */}
         <div className="p-4 flex items-center justify-between" style={{borderBottom: '1px solid #E0E6ED'}}>
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-bold text-lg ml-2" style={{color: '#1A1A1A'}}>IndexNow</span>
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt={`${siteName} Logo`}
+                className="h-8 w-auto max-w-[120px]"
+              />
+            ) : (
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
+                  <Zap className="h-4 w-4 text-white" />
+                </div>
+                <span className="font-bold text-lg ml-2" style={{color: '#1A1A1A'}}>{siteName}</span>
+              </div>
+            )}
           </div>
           <Button
             variant="ghost"
@@ -302,9 +317,17 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
         <div className="p-4" style={{borderBottom: '1px solid #E0E6ED'}}>
           {isCollapsed ? (
             <div className="flex flex-col items-center space-y-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-                <Zap className="h-4 w-4 text-white" />
-              </div>
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt={`${siteName} Icon`}
+                  className="w-8 h-8 object-contain"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
+                  <Zap className="h-4 w-4 text-white" />
+                </div>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -316,10 +339,20 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
             </div>
           ) : (
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-                <Zap className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-bold text-lg ml-2" style={{color: '#1A1A1A'}}>IndexNow</span>
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt={`${siteName} Logo`}
+                  className="h-8 w-auto max-w-[180px]"
+                />
+              ) : (
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
+                    <Zap className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="font-bold text-lg ml-2" style={{color: '#1A1A1A'}}>{siteName}</span>
+                </div>
+              )}
               <Button
                 variant="ghost"
                 size="sm"

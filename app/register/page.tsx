@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { authService } from "@/lib/auth"
+import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
 // import DashboardPreview from '../components/DashboardPreview'
 
@@ -19,6 +20,11 @@ export default function Register() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  
+  // Site settings hooks
+  const siteName = useSiteName()
+  const logoUrl = useSiteLogo(true) // Always use full logo for register page
+  useFavicon() // Automatically updates favicon
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -136,13 +142,26 @@ export default function Register() {
             alignItems: 'center',
             marginBottom: '20px'
           }}>
-            <span style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#ffffff'
-            }}>
-              IndexNow
-            </span>
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt={`${siteName} Logo`}
+                style={{
+                  height: '28px',
+                  width: 'auto',
+                  maxWidth: '140px',
+                  filter: 'brightness(0) invert(1)' // Make logo white for dark background
+                }}
+              />
+            ) : (
+              <span style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#ffffff'
+              }}>
+                {siteName}
+              </span>
+            )}
           </div>
           
           <div style={{
@@ -188,13 +207,25 @@ export default function Register() {
             display: 'flex',
             alignItems: 'center'
           }}>
-            <span style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1a1a1a'
-            }}>
-              IndexNow
-            </span>
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt={`${siteName} Logo`}
+                style={{
+                  height: '32px',
+                  width: 'auto',
+                  maxWidth: '160px'
+                }}
+              />
+            ) : (
+              <span style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#1a1a1a'
+              }}>
+                {siteName}
+              </span>
+            )}
           </div>
         )}
 
@@ -219,7 +250,7 @@ export default function Register() {
             marginBottom: '40px',
             lineHeight: '1.5'
           }}>
-            Join IndexNow to start indexing your URLs instantly.
+            Join {siteName} to start indexing your URLs instantly.
           </p>
 
           <form onSubmit={handleSubmit}>

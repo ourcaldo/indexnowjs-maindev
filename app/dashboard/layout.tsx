@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { authService, AuthUser } from '@/lib/auth'
 import { ToastContainer } from '@/components/ui/toast'
+import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
 export default function DashboardLayout({
   children,
@@ -16,6 +17,12 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  
+  // Site settings hooks
+  const siteName = useSiteName()
+  const logoUrl = useSiteLogo(!sidebarCollapsed) // Use expanded logo when sidebar is not collapsed
+  const iconUrl = useSiteLogo(false) // Always get icon for mobile header
+  useFavicon() // Automatically updates favicon
 
   useEffect(() => {
     let isMounted = true
@@ -100,12 +107,20 @@ export default function DashboardLayout({
           {/* Mobile header - always show on mobile */}
           <div className="lg:hidden bg-white border-b border-[#E0E6ED] px-4 py-3 flex items-center justify-between">
             <div className="flex items-center space-x-3 min-w-0 flex-1">
-              <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{backgroundColor: '#1C2331'}}>
-                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <h1 className="text-lg font-semibold text-[#1A1A1A] truncate">IndexNow Pro</h1>
+              {iconUrl ? (
+                <img 
+                  src={iconUrl} 
+                  alt={`${siteName} Icon`}
+                  className="w-6 h-6 rounded flex-shrink-0"
+                />
+              ) : (
+                <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{backgroundColor: '#1C2331'}}>
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
+              <h1 className="text-lg font-semibold text-[#1A1A1A] truncate">{siteName}</h1>
               {user && (
                 <span className="hidden lg:block text-sm text-[#6C757D] truncate ml-auto pr-2" style={{maxWidth: '140px'}}>
                   {user.email}

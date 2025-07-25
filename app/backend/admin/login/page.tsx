@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 // import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, Shield, AlertCircle } from 'lucide-react'
+import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
@@ -17,6 +18,11 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  
+  // Site settings hooks
+  const siteName = useSiteName()
+  const logoUrl = useSiteLogo(true) // Always use full logo for admin login
+  useFavicon() // Automatically updates favicon
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,7 +97,15 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-[#1A1A1A] rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-white" />
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt={`${siteName} Admin Logo`}
+                className="w-12 h-12 object-contain filter brightness-0 invert"
+              />
+            ) : (
+              <Shield className="w-8 h-8 text-white" />
+            )}
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-[#1A1A1A]">

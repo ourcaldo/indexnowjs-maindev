@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { AdminUser } from '@/lib/admin-auth'
 import { authService } from '@/lib/auth'
+import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
 interface AdminSidebarProps {
   isOpen: boolean
@@ -35,6 +36,12 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
   const router = useRouter()
   const [settingsExpanded, setSettingsExpanded] = useState(true)
   const [cmsExpanded, setCmsExpanded] = useState(true)
+  
+  // Site settings hooks
+  const siteName = useSiteName()
+  const logoUrl = useSiteLogo(!isCollapsed) // Full logo when expanded, icon when collapsed
+  const iconUrl = useSiteLogo(false) // Always get icon for mobile header
+  useFavicon() // Automatically updates favicon
 
   const handleLogout = async () => {
     try {
@@ -171,11 +178,27 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             isCollapsed ? 'justify-center flex-col space-y-2' : 'justify-between'
           }`}>
             <div className="flex items-center">
-              <Shield className="h-8 w-8 text-[#1C2331]" />
-              {!isCollapsed && (
-                <div className="ml-3">
-                  <h1 className="text-lg font-bold text-[#1A1A1A]">Admin Panel</h1>
-                  <p className="text-xs text-[#6C757D]">IndexNow Pro</p>
+              {logoUrl && !isCollapsed ? (
+                <img 
+                  src={logoUrl} 
+                  alt={`${siteName} Admin Logo`}
+                  className="h-8 w-auto max-w-[180px]"
+                />
+              ) : logoUrl && isCollapsed ? (
+                <img 
+                  src={logoUrl} 
+                  alt={`${siteName} Admin Icon`}
+                  className="h-8 w-8 object-contain"
+                />
+              ) : (
+                <div className="flex items-center">
+                  <Shield className="h-8 w-8 text-[#1C2331]" />
+                  {!isCollapsed && (
+                    <div className="ml-3">
+                      <h1 className="text-lg font-bold text-[#1A1A1A]">Admin Panel</h1>
+                      <p className="text-xs text-[#6C757D]">{siteName}</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -221,11 +244,21 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-[#E0E6ED]">
             <div className="flex items-center">
-              <Shield className="h-8 w-8 text-[#1C2331]" />
-              <div className="ml-3">
-                <h1 className="text-lg font-bold text-[#1A1A1A]">Admin Panel</h1>
-                <p className="text-xs text-[#6C757D]">IndexNow Pro</p>
-              </div>
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt={`${siteName} Admin Logo`}
+                  className="h-8 w-auto max-w-[180px]"
+                />
+              ) : (
+                <div className="flex items-center">
+                  <Shield className="h-8 w-8 text-[#1C2331]" />
+                  <div className="ml-3">
+                    <h1 className="text-lg font-bold text-[#1A1A1A]">Admin Panel</h1>
+                    <p className="text-xs text-[#6C757D]">{siteName}</p>
+                  </div>
+                </div>
+              )}
             </div>
             <button 
               onClick={onToggle}
@@ -270,7 +303,15 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Shield className="h-6 w-6 text-[#1C2331]" />
+            {iconUrl ? (
+              <img 
+                src={iconUrl} 
+                alt={`${siteName} Admin Icon`}
+                className="h-6 w-6"
+              />
+            ) : (
+              <Shield className="h-6 w-6 text-[#1C2331]" />
+            )}
             <h1 className="ml-2 text-lg font-bold text-[#1A1A1A]">Admin Panel</h1>
           </div>
           {user && (

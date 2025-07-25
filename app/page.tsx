@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { authService } from "@/lib/auth"
+import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
 import DashboardPreview from '../components/DashboardPreview'
 
@@ -16,6 +17,11 @@ export default function Login() {
   const [error, setError] = useState("")
   const [isMagicLinkMode, setIsMagicLinkMode] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
+  
+  // Site settings hooks
+  const siteName = useSiteName()
+  const logoUrl = useSiteLogo(true) // Always use full logo for login page
+  useFavicon() // Automatically updates favicon
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -131,13 +137,25 @@ export default function Login() {
             display: 'flex',
             alignItems: 'center'
           }}>
-            <span style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1a1a1a'
-            }}>
-              IndexNow
-            </span>
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt={`${siteName} Logo`}
+                style={{
+                  height: '32px',
+                  width: 'auto',
+                  maxWidth: '160px'
+                }}
+              />
+            ) : (
+              <span style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#1a1a1a'
+              }}>
+                {siteName}
+              </span>
+            )}
           </div>
         )}
 
