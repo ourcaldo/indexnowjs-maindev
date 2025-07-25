@@ -63,6 +63,7 @@ export async function POST(
       .update({
         package_id: packageId,
         subscribed_at: new Date().toISOString(),
+        expires_at: packageData.slug === 'free' ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // +30 days for paid plans
         daily_quota_used: 0, // Reset quota when package changes
         daily_quota_reset_date: new Date().toISOString().split('T')[0],
         updated_at: new Date().toISOString()
@@ -83,7 +84,7 @@ export async function POST(
         currentUser.package[0]?.name : currentUser.package?.name || 'No Package'
       
       await ActivityLogger.logAdminAction(
-        authResult.user.id,
+        authResult.id,
         'package_change',
         userId,
         `Changed package for ${currentUser.full_name || 'User'} from "${oldPackageName}" to "${packageData.name}"`,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireSuperAdminAuth } from '@/lib/admin-auth'
+import { ActivityLogger } from '@/lib/activity-logger'
 
 export async function POST(
   request: NextRequest,
@@ -8,37 +9,39 @@ export async function POST(
 ) {
   try {
     // Check admin authentication
-    const authResult = await requireSuperAdminAuth(request)
-    if (authResult.error) {
+    const adminUser = await requireSuperAdminAuth(request)
+    if (!adminUser) {
       return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
+        { error: 'Super admin access required' },
+        { status: 403 }
       )
     }
 
     const { id: userId } = await params
-    const { days = 30 } = await request.json()
+    const body = await request.json()
+    const { days = 30 } = body
 
-    // Get current user profile
-    const { data: userProfile, error: fetchError } = await supabaseAdmin
+    // Get current user data
+    const { data: currentUser, error: userError } = await supabaseAdmin
       .from('indb_auth_user_profiles')
-      .select('expires_at')
+      .select('full_name, expires_at, package:indb_payment_packages(name, slug)')
       .eq('user_id', userId)
       .single()
 
-    if (fetchError) {
-      console.error('Error fetching user profile:', fetchError)
+    if (userError || !currentUser) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       )
     }
 
-    // Calculate new expiration date
-    const currentExpiry = userProfile.expires_at ? new Date(userProfile.expires_at) : new Date()
-    const newExpiry = new Date(currentExpiry.getTime() + (days * 24 * 60 * 60 * 1000))
+    // Calculate new expiry date
+    const currentExpiry = currentUser.expires_at ? new Date(currentUser.expires_at) : new Date()
+    const now = new Date()
+    const baseDate = currentExpiry > now ? currentExpiry : now
+    const newExpiry = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000)
 
-    // Update user's subscription expiration
+    // Update subscription expiry
     const { error: updateError } = await supabaseAdmin
       .from('indb_auth_user_profiles')
       .update({
@@ -55,9 +58,29 @@ export async function POST(
       )
     }
 
+    // Log admin activity
+    try {
+      await ActivityLogger.logAdminAction(
+        adminUser.id,
+        'subscription_extend',
+        userId,
+        `Extended subscription for ${currentUser.full_name || 'User'} by ${days} days`,
+        request,
+        { 
+          subscriptionExtend: true,
+          extensionDays: days,
+          previousExpiry: currentUser.expires_at,
+          newExpiry: newExpiry.toISOString(),
+          userFullName: currentUser.full_name 
+        }
+      )
+    } catch (logError) {
+      console.error('Failed to log subscription extension activity:', logError)
+    }
+
     return NextResponse.json({ 
       success: true,
-      message: `Subscription extended by ${days} days`,
+      message: `Subscription successfully extended by ${days} days`,
       new_expiry: newExpiry.toISOString()
     })
 

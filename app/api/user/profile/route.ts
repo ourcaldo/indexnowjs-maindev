@@ -62,12 +62,28 @@ export async function GET(request: NextRequest) {
       console.error('Auth user fetch error:', authError)
     }
 
-    // Combine profile and auth data
+    // Get additional user statistics
+    const [serviceAccountsResult, activeJobsResult] = await Promise.all([
+      supabaseAdmin
+        .from('indb_google_service_accounts')
+        .select('id', { count: 'exact' })
+        .eq('user_id', userId)
+        .eq('is_active', true),
+      supabaseAdmin
+        .from('indb_indexing_jobs')
+        .select('id', { count: 'exact' })
+        .eq('user_id', userId)
+        .in('status', ['running', 'pending'])
+    ])
+
+    // Combine profile and auth data with additional stats
     const userProfile = {
       ...profile,
       email: authUser.user?.email || null,
       email_confirmed_at: authUser.user?.email_confirmed_at || null,
       last_sign_in_at: authUser.user?.last_sign_in_at || null,
+      service_account_count: serviceAccountsResult.count || 0,
+      active_jobs_count: activeJobsResult.count || 0,
     }
 
     return NextResponse.json({ 

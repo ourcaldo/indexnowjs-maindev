@@ -109,6 +109,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, type, urls, sitemapUrl, scheduleType, startTime } = body
 
+    // Import QuotaService for quota enforcement at the top
+    const { QuotaService } = await import('@/lib/quota-service')
+
     // Security: Sanitize inputs
     const sanitizeInput = (input: string): string => {
       if (typeof input !== 'string') return ''
@@ -165,8 +168,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid URLs detected' }, { status: 400 })
       }
 
-      // Check for duplicates (no limit on URL count per user request)
+      // Check for duplicates 
       const uniqueUrls = Array.from(new Set(sanitizedUrls))
+
+      // CHECK USER QUOTA BEFORE ALLOWING JOB CREATION
+      const quotaCheck = await QuotaService.canSubmitUrls(user.id, uniqueUrls.length)
+      if (!quotaCheck.canSubmit) {
+        return NextResponse.json({ 
+          error: quotaCheck.message || 'Quota exceeded. Unable to submit this many URLs.',
+          quota_exhausted: quotaCheck.quotaExhausted,
+          remaining_quota: quotaCheck.remainingQuota
+        }, { status: 400 })
+      }
     }
 
     if (type === 'sitemap') {
@@ -185,8 +198,7 @@ export async function POST(request: NextRequest) {
       ? Array.from(new Set(urls.map((url: string) => sanitizeInput(url)).filter((url: string) => url.trim())))
       : []
     
-    // Import quota service and check user's quota
-    const { QuotaService } = await import('@/lib/quota-service')
+    // Check user's quota using already imported service
     const urlCount = processedUrls.length
     
     if (urlCount > 0) {

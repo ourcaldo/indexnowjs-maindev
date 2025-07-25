@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authService } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
+import QuotaExhaustedNotification from '@/components/quota-exhausted-notification'
 import { 
   Zap, 
   Download, 
@@ -32,6 +33,14 @@ export default function IndexNowPage() {
   // Service accounts data
   const [serviceAccounts, setServiceAccounts] = useState<any[]>([])
   const [currentUser, setCurrentUser] = useState<any>(null)
+  
+  // Quota notification state
+  const [showQuotaNotification, setShowQuotaNotification] = useState(false)
+  const [quotaNotificationData, setQuotaNotificationData] = useState({
+    remainingQuota: 0,
+    dailyLimit: 0,
+    packageName: ''
+  })
 
   // Load data on component mount
   useEffect(() => {
@@ -326,9 +335,20 @@ export default function IndexNowPage() {
         setNextJobNumber(prev => prev + 1)
       } else {
         const error = await response.json()
+        
+        // Handle quota exhaustion with notification
+        if (error.quota_exhausted || error.quotaExhausted) {
+          setQuotaNotificationData({
+            remainingQuota: error.remaining_quota || error.remainingQuota || 0,
+            dailyLimit: currentUser?.package?.quota_limits?.daily_urls || 50,
+            packageName: currentUser?.package?.name || 'Free'
+          })
+          setShowQuotaNotification(true)
+        }
+        
         addToast({
-          title: 'Error',
-          description: error.error || 'Failed to create job',
+          title: 'Quota Limit Reached',
+          description: error.error || 'Daily quota exceeded. Upgrade your plan to submit more URLs.',
           type: 'error'
         })
       }
@@ -357,6 +377,15 @@ export default function IndexNowPage() {
 
   return (
     <div className="space-y-6">
+      {/* Quota Exhausted Notification */}
+      <QuotaExhaustedNotification
+        isVisible={showQuotaNotification}
+        remainingQuota={quotaNotificationData.remainingQuota}
+        dailyLimit={quotaNotificationData.dailyLimit}
+        packageName={quotaNotificationData.packageName}
+        onClose={() => setShowQuotaNotification(false)}
+      />
+      
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{color: '#1A1A1A'}}>IndexNow</h1>

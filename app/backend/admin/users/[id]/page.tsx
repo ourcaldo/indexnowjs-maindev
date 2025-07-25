@@ -815,7 +815,7 @@ export default function UserDetail() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-[#6C757D]">Service Accounts</span>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-[#1A1A1A]">-</p>
+                      <p className="text-lg font-bold text-[#1A1A1A]">{user.service_account_count || 0}</p>
                       <p className="text-xs text-[#6C757D]">
                         / {user.package.quota_limits.service_accounts === -1 ? '∞' : user.package.quota_limits.service_accounts}
                       </p>
@@ -827,7 +827,7 @@ export default function UserDetail() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-[#6C757D]">Concurrent Jobs</span>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-[#1A1A1A]">-</p>
+                      <p className="text-lg font-bold text-[#1A1A1A]">{user.active_jobs_count || 0}</p>
                       <p className="text-xs text-[#6C757D]">
                         / {user.package.quota_limits.concurrent_jobs === -1 ? '∞' : user.package.quota_limits.concurrent_jobs}
                       </p>

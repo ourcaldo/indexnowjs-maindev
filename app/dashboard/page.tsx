@@ -323,7 +323,7 @@ export default function Dashboard() {
                   <div>
                     <p className="text-sm font-medium text-[#6C757D]">Service Accounts</p>
                     <p className="text-lg font-bold text-[#1A1A1A]">
-                      - / {userProfile.package.quota_limits.service_accounts === -1 ? '∞' : userProfile.package.quota_limits.service_accounts}
+                      {userProfile.service_account_count || 0} / {userProfile.package.quota_limits.service_accounts === -1 ? '∞' : userProfile.package.quota_limits.service_accounts}
                     </p>
                   </div>
                   <div className="w-8 h-8 rounded-lg bg-[#4BB543]/10 flex items-center justify-center">
@@ -337,7 +337,7 @@ export default function Dashboard() {
                   <div>
                     <p className="text-sm font-medium text-[#6C757D]">Concurrent Jobs</p>
                     <p className="text-lg font-bold text-[#1A1A1A]">
-                      - / {userProfile.package.quota_limits.concurrent_jobs === -1 ? '∞' : userProfile.package.quota_limits.concurrent_jobs}
+                      {userProfile.active_jobs_count || 0} / {userProfile.package.quota_limits.concurrent_jobs === -1 ? '∞' : userProfile.package.quota_limits.concurrent_jobs}
                     </p>
                   </div>
                   <div className="w-8 h-8 rounded-lg bg-[#F0A202]/10 flex items-center justify-center">
