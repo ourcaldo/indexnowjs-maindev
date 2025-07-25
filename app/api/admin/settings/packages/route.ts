@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireServerSuperAdminAuth } from '@/lib/server-auth'
+import { requireSuperAdminAuth } from '@/lib/admin-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    await requireServerSuperAdminAuth(request)
+    await requireSuperAdminAuth(request)
 
     const { data: packages, error } = await supabaseAdmin
       .from('indb_payment_packages')
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireServerSuperAdminAuth(request)
+    await requireSuperAdminAuth(request)
     const body = await request.json()
 
     const { data: package_data, error } = await supabaseAdmin
@@ -34,12 +34,14 @@ export async function POST(request: NextRequest) {
         name: body.name,
         slug: body.slug,
         description: body.description,
-        price: body.price,
-        billing_period: body.billing_period,
+        price: body.price || 0,
+        currency: body.currency || 'IDR',
+        billing_period: body.billing_period || 'monthly',
         features: body.features || [],
+        quota_limits: body.quota_limits || {},
         is_active: body.is_active || false,
-        is_popular: body.is_popular || false,
-        metadata: body.metadata || {}
+        sort_order: body.sort_order || 0,
+        pricing_tiers: body.pricing_tiers || []
       })
       .select()
       .single()
