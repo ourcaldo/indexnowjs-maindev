@@ -6,7 +6,7 @@ import { adminAuthService } from '@/lib/admin-auth'
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    const adminUser = await requireServerSuperAdminAuth()
+    const adminUser = await requireServerSuperAdminAuth(request)
 
     // Fetch user profiles - we'll get auth data separately via RPC or admin API
     const { data: profiles, error: profilesError } = await supabaseAdmin

@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    await requireServerSuperAdminAuth()
+    await requireServerSuperAdminAuth(request)
 
     const { data: packages, error } = await supabaseAdmin
       .from('indb_payment_packages')
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireServerSuperAdminAuth()
+    await requireServerSuperAdminAuth(request)
     const body = await request.json()
 
     const { data: package_data, error } = await supabaseAdmin

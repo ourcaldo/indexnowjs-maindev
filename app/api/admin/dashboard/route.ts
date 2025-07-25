@@ -5,7 +5,7 @@ import { requireServerSuperAdminAuth } from '@/lib/server-auth'
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    await requireServerSuperAdminAuth()
+    await requireServerSuperAdminAuth(request)
 
     // Fetch dashboard stats from the view
     const { data: stats, error: statsError } = await supabaseAdmin

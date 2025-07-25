@@ -5,7 +5,7 @@ import { requireServerSuperAdminAuth } from '@/lib/server-auth'
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    await requireServerSuperAdminAuth()
+    await requireServerSuperAdminAuth(request)
 
     // Fetch site settings
     const { data: settings, error } = await supabaseAdmin
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     // Verify super admin authentication
-    const adminUser = await requireServerSuperAdminAuth()
+    const adminUser = await requireServerSuperAdminAuth(request)
 
     const body = await request.json()
     const {

@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    await requireServerSuperAdminAuth()
+    await requireServerSuperAdminAuth(request)
 
     const { data: posts, error } = await supabaseAdmin
       .from('indb_cms_posts')
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const adminUser = await requireServerSuperAdminAuth()
+    const adminUser = await requireServerSuperAdminAuth(request)
     const body = await request.json()
 
     if (!adminUser) {

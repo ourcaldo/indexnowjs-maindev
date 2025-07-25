@@ -5,7 +5,7 @@ import { requireServerSuperAdminAuth } from '@/lib/server-auth'
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    await requireServerSuperAdminAuth()
+    await requireServerSuperAdminAuth(request)
 
     const searchParams = request.nextUrl.searchParams
     const days = parseInt(searchParams.get('days') || '7')

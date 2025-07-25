@@ -15,31 +15,51 @@ export interface ServerAdminUser {
 /**
  * Get authenticated user from server-side API route with admin role information
  */
-export async function getServerAdminUser(): Promise<ServerAdminUser | null> {
+export async function getServerAdminUser(request?: NextRequest): Promise<ServerAdminUser | null> {
   try {
-    const cookieStore = await cookies()
+    let supabaseServer
     
-    const supabaseServer = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
+    if (request) {
+      // Use request headers if available (for API routes)
+      supabaseServer = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll()
+            },
+            setAll() {
+              // Cannot set cookies in API routes
+            },
           },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
+        }
+      )
+    } else {
+      // Use cookies() for server components
+      const cookieStore = await cookies()
+      supabaseServer = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll()
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value, options }) => {
+                cookieStore.set(name, value, options)
+              })
+            },
           },
-        },
-      }
-    )
+        }
+      )
+    }
 
     const { data: { user }, error: userError } = await supabaseServer.auth.getUser()
     
     if (userError || !user) {
-      console.log('Server auth: No authenticated user found')
+      console.log('Server auth: No authenticated user found', userError?.message)
       return null
     }
 
@@ -105,8 +125,8 @@ export async function getServerAdminUser(): Promise<ServerAdminUser | null> {
 /**
  * Middleware for super admin route protection in API routes
  */
-export async function requireServerSuperAdminAuth(): Promise<ServerAdminUser> {
-  const adminUser = await getServerAdminUser()
+export async function requireServerSuperAdminAuth(request?: NextRequest): Promise<ServerAdminUser> {
+  const adminUser = await getServerAdminUser(request)
   if (!adminUser?.isSuperAdmin) {
     throw new Error('Super admin access required')
   }
