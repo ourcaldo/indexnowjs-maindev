@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   Users, 
   Search, 
@@ -13,7 +14,8 @@ import {
   Key,
   CheckCircle,
   XCircle,
-  AlertTriangle
+  AlertTriangle,
+  Eye
 } from 'lucide-react'
 
 interface UserProfile {
@@ -31,6 +33,7 @@ interface UserProfile {
 }
 
 export default function UserManagement() {
+  const router = useRouter()
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -244,7 +247,11 @@ export default function UserManagement() {
             </thead>
             <tbody className="divide-y divide-[#E0E6ED]">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-[#F7F9FC]">
+                <tr 
+                  key={user.id} 
+                  className="hover:bg-[#F7F9FC] cursor-pointer transition-colors"
+                  onClick={() => router.push(`/backend/admin/users/${user.user_id}`)}
+                >
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-[#3D8BFF]/10 rounded-full flex items-center justify-center">
@@ -285,17 +292,45 @@ export default function UserManagement() {
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center justify-end space-x-2">
-                      <button className="p-1 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/backend/admin/users/${user.user_id}`)
+                        }}
+                        className="p-1 text-[#6C757D] hover:text-[#3D8BFF] hover:bg-[#3D8BFF]/10 rounded transition-colors"
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/backend/admin/users/${user.user_id}`)
+                        }}
+                        className="p-1 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded transition-colors"
+                        title="Edit User"
+                      >
                         <Edit3 className="h-4 w-4" />
                       </button>
-                      <button className="p-1 text-[#6C757D] hover:text-[#F0A202] hover:bg-[#F0A202]/10 rounded">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          // Quick actions could be implemented here
+                        }}
+                        className="p-1 text-[#6C757D] hover:text-[#F0A202] hover:bg-[#F0A202]/10 rounded transition-colors"
+                        title="Reset Password"
+                      >
                         <Key className="h-4 w-4" />
                       </button>
-                      <button className="p-1 text-[#6C757D] hover:text-[#E63946] hover:bg-[#E63946]/10 rounded">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          // Quick actions could be implemented here
+                        }}
+                        className="p-1 text-[#6C757D] hover:text-[#E63946] hover:bg-[#E63946]/10 rounded transition-colors"
+                        title="Suspend User"
+                      >
                         <Ban className="h-4 w-4" />
-                      </button>
-                      <button className="p-1 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded">
-                        <MoreHorizontal className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
