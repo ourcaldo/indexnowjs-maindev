@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      data: stats 
+      stats: stats 
     })
 
   } catch (error: any) {

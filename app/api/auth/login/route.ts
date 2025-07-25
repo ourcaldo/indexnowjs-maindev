@@ -13,6 +13,7 @@ import {
   ErrorSeverity, 
   logger 
 } from '@/lib/error-handling'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
 
 export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint: string) => {
   // Validate request body
@@ -37,7 +38,7 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
     })
 
     if (error) {
-      // Log authentication failure
+      // Log authentication failure with activity logging
       const authError = await ErrorHandlingService.createError(
         ErrorType.AUTHENTICATION,
         `Login failed for ${email}: ${error.message}`,
@@ -53,6 +54,20 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
           }
         }
       )
+
+      // Log failed login attempt (use email as temporary user ID for failed attempts)
+      try {
+        await ActivityLogger.logAuth(
+          email, // Use email as ID for failed attempts
+          ActivityEventTypes.LOGIN,
+          false,
+          request,
+          error.message
+        )
+      } catch (logError) {
+        logger.error({ error: logError, email }, 'Failed to log authentication failure')
+      }
+
       return createErrorResponse(authError)
     }
 
@@ -63,6 +78,20 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       endpoint,
       loginMethod: 'password'
     }, 'User logged in successfully')
+
+    // Log successful login with comprehensive activity logging
+    if (data.user?.id) {
+      try {
+        await ActivityLogger.logAuth(
+          data.user.id,
+          ActivityEventTypes.LOGIN,
+          true,
+          request
+        )
+      } catch (logError) {
+        logger.error({ error: logError, userId: data.user.id }, 'Failed to log successful authentication')
+      }
+    }
 
     // Return user data and session
     return createApiResponse({

@@ -66,6 +66,37 @@ interface ActivityLog {
   error_message?: string
 }
 
+interface SecurityData {
+  ipAddresses: string[]
+  devices: Array<{
+    type: string
+    browser: string
+    os: string
+    firstSeen: string
+    lastUsed: string
+    usageCount: number
+  }>
+  locations: string[]
+  loginAttempts: {
+    total: number
+    successful: number
+    failed: number
+    recent: Array<{
+      success: boolean
+      timestamp: string
+      ip_address?: string
+      device_info?: any
+    }>
+  }
+  activity: {
+    lastActivity: string | null
+    firstSeen: string | null
+    totalActivities: number
+  }
+  securityScore: number
+  riskLevel: 'low' | 'medium' | 'high'
+}
+
 export default function UserDetail() {
   const params = useParams()
   const router = useRouter()
@@ -86,6 +117,10 @@ export default function UserDetail() {
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
   const [activityLoading, setActivityLoading] = useState(false)
   
+  // Security data state
+  const [securityData, setSecurityData] = useState<SecurityData | null>(null)
+  const [securityLoading, setSecurityLoading] = useState(false)
+  
   // Edit form state
   const [editForm, setEditForm] = useState({
     full_name: '',
@@ -98,6 +133,7 @@ export default function UserDetail() {
     if (userId) {
       fetchUser()
       fetchUserActivity()
+      fetchUserSecurity()
     }
   }, [userId])
 
@@ -115,6 +151,23 @@ export default function UserDetail() {
       console.error('Failed to fetch user activity:', error)
     } finally {
       setActivityLoading(false)
+    }
+  }
+
+  const fetchUserSecurity = async () => {
+    try {
+      setSecurityLoading(true)
+      const response = await fetch(`/api/admin/users/${userId}/security`, {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setSecurityData(data.security)
+      }
+    } catch (error) {
+      console.error('Failed to fetch user security data:', error)
+    } finally {
+      setSecurityLoading(false)
     }
   }
 
@@ -200,6 +253,7 @@ export default function UserDetail() {
       if (response.ok) {
         await fetchUser() // Refresh user data
         await fetchUserActivity() // Refresh activity logs
+        await fetchUserSecurity() // Refresh security data
         setEditMode(false)
       }
     } catch (error) {
@@ -590,153 +644,193 @@ export default function UserDetail() {
         </div>
       )}
 
-      {/* Comprehensive User Information */}
+      {/* Security Information */}
       <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
-            <User className="h-5 w-5 text-[#3D8BFF]" />
+          <div className="p-2 rounded-lg bg-[#E63946]/10">
+            <Shield className="h-5 w-5 text-[#E63946]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-[#1A1A1A]">User Information</h3>
-            <p className="text-sm text-[#6C757D]">Comprehensive user details and device information</p>
+            <h3 className="text-lg font-bold text-[#1A1A1A]">Security Information</h3>
+            <p className="text-sm text-[#6C757D]">IP addresses, devices, and login security analysis</p>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Account Information */}
-          <div>
-            <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Account Details
-            </h4>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
-                <span className="text-[#6C757D] text-sm">User ID</span>
-                <span className="text-[#1A1A1A] text-sm font-mono">{user?.user_id}</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
-                <span className="text-[#6C757D] text-sm">Account Status</span>
-                <div className="flex items-center gap-2">
-                  {getStatusIcon(user)}
-                  <span className="text-[#1A1A1A] text-sm">
-                    {user?.email_confirmed_at ? 'Verified' : 'Unverified'}
-                  </span>
+        {securityLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#3D8BFF]"></div>
+          </div>
+        ) : securityData ? (
+          <div className="space-y-6">
+            {/* Security Overview */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="bg-[#F7F9FC] rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`p-2 rounded-lg ${
+                    securityData.riskLevel === 'low' ? 'bg-[#4BB543]/10' : 
+                    securityData.riskLevel === 'medium' ? 'bg-[#F0A202]/10' : 'bg-[#E63946]/10'
+                  }`}>
+                    <Shield className={`h-4 w-4 ${
+                      securityData.riskLevel === 'low' ? 'text-[#4BB543]' : 
+                      securityData.riskLevel === 'medium' ? 'text-[#F0A202]' : 'text-[#E63946]'
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#6C757D] uppercase tracking-wide">Security Score</p>
+                    <p className="text-xl font-bold text-[#1A1A1A]">{securityData.securityScore}/100</p>
+                  </div>
+                </div>
+                <div className={`text-xs px-2 py-1 rounded-full w-fit ${
+                  securityData.riskLevel === 'low' ? 'bg-[#4BB543]/10 text-[#4BB543]' : 
+                  securityData.riskLevel === 'medium' ? 'bg-[#F0A202]/10 text-[#F0A202]' : 'bg-[#E63946]/10 text-[#E63946]'
+                }`}>
+                  {securityData.riskLevel.toUpperCase()} RISK
                 </div>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
-                <span className="text-[#6C757D] text-sm">Member Since</span>
-                <span className="text-[#1A1A1A] text-sm">
-                  {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  }) : 'Unknown'}
-                </span>
+
+              <div className="bg-[#F7F9FC] rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Globe className="h-4 w-4 text-[#6C757D]" />
+                  <div>
+                    <p className="text-xs text-[#6C757D] uppercase tracking-wide">Unique IP Addresses</p>
+                    <p className="text-xl font-bold text-[#1A1A1A]">{securityData.ipAddresses.length}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-[#6C757D]">Different locations</p>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
-                <span className="text-[#6C757D] text-sm">Last Updated</span>
-                <span className="text-[#1A1A1A] text-sm">
-                  {user?.updated_at ? new Date(user.updated_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  }) : 'Unknown'}
-                </span>
+
+              <div className="bg-[#F7F9FC] rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Monitor className="h-4 w-4 text-[#6C757D]" />
+                  <div>
+                    <p className="text-xs text-[#6C757D] uppercase tracking-wide">Unique Devices</p>
+                    <p className="text-xl font-bold text-[#1A1A1A]">{securityData.devices.length}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-[#6C757D]">Different browsers/devices</p>
               </div>
             </div>
-          </div>
 
-          {/* Activity Summary */}
-          <div>
-            <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
-              <Activity className="h-4 w-4" />
-              Activity Summary
-            </h4>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
-                <span className="text-[#6C757D] text-sm">Total Activities</span>
-                <span className="text-[#1A1A1A] text-sm font-semibold">{activityLogs.length}</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
-                <span className="text-[#6C757D] text-sm">Successful Actions</span>
-                <span className="text-[#4BB543] text-sm font-semibold">
-                  {activityLogs.filter(log => log.success).length}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
-                <span className="text-[#6C757D] text-sm">Failed Actions</span>
-                <span className="text-[#E63946] text-sm font-semibold">
-                  {activityLogs.filter(log => !log.success).length}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
-                <span className="text-[#6C757D] text-sm">Last Activity</span>
-                <span className="text-[#1A1A1A] text-sm">
-                  {activityLogs.length > 0 
-                    ? formatActivityDate(activityLogs[0].created_at)
-                    : 'No activity'
-                  }
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Device and IP Information */}
-        {activityLogs.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-[#E0E6ED]">
-            <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
-              <Monitor className="h-4 w-4" />
-              Device & Access Information
-            </h4>
-            
+            {/* Login Attempts */}
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Recent Devices */}
               <div>
-                <h5 className="text-xs font-medium text-[#6C757D] mb-3 uppercase tracking-wide">Recent Devices</h5>
-                <div className="space-y-2">
-                  {Array.from(new Set(activityLogs.slice(0, 5).map(log => log.user_agent).filter(Boolean)))
-                    .slice(0, 3)
-                    .map((userAgent, index) => {
-                      const deviceInfo = getDeviceInfo(userAgent)
-                      const DeviceIcon = deviceInfo.icon
-                      return (
-                        <div key={index} className="flex items-center gap-3 p-2 bg-[#F7F9FC] rounded-lg">
-                          <DeviceIcon className="h-4 w-4 text-[#6C757D]" />
-                          <div className="flex-1">
-                            <div className="text-[#1A1A1A] text-sm font-medium">{deviceInfo.text}</div>
-                            <div className="text-[#6C757D] text-xs truncate" title={userAgent}>
-                              {userAgent?.substring(0, 50)}...
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
+                <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Login Attempts
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                    <span className="text-[#6C757D] text-sm">Total Attempts</span>
+                    <span className="text-[#1A1A1A] text-sm font-semibold">{securityData.loginAttempts.total}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                    <span className="text-[#6C757D] text-sm">Successful</span>
+                    <span className="text-[#4BB543] text-sm font-semibold">{securityData.loginAttempts.successful}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                    <span className="text-[#6C757D] text-sm">Failed</span>
+                    <span className="text-[#E63946] text-sm font-semibold">{securityData.loginAttempts.failed}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-[#6C757D] text-sm">Success Rate</span>
+                    <span className="text-[#1A1A1A] text-sm font-semibold">
+                      {securityData.loginAttempts.total > 0 
+                        ? Math.round((securityData.loginAttempts.successful / securityData.loginAttempts.total) * 100)
+                        : 0}%
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Recent IP Addresses */}
               <div>
-                <h5 className="text-xs font-medium text-[#6C757D] mb-3 uppercase tracking-wide">Recent IP Addresses</h5>
-                <div className="space-y-2">
-                  {Array.from(new Set(activityLogs.slice(0, 10).map(log => log.ip_address).filter(Boolean)))
-                    .slice(0, 5)
-                    .map((ip, index) => (
+                <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Activity Overview
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                    <span className="text-[#6C757D] text-sm">Total Activities</span>
+                    <span className="text-[#1A1A1A] text-sm font-semibold">{securityData.activity.totalActivities}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                    <span className="text-[#6C757D] text-sm">Last Activity</span>
+                    <span className="text-[#1A1A1A] text-sm">
+                      {securityData.activity.lastActivity 
+                        ? formatActivityDate(securityData.activity.lastActivity)
+                        : 'No activity'
+                      }
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                    <span className="text-[#6C757D] text-sm">First Seen</span>
+                    <span className="text-[#1A1A1A] text-sm">
+                      {securityData.activity.firstSeen 
+                        ? formatActivityDate(securityData.activity.firstSeen)
+                        : 'Unknown'
+                      }
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-[#6C757D] text-sm">Locations</span>
+                    <span className="text-[#1A1A1A] text-sm font-semibold">{securityData.locations.length}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* IP Addresses and Devices */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* IP Addresses */}
+              <div>
+                <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  IP Addresses ({securityData.ipAddresses.length})
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {securityData.ipAddresses.map((ip, index) => (
+                    <div key={index} className="flex items-center gap-3 p-2 bg-[#F7F9FC] rounded-lg">
+                      <Globe className="h-4 w-4 text-[#6C757D]" />
+                      <div className="flex-1">
+                        <div className="text-[#1A1A1A] text-sm font-mono">{ip}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Devices */}
+              <div>
+                <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
+                  <Monitor className="h-4 w-4" />
+                  Devices ({securityData.devices.length})
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {securityData.devices.map((device, index) => {
+                    const DeviceIcon = device.type === 'mobile' ? Smartphone : 
+                                      device.type === 'tablet' ? Tablet : Monitor
+                    return (
                       <div key={index} className="flex items-center gap-3 p-2 bg-[#F7F9FC] rounded-lg">
-                        <Globe className="h-4 w-4 text-[#6C757D]" />
+                        <DeviceIcon className="h-4 w-4 text-[#6C757D]" />
                         <div className="flex-1">
-                          <div className="text-[#1A1A1A] text-sm font-mono">{ip}</div>
+                          <div className="text-[#1A1A1A] text-sm font-medium">
+                            {device.browser} on {device.os}
+                          </div>
                           <div className="text-[#6C757D] text-xs">
-                            Used {activityLogs.filter(log => log.ip_address === ip).length} times
+                            Used {device.usageCount} times • Last: {formatActivityDate(device.lastUsed)}
                           </div>
                         </div>
                       </div>
-                    ))}
+                    )
+                  })}
                 </div>
               </div>
             </div>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Shield className="h-12 w-12 text-[#6C757D] mx-auto mb-4 opacity-50" />
+            <h4 className="text-lg font-medium text-[#1A1A1A] mb-2">No Security Data</h4>
+            <p className="text-[#6C757D]">No security information available for this user</p>
           </div>
         )}
       </div>

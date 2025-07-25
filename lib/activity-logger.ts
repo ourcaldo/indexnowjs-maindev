@@ -5,6 +5,8 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from './error-handling'
+import { getRequestInfo, formatDeviceInfo, formatLocationData, getSecurityRiskLevel } from './ip-device-utils'
+import { NextRequest } from 'next/server'
 
 export interface ActivityLogData {
   userId: string
@@ -19,6 +21,7 @@ export interface ActivityLogData {
   success?: boolean
   errorMessage?: string
   metadata?: Record<string, any>
+  request?: NextRequest // Optional request object for auto-extraction
 }
 
 export interface ActivityLogEntry {
@@ -91,6 +94,25 @@ export class ActivityLogger {
    */
   static async logActivity(data: ActivityLogData): Promise<string | null> {
     try {
+      // Auto-extract request info if request is provided but other fields are missing
+      let { ipAddress, userAgent, deviceInfo, locationData } = data
+      
+      if (data.request && (!ipAddress || !userAgent || !deviceInfo)) {
+        const requestInfo = getRequestInfo(data.request)
+        ipAddress = ipAddress || requestInfo.ipAddress || undefined
+        userAgent = userAgent || requestInfo.userAgent || undefined
+        deviceInfo = deviceInfo || requestInfo.deviceInfo || undefined
+        locationData = locationData || requestInfo.locationData || undefined
+      }
+      
+      // Enhance metadata with formatted info
+      const enhancedMetadata = {
+        ...(data.metadata || {}),
+        deviceFormatted: deviceInfo ? formatDeviceInfo(deviceInfo as any) : null,
+        locationFormatted: locationData ? formatLocationData(locationData as any) : null,
+        timestamp: new Date().toISOString()
+      }
+
       const { data: result, error } = await supabaseAdmin
         .from('indb_security_activity_logs')
         .insert({
@@ -99,13 +121,13 @@ export class ActivityLogger {
           action_description: data.actionDescription,
           target_type: data.targetType || null,
           target_id: data.targetId || null,
-          ip_address: data.ipAddress || null,
-          user_agent: data.userAgent || null,
-          device_info: data.deviceInfo || null,
-          location_data: data.locationData || null,
+          ip_address: ipAddress || null,
+          user_agent: userAgent || null,
+          device_info: deviceInfo || null,
+          location_data: locationData || null,
           success: data.success !== false, // Default to true unless explicitly false
           error_message: data.errorMessage || null,
-          metadata: data.metadata || null,
+          metadata: enhancedMetadata,
         })
         .select('id')
         .single()
@@ -138,9 +160,9 @@ export class ActivityLogger {
   }
 
   /**
-   * Log authentication activities
+   * Log authentication activities with enhanced tracking
    */
-  static async logAuth(userId: string, eventType: string, success: boolean, ipAddress?: string, userAgent?: string, errorMessage?: string) {
+  static async logAuth(userId: string, eventType: string, success: boolean, request?: NextRequest, errorMessage?: string) {
     const actionDescriptions = {
       [ActivityEventTypes.LOGIN]: success ? 'User logged in successfully' : 'Failed login attempt',
       [ActivityEventTypes.LOGOUT]: 'User logged out',
@@ -153,11 +175,10 @@ export class ActivityLogger {
       userId,
       eventType,
       actionDescription: actionDescriptions[eventType as keyof typeof actionDescriptions] || eventType,
-      ipAddress,
-      userAgent,
       success,
       errorMessage,
-      metadata: { timestamp: new Date().toISOString() }
+      request,
+      metadata: { authenticationEvent: true }
     })
   }
 
@@ -214,41 +235,90 @@ export class ActivityLogger {
   }
 
   /**
-   * Log admin activities
+   * Log admin activities with request context
    */
-  static async logAdminActivity(adminId: string, eventType: string, targetUserId: string, action: string, metadata?: Record<string, any>) {
+  static async logAdminActivity(adminId: string, eventType: string, targetUserId: string, action: string, request?: NextRequest, metadata?: Record<string, any>) {
     return this.logActivity({
       userId: adminId,
       eventType,
       actionDescription: action,
       targetType: 'users',
       targetId: targetUserId,
+      request,
       metadata: {
         adminAction: true,
-        ...metadata,
-        timestamp: new Date().toISOString()
+        ...metadata
       }
     })
   }
 
   /**
-   * Log API calls for tracking usage
+   * Log API calls for tracking usage with request context
    */
-  static async logApiCall(userId: string, endpoint: string, method: string, success: boolean, ipAddress?: string, responseTime?: number, errorMessage?: string) {
+  static async logApiCall(userId: string, endpoint: string, method: string, success: boolean, request?: NextRequest, responseTime?: number, errorMessage?: string) {
     return this.logActivity({
       userId,
       eventType: ActivityEventTypes.API_CALL,
       actionDescription: `${method} ${endpoint}`,
       success,
-      ipAddress,
       errorMessage,
+      request,
       metadata: {
         endpoint,
         method,
         responseTime,
-        timestamp: new Date().toISOString()
+        apiCall: true
       }
     })
+  }
+
+  /**
+   * Log user dashboard activities (for regular users)
+   */
+  static async logUserDashboardActivity(userId: string, action: string, details?: string, request?: NextRequest, metadata?: Record<string, any>) {
+    return this.logActivity({
+      userId,
+      eventType: 'dashboard_activity',
+      actionDescription: details ? `${action}: ${details}` : action,
+      request,
+      metadata: {
+        userDashboard: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Get user's previous IPs and devices for security analysis
+   */
+  static async getUserSecurityHistory(userId: string): Promise<{
+    previousIPs: string[]
+    previousDevices: any[]
+    lastActivity: string | null
+  }> {
+    try {
+      const { data: logs, error } = await supabaseAdmin
+        .from('indb_security_activity_logs')
+        .select('ip_address, device_info, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (error) {
+        logger.error({ error: error.message, userId }, 'Failed to fetch user security history')
+        return { previousIPs: [], previousDevices: [], lastActivity: null }
+      }
+
+      const uniqueIPs = new Set(logs?.map(log => log.ip_address).filter(Boolean) || [])
+      const previousIPs = Array.from(uniqueIPs)
+      const previousDevices = logs?.map(log => log.device_info).filter(Boolean) || []
+      const lastActivity = logs?.[0]?.created_at || null
+
+      return { previousIPs, previousDevices, lastActivity }
+    } catch (error: any) {
+      logger.error({ error: error.message, userId }, 'Exception while fetching user security history')
+      return { previousIPs: [], previousDevices: [], lastActivity: null }
+    }
   }
 
   /**

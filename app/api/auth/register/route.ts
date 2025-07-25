@@ -13,6 +13,7 @@ import {
   ErrorSeverity, 
   logger 
 } from '@/lib/error-handling'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
 
 export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint: string) => {
   // Validate request body
@@ -61,6 +62,20 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
           }
         }
       )
+
+      // Log failed registration attempt
+      try {
+        await ActivityLogger.logAuth(
+          email, // Use email as ID for failed attempts
+          ActivityEventTypes.REGISTER,
+          false,
+          request,
+          error.message
+        )
+      } catch (logError) {
+        logger.error({ error: logError, email }, 'Failed to log registration failure')
+      }
+
       return createErrorResponse(authError)
     }
 
@@ -71,6 +86,20 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       endpoint,
       registrationMethod: 'email_password'
     }, 'User registered successfully')
+
+    // Log successful registration with comprehensive activity logging
+    if (data.user?.id) {
+      try {
+        await ActivityLogger.logAuth(
+          data.user.id,
+          ActivityEventTypes.REGISTER,
+          true,
+          request
+        )
+      } catch (logError) {
+        logger.error({ error: logError, userId: data.user.id }, 'Failed to log successful registration')
+      }
+    }
 
     // Return user data
     return createApiResponse({

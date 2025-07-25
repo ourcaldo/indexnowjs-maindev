@@ -1,0 +1,57 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, I ask you to enhance the activity log in admin dashboard and we already do that, but there's still feedback to improvement:
+
+Before, I ask you to add matter information in single user detail page before the history activity, but the information that you add is look a like from the information that we already created before.
+See this:
+[on the top]
+User ID
+bffbd6fe-c4aa-49bd-8e4f-325a5136cd6e
+Phone
+Not provided
+Joined
+25/7/2025
+Last Active
+25/7/2025
+Email Notifications
+Enabled
+
+[admin actions]
+
+[User Information - you created this]
+Account Details
+User ID
+bffbd6fe-c4aa-49bd-8e4f-325a5136cd6e
+Account Status
+Verified
+Member Since
+July 25, 2025
+Last Updated
+Jul 25, 2025, 07:56 PM
+Activity Summary
+Total Activities
+0
+Successful Actions
+0
+Failed Actions
+0
+Last Activity
+No activity
+
+[Recent Activity Logs]
+
+The one that I mean by adding matter information before user history logs is like the IP, Devices, and others security related. Not duplicated information like this.
+
+As I ask to record the IP and device of the user, on the current version there's no function to that, so I need you to make:
+1. Function to record IP for every login and when user do activity and log all IP changes for security purpose. Not just that, there's some information that NULL in database, so make sure to also log and record that information, see this SQL to get to know about which information "INSERT INTO "public"."indb_security_activity_logs" ("id", "user_id", "event_type", "action_description", "target_type", "target_id", "ip_address", "user_agent", "device_info", "location_data", "success", "error_message", "metadata", "created_at") VALUES ('1538faa7-f2ac-474e-9672-5550426cbfaa', '915f50e5-0902-466a-b1af-bdf19d789722', 'user_management', 'Viewed users list', 'users', null, null, null, null, null, 'true', null, '{"count": 1}', '2025-07-25 06:45:11.835497+00');"
+2. For the user or in user dashboard, there's still no function to record log for activity log and history, don't forget to make it.

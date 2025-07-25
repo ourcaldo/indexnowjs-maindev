@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { ActivityLogger } from '@/lib/activity-logger'
+import { logger } from '@/lib/error-handling'
 
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
@@ -60,7 +62,22 @@ export async function POST(request: NextRequest) {
   })
 
   if (error) {
+    logger.error({ error: error.message }, 'Failed to set session')
     return NextResponse.json({ error: error.message }, { status: 400 })
+  }
+
+  // Log session activity if user is available
+  if (data.session?.user?.id) {
+    try {
+      await ActivityLogger.logUserDashboardActivity(
+        data.session.user.id,
+        'Session established',
+        'User session restored from stored tokens',
+        request
+      )
+    } catch (logError) {
+      logger.error({ error: logError, userId: data.session.user.id }, 'Failed to log session activity')
+    }
   }
 
   return NextResponse.json({ success: true })
