@@ -1,9 +1,29 @@
+import pino from 'pino'
 import { v4 as uuidv4 } from 'uuid'
 import { supabaseAdmin } from '@/lib/supabase'
-import { simpleLogger } from './simple-logger'
 
-// Export simple logger to replace pino and avoid worker thread issues
-export const logger = simpleLogger
+// Configure Pino logger with proper worker thread handling
+export const logger = pino({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  formatters: {
+    level: (label) => {
+      return { level: label.toUpperCase() };
+    },
+  },
+  timestamp: pino.stdTimeFunctions.isoTime,
+  // Fix worker thread issues by using sync mode in development
+  ...(process.env.NODE_ENV !== 'production' && {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        ignore: 'pid,hostname',
+        translateTime: 'SYS:yyyy-mm-dd HH:MM:ss',
+        sync: true, // This prevents worker thread spawning
+      },
+    },
+  }),
+})
 
 // Error types for structured logging
 export enum ErrorType {
