@@ -74,16 +74,8 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
 
     try {
       setLoading(true)
-      const token = localStorage.getItem('supabase_access_token')
-      if (!token) {
-        throw new Error('No authentication token found')
-      }
-
       const response = await fetch(`/api/admin/activity/${resolvedParams.id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include'
       })
 
       if (!response.ok) {

@@ -69,11 +69,6 @@ export default function ActivityLogsPage() {
   const fetchActivityLogs = async () => {
     try {
       setLoading(true)
-      const token = localStorage.getItem('supabase_access_token')
-      if (!token) {
-        throw new Error('No authentication token found')
-      }
-
       const params = new URLSearchParams({
         days: dayFilter,
         limit: '50',
@@ -81,10 +76,7 @@ export default function ActivityLogsPage() {
       })
 
       const response = await fetch(`/api/admin/activity?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include'
       })
 
       if (!response.ok) {
