@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import { authService, AuthUser } from '@/lib/auth'
 import { ToastContainer } from '@/components/ui/toast'
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
+import QuotaNotification from '@/components/QuotaNotification'
 
 export default function DashboardLayout({
   children,
@@ -152,6 +153,9 @@ export default function DashboardLayout({
             {children}
           </main>
         </div>
+        
+        {/* Quota Notification */}
+        <QuotaNotification />
       </div>
     </ToastContainer>
   )

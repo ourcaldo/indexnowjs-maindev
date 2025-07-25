@@ -8,10 +8,18 @@ export async function GET(request: NextRequest) {
     // Verify super admin authentication
     const adminUser = await requireSuperAdminAuth(request)
 
-    // Fetch user profiles - we'll get auth data separately via RPC or admin API
+    // Fetch user profiles with package information
     const { data: profiles, error: profilesError } = await supabaseAdmin
       .from('indb_auth_user_profiles')
-      .select('*')
+      .select(`
+        *,
+        package:indb_payment_packages(
+          id,
+          name,
+          slug,
+          quota_limits
+        )
+      `)
       .order('created_at', { ascending: false })
 
     if (profilesError) {

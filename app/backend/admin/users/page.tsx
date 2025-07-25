@@ -27,6 +27,21 @@ interface UserProfile {
   created_at: string
   updated_at: string
   phone_number: string | null
+  package_id?: string
+  subscribed_at?: string
+  expires_at?: string
+  daily_quota_used?: number
+  daily_quota_reset_date?: string
+  package?: {
+    id: string
+    name: string
+    slug: string
+    quota_limits: {
+      service_accounts: number
+      daily_urls: number
+      concurrent_jobs: number
+    }
+  }
   email?: string
   email_confirmed_at?: string
   last_sign_in_at?: string
@@ -239,9 +254,10 @@ export default function UserManagement() {
               <tr>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">User</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Role</th>
+                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Package</th>
+                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Daily Quota</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Status</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Joined</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Last Active</th>
                 <th className="text-right py-3 px-4 font-medium text-[#1A1A1A]">Actions</th>
               </tr>
             </thead>
@@ -271,6 +287,34 @@ export default function UserManagement() {
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getRoleColor(user.role)}`}>
                       {user.role.replace('_', ' ')}
                     </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center space-x-2">
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${
+                        user.package?.slug === 'free' ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20' :
+                        user.package?.slug === 'premium' ? 'bg-[#3D8BFF]/10 text-[#3D8BFF] border-[#3D8BFF]/20' :
+                        user.package?.slug === 'pro' ? 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20' :
+                        'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                      }`}>
+                        {user.package?.name || 'No Package'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="text-sm">
+                        <span className="font-medium text-[#1A1A1A]">
+                          {user.daily_quota_used || 0}
+                        </span>
+                        <span className="text-[#6C757D]">
+                          /{user.package?.quota_limits?.daily_urls === -1 ? '∞' : user.package?.quota_limits?.daily_urls || 0}
+                        </span>
+                      </div>
+                      {user.package?.quota_limits?.daily_urls !== -1 && user.daily_quota_used && user.package?.quota_limits?.daily_urls && 
+                       user.daily_quota_used >= user.package.quota_limits.daily_urls && (
+                        <AlertTriangle className="h-4 w-4 text-[#E63946]" />
+                      )}
+                    </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
