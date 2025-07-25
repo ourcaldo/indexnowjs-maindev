@@ -1,272 +1,444 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { 
-  Activity, 
-  Search, 
-  Filter, 
   Calendar,
+  Activity,
+  Clock,
   User,
-  Server,
-  Shield,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
   Eye,
-  AlertTriangle,
-  Info,
-  CheckCircle
+  Monitor,
+  MapPin,
+  Smartphone
 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import Link from 'next/link'
 
 interface ActivityLog {
   id: string
-  admin_id: string
-  action_type: string
+  user_id: string
+  user_name: string
+  user_email: string
+  event_type: string
   action_description: string
-  target_type: string | null
-  target_id: string | null
-  ip_address: string | null
-  user_agent: string | null
-  metadata: Record<string, any>
+  target_type?: string
+  target_id?: string
+  ip_address?: string
+  user_agent?: string
+  device_info?: any
+  location_data?: any
+  success: boolean
+  error_message?: string
+  metadata?: any
   created_at: string
-  admin_name?: string
-  admin_email?: string
 }
 
-export default function ActivityLogs() {
+export default function ActivityLogsPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [actionFilter, setActionFilter] = useState<string>('all')
-  const [dateFilter, setDateFilter] = useState<string>('7days')
+  const [dayFilter, setDayFilter] = useState('7')
+  const [typeFilter, setTypeFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 50,
+    total: 0,
+    totalPages: 0
+  })
 
   useEffect(() => {
     fetchActivityLogs()
-  }, [dateFilter])
+  }, [dayFilter, typeFilter, currentPage])
 
   const fetchActivityLogs = async () => {
     try {
-      const params = new URLSearchParams({
-        days: dateFilter === '7days' ? '7' : dateFilter === '30days' ? '30' : '1'
-      })
-      
-      const response = await fetch(`/api/admin/activity?${params}`, {
-        credentials: 'include'
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setLogs(data.logs || [])
+      setLoading(true)
+      const token = localStorage.getItem('supabase_access_token')
+      if (!token) {
+        throw new Error('No authentication token found')
       }
-    } catch (error) {
-      console.error('Failed to fetch activity logs:', error)
+
+      const params = new URLSearchParams({
+        days: dayFilter,
+        limit: '50',
+        page: currentPage.toString()
+      })
+
+      const response = await fetch(`/api/admin/activity?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch activity logs')
+      }
+
+      const data = await response.json()
+      setLogs(data.logs || [])
+      setPagination(data.pagination || {})
+    } catch (err: any) {
+      setError(err.message)
     } finally {
       setLoading(false)
     }
   }
 
   const filteredLogs = logs.filter(log => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = 
+      log.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.action_description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.admin_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.admin_email?.toLowerCase().includes(searchTerm.toLowerCase())
+      log.event_type.toLowerCase().includes(searchTerm.toLowerCase())
     
-    const matchesAction = actionFilter === 'all' || log.action_type === actionFilter
-
-    return matchesSearch && matchesAction
+    const matchesType = typeFilter === 'all' || log.event_type === typeFilter
+    
+    return matchesSearch && matchesType
   })
 
-  const getActionIcon = (actionType: string) => {
-    switch (actionType) {
-      case 'user_management':
-        return <User className="h-4 w-4 text-[#3D8BFF]" />
-      case 'system_settings':
-        return <Server className="h-4 w-4 text-[#F0A202]" />
-      case 'content_management':
-        return <Activity className="h-4 w-4 text-[#4BB543]" />
-      case 'security':
-        return <Shield className="h-4 w-4 text-[#E63946]" />
-      default:
-        return <Info className="h-4 w-4 text-[#6C757D]" />
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 
-  const getActionColor = (actionType: string) => {
-    switch (actionType) {
-      case 'user_management':
-        return 'bg-[#3D8BFF]/10 text-[#3D8BFF] border-[#3D8BFF]/20'
-      case 'system_settings':
-        return 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20'
-      case 'content_management':
-        return 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20'
-      case 'security':
-        return 'bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20'
-      default:
-        return 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+  const getEventTypeBadge = (eventType: string, success: boolean) => {
+    const colors = {
+      login: success ? 'bg-[#4BB543]/10 text-[#4BB543]' : 'bg-[#E63946]/10 text-[#E63946]',
+      logout: 'bg-[#6C757D]/10 text-[#6C757D]',
+      job_create: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+      job_update: 'bg-[#F0A202]/10 text-[#F0A202]',
+      job_delete: 'bg-[#E63946]/10 text-[#E63946]',
+      service_account_add: 'bg-[#4BB543]/10 text-[#4BB543]',
+      service_account_delete: 'bg-[#E63946]/10 text-[#E63946]',
+      profile_update: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+      admin_login: 'bg-[#F0A202]/10 text-[#F0A202]',
+      user_management: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+      api_call: 'bg-[#6C757D]/10 text-[#6C757D]'
     }
+    
+    return colors[eventType as keyof typeof colors] || 'bg-[#6C757D]/10 text-[#6C757D]'
+  }
+
+  const getDeviceIcon = (userAgent?: string) => {
+    if (!userAgent) return <Monitor className="h-4 w-4" />
+    
+    if (userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone')) {
+      return <Smartphone className="h-4 w-4" />
+    }
+    
+    return <Monitor className="h-4 w-4" />
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-[#1C2331]"></div>
+      <div className="min-h-screen bg-[#F7F9FC] p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-[#1A1A1A]">Activity Logs</h1>
+            <p className="text-[#6C757D] mt-2">Loading activity logs...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#F7F9FC] p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-[#1A1A1A]">Activity Logs</h1>
+            <Card className="mt-4">
+              <CardContent className="p-6">
+                <p className="text-[#E63946]">Error: {error}</p>
+                <Button 
+                  onClick={fetchActivityLogs}
+                  className="mt-4 bg-[#1C2331] hover:bg-[#0d1b2a] text-white"
+                >
+                  Retry
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Activity Logs</h1>
-          <p className="text-[#6C757D] mt-1">Track admin actions and system events</p>
+    <div className="min-h-screen bg-[#F7F9FC] p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-[#1A1A1A]">Activity Logs</h1>
+          <p className="text-[#6C757D] mt-2">
+            Track backend events, user actions (logins, changes, API calls), and system warnings or errors for audits and debugging
+          </p>
         </div>
-        <button
-          onClick={fetchActivityLogs}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
-        >
-          Refresh
-        </button>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
-              <Activity className="h-5 w-5 text-[#3D8BFF]" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">{logs.length}</p>
-              <p className="text-xs text-[#6C757D]">Total Activities</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#4BB543]/10">
-              <User className="h-5 w-5 text-[#4BB543]" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
-                {logs.filter(l => l.action_type === 'user_management').length}
-              </p>
-              <p className="text-xs text-[#6C757D]">User Actions</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#F0A202]/10">
-              <Server className="h-5 w-5 text-[#F0A202]" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
-                {logs.filter(l => l.action_type === 'system_settings').length}
-              </p>
-              <p className="text-xs text-[#6C757D]">System Changes</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#E63946]/10">
-              <Shield className="h-5 w-5 text-[#E63946]" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
-                {logs.filter(l => l.action_type === 'security').length}
-              </p>
-              <p className="text-xs text-[#6C757D]">Security Events</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
-            <input
-              type="text"
-              placeholder="Search activity logs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <Filter className="h-4 w-4 text-[#6C757D]" />
-            <select
-              value={actionFilter}
-              onChange={(e) => setActionFilter(e.target.value)}
-              className="px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
-            >
-              <option value="all">All Actions</option>
-              <option value="user_management">User Management</option>
-              <option value="system_settings">System Settings</option>
-              <option value="content_management">Content Management</option>
-              <option value="security">Security</option>
-            </select>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Calendar className="h-4 w-4 text-[#6C757D]" />
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
-            >
-              <option value="1day">Today</option>
-              <option value="7days">Last 7 Days</option>
-              <option value="30days">Last 30 Days</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Activity Logs */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED]">
-        <div className="divide-y divide-[#E0E6ED]">
-          {filteredLogs.map((log) => (
-            <div key={log.id} className="p-4 hover:bg-[#F7F9FC]">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 mt-1">
-                  {getActionIcon(log.action_type)}
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
+                  <Activity className="h-5 w-5 text-[#3D8BFF]" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getActionColor(log.action_type)}`}>
-                        {log.action_type.replace('_', ' ')}
-                      </span>
-                      {log.target_type && (
-                        <span className="text-xs text-[#6C757D] bg-[#F7F9FC] px-2 py-1 rounded">
-                          {log.target_type}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-xs text-[#6C757D]">
-                      {new Date(log.created_at).toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-[#1A1A1A] mb-2">{log.action_description}</p>
-                  <div className="flex items-center space-x-4 text-xs text-[#6C757D]">
-                    <span>Admin: {log.admin_name || 'Unknown'}</span>
-                    {log.ip_address && <span>IP: {log.ip_address}</span>}
-                    {log.metadata && Object.keys(log.metadata).length > 0 && (
-                      <span>Metadata: {Object.keys(log.metadata).length} items</span>
-                    )}
-                  </div>
+                <div>
+                  <p className="text-lg font-bold text-[#1A1A1A]">{filteredLogs.length}</p>
+                  <p className="text-xs text-[#6C757D]">Total Activities</p>
                 </div>
               </div>
-            </div>
-          ))}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-[#4BB543]/10">
+                  <User className="h-5 w-5 text-[#4BB543]" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-[#1A1A1A]">
+                    {new Set(filteredLogs.map(l => l.user_id)).size}
+                  </p>
+                  <p className="text-xs text-[#6C757D]">Active Users</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-[#4BB543]/10">
+                  <Activity className="h-5 w-5 text-[#4BB543]" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-[#1A1A1A]">
+                    {filteredLogs.filter(l => l.success).length}
+                  </p>
+                  <p className="text-xs text-[#6C757D]">Successful Actions</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-[#E63946]/10">
+                  <Activity className="h-5 w-5 text-[#E63946]" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-[#1A1A1A]">
+                    {filteredLogs.filter(l => !l.success).length}
+                  </p>
+                  <p className="text-xs text-[#6C757D]">Failed Actions</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {filteredLogs.length === 0 && (
-          <div className="text-center py-12">
-            <Activity className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-            <p className="text-[#6C757D]">No activity logs found</p>
-          </div>
-        )}
+        {/* Filters */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+                  <Input
+                    placeholder="Search by user name, email, action, or event type..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Select value={dayFilter} onValueChange={setDayFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select time range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Last 24 hours</SelectItem>
+                    <SelectItem value="7">Last 7 days</SelectItem>
+                    <SelectItem value="30">Last 30 days</SelectItem>
+                    <SelectItem value="90">Last 90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter by type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="login">Login/Logout</SelectItem>
+                    <SelectItem value="job_create">Job Management</SelectItem>
+                    <SelectItem value="service_account_add">Service Accounts</SelectItem>
+                    <SelectItem value="profile_update">Profile Updates</SelectItem>
+                    <SelectItem value="api_call">API Calls</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Activity Logs Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Recent Activity ({filteredLogs.length} entries)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {filteredLogs.length === 0 ? (
+              <div className="text-center py-8">
+                <Activity className="h-12 w-12 text-[#6C757D] mx-auto mb-4 opacity-50" />
+                <p className="text-[#6C757D]">No activity logs found</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredLogs.map((log) => (
+                  <div 
+                    key={log.id} 
+                    className="border border-[#E0E6ED] rounded-lg p-4 hover:bg-[#FFFFFF] cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-4 flex-1">
+                        {/* Timestamp */}
+                        <div className="flex items-center gap-2 min-w-[140px]">
+                          <Clock className="h-4 w-4 text-[#6C757D]" />
+                          <span className="text-[#1A1A1A] text-sm font-medium">
+                            {formatDate(log.created_at)}
+                          </span>
+                        </div>
+
+                        {/* User Info */}
+                        <div className="flex items-center gap-2 min-w-[200px]">
+                          <User className="h-4 w-4 text-[#6C757D]" />
+                          <div>
+                            <Link 
+                              href={`/backend/admin/users/${log.user_id}`}
+                              className="text-[#1A1A1A] font-medium text-sm hover:text-[#3D8BFF] transition-colors"
+                            >
+                              {log.user_name}
+                            </Link>
+                            <div className="text-[#6C757D] text-xs">
+                              {log.user_email}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Event/Action */}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge className={`${getEventTypeBadge(log.event_type, log.success)} border-0 text-xs`}>
+                              {log.event_type.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                            {!log.success && (
+                              <Badge className="bg-[#E63946]/10 text-[#E63946] border-0 text-xs">
+                                FAILED
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-[#1A1A1A] text-sm">
+                            {log.action_description}
+                          </p>
+                          {log.error_message && (
+                            <p className="text-[#E63946] text-xs mt-1">
+                              Error: {log.error_message}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* IP and Device */}
+                        <div className="flex items-center gap-4 min-w-[180px] text-[#6C757D] text-xs">
+                          {log.ip_address && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              <span className="font-mono">{log.ip_address}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1">
+                            {getDeviceIcon(log.user_agent)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* View Details Button */}
+                      <Link href={`/backend/admin/activity/${log.id}`}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-[#F7F9FC]"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between mt-6">
+                <p className="text-sm text-[#6C757D]">
+                  Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+                  {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
+                  {pagination.total} entries
+                </p>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  <span className="text-sm text-[#6C757D]">
+                    Page {pagination.page} of {pagination.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === pagination.totalPages}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

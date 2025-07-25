@@ -1,26 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { requireServerSuperAdminAuth } from '@/lib/server-auth'
+import { requireSuperAdminAuth } from '@/lib/admin-auth'
+import { ActivityLogger } from '@/lib/activity-logger'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    await requireServerSuperAdminAuth(request)
+    await requireSuperAdminAuth(request)
 
     const searchParams = request.nextUrl.searchParams
     const days = parseInt(searchParams.get('days') || '7')
+    const limit = parseInt(searchParams.get('limit') || '100')
+    const page = parseInt(searchParams.get('page') || '1')
+    const offset = (page - 1) * limit
 
     // Calculate date filter
     const dateFilter = new Date()
     dateFilter.setDate(dateFilter.getDate() - days)
 
-    // Fetch activity logs
+    // Fetch activity logs from the new security collection table
     const { data: logs, error } = await supabaseAdmin
-      .from('indb_admin_activity_logs')
+      .from('indb_security_activity_logs')
       .select('*')
       .gte('created_at', dateFilter.toISOString())
       .order('created_at', { ascending: false })
-      .limit(1000)
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Error fetching activity logs:', error)
@@ -30,47 +34,59 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get admin profiles for each log to include admin name/email
-    const logsWithAdminData = []
+    // Get user profiles for each log to include user name/email
+    const logsWithUserData = []
     
     for (const log of logs || []) {
       try {
-        const { data: adminProfile, error: profileError } = await supabaseAdmin
+        const { data: userProfile, error: profileError } = await supabaseAdmin
           .from('indb_auth_user_profiles')
           .select('full_name, user_id')
-          .eq('user_id', log.admin_id)
+          .eq('user_id', log.user_id)
           .single()
 
-        let adminEmail = null
-        if (!profileError && adminProfile) {
+        let userEmail = null
+        if (!profileError && userProfile) {
           try {
-            const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(adminProfile.user_id)
+            const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(userProfile.user_id)
             if (!authError && authUser?.user) {
-              adminEmail = authUser.user.email
+              userEmail = authUser.user.email
             }
           } catch (authFetchError) {
-            console.error(`Failed to fetch auth data for admin ${log.admin_id}:`, authFetchError)
+            console.error(`Failed to fetch auth data for user ${log.user_id}:`, authFetchError)
           }
         }
 
-        logsWithAdminData.push({
+        logsWithUserData.push({
           ...log,
-          admin_name: adminProfile?.full_name || 'Unknown Admin',
-          admin_email: adminEmail || 'Unknown Email'
+          user_name: userProfile?.full_name || 'Unknown User',
+          user_email: userEmail || 'Unknown Email'
         })
       } catch (fetchError) {
-        console.error(`Failed to fetch admin data for log ${log.id}:`, fetchError)
-        logsWithAdminData.push({
+        console.error(`Failed to fetch user data for log ${log.id}:`, fetchError)
+        logsWithUserData.push({
           ...log,
-          admin_name: 'Unknown Admin',
-          admin_email: 'Unknown Email'
+          user_name: 'Unknown User',
+          user_email: 'Unknown Email'
         })
       }
     }
 
+    // Get total count for pagination
+    const { count, error: countError } = await supabaseAdmin
+      .from('indb_security_activity_logs')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', dateFilter.toISOString())
+
     return NextResponse.json({ 
       success: true, 
-      logs: logsWithAdminData 
+      logs: logsWithUserData,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit)
+      }
     })
 
   } catch (error: any) {

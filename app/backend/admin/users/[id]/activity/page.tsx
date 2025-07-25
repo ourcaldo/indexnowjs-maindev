@@ -1,0 +1,1 @@
+// This creates the user activity page
