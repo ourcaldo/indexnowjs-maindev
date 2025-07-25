@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 // GET /api/admin/users/[id] - Get individual user details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Require super admin authentication
@@ -17,7 +17,7 @@ export async function GET(
       )
     }
 
-    const userId = params.id
+    const { id: userId } = await params
 
     // Get user profile from our custom table
     const { data: profile, error: profileError } = await supabaseAdmin
@@ -90,7 +90,7 @@ export async function GET(
 // PATCH /api/admin/users/[id] - Update user details
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Require super admin authentication
@@ -102,7 +102,7 @@ export async function PATCH(
       )
     }
 
-    const userId = params.id
+    const { id: userId } = await params
     const body = await request.json()
     const { full_name, role, email_notifications, phone_number } = body
 

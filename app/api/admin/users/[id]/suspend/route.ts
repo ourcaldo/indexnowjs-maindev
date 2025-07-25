@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 // PATCH /api/admin/users/[id]/suspend - Suspend/unsuspend user
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Require super admin authentication
@@ -17,7 +17,7 @@ export async function PATCH(
       )
     }
 
-    const userId = params.id
+    const { id: userId } = await params
 
     // Get current user to check status and get name for logging
     const { data: currentUser, error: fetchError } = await supabaseAdmin

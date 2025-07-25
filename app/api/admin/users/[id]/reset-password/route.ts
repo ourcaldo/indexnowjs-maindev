@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 // POST /api/admin/users/[id]/reset-password - Generate new password for user
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Require super admin authentication
@@ -17,7 +17,7 @@ export async function POST(
       )
     }
 
-    const userId = params.id
+    const { id: userId } = await params
 
     // Get current user to get name for logging
     const { data: currentUser, error: fetchError } = await supabaseAdmin
