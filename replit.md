@@ -160,6 +160,11 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_auth_user_profiles        | created_at              | timestamp with time zone | YES         |
 | indb_auth_user_profiles        | updated_at              | timestamp with time zone | YES         |
 | indb_auth_user_profiles        | phone_number            | text                     | YES         |
+| indb_auth_user_profiles        | package_id              | uuid                     | YES         |
+| indb_auth_user_profiles        | subscribed_at           | timestamp with time zone | YES         |
+| indb_auth_user_profiles        | expires_at              | timestamp with time zone | YES         |
+| indb_auth_user_profiles        | daily_quota_used        | integer                  | YES         |
+| indb_auth_user_profiles        | daily_quota_reset_date  | date                     | YES         |
 | indb_auth_user_settings        | id                      | uuid                     | NO          |
 | indb_auth_user_settings        | user_id                 | uuid                     | NO          |
 | indb_auth_user_settings        | timeout_duration        | integer                  | YES         |
@@ -325,6 +330,8 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_payment_packages          | sort_order              | integer                  | YES         |
 | indb_payment_packages          | created_at              | timestamp with time zone | YES         |
 | indb_payment_packages          | updated_at              | timestamp with time zone | YES         |
+| indb_payment_packages          | is_popular              | boolean                  | YES         |
+| indb_payment_packages          | pricing_tiers           | jsonb                    | YES         |
 | indb_security_activity_logs    | id                      | uuid                     | NO          |
 | indb_security_activity_logs    | user_id                 | uuid                     | YES         |
 | indb_security_activity_logs    | event_type              | text                     | NO          |
