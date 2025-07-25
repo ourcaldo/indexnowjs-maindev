@@ -2,7 +2,7 @@ import pino from 'pino'
 import { v4 as uuidv4 } from 'uuid'
 import { supabaseAdmin } from '@/lib/supabase'
 
-// Configure Pino logger with proper worker thread handling
+// Configure Pino logger to avoid worker threads completely
 export const logger = pino({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
   formatters: {
@@ -11,18 +11,8 @@ export const logger = pino({
     },
   },
   timestamp: pino.stdTimeFunctions.isoTime,
-  // Fix worker thread issues by using sync mode in development
-  ...(process.env.NODE_ENV !== 'production' && {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        ignore: 'pid,hostname',
-        translateTime: 'SYS:yyyy-mm-dd HH:MM:ss',
-        sync: true, // This prevents worker thread spawning
-      },
-    },
-  }),
+  // Completely disable pino-pretty transport to avoid worker thread issues
+  // Use basic console output instead of pino-pretty which creates workers
 })
 
 // Error types for structured logging
