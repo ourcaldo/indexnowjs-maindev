@@ -1,0 +1,58 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, I ask you to enhance the admin dashboard by making sure that in user management I can do a bunch of feature like this:
+'''
+Now, I need you to enhance the user management menu. Where at the very first begining I ask you to make the user management page with this feature:
+
+User Management: List all users, view detailed user profiles, see account status (active, suspended, unverified), and actions to suspend, reset password, and edit user data.
+
+When I open the page, it does show all the user, but when I click the user, it's not opening a single user detail for me to do that action.
+
+So, please enhance the by adding that feature and make sure that the feature will work.
+
+For reset password, it'll generate new password that I can see
+'''
+
+But, after you do make the changes, same problem error like before that we've solved is back again when I open single user details:
+
+Again, the fucking same problem like before is fucking appear, check the cookies and middleware.
+
+Admin auth: No current user found
+Admin user detail API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:154:10)
+    at async GET (app/api/admin/users/[id]/route.ts:12:22)
+  152 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  153 |   if (!adminUser?.isSuperAdmin) {
+> 154 |     throw new Error('Super admin access required')
+      |          ^
+  155 |   }
+  156 |   return adminUser
+  157 | }
+ GET /api/admin/users/915f50e5-0902-466a-b1af-bdf19d789722 403 in 1393ms
+📊 Background Worker Status: { isStarted: true, jobMonitor: true, uptime: '10 minutes' }
+Admin auth: No current user found
+Admin user detail API error: Error: Super admin access required
+    at requireSuperAdminAuth (lib/admin-auth.ts:154:10)
+    at async GET (app/api/admin/users/[id]/route.ts:12:22)
+  152 |   const adminUser = await adminAuthService.getCurrentAdminUser()
+  153 |   if (!adminUser?.isSuperAdmin) {
+> 154 |     throw new Error('Super admin access required')
+      |          ^
+  155 |   }
+  156 |   return adminUser
+  157 | }
+ GET /api/admin/users/915f50e5-0902-466a-b1af-bdf19d789722 403 in 149ms
+
+I need you to litterely fix this issue and make sure that this fucking problem isn't appear again in the future time. Fucking make sure that all admin is using the fucking correct cookies and correct middleware
+ 
+ 

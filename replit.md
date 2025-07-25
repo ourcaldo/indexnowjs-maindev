@@ -15,6 +15,14 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 - **Professional Email Notifications**: Branded email reports for job completion, failures, and quota alerts
 - **Enterprise Security**: Role-based access control, input validation, and security auditing
 
+## Recent Changes  
+**Authentication Fix (January 25, 2025)**
+- ✅ Fixed critical admin authentication issue causing "Super admin access required" errors
+- ✅ Updated all admin API routes to use proper server-side authentication with request cookies  
+- ✅ Modified `requireSuperAdminAuth()` and `requireAdminAuth()` functions to accept NextRequest parameter
+- ✅ Ensured consistent authentication across all admin endpoints
+- ✅ Migration from Replit Agent to standard Replit environment completed successfully
+
 ## CRITICAL PROJECT CAUTIONS - ALWAYS REMEMBER
 
 ⚠️ **ARCHITECTURE REQUIREMENTS:**

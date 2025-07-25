@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     // Require super admin authentication
-    const adminUser = await requireSuperAdminAuth()
+    const adminUser = await requireSuperAdminAuth(request)
     if (!adminUser) {
       return NextResponse.json(
         { error: 'Super admin access required' },
@@ -94,7 +94,7 @@ export async function PATCH(
 ) {
   try {
     // Require super admin authentication
-    const adminUser = await requireSuperAdminAuth()
+    const adminUser = await requireSuperAdminAuth(request)
     if (!adminUser) {
       return NextResponse.json(
         { error: 'Super admin access required' },

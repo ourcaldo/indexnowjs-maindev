@@ -1,5 +1,7 @@
 import { supabaseAdmin } from './supabase'
 import { authService } from './auth'
+import { getServerAdminUser, ServerAdminUser } from './server-auth'
+import { NextRequest } from 'next/server'
 
 export interface AdminUser {
   id: string
@@ -135,23 +137,39 @@ export class AdminAuthService {
 export const adminAuthService = new AdminAuthService()
 
 /**
- * Middleware for admin route protection
+ * Middleware for admin route protection (server-side)
  */
-export async function requireAdminAuth(): Promise<AdminUser | null> {
-  const adminUser = await adminAuthService.getCurrentAdminUser()
-  if (!adminUser?.isAdmin) {
+export async function requireAdminAuth(request?: NextRequest): Promise<AdminUser | null> {
+  const serverAdminUser = await getServerAdminUser(request)
+  if (!serverAdminUser?.isAdmin) {
     throw new Error('Admin access required')
   }
-  return adminUser
+  
+  return {
+    id: serverAdminUser.id,
+    email: serverAdminUser.email,
+    name: serverAdminUser.name,
+    role: serverAdminUser.role,
+    isAdmin: serverAdminUser.isAdmin,
+    isSuperAdmin: serverAdminUser.isSuperAdmin
+  }
 }
 
 /**
- * Middleware for super admin route protection
+ * Middleware for super admin route protection (server-side)
  */
-export async function requireSuperAdminAuth(): Promise<AdminUser | null> {
-  const adminUser = await adminAuthService.getCurrentAdminUser()
-  if (!adminUser?.isSuperAdmin) {
+export async function requireSuperAdminAuth(request?: NextRequest): Promise<AdminUser | null> {
+  const serverAdminUser = await getServerAdminUser(request)
+  if (!serverAdminUser?.isSuperAdmin) {
     throw new Error('Super admin access required')
   }
-  return adminUser
+  
+  return {
+    id: serverAdminUser.id,
+    email: serverAdminUser.email,
+    name: serverAdminUser.name,
+    role: serverAdminUser.role,
+    isAdmin: serverAdminUser.isAdmin,
+    isSuperAdmin: serverAdminUser.isSuperAdmin
+  }
 }
