@@ -1,7 +1,16 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
+import { adminMiddleware } from './app/backend/admin/middleware'
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  // Handle admin routes with dedicated middleware
+  if (pathname.startsWith('/backend/admin')) {
+    return adminMiddleware(request)
+  }
+
+  // Handle regular routes
   let response = NextResponse.next({
     request: {
       headers: request.headers,
