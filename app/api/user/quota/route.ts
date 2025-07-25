@@ -24,39 +24,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get real-time quota data directly from user_quota_summary view
-    const { data: quotaSummary, error: quotaError } = await supabaseAdmin
+    // Get ALL quota data from the updated user_quota_summary view
+    const { data: quotaData, error: quotaError } = await supabaseAdmin
       .from('user_quota_summary')
-      .select('total_quota_used, total_quota_limit')
+      .select('*')
       .eq('user_id', user.id)
       .single()
 
-    // Get user profile for package info and daily quota tracking
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('indb_auth_user_profiles')
-      .select(`
-        daily_quota_used,
-        daily_quota_reset_date,
-        package_id,
-        indb_payment_packages!inner(name, quota_limits)
-      `)
-      .eq('user_id', user.id)
-      .single()
-
-    if (profileError) {
-      console.error('Error fetching user profile:', profileError)
-      return NextResponse.json({ error: 'Failed to fetch user profile' }, { status: 500 })
+    if (quotaError) {
+      console.error('Error fetching quota data:', quotaError)
+      return NextResponse.json({ error: 'Failed to fetch quota data' }, { status: 500 })
     }
 
-    const packageData = Array.isArray(profile.indb_payment_packages) ? profile.indb_payment_packages[0] : profile.indb_payment_packages
-    const dailyLimit = packageData?.quota_limits?.daily_urls || 0
-    const isUnlimited = dailyLimit === -1
-    const packageName = packageData?.name || 'Free'
+    // Extract all data from the view
+    const totalQuotaUsed = quotaData?.total_quota_used || 0
+    const dailyQuotaLimit = quotaData?.daily_quota_limit || 50
+    const isUnlimited = quotaData?.is_unlimited || false
+    const packageName = quotaData?.package_name || 'Free'
+    const dailyQuotaUsed = quotaData?.daily_quota_used || 0
 
-    // Get current daily quota used (with daily reset logic)
+    // Handle daily reset logic
     const today = new Date().toISOString().split('T')[0]
-    const resetDate = profile.daily_quota_reset_date
-    let dailyQuotaUsed = profile.daily_quota_used || 0
+    const resetDate = quotaData?.daily_quota_reset_date
+    let actualDailyUsed = dailyQuotaUsed
 
     // Reset quota if it's a new day
     if (resetDate !== today) {
@@ -69,33 +59,26 @@ export async function GET(request: NextRequest) {
         })
         .eq('user_id', user.id)
       
-      dailyQuotaUsed = 0
+      actualDailyUsed = 0
     }
 
-    const remainingQuota = isUnlimited ? -1 : Math.max(0, dailyLimit - dailyQuotaUsed)
+    // Calculate quota status based on package limits
+    const remainingQuota = isUnlimited ? -1 : Math.max(0, dailyQuotaLimit - actualDailyUsed)
     const quotaExhausted = !isUnlimited && remainingQuota <= 0
-    const dailyLimitReached = !isUnlimited && dailyQuotaUsed >= dailyLimit
-
-    // Use total_quota_used from user_quota_summary view but keep package daily limit
-    const displayQuotaUsed = quotaSummary?.total_quota_used || 0
-    const displayQuotaLimit = dailyLimit // Use package daily limit (50), not total quota limit
-    
-    // Recalculate based on actual usage from database and package limits
-    const actualRemainingQuota = isUnlimited ? -1 : Math.max(0, displayQuotaLimit - displayQuotaUsed)
-    const actualQuotaExhausted = !isUnlimited && actualRemainingQuota <= 0
-    const actualDailyLimitReached = !isUnlimited && displayQuotaUsed >= displayQuotaLimit
+    const dailyLimitReached = !isUnlimited && actualDailyUsed >= dailyQuotaLimit
 
     return NextResponse.json({ 
       quota: {
-        daily_quota_used: displayQuotaUsed, // Show actual usage (200)
-        daily_quota_limit: displayQuotaLimit, // Show package limit (50)
+        daily_quota_used: actualDailyUsed, // Show daily usage from profile
+        daily_quota_limit: dailyQuotaLimit, // Show package daily limit (50)
         is_unlimited: isUnlimited,
-        quota_exhausted: actualQuotaExhausted,
-        daily_limit_reached: actualDailyLimitReached,
+        quota_exhausted: quotaExhausted,
+        daily_limit_reached: dailyLimitReached,
         package_name: packageName,
-        remaining_quota: actualRemainingQuota,
-        total_quota_used: quotaSummary?.total_quota_used || 0,
-        total_quota_limit: quotaSummary?.total_quota_limit || 0
+        remaining_quota: remainingQuota,
+        total_quota_used: totalQuotaUsed, // Show total service account usage
+        total_quota_limit: quotaData?.total_quota_limit || 0,
+        service_account_count: quotaData?.service_account_count || 0
       }
     })
   } catch (error) {
