@@ -39,7 +39,9 @@ export default function SiteSettings() {
 
   const fetchSiteSettings = async () => {
     try {
-      const response = await fetch('/api/admin/settings/site')
+      const response = await fetch('/api/admin/settings/site', {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         setSettings(data.settings)
@@ -63,6 +65,7 @@ export default function SiteSettings() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(settings),
       })
 

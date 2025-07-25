@@ -39,17 +39,16 @@ export default function AdminDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      const { data, error } = await supabaseAdmin
-        .from('admin_dashboard_stats')
-        .select('*')
-        .single()
-
-      if (error) {
-        console.error('Error fetching dashboard stats:', error)
-        return
+      const response = await fetch('/api/admin/dashboard', {
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data.stats)
+      } else {
+        console.error('Error fetching dashboard stats:', response.status)
       }
-
-      setStats(data)
     } catch (error) {
       console.error('Failed to fetch dashboard stats:', error)
     } finally {

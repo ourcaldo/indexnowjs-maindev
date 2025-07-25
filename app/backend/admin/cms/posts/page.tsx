@@ -50,7 +50,9 @@ export default function CMSPosts() {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('/api/admin/cms/posts')
+      const response = await fetch('/api/admin/cms/posts', {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         setPosts(data.posts || [])
@@ -68,6 +70,7 @@ export default function CMSPosts() {
     try {
       const response = await fetch(`/api/admin/cms/posts/${id}`, {
         method: 'DELETE',
+        credentials: 'include'
       })
 
       if (response.ok) {
@@ -85,6 +88,7 @@ export default function CMSPosts() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ status }),
       })
 

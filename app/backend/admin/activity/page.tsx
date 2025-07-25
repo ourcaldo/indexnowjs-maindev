@@ -47,7 +47,9 @@ export default function ActivityLogs() {
         days: dateFilter === '7days' ? '7' : dateFilter === '30days' ? '30' : '1'
       })
       
-      const response = await fetch(`/api/admin/activity?${params}`)
+      const response = await fetch(`/api/admin/activity?${params}`, {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         setLogs(data.logs || [])

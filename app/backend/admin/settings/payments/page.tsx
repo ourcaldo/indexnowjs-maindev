@@ -38,7 +38,9 @@ export default function PaymentGateways() {
 
   const fetchPaymentGateways = async () => {
     try {
-      const response = await fetch('/api/admin/settings/payments')
+      const response = await fetch('/api/admin/settings/payments', {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         setGateways(data.gateways || [])
@@ -63,6 +65,7 @@ export default function PaymentGateways() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(gateway),
       })
 
@@ -86,6 +89,7 @@ export default function PaymentGateways() {
     try {
       const response = await fetch(`/api/admin/settings/payments/${id}`, {
         method: 'DELETE',
+        credentials: 'include'
       })
 
       if (response.ok) {
@@ -104,6 +108,7 @@ export default function PaymentGateways() {
     try {
       const response = await fetch(`/api/admin/settings/payments/${id}/default`, {
         method: 'PATCH',
+        credentials: 'include'
       })
 
       if (response.ok) {
