@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     // Verify super admin authentication
-    const adminUser = await requireSuperAdminAuth()
+    const adminUser = await requireServerSuperAdminAuth()
 
     const body = await request.json()
     const {
@@ -89,16 +89,23 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Log admin activity
-    await adminAuthService.logAdminActivity(
-      'system_settings',
-      'Updated site settings',
-      'site_settings',
-      settings.id,
-      { 
-        changes: Object.keys(body).filter(key => key !== 'id'),
-        site_name 
-      }
-    )
+    try {
+      await supabaseAdmin
+        .from('indb_admin_activity_logs')
+        .insert({
+          admin_id: adminUser.id,
+          action_type: 'system_settings',
+          action_description: 'Updated site settings',
+          target_type: 'site_settings',
+          target_id: settings.id,
+          metadata: { 
+            changes: Object.keys(body).filter(key => key !== 'id'),
+            site_name 
+          }
+        })
+    } catch (logError) {
+      console.error('Failed to log admin activity:', logError)
+    }
 
     return NextResponse.json({ 
       success: true, 

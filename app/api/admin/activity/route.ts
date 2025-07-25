@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { requireServerSuperAdminAuth, adminAuthService } from '@/lib/server-auth'
+import { requireServerSuperAdminAuth } from '@/lib/server-auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,18 +14,10 @@ export async function GET(request: NextRequest) {
     const dateFilter = new Date()
     dateFilter.setDate(dateFilter.getDate() - days)
 
-    // Fetch activity logs with admin profile data
+    // Fetch activity logs
     const { data: logs, error } = await supabaseAdmin
       .from('indb_admin_activity_logs')
-      .select(`
-        *,
-        admin_profile:admin_id (
-          full_name,
-          auth_users:user_id (
-            email
-          )
-        )
-      `)
+      .select('*')
       .gte('created_at', dateFilter.toISOString())
       .order('created_at', { ascending: false })
       .limit(1000)
@@ -38,26 +30,47 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Transform the data to flatten admin profile data
-    const transformedLogs = logs?.map(log => ({
-      ...log,
-      admin_name: log.admin_profile?.full_name,
-      admin_email: log.admin_profile?.auth_users?.email,
-      admin_profile: undefined // Remove nested object
-    })) || []
+    // Get admin profiles for each log to include admin name/email
+    const logsWithAdminData = []
+    
+    for (const log of logs || []) {
+      try {
+        const { data: adminProfile, error: profileError } = await supabaseAdmin
+          .from('indb_auth_user_profiles')
+          .select('full_name, user_id')
+          .eq('user_id', log.admin_id)
+          .single()
 
-    // Log admin activity
-    await adminAuthService.logAdminActivity(
-      'system_monitoring',
-      'Viewed activity logs',
-      'activity_logs',
-      undefined,
-      { days, count: transformedLogs.length }
-    )
+        let adminEmail = null
+        if (!profileError && adminProfile) {
+          try {
+            const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(adminProfile.user_id)
+            if (!authError && authUser?.user) {
+              adminEmail = authUser.user.email
+            }
+          } catch (authFetchError) {
+            console.error(`Failed to fetch auth data for admin ${log.admin_id}:`, authFetchError)
+          }
+        }
+
+        logsWithAdminData.push({
+          ...log,
+          admin_name: adminProfile?.full_name || 'Unknown Admin',
+          admin_email: adminEmail || 'Unknown Email'
+        })
+      } catch (fetchError) {
+        console.error(`Failed to fetch admin data for log ${log.id}:`, fetchError)
+        logsWithAdminData.push({
+          ...log,
+          admin_name: 'Unknown Admin',
+          admin_email: 'Unknown Email'
+        })
+      }
+    }
 
     return NextResponse.json({ 
       success: true, 
-      logs: transformedLogs 
+      logs: logsWithAdminData 
     })
 
   } catch (error: any) {

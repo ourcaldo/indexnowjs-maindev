@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireServerSuperAdminAuth } from '@/lib/server-auth'
-import { supabaseAdmin } from '@/lib/database'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,11 +8,7 @@ export async function GET(request: NextRequest) {
 
     const { data: posts, error } = await supabaseAdmin
       .from('indb_cms_posts')
-      .select(`
-        *,
-        author_name:indb_auth_user_profiles!indb_cms_posts_author_id_fkey(full_name),
-        author_email:indb_auth_user_profiles!indb_cms_posts_author_id_fkey(user_id)
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -20,14 +16,50 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 })
     }
 
-    // Transform the data to include author information
-    const transformedPosts = posts?.map(post => ({
-      ...post,
-      author_name: post.author_name?.full_name || 'Unknown',
-      author_email: post.author_email?.user_id || ''
-    })) || []
+    // Get author information for each post
+    const postsWithAuthorData = []
+    
+    for (const post of posts || []) {
+      try {
+        let authorName = 'Unknown'
+        let authorEmail = 'Unknown'
+        
+        if (post.author_id) {
+          const { data: authorProfile, error: profileError } = await supabaseAdmin
+            .from('indb_auth_user_profiles')
+            .select('full_name, user_id')
+            .eq('user_id', post.author_id)
+            .single()
 
-    return NextResponse.json({ posts: transformedPosts })
+          if (!profileError && authorProfile) {
+            authorName = authorProfile.full_name || 'Unknown'
+            try {
+              const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(authorProfile.user_id)
+              if (!authError && authUser?.user) {
+                authorEmail = authUser.user.email || 'Unknown'
+              }
+            } catch (authFetchError) {
+              console.error(`Failed to fetch auth data for author ${post.author_id}:`, authFetchError)
+            }
+          }
+        }
+
+        postsWithAuthorData.push({
+          ...post,
+          author_name: authorName,
+          author_email: authorEmail
+        })
+      } catch (fetchError) {
+        console.error(`Failed to fetch author data for post ${post.id}:`, fetchError)
+        postsWithAuthorData.push({
+          ...post,
+          author_name: 'Unknown',
+          author_email: 'Unknown'
+        })
+      }
+    }
+
+    return NextResponse.json({ posts: postsWithAuthorData })
   } catch (error) {
     console.error('CMS posts API error:', error)
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
