@@ -167,6 +167,70 @@ export const POST = apiRouteWrapper(async (request: NextRequest, auth: Authentic
     return createErrorResponse(error)
   }
 
+  // Check package limitations - Free plan users can only have 1 service account
+  const packageCheck = await withDatabaseErrorHandling(
+    async () => {
+      // Get user's package information
+      const { data: userProfile, error } = await supabaseAdmin!
+        .from('indb_auth_user_profiles')
+        .select(`
+          package:indb_payment_packages(
+            slug,
+            name,
+            quota_limits
+          )
+        `)
+        .eq('user_id', auth.userId)
+        .single()
+
+      if (error) throw new Error(`Failed to fetch user profile: ${error.message}`)
+
+      // Count existing service accounts
+      const { count, error: countError } = await supabaseAdmin!
+        .from('indb_google_service_accounts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', auth.userId)
+        .eq('is_active', true)
+
+      if (countError) throw new Error(`Failed to count service accounts: ${countError.message}`)
+
+      return { userProfile, existingCount: count || 0 }
+    },
+    'check_package_limitations',
+    auth.userId,
+    endpoint
+  )
+
+  if (!packageCheck.success) {
+    return createErrorResponse(packageCheck.error)
+  }
+
+  const { userProfile, existingCount } = packageCheck.data
+  const packageData = Array.isArray(userProfile.package) ? userProfile.package[0] : userProfile.package
+  const maxServiceAccounts = packageData?.quota_limits?.service_accounts || 1
+  
+  // Check if user has reached service account limit
+  if (maxServiceAccounts !== -1 && existingCount >= maxServiceAccounts) {
+    const error = await ErrorHandlingService.createError(
+      ErrorType.BUSINESS_LOGIC,
+      `${packageData?.name || 'Current'} plan allows maximum ${maxServiceAccounts} service account${maxServiceAccounts > 1 ? 's' : ''}. Upgrade your plan to add more.`,
+      {
+        severity: ErrorSeverity.LOW,
+        userId: auth.userId,
+        endpoint,
+        statusCode: 403,
+        userMessageKey: 'quota_limit_reached',
+        metadata: { 
+          packageName: packageData?.name,
+          maxServiceAccounts,
+          currentCount: existingCount,
+          limitType: 'service_accounts'
+        }
+      }
+    )
+    return createErrorResponse(error)
+  }
+
   // Encrypt credentials with proper error handling
   let encryptedCredentials: string
   try {

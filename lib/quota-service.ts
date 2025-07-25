@@ -17,6 +17,7 @@ export class QuotaService {
    */
   static async getUserQuota(userId: string): Promise<UserQuotaInfo | null> {
     try {
+      // Get user profile with package information
       const { data: profile, error } = await supabaseAdmin
         .from('indb_auth_user_profiles')
         .select(`
@@ -42,16 +43,43 @@ export class QuotaService {
       const dailyLimit = packageData?.quota_limits?.daily_urls || 0
       const isUnlimited = dailyLimit === -1
       
+      // Get real quota usage from user_quota_summary table
+      let dailyQuotaUsed = 0
+      const { data: quotaSummary } = await supabaseAdmin
+        .from('user_quota_summary')
+        .select('total_quota_used')
+        .eq('user_id', userId)
+        .single()
+
+      if (quotaSummary) {
+        dailyQuotaUsed = parseInt(quotaSummary.total_quota_used) || 0
+      } else {
+        // Fallback: Calculate from indb_google_quota_usage for today
+        const today = new Date().toISOString().split('T')[0]
+        const { data: quotaUsage } = await supabaseAdmin
+          .from('indb_google_quota_usage')
+          .select(`
+            requests_successful,
+            indb_google_service_accounts!inner(user_id)
+          `)
+          .eq('date', today)
+          .eq('indb_google_service_accounts.user_id', userId)
+
+        if (quotaUsage && quotaUsage.length > 0) {
+          dailyQuotaUsed = quotaUsage.reduce((total, usage) => total + (usage.requests_successful || 0), 0)
+        }
+      }
+      
       // Reset quota if it's a new day
       await this.resetQuotaIfNeeded(userId)
 
       return {
         user_id: userId,
         package_id: profile.package_id,
-        daily_quota_used: profile.daily_quota_used || 0,
+        daily_quota_used: dailyQuotaUsed,
         daily_quota_limit: dailyLimit,
         is_unlimited: isUnlimited,
-        quota_exhausted: !isUnlimited && (profile.daily_quota_used || 0) >= dailyLimit,
+        quota_exhausted: !isUnlimited && dailyQuotaUsed >= dailyLimit,
         package_name: packageData?.name || 'Unknown'
       }
     } catch (error) {
