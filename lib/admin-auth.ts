@@ -50,7 +50,13 @@ export class AdminAuthService {
           .single()
 
         if (createError) {
-          console.error('Admin auth: Failed to create profile:', createError)
+          console.error('Admin auth: Failed to create profile - Error:', createError)
+          console.error('Admin auth: Error details:', {
+            message: createError.message,
+            details: createError.details,
+            code: createError.code,
+            hint: createError.hint
+          })
           return null
         }
 
