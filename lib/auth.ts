@@ -39,6 +39,21 @@ export class AuthService {
       throw error
     }
 
+    // Transfer session to server-side cookies
+    if (data.session) {
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        }),
+        credentials: 'include'
+      })
+    }
+
     return data
   }
 

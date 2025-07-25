@@ -1,0 +1,55 @@
+ ✓ Compiled /api/admin/dashboard in 840ms (1045 modules)
+Server auth: No authenticated user found Auth session missing!
+Admin dashboard API error: Error: Super admin access required
+    at requireServerSuperAdminAuth (lib/server-auth.ts:131:10)
+    at async GET (app/api/admin/dashboard/route.ts:8:4)
+  129 |   const adminUser = await getServerAdminUser(request)
+  130 |   if (!adminUser?.isSuperAdmin) {
+> 131 |     throw new Error('Super admin access required')
+      |          ^
+  132 |   }
+  133 |   return adminUser
+  134 | }
+ GET /api/admin/dashboard 403 in 1338ms
+Server auth: No authenticated user found Auth session missing!
+Admin dashboard API error: Error: Super admin access required
+    at requireServerSuperAdminAuth (lib/server-auth.ts:131:10)
+    at async GET (app/api/admin/dashboard/route.ts:8:4)
+  129 |   const adminUser = await getServerAdminUser(request)
+  130 |   if (!adminUser?.isSuperAdmin) {
+> 131 |     throw new Error('Super admin access required')
+      |          ^
+  132 |   }
+  133 |   return adminUser
+  134 | }
+ GET /api/admin/dashboard 403 in 95ms
+ ○ Compiling /backend/admin/users ...
+ ✓ Compiled /backend/admin/users in 565ms (1068 modules)
+ GET /backend/admin/users 200 in 886ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ○ Compiling /api/admin/users ...
+ ✓ Compiled /api/admin/users in 557ms (1070 modules)
+Server auth: No authenticated user found Auth session missing!
+Admin users API error: Error: Super admin access required
+    at requireServerSuperAdminAuth (lib/server-auth.ts:131:10)
+    at async GET (app/api/admin/users/route.ts:9:22)
+  129 |   const adminUser = await getServerAdminUser(request)
+  130 |   if (!adminUser?.isSuperAdmin) {
+> 131 |     throw new Error('Super admin access required')
+      |          ^
+  132 |   }
+  133 |   return adminUser
+  134 | }
+ GET /api/admin/users 403 in 793ms
+Server auth: No authenticated user found Auth session missing!
+Admin users API error: Error: Super admin access required
+    at requireServerSuperAdminAuth (lib/server-auth.ts:131:10)
+    at async GET (app/api/admin/users/route.ts:9:22)
+  129 |   const adminUser = await getServerAdminUser(request)
+  130 |   if (!adminUser?.isSuperAdmin) {
+> 131 |     throw new Error('Super admin access required')
+      |          ^
+  132 |   }
+  133 |   return adminUser
+  134 | }
+ GET /api/admin/users 403 in 77ms
