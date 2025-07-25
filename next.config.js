@@ -11,6 +11,13 @@ const nextConfig = {
       allowedOrigins: ['localhost:5000', '*.replit.dev', '*.replit.app', '*.replit.co']
     }
   },
+  devIndicators: {
+    buildActivity: false
+  },
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
   async headers() {
     return [
       {
