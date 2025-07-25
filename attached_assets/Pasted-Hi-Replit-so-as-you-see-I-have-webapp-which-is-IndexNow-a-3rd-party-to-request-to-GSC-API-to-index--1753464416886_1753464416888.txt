@@ -1,0 +1,32 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, I ask you to enhance the activity log in admin dashboard and we already do that, but there's still error that you need to fix, please see this error log:
+
+ ⨯ Error: ENOENT: no such file or directory, open '/home/runner/workspace/.next/server/data/geoip-country.dat'
+    at eval (webpack-internal:///(rsc)/./lib/ip-device-utils.ts:10:68)
+    at <unknown> (rsc)/./lib/ip-device-utils.ts (/home/runner/workspace/.next/server/app/api/auth/session/route.js:55:1)
+    at eval (webpack-internal:///(rsc)/./lib/activity-logger.ts:8:74)
+    at <unknown> (rsc)/./lib/activity-logger.ts (/home/runner/workspace/.next/server/app/api/auth/session/route.js:33:1)
+    at eval (webpack-internal:///(rsc)/./app/api/auth/session/route.ts:9:78)
+    at <unknown> (rsc)/./app/api/auth/session/route.ts (/home/runner/workspace/.next/server/app/api/auth/session/route.js:22:1)
+    at __webpack_exec__ (.next/server/app/api/auth/session/route.js:424:39)
+    at <unknown> (.next/server/app/api/auth/session/route.js:425:586)
+    at <unknown> (.next/server/app/api/auth/session/route.js:425:47)
+    at Object.<anonymous> (.next/server/app/api/auth/session/route.js:428:3) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/runner/workspace/.next/server/data/geoip-country.dat',
+  page: '/api/auth/session'
+}
+ ○ Compiling /_error ...

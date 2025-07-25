@@ -320,7 +320,7 @@ export class ActivityLogger {
    * Log admin actions with specific event types
    */
   static async logAdminAction(userId: string, action: string, targetUserId?: string, actionDescription?: string, request?: NextRequest, metadata?: Record<string, any>) {
-    let eventType = ActivityEventTypes.USER_MANAGEMENT
+    let eventType: string = ActivityEventTypes.USER_MANAGEMENT
     
     // Map specific actions to event types
     if (action.includes('password') || action.includes('reset')) {

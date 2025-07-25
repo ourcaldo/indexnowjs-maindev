@@ -5,7 +5,13 @@
 
 import { NextRequest } from 'next/server'
 import { headers } from 'next/headers'
-import geoip from 'geoip-lite'
+// Import with error handling for missing data files
+let geoip: any = null
+try {
+  geoip = require('geoip-lite')
+} catch (error: any) {
+  console.warn('GeoIP-lite module failed to load:', error?.message || 'Unknown error')
+}
 
 export interface DeviceInfo {
   type: 'mobile' | 'tablet' | 'desktop'
@@ -118,8 +124,8 @@ export function getRequestInfo(request?: NextRequest): {
       deviceInfo = parseUserAgent(userAgent)
     }
     
-    // Get location data using geoip-lite if we have an IP
-    if (ipAddress && ipAddress !== '127.0.0.1' && ipAddress !== '::1' && !ipAddress.startsWith('192.168.') && !ipAddress.startsWith('10.')) {
+    // Get location data using geoip-lite if we have an IP and the module is available
+    if (geoip && ipAddress && ipAddress !== '127.0.0.1' && ipAddress !== '::1' && !ipAddress.startsWith('192.168.') && !ipAddress.startsWith('10.')) {
       try {
         const geoData = geoip.lookup(ipAddress)
         if (geoData) {
@@ -132,8 +138,8 @@ export function getRequestInfo(request?: NextRequest): {
             longitude: geoData.ll?.[1],
           }
         }
-      } catch (geoError) {
-        console.warn('Failed to get geo location for IP:', ipAddress, geoError)
+      } catch (geoError: any) {
+        console.warn('Failed to get geo location for IP:', ipAddress, geoError?.message || 'Unknown error')
       }
     }
     
