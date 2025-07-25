@@ -590,6 +590,157 @@ export default function UserDetail() {
         </div>
       )}
 
+      {/* Comprehensive User Information */}
+      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
+            <User className="h-5 w-5 text-[#3D8BFF]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-[#1A1A1A]">User Information</h3>
+            <p className="text-sm text-[#6C757D]">Comprehensive user details and device information</p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Account Information */}
+          <div>
+            <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Account Details
+            </h4>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                <span className="text-[#6C757D] text-sm">User ID</span>
+                <span className="text-[#1A1A1A] text-sm font-mono">{user?.user_id}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                <span className="text-[#6C757D] text-sm">Account Status</span>
+                <div className="flex items-center gap-2">
+                  {getStatusIcon(user)}
+                  <span className="text-[#1A1A1A] text-sm">
+                    {user?.email_confirmed_at ? 'Verified' : 'Unverified'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                <span className="text-[#6C757D] text-sm">Member Since</span>
+                <span className="text-[#1A1A1A] text-sm">
+                  {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  }) : 'Unknown'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                <span className="text-[#6C757D] text-sm">Last Updated</span>
+                <span className="text-[#1A1A1A] text-sm">
+                  {user?.updated_at ? new Date(user.updated_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) : 'Unknown'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Activity Summary */}
+          <div>
+            <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Activity Summary
+            </h4>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                <span className="text-[#6C757D] text-sm">Total Activities</span>
+                <span className="text-[#1A1A1A] text-sm font-semibold">{activityLogs.length}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                <span className="text-[#6C757D] text-sm">Successful Actions</span>
+                <span className="text-[#4BB543] text-sm font-semibold">
+                  {activityLogs.filter(log => log.success).length}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                <span className="text-[#6C757D] text-sm">Failed Actions</span>
+                <span className="text-[#E63946] text-sm font-semibold">
+                  {activityLogs.filter(log => !log.success).length}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-[#E0E6ED]">
+                <span className="text-[#6C757D] text-sm">Last Activity</span>
+                <span className="text-[#1A1A1A] text-sm">
+                  {activityLogs.length > 0 
+                    ? formatActivityDate(activityLogs[0].created_at)
+                    : 'No activity'
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Device and IP Information */}
+        {activityLogs.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-[#E0E6ED]">
+            <h4 className="text-sm font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
+              <Monitor className="h-4 w-4" />
+              Device & Access Information
+            </h4>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Recent Devices */}
+              <div>
+                <h5 className="text-xs font-medium text-[#6C757D] mb-3 uppercase tracking-wide">Recent Devices</h5>
+                <div className="space-y-2">
+                  {Array.from(new Set(activityLogs.slice(0, 5).map(log => log.user_agent).filter(Boolean)))
+                    .slice(0, 3)
+                    .map((userAgent, index) => {
+                      const deviceInfo = getDeviceInfo(userAgent)
+                      const DeviceIcon = deviceInfo.icon
+                      return (
+                        <div key={index} className="flex items-center gap-3 p-2 bg-[#F7F9FC] rounded-lg">
+                          <DeviceIcon className="h-4 w-4 text-[#6C757D]" />
+                          <div className="flex-1">
+                            <div className="text-[#1A1A1A] text-sm font-medium">{deviceInfo.text}</div>
+                            <div className="text-[#6C757D] text-xs truncate" title={userAgent}>
+                              {userAgent?.substring(0, 50)}...
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                </div>
+              </div>
+
+              {/* Recent IP Addresses */}
+              <div>
+                <h5 className="text-xs font-medium text-[#6C757D] mb-3 uppercase tracking-wide">Recent IP Addresses</h5>
+                <div className="space-y-2">
+                  {Array.from(new Set(activityLogs.slice(0, 10).map(log => log.ip_address).filter(Boolean)))
+                    .slice(0, 5)
+                    .map((ip, index) => (
+                      <div key={index} className="flex items-center gap-3 p-2 bg-[#F7F9FC] rounded-lg">
+                        <Globe className="h-4 w-4 text-[#6C757D]" />
+                        <div className="flex-1">
+                          <div className="text-[#1A1A1A] text-sm font-mono">{ip}</div>
+                          <div className="text-[#6C757D] text-xs">
+                            Used {activityLogs.filter(log => log.ip_address === ip).length} times
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* User Activity History */}
       <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
         <div className="flex items-center justify-between mb-6">

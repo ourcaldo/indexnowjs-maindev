@@ -408,13 +408,13 @@ export default function ActivityLogsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-[#F7F9FC] hover:bg-[#F7F9FC]">
-                      <TableHead className="w-16 text-[#1A1A1A] font-semibold">#</TableHead>
-                      <TableHead className="text-[#1A1A1A] font-semibold">Timestamp</TableHead>
-                      <TableHead className="text-[#1A1A1A] font-semibold">User</TableHead>
-                      <TableHead className="text-[#1A1A1A] font-semibold">Action/Event</TableHead>
-                      <TableHead className="text-[#1A1A1A] font-semibold">Device & IP</TableHead>
-                      <TableHead className="text-[#1A1A1A] font-semibold">Status</TableHead>
-                      <TableHead className="w-16 text-[#1A1A1A] font-semibold">Details</TableHead>
+                      <TableHead className="w-16 text-center text-[#1A1A1A] font-semibold">#</TableHead>
+                      <TableHead className="text-center text-[#1A1A1A] font-semibold">Timestamp</TableHead>
+                      <TableHead className="text-center text-[#1A1A1A] font-semibold">User</TableHead>
+                      <TableHead className="text-center text-[#1A1A1A] font-semibold">Action/Event</TableHead>
+                      <TableHead className="text-center text-[#1A1A1A] font-semibold">Device & IP</TableHead>
+                      <TableHead className="text-center text-[#1A1A1A] font-semibold">Status</TableHead>
+                      <TableHead className="w-16 text-center text-[#1A1A1A] font-semibold">Details</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -435,87 +435,60 @@ export default function ActivityLogsPage() {
                           </TableCell>
                           
                           {/* Timestamp */}
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4 text-[#6C757D] flex-shrink-0" />
-                              <div>
-                                <div className="text-[#1A1A1A] text-sm font-medium">
-                                  {formatDate(log.created_at)}
-                                </div>
-                                <div className="text-[#6C757D] text-xs">
-                                  {new Date(log.created_at).toLocaleTimeString('en-US', { 
-                                    hour12: false, 
-                                    hour: '2-digit', 
-                                    minute: '2-digit' 
-                                  })}
-                                </div>
-                              </div>
+                          <TableCell className="text-center">
+                            <div className="text-[#1A1A1A] text-sm font-medium">
+                              {formatDate(log.created_at)}
                             </div>
                           </TableCell>
                           
                           {/* User Info */}
-                          <TableCell>
+                          <TableCell className="text-center">
                             <Link 
                               href={`/backend/admin/users/${log.user_id}`}
-                              className="block hover:bg-[#F7F9FC] p-1 rounded transition-colors"
+                              className="hover:text-[#3D8BFF] transition-colors"
                             >
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-[#6C757D] flex-shrink-0" />
-                                <div>
-                                  <div className="text-[#1A1A1A] font-medium text-sm hover:text-[#3D8BFF] transition-colors">
-                                    {log.user_name}
-                                  </div>
-                                  <div className="text-[#6C757D] text-xs">
-                                    {log.user_email}
-                                  </div>
-                                </div>
+                              <div className="text-[#1A1A1A] font-medium text-sm">
+                                {log.user_name}
+                              </div>
+                              <div className="text-[#6C757D] text-xs">
+                                {log.user_email}
                               </div>
                             </Link>
                           </TableCell>
                           
                           {/* Event/Action */}
-                          <TableCell>
-                            <div className="flex items-start gap-3">
-                              <div className="p-1.5 rounded-md" style={{ backgroundColor: eventConfig.color.split(' ')[0].replace('bg-', '').replace('/10', '') + '1A' }}>
-                                <IconComponent className="h-4 w-4" style={{ color: eventConfig.color.split(' ')[1].replace('text-', '') }} />
-                              </div>
-                              <div className="flex-1">
-                                <Badge className={`${eventConfig.color} border-0 text-xs mb-1`}>
-                                  {eventConfig.label}
-                                </Badge>
-                                <div className="text-[#1A1A1A] text-sm">
-                                  {log.action_description}
-                                </div>
-                                {log.error_message && (
-                                  <div className="text-[#E63946] text-xs mt-1 bg-[#E63946]/5 px-2 py-1 rounded">
-                                    <strong>Error:</strong> {log.error_message}
-                                  </div>
-                                )}
-                              </div>
+                          <TableCell className="text-center">
+                            <Badge className={`${eventConfig.color} border-0 text-xs mb-1`}>
+                              {eventConfig.label}
+                            </Badge>
+                            <div className="text-[#1A1A1A] text-sm">
+                              {log.action_description}
                             </div>
+                            {log.error_message && (
+                              <div className="text-[#E63946] text-xs mt-1 bg-[#E63946]/5 px-2 py-1 rounded">
+                                <strong>Error:</strong> {log.error_message}
+                              </div>
+                            )}
                           </TableCell>
                           
                           {/* Device & IP */}
-                          <TableCell>
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-[#6C757D] text-sm">
-                                <DeviceIcon className="h-4 w-4 flex-shrink-0" />
-                                <span className="font-medium">{deviceInfo.text}</span>
-                              </div>
-                              {log.ip_address && (
-                                <div className="flex items-center gap-2 text-[#6C757D] text-xs">
-                                  <Globe className="h-3 w-3 flex-shrink-0" />
-                                  <span className="font-mono bg-[#F7F9FC] px-1.5 py-0.5 rounded">
-                                    {log.ip_address}
-                                  </span>
-                                </div>
-                              )}
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-1 text-[#6C757D] text-sm mb-1">
+                              <DeviceIcon className="h-4 w-4 flex-shrink-0" />
+                              <span className="font-medium">{deviceInfo.text}</span>
                             </div>
+                            {log.ip_address && (
+                              <div className="text-[#6C757D] text-xs">
+                                <span className="font-mono bg-[#F7F9FC] px-1.5 py-0.5 rounded">
+                                  {log.ip_address}
+                                </span>
+                              </div>
+                            )}
                           </TableCell>
                           
                           {/* Status */}
-                          <TableCell>
-                            <div className="flex items-center gap-2">
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-2">
                               {log.success ? (
                                 <>
                                   <CheckCircle className="h-4 w-4 text-[#4BB543]" />
@@ -531,7 +504,7 @@ export default function ActivityLogsPage() {
                           </TableCell>
                           
                           {/* View Details */}
-                          <TableCell>
+                          <TableCell className="text-center">
                             <Link href={`/backend/admin/activity/${log.id}`}>
                               <Button 
                                 variant="ghost" 
