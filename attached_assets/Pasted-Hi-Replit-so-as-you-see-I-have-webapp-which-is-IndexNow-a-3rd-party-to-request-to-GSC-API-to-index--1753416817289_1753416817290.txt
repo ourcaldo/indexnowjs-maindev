@@ -1,0 +1,89 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Error that appear on every page (execpt the main page admin dashboard /backend/admin)
+
+Server auth: No authenticated user found
+Admin users API error: Error: Super admin access required
+    at requireServerSuperAdminAuth (lib/server-auth.ts:111:10)
+    at async GET (app/api/admin/users/route.ts:8:4)
+  109 |   const adminUser = await getServerAdminUser()
+  110 |   if (!adminUser?.isSuperAdmin) {
+> 111 |     throw new Error('Super admin access required')
+      |          ^
+  112 |   }
+  113 |   return adminUser
+  114 | }
+ GET /api/admin/users 403 in 3746ms
+Server auth: No authenticated user found
+Admin users API error: Error: Super admin access required
+    at requireServerSuperAdminAuth (lib/server-auth.ts:111:10)
+    at async GET (app/api/admin/users/route.ts:8:4)
+  109 |   const adminUser = await getServerAdminUser()
+  110 |   if (!adminUser?.isSuperAdmin) {
+> 111 |     throw new Error('Super admin access required')
+      |          ^
+  112 |   }
+  113 |   return adminUser
+  114 | }
+ GET /api/admin/users 403 in 101ms
+ 
+Keep in mind that:
+1. I already login using super_admin role as state in tables "indb_auth_user_profiles" with data like this: "INSERT INTO "public"."indb_auth_user_profiles" ("id", "user_id", "full_name", "role", "email_notifications", "created_at", "updated_at", "phone_number") VALUES ('7ed3a4e9-dcc6-47f2-92a8-8f16c8c1ed6f', '915f50e5-0902-466a-b1af-bdf19d789722', 'aldodkris', 'super_admin', 'false', '2025-07-22 12:49:18.341865+00', '2025-07-24 18:35:20.93757+00', '');"
+2. I already see that I do authenticated using Supabase auth and I can see sb-base-auth in local storage like this one
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5MTVmNTBlNS0wOTAyLTQ2NmEtYjFhZi1iZGYxOWQ3ODk3MjIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzUzNDIwMTEwLCJpYXQiOjE3NTM0MTY1MTAsImVtYWlsIjoiYWxkb2RrcmlzQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzUzNDE2NTEwfV0sInNlc3Npb25faWQiOiIzYWM1ZjY2Mi04MTk4LTRiZmEtYjdiYS1hMWYwOTYyN2EzY2UiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.A39gaKZMLWb7LZaTPyQaTIqxqn6ScDI7qR3O1-9-1SY",
+  "token_type": "bearer",
+  "expires_in": 3600,
+  "expires_at": 1753420110,
+  "refresh_token": "hvwvzkjyvcgp",
+  "user": {
+    "id": "915f50e5-0902-466a-b1af-bdf19d789722",
+    "aud": "authenticated",
+    "role": "authenticated",
+    "email": "aldodkris@gmail.com",
+    "email_confirmed_at": "2025-07-21T15:03:15.040394Z",
+    "phone": "",
+    "confirmed_at": "2025-07-21T15:03:15.040394Z",
+    "last_sign_in_at": "2025-07-25T04:08:30.155478885Z",
+    "app_metadata": {
+      "provider": "email",
+      "providers": [
+        "email"
+      ]
+    },
+    "user_metadata": {
+      "email_verified": true
+    },
+    "identities": [
+      {
+        "identity_id": "9b1dc5fb-88c1-46db-9765-709f9c52d3d4",
+        "id": "915f50e5-0902-466a-b1af-bdf19d789722",
+        "user_id": "915f50e5-0902-466a-b1af-bdf19d789722",
+        "identity_data": {
+          "email": "aldodkris@gmail.com",
+          "email_verified": false,
+          "phone_verified": false,
+          "sub": "915f50e5-0902-466a-b1af-bdf19d789722"
+        },
+        "provider": "email",
+        "last_sign_in_at": "2025-07-21T15:03:15.038354Z",
+        "created_at": "2025-07-21T15:03:15.0384Z",
+        "updated_at": "2025-07-21T15:03:15.0384Z",
+        "email": "aldodkris@gmail.com"
+      }
+    ],
+    "created_at": "2025-07-21T15:03:15.036254Z",
+    "updated_at": "2025-07-25T04:08:30.156867Z",
+    "is_anonymous": false
+  }
+}

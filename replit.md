@@ -43,6 +43,29 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 
 | table_name                     | column_name             | data_type                | is_nullable |
 | ------------------------------ | ----------------------- | ------------------------ | ----------- |
+| admin_dashboard_stats          | total_users             | bigint                   | YES         |
+| admin_dashboard_stats          | regular_users           | bigint                   | YES         |
+| admin_dashboard_stats          | admin_users             | bigint                   | YES         |
+| admin_dashboard_stats          | super_admin_users       | bigint                   | YES         |
+| admin_dashboard_stats          | total_jobs              | bigint                   | YES         |
+| admin_dashboard_stats          | active_jobs             | bigint                   | YES         |
+| admin_dashboard_stats          | completed_jobs          | bigint                   | YES         |
+| admin_dashboard_stats          | failed_jobs             | bigint                   | YES         |
+| admin_dashboard_stats          | total_service_accounts  | bigint                   | YES         |
+| admin_dashboard_stats          | active_service_accounts | bigint                   | YES         |
+| admin_dashboard_stats          | daily_api_requests      | bigint                   | YES         |
+| admin_dashboard_stats          | published_posts         | bigint                   | YES         |
+| admin_dashboard_stats          | published_pages         | bigint                   | YES         |
+| indb_admin_activity_logs       | id                      | uuid                     | NO          |
+| indb_admin_activity_logs       | admin_id                | uuid                     | YES         |
+| indb_admin_activity_logs       | action_type             | text                     | NO          |
+| indb_admin_activity_logs       | action_description      | text                     | NO          |
+| indb_admin_activity_logs       | target_type             | text                     | YES         |
+| indb_admin_activity_logs       | target_id               | uuid                     | YES         |
+| indb_admin_activity_logs       | ip_address              | inet                     | YES         |
+| indb_admin_activity_logs       | user_agent              | text                     | YES         |
+| indb_admin_activity_logs       | metadata                | jsonb                    | YES         |
+| indb_admin_activity_logs       | created_at              | timestamp with time zone | YES         |
 | indb_analytics_daily_stats     | id                      | uuid                     | NO          |
 | indb_analytics_daily_stats     | user_id                 | uuid                     | NO          |
 | indb_analytics_daily_stats     | date                    | date                     | NO          |
@@ -81,6 +104,37 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_auth_user_settings        | updated_at              | timestamp with time zone | YES         |
 | indb_auth_user_settings        | default_schedule        | text                     | YES         |
 | indb_auth_user_settings        | email_daily_report      | boolean                  | YES         |
+| indb_cms_pages                 | id                      | uuid                     | NO          |
+| indb_cms_pages                 | title                   | text                     | NO          |
+| indb_cms_pages                 | slug                    | text                     | NO          |
+| indb_cms_pages                 | content                 | text                     | YES         |
+| indb_cms_pages                 | template                | text                     | YES         |
+| indb_cms_pages                 | featured_image_url      | text                     | YES         |
+| indb_cms_pages                 | author_id               | uuid                     | YES         |
+| indb_cms_pages                 | status                  | text                     | YES         |
+| indb_cms_pages                 | is_homepage             | boolean                  | YES         |
+| indb_cms_pages                 | meta_title              | text                     | YES         |
+| indb_cms_pages                 | meta_description        | text                     | YES         |
+| indb_cms_pages                 | custom_css              | text                     | YES         |
+| indb_cms_pages                 | custom_js               | text                     | YES         |
+| indb_cms_pages                 | published_at            | timestamp with time zone | YES         |
+| indb_cms_pages                 | created_at              | timestamp with time zone | YES         |
+| indb_cms_pages                 | updated_at              | timestamp with time zone | YES         |
+| indb_cms_posts                 | id                      | uuid                     | NO          |
+| indb_cms_posts                 | title                   | text                     | NO          |
+| indb_cms_posts                 | slug                    | text                     | NO          |
+| indb_cms_posts                 | content                 | text                     | YES         |
+| indb_cms_posts                 | excerpt                 | text                     | YES         |
+| indb_cms_posts                 | featured_image_url      | text                     | YES         |
+| indb_cms_posts                 | author_id               | uuid                     | YES         |
+| indb_cms_posts                 | status                  | text                     | YES         |
+| indb_cms_posts                 | post_type               | text                     | YES         |
+| indb_cms_posts                 | meta_title              | text                     | YES         |
+| indb_cms_posts                 | meta_description        | text                     | YES         |
+| indb_cms_posts                 | tags                    | jsonb                    | YES         |
+| indb_cms_posts                 | published_at            | timestamp with time zone | YES         |
+| indb_cms_posts                 | created_at              | timestamp with time zone | YES         |
+| indb_cms_posts                 | updated_at              | timestamp with time zone | YES         |
 | indb_error_analytics           | error_date              | date                     | YES         |
 | indb_error_analytics           | user_id                 | uuid                     | YES         |
 | indb_error_analytics           | error_type              | text                     | YES         |
@@ -181,6 +235,29 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_notifications_email_queue | metadata                | jsonb                    | YES         |
 | indb_notifications_email_queue | created_at              | timestamp with time zone | YES         |
 | indb_notifications_email_queue | updated_at              | timestamp with time zone | YES         |
+| indb_payment_gateways          | id                      | uuid                     | NO          |
+| indb_payment_gateways          | name                    | text                     | NO          |
+| indb_payment_gateways          | slug                    | text                     | NO          |
+| indb_payment_gateways          | description             | text                     | YES         |
+| indb_payment_gateways          | is_active               | boolean                  | YES         |
+| indb_payment_gateways          | is_default              | boolean                  | YES         |
+| indb_payment_gateways          | configuration           | jsonb                    | YES         |
+| indb_payment_gateways          | api_credentials         | jsonb                    | YES         |
+| indb_payment_gateways          | created_at              | timestamp with time zone | YES         |
+| indb_payment_gateways          | updated_at              | timestamp with time zone | YES         |
+| indb_payment_packages          | id                      | uuid                     | NO          |
+| indb_payment_packages          | name                    | text                     | NO          |
+| indb_payment_packages          | slug                    | text                     | NO          |
+| indb_payment_packages          | description             | text                     | YES         |
+| indb_payment_packages          | price                   | numeric                  | NO          |
+| indb_payment_packages          | currency                | text                     | YES         |
+| indb_payment_packages          | billing_period          | text                     | YES         |
+| indb_payment_packages          | features                | jsonb                    | YES         |
+| indb_payment_packages          | quota_limits            | jsonb                    | YES         |
+| indb_payment_packages          | is_active               | boolean                  | YES         |
+| indb_payment_packages          | sort_order              | integer                  | YES         |
+| indb_payment_packages          | created_at              | timestamp with time zone | YES         |
+| indb_payment_packages          | updated_at              | timestamp with time zone | YES         |
 | indb_security_audit_logs       | id                      | uuid                     | NO          |
 | indb_security_audit_logs       | user_id                 | uuid                     | YES         |
 | indb_security_audit_logs       | event_type              | text                     | NO          |
@@ -197,6 +274,18 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_security_rate_limits      | window_start            | timestamp with time zone | YES         |
 | indb_security_rate_limits      | created_at              | timestamp with time zone | YES         |
 | indb_security_rate_limits      | updated_at              | timestamp with time zone | YES         |
+| indb_site_settings             | id                      | uuid                     | NO          |
+| indb_site_settings             | site_name               | text                     | NO          |
+| indb_site_settings             | site_description        | text                     | YES         |
+| indb_site_settings             | site_logo_url           | text                     | YES         |
+| indb_site_settings             | site_icon_url           | text                     | YES         |
+| indb_site_settings             | site_favicon_url        | text                     | YES         |
+| indb_site_settings             | contact_email           | text                     | YES         |
+| indb_site_settings             | support_email           | text                     | YES         |
+| indb_site_settings             | maintenance_mode        | boolean                  | YES         |
+| indb_site_settings             | registration_enabled    | boolean                  | YES         |
+| indb_site_settings             | created_at              | timestamp with time zone | YES         |
+| indb_site_settings             | updated_at              | timestamp with time zone | YES         |
 | indb_system_error_logs         | id                      | uuid                     | NO          |
 | indb_system_error_logs         | user_id                 | uuid                     | YES         |
 | indb_system_error_logs         | error_type              | text                     | NO          |
