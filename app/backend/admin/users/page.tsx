@@ -257,7 +257,7 @@ export default function UserManagement() {
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Package</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Status</th>
                 <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Joined</th>
-                <th className="text-right py-3 px-4 font-medium text-[#1A1A1A]">Actions</th>
+                <th className="text-center py-3 px-4 font-medium text-[#1A1A1A]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E0E6ED]">

@@ -4,7 +4,7 @@ import { requireSuperAdminAuth } from '@/lib/admin-auth'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check admin authentication
@@ -16,7 +16,7 @@ export async function POST(
       )
     }
 
-    const userId = params.id
+    const { id: userId } = await params
     const { days = 30 } = await request.json()
 
     // Get current user profile

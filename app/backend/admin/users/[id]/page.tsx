@@ -139,6 +139,9 @@ export default function UserDetail() {
   const [editMode, setEditMode] = useState(false)
   const [newPassword, setNewPassword] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [showPackageModal, setShowPackageModal] = useState(false)
+  const [availablePackages, setAvailablePackages] = useState<any[]>([])
+  const [selectedPackageId, setSelectedPackageId] = useState<string>('')
   
   // Activity logs state
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
@@ -321,8 +324,56 @@ export default function UserDetail() {
   }
 
   const handleChangePackage = async () => {
-    // For now, show a coming soon message
-    alert('Package change functionality coming soon!')
+    // Fetch available packages
+    try {
+      const response = await fetch('/api/admin/packages', {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setAvailablePackages(data.packages || [])
+        setSelectedPackageId(user?.package_id || '')
+        setShowPackageModal(true)
+      }
+    } catch (error) {
+      console.error('Failed to fetch packages:', error)
+      alert('Failed to load packages. Please try again.')
+    }
+  }
+
+  const handlePackageChangeSubmit = async () => {
+    if (!selectedPackageId) {
+      alert('Please select a package.')
+      return
+    }
+
+    try {
+      setActionLoading(prev => ({ ...prev, changePackage: true }))
+      
+      const response = await fetch(`/api/admin/users/${userId}/change-package`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ packageId: selectedPackageId }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        await fetchUser() // Refresh user data
+        setShowPackageModal(false)
+        alert(data.message || 'Package changed successfully!')
+      } else {
+        const errorData = await response.json()
+        alert(errorData.error || 'Failed to change package. Please try again.')
+      }
+    } catch (error) {
+      console.error('Failed to change package:', error)
+      alert('An error occurred while changing package.')
+    } finally {
+      setActionLoading(prev => ({ ...prev, changePackage: false }))
+    }
   }
 
   const handleExtendSubscription = async () => {
@@ -1248,6 +1299,78 @@ export default function UserDetail() {
           </div>
         )}
       </div>
+
+      {/* Package Change Modal */}
+      {showPackageModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg border border-[#E0E6ED] p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-[#1A1A1A]">Change Package</h3>
+              <button
+                onClick={() => setShowPackageModal(false)}
+                className="p-1 text-[#6C757D] hover:text-[#1A1A1A] rounded"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+                  Select New Package
+                </label>
+                <select
+                  value={selectedPackageId}
+                  onChange={(e) => setSelectedPackageId(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                >
+                  <option value="">Select a package...</option>
+                  {availablePackages.map((pkg) => (
+                    <option key={pkg.id} value={pkg.id}>
+                      {pkg.name} - {pkg.currency} {pkg.price} / {pkg.billing_period}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {selectedPackageId && (
+                <div className="bg-[#F7F9FC] rounded-lg p-3">
+                  {(() => {
+                    const selectedPkg = availablePackages.find(p => p.id === selectedPackageId)
+                    return selectedPkg ? (
+                      <div>
+                        <h4 className="font-medium text-[#1A1A1A] mb-2">{selectedPkg.name}</h4>
+                        <p className="text-sm text-[#6C757D] mb-2">{selectedPkg.description}</p>
+                        <div className="text-xs text-[#6C757D]">
+                          <p>Daily URLs: {selectedPkg.quota_limits?.daily_urls === -1 ? 'Unlimited' : selectedPkg.quota_limits?.daily_urls}</p>
+                          <p>Service Accounts: {selectedPkg.quota_limits?.service_accounts === -1 ? 'Unlimited' : selectedPkg.quota_limits?.service_accounts}</p>
+                          <p>Concurrent Jobs: {selectedPkg.quota_limits?.concurrent_jobs === -1 ? 'Unlimited' : selectedPkg.quota_limits?.concurrent_jobs}</p>
+                        </div>
+                      </div>
+                    ) : null
+                  })()}
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center space-x-3 mt-6">
+              <button
+                onClick={() => setShowPackageModal(false)}
+                className="flex-1 px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePackageChangeSubmit}
+                disabled={!selectedPackageId || actionLoading.changePackage}
+                className="flex-1 px-4 py-2 bg-[#3D8BFF] text-white rounded-lg hover:bg-[#3D8BFF]/90 transition-colors disabled:opacity-50"
+              >
+                {actionLoading.changePackage ? 'Changing...' : 'Change Package'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

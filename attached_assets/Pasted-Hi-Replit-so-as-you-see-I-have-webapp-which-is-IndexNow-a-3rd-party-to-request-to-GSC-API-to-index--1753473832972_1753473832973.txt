@@ -1,0 +1,57 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, I ask you to enhance the packages for the user with these commands:
+
+'''
+In admin dashboard, it's already show the subscrition info in single user detail page, but when I try to click Change page, reset quota, or extend, nothing happen. Please fix it.
+
+Then in user management page, which show list of all user, please fix a bug which show 2 joined date (please see image)
+'''
+
+But, you're just fixed about:
+1. Bug for double joined date, but the header for "Actions" isn't centered, so update it so it's centered.
+2. Before, I also ask you to make card to show the user packages in user dashboard and you already do that. At very begining I also ask you to make restriction same as package that user subscribe, for example for free plan, which user just can submit 50 urls for IndexNow, but it doesn't work, I still can requested for 100 URLS. So please make everything work, limitation must be work based on the user packages.
+For example, this is for Free Plan:
+{
+  "daily_urls": 50,
+  "concurrent_jobs": 1,
+  "service_accounts": 1
+}
+In card in dashboard user, make sure that it'll also reflect, bcs when I submit 100 URLS, the quota still 0/50, make sure all inforation based on current real data and if limit (daily quota) show notification, before I already ask you for this, but I didn't know you already made it or not.
+3. Then in admin dashboard in single user detail page, before I ask you to fix button for change package. but why the change package is show future update or similar to it? The reset quota and extend package is have error, Fix it. The information like quota, service account and other is also not based on real data.
+
+Error when I reset Quota
+Error: Route "/api/admin/users/[id]/reset-quota" used `params.id`. `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at POST (app/api/admin/users/[id]/reset-quota/route.ts:19:26)
+  17 |     }
+  18 |
+> 19 |     const userId = params.id
+     |                          ^
+  20 |
+  21 |     // Reset user's daily quota
+  22 |     const { error: updateError } = await supabaseAdmin
+Background services initialization module loaded
+
+Error when I click extend quota
+Error: Route "/api/admin/users/[id]/extend-subscription" used `params.id`. `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at POST (app/api/admin/users/[id]/extend-subscription/route.ts:19:26)
+  17 |     }
+  18 |
+> 19 |     const userId = params.id
+     |                          ^
+  20 |     const { days = 30 } = await request.json()
+  21 |
+  22 |     // Get current user profile
+ POST /api/admin/users/bffbd6fe-c4aa-49bd-8e4f-325a5136cd6e/extend-subscription 200 in 3587ms
+ 
+Please fix it one by one and make sure you fix all of that, not just 1 or 2, but all. Make sure to also read replit.md to get all information including tables name and column.

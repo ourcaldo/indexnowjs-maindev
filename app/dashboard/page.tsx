@@ -148,12 +148,29 @@ export default function Dashboard() {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
-      const response = await fetch('/api/dashboard/stats', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Load both dashboard stats and real quota data
+      const [statsResponse, quotaResponse] = await Promise.all([
+        fetch('/api/dashboard/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch('/api/user/quota', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (statsResponse.ok && quotaResponse.ok) {
+        const statsData = await statsResponse.json();
+        const quotaData = await quotaResponse.json();
+        
+        // Merge stats with real quota data
+        setStats({
+          ...statsData,
+          quotaUsed: quotaData.quota.daily_quota_used || 0,
+          quotaLimit: quotaData.quota.is_unlimited ? 999999 : (quotaData.quota.daily_quota_limit || 200)
+        });
+      } else if (statsResponse.ok) {
+        // Fallback to just stats if quota fails
+        const data = await statsResponse.json();
         setStats(data);
       }
     } catch (error) {

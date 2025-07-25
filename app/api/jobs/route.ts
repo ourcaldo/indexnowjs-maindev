@@ -180,10 +180,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid schedule type' }, { status: 400 })
     }
 
-    // Create the job with sanitized data
+    // Check quota before creating job
     const processedUrls = type === 'manual' 
       ? Array.from(new Set(urls.map((url: string) => sanitizeInput(url)).filter((url: string) => url.trim())))
       : []
+    
+    // Import quota service and check user's quota
+    const { QuotaService } = await import('@/lib/quota-service')
+    const urlCount = processedUrls.length
+    
+    if (urlCount > 0) {
+      const quotaCheck = await QuotaService.canSubmitUrls(user.id, urlCount)
+      if (!quotaCheck.canSubmit) {
+        return NextResponse.json({ 
+          error: quotaCheck.message || 'Quota exceeded. Upgrade your package to submit more URLs.',
+          quotaExhausted: true,
+          remainingQuota: quotaCheck.remainingQuota
+        }, { status: 403 })
+      }
+    }
       
     const jobData = {
       user_id: user.id,
