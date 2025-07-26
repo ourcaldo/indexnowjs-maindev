@@ -123,11 +123,33 @@ export class GoogleIndexingProcessor {
       // Process all URLs through Google's Indexing API
       await this.processUrlSubmissionsWithGoogleAPI(job);
 
-      // Get final stats
+      // Get final stats and check current job status
       const finalJob = await this.getJobDetails(jobId);
       const processingTimeMs = finalJob?.started_at ? new Date().getTime() - new Date(finalJob.started_at).getTime() : undefined;
 
-      // Mark job as completed
+      // Check if job was paused due to quota exhaustion during processing
+      if (finalJob?.status === 'paused') {
+        console.log(`⏸️ Job ${jobId} was paused due to quota exhaustion - not marking as completed`);
+        
+        // Log job pause event
+        await this.jobLogger.logJobEvent({
+          job_id: jobId,
+          level: 'INFO',
+          message: `Job paused due to service account quota exhaustion`,
+          metadata: {
+            event_type: 'job_paused_quota_exhausted',
+            total_urls: finalJob?.total_urls || 0,
+            processed_urls: finalJob?.processed_urls || 0,
+            successful_urls: finalJob?.successful_urls || 0,
+            failed_urls: finalJob?.failed_urls || 0,
+            processing_time_ms: processingTimeMs
+          }
+        });
+
+        return { success: true };
+      }
+
+      // Mark job as completed only if not paused
       await this.updateJobStatus(jobId, 'completed', { 
         completed_at: new Date().toISOString()
       });
