@@ -146,23 +146,50 @@ async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | nu
       return null
     }
 
-    // Create Supabase client using request cookies
-    const supabaseServer = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll() {
-            // Cannot set cookies in API routes
-          },
-        },
-      }
-    )
+    // Try to get JWT token from Authorization header first
+    const authHeader = request.headers.get('authorization')
+    let user = null
+    let userError = null
 
-    const { data: { user }, error: userError } = await supabaseServer.auth.getUser()
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+      
+      // Verify JWT token using Supabase admin
+      const { data: userData, error: tokenError } = await supabaseAdmin.auth.getUser(token)
+      user = userData.user
+      userError = tokenError
+      
+      if (user) {
+        console.log('Server auth: Authenticated via Bearer token:', { id: user.id, email: user.email })
+      }
+    }
+
+    // Fallback to cookies if no valid Bearer token
+    if (!user) {
+      // Create Supabase client using request cookies
+      const supabaseServer = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll()
+            },
+            setAll() {
+              // Cannot set cookies in API routes
+            },
+          },
+        }
+      )
+
+      const { data: { user: cookieUser }, error: cookieError } = await supabaseServer.auth.getUser()
+      user = cookieUser
+      userError = cookieError
+      
+      if (user) {
+        console.log('Server auth: Authenticated via cookies:', { id: user.id, email: user.email })
+      }
+    }
     
     if (userError || !user) {
       console.log('Server auth: No authenticated user found', userError?.message)

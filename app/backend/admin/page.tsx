@@ -11,7 +11,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 interface DashboardStats {
   total_users: number
@@ -39,8 +39,20 @@ export default function AdminDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
+      // Get current session token from Supabase auth
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.access_token) {
+        console.error('No authentication session found')
+        return
+      }
+
       const response = await fetch('/api/admin/dashboard', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
       })
       
       if (response.ok) {
@@ -48,6 +60,8 @@ export default function AdminDashboard() {
         setStats(data.stats)
       } else {
         console.error('Error fetching dashboard stats:', response.status)
+        const errorData = await response.text()
+        console.error('Error details:', errorData)
       }
     } catch (error) {
       console.error('Failed to fetch dashboard stats:', error)

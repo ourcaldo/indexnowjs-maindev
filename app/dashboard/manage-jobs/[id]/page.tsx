@@ -118,6 +118,7 @@ export default function JobDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [job, setJob] = useState<Job | null>(null);
   const [submissions, setSubmissions] = useState<URLSubmission[]>([]);
+  const [isSubmissionsLoading, setIsSubmissionsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalSubmissions, setTotalSubmissions] = useState(0);
   const itemsPerPage = 20;
@@ -311,6 +312,7 @@ export default function JobDetailsPage() {
 
   const loadSubmissions = useCallback(async () => {
     try {
+      setIsSubmissionsLoading(true);
       const user = await authService.getCurrentUser();
       if (!user) return;
 
@@ -333,6 +335,8 @@ export default function JobDetailsPage() {
       }
     } catch (error) {
       console.error('Error loading submissions:', error);
+    } finally {
+      setIsSubmissionsLoading(false);
     }
   }, [jobId, currentPage, itemsPerPage]);
 
