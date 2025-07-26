@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, CreditCard, Building2, Check, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { authService } from '@/lib/auth'
+import { supabaseBrowser } from '@/lib/supabase-browser'
 
 interface PaymentPackage {
   id: string
@@ -58,10 +60,10 @@ interface CheckoutForm {
 export default function CheckoutPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { toast } = useToast()
+  const { addToast } = useToast()
   
-  const [package_id] = useState(searchParams.get('package'))
-  const [billing_period] = useState(searchParams.get('period') || 'monthly')
+  const [package_id] = useState(searchParams?.get('package'))
+  const [billing_period] = useState(searchParams?.get('period') || 'monthly')
   const [selectedPackage, setSelectedPackage] = useState<PaymentPackage | null>(null)
   const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([])
   const [loading, setLoading] = useState(true)
@@ -87,16 +89,44 @@ export default function CheckoutPage() {
       try {
         setLoading(true)
         
-        // Fetch package details
-        const packageRes = await fetch('/api/billing/packages')
+        // Get authentication token
+        const user = await authService.getCurrentUser()
+        if (!user) {
+          addToast({
+            title: "Authentication required",
+            description: "Please log in to continue.",
+            type: "error"
+          })
+          router.push('/login')
+          return
+        }
+
+        const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
+        if (!token) {
+          addToast({
+            title: "Authentication error",
+            description: "Please log in again to continue.",
+            type: "error"
+          })
+          router.push('/login')
+          return
+        }
+
+        // Fetch package details with authentication
+        const packageRes = await fetch('/api/billing/packages', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
         const packageData = await packageRes.json()
         const selected = packageData.packages?.find((pkg: PaymentPackage) => pkg.id === package_id)
         
         if (!selected) {
-          toast({
+          addToast({
             title: "Package not found",
             description: "The selected package could not be found.",
-            variant: "destructive"
+            type: "error"
           })
           router.push('/dashboard/billing')
           return
@@ -121,10 +151,10 @@ export default function CheckoutPage() {
         
       } catch (error) {
         console.error('Error fetching checkout data:', error)
-        toast({
+        addToast({
           title: "Error",
           description: "Failed to load checkout information.",
-          variant: "destructive"
+          type: "error"
         })
       } finally {
         setLoading(false)
@@ -136,7 +166,7 @@ export default function CheckoutPage() {
     } else {
       router.push('/dashboard/billing')
     }
-  }, [package_id, router, toast])
+  }, [package_id, router, addToast])
 
   // Calculate pricing based on selected billing period
   const calculatePrice = () => {
@@ -158,10 +188,10 @@ export default function CheckoutPage() {
     e.preventDefault()
     
     if (!selectedPackage || !form.payment_method) {
-      toast({
+      addToast({
         title: "Missing information",
         description: "Please fill in all required fields and select a payment method.",
-        variant: "destructive"
+        type: "error"
       })
       return
     }
@@ -196,10 +226,10 @@ export default function CheckoutPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast({
+        addToast({
           title: "Order submitted successfully!",
           description: "Payment instructions have been sent to your email.",
-          variant: "default"
+          type: "success"
         })
         
         // Redirect to success page or back to billing
@@ -210,10 +240,10 @@ export default function CheckoutPage() {
       
     } catch (error) {
       console.error('Checkout error:', error)
-      toast({
+      addToast({
         title: "Checkout failed",
         description: error instanceof Error ? error.message : "Please try again later.",
-        variant: "destructive"
+        type: "error"
       })
     } finally {
       setSubmitting(false)

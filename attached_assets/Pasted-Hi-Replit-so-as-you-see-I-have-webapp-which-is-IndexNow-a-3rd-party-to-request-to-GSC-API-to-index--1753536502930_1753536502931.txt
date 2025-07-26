@@ -1,0 +1,40 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, we already made Plans and Billing menu and also a checkout page, so user can directly purchase and upgrade their subscription, please check the changelogs in replit.md to get all information. 
+
+But, after we do an updates, there's few error that you need to fix, which is:
+1. When I try to upgrade an package from Free to Premium and it's redirected to checkout page, we're got "Package not found"
+2. There's an error related to toast notification 
+toast is not a function
+
+app/dashboard/billing/checkout/page.tsx (96:11) @ CheckoutPage.useEffect.fetchData
+
+
+  94 |         
+  95 |         if (!selected) {
+> 96 |           toast({
+     |           ^
+  97 |             title: "Package not found",
+  98 |             description: "The selected package could not be found.",
+  99 |             variant: "destructive"
+  
+toast is not a function
+
+app/dashboard/billing/checkout/page.tsx (124:9) @ CheckoutPage.useEffect.fetchData
+
+
+  122 |       } catch (error) {
+  123 |         console.error('Error fetching checkout data:', error)
+> 124 |         toast({
+      |         ^
+  125 |           title: "Error",
+  126 |           description: "Failed to load checkout information.",
+  127 |           variant: "destructive"
