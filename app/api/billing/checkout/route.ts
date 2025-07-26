@@ -65,32 +65,30 @@ export async function POST(request: NextRequest) {
     // Generate unique order ID
     const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
-    // Create transaction record
+    // Create transaction record using existing table structure
     const { data: transaction, error: transactionError } = await supabase
-      .from('indb_billing_transactions')
+      .from('indb_payment_transactions')
       .insert({
         id: crypto.randomUUID(),
         user_id: user.id,
         package_id: package_id,
-        order_id: orderId,
+        gateway_id: payment_method,
         transaction_type: 'subscription',
+        transaction_status: 'pending',
         amount: finalPrice,
         currency: packageData.currency || 'IDR',
-        billing_period: billing_period,
-        transaction_status: 'pending',
-        payment_method: payment_method,
-        customer_info: customer_info,
-        gateway_info: {
-          gateway_id: gatewayData.id,
-          gateway_name: gatewayData.name,
-          configuration: gatewayData.configuration
-        },
+        payment_method: gatewayData.name,
+        payment_reference: orderId,
+        gateway_response: gatewayData.configuration,
         metadata: {
+          billing_period: billing_period,
+          customer_info: customer_info,
           package_name: packageData.name,
           package_description: packageData.description,
           original_price: regularPrice,
           promo_price: promoPrice,
-          discount_applied: promoPrice ? (regularPrice - promoPrice) : 0
+          discount_applied: promoPrice ? (regularPrice - promoPrice) : 0,
+          order_id: orderId
         }
       })
       .select()
@@ -127,7 +125,8 @@ export async function POST(request: NextRequest) {
         amount: finalPrice,
         currency: packageData.currency || 'IDR',
         payment_instructions: gatewayData.configuration,
-        package_name: packageData.name
+        package_name: packageData.name,
+        payment_reference: transaction.payment_reference
       }
     })
 
@@ -201,9 +200,9 @@ async function sendCheckoutEmailNotification({ user, transaction, package: pkg, 
             
             <div class="order-details">
               <h3>Order Details</h3>
-              <p><strong>Order ID:</strong> ${transaction.order_id}</p>
+              <p><strong>Order ID:</strong> ${transaction.payment_reference}</p>
               <p><strong>Package:</strong> ${pkg.name}</p>
-              <p><strong>Billing Period:</strong> ${transaction.billing_period}</p>
+              <p><strong>Billing Period:</strong> ${transaction.metadata?.billing_period}</p>
               <p><strong>Amount:</strong> ${formatCurrency(transaction.amount)}</p>
               <p><strong>Status:</strong> Pending Payment</p>
             </div>
@@ -217,7 +216,7 @@ async function sendCheckoutEmailNotification({ user, transaction, package: pkg, 
                 <p><strong>Account Number:</strong> ${bankConfig.account_number}</p>
               ` : ''}
               <p><strong>Amount to Pay:</strong> ${formatCurrency(transaction.amount)}</p>
-              <p>Please include your Order ID (${transaction.order_id}) in the payment reference.</p>
+              <p>Please include your Order ID (${transaction.payment_reference}) in the payment reference.</p>
             </div>
             
             <p>Once we receive your payment, we'll activate your subscription and send you a confirmation email.</p>

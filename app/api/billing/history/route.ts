@@ -31,25 +31,26 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit
 
-    // Build query using new billing transactions table
+    // Build query using existing payment transactions table
     let query = supabaseAdmin
-      .from('indb_billing_transactions')
+      .from('indb_payment_transactions')
       .select(`
         id,
-        order_id,
         transaction_type,
+        transaction_status,
         amount,
         currency,
-        billing_period,
-        transaction_status,
-        customer_info,
-        gateway_info,
-        metadata,
+        payment_method,
+        payment_reference,
+        gateway_transaction_id,
         created_at,
         updated_at,
         processed_at,
-        admin_notes,
-        payment_proof_url
+        verified_at,
+        notes,
+        metadata,
+        payment_proof_url,
+        gateway_response
       `, { count: 'exact' })
       .eq('user_id', user.id)
 
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
 
     // Get summary statistics
     const { data: summaryStats } = await supabaseAdmin
-      .from('indb_billing_transactions')
+      .from('indb_payment_transactions')
       .select('transaction_status, amount, currency')
       .eq('user_id', user.id)
 
@@ -95,20 +96,22 @@ export async function GET(request: NextRequest) {
     // Transform transactions data
     const transformedTransactions = transactions?.map(transaction => ({
       id: transaction.id,
-      order_id: transaction.order_id,
+      order_id: transaction.payment_reference,
       transaction_type: transaction.transaction_type,
       transaction_status: transaction.transaction_status,
       amount: parseFloat(transaction.amount || '0'),
       currency: transaction.currency,
-      billing_period: transaction.billing_period,
+      billing_period: transaction.metadata?.billing_period || 'monthly',
       created_at: transaction.created_at,
       updated_at: transaction.updated_at,
       processed_at: transaction.processed_at,
-      admin_notes: transaction.admin_notes,
+      verified_at: transaction.verified_at,
+      notes: transaction.notes,
       payment_proof_url: transaction.payment_proof_url,
       package_name: transaction.metadata?.package_name || 'Unknown Package',
-      payment_method: transaction.gateway_info?.gateway_name || 'Unknown Method',
-      customer_info: transaction.customer_info
+      payment_method: transaction.payment_method || 'Unknown Method',
+      gateway_transaction_id: transaction.gateway_transaction_id,
+      customer_info: transaction.metadata?.customer_info
     })) || []
 
     // Calculate pagination info
