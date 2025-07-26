@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit
 
-    // Build query using existing payment transactions table
+    // Build query using existing payment transactions table with gateway join
     let query = supabaseAdmin
       .from('indb_payment_transactions')
       .select(`
@@ -50,7 +50,9 @@ export async function GET(request: NextRequest) {
         notes,
         metadata,
         payment_proof_url,
-        gateway_response
+        gateway_response,
+        gateway:indb_payment_gateways(id, name, slug),
+        package:indb_payment_packages(id, name, slug)
       `, { count: 'exact' })
       .eq('user_id', user.id)
 
@@ -108,10 +110,13 @@ export async function GET(request: NextRequest) {
       verified_at: transaction.verified_at,
       notes: transaction.notes,
       payment_proof_url: transaction.payment_proof_url,
-      package_name: transaction.metadata?.package_name || 'Unknown Package',
+      package_name: transaction.metadata?.package_name || transaction.package?.name || 'Unknown Package',
       payment_method: transaction.payment_method || 'Unknown Method',
       gateway_transaction_id: transaction.gateway_transaction_id,
-      customer_info: transaction.metadata?.customer_info
+      customer_info: transaction.metadata?.customer_info,
+      package: transaction.package || { name: transaction.metadata?.package_name || 'Unknown Package', slug: 'unknown' },
+      gateway: transaction.gateway || { name: 'Unknown Gateway', slug: 'unknown' },
+      subscription: null // Add this to match the interface
     })) || []
 
     // Calculate pagination info

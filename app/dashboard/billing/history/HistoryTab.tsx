@@ -34,11 +34,11 @@ interface Transaction {
     name: string
     slug: string
   }
-  gateway: {
+  gateway?: {
     name: string
     slug: string
   }
-  subscription: {
+  subscription?: {
     billing_period: string
     started_at: string
     expires_at: string
@@ -323,7 +323,7 @@ export default function HistoryTab() {
                         <div>
                           <span className="text-[#6C757D]">Method: </span>
                           <span className="text-[#1A1A1A]">
-                            {transaction.gateway.name} - {transaction.payment_method || 'N/A'}
+                            {transaction.gateway?.name || 'Unknown Gateway'} - {transaction.payment_method || 'N/A'}
                           </span>
                         </div>
                         {transaction.subscription && (
