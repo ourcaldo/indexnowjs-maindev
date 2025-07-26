@@ -156,15 +156,15 @@ export default function AdminOrdersPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="secondary" className="bg-[#F0A202] text-white"><Clock className="w-3 h-3 mr-1" />Pending</Badge>
+        return <Badge variant="secondary" className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20"><Clock className="w-3 h-3 mr-1" />Pending</Badge>
       case 'proof_uploaded':
-        return <Badge variant="secondary" className="bg-[#F0A202] text-white"><AlertCircle className="w-3 h-3 mr-1" />Proof Uploaded</Badge>
+        return <Badge variant="secondary" className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20"><AlertCircle className="w-3 h-3 mr-1" />Waiting for Confirmation</Badge>
       case 'completed':
-        return <Badge variant="secondary" className="bg-[#4BB543] text-white"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>
+        return <Badge variant="secondary" className="bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>
       case 'failed':
-        return <Badge variant="secondary" className="bg-[#E63946] text-white"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>
+        return <Badge variant="secondary" className="bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>
       default:
-        return <Badge variant="secondary" className="bg-[#6C757D] text-white">{status}</Badge>
+        return <Badge variant="secondary" className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20">{status}</Badge>
     }
   }
 
@@ -357,7 +357,7 @@ export default function AdminOrdersPage() {
                     onCheckedChange={handleSelectAll}
                   />
                 </TableHead>
-                <TableHead>Order ID</TableHead>
+                <TableHead className="text-left">Order ID</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Package</TableHead>
                 <TableHead>Amount</TableHead>
@@ -375,10 +375,10 @@ export default function AdminOrdersPage() {
                       onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-left">
                     <button
                       onClick={() => handleViewOrder(order.id)}
-                      className="text-[#1A1A1A] hover:underline font-medium"
+                      className="text-[#1A1A1A] hover:text-[#1C2331] hover:underline font-medium transition-colors"
                     >
                       #{order.payment_reference}
                     </button>
@@ -412,12 +412,12 @@ export default function AdminOrdersPage() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)}>
+                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-[#1A1A1A] hover:bg-[#F7F9FC]">
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
                         </DropdownMenuItem>

@@ -237,34 +237,34 @@ export default function AdminOrderDetailPage() {
     switch (status) {
       case 'pending':
         return (
-          <Badge className="bg-[#F0A202] text-white border-[#F0A202]">
+          <Badge className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20">
             <Clock className="w-3 h-3 mr-1" />
             Pending
           </Badge>
         )
       case 'proof_uploaded':
         return (
-          <Badge className="bg-[#F0A202] text-white border-[#F0A202]">
+          <Badge className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20">
             <AlertCircle className="w-3 h-3 mr-1" />
-            Proof Uploaded
+            Waiting for Confirmation
           </Badge>
         )
       case 'completed':
         return (
-          <Badge className="bg-[#4BB543] text-white border-[#4BB543]">
+          <Badge className="bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20">
             <CheckCircle className="w-3 h-3 mr-1" />
             Completed
           </Badge>
         )
       case 'failed':
         return (
-          <Badge className="bg-[#E63946] text-white border-[#E63946]">
+          <Badge className="bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20">
             <XCircle className="w-3 h-3 mr-1" />
             Failed
           </Badge>
         )
       default:
-        return <Badge variant="secondary">{status}</Badge>
+        return <Badge className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20">{status}</Badge>
     }
   }
 
@@ -334,11 +334,11 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {/* Three Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Column - Order Information (40%) */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Main Content - Order Information (67%) */}
+        <div className="lg:col-span-2 space-y-6">
           
           {/* Order Details */}
           <Card>
@@ -485,34 +485,141 @@ export default function AdminOrderDetailPage() {
           </Card>
         </div>
 
-        {/* Middle Column - Payment Information (35%) */}
-        <div className="lg:col-span-4 space-y-6">
-          
-          {/* Payment Gateway */}
+          {/* Payment & Customer Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Customer Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <User className="w-5 h-5 mr-2" />
+                  Customer Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Full Name</label>
+                  <p className="font-medium">{order.user.full_name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Email</label>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm">{order.user.email}</p>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
+                      className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                    >
+                      <Mail className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+                {order.metadata?.customer_info?.phone_number && (
+                  <div>
+                    <label className="text-sm font-medium text-[#6C757D]">Phone</label>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-sm">{order.metadata.customer_info.phone_number}</p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => window.open(`tel:${order.metadata.customer_info.phone_number}`, '_blank')}
+                        className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                      >
+                        <Phone className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Registration Date</label>
+                  <p className="text-sm">{formatDate(order.user.created_at)}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Current Plan Status</label>
+                  <p className="text-sm">
+                    {order.user.expires_at ? (
+                      <>
+                        Active until {formatDate(order.user.expires_at)}
+                      </>
+                    ) : (
+                      'No active subscription'
+                    )}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Payment Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Gateway</label>
+                  <p className="font-medium">{order.gateway.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Payment Method</label>
+                  <p className="text-sm">{order.payment_method}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Reference Number</label>
+                  <p className="font-mono text-sm">{order.payment_reference}</p>
+                </div>
+                {order.gateway_transaction_id && (
+                  <div>
+                    <label className="text-sm font-medium text-[#6C757D]">Gateway Transaction ID</label>
+                    <p className="font-mono text-sm">{order.gateway_transaction_id}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Package Details */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <CreditCard className="w-5 h-5 mr-2" />
-                Payment Information
+                <Package className="w-5 h-5 mr-2" />
+                Package Details
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Gateway</label>
-                <p className="font-medium">{order.gateway.name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Payment Method</label>
-                <p className="text-sm">{order.payment_method}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Reference Number</label>
-                <p className="font-mono text-sm">{order.payment_reference}</p>
-              </div>
-              {order.gateway_transaction_id && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Gateway Transaction ID</label>
-                  <p className="font-mono text-sm">{order.gateway_transaction_id}</p>
+                  <label className="text-sm font-medium text-[#6C757D]">Package Name</label>
+                  <p className="font-medium">{order.package.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Billing Period</label>
+                  <p className="text-sm">{order.metadata?.billing_period || order.package.billing_period}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Amount</label>
+                  <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Description</label>
+                <p className="text-sm text-[#6C757D]">{order.package.description}</p>
+              </div>
+              
+              {order.package.features && Array.isArray(order.package.features) && (
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D] mb-2 block">Features</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {order.package.features.map((feature, index) => (
+                      <div key={index} className="flex items-center text-sm">
+                        <CheckCircle className="w-3 h-3 mr-2 text-[#4BB543] flex-shrink-0" />
+                        <span>{typeof feature === 'string' ? feature : feature.name || 'Feature'}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -546,7 +653,7 @@ export default function AdminOrderDetailPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(order.payment_proof_url, '_blank')}
-                      className="border-[#E0E6ED]"
+                      className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
                     >
                       <Download className="w-4 h-4 mr-2" />
                       Download
@@ -556,38 +663,10 @@ export default function AdminOrderDetailPage() {
               </CardContent>
             </Card>
           )}
-
-          {/* Transaction Metadata */}
-          {order.metadata && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Additional Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {order.metadata.customer_info && (
-                    <div>
-                      <label className="text-sm font-medium text-[#6C757D]">Customer Info</label>
-                      <div className="text-sm mt-1">
-                        <p>{order.metadata.customer_info.first_name} {order.metadata.customer_info.last_name}</p>
-                        <p className="text-[#6C757D]">{order.metadata.customer_info.email}</p>
-                      </div>
-                    </div>
-                  )}
-                  {order.metadata.billing_period && (
-                    <div>
-                      <label className="text-sm font-medium text-[#6C757D]">Billing Period</label>
-                      <p className="text-sm">{order.metadata.billing_period}</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
-        {/* Right Column - Admin Actions (25%) */}
-        <div className="lg:col-span-3 space-y-6">
+        {/* Sidebar - Admin Actions & Activity (33%) */}
+        <div className="lg:col-span-1 space-y-6">
           
           {/* Status Management */}
           <Card>
