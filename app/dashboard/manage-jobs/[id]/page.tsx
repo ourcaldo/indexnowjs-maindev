@@ -29,7 +29,6 @@ import { supabase } from '@/lib/supabase';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useSocketIO } from '@/hooks/useSocketIO';
-import { UserActivityLogger } from '@/lib/user-activity-logger';
 
 interface Job {
   id: string;
@@ -346,15 +345,6 @@ export default function JobDetailsPage() {
     loadJobData();
     loadSubmissions();
   }, [loadJobData, loadSubmissions]);
-
-  // Log job detail page view
-  useEffect(() => {
-    UserActivityLogger.logPageView('job-details', { 
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      jobId: jobId
-    });
-  }, []);
 
   // Helper functions
   const formatDate = (dateString: string) => {

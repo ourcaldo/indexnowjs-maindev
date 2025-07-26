@@ -11,7 +11,6 @@ import { Separator } from '@/components/ui/separator'
 import { Upload, CheckCircle, Clock, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { useToast } from '@/hooks/use-toast'
-import { UserActivityLogger } from '@/lib/user-activity-logger'
 
 interface Transaction {
   id: string
@@ -61,12 +60,6 @@ export default function OrderCompletedPage() {
 
   useEffect(() => {
     fetchTransactionDetails()
-    // Log order details page view
-    UserActivityLogger.logPageView('order-details', { 
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      orderId: params.id
-    });
   }, [params.id])
 
   const fetchTransactionDetails = async () => {

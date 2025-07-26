@@ -6,7 +6,6 @@ import { useSocketIO } from '@/hooks/useSocketIO'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import QuotaCard from '@/components/QuotaCard'
-import { UserActivityLogger } from '@/lib/user-activity-logger'
 
 interface DashboardStats {
   totalUrlsIndexed: number;
@@ -106,11 +105,6 @@ export default function Dashboard() {
   // Load dashboard data
   useEffect(() => {
     loadDashboardData();
-    // Log dashboard page view
-    UserActivityLogger.logPageView('dashboard', { 
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent 
-    });
   }, []);
 
   const loadDashboardData = async () => {

@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 import { authService } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import QuotaExhaustedNotification from '@/components/quota-exhausted-notification'
-import { UserActivityLogger } from '@/lib/user-activity-logger'
 import { 
   Zap, 
   Download, 
@@ -46,11 +45,6 @@ export default function IndexNowPage() {
   // Load data on component mount
   useEffect(() => {
     loadData()
-    // Log IndexNow page view
-    UserActivityLogger.logPageView('indexnow', { 
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent 
-    });
   }, [])
 
   useEffect(() => {

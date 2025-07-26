@@ -102,33 +102,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     loadOrders()
-    // Log page view when component loads
-    logAdminActivity('orders_page_view', `Viewed orders management page (Page ${currentPage})`)
   }, [currentPage, statusFilter, customerSearch, packageFilter])
-
-  const logAdminActivity = async (action: string, description: string, metadata?: any) => {
-    try {
-      const { data: { session } } = await supabaseBrowser.auth.getSession()
-      if (!session?.access_token) return
-
-      await fetch('/api/admin/activity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          event_type: 'order_management',
-          action_description: description,
-          target_type: 'orders',
-          target_id: null,
-          metadata: metadata ? { action, ...metadata } : { action }
-        })
-      })
-    } catch (error) {
-      console.error('Failed to log admin activity:', error)
-    }
-  }
 
   const loadOrders = async () => {
     try {
@@ -162,23 +136,6 @@ export default function AdminOrdersPage() {
       const data = await response.json()
       if (data.success) {
         setOrdersData(data)
-        
-        // Log successful orders load with filter information
-        const filterInfo = []
-        if (statusFilter !== 'all') filterInfo.push(`status: ${statusFilter}`)
-        if (customerSearch) filterInfo.push(`customer: ${customerSearch}`)
-        if (packageFilter !== 'all') filterInfo.push(`package: ${packageFilter}`)
-        
-        await logAdminActivity(
-          'orders_loaded',
-          `Loaded orders page ${currentPage} with ${data.orders.length} orders${filterInfo.length > 0 ? ` (filtered by ${filterInfo.join(', ')})` : ''}`,
-          {
-            page: currentPage,
-            total_orders: data.summary.total_orders,
-            filters_applied: filterInfo,
-            orders_count: data.orders.length
-          }
-        )
       } else {
         throw new Error(data.error || 'Failed to fetch orders')
       }
@@ -214,74 +171,21 @@ export default function AdminOrdersPage() {
   const handleSelectOrder = (orderId: string, checked: boolean) => {
     if (checked) {
       setSelectedOrders([...selectedOrders, orderId])
-      logAdminActivity('order_selected', `Selected order ${orderId} for bulk action`, { order_id: orderId, action: 'select' })
     } else {
       setSelectedOrders(selectedOrders.filter(id => id !== orderId))
-      logAdminActivity('order_deselected', `Deselected order ${orderId}`, { order_id: orderId, action: 'deselect' })
     }
   }
 
   const handleSelectAll = (checked: boolean) => {
     if (checked && ordersData?.orders) {
       setSelectedOrders(ordersData.orders.map(order => order.id))
-      logAdminActivity('orders_select_all', `Selected all ${ordersData.orders.length} orders on page ${currentPage}`, { 
-        action: 'select_all', 
-        count: ordersData.orders.length, 
-        page: currentPage 
-      })
     } else {
       setSelectedOrders([])
-      logAdminActivity('orders_deselect_all', 'Deselected all orders', { action: 'deselect_all' })
     }
   }
 
   const handleViewOrder = (orderId: string) => {
-    logAdminActivity('order_view_navigate', `Clicked to view order details for ${orderId}`, { 
-      order_id: orderId, 
-      action: 'navigate_to_details' 
-    })
     router.push(`/backend/admin/orders/${orderId}`)
-  }
-
-  const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value)
-    setCurrentPage(1) // Reset to first page when filter changes
-    logAdminActivity('orders_filter_status', `Applied status filter: ${value}`, { 
-      filter_type: 'status', 
-      filter_value: value,
-      previous_value: statusFilter 
-    })
-  }
-
-  const handleCustomerSearchChange = (value: string) => {
-    setCustomerSearch(value)
-    setCurrentPage(1) // Reset to first page when search changes
-    if (value.trim()) {
-      logAdminActivity('orders_search_customer', `Searched for customer: "${value}"`, { 
-        search_term: value,
-        search_type: 'customer' 
-      })
-    }
-  }
-
-  const handlePackageFilterChange = (value: string) => {
-    setPackageFilter(value)
-    setCurrentPage(1) // Reset to first page when filter changes
-    logAdminActivity('orders_filter_package', `Applied package filter: ${value}`, { 
-      filter_type: 'package', 
-      filter_value: value,
-      previous_value: packageFilter 
-    })
-  }
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-    logAdminActivity('orders_page_change', `Navigated to page ${newPage}`, { 
-      action: 'pagination', 
-      new_page: newPage, 
-      previous_page: currentPage,
-      direction: newPage > currentPage ? 'forward' : 'backward'
-    })
   }
 
   if (loading) {
@@ -376,7 +280,7 @@ export default function AdminOrdersPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">Status</label>
-              <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
@@ -395,14 +299,14 @@ export default function AdminOrdersPage() {
               <Input
                 placeholder="Search by name or email"
                 value={customerSearch}
-                onChange={(e) => handleCustomerSearchChange(e.target.value)}
+                onChange={(e) => setCustomerSearch(e.target.value)}
                 className="border-[#E0E6ED]"
               />
             </div>
             
             <div>
               <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">Package</label>
-              <Select value={packageFilter} onValueChange={handlePackageFilterChange}>
+              <Select value={packageFilter} onValueChange={setPackageFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="All packages" />
                 </SelectTrigger>
@@ -513,7 +417,7 @@ export default function AdminOrdersPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A]">
+                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-[#1A1A1A] hover:bg-[#F7F9FC]">
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
@@ -537,7 +441,7 @@ export default function AdminOrdersPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handlePageChange(currentPage - 1)}
+                  onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={!ordersData.pagination.has_prev}
                   className="border-[#E0E6ED]"
                 >
@@ -550,7 +454,7 @@ export default function AdminOrdersPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handlePageChange(currentPage + 1)}
+                  onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={!ordersData.pagination.has_next}
                   className="border-[#E0E6ED]"
                 >

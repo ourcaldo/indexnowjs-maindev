@@ -13,7 +13,6 @@ import { ArrowLeft, CreditCard, Building2, Check, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { authService } from '@/lib/auth'
 import { supabaseBrowser } from '@/lib/supabase-browser'
-import { UserActivityLogger } from '@/lib/user-activity-logger'
 
 interface PaymentPackage {
   id: string
@@ -182,16 +181,6 @@ export default function CheckoutPage() {
       router.push('/dashboard/billing')
     }
   }, [package_id, router, addToast])
-
-  // Log checkout page view
-  useEffect(() => {
-    UserActivityLogger.logPageView('checkout', { 
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      packageId: package_id,
-      billingPeriod: billing_period
-    });
-  }, [])
 
   // Calculate pricing based on selected billing period
   const calculatePrice = () => {
