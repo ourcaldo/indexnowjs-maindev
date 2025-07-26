@@ -17,7 +17,7 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 
 ## Recent Changes  
 
-**CRITICAL QUOTA EXHAUSTION BUG FIXES (January 26, 2025)**
+**CRITICAL BUG FIXES & UI IMPROVEMENTS (January 26, 2025)**
 - ✅ **FIXED QUOTA EXHAUSTION JOB STATUS BUG**: Resolved critical issue where jobs showed "Completed" instead of "Paused" when service account quota exhausted
   - **Root Cause**: Main job processing method continued to completion even after quota exhaustion pause logic ran
   - **Solution**: Added job status check before marking as completed - if job was paused due to quota exhaustion, it now remains paused
@@ -29,6 +29,11 @@ The application provides instant indexing capabilities similar to RankMath's Ins
   - **Database Integration**: Notifications created in `indb_notifications_dashboard` when quota exhaustion detected
   - **UI Display**: Sticky notifications appear at top-center with service account details and quota reset timing
   - **Auto-cleanup**: Notifications expire after 24 hours and are automatically cleaned up
+- ✅ **FIXED URL SUBMISSIONS DISPLAY BUGS**: Resolved two critical UI issues in job detail pages
+  - **"No submissions yet" Logic Fixed**: Changed condition from `job.processed_urls === 0` to `submissions.length === 0` - now only shows when truly no submissions exist
+  - **Missing Submission Dates Fixed**: Enhanced date display logic to show `submitted_at` or fallback to `created_at` for all submissions including failed ones
+  - **Proper Date Validation**: Added comprehensive date validation to prevent epoch dates and ensure proper sorting by latest date
+  - **Enhanced User Experience**: Failed submissions now display actual submission dates enabling proper chronological sorting
 
 **MANAGE JOBS PAGE SCHEDULE DISPLAY FIX (January 26, 2025)**
 - ✅ **SINGLE-LINE SCHEDULE DISPLAY**: Fixed schedule text wrapping issue in manage-jobs table

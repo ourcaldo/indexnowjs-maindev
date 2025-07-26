@@ -54,7 +54,8 @@ interface URLSubmission {
   id: string;
   url: string;
   status: 'success' | 'failed' | 'pending' | 'quota_exceeded';
-  submitted_at: string;
+  submitted_at?: string;
+  created_at: string;
   indexed_at?: string;
   error_message?: string;
   response_data?: any;
@@ -732,10 +733,18 @@ export default function JobDetailsPage() {
                       </td>
                       <td className="p-4 w-1/6">
                         <div className="text-sm text-[#1A1A1A]">
-                          {submission.submitted_at && submission.submitted_at !== '1970-01-01T07:00:00.000Z' ? 
-                            formatDate(submission.submitted_at) : 
-                            '-'
-                          }
+                          {(() => {
+                            // Use submitted_at if available, otherwise use created_at
+                            const dateToFormat = submission.submitted_at || submission.created_at;
+                            // Check for invalid/epoch dates
+                            if (dateToFormat && dateToFormat !== '1970-01-01T07:00:00.000Z') {
+                              const date = new Date(dateToFormat);
+                              if (date.getTime() > 0) { // Valid date check
+                                return formatDate(dateToFormat);
+                              }
+                            }
+                            return '-';
+                          })()}
                         </div>
                       </td>
                       <td className="p-4 w-1/3">
@@ -828,7 +837,7 @@ export default function JobDetailsPage() {
             </div>
           )}
 
-          {job.processed_urls === 0 && (
+          {submissions.length === 0 && !isSubmissionsLoading && (
             <div className="p-8 text-center">
               <Archive className="h-12 w-12 text-[#1A1A1A] mx-auto mb-4" />
               <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No submissions yet</h3>
