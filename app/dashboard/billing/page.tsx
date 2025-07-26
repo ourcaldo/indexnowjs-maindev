@@ -534,7 +534,7 @@ export default function BillingPage() {
 
                 {/* Expandable Features */}
                 <div className="flex-grow">
-                  {(showDetails[pkg.id] || showComparePlans) && (
+                  {(showComparePlans || showDetails[pkg.id]) && (
                     <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
                       <div className="space-y-3">
                         {/* Database Features ONLY - no hardcoded quota features */}
@@ -583,7 +583,7 @@ export default function BillingPage() {
                       isCurrentPlan ? 'text-gray-300 hover:text-white' : 'text-[#6C757D] hover:text-[#1A1A1A]'
                     } transition-colors flex items-center justify-center gap-1`}
                   >
-                    {showDetails[pkg.id] ? (
+                    {(showComparePlans || showDetails[pkg.id]) ? (
                       <>Hide details <ChevronUp className="h-3 w-3" /></>
                     ) : (
                       <>Show details <ChevronDown className="h-3 w-3" /></>
