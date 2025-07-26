@@ -244,7 +244,7 @@ export default function OrderCompletedPage() {
           <Button
             variant="ghost"
             onClick={() => router.push('/dashboard/billing')}
-            className="mb-4 text-[#6C757D] hover:text-[#1A1A1A]"
+            className="mb-4 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Billing

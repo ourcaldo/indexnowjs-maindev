@@ -152,6 +152,10 @@ export default function BillingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [typeFilter, setTypeFilter] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
+  const [selectAll, setSelectAll] = useState(false)
+  const [showDetails, setShowDetails] = useState<Record<string, boolean>>({})
+  const [showComparePlans, setShowComparePlans] = useState(false)
 
   useEffect(() => {
     loadAllData()
@@ -368,6 +372,47 @@ export default function BillingPage() {
     }).format(amount)
   }
 
+  const handleSelectInvoice = (invoiceId: string) => {
+    if (selectedInvoices.includes(invoiceId)) {
+      setSelectedInvoices(selectedInvoices.filter(id => id !== invoiceId))
+    } else {
+      setSelectedInvoices([...selectedInvoices, invoiceId])
+    }
+  }
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedInvoices([])
+      setSelectAll(false)
+    } else {
+      const allIds = historyData?.transactions.map(t => t.id) || []
+      setSelectedInvoices(allIds)
+      setSelectAll(true)
+    }
+  }
+
+  const togglePlanDetails = (planId: string) => {
+    setShowDetails(prev => ({
+      ...prev,
+      [planId]: !prev[planId]
+    }))
+  }
+
+  const toggleComparePlans = () => {
+    setShowComparePlans(!showComparePlans)
+    if (!showComparePlans) {
+      // Show all plan details when comparing
+      const allPlansDetails: Record<string, boolean> = {}
+      packagesData?.packages.forEach(pkg => {
+        allPlansDetails[pkg.id] = true
+      })
+      setShowDetails(allPlansDetails)
+    } else {
+      // Hide all details when not comparing
+      setShowDetails({})
+    }
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       year: 'numeric',
@@ -431,9 +476,12 @@ export default function BillingPage() {
             <h2 className="text-lg font-semibold text-[#1A1A1A]">Billing settings</h2>
             <p className="text-sm text-[#6C757D]">Manage your plan and billing history here.</p>
           </div>
-          <button className="px-4 py-2 border border-[#E0E6ED] rounded-lg text-sm font-medium text-[#1A1A1A] hover:bg-[#F7F9FC] transition-colors flex items-center gap-2">
+          <button 
+            onClick={toggleComparePlans}
+            className="px-4 py-2 border border-[#E0E6ED] rounded-lg text-sm font-medium text-[#1A1A1A] hover:bg-[#F7F9FC] transition-colors flex items-center gap-2"
+          >
             <Package className="h-4 w-4" />
-            Compare plans
+            {showComparePlans ? 'Hide comparison' : 'Compare plans'}
           </button>
         </div>
 
@@ -444,7 +492,7 @@ export default function BillingPage() {
             const pricing = getBillingPeriodPrice(pkg, selectedBillingPeriod)
             
             return (
-              <div key={pkg.id} className={`rounded-lg border p-4 relative ${
+              <div key={pkg.id} className={`rounded-lg border p-4 relative flex flex-col h-full ${
                 isCurrentPlan 
                   ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white' 
                   : 'border-[#E0E6ED] bg-white hover:border-[#1A1A1A] transition-colors'
@@ -482,60 +530,64 @@ export default function BillingPage() {
                   </div>
                 </div>
 
-                <button 
-                  onClick={() => isCurrentPlan ? null : handleSubscribe(pkg.id)}
-                  disabled={isCurrentPlan || subscribing === pkg.id}
-                  className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                    isCurrentPlan 
-                      ? 'bg-white text-[#1A1A1A] cursor-default'
-                      : 'bg-[#1A1A1A] text-white hover:bg-[#0d1b2a]'
-                  } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {subscribing === pkg.id ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Processing...
-                    </div>
-                  ) : isCurrentPlan ? 'Current plan' : 'Switch plan'}
-                </button>
-
                 {/* Expandable Features */}
-                {expandedPlan === pkg.id && (
-                  <div className={`mt-4 pt-4 border-t ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
-                    <div className="space-y-3">
-                      {pkg.features.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
-                          <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
-                            {feature}
-                          </span>
+                <div className="flex-grow">
+                  {(showDetails[pkg.id] || showComparePlans) && (
+                    <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
+                      <div className="space-y-3">
+                        {pkg.features.map((feature, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
+                            <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                              {feature}
+                            </span>
+                          </div>
+                        ))}
+                        <div className={`pt-2 border-t ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
+                          <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
+                            Daily URLs: {pkg.quota_limits?.daily_quota_limit?.toLocaleString() || 'Unlimited'}
+                          </p>
+                          <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
+                            Service Accounts: {pkg.quota_limits?.service_accounts_limit || 'Unlimited'}
+                          </p>
+                          <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
+                            Concurrent Jobs: {pkg.quota_limits?.concurrent_jobs_limit || 'Unlimited'}
+                          </p>
                         </div>
-                      ))}
-                      <div className={`pt-2 border-t ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
-                        <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
-                          Daily URLs: {pkg.quota_limits.daily_quota_limit.toLocaleString()}
-                        </p>
-                        <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
-                          Service Accounts: {pkg.quota_limits.service_accounts_limit}
-                        </p>
-                        <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
-                          Concurrent Jobs: {pkg.quota_limits.concurrent_jobs_limit}
-                        </p>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => setExpandedPlan(expandedPlan === pkg.id ? null : pkg.id)}
-                  className={`w-full mt-3 py-1 text-xs ${isCurrentPlan ? 'text-gray-300 hover:text-white' : 'text-[#6C757D] hover:text-[#1A1A1A]'} transition-colors flex items-center justify-center gap-1`}
-                >
-                  {expandedPlan === pkg.id ? (
-                    <>Hide details <ChevronUp className="h-3 w-3" /></>
-                  ) : (
-                    <>Show details <ChevronDown className="h-3 w-3" /></>
                   )}
-                </button>
+                </div>
+
+                <div className="mt-auto space-y-2">
+                  <button 
+                    onClick={() => isCurrentPlan ? null : handleSubscribe(pkg.id)}
+                    disabled={isCurrentPlan || subscribing === pkg.id}
+                    className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 ${
+                      isCurrentPlan 
+                        ? 'bg-white text-[#1A1A1A] cursor-default'
+                        : 'bg-[#1A1A1A] text-white hover:bg-[#0d1b2a]'
+                    } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {subscribing === pkg.id ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </div>
+                    ) : isCurrentPlan ? 'Current plan' : 'Switch plan'}
+                  </button>
+
+                  <button
+                    onClick={() => togglePlanDetails(pkg.id)}
+                    className={`w-full py-1 text-xs ${isCurrentPlan ? 'text-gray-300 hover:text-white' : 'text-[#6C757D] hover:text-[#1A1A1A]'} transition-colors flex items-center justify-center gap-1`}
+                  >
+                    {showDetails[pkg.id] ? (
+                      <>Hide details <ChevronUp className="h-3 w-3" /></>
+                    ) : (
+                      <>Show details <ChevronDown className="h-3 w-3" /></>
+                    )}
+                  </button>
+                </div>
               </div>
             )
           })}
@@ -608,11 +660,16 @@ export default function BillingPage() {
             <thead>
               <tr className="border-b border-[#E0E6ED]">
                 <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
-                  <input type="checkbox" className="rounded border-[#E0E6ED]" />
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-[#E0E6ED]"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                  />
                 </th>
-                <th className="text-center py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Billing Date</th>
-                <th className="text-center py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Plan</th>
-                <th className="text-center py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Users</th>
+                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Billing Date</th>
+                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Plan</th>
+                <th className="text-center py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -626,29 +683,31 @@ export default function BillingPage() {
                     <input 
                       type="checkbox" 
                       className="rounded border-[#E0E6ED]"
+                      checked={selectedInvoices.includes(transaction.id)}
+                      onChange={() => handleSelectInvoice(transaction.id)}
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
+                  <td className="py-3 px-4 text-left">
+                    <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-[#6C757D]" />
                       <span className="text-sm text-[#1A1A1A]">
-                        {transaction.package_name || transaction.package?.name || 'Unknown'}
+                        {formatDate(transaction.created_at)}
                       </span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-center">
+                  <td className="py-3 px-4 text-left">
                     <span className="text-sm text-[#1A1A1A]">
-                      {formatDate(transaction.created_at)}
+                      {transaction.package_name || transaction.package?.name || 'Unknown'}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {getStatusIcon(transaction.transaction_status)}
                       <span className={`text-xs px-2 py-1 rounded-full border ${
-                        getStatusColor(transaction.transaction_status).bg
-                      } ${getStatusColor(transaction.transaction_status).text} ${
-                        getStatusColor(transaction.transaction_status).border
+                        transaction.transaction_status === 'pending' || transaction.transaction_status === 'proof_uploaded'
+                          ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                          : getStatusColor(transaction.transaction_status).bg + ' ' + getStatusColor(transaction.transaction_status).text + ' ' + getStatusColor(transaction.transaction_status).border
                       }`}>
                         {getStatusText(transaction.transaction_status)}
                       </span>
@@ -691,28 +750,32 @@ export default function BillingPage() {
         )}
       </div>
 
-      {/* Download Section */}
-      <div className="bg-[#1A1A1A] text-white rounded-lg p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="bg-white text-[#1A1A1A] px-2 py-1 rounded text-xs font-medium">
-                {historyData?.transactions.filter(t => t.transaction_status === 'completed').length || 0} Invoices selected
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#1A1A1A] rounded-lg hover:bg-gray-100 transition-colors">
-                <Download className="h-4 w-4" />
-                Download CSV
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#1A1A1A] rounded-lg hover:bg-gray-100 transition-colors">
-                <Download className="h-4 w-4" />
-                Download PDF
-              </button>
+      {/* Floating Action Bar - Only shows when invoices are selected */}
+      {selectedInvoices.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-[#1A1A1A] text-white rounded-lg p-4 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="bg-white text-[#1A1A1A] px-2 py-1 rounded text-xs font-medium">
+                    {selectedInvoices.length} Invoices selected
+                  </span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#1A1A1A] rounded-lg hover:bg-gray-100 transition-colors">
+                    <Download className="h-4 w-4" />
+                    Download CSV
+                  </button>
+                  <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#1A1A1A] rounded-lg hover:bg-gray-100 transition-colors">
+                    <Download className="h-4 w-4" />
+                    Download PDF
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
