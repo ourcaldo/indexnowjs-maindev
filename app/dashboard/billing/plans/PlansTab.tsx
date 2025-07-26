@@ -138,21 +138,7 @@ export default function PlansTab() {
     return { price: pkg.price }
   }
 
-  // Helper function to safely get quota values from the database structure
-  const getQuotaValue = (pkg: PaymentPackage, type: 'daily' | 'service_accounts' | 'concurrent_jobs'): number => {
-    if (!pkg.quota_limits) return 0
-    
-    switch (type) {
-      case 'daily':
-        return pkg.quota_limits.daily_urls ?? pkg.quota_limits.daily_quota_limit ?? 0
-      case 'service_accounts':
-        return pkg.quota_limits.service_accounts ?? pkg.quota_limits.service_accounts_limit ?? 0
-      case 'concurrent_jobs':
-        return pkg.quota_limits.concurrent_jobs ?? pkg.quota_limits.concurrent_jobs_limit ?? 0
-      default:
-        return 0
-    }
-  }
+
 
   const handleSubscribe = async (packageId: string) => {
     try {
@@ -228,14 +214,16 @@ export default function PlansTab() {
     { key: 'annual', label: '12 Months', suffix: '/year' }
   ]
 
-  // All available features across all plans
+  // All available features across all plans - using actual database feature format
   const allFeatures = [
-    { key: 'max_service_accounts', label: 'Max Service Accounts', plans: ['free', 'premium', 'pro'] },
-    { key: 'daily_quota', label: 'Daily Quota for IndexNow', plans: ['free', 'premium', 'pro'] },
+    { key: 'max_service_accounts', label: 'Max 1 Service Account', plans: ['free'] },
+    { key: 'max_service_accounts_premium', label: 'Max 3 Service Account', plans: ['premium'] },
+    { key: 'unlimited_service_accounts', label: 'Unlimited Service Account', plans: ['pro'] },
+    { key: 'daily_quota_free', label: '50 Daily Quota for IndexNow', plans: ['free'] },
+    { key: 'daily_quota_premium', label: '500 Daily Quota for IndexNow', plans: ['premium'] },
+    { key: 'unlimited_daily_quota', label: 'Unlimited Daily Quota for Auto Indexing', plans: ['pro'] },
     { key: 'auto_schedule', label: 'Auto Schedule Feature for IndexNow', plans: ['premium', 'pro'] },
     { key: 'sitemap_feature', label: 'Auto Index with Sitemap Feature', plans: ['premium', 'pro'] },
-    { key: 'unlimited_service_accounts', label: 'Unlimited Service Account', plans: ['pro'] },
-    { key: 'unlimited_daily_quota', label: 'Unlimited Daily Quota for Auto Indexing', plans: ['pro'] },
     { key: 'priority_support', label: 'Priority Support', plans: ['pro'] },
     { key: 'advanced_analytics', label: 'Advanced Analytics & Reporting', plans: ['pro'] }
   ]
@@ -364,30 +352,6 @@ export default function PlansTab() {
                     </div>
                   )
                 })}
-                
-                {/* Quota Limits */}
-                <div className="pt-4 border-t border-[#E0E6ED]">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-[#6C757D]">Daily Quota:</span>
-                      <span className="font-medium text-[#1A1A1A]">
-                        {getQuotaValue(pkg, 'daily') === -1 ? 'Unlimited' : `${getQuotaValue(pkg, 'daily').toLocaleString()} URLs`}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#6C757D]">Service Accounts:</span>
-                      <span className="font-medium text-[#1A1A1A]">
-                        {getQuotaValue(pkg, 'service_accounts') === -1 ? 'Unlimited' : getQuotaValue(pkg, 'service_accounts')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#6C757D]">Concurrent Jobs:</span>
-                      <span className="font-medium text-[#1A1A1A]">
-                        {getQuotaValue(pkg, 'concurrent_jobs') === -1 ? 'Unlimited' : getQuotaValue(pkg, 'concurrent_jobs')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               {/* Action Button - Always present for symmetry */}
