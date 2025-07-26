@@ -71,6 +71,8 @@ export default function PlansTab() {
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<string>('monthly')
   const [subscribing, setSubscribing] = useState<string | null>(null)
   const [showSuccessNotification, setShowSuccessNotification] = useState(false)
+  const [expandedPlans, setExpandedPlans] = useState<Record<string, boolean>>({})
+  const [showComparePlans, setShowComparePlans] = useState(false)
 
   // Check for checkout success
   useEffect(() => {
@@ -201,30 +203,31 @@ export default function PlansTab() {
     { key: 'annual', label: '12 Months', suffix: '/year' }
   ]
 
-  // Define features per plan - each plan shows only its own features
-  const planFeatures = {
-    free: [
-      'Max 1 Service Account',
-      '50 Daily Quota for IndexNow'
-    ],
-    premium: [
-      'Max 3 Service Account', 
-      '500 Daily Quota for IndexNow',
-      'Auto Schedule Feature for IndexNow',
-      'Auto Index with Sitemap Feature'
-    ],
-    pro: [
-      'Unlimited Service Account',
-      'Unlimited Daily Quota for Auto Indexing', 
-      'Auto Schedule Feature for IndexNow',
-      'Auto Index with Sitemap Feature',
-      'Priority Support',
-      'Advanced Analytics & Reporting'
-    ]
+  // Get features directly from database
+  const getFeaturesForPlan = (pkg: PaymentPackage): string[] => {
+    return pkg.features || []
   }
 
-  const getFeaturesForPlan = (planSlug: string): string[] => {
-    return planFeatures[planSlug as keyof typeof planFeatures] || []
+  const toggleComparePlans = () => {
+    setShowComparePlans(!showComparePlans)
+    if (!showComparePlans) {
+      // Show all plan details when comparing
+      const allExpanded: Record<string, boolean> = {}
+      packagesData?.packages.forEach(pkg => {
+        allExpanded[pkg.id] = true
+      })
+      setExpandedPlans(allExpanded)
+    } else {
+      // Hide all details when not comparing
+      setExpandedPlans({})
+    }
+  }
+
+  const togglePlanDetails = (planId: string) => {
+    setExpandedPlans(prev => ({
+      ...prev,
+      [planId]: !prev[planId]
+    }))
   }
 
   return (
@@ -252,6 +255,16 @@ export default function PlansTab() {
       <div className="text-center">
         <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">Choose Your Plan</h2>
         <p className="text-[#6C757D]">Select the perfect plan for your URL indexing needs</p>
+        
+        {/* Compare Plans Button */}
+        <div className="mt-4">
+          <button 
+            onClick={toggleComparePlans}
+            className="text-[#6C757D] hover:text-[#1A1A1A] text-sm font-medium transition-colors"
+          >
+            {showComparePlans ? 'Hide comparison' : 'Compare plans'}
+          </button>
+        </div>
       </div>
 
       {/* Billing Period Toggle */}
@@ -344,7 +357,7 @@ export default function PlansTab() {
 
               {/* Features List */}
               <div className="space-y-3 mb-8 flex-grow">
-                {getFeaturesForPlan(pkg.slug).map((feature, index) => (
+                {getFeaturesForPlan(pkg).map((feature, index) => (
                   <div key={index} className="flex items-start">
                     <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-[#6C757D]">
@@ -353,6 +366,48 @@ export default function PlansTab() {
                   </div>
                 ))}
               </div>
+
+              {/* Show Details Button */}
+              <div className="mb-4">
+                <button 
+                  onClick={() => togglePlanDetails(pkg.id)}
+                  className="text-[#6C757D] hover:text-[#1A1A1A] text-sm font-medium transition-colors"
+                >
+                  {expandedPlans[pkg.id] ? 'Hide details' : 'Show details'}
+                </button>
+              </div>
+
+              {/* Expanded Details */}
+              {expandedPlans[pkg.id] && (
+                <div className="mb-6 p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                  <div className="space-y-3">
+                    {pkg.quota_limits?.daily_quota_limit && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#6C757D]">Daily URLs:</span>
+                        <span className="text-[#1A1A1A] font-medium">
+                          {pkg.quota_limits.daily_quota_limit === -1 ? 'Unlimited' : pkg.quota_limits.daily_quota_limit.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {pkg.quota_limits?.service_accounts_limit && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#6C757D]">Service Accounts:</span>
+                        <span className="text-[#1A1A1A] font-medium">
+                          {pkg.quota_limits.service_accounts_limit === -1 ? 'Unlimited' : pkg.quota_limits.service_accounts_limit}
+                        </span>
+                      </div>
+                    )}
+                    {pkg.quota_limits?.concurrent_jobs_limit && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#6C757D]">Concurrent Jobs:</span>
+                        <span className="text-[#1A1A1A] font-medium">
+                          {pkg.quota_limits.concurrent_jobs_limit === -1 ? 'Unlimited' : pkg.quota_limits.concurrent_jobs_limit}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Action Button - Always same style and alignment */}
               {!pkg.is_current && (

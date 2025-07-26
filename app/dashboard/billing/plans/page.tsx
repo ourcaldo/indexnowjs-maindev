@@ -269,7 +269,7 @@ export default function PlansPage() {
 
               {/* Features List */}
               <div className="space-y-4 mb-8">
-                {pkg.features.map((feature, index) => (
+                {(pkg.features || []).map((feature, index) => (
                   <div key={index} className="flex items-start">
                     <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
                     <span className="text-[#6C757D]">{feature}</span>
@@ -282,19 +282,19 @@ export default function PlansPage() {
                     <div className="flex justify-between">
                       <span className="text-[#6C757D]">Daily Quota:</span>
                       <span className="font-medium text-[#1A1A1A]">
-                        {pkg.quota_limits.daily_quota_limit.toLocaleString()} URLs
+                        {pkg.quota_limits?.daily_quota_limit === -1 ? 'Unlimited' : pkg.quota_limits?.daily_quota_limit?.toLocaleString() || 0} URLs
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#6C757D]">Service Accounts:</span>
                       <span className="font-medium text-[#1A1A1A]">
-                        {pkg.quota_limits.service_accounts_limit}
+                        {pkg.quota_limits?.service_accounts_limit === -1 ? 'Unlimited' : pkg.quota_limits?.service_accounts_limit || 0}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#6C757D]">Concurrent Jobs:</span>
                       <span className="font-medium text-[#1A1A1A]">
-                        {pkg.quota_limits.concurrent_jobs_limit}
+                        {pkg.quota_limits?.concurrent_jobs_limit === -1 ? 'Unlimited' : pkg.quota_limits?.concurrent_jobs_limit || 0}
                       </span>
                     </div>
                   </div>

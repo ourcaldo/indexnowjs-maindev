@@ -688,6 +688,7 @@ export default function BillingPage() {
                     onChange={handleSelectAll}
                   />
                 </th>
+                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Order ID</th>
                 <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Billing Date</th>
                 <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Plan</th>
                 <th className="text-center py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Status</th>
@@ -708,6 +709,11 @@ export default function BillingPage() {
                       onChange={() => handleSelectInvoice(transaction.id)}
                       onClick={(e) => e.stopPropagation()}
                     />
+                  </td>
+                  <td className="py-3 px-4 text-left">
+                    <span className="text-sm text-[#1A1A1A] font-mono">
+                      #{transaction.id.slice(0, 8)}
+                    </span>
                   </td>
                   <td className="py-3 px-4 text-left">
                     <div className="flex items-center gap-2">
@@ -774,24 +780,20 @@ export default function BillingPage() {
       {/* Floating Action Bar - Only shows when invoices are selected */}
       {selectedInvoices.length > 0 && (
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
-          <div className="bg-[#1A1A1A] text-white rounded-lg p-4 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="bg-white text-[#1A1A1A] px-2 py-1 rounded text-xs font-medium">
-                    {selectedInvoices.length} Invoices selected
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#1A1A1A] rounded-lg hover:bg-gray-100 transition-colors">
-                    <Download className="h-4 w-4" />
-                    Download CSV
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#1A1A1A] rounded-lg hover:bg-gray-100 transition-colors">
-                    <Download className="h-4 w-4" />
-                    Download PDF
-                  </button>
-                </div>
+          <div className="bg-[#1A1A1A] text-white rounded-xl px-6 py-4 shadow-xl border border-white/10">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-white">
+                {selectedInvoices.length} invoices selected
+              </span>
+              <div className="flex items-center gap-3">
+                <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/20">
+                  <Download className="h-4 w-4" />
+                  Download CSV
+                </button>
+                <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/20">
+                  <Download className="h-4 w-4" />
+                  Download PDF
+                </button>
               </div>
             </div>
           </div>
