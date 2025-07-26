@@ -399,14 +399,16 @@ export default function BillingPage() {
   }
 
   const toggleComparePlans = () => {
-    setShowComparePlans(!showComparePlans)
-    if (!showComparePlans) {
+    const newShowComparePlans = !showComparePlans
+    setShowComparePlans(newShowComparePlans)
+
+    if (newShowComparePlans) {
       // Show all plan details when comparing
-      const allPlansDetails: Record<string, boolean> = {}
+      const allExpanded: Record<string, boolean> = {}
       packagesData?.packages.forEach(pkg => {
-        allPlansDetails[pkg.id] = true
+        allExpanded[pkg.id] = true
       })
-      setShowDetails(allPlansDetails)
+      setShowDetails(allExpanded)
     } else {
       // Hide all details when not comparing
       setShowDetails({})
@@ -567,9 +569,19 @@ export default function BillingPage() {
                     ) : isCurrentPlan ? 'Current plan' : 'Switch plan'}
                   </button>
 
-                  <button
-                    onClick={() => togglePlanDetails(pkg.id)}
-                    className={`w-full py-1 text-xs ${isCurrentPlan ? 'text-gray-300 hover:text-white' : 'text-[#6C757D] hover:text-[#1A1A1A]'} transition-colors flex items-center justify-center gap-1`}
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      if (!showComparePlans) {
+                        togglePlanDetails(pkg.id)
+                      }
+                    }}
+                    disabled={showComparePlans}
+                    className={`w-full py-1 text-xs ${
+                      showComparePlans ? 'opacity-50 cursor-not-allowed' : 
+                      isCurrentPlan ? 'text-gray-300 hover:text-white' : 'text-[#6C757D] hover:text-[#1A1A1A]'
+                    } transition-colors flex items-center justify-center gap-1`}
                   >
                     {showDetails[pkg.id] ? (
                       <>Hide details <ChevronUp className="h-3 w-3" /></>
