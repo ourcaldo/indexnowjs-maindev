@@ -90,7 +90,8 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
   if (showQuotaExhausted) {
     return (
       <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
-        <div className="bg-[#F0A202] text-white rounded-lg p-4">
+        {/* Daily Limit Warning with project color scheme */}
+        <div className="bg-[#E63946] text-white rounded-lg p-4 mb-4">
           <div className="flex items-start justify-between">
             <div className="flex items-start space-x-3">
               <div className="mt-0.5">
@@ -123,6 +124,77 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
                     <span>Upgrade for higher daily limits and continuous processing</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Always show quota details even when limit reached */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Daily URLs */}
+          <div className="bg-[#F7F9FC] rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-[#6C757D]">Daily URLs</p>
+                <p className="text-lg font-bold text-[#1A1A1A]">
+                  {loading ? '...' : (
+                    <>
+                      {displayQuotaUsed.toLocaleString()} / {isUnlimited ? '∞' : displayQuotaLimit.toLocaleString()}
+                    </>
+                  )}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-[#E63946]/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-[#E63946]" />
+              </div>
+            </div>
+            {!isUnlimited && !loading && (
+              <div className="mt-2">
+                <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full transition-all duration-300 bg-[#E63946]"
+                    style={{ width: '100%' }}
+                  ></div>
+                </div>
+                <p className="text-xs text-[#6C757D] mt-1">
+                  Limit reached - resets tomorrow
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Service Accounts */}
+          <div className="bg-[#F7F9FC] rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-[#6C757D]">Service Accounts</p>
+                <p className="text-lg font-bold text-[#1A1A1A]">
+                  {userProfile.service_account_count || 0} / {
+                    userProfile.package?.quota_limits.service_accounts === -1 ? '∞' : 
+                    userProfile.package?.quota_limits.service_accounts || 0
+                  }
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-[#4BB543]/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-[#4BB543]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Concurrent Jobs */}
+          <div className="bg-[#F7F9FC] rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-[#6C757D]">Concurrent Jobs</p>
+                <p className="text-lg font-bold text-[#1A1A1A]">
+                  {userProfile.active_jobs_count || 0} / {
+                    userProfile.package?.quota_limits.concurrent_jobs === -1 ? '∞' :
+                    userProfile.package?.quota_limits.concurrent_jobs || 0
+                  }
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-[#3D8BFF]/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-[#3D8BFF]" />
               </div>
             </div>
           </div>

@@ -1,0 +1,69 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Before, we already made plan in plan.md and I ask you to make dashboard for admin to manage entire side. But, when I login with super_admin role, there's error like this and I need you to fix it.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, I ask you to enhance the packages and quota that appear on user dashboard, alongside with stick notification if the daily quota is limit.
+
+I do like the design of the quota card, but when daily usage is limit, I don't like the yellow color, bcs its too bright and not this own project color scheme, so pls check the color scheme for this project in replit.md.
+
+Then, when daily quota limit, you also hide some detail from content card quota, like daily quota limit, service account added, and job concurrement. So please don't do that.
+
+Also, when I see the tables "user_quota_summary" which you using this to pull the data for daily limit, I see the "total_quota_used_ is 96, which is this is not accurate bcs on the "indb_google_quota_usage" 96 is compination of 3 different date time in same account, which the "user_quota_summary" should be not added all of that, but by date as we call it Daily Usage and Daily Limit
+See this SQL for user_quota_summary
+INSERT INTO "public"."user_quota_summary" ("user_id", "total_quota_used", "service_account_count", "total_quota_limit", "package_name", "daily_quota_limit", "service_accounts_limit", "concurrent_jobs_limit", "daily_quota_used", "daily_quota_reset_date", "is_unlimited") VALUES ('915f50e5-0902-466a-b1af-bdf19d789722', '96', '1', '200', 'Free', '50', '1', '1', '0', '2025-07-25', 'false'), ('bffbd6fe-c4aa-49bd-8e4f-325a5136cd6e', '0', '0', '0', 'Free', '50', '1', '1', '0', '2025-07-25', 'false');
+
+See this SQL of indb_google_quota_usage
+INSERT INTO "public"."indb_google_quota_usage" ("id", "service_account_id", "date", "requests_made", "requests_successful", "requests_failed", "last_request_at", "created_at", "updated_at") VALUES ('3b246357-8ddf-4152-b470-009220848db9', '35e436ba-53af-4464-b80c-c3fb0c18bf98', '2025-07-23', '45', '45', '0', '2025-07-23 17:32:10.049+00', '2025-07-23 07:35:06.289+00', '2025-07-26 05:14:14.578007+00'), ('cbb07c03-c812-4ca9-a6c9-c936f5deedaf', '35e436ba-53af-4464-b80c-c3fb0c18bf98', '2025-07-24', '11', '11', '0', '2025-07-24 16:58:06.88+00', '2025-07-24 14:47:06.202+00', '2025-07-25 20:36:37.417993+00'), ('ec82fa8f-9029-469b-b105-0bdbc6e7f0d3', '35e436ba-53af-4464-b80c-c3fb0c18bf98', '2025-07-25', '40', '40', '0', '2025-07-25 20:58:22.374+00', '2025-07-25 19:37:01.595+00', '2025-07-26 05:12:25.532781+00');
+
+Then on the "indb_google_quota_usage" also doesn't have the user_id of the user which we get from table "indb_auth_user_profiles" so you need to fix this.
+create table public.indb_auth_user_profiles (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  user_id uuid not null,
+  full_name text null,
+  role text null default 'user'::text,
+  email_notifications boolean null default true,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  phone_number text null,
+  package_id uuid null,
+  subscribed_at timestamp with time zone null,
+  expires_at timestamp with time zone null,
+  daily_quota_used integer null default 0,
+  daily_quota_reset_date date null default CURRENT_DATE,
+  constraint indb_auth_user_profiles_pkey primary key (id),
+  constraint indb_auth_user_profiles_user_id_key unique (user_id),
+  constraint indb_auth_user_profiles_user_id_fkey foreign KEY (user_id) references auth.users (id) on delete CASCADE,
+  constraint indb_auth_user_profiles_package_id_fkey foreign KEY (package_id) references indb_payment_packages (id),
+  constraint indb_auth_user_profiles_role_check check (
+    (
+      role = any (
+        array['user'::text, 'admin'::text, 'super_admin'::text]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists idx_user_profiles_package_id on public.indb_auth_user_profiles using btree (package_id) TABLESPACE pg_default;
+
+create index IF not exists idx_user_profiles_quota_reset on public.indb_auth_user_profiles using btree (daily_quota_reset_date) TABLESPACE pg_default;
+
+create index IF not exists idx_user_profiles_expires_at on public.indb_auth_user_profiles using btree (expires_at) TABLESPACE pg_default;
+
+create index IF not exists idx_user_quota_summary_user_id on public.indb_auth_user_profiles using btree (user_id) TABLESPACE pg_default;
+
+create index IF not exists idx_user_profiles_user_id on public.indb_auth_user_profiles using btree (user_id) TABLESPACE pg_default;
+
+create trigger update_user_profiles_updated_at BEFORE
+update on indb_auth_user_profiles for EACH row
+execute FUNCTION update_updated_at_column ();
+
+create trigger assign_default_package_trigger BEFORE INSERT on indb_auth_user_profiles for EACH row when (new.package_id is null)
+execute FUNCTION assign_default_package ();

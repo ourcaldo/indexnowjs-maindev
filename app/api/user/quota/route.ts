@@ -24,41 +24,75 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get ALL quota data from the updated user_quota_summary view
-    const { data: quotaData, error: quotaError } = await supabaseAdmin
-      .from('user_quota_summary')
-      .select('*')
+    // Get user profile with package information (direct and accurate)
+    const { data: profileData, error: profileError } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select(`
+        user_id,
+        daily_quota_used,
+        daily_quota_reset_date,
+        package:indb_payment_packages(
+          id,
+          name,
+          quota_limits
+        )
+      `)
       .eq('user_id', user.id)
       .single()
 
-    if (quotaError) {
-      console.error('Error fetching quota data:', quotaError)
-      return NextResponse.json({ error: 'Failed to fetch quota data' }, { status: 500 })
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError)
+      return NextResponse.json({ error: 'Failed to fetch user profile' }, { status: 500 })
     }
 
-    // Use data directly from user_quota_summary view
-    const totalQuotaUsed = quotaData?.total_quota_used || 0
-    const dailyQuotaLimit = quotaData?.daily_quota_limit || 50
-    const isUnlimited = quotaData?.is_unlimited === true
-    const packageName = quotaData?.package_name || 'Free'
+    // Get service account count
+    const { count: serviceAccountCount } = await supabaseAdmin
+      .from('indb_google_service_accounts')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_active', true)
 
-    // Use total_quota_used vs daily_quota_limit as requested
-    const remainingQuota = isUnlimited ? -1 : Math.max(0, dailyQuotaLimit - totalQuotaUsed)
-    const quotaExhausted = !isUnlimited && totalQuotaUsed >= dailyQuotaLimit
-    const dailyLimitReached = quotaExhausted // Same condition
+    const packageData = Array.isArray(profileData.package) ? profileData.package[0] : profileData.package
+    
+    // Reset quota if it's a new day
+    const today = new Date().toISOString().split('T')[0]
+    let dailyQuotaUsed = profileData.daily_quota_used || 0
+    
+    if (profileData.daily_quota_reset_date !== today) {
+      // Reset quota for new day
+      await supabaseAdmin
+        .from('indb_auth_user_profiles')
+        .update({
+          daily_quota_used: 0,
+          daily_quota_reset_date: today,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+      
+      dailyQuotaUsed = 0
+    }
+
+    // Use accurate daily quota tracking from user profile
+    const dailyQuotaLimit = packageData?.quota_limits?.daily_urls || 50
+    const isUnlimited = dailyQuotaLimit === -1
+    const packageName = packageData?.name || 'Free'
+    
+    const remainingQuota = isUnlimited ? -1 : Math.max(0, dailyQuotaLimit - dailyQuotaUsed)
+    const quotaExhausted = !isUnlimited && dailyQuotaUsed >= dailyQuotaLimit
+    const dailyLimitReached = quotaExhausted
 
     return NextResponse.json({ 
       quota: {
-        daily_quota_used: totalQuotaUsed, // Show total_quota_used as daily usage (256)
-        daily_quota_limit: dailyQuotaLimit, // Show package daily limit (50)
+        daily_quota_used: dailyQuotaUsed, // Accurate daily usage from profile
+        daily_quota_limit: dailyQuotaLimit, // Package daily limit
         is_unlimited: isUnlimited,
-        quota_exhausted: quotaExhausted, // true when 256 >= 50
+        quota_exhausted: quotaExhausted,
         daily_limit_reached: dailyLimitReached,
         package_name: packageName,
-        remaining_quota: remainingQuota, // Will be 0 since 256 > 50
-        total_quota_used: totalQuotaUsed,
-        total_quota_limit: quotaData?.total_quota_limit || 0,
-        service_account_count: quotaData?.service_account_count || 0
+        remaining_quota: remainingQuota,
+        total_quota_used: dailyQuotaUsed, // Same as daily for compatibility
+        total_quota_limit: (serviceAccountCount || 0) * 200,
+        service_account_count: serviceAccountCount || 0
       }
     })
   } catch (error) {

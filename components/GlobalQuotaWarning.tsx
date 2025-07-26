@@ -53,7 +53,7 @@ export default function GlobalQuotaWarning() {
   }
 
   return (
-    <div className="bg-[#F0A202] text-white rounded-lg p-4 mb-6">
+    <div className="bg-[#E63946] text-white rounded-lg p-4 mb-6">
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3">
           <div className="mt-0.5">
