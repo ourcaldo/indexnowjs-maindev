@@ -398,7 +398,6 @@ export default function CheckoutPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Billing Address</CardTitle>
-                  <p className="text-sm text-[#6C757D] mt-1">You can skip this section if not needed</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>

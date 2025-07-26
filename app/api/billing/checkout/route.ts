@@ -150,26 +150,11 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendCheckoutEmailNotification({ user, transaction, package: pkg, gateway, customer_info }: any) {
-  // Use existing SMTP configuration from .env
   try {
-    const nodemailer = require('nodemailer')
+    console.log('🚀 Starting checkout email notification process...')
     
-    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.warn('SMTP configuration not complete, skipping email notification')
-      return
-    }
-
-    // Create transporter using existing SMTP settings
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    })
-
+    const { emailService } = await import('@/lib/email/emailService')
+    
     const bankConfig = gateway.configuration || {}
     const formatCurrency = (amount: number) => {
       return new Intl.NumberFormat('id-ID', {
@@ -180,82 +165,29 @@ async function sendCheckoutEmailNotification({ user, transaction, package: pkg, 
       }).format(amount)
     }
 
-    const emailHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Order Confirmation - IndexNow Pro</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #1A1A1A; color: white; padding: 20px; text-align: center; }
-          .content { padding: 20px; background: #f9f9f9; }
-          .order-details { background: white; padding: 15px; margin: 20px 0; border-radius: 5px; }
-          .payment-info { background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #ffc107; }
-          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>IndexNow Pro</h1>
-            <h2>Order Confirmation</h2>
-          </div>
-          
-          <div class="content">
-            <p>Dear ${customer_info.first_name} ${customer_info.last_name},</p>
-            
-            <p>Thank you for your order! We've received your subscription request and are processing it.</p>
-            
-            <div class="order-details">
-              <h3>Order Details</h3>
-              <p><strong>Order ID:</strong> ${transaction.payment_reference}</p>
-              <p><strong>Package:</strong> ${pkg.name}</p>
-              <p><strong>Billing Period:</strong> ${transaction.metadata?.billing_period}</p>
-              <p><strong>Amount:</strong> ${formatCurrency(transaction.amount)}</p>
-              <p><strong>Status:</strong> Pending Payment</p>
-            </div>
-            
-            <div class="payment-info">
-              <h3>Payment Instructions</h3>
-              <p><strong>Payment Method:</strong> ${gateway.name}</p>
-              ${bankConfig.bank_name ? `
-                <p><strong>Bank:</strong> ${bankConfig.bank_name}</p>
-                <p><strong>Account Name:</strong> ${bankConfig.account_name}</p>
-                <p><strong>Account Number:</strong> ${bankConfig.account_number}</p>
-              ` : ''}
-              <p><strong>Amount to Pay:</strong> ${formatCurrency(transaction.amount)}</p>
-              <p>Please include your Order ID (${transaction.payment_reference}) in the payment reference.</p>
-            </div>
-            
-            <p>Once we receive your payment, we'll activate your subscription and send you a confirmation email.</p>
-            
-            <p>If you have any questions, please contact our support team.</p>
-            
-            <p>Best regards,<br>The IndexNow Pro Team</p>
-          </div>
-          
-          <div class="footer">
-            <p>This is an automated email. Please do not reply.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `
-
-    const mailOptions = {
-      from: `${process.env.SMTP_FROM_NAME || 'IndexNow Pro'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
-      to: customer_info.email,
-      subject: `Order Confirmation - ${pkg.name} Subscription`,
-      html: emailHtml
+    const emailData = {
+      customerName: `${customer_info.first_name}${customer_info.last_name ? ' ' + customer_info.last_name : ''}`,
+      orderId: transaction.payment_reference,
+      packageName: pkg.name,
+      billingPeriod: transaction.metadata?.billing_period || 'N/A',
+      amount: formatCurrency(transaction.amount),
+      paymentMethod: gateway.name,
+      bankName: bankConfig.bank_name,
+      accountName: bankConfig.account_name,
+      accountNumber: bankConfig.account_number,
+      orderDate: new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
     }
 
-    await transporter.sendMail(mailOptions)
-    console.log('Checkout confirmation email sent successfully via SMTP')
+    console.log('📤 Sending billing confirmation email to:', customer_info.email)
+    await emailService.sendBillingConfirmation(customer_info.email, emailData)
+    console.log('✅ Checkout confirmation email sent successfully!')
 
   } catch (error) {
-    console.error('Failed to send checkout email:', error)
+    console.error('❌ Failed to send checkout email notification:', error)
     throw error
   }
 }

@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Quota Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px 0;
+        }
+        
+        .email-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: none;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .header {
+            background-color: #ffffff;
+            padding: 30px 30px 20px 30px;
+            text-align: center;
+            border-bottom: none;
+        }
+        
+        .logo {
+            max-width: 120px;
+            height: auto;
+        }
+        
+        .content {
+            padding: 20px 30px 30px 30px;
+            text-align: left;
+        }
+        
+        .greeting {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .stats-container {
+            margin: 30px 0;
+        }
+        
+        .stats-row {
+            display: table;
+            width: 100%;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stats-label {
+            display: table-cell;
+            color: #333;
+            width: 70%;
+            text-align: left;
+        }
+        
+        .stats-value {
+            display: table-cell;
+            color: #333;
+            width: 30%;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .detail-section {
+            margin: 30px 0;
+        }
+        
+        .detail-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 15px;
+        }
+        
+        .detail-grid {
+            margin: 15px 0;
+        }
+        
+        .detail-row {
+            display: table;
+            width: 100%;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            display: table-cell;
+            font-weight: 600;
+            color: #000;
+            width: 70%;
+            text-align: left;
+        }
+        
+        .detail-value {
+            display: table-cell;
+            color: #333;
+            width: 30%;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .footer-message {
+            font-size: 14px;
+            color: #333;
+            margin: 30px 0 20px 0;
+            line-height: 1.6;
+        }
+        
+        .signature {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .team-name {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+        }
+        
+        .footer {
+            background-color: #2c2c2c;
+            padding: 20px 30px;
+            text-align: left;
+        }
+        
+        .footer-logo {
+            max-width: 80px;
+            height: auto;
+            margin-bottom: 10px;
+            filter: brightness(0) invert(1);
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .social-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #555;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0 10px;
+            }
+            
+            .content, .header, .footer {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="{{logoUrl}}" alt="IndexNow" class="logo">
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Hi {{userName}},</div>
+            
+            <div class="title">Daily Quota Report</div>
+            
+            <div class="message">
+                Here's your daily summary for {{reportDate}}. We're happy to inform you about your indexing activities and quota usage.
+            </div>
+            
+            <div class="stats-container">
+                <div class="stats-row">
+                    <span class="stats-label">URLs Indexed</span>
+                    <span class="stats-value">{{totalSuccessfulUrls}}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Failed URLs</span>
+                    <span class="stats-value">{{totalFailedUrls}}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Jobs Completed</span>
+                    <span class="stats-value">{{completedJobs}}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Active Jobs</span>
+                    <span class="stats-value">{{activeJobs}}</span>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <div class="detail-title">Account Details</div>
+                <div class="detail-grid">
+                    <div class="detail-row">
+                        <span class="detail-label">Service Accounts</span>
+                        <span class="detail-value">{{totalServiceAccounts}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Active Accounts</span>
+                        <span class="detail-value">{{activeServiceAccounts}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Quota Used</span>
+                        <span class="detail-value">{{quotaUsed}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Quota Limit</span>
+                        <span class="detail-value">{{quotaLimit}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-message">
+                You can view your detailed reports and manage your indexing jobs by visiting your dashboard.
+            </div>
+            
+            <div class="signature">Thank you for choosing us and being part of our community.</div>
+            <div class="team-name">The IndexNow Team</div>
+            
+            <div class="timestamp">Report generated on {{reportDate}}</div>
+        </div>
+        
+        <div class="footer">
+            <img src="{{logoUrl}}" alt="IndexNow" class="footer-logo">
+            <div class="social-icons">
+                <span class="social-icon"></span>
+                <span class="social-icon"></span>
+                <span class="social-icon"></span>
+                <span class="social-icon"></span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
