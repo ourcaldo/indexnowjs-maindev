@@ -15,7 +15,8 @@ import {
   LogOut,
   User,
   Menu,
-  Activity
+  Activity,
+  CreditCard
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -105,6 +106,12 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           active: pathname === '/dashboard/manage-jobs'
         }
       ]
+    },
+    {
+      label: 'Billing & Payment',
+      href: '/dashboard/billing',
+      icon: CreditCard,
+      active: pathname.startsWith('/dashboard/billing')
     },
     {
       label: 'Settings',
