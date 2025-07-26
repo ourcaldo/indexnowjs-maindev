@@ -203,9 +203,10 @@ export default function PlansTab() {
     { key: 'annual', label: '12 Months', suffix: '/year' }
   ]
 
-  // Get features directly from database
+  // Get features directly from database - ONLY from database, no hardcoded features
   const getFeaturesForPlan = (pkg: PaymentPackage): string[] => {
-    return pkg.features || []
+    // Return ONLY the features from database, nothing else
+    return Array.isArray(pkg.features) ? pkg.features : []
   }
 
   const toggleComparePlans = () => {
@@ -229,10 +230,10 @@ export default function PlansTab() {
     // Don't allow individual toggle when compare mode is active
     if (showComparePlans) return
     
-    setExpandedPlans(prev => ({
-      ...prev,
-      [planId]: !prev[planId]
-    }))
+    // Only toggle the specific plan, clear all others
+    setExpandedPlans({
+      [planId]: !expandedPlans[planId]
+    })
   }
 
   return (
