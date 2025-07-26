@@ -197,7 +197,7 @@ export default function OrderCompletedPage() {
       case 'pending':
         return <Badge className="bg-[#F0A202] text-white"><Clock className="w-3 h-3 mr-1" />Pending Payment</Badge>
       case 'proof_uploaded':
-        return <Badge className="bg-[#3D8BFF] text-white"><Upload className="w-3 h-3 mr-1" />Proof Uploaded</Badge>
+        return <Badge className="bg-[#F0A202] text-white"><Upload className="w-3 h-3 mr-1" />Waiting for Confirmation</Badge>
       case 'completed':
         return <Badge className="bg-[#4BB543] text-white"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>
       case 'failed':

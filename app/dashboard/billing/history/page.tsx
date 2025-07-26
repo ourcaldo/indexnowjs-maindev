@@ -124,6 +124,7 @@ export default function BillingHistoryPage() {
     switch (status) {
       case 'completed': return <CheckCircle className="h-4 w-4 text-[#4BB543]" />
       case 'pending': return <Clock className="h-4 w-4 text-[#F0A202]" />
+      case 'proof_uploaded': return <Clock className="h-4 w-4 text-[#F0A202]" />
       case 'failed': return <XCircle className="h-4 w-4 text-[#E63946]" />
       case 'cancelled': return <XCircle className="h-4 w-4 text-[#6C757D]" />
       default: return <AlertCircle className="h-4 w-4 text-[#6C757D]" />
@@ -134,6 +135,7 @@ export default function BillingHistoryPage() {
     switch (status) {
       case 'completed': return { bg: 'bg-[#4BB543]/10', text: 'text-[#4BB543]', border: 'border-[#4BB543]/20' }
       case 'pending': return { bg: 'bg-[#F0A202]/10', text: 'text-[#F0A202]', border: 'border-[#F0A202]/20' }
+      case 'proof_uploaded': return { bg: 'bg-[#F0A202]/10', text: 'text-[#F0A202]', border: 'border-[#F0A202]/20' }
       case 'failed': return { bg: 'bg-[#E63946]/10', text: 'text-[#E63946]', border: 'border-[#E63946]/20' }
       case 'cancelled': return { bg: 'bg-[#6C757D]/10', text: 'text-[#6C757D]', border: 'border-[#6C757D]/20' }
       default: return { bg: 'bg-[#6C757D]/10', text: 'text-[#6C757D]', border: 'border-[#6C757D]/20' }
@@ -220,30 +222,30 @@ export default function BillingHistoryPage() {
 
       {/* Summary Stats */}
       {historyData?.summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-            <div className="text-2xl font-bold text-[#1A1A1A]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-white p-3 rounded-lg border border-[#E0E6ED]">
+            <div className="text-xl font-bold text-[#1A1A1A]">
               {historyData.summary.total_transactions}
             </div>
-            <div className="text-sm text-[#6C757D]">Total Transactions</div>
+            <div className="text-xs text-[#6C757D]">Total Transactions</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-            <div className="text-2xl font-bold text-[#4BB543]">
+          <div className="bg-white p-3 rounded-lg border border-[#E0E6ED]">
+            <div className="text-xl font-bold text-[#4BB543]">
               {historyData.summary.completed_transactions}
             </div>
-            <div className="text-sm text-[#6C757D]">Completed</div>
+            <div className="text-xs text-[#6C757D]">Completed</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-            <div className="text-2xl font-bold text-[#F0A202]">
+          <div className="bg-white p-3 rounded-lg border border-[#E0E6ED]">
+            <div className="text-xl font-bold text-[#F0A202]">
               {historyData.summary.pending_transactions}
             </div>
-            <div className="text-sm text-[#6C757D]">Pending</div>
+            <div className="text-xs text-[#6C757D]">Pending</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-            <div className="text-2xl font-bold text-[#1A1A1A]">
+          <div className="bg-white p-3 rounded-lg border border-[#E0E6ED]">
+            <div className="text-xl font-bold text-[#1A1A1A]">
               {formatCurrency(historyData.summary.total_amount_spent)}
             </div>
-            <div className="text-sm text-[#6C757D]">Total Spent</div>
+            <div className="text-xs text-[#6C757D]">Total Spent</div>
           </div>
         </div>
       )}
@@ -260,7 +262,7 @@ export default function BillingHistoryPage() {
                 placeholder="Search by package, reference, or transaction ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent"
               />
             </div>
           </div>
@@ -270,7 +272,7 @@ export default function BillingHistoryPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent"
             >
               <option value="">All Status</option>
               <option value="completed">Completed</option>
@@ -285,7 +287,7 @@ export default function BillingHistoryPage() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent"
             >
               <option value="">All Types</option>
               <option value="subscription">New Subscription</option>
@@ -305,45 +307,49 @@ export default function BillingHistoryPage() {
               <table className="w-full">
                 <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
                   <tr>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-[#6C757D]">Transaction</th>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-[#6C757D]">Package</th>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-[#6C757D]">Amount</th>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-[#6C757D]">Status</th>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-[#6C757D]">Date</th>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-[#6C757D]">Method</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Transaction</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Package</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Amount</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Status</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Date</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Method</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E0E6ED]">
                   {filteredTransactions.map((transaction) => (
-                    <tr key={transaction.id} className="hover:bg-[#F7F9FC]/50 transition-colors">
-                      <td className="py-4 px-6">
+                    <tr 
+                      key={transaction.id} 
+                      className="hover:bg-[#F7F9FC]/50 transition-colors cursor-pointer"
+                      onClick={() => window.location.href = `/dashboard/billing/order/${transaction.id}`}
+                    >
+                      <td className="py-3 px-4">
                         <div>
-                          <div className="font-medium text-[#1A1A1A]">
+                          <div className="font-medium text-[#1A1A1A] text-sm">
                             {formatTransactionType(transaction.transaction_type)}
                           </div>
                           {transaction.payment_reference && (
-                            <div className="text-sm text-[#6C757D]">
+                            <div className="text-xs text-[#6C757D]">
                               Ref: {transaction.payment_reference}
                             </div>
                           )}
                         </div>
                       </td>
-                      <td className="py-4 px-6">
-                        <div className="font-medium text-[#1A1A1A]">
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-[#1A1A1A] text-sm">
                           {transaction.package.name}
                         </div>
                         {transaction.subscription && (
-                          <div className="text-sm text-[#6C757D]">
+                          <div className="text-xs text-[#6C757D]">
                             {transaction.subscription.billing_period}
                           </div>
                         )}
                       </td>
-                      <td className="py-4 px-6">
-                        <div className="font-semibold text-[#1A1A1A]">
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-[#1A1A1A] text-sm">
                           {formatCurrency(transaction.amount, transaction.currency)}
                         </div>
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-4">
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(transaction.transaction_status)}
                           <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
@@ -351,12 +357,12 @@ export default function BillingHistoryPage() {
                           } ${getStatusColor(transaction.transaction_status).text} ${
                             getStatusColor(transaction.transaction_status).border
                           }`}>
-                            {transaction.transaction_status.toUpperCase()}
+                            {transaction.transaction_status === 'proof_uploaded' ? 'WAITING FOR CONFIRMATION' : transaction.transaction_status.toUpperCase()}
                           </span>
                         </div>
                       </td>
-                      <td className="py-4 px-6">
-                        <div className="text-sm text-[#1A1A1A]">
+                      <td className="py-3 px-4">
+                        <div className="text-xs text-[#1A1A1A]">
                           {formatDate(transaction.created_at)}
                         </div>
                         {transaction.verified_at && (
@@ -365,8 +371,8 @@ export default function BillingHistoryPage() {
                           </div>
                         )}
                       </td>
-                      <td className="py-4 px-6">
-                        <div className="text-sm text-[#1A1A1A]">
+                      <td className="py-3 px-4">
+                        <div className="text-xs text-[#1A1A1A]">
                           {transaction.gateway.name}
                         </div>
                         <div className="text-xs text-[#6C757D]">
