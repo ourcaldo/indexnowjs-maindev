@@ -4,12 +4,12 @@
 -- Drop the incorrect view
 DROP VIEW IF EXISTS user_quota_summary;
 
--- Create the corrected view that properly calculates DAILY quota usage
+-- Create the corrected view that properly calculates DAILY quota usage from actual usage data
 CREATE VIEW user_quota_summary AS
 SELECT 
     p.user_id,
-    -- FIXED: Use daily_quota_used from user profile (accurate daily tracking)
-    p.daily_quota_used as total_quota_used,
+    -- FIXED: Calculate today's quota usage from actual quota table using user_id
+    COALESCE(SUM(CASE WHEN qu.date = CURRENT_DATE THEN qu.requests_made ELSE 0 END), 0) as total_quota_used,
     COUNT(DISTINCT sa.id) as service_account_count,
     COUNT(DISTINCT sa.id) * 200 as total_quota_limit,
     -- Package information
@@ -17,17 +17,17 @@ SELECT
     (pkg.quota_limits->>'daily_urls')::integer as daily_quota_limit,
     (pkg.quota_limits->>'service_accounts')::integer as service_accounts_limit,
     (pkg.quota_limits->>'concurrent_jobs')::integer as concurrent_jobs_limit,
-    -- Daily quota usage from profile (most accurate)
-    p.daily_quota_used,
+    -- Daily quota usage from actual usage data (today only)
+    COALESCE(SUM(CASE WHEN qu.date = CURRENT_DATE THEN qu.requests_made ELSE 0 END), 0) as daily_quota_used,
     p.daily_quota_reset_date,
     -- Calculate if unlimited
     CASE WHEN (pkg.quota_limits->>'daily_urls')::integer = -1 THEN true ELSE false END as is_unlimited
 FROM indb_auth_user_profiles p
 LEFT JOIN indb_google_service_accounts sa ON sa.user_id = p.user_id AND sa.is_active = true
+LEFT JOIN indb_google_quota_usage qu ON qu.user_id = p.user_id
 LEFT JOIN indb_payment_packages pkg ON pkg.id = p.package_id
 GROUP BY 
     p.user_id, 
-    p.daily_quota_used, 
     p.daily_quota_reset_date,
     pkg.name,
     pkg.quota_limits;
