@@ -46,7 +46,12 @@ interface PaymentPackage {
   }
   is_popular: boolean
   is_current: boolean
-  pricing_tiers: Record<string, PricingTier>
+  pricing_tiers: Record<string, PricingTier> | Array<{
+    period: string
+    period_label: string
+    regular_price: number
+    promo_price?: number
+  }>
 }
 
 interface PackagesData {
@@ -110,8 +115,20 @@ export default function PlansTab() {
   }
 
   const getBillingPeriodPrice = (pkg: PaymentPackage, period: string): { price: number, originalPrice?: number, discount?: number } => {
-    const tier = pkg.pricing_tiers?.[period]
-    if (tier) {
+    // Handle pricing_tiers as array format from database
+    if (Array.isArray(pkg.pricing_tiers)) {
+      const tier = pkg.pricing_tiers.find((t: any) => t.period === period)
+      if (tier) {
+        return {
+          price: tier.promo_price || tier.regular_price,
+          originalPrice: tier.promo_price ? tier.regular_price : undefined,
+          discount: tier.promo_price ? Math.round(((tier.regular_price - tier.promo_price) / tier.regular_price) * 100) : undefined
+        }
+      }
+    }
+    // Handle pricing_tiers as object format (fallback)
+    else if (pkg.pricing_tiers?.[period]) {
+      const tier = pkg.pricing_tiers[period]
       return {
         price: tier.promo_price || tier.regular_price,
         originalPrice: tier.promo_price ? tier.regular_price : undefined,
@@ -206,10 +223,27 @@ export default function PlansTab() {
 
   const billingPeriods = [
     { key: 'monthly', label: 'Monthly', suffix: '/month' },
-    { key: '3-month', label: '3 Months', suffix: '/3 months' },
-    { key: '6-month', label: '6 Months', suffix: '/6 months' },
-    { key: '12-month', label: '12 Months', suffix: '/year' }
+    { key: 'quarterly', label: '3 Months', suffix: '/3 months' },
+    { key: 'biannual', label: '6 Months', suffix: '/6 months' },
+    { key: 'annual', label: '12 Months', suffix: '/year' }
   ]
+
+  // All available features across all plans
+  const allFeatures = [
+    { key: 'max_service_accounts', label: 'Max Service Accounts', plans: ['free', 'premium', 'pro'] },
+    { key: 'daily_quota', label: 'Daily Quota for IndexNow', plans: ['free', 'premium', 'pro'] },
+    { key: 'auto_schedule', label: 'Auto Schedule Feature for IndexNow', plans: ['premium', 'pro'] },
+    { key: 'sitemap_feature', label: 'Auto Index with Sitemap Feature', plans: ['premium', 'pro'] },
+    { key: 'unlimited_service_accounts', label: 'Unlimited Service Account', plans: ['pro'] },
+    { key: 'unlimited_daily_quota', label: 'Unlimited Daily Quota for Auto Indexing', plans: ['pro'] },
+    { key: 'priority_support', label: '24/7 Priority Support', plans: ['pro'] },
+    { key: 'advanced_analytics', label: 'Advanced Analytics & Reporting', plans: ['pro'] }
+  ]
+
+  const getFeatureForPlan = (planSlug: string, featureKey: string) => {
+    const feature = allFeatures.find(f => f.key === featureKey)
+    return feature?.plans.includes(planSlug) || false
+  }
 
   return (
     <div className="space-y-8">
@@ -233,9 +267,9 @@ export default function PlansTab() {
               }`}
             >
               {period.label}
-              {period.key === '12-month' && (
+              {period.key === 'annual' && (
                 <span className="ml-1 text-xs bg-[#4BB543] text-white px-1.5 py-0.5 rounded-full">
-                  Save 20%
+                  Save 80%
                 </span>
               )}
             </button>
@@ -308,13 +342,28 @@ export default function PlansTab() {
               </div>
 
               {/* Features List */}
-              <div className="space-y-4 mb-8">
-                {pkg.features.map((feature, index) => (
-                  <div key={index} className="flex items-start">
-                    <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-[#6C757D]">{feature}</span>
-                  </div>
-                ))}
+              <div className="space-y-3 mb-8">
+                {allFeatures.map((feature) => {
+                  const isIncluded = getFeatureForPlan(pkg.slug, feature.key)
+                  return (
+                    <div key={feature.key} className="flex items-start">
+                      {isIncluded ? (
+                        <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
+                      ) : (
+                        <div className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0 flex items-center justify-center">
+                          <div className="h-4 w-4 rounded-full bg-[#E63946]/10 flex items-center justify-center">
+                            <svg className="h-3 w-3 text-[#E63946]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                      <span className={`text-sm ${isIncluded ? 'text-[#6C757D]' : 'text-[#E63946] line-through'}`}>
+                        {feature.label}
+                      </span>
+                    </div>
+                  )
+                })}
                 
                 {/* Quota Limits */}
                 <div className="pt-4 border-t border-[#E0E6ED]">
@@ -342,31 +391,29 @@ export default function PlansTab() {
               </div>
 
               {/* Action Button */}
-              <button
-                onClick={() => handleSubscribe(pkg.id)}
-                disabled={pkg.is_current || subscribing === pkg.id}
-                className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center ${
-                  pkg.is_current
-                    ? 'bg-[#4BB543]/10 text-[#4BB543] cursor-not-allowed'
-                    : pkg.is_popular
-                    ? 'bg-[#3D8BFF] text-white hover:bg-[#2563eb] hover:shadow-md'
-                    : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
-                } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {subscribing === pkg.id ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : pkg.is_current ? (
-                  'Current Plan'
-                ) : (
-                  <>
-                    Get Started
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </>
-                )}
-              </button>
+              {!pkg.is_current && (
+                <button
+                  onClick={() => handleSubscribe(pkg.id)}
+                  disabled={subscribing === pkg.id}
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center ${
+                    pkg.is_popular
+                      ? 'bg-[#3D8BFF] text-white hover:bg-[#2563eb] hover:shadow-md'
+                      : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
+                  } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {subscribing === pkg.id ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      Get Started
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           )
         })}
