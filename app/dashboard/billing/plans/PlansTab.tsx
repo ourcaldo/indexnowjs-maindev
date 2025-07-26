@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { 
   Check, 
   Crown, 
@@ -8,7 +9,9 @@ import {
   ArrowRight,
   Package,
   AlertCircle,
-  Loader2
+  Loader2,
+  CheckCircle,
+  X
 } from 'lucide-react'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
@@ -61,11 +64,22 @@ interface PackagesData {
 }
 
 export default function PlansTab() {
+  const searchParams = useSearchParams()
   const [packagesData, setPackagesData] = useState<PackagesData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<string>('monthly')
   const [subscribing, setSubscribing] = useState<string | null>(null)
+  const [showSuccessNotification, setShowSuccessNotification] = useState(false)
+
+  // Check for checkout success
+  useEffect(() => {
+    if (searchParams.get('checkout') === 'success') {
+      setShowSuccessNotification(true)
+      // Remove the query parameter
+      window.history.replaceState({}, '', '/dashboard/billing')
+    }
+  }, [searchParams])
 
   useEffect(() => {
     loadPackages()
@@ -143,41 +157,14 @@ export default function PlansTab() {
   const handleSubscribe = async (packageId: string) => {
     try {
       setSubscribing(packageId)
-      const user = await authService.getCurrentUser()
-      if (!user) {
-        throw new Error('User not authenticated')
-      }
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) {
-        throw new Error('No authentication token')
-      }
-
-      const response = await fetch('/api/billing/subscribe', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          package_id: packageId,
-          billing_period: selectedBillingPeriod
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to initiate subscription')
-      }
-
-      const result = await response.json()
       
-      // Show success message and refresh data
-      alert('Subscription request submitted successfully! You will receive payment instructions via email.')
-      loadPackages()
+      // Redirect to checkout page with package and billing period
+      const checkoutUrl = `/dashboard/billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
+      window.location.href = checkoutUrl
+      
     } catch (error) {
       console.error('Error subscribing:', error)
-      alert(error instanceof Error ? error.message : 'Failed to initiate subscription')
+      alert(error instanceof Error ? error.message : 'Failed to redirect to checkout')
     } finally {
       setSubscribing(null)
     }
@@ -242,6 +229,25 @@ export default function PlansTab() {
 
   return (
     <div className="space-y-8">
+      {/* Success Notification */}
+      {showSuccessNotification && (
+        <div className="bg-[#4BB543]/10 border border-[#4BB543]/20 rounded-lg p-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <CheckCircle className="h-5 w-5 text-[#4BB543] mr-3" />
+            <div>
+              <h3 className="font-semibold text-[#1A1A1A]">Order submitted successfully!</h3>
+              <p className="text-sm text-[#6C757D]">Payment instructions have been sent to your email. We'll activate your subscription once payment is confirmed.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowSuccessNotification(false)}
+            className="text-[#6C757D] hover:text-[#1A1A1A] p-1"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center">
         <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">Choose Your Plan</h2>

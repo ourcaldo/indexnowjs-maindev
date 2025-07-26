@@ -1,0 +1,581 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { ArrowLeft, CreditCard, Building2, Check, Loader2 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+
+interface PaymentPackage {
+  id: string
+  name: string
+  slug: string
+  price: number
+  currency: string
+  billing_period: string
+  pricing_tiers: any
+  features: string[]
+  description: string
+}
+
+interface PaymentGateway {
+  id: string
+  name: string
+  slug: string
+  description: string
+  is_active: boolean
+  is_default: boolean
+  configuration: any
+}
+
+interface CheckoutForm {
+  // Personal Information
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  
+  // Billing Address
+  address: string
+  city: string
+  state: string
+  zip_code: string
+  country: string
+  
+  // Additional Info
+  description: string
+  
+  // Payment
+  payment_method: string
+}
+
+export default function CheckoutPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { toast } = useToast()
+  
+  const [package_id] = useState(searchParams.get('package'))
+  const [billing_period] = useState(searchParams.get('period') || 'monthly')
+  const [selectedPackage, setSelectedPackage] = useState<PaymentPackage | null>(null)
+  const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  
+  const [form, setForm] = useState<CheckoutForm>({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    country: 'Indonesia',
+    description: '',
+    payment_method: ''
+  })
+
+  // Fetch package and payment gateway data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        
+        // Fetch package details
+        const packageRes = await fetch('/api/billing/packages')
+        const packageData = await packageRes.json()
+        const selected = packageData.packages?.find((pkg: PaymentPackage) => pkg.id === package_id)
+        
+        if (!selected) {
+          toast({
+            title: "Package not found",
+            description: "The selected package could not be found.",
+            variant: "destructive"
+          })
+          router.push('/dashboard/billing')
+          return
+        }
+        
+        setSelectedPackage(selected)
+        
+        // Fetch payment gateways
+        const gatewayRes = await fetch('/api/billing/payment-gateways')
+        const gatewayData = await gatewayRes.json()
+        
+        if (gatewayData.success) {
+          const activeGateways = gatewayData.gateways.filter((gw: PaymentGateway) => gw.is_active)
+          setPaymentGateways(activeGateways)
+          
+          // Set default payment method
+          const defaultGateway = activeGateways.find((gw: PaymentGateway) => gw.is_default)
+          if (defaultGateway) {
+            setForm(prev => ({ ...prev, payment_method: defaultGateway.id }))
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error fetching checkout data:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load checkout information.",
+          variant: "destructive"
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (package_id) {
+      fetchData()
+    } else {
+      router.push('/dashboard/billing')
+    }
+  }, [package_id, router, toast])
+
+  // Calculate pricing based on selected billing period
+  const calculatePrice = () => {
+    if (!selectedPackage) return { price: 0, discount: 0, originalPrice: 0 }
+    
+    if (selectedPackage.pricing_tiers && selectedPackage.pricing_tiers[billing_period]) {
+      const tier = selectedPackage.pricing_tiers[billing_period]
+      const price = tier.promo_price || tier.regular_price
+      const originalPrice = tier.regular_price
+      const discount = tier.promo_price ? Math.round(((originalPrice - tier.promo_price) / originalPrice) * 100) : 0
+      
+      return { price, discount, originalPrice }
+    }
+    
+    return { price: selectedPackage.price, discount: 0, originalPrice: selectedPackage.price }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!selectedPackage || !form.payment_method) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields and select a payment method.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setSubmitting(true)
+    
+    try {
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          package_id: selectedPackage.id,
+          billing_period,
+          payment_gateway_id: form.payment_method,
+          customer_info: {
+            first_name: form.first_name,
+            last_name: form.last_name,
+            email: form.email,
+            phone: form.phone,
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            zip_code: form.zip_code,
+            country: form.country,
+            description: form.description
+          }
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast({
+          title: "Order submitted successfully!",
+          description: "Payment instructions have been sent to your email.",
+          variant: "default"
+        })
+        
+        // Redirect to success page or back to billing
+        router.push('/dashboard/billing?checkout=success')
+      } else {
+        throw new Error(result.message || 'Checkout failed')
+      }
+      
+    } catch (error) {
+      console.error('Checkout error:', error)
+      toast({
+        title: "Checkout failed",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        variant: "destructive"
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin text-[#3D8BFF]" />
+          <span className="text-[#6C757D]">Loading checkout...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (!selectedPackage) {
+    return (
+      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-[#1A1A1A] mb-2">Package not found</h2>
+          <p className="text-[#6C757D] mb-4">The selected package could not be found.</p>
+          <Button onClick={() => router.push('/dashboard/billing')} className="bg-[#3D8BFF] hover:bg-[#2C6FCC]">
+            Back to Billing
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  const { price, discount, originalPrice } = calculatePrice()
+
+  return (
+    <div className="min-h-screen bg-[#F7F9FC]">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => router.push('/dashboard/billing')}
+            className="mb-4 text-[#6C757D] hover:text-[#1A1A1A]"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Plans
+          </Button>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Complete Your Order</h1>
+          <p className="text-[#6C757D] mt-1">Fill in your details to upgrade to {selectedPackage.name}</p>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Form */}
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Personal Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">1. Personal Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="first_name" className="text-sm font-medium text-[#1A1A1A]">
+                        First Name *
+                      </Label>
+                      <Input
+                        id="first_name"
+                        type="text"
+                        required
+                        value={form.first_name}
+                        onChange={(e) => setForm(prev => ({ ...prev, first_name: e.target.value }))}
+                        className="mt-1"
+                        placeholder="Enter your first name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="last_name" className="text-sm font-medium text-[#1A1A1A]">
+                        Last Name *
+                      </Label>
+                      <Input
+                        id="last_name"
+                        type="text"
+                        required
+                        value={form.last_name}
+                        onChange={(e) => setForm(prev => ({ ...prev, last_name: e.target.value }))}
+                        className="mt-1"
+                        placeholder="Enter your last name"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="email" className="text-sm font-medium text-[#1A1A1A]">
+                        Email Address *
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        required
+                        value={form.email}
+                        onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
+                        className="mt-1"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone" className="text-sm font-medium text-[#1A1A1A]">
+                        Phone Number *
+                      </Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        required
+                        value={form.phone}
+                        onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
+                        className="mt-1"
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Billing Address */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Billing Address</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="address" className="text-sm font-medium text-[#1A1A1A]">
+                      Street Address *
+                    </Label>
+                    <Input
+                      id="address"
+                      type="text"
+                      required
+                      value={form.address}
+                      onChange={(e) => setForm(prev => ({ ...prev, address: e.target.value }))}
+                      className="mt-1"
+                      placeholder="Enter your street address"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A]">
+                        City *
+                      </Label>
+                      <Input
+                        id="city"
+                        type="text"
+                        required
+                        value={form.city}
+                        onChange={(e) => setForm(prev => ({ ...prev, city: e.target.value }))}
+                        className="mt-1"
+                        placeholder="City"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="state" className="text-sm font-medium text-[#1A1A1A]">
+                        State/Province *
+                      </Label>
+                      <Input
+                        id="state"
+                        type="text"
+                        required
+                        value={form.state}
+                        onChange={(e) => setForm(prev => ({ ...prev, state: e.target.value }))}
+                        className="mt-1"
+                        placeholder="State"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="zip_code" className="text-sm font-medium text-[#1A1A1A]">
+                        ZIP Code *
+                      </Label>
+                      <Input
+                        id="zip_code"
+                        type="text"
+                        required
+                        value={form.zip_code}
+                        onChange={(e) => setForm(prev => ({ ...prev, zip_code: e.target.value }))}
+                        className="mt-1"
+                        placeholder="ZIP"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="country" className="text-sm font-medium text-[#1A1A1A]">
+                      Country *
+                    </Label>
+                    <Select value={form.country} onValueChange={(value) => setForm(prev => ({ ...prev, country: value }))}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Indonesia">Indonesia</SelectItem>
+                        <SelectItem value="Malaysia">Malaysia</SelectItem>
+                        <SelectItem value="Singapore">Singapore</SelectItem>
+                        <SelectItem value="Thailand">Thailand</SelectItem>
+                        <SelectItem value="Philippines">Philippines</SelectItem>
+                        <SelectItem value="Vietnam">Vietnam</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description" className="text-sm font-medium text-[#1A1A1A]">
+                      Additional Notes
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={form.description}
+                      onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
+                      className="mt-1"
+                      placeholder="Any additional information or special requests..."
+                      rows={3}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Payment Methods */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup value={form.payment_method} onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}>
+                    {paymentGateways.map((gateway) => (
+                      <div key={gateway.id} className="flex items-center space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#3D8BFF] transition-colors">
+                        <RadioGroupItem value={gateway.id} id={gateway.id} />
+                        <div className="flex-1">
+                          <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
+                            {gateway.slug === 'bank_transfer' ? (
+                              <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
+                            ) : (
+                              <CreditCard className="h-5 w-5 text-[#6C757D] mr-3" />
+                            )}
+                            <div>
+                              <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
+                              <div className="text-sm text-[#6C757D]">{gateway.description}</div>
+                              {gateway.configuration?.bank_name && (
+                                <div className="text-xs text-[#6C757D] mt-1">
+                                  {gateway.configuration.bank_name} - {gateway.configuration.account_name}
+                                </div>
+                              )}
+                            </div>
+                          </Label>
+                        </div>
+                        {gateway.is_default && (
+                          <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full">
+                            Recommended
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+            </form>
+          </div>
+
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <Card className="sticky top-8">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Package Details */}
+                <div className="p-4 bg-[#F7F9FC] rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-semibold text-[#1A1A1A]">{selectedPackage.name} Plan</h3>
+                      <p className="text-sm text-[#6C757D] capitalize">{billing_period} billing</p>
+                    </div>
+                    {discount > 0 && (
+                      <span className="bg-[#4BB543] text-white text-xs px-2 py-1 rounded-full">
+                        Save {discount}%
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {selectedPackage.features.slice(0, 3).map((feature, index) => (
+                      <div key={index} className="flex items-center text-sm">
+                        <Check className="h-4 w-4 text-[#4BB543] mr-2 flex-shrink-0" />
+                        <span className="text-[#6C757D]">{feature}</span>
+                      </div>
+                    ))}
+                    {selectedPackage.features.length > 3 && (
+                      <div className="text-xs text-[#6C757D]">
+                        +{selectedPackage.features.length - 3} more features
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Pricing Breakdown */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#6C757D]">Subtotal:</span>
+                    <span className="font-medium text-[#1A1A1A]">
+                      Rp {originalPrice.toLocaleString()}
+                    </span>
+                  </div>
+                  
+                  {discount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#6C757D]">Discount ({discount}%):</span>
+                      <span className="font-medium text-[#4BB543]">
+                        -Rp {(originalPrice - price).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#6C757D]">Tax:</span>
+                    <span className="font-medium text-[#1A1A1A]">Rp 0</span>
+                  </div>
+                  
+                  <hr className="border-[#E0E6ED]" />
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
+                    <span className="text-lg font-bold text-[#1A1A1A]">
+                      Rp {price.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={submitting || !form.payment_method}
+                  className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12 mt-6"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Complete Order'
+                  )}
+                </Button>
+
+                {/* Security Note */}
+                <div className="text-center">
+                  <p className="text-xs text-[#6C757D]">
+                    🔒 Secure checkout. Your information is protected.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
