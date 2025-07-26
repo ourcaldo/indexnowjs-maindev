@@ -141,12 +141,12 @@ export default function BillingPage() {
   const [historyData, setHistoryData] = useState<BillingHistoryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Plans section state
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<string>('monthly')
   const [subscribing, setSubscribing] = useState<string | null>(null)
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null)
-  
+
   // History section state
   const [currentPage, setCurrentPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<string>('')
@@ -490,7 +490,7 @@ export default function BillingPage() {
           {packagesData?.packages.map((pkg) => {
             const isCurrentPlan = pkg.is_current
             const pricing = getBillingPeriodPrice(pkg, selectedBillingPeriod)
-            
+
             return (
               <div key={pkg.id} className={`rounded-lg border p-4 relative flex flex-col h-full ${
                 isCurrentPlan 
@@ -502,7 +502,7 @@ export default function BillingPage() {
                     Most Popular
                   </div>
                 )}
-                
+
                 <div className="mb-4">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className={`font-semibold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
@@ -681,7 +681,7 @@ export default function BillingPage() {
                   </td>
                   <td className="py-3 px-4 text-left">
                     <span className="text-sm text-[#1A1A1A] font-mono">
-                      #{transaction.payment_reference || transaction.id.slice(0, 8)}
+                      #{transaction.payment_reference || transaction.id}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-left">

@@ -327,11 +327,9 @@ export default function BillingHistoryPage() {
                           <div className="font-medium text-[#1A1A1A] text-sm">
                             {formatTransactionType(transaction.transaction_type)}
                           </div>
-                          {transaction.payment_reference && (
-                            <div className="text-xs text-[#6C757D]">
-                              Ref: {transaction.payment_reference}
-                            </div>
-                          )}
+                          <div className="text-xs text-[#6C757D]">
+                            ID: {transaction.payment_reference || transaction.id}
+                          </div>
                         </div>
                       </td>
                       <td className="py-3 px-4">

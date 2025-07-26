@@ -312,14 +312,12 @@ export default function HistoryTab() {
                           <span className="text-[#6C757D]">Date: </span>
                           <span className="text-[#1A1A1A]">{formatDate(transaction.created_at)}</span>
                         </div>
-                        {transaction.payment_reference && (
-                          <div>
-                            <span className="text-[#6C757D]">Reference: </span>
-                            <span className="text-[#1A1A1A] font-mono text-xs">
-                              {transaction.payment_reference}
-                            </span>
-                          </div>
-                        )}
+                        <div>
+                          <span className="text-[#6C757D]">Order ID: </span>
+                          <span className="text-[#1A1A1A] font-mono text-xs">
+                            {transaction.payment_reference || transaction.id}
+                          </span>
+                        </div>
                         <div>
                           <span className="text-[#6C757D]">Method: </span>
                           <span className="text-[#1A1A1A]">
