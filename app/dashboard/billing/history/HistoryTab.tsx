@@ -29,7 +29,8 @@ interface Transaction {
   processed_at: string | null
   verified_at: string | null
   notes: string | null
-  package: {
+  package_name?: string
+  package?: {
     name: string
     slug: string
   }
@@ -287,7 +288,11 @@ export default function HistoryTab() {
           <>
             <div className="divide-y divide-[#E0E6ED]">
               {filteredTransactions.map((transaction) => (
-                <div key={transaction.id} className="p-6 hover:bg-[#F7F9FC]/50 transition-colors">
+                <div 
+                  key={transaction.id} 
+                  className="p-6 hover:bg-[#F7F9FC]/50 transition-colors cursor-pointer"
+                  onClick={() => window.location.href = `/dashboard/billing/order/${transaction.id}`}
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0 mr-4">
                       <div className="flex items-center space-x-3 mb-2">
@@ -297,7 +302,7 @@ export default function HistoryTab() {
                             {formatTransactionType(transaction.transaction_type)}
                           </h3>
                           <p className="text-sm text-[#6C757D]">
-                            {transaction.package.name}
+                            {transaction.package?.name || transaction.package_name || 'N/A'}
                           </p>
                         </div>
                       </div>

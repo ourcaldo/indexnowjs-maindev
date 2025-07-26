@@ -255,12 +255,14 @@ export default function CheckoutPage() {
       if (result.success) {
         addToast({
           title: "Order submitted successfully!",
-          description: "Payment instructions have been sent to your email.",
+          description: "Redirecting to order details...",
           type: "success"
         })
         
-        // Redirect to success page or back to billing
-        router.push('/dashboard/billing?checkout=success')
+        // Redirect to order completed page
+        setTimeout(() => {
+          router.push(result.data.redirect_url)
+        }, 1500)
       } else {
         throw new Error(result.message || 'Checkout failed')
       }

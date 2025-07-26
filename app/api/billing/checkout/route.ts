@@ -136,7 +136,8 @@ export async function POST(request: NextRequest) {
         currency: packageData.currency || 'IDR',
         payment_instructions: gatewayData.configuration,
         package_name: packageData.name,
-        payment_reference: transaction.payment_reference
+        payment_reference: transaction.payment_reference,
+        redirect_url: `/dashboard/billing/order/${transaction.id}`
       }
     })
 
