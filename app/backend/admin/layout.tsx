@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { adminAuthService, AdminUser } from '@/lib/admin-auth'
 import { AdminSidebar } from '@/components/AdminSidebar'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { ToastContainer } from '@/components/ui/toast'
 
 export default function AdminLayout({
   children,
@@ -67,30 +68,32 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC]">
-      <AdminSidebar 
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-        onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-        user={adminUser}
-        isCollapsed={sidebarCollapsed}
-      />
-      
-      <div className={`transition-all duration-200 ${
-        sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
-      } ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
-        <main className="p-6">
-          {children}
-        </main>
-      </div>
-
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+    <ToastContainer>
+      <div className="min-h-screen bg-[#F7F9FC]">
+        <AdminSidebar 
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+          onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          user={adminUser}
+          isCollapsed={sidebarCollapsed}
         />
-      )}
-    </div>
+        
+        <div className={`transition-all duration-200 ${
+          sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
+        } ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+          <main className="p-6">
+            {children}
+          </main>
+        </div>
+
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </div>
+    </ToastContainer>
   )
 }
