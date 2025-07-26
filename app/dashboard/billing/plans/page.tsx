@@ -126,39 +126,14 @@ export default function PlansPage() {
         throw new Error('User not authenticated')
       }
 
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) {
-        throw new Error('No authentication token')
-      }
-
-      const response = await fetch('/api/billing/subscribe', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          package_id: packageId,
-          billing_period: selectedBillingPeriod
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to initiate subscription')
-      }
-
-      const result = await response.json()
+      // Redirect to unified checkout page with selected package and billing period
+      // This prevents duplicate transaction creation by using only the checkout API
+      const checkoutUrl = `/dashboard/billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
+      window.location.href = checkoutUrl
       
-      // Redirect to payment page or show payment instructions
-      if (result.payment_instructions) {
-        // Handle bank transfer instructions
-        window.location.href = `/dashboard/billing/payment/${result.transaction_id}`
-      }
     } catch (error) {
-      console.error('Error subscribing:', error)
-      alert(error instanceof Error ? error.message : 'Failed to initiate subscription')
-    } finally {
+      console.error('Error redirecting to checkout:', error)
+      alert(error instanceof Error ? error.message : 'Failed to proceed to checkout')
       setSubscribing(null)
     }
   }

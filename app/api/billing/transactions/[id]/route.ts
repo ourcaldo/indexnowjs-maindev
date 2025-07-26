@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get('authorization')
@@ -37,7 +37,7 @@ export async function GET(
         package:indb_payment_packages(*),
         gateway:indb_payment_gateways(*)
       `)
-      .eq('id', params.id)
+      .eq('id', (await params).id)
       .eq('user_id', user.id)
       .single()
 
