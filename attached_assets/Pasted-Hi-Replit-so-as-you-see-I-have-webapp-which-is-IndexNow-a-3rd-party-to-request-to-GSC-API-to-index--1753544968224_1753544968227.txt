@@ -1,0 +1,46 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before we more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things that you should know.
+
+Please make sure you're read the replit.md to get current latest tables and column.
+
+Before, we already made Plans and Billing menu and also a checkout page, so user can directly purchase and upgrade their subscription, please check the changelogs in replit.md to get all information. 
+
+But, after we do an updates, there's few error and enhancement that you need to fix, which is:
+
+Error when I open single order history
+Module not found: Can't resolve '@/lib/supabase/client'
+
+./app/dashboard/billing/order/[id]/page.tsx (12:1)
+
+Module not found: Can't resolve '@/lib/supabase/client'
+  10 | import { Separator } from '@/components/ui/separator'
+  11 | import { Upload, CheckCircle, Clock, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react'
+> 12 | import { supabaseBrowser } from '@/lib/supabase/client'
+     | ^
+  13 | import { useToast } from '@/hooks/use-toast'
+  14 |
+  15 | interface Transaction {
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+There's also error when I try to placed an order and after success it's try to redirected to order completed page, but got an error
+Module not found: Can't resolve '@/lib/supabase/client'
+
+./app/dashboard/billing/order/[id]/page.tsx (12:1)
+
+Module not found: Can't resolve '@/lib/supabase/client'
+  10 | import { Separator } from '@/components/ui/separator'
+  11 | import { Upload, CheckCircle, Clock, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react'
+> 12 | import { supabaseBrowser } from '@/lib/supabase/client'
+     | ^
+  13 | import { useToast } from '@/hooks/use-toast'
+  14 |
+  15 | interface Transaction {
+
+https://nextjs.org/docs/messages/module-not-found
