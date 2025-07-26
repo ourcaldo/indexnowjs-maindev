@@ -124,3 +124,53 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    // Verify super admin authentication
+    const user = await requireSuperAdminAuth(request)
+    
+    const body = await request.json()
+    const {
+      event_type,
+      action_description,
+      target_type,
+      target_id,
+      metadata
+    } = body
+
+    // Log admin activity using ActivityLogger
+    const activityId = await ActivityLogger.logActivity({
+      userId: user?.id || '',
+      eventType: event_type,
+      actionDescription: action_description,
+      targetType: target_type,
+      targetId: target_id,
+      request,
+      metadata: {
+        adminAction: true,
+        ...metadata
+      }
+    })
+
+    return NextResponse.json({ 
+      success: true, 
+      activityId 
+    })
+
+  } catch (error: any) {
+    console.error('Admin activity POST API error:', error)
+    
+    if (error.message === 'Super admin access required') {
+      return NextResponse.json(
+        { error: 'Super admin access required' },
+        { status: 403 }
+      )
+    }
+
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

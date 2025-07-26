@@ -13,7 +13,6 @@ import {
   CreditCard,
   FileText,
   Download,
-  Eye,
   Mail,
   Phone,
   ExternalLink
@@ -98,9 +97,8 @@ interface ActivityLog {
   event_type: string
   action_description: string
   created_at: string
-  user_id: string
-  metadata: any
-  user: {
+  user?: {
+    user_id: string
     full_name: string
     role: string
   }
@@ -123,54 +121,73 @@ export default function AdminOrderDetailPage() {
   const router = useRouter()
   const params = useParams()
   const { addToast } = useToast()
-  const orderId = params.id as string
 
   useEffect(() => {
-    if (orderId) {
-      loadOrderDetail()
-    }
-  }, [orderId])
+    fetchOrderData()
+  }, [params?.id])
 
-  const loadOrderDetail = async () => {
+  const fetchOrderData = async () => {
     try {
       setLoading(true)
       setError(null)
-
-      const session = await supabaseBrowser.auth.getSession()
-      if (!session.data.session?.access_token) {
-        throw new Error('Not authenticated')
+      
+      // Get user session first
+      const { data: { session } } = await supabaseBrowser.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('Authentication required')
       }
 
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
+      // Log admin activity - order view
+      await logAdminActivity('order_view', `Viewed order details for order #${params?.id}`)
+
+      const response = await fetch(`/api/admin/orders/${params?.id}`, {
         headers: {
-          'Authorization': `Bearer ${session.data.session.access_token}`
+          'Authorization': `Bearer ${session.access_token}`
         }
       })
 
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Order not found')
-        }
-        throw new Error('Failed to fetch order details')
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to fetch order')
       }
 
       const data = await response.json()
-      if (data.success) {
-        setOrderData(data)
-      } else {
-        throw new Error(data.error || 'Failed to fetch order details')
-      }
-
-    } catch (error: any) {
-      console.error('Error loading order detail:', error)
-      setError(error.message)
+      setOrderData(data)
+      
+    } catch (error) {
+      console.error('Error fetching order:', error)
+      setError(error instanceof Error ? error.message : 'Failed to fetch order')
       addToast({
         type: 'error',
         title: 'Error',
-        description: error.message || 'Failed to load order details'
+        message: error instanceof Error ? error.message : 'Failed to fetch order'
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const logAdminActivity = async (action: string, description: string, metadata?: any) => {
+    try {
+      const { data: { session } } = await supabaseBrowser.auth.getSession()
+      if (!session?.access_token) return
+
+      await fetch('/api/admin/activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          event_type: 'order_management',
+          action_description: description,
+          target_type: 'order',
+          target_id: params?.id,
+          metadata: metadata ? { action, ...metadata } : { action }
+        })
+      })
+    } catch (error) {
+      console.error('Failed to log admin activity:', error)
     }
   }
 
@@ -179,17 +196,17 @@ export default function AdminOrderDetailPage() {
 
     try {
       setUpdating(true)
-
-      const session = await supabaseBrowser.auth.getSession()
-      if (!session.data.session?.access_token) {
-        throw new Error('Not authenticated')
+      
+      const { data: { session } } = await supabaseBrowser.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('Authentication required')
       }
 
-      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+      const response = await fetch(`/api/admin/orders/${params?.id}/status`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${session.data.session.access_token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
           status: statusAction,
@@ -197,36 +214,52 @@ export default function AdminOrderDetailPage() {
         })
       })
 
-      const data = await response.json()
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update order status')
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to update status')
       }
 
-      if (data.success) {
-        addToast({
-          type: 'success',
-          title: 'Success',
-          description: data.message
-        })
-        
-        // Reload order data
-        await loadOrderDetail()
-        
-        // Close modal and reset state
-        setStatusModalOpen(false)
-        setStatusAction(null)
-        setStatusNotes('')
-      } else {
-        throw new Error(data.error || 'Failed to update order status')
-      }
+      const updatedOrder = await response.json()
+      
+      // Log the admin activity
+      await logAdminActivity(
+        `order_status_${statusAction}`,
+        `${statusAction === 'completed' ? 'Approved' : 'Rejected'} payment for order #${orderData.order.payment_reference}`,
+        {
+          old_status: orderData.order.transaction_status,
+          new_status: statusAction,
+          notes: statusNotes.trim() || null,
+          customer_email: orderData.order.user.email,
+          package_name: orderData.order.package.name,
+          amount: orderData.order.amount
+        }
+      )
 
-    } catch (error: any) {
-      console.error('Error updating order status:', error)
+      // Update local state
+      setOrderData(prev => prev ? {
+        ...prev,
+        order: { ...prev.order, ...updatedOrder.order }
+      } : null)
+
+      addToast({
+        type: 'success',
+        title: 'Success',
+        message: `Payment ${statusAction === 'completed' ? 'approved' : 'rejected'} successfully`
+      })
+
+      setStatusModalOpen(false)
+      setStatusNotes('')
+      setStatusAction(null)
+      
+      // Refresh data to get updated activity logs
+      fetchOrderData()
+      
+    } catch (error) {
+      console.error('Error updating status:', error)
       addToast({
         type: 'error',
         title: 'Error',
-        description: error.message || 'Failed to update order status'
+        message: error instanceof Error ? error.message : 'Failed to update status'
       })
     } finally {
       setUpdating(false)
@@ -277,7 +310,7 @@ export default function AdminOrderDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A] mx-auto mb-4"></div>
+          <div className="w-8 h-8 border-2 border-[#6C757D] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-[#6C757D]">Loading order details...</p>
         </div>
       </div>
@@ -287,16 +320,14 @@ export default function AdminOrderDetailPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <XCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Order</h3>
-          <p className="text-[#6C757D] mb-4">{error}</p>
-          <div className="space-x-2">
-            <Button onClick={() => router.back()} variant="outline" className="border-[#E0E6ED]">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go Back
-            </Button>
-            <Button onClick={loadOrderDetail} className="bg-[#1C2331] hover:bg-[#0d1b2a] text-white">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-[#E63946]/10 rounded-full flex items-center justify-center mx-auto">
+            <XCircle className="w-8 h-8 text-[#E63946]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Failed to load order</h3>
+            <p className="text-[#6C757D] mb-4">{error}</p>
+            <Button onClick={fetchOrderData} className="bg-[#1A1A1A] hover:bg-[#2C2C2E] text-white">
               Try Again
             </Button>
           </div>
@@ -319,7 +350,7 @@ export default function AdminOrderDetailPage() {
             onClick={() => router.back()} 
             variant="outline" 
             size="sm"
-            className="border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]"
+            className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
@@ -381,109 +412,6 @@ export default function AdminOrderDetailPage() {
               )}
             </CardContent>
           </Card>
-
-          {/* Customer Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <User className="w-5 h-5 mr-2" />
-                Customer Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Full Name</label>
-                <p className="font-medium">{order.user.full_name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Email</label>
-                <div className="flex items-center space-x-2">
-                  <p className="text-sm">{order.user.email}</p>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
-                  >
-                    <Mail className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-              {order.metadata?.customer_info?.phone_number && (
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Phone</label>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-sm">{order.metadata.customer_info.phone_number}</p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => window.open(`tel:${order.metadata.customer_info.phone_number}`, '_blank')}
-                    >
-                      <Phone className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Registration Date</label>
-                <p className="text-sm">{formatDate(order.user.created_at)}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Current Plan Status</label>
-                <p className="text-sm">
-                  {order.user.expires_at ? (
-                    <>
-                      Active until {formatDate(order.user.expires_at)}
-                    </>
-                  ) : (
-                    'No active subscription'
-                  )}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Package Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Package className="w-5 h-5 mr-2" />
-                Package Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Package Name</label>
-                <p className="font-medium">{order.package.name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Description</label>
-                <p className="text-sm text-[#6C757D]">{order.package.description}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Billing Period</label>
-                <p className="text-sm">{order.metadata?.billing_period || order.package.billing_period}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Amount</label>
-                <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
-              </div>
-              
-              {order.package.features && Array.isArray(order.package.features) && (
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Features</label>
-                  <ul className="text-sm text-[#6C757D] mt-1 space-y-1">
-                    {order.package.features.map((feature, index) => (
-                      <li key={index} className="flex items-center">
-                        <CheckCircle className="w-3 h-3 mr-2 text-[#4BB543]" />
-                        {typeof feature === 'string' ? feature : feature.name || 'Feature'}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
 
           {/* Payment & Customer Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -704,7 +632,7 @@ export default function AdminOrderDetailPage() {
                 <div className="pt-4 space-y-2">
                   <Button
                     variant="outline"
-                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]"
+                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
                     onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
                   >
                     <Mail className="w-4 h-4 mr-2" />
@@ -712,7 +640,7 @@ export default function AdminOrderDetailPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]"
+                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
                     onClick={() => router.push(`/backend/admin/users?search=${order.user.email}`)}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
@@ -813,7 +741,7 @@ export default function AdminOrderDetailPage() {
               variant="outline" 
               onClick={() => setStatusModalOpen(false)}
               disabled={updating}
-              className="border-[#E0E6ED]"
+              className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
             >
               Cancel
             </Button>

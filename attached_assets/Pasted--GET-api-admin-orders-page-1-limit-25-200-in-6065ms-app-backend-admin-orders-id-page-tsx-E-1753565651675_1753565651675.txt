@@ -1,0 +1,60 @@
+ GET /api/admin/orders?page=1&limit=25 200 in 6065ms
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got '{'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       {/* Status Change Modal */}
+     ·       ─
+ 769 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+ 770 │         <DialogContent>
+ 771 │           <DialogHeader>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx
+ ○ Compiling /_not-found ...
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got '{'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       {/* Status Change Modal */}
+     ·       ─
+ 769 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+ 770 │         <DialogContent>
+ 771 │           <DialogHeader>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got '{'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       {/* Status Change Modal */}
+     ·       ─
+ 769 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+ 770 │         <DialogContent>
+ 771 │           <DialogHeader>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx
+ GET /backend/admin/orders/faf460ce-3e96-42a6-93c9-3aba1431b1b7 500 in 13898ms
+ GET /backend/admin/orders/faf460ce-3e96-42a6-93c9-3aba1431b1b7 500 in 17ms
+ GET /backend/admin/orders/faf460ce-3e96-42a6-93c9-3aba1431b1b7 500 in 25ms
+ GET /backend/admin/orders/faf460ce-3e96-42a6-93c9-3aba1431b1b7 500 in 28ms
