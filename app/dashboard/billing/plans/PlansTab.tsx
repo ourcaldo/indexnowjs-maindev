@@ -352,7 +352,7 @@ export default function PlansTab() {
               <button
                 onClick={() => handleSubscribe(pkg.id)}
                 disabled={pkg.is_current || subscribing === pkg.id}
-                className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center ${
+                className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 ${
                   pkg.is_current
                     ? 'bg-[#4BB543]/10 text-[#4BB543] cursor-not-allowed border border-[#4BB543]/20'
                     : pkg.is_popular
@@ -366,15 +366,9 @@ export default function PlansTab() {
                     Processing...
                   </>
                 ) : pkg.is_current ? (
-                  <>
-                    <Crown className="h-4 w-4 mr-2" />
-                    Current Plan
-                  </>
+                  'Current Plan'
                 ) : (
-                  <>
-                    Get Started
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </>
+                  'Upgrade'
                 )}
               </button>
             </div>
