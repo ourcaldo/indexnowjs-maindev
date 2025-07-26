@@ -328,7 +328,7 @@ export default function BillingHistoryPage() {
                             {formatTransactionType(transaction.transaction_type)}
                           </div>
                           <div className="text-xs text-[#6C757D]">
-                            ID: {transaction.payment_reference || transaction.id}
+                            ID: {transaction.payment_reference}
                           </div>
                         </div>
                       </td>
