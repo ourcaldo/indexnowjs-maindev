@@ -681,7 +681,7 @@ export default function BillingPage() {
                   </td>
                   <td className="py-3 px-4 text-left">
                     <span className="text-sm text-[#1A1A1A] font-mono">
-                      {transaction.payment_reference || 'N/A'}
+                      {transaction.payment_reference}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-left">

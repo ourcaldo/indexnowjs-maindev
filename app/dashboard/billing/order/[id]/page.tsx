@@ -272,7 +272,7 @@ export default function OrderCompletedPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Order ID</p>
-                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference || 'N/A'}</p>
+                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Order Date</p>
@@ -406,7 +406,7 @@ export default function OrderCompletedPage() {
 
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Reference Number</p>
-                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference || 'N/A'}</p>
+                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference}</p>
                   </div>
                 </div>
               </CardContent>
