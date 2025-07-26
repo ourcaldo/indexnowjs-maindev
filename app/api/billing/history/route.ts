@@ -99,6 +99,7 @@ export async function GET(request: NextRequest) {
     const transformedTransactions = transactions?.map(transaction => ({
       id: transaction.id,
       order_id: transaction.payment_reference,
+      payment_reference: transaction.payment_reference, // Ensure this field is included
       transaction_type: transaction.transaction_type,
       transaction_status: transaction.transaction_status,
       amount: parseFloat(transaction.amount || '0'),
