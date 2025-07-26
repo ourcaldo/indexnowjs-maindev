@@ -17,6 +17,21 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 
 ## Recent Changes  
 
+**FINAL BILLING FEATURE CONFLICTS & EXPANSION LOGIC RESOLVED (January 26, 2025)**
+- ✅ **HARDCODED QUOTA FEATURES COMPLETELY REMOVED**: Eliminated conflicting feature generation from quota_limits in billing page
+  - **Root Cause Found**: Lines 548-577 in `app/dashboard/billing/page.tsx` were generating hardcoded features from quota_limits
+  - **Hardcoded Features Removed**: Eliminated "Unlimited Daily URLs", "Unlimited Service Accounts", and "Unlimited Concurrent Jobs" generation
+  - **Database Features Only**: Now displays ONLY features from `indb_payment_packages.features` column as intended
+  - **No More Conflicts**: Free plan no longer shows both "50 Daily Quota for IndexNow" AND "Unlimited Daily URLs"
+- ✅ **PLAN EXPANSION LOGIC COMPLETELY FIXED**: Resolved desktop-specific expansion bug where all cards expanded simultaneously
+  - **React Key Enhancement**: Added unique keys with billing period to prevent React reconciliation issues
+  - **Event Propagation Fixed**: Added preventDefault and stopPropagation to expansion buttons
+  - **State Management**: Enhanced togglePlanDetails function with proper individual plan state tracking
+  - **Desktop Bug Resolved**: Fixed issue where clicking one plan's "Show details" expanded all plans on desktop browsers
+- ✅ **ORDER ID VERIFICATION**: Confirmed Order ID correctly uses `payment_reference` column as intended
+  - **Proper Implementation**: `#{transaction.payment_reference || transaction.id.slice(0, 8)}` already correctly implemented
+  - **No Changes Needed**: Order ID display working as designed using payment_reference as primary, id as fallback
+
 **UNIFIED BILLING PAGE 7-ISSUE COMPREHENSIVE FIX (January 26, 2025)**
 - ✅ **COMPLETE BILLING PAGE REDESIGN**: Fixed all 7 user-identified issues in single comprehensive update
   - **Uniform Card Sizing**: Plan cards now use flex layout (flex flex-col h-full) with consistent height and symmetrical linear buttons

@@ -305,7 +305,7 @@ export default function PlansTab() {
           
           return (
             <div
-              key={pkg.id}
+              key={`plan-${pkg.id}-${selectedBillingPeriod}`}
               className={`relative bg-white rounded-xl border-2 p-8 transition-all hover:shadow-lg flex flex-col h-full ${
                 pkg.is_popular 
                   ? 'border-[#1A1A1A] shadow-md' 
@@ -377,8 +377,13 @@ export default function PlansTab() {
               {!showComparePlans && (
                 <div className="mb-4">
                   <button 
-                    onClick={() => togglePlanDetails(pkg.id)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      togglePlanDetails(pkg.id)
+                    }}
                     className="text-[#6C757D] hover:text-[#1A1A1A] text-sm font-medium transition-colors"
+                    type="button"
                   >
                     {expandedPlans[pkg.id] ? 'Hide details' : 'Show details'}
                   </button>
