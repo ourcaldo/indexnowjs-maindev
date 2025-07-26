@@ -90,13 +90,13 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
-  
+
   // Filters
   const [currentPage, setCurrentPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [customerSearch, setCustomerSearch] = useState<string>('')
   const [packageFilter, setPackageFilter] = useState<string>('all')
-  
+
   const router = useRouter()
   const { addToast } = useToast()
 
@@ -241,7 +241,7 @@ export default function AdminOrdersPage() {
               <div className="text-2xl font-bold text-[#1A1A1A]">{ordersData.summary.total_orders}</div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-[#6C757D]">Pending Review</CardTitle>
@@ -250,7 +250,7 @@ export default function AdminOrdersPage() {
               <div className="text-2xl font-bold text-[#F0A202]">{ordersData.summary.proof_uploaded_orders}</div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-[#6C757D]">Completed</CardTitle>
@@ -259,7 +259,7 @@ export default function AdminOrdersPage() {
               <div className="text-2xl font-bold text-[#4BB543]">{ordersData.summary.completed_orders}</div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-[#6C757D]">Total Revenue</CardTitle>
@@ -293,7 +293,7 @@ export default function AdminOrdersPage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
               <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">Customer Search</label>
               <Input
@@ -303,7 +303,7 @@ export default function AdminOrdersPage() {
                 className="border-[#E0E6ED]"
               />
             </div>
-            
+
             <div>
               <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">Package</label>
               <Select value={packageFilter} onValueChange={setPackageFilter}>
@@ -316,7 +316,7 @@ export default function AdminOrdersPage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex items-end">
               <Button 
                 onClick={() => {
@@ -378,7 +378,7 @@ export default function AdminOrdersPage() {
                   <TableCell className="text-left">
                     <button
                       onClick={() => handleViewOrder(order.id)}
-                      className="text-[#1A1A1A] hover:text-[#1C2331] hover:underline font-medium transition-colors"
+                      className="text-[#1A1A1A] hover:text-[#1C2331] hover:underline font-medium transition-colors text-left block"
                     >
                       #{order.payment_reference}
                     </button>
@@ -417,7 +417,7 @@ export default function AdminOrdersPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-[#1A1A1A] hover:bg-[#F7F9FC]">
+                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
