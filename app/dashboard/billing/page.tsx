@@ -394,8 +394,15 @@ export default function BillingPage() {
   const togglePlanDetails = (planId: string) => {
     // When not in compare mode, only expand the clicked plan and collapse others
     if (!showComparePlans) {
-      setShowDetails({
-        [planId]: !showDetails[planId]
+      setShowDetails(prev => {
+        const newState: Record<string, boolean> = {}
+        // Close all other cards
+        Object.keys(prev).forEach(key => {
+          newState[key] = false
+        })
+        // Toggle only the clicked card
+        newState[planId] = !prev[planId]
+        return newState
       })
     }
   }
