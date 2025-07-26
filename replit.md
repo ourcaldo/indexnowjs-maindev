@@ -17,6 +17,12 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 
 ## Recent Changes  
 
+**MANAGE JOBS PAGE SCHEDULE DISPLAY FIX (January 26, 2025)**
+- ✅ **SINGLE-LINE SCHEDULE DISPLAY**: Fixed schedule text wrapping issue in manage-jobs table
+  - **Schedule Column Constraints**: Added `min-w-[120px]` to schedule column header for proper spacing
+  - **Whitespace Control**: Added `whitespace-nowrap` to schedule badges to prevent text wrapping
+  - **Professional Badge Layout**: Schedule types now display cleanly in single line format without separation
+
 **JOB DETAILS PAGE UI ENHANCEMENTS - FINAL FIXES (January 26, 2025)**
 - ✅ **PROPORTIONAL URL DISPLAY FIXED**: Enhanced URL submissions table for better space utilization
   - **Natural URL Breaking**: Changed from `break-all` to `break-words` for professional URL display without awkward word splitting

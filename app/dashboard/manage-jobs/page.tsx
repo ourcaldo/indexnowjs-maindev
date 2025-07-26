@@ -403,7 +403,7 @@ export default function ManageJobsPage() {
                 </th>
                 <th className="text-left p-4 font-medium text-[#1A1A1A]">Name</th>
                 <th className="text-left p-4 font-medium text-[#1A1A1A]">Created</th>
-                <th className="text-left p-4 font-medium text-[#1A1A1A]">Schedule</th>
+                <th className="text-left p-4 font-medium text-[#1A1A1A] min-w-[120px]">Schedule</th>
                 <th className="text-left p-4 font-medium text-[#1A1A1A]">URLs</th>
                 <th className="text-left p-4 font-medium text-[#1A1A1A]">Status</th>
                 <th className="text-left p-4 font-medium text-[#1A1A1A]">Progress</th>
@@ -439,8 +439,8 @@ export default function ManageJobsPage() {
                       </div>
                     </td>
                     <td className="p-4 text-[#1A1A1A]">{formatDate(job.created_at)}</td>
-                    <td className="p-4">
-                      <Badge className="bg-[#1C2331] text-white hover:bg-[#0d1b2a]">
+                    <td className="p-4 min-w-[100px]">
+                      <Badge className="bg-[#1C2331] text-white hover:bg-[#0d1b2a] whitespace-nowrap">
                         {job.schedule_type}
                       </Badge>
                     </td>
