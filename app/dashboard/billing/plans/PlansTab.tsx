@@ -236,7 +236,7 @@ export default function PlansTab() {
     { key: 'sitemap_feature', label: 'Auto Index with Sitemap Feature', plans: ['premium', 'pro'] },
     { key: 'unlimited_service_accounts', label: 'Unlimited Service Account', plans: ['pro'] },
     { key: 'unlimited_daily_quota', label: 'Unlimited Daily Quota for Auto Indexing', plans: ['pro'] },
-    { key: 'priority_support', label: '24/7 Priority Support', plans: ['pro'] },
+    { key: 'priority_support', label: 'Priority Support', plans: ['pro'] },
     { key: 'advanced_analytics', label: 'Advanced Analytics & Reporting', plans: ['pro'] }
   ]
 
@@ -390,30 +390,35 @@ export default function PlansTab() {
                 </div>
               </div>
 
-              {/* Action Button */}
-              {!pkg.is_current && (
-                <button
-                  onClick={() => handleSubscribe(pkg.id)}
-                  disabled={subscribing === pkg.id}
-                  className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center ${
-                    pkg.is_popular
-                      ? 'bg-[#3D8BFF] text-white hover:bg-[#2563eb] hover:shadow-md'
-                      : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
-                  } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {subscribing === pkg.id ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      Get Started
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
-                  )}
-                </button>
-              )}
+              {/* Action Button - Always present for symmetry */}
+              <button
+                onClick={() => handleSubscribe(pkg.id)}
+                disabled={pkg.is_current || subscribing === pkg.id}
+                className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center ${
+                  pkg.is_current
+                    ? 'bg-[#4BB543]/10 text-[#4BB543] cursor-not-allowed border border-[#4BB543]/20'
+                    : pkg.is_popular
+                    ? 'bg-[#3D8BFF] text-white hover:bg-[#2563eb] hover:shadow-md'
+                    : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
+                } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {subscribing === pkg.id ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : pkg.is_current ? (
+                  <>
+                    <Crown className="h-4 w-4 mr-2" />
+                    Current Plan
+                  </>
+                ) : (
+                  <>
+                    Get Started
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </>
+                )}
+              </button>
             </div>
           )
         })}
