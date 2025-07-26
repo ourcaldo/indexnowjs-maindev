@@ -214,23 +214,30 @@ export default function PlansTab() {
     { key: 'annual', label: '12 Months', suffix: '/year' }
   ]
 
-  // All available features across all plans - using actual database feature format
-  const allFeatures = [
-    { key: 'max_service_accounts', label: 'Max 1 Service Account', plans: ['free'] },
-    { key: 'max_service_accounts_premium', label: 'Max 3 Service Account', plans: ['premium'] },
-    { key: 'unlimited_service_accounts', label: 'Unlimited Service Account', plans: ['pro'] },
-    { key: 'daily_quota_free', label: '50 Daily Quota for IndexNow', plans: ['free'] },
-    { key: 'daily_quota_premium', label: '500 Daily Quota for IndexNow', plans: ['premium'] },
-    { key: 'unlimited_daily_quota', label: 'Unlimited Daily Quota for Auto Indexing', plans: ['pro'] },
-    { key: 'auto_schedule', label: 'Auto Schedule Feature for IndexNow', plans: ['premium', 'pro'] },
-    { key: 'sitemap_feature', label: 'Auto Index with Sitemap Feature', plans: ['premium', 'pro'] },
-    { key: 'priority_support', label: 'Priority Support', plans: ['pro'] },
-    { key: 'advanced_analytics', label: 'Advanced Analytics & Reporting', plans: ['pro'] }
-  ]
+  // Define features per plan - each plan shows only its own features
+  const planFeatures = {
+    free: [
+      'Max 1 Service Account',
+      '50 Daily Quota for IndexNow'
+    ],
+    premium: [
+      'Max 3 Service Account', 
+      '500 Daily Quota for IndexNow',
+      'Auto Schedule Feature for IndexNow',
+      'Auto Index with Sitemap Feature'
+    ],
+    pro: [
+      'Unlimited Service Account',
+      'Unlimited Daily Quota for Auto Indexing', 
+      'Auto Schedule Feature for IndexNow',
+      'Auto Index with Sitemap Feature',
+      'Priority Support',
+      'Advanced Analytics & Reporting'
+    ]
+  }
 
-  const getFeatureForPlan = (planSlug: string, featureKey: string) => {
-    const feature = allFeatures.find(f => f.key === featureKey)
-    return feature?.plans.includes(planSlug) || false
+  const getFeaturesForPlan = (planSlug: string): string[] => {
+    return planFeatures[planSlug as keyof typeof planFeatures] || []
   }
 
   return (
@@ -331,27 +338,14 @@ export default function PlansTab() {
 
               {/* Features List */}
               <div className="space-y-3 mb-8">
-                {allFeatures.map((feature) => {
-                  const isIncluded = getFeatureForPlan(pkg.slug, feature.key)
-                  return (
-                    <div key={feature.key} className="flex items-start">
-                      {isIncluded ? (
-                        <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
-                      ) : (
-                        <div className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0 flex items-center justify-center">
-                          <div className="h-4 w-4 rounded-full bg-[#E63946]/10 flex items-center justify-center">
-                            <svg className="h-3 w-3 text-[#E63946]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-                      <span className={`text-sm ${isIncluded ? 'text-[#6C757D]' : 'text-[#E63946] line-through'}`}>
-                        {feature.label}
-                      </span>
-                    </div>
-                  )
-                })}
+                {getFeaturesForPlan(pkg.slug).map((feature, index) => (
+                  <div key={index} className="flex items-start">
+                    <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-[#6C757D]">
+                      {feature}
+                    </span>
+                  </div>
+                ))}
               </div>
 
               {/* Action Button - Always present for symmetry */}
