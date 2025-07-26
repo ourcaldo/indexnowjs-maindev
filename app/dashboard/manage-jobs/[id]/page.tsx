@@ -636,15 +636,16 @@ export default function JobDetailsPage() {
               <div>
                 <div className="text-sm font-medium text-[#1A1A1A] mb-2">Manual URL list</div>
                 {job.source_data?.urls && job.source_data.urls.length > 0 ? (
-                  <div className="space-y-1">
-                    {job.source_data.urls.slice(0, 5).map((url: string, index: number) => (
-                      <div key={index} className="text-xs text-[#1A1A1A] break-all bg-[#F7F9FC] p-2 rounded">
-                        {url}
+                  <div className="space-y-2">
+                    {/* Show only first few URLs that fit in card space, then count */}
+                    {job.source_data.urls.slice(0, 2).map((url: string, index: number) => (
+                      <div key={index} className="text-xs text-[#1A1A1A] break-all p-2 rounded border border-[#E0E6ED]">
+                        {url.length > 50 ? `${url.slice(0, 50)}...` : url}
                       </div>
                     ))}
-                    {job.source_data.urls.length > 5 && (
-                      <div className="text-xs text-[#1A1A1A] font-medium">
-                        +{job.source_data.urls.length - 5} more URLs
+                    {job.source_data.urls.length > 2 && (
+                      <div className="text-sm text-[#1A1A1A] font-medium text-center p-2 rounded bg-[#F7F9FC]">
+                        +{job.source_data.urls.length - 2} more URLs
                       </div>
                     )}
                   </div>
@@ -657,8 +658,11 @@ export default function JobDetailsPage() {
                 <div className="text-sm font-medium text-[#1A1A1A] mb-2">Sitemap URL</div>
                 {job.source_data?.sitemap_url ? (
                   <>
-                    <div className="text-sm text-[#1A1A1A] break-all bg-[#F7F9FC] p-2 rounded">
-                      {job.source_data.sitemap_url}
+                    <div className="text-sm text-[#1A1A1A] break-all p-2 rounded border border-[#E0E6ED]">
+                      {job.source_data.sitemap_url.length > 50 ? 
+                        `${job.source_data.sitemap_url.slice(0, 50)}...` : 
+                        job.source_data.sitemap_url
+                      }
                     </div>
                     <Button 
                       variant="outline" 
@@ -708,15 +712,15 @@ export default function JobDetailsPage() {
                           {(currentPage - 1) * itemsPerPage + index + 1}
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 w-2/5">
                         <div className="flex items-start gap-2">
                           <Globe className="h-4 w-4 text-[#1A1A1A] flex-shrink-0 mt-0.5" />
                           <div className="min-w-0 flex-1">
                             <div className="text-sm font-medium text-[#1A1A1A] leading-tight break-all">
-                              {submission.url.length > 60 ? (
+                              {submission.url.length > 80 ? (
                                 <>
-                                  <div>{submission.url.slice(0, 60)}</div>
-                                  <div className="text-[#6C757D]">{submission.url.slice(60)}</div>
+                                  <div>{submission.url.slice(0, 80)}</div>
+                                  <div className="text-[#6C757D]">{submission.url.slice(80)}</div>
                                 </>
                               ) : (
                                 submission.url
@@ -733,13 +737,21 @@ export default function JobDetailsPage() {
                            submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
                         </Badge>
                       </td>
-                      <td className="p-4">
-                        <div className="text-sm text-[#1A1A1A]">{formatDate(submission.submitted_at)}</div>
+                      <td className="p-4 w-1/6">
+                        <div className="text-sm text-[#1A1A1A]">
+                          {submission.submitted_at && submission.submitted_at !== '1970-01-01T07:00:00.000Z' ? 
+                            formatDate(submission.submitted_at) : 
+                            '-'
+                          }
+                        </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 w-1/3">
                         {submission.error_message ? (
-                          <div className="text-sm text-[#E63946]">
-                            {submission.error_message}
+                          <div className="text-sm text-[#E63946] leading-tight">
+                            {submission.error_message.length > 100 ? 
+                              `${submission.error_message.slice(0, 100)}...` : 
+                              submission.error_message
+                            }
                           </div>
                         ) : (
                           <div className="text-sm text-[#1A1A1A]">-</div>
