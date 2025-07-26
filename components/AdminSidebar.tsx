@@ -17,7 +17,8 @@ import {
   Menu,
   X,
   LogOut,
-  Shield
+  Shield,
+  Receipt
 } from 'lucide-react'
 import { AdminUser } from '@/lib/admin-auth'
 import { authService } from '@/lib/auth'
@@ -64,6 +65,12 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
       href: '/backend/admin/users',
       icon: Users,
       active: pathname?.startsWith('/backend/admin/users') || false
+    },
+    {
+      label: 'Orders',
+      href: '/backend/admin/orders',
+      icon: Receipt,
+      active: pathname?.startsWith('/backend/admin/orders') || false
     },
     {
       label: 'Activity Logs',
