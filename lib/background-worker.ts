@@ -1,4 +1,5 @@
 import { jobMonitor } from './job-monitor';
+import { QuotaResetMonitor } from './quota-reset-monitor';
 
 /**
  * Background Worker Service
@@ -11,6 +12,11 @@ import { jobMonitor } from './job-monitor';
 export class BackgroundWorker {
   private static instance: BackgroundWorker;
   private isStarted = false;
+  private quotaResetMonitor: QuotaResetMonitor;
+
+  constructor() {
+    this.quotaResetMonitor = QuotaResetMonitor.getInstance();
+  }
 
   static getInstance(): BackgroundWorker {
     if (!BackgroundWorker.instance) {
@@ -33,6 +39,9 @@ export class BackgroundWorker {
     try {
       // Start job monitor
       jobMonitor.start();
+      
+      // Start quota reset monitor
+      this.quotaResetMonitor.start();
       
       this.isStarted = true;
       console.log('✅ Background worker started successfully');
@@ -61,6 +70,9 @@ export class BackgroundWorker {
     try {
       // Stop job monitor
       jobMonitor.stop();
+      
+      // Stop quota reset monitor
+      this.quotaResetMonitor.stop();
       
       this.isStarted = false;
       console.log('✅ Background worker stopped successfully');

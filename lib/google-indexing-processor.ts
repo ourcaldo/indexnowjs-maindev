@@ -44,11 +44,13 @@ export class GoogleIndexingProcessor {
   private socketBroadcaster: SocketIOBroadcaster;
   private jobLogger: JobLoggingService;
   private processingJobs = new Set<string>();
+  private rateLimitTracker: Map<string, number>;
 
   constructor() {
     this.googleAuth = GoogleAuthService.getInstance();
     this.socketBroadcaster = SocketIOBroadcaster.getInstance();
     this.jobLogger = JobLoggingService.getInstance();
+    this.rateLimitTracker = new Map();
   }
 
   static getInstance(): GoogleIndexingProcessor {
@@ -392,7 +394,7 @@ export class GoogleIndexingProcessor {
 
           // Submit URL to Google's Indexing API
           const startTime = Date.now();
-          await this.submitUrlToGoogleIndexingAPI(submission.url, accessToken);
+          await this.submitUrlToGoogleIndexingAPI(submission.url, accessToken, serviceAccount.id);
           const responseTime = Date.now() - startTime;
           
           // Update submission as successful
@@ -518,9 +520,12 @@ export class GoogleIndexingProcessor {
   }
 
   /**
-   * Submit individual URL to Google's Indexing API
+   * Submit individual URL to Google's Indexing API with rate limiting
    */
-  private async submitUrlToGoogleIndexingAPI(url: string, accessToken: string): Promise<void> {
+  private async submitUrlToGoogleIndexingAPI(url: string, accessToken: string, serviceAccountId: string): Promise<void> {
+    // Apply rate limiting: 60 requests per minute = 1 request per second
+    await this.applyRateLimit(serviceAccountId);
+    
     const apiUrl = 'https://indexing.googleapis.com/v3/urlNotifications:publish';
     
     const response = await fetch(apiUrl, {
@@ -538,12 +543,139 @@ export class GoogleIndexingProcessor {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+      
+      // Check for quota exceeded error specifically
+      if (errorMessage.includes('Quota exceeded') || errorMessage.includes('quota exceeded')) {
+        console.log(`🚫 Service account ${serviceAccountId} quota exhausted, pausing all related jobs`);
+        await this.handleServiceAccountQuotaExhausted(serviceAccountId);
+      }
+      
       throw new Error(`Google Indexing API error: ${errorMessage}`);
     }
 
     // Log successful response for debugging
     const responseData = await response.json();
     console.log(`🎯 Google API response for ${url}:`, responseData);
+  }
+
+  /**
+   * Apply rate limiting to comply with Google's 60 requests/minute limit
+   */
+  private async applyRateLimit(serviceAccountId: string): Promise<void> {
+    const now = Date.now();
+    const key = `rate_limit_${serviceAccountId}`;
+    
+    // Get last request time from memory
+    if (!this.rateLimitTracker) {
+      this.rateLimitTracker = new Map();
+    }
+    
+    const lastRequestTime = this.rateLimitTracker.get(key) || 0;
+    const timeSinceLastRequest = now - lastRequestTime;
+    
+    // Ensure at least 1 second between requests (60 requests/minute)
+    const minimumDelay = 1000; // 1 second
+    
+    if (timeSinceLastRequest < minimumDelay) {
+      const delayNeeded = minimumDelay - timeSinceLastRequest;
+      console.log(`⏱️ Rate limiting: waiting ${delayNeeded}ms before next request for service account ${serviceAccountId}`);
+      await new Promise(resolve => setTimeout(resolve, delayNeeded));
+    }
+    
+    // Update last request time
+    this.rateLimitTracker.set(key, Date.now());
+  }
+
+  /**
+   * Handle service account quota exhaustion
+   */
+  private async handleServiceAccountQuotaExhausted(serviceAccountId: string): Promise<void> {
+    try {
+      // 1. Mark service account as quota exhausted
+      await supabaseAdmin
+        .from('indb_google_service_accounts')
+        .update({
+          is_active: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', serviceAccountId);
+      
+      // 2. Pause all jobs using this service account
+      const { data: activeJobs } = await supabaseAdmin
+        .from('indb_indexing_jobs')
+        .select('id, user_id')
+        .eq('status', 'running');
+      
+      if (activeJobs && activeJobs.length > 0) {
+        // Get user_id from service account
+        const { data: serviceAccount } = await supabaseAdmin
+          .from('indb_google_service_accounts')
+          .select('user_id')
+          .eq('id', serviceAccountId)
+          .single();
+        
+        if (serviceAccount) {
+          // Pause jobs for this user
+          const userJobs = activeJobs.filter(job => job.user_id === serviceAccount.user_id);
+          
+          for (const job of userJobs) {
+            await supabaseAdmin
+              .from('indb_indexing_jobs')
+              .update({
+                status: 'paused',
+                error_message: 'Service account quota exhausted. Jobs will resume after quota reset (midnight Pacific Time).',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', job.id);
+            
+            console.log(`⏸️ Paused job ${job.id} due to service account quota exhaustion`);
+          }
+        }
+      }
+      
+      // 3. Create quota exhausted notification
+      await this.createQuotaExhaustedNotification(serviceAccountId);
+      
+      console.log(`🚫 Service account ${serviceAccountId} quota exhausted - jobs paused until quota reset`);
+      
+    } catch (error) {
+      console.error('Error handling service account quota exhaustion:', error);
+    }
+  }
+
+  /**
+   * Create notification for quota exhausted service account
+   */
+  private async createQuotaExhaustedNotification(serviceAccountId: string): Promise<void> {
+    try {
+      // Get service account and user info
+      const { data: serviceAccount } = await supabaseAdmin
+        .from('indb_google_service_accounts')
+        .select('user_id, name, email')
+        .eq('id', serviceAccountId)
+        .single();
+      
+      if (serviceAccount) {
+        await supabaseAdmin
+          .from('indb_notifications_dashboard')
+          .insert({
+            user_id: serviceAccount.user_id,
+            type: 'service_account_quota_exhausted',
+            title: 'Service Account Quota Exhausted',
+            message: `Service account "${serviceAccount.name}" (${serviceAccount.email}) has exhausted its daily quota. Jobs have been paused and will resume automatically after quota reset (midnight Pacific Time).`,
+            metadata: {
+              service_account_id: serviceAccountId,
+              service_account_name: serviceAccount.name,
+              service_account_email: serviceAccount.email,
+              quota_reset_time: 'midnight Pacific Time'
+            },
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+            created_at: new Date().toISOString()
+          });
+      }
+    } catch (error) {
+      console.error('Error creating quota exhausted notification:', error);
+    }
   }
 
   /**
