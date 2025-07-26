@@ -513,7 +513,7 @@ export default function AdminOrdersPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-[#1A1A1A] hover:bg-[#F7F9FC]">
+                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A]">
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
                         </DropdownMenuItem>

@@ -26,6 +26,7 @@ import {
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { UserActivityLogger } from '@/lib/user-activity-logger'
 
 interface PricingTier {
   period: string
@@ -159,6 +160,11 @@ export default function BillingPage() {
 
   useEffect(() => {
     loadAllData()
+    // Log billing page view
+    UserActivityLogger.logPageView('billing', { 
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent 
+    });
   }, [])
 
   useEffect(() => {

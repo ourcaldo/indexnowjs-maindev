@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { UserActivityLogger } from '@/lib/user-activity-logger'
 import { 
   Settings as SettingsIcon, 
   Mail, 
@@ -70,6 +71,11 @@ export default function SettingsPage() {
   // Load data on component mount
   useEffect(() => {
     loadData()
+    // Log settings page view
+    UserActivityLogger.logPageView('settings', { 
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent 
+    });
   }, [])
 
   const loadData = async () => {

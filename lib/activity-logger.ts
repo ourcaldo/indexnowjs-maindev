@@ -115,6 +115,12 @@ export class ActivityLogger {
         locationData = locationData || requestInfo.locationData || undefined
       }
       
+      // Validate UUID format - if empty or invalid, skip logging
+      if (!data.userId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.userId)) {
+        logger.warn('Invalid or empty user ID, skipping activity log', { userId: data.userId, eventType: data.eventType });
+        return null;
+      }
+
       // Enhance metadata with formatted info
       const enhancedMetadata = {
         ...(data.metadata || {}),

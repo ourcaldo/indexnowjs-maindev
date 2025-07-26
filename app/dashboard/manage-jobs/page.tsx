@@ -31,6 +31,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
+import { UserActivityLogger } from '@/lib/user-activity-logger';
 
 interface Job {
   id: string;
@@ -191,6 +192,14 @@ export default function ManageJobsPage() {
   useEffect(() => {
     loadJobs();
   }, [loadJobs]);
+
+  // Log page view on initial load
+  useEffect(() => {
+    UserActivityLogger.logPageView('manage-jobs', { 
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent 
+    });
+  }, []);
 
   // Helper functions
   const formatDate = (dateString: string) => {

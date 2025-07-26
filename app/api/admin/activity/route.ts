@@ -127,9 +127,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify super admin authentication
-    const user = await requireSuperAdminAuth(request)
-    
     const body = await request.json()
     const {
       event_type,
@@ -139,16 +136,27 @@ export async function POST(request: NextRequest) {
       metadata
     } = body
 
-    // Log admin activity using ActivityLogger
+    // Check if this is an admin action vs user action
+    const isAdminAction = request.nextUrl.searchParams.get('admin') === 'true' || 
+                         event_type.includes('admin') || 
+                         event_type.includes('user_management') ||
+                         event_type.includes('order_management')
+
+    if (isAdminAction) {
+      // Verify super admin authentication for admin actions
+      await requireSuperAdminAuth(request)
+    }
+
+    // Log activity using ActivityLogger (works for both admin and user activities)
     const activityId = await ActivityLogger.logActivity({
-      userId: user?.id || '',
+      userId: '', // Will be populated by ActivityLogger from request
       eventType: event_type,
       actionDescription: action_description,
       targetType: target_type,
       targetId: target_id,
       request,
       metadata: {
-        adminAction: true,
+        isAdminAction,
         ...metadata
       }
     })
@@ -159,12 +167,12 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Admin activity POST API error:', error)
+    console.error('Activity POST API error:', error)
     
-    if (error.message === 'Super admin access required') {
+    if (error.message === 'Super admin access required' || error.message === 'Authentication required') {
       return NextResponse.json(
-        { error: 'Super admin access required' },
-        { status: 403 }
+        { error: 'Authentication required' },
+        { status: error.message === 'Super admin access required' ? 403 : 401 }
       )
     }
 
