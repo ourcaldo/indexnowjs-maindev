@@ -279,7 +279,7 @@ export default function PlansTab() {
       </div>
 
       {/* Plans Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-end">
         {packagesData?.packages.map((pkg) => {
           const pricingInfo = getBillingPeriodPrice(pkg, selectedBillingPeriod)
           const currentPeriod = billingPeriods.find(p => p.key === selectedBillingPeriod)
@@ -354,29 +354,27 @@ export default function PlansTab() {
                 ))}
               </div>
 
-              {/* Action Button - Always at bottom for symmetry */}
-              <button
-                onClick={() => handleSubscribe(pkg.id)}
-                disabled={pkg.is_current || subscribing === pkg.id}
-                className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 ${
-                  pkg.is_current
-                    ? 'bg-[#4BB543]/10 text-[#4BB543] cursor-not-allowed border border-[#4BB543]/20'
-                    : pkg.is_popular
-                    ? 'bg-[#1A1A1A] text-white hover:bg-[#2C2C2E] hover:shadow-md'
-                    : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
-                } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {subscribing === pkg.id ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : pkg.is_current ? (
-                  'Current Plan'
-                ) : (
-                  'Upgrade'
-                )}
-              </button>
+              {/* Action Button - Always same style and alignment */}
+              {!pkg.is_current && (
+                <button
+                  onClick={() => handleSubscribe(pkg.id)}
+                  disabled={subscribing === pkg.id}
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 ${
+                    pkg.is_popular
+                      ? 'bg-[#1A1A1A] text-white hover:bg-[#2C2C2E] hover:shadow-md'
+                      : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
+                  } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {subscribing === pkg.id ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Upgrade'
+                  )}
+                </button>
+              )}
             </div>
           )
         })}
