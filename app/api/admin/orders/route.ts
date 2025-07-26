@@ -60,20 +60,10 @@ export async function GET(request: NextRequest) {
           billing_period,
           features
         ),
-        user:indb_auth_user_profiles!inner(
-          user_id,
-          full_name,
-          role,
-          created_at
-        ),
         gateway:indb_payment_gateways(
           id,
           name,
           slug
-        ),
-        verifier:indb_auth_user_profiles(
-          user_id,
-          full_name
         )
       `, { count: 'exact' })
 
@@ -120,6 +110,45 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Fetch user profiles and auth data for each order
+    const enrichedOrders = []
+    if (orders && orders.length > 0) {
+      for (const order of orders) {
+        // Get user profile from database
+        const { data: userProfile } = await supabaseAdmin
+          .from('indb_auth_user_profiles')
+          .select('full_name, role, created_at')
+          .eq('user_id', order.user_id)
+          .single()
+
+        // Get user email from Supabase Auth
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(order.user_id)
+
+        // Get verifier profile if exists
+        let verifierProfile = null
+        if (order.verified_by) {
+          const { data: verifier } = await supabaseAdmin
+            .from('indb_auth_user_profiles')
+            .select('user_id, full_name, role')
+            .eq('user_id', order.verified_by)
+            .single()
+          verifierProfile = verifier
+        }
+
+        enrichedOrders.push({
+          ...order,
+          user: {
+            user_id: order.user_id,
+            full_name: userProfile?.full_name || 'Unknown User',
+            role: userProfile?.role || 'user',
+            email: authUser?.user?.email || 'N/A',
+            created_at: userProfile?.created_at || order.created_at
+          },
+          verifier: verifierProfile
+        })
+      }
+    }
+
     // Get summary statistics
     const { data: summaryData, error: summaryError } = await supabaseAdmin
       .from('indb_payment_transactions')
@@ -155,11 +184,11 @@ export async function GET(request: NextRequest) {
         adminUser.id,
         'orders_list_view',
         undefined,
-        `Viewed orders list (${orders?.length || 0} orders)`,
+        `Viewed orders list (${enrichedOrders?.length || 0} orders)`,
         request,
         {
           ordersView: true,
-          totalOrders: orders?.length || 0,
+          totalOrders: enrichedOrders?.length || 0,
           filters: {
             status,
             customer,
@@ -177,7 +206,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      orders: orders || [],
+      orders: enrichedOrders,
       summary,
       pagination: {
         current_page: page,

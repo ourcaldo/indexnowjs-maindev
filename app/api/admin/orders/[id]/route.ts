@@ -34,29 +34,12 @@ export async function GET(
           features,
           quota_limits
         ),
-        user:indb_auth_user_profiles!inner(
-          user_id,
-          full_name,
-          role,
-          email_notifications,
-          phone_number,
-          created_at,
-          package_id,
-          subscribed_at,
-          expires_at,
-          daily_quota_used
-        ),
         gateway:indb_payment_gateways(
           id,
           name,
           slug,
           description,
           configuration
-        ),
-        verifier:indb_auth_user_profiles(
-          user_id,
-          full_name,
-          role
         )
       `)
       .eq('id', orderId)
@@ -70,16 +53,43 @@ export async function GET(
       )
     }
 
+    // Get user profile data
+    const { data: userProfile } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select('full_name, role, phone_number, created_at, package_id, subscribed_at, expires_at, daily_quota_used')
+      .eq('user_id', order.user_id)
+      .single()
+
     // Get user's email from Supabase Auth
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(order.user_id)
     
-    // Attach email to user data
+    // Get verifier profile if exists
+    let verifierProfile = null
+    if (order.verified_by) {
+      const { data: verifier } = await supabaseAdmin
+        .from('indb_auth_user_profiles')
+        .select('user_id, full_name, role')
+        .eq('user_id', order.verified_by)
+        .single()
+      verifierProfile = verifier
+    }
+    
+    // Attach user and verifier data to order
     const orderWithEmail = {
       ...order,
       user: {
-        ...order.user,
-        email: authUser?.user?.email || 'N/A'
-      }
+        user_id: order.user_id,
+        full_name: userProfile?.full_name || 'Unknown User',
+        email: authUser?.user?.email || 'N/A',
+        role: userProfile?.role || 'user',
+        phone_number: userProfile?.phone_number,
+        created_at: userProfile?.created_at || order.created_at,
+        package_id: userProfile?.package_id,
+        subscribed_at: userProfile?.subscribed_at,
+        expires_at: userProfile?.expires_at,
+        daily_quota_used: userProfile?.daily_quota_used
+      },
+      verifier: verifierProfile
     }
 
     // Get activity history for this order

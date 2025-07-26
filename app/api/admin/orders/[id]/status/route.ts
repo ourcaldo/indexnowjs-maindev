@@ -97,8 +97,7 @@ export async function PATCH(
       .from('indb_payment_transactions')
       .select(`
         *,
-        package:indb_payment_packages(*),
-        user:indb_auth_user_profiles(*)
+        package:indb_payment_packages(*)
       `)
       .eq('id', orderId)
       .single()
@@ -109,6 +108,16 @@ export async function PATCH(
         { status: 404 }
       )
     }
+
+    // Get user profile data
+    const { data: userProfile } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select('*')
+      .eq('user_id', currentTransaction.user_id)
+      .single()
+
+    // Attach user data to transaction
+    currentTransaction.user = userProfile
 
     // Validate current status - only allow updates from 'proof_uploaded'
     if (currentTransaction.transaction_status !== 'proof_uploaded') {
@@ -135,15 +144,38 @@ export async function PATCH(
       .select(`
         *,
         package:indb_payment_packages(*),
-        user:indb_auth_user_profiles(*),
-        gateway:indb_payment_gateways(*),
-        verifier:indb_auth_user_profiles(
-          user_id,
-          full_name,
-          role
-        )
+        gateway:indb_payment_gateways(*)
       `)
       .single()
+
+    if (updateError) {
+      console.error('Error updating transaction:', updateError)
+      return NextResponse.json(
+        { error: 'Failed to update transaction status' },
+        { status: 500 }
+      )
+    }
+
+    // Get updated user profile and verifier profile
+    const { data: updatedUserProfile } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select('*')
+      .eq('user_id', updatedTransaction.user_id)
+      .single()
+
+    let verifierProfile = null
+    if (updatedTransaction.verified_by) {
+      const { data: verifier } = await supabaseAdmin
+        .from('indb_auth_user_profiles')
+        .select('user_id, full_name, role')
+        .eq('user_id', updatedTransaction.verified_by)
+        .single()
+      verifierProfile = verifier
+    }
+
+    // Attach user and verifier data
+    updatedTransaction.user = updatedUserProfile
+    updatedTransaction.verifier = verifierProfile
 
     if (updateError) {
       console.error('Error updating transaction:', updateError)
