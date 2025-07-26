@@ -89,7 +89,7 @@ export default function CheckoutPage() {
       try {
         setLoading(true)
         
-        // Get authentication token
+        // Get authentication token and user profile
         const user = await authService.getCurrentUser()
         if (!user) {
           addToast({
@@ -100,6 +100,20 @@ export default function CheckoutPage() {
           router.push('/login')
           return
         }
+
+        // Auto-populate user information from logged-in user
+        const userName = (user as any).full_name || user.email?.split('@')[0] || ''
+        const nameParts = userName.split(' ')
+        const firstName = nameParts[0] || ''
+        const lastName = nameParts.slice(1).join(' ') || ''
+        
+        setForm(prev => ({
+          ...prev,
+          first_name: firstName,
+          last_name: lastName,
+          email: user.email || '',
+          phone: (user as any).phone_number || ''
+        }))
 
         const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
         if (!token) {
@@ -477,7 +491,7 @@ export default function CheckoutPage() {
                 <CardContent>
                   <RadioGroup value={form.payment_method} onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}>
                     {paymentGateways.map((gateway) => (
-                      <div key={gateway.id} className="flex items-center space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#3D8BFF] transition-colors">
+                      <div key={gateway.id} className="flex items-start space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#1A1A1A] transition-colors">
                         <RadioGroupItem value={gateway.id} id={gateway.id} />
                         <div className="flex-1">
                           <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
@@ -490,15 +504,20 @@ export default function CheckoutPage() {
                               <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
                               <div className="text-sm text-[#6C757D]">{gateway.description}</div>
                               {gateway.configuration?.bank_name && (
-                                <div className="text-xs text-[#6C757D] mt-1">
-                                  {gateway.configuration.bank_name} - {gateway.configuration.account_name}
+                                <div className="text-sm text-[#1A1A1A] mt-2 p-2 bg-[#F7F9FC] rounded border">
+                                  <div className="font-semibold">Bank Details:</div>
+                                  <div className="text-xs space-y-1 mt-1">
+                                    <div><span className="font-medium">Bank:</span> {gateway.configuration.bank_name}</div>
+                                    <div><span className="font-medium">Account Name:</span> {gateway.configuration.account_name}</div>
+                                    <div><span className="font-medium">Account Number:</span> {gateway.configuration.account_number}</div>
+                                  </div>
                                 </div>
                               )}
                             </div>
                           </Label>
                         </div>
                         {gateway.is_default && (
-                          <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full">
+                          <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full mt-1">
                             Recommended
                           </span>
                         )}

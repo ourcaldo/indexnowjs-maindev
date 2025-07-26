@@ -74,7 +74,7 @@ export default function PlansTab() {
 
   // Check for checkout success
   useEffect(() => {
-    if (searchParams.get('checkout') === 'success') {
+    if (searchParams?.get('checkout') === 'success') {
       setShowSuccessNotification(true)
       // Remove the query parameter
       window.history.replaceState({}, '', '/dashboard/billing')
@@ -287,18 +287,18 @@ export default function PlansTab() {
           return (
             <div
               key={pkg.id}
-              className={`relative bg-white rounded-xl border-2 p-8 transition-all hover:shadow-lg ${
+              className={`relative bg-white rounded-xl border-2 p-8 transition-all hover:shadow-lg flex flex-col h-full ${
                 pkg.is_popular 
-                  ? 'border-[#3D8BFF] shadow-md' 
+                  ? 'border-[#1A1A1A] shadow-md' 
                   : pkg.is_current
                   ? 'border-[#4BB543]'
-                  : 'border-[#E0E6ED] hover:border-[#3D8BFF]'
+                  : 'border-[#E0E6ED] hover:border-[#1A1A1A]'
               }`}
             >
               {/* Popular Badge */}
               {pkg.is_popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="flex items-center bg-[#3D8BFF] text-white px-4 py-2 rounded-full text-sm font-medium">
+                  <div className="flex items-center bg-[#1A1A1A] text-white px-4 py-2 rounded-full text-sm font-medium">
                     <Star className="h-4 w-4 mr-1" />
                     Most Popular
                   </div>
@@ -343,7 +343,7 @@ export default function PlansTab() {
               </div>
 
               {/* Features List */}
-              <div className="space-y-3 mb-8">
+              <div className="space-y-3 mb-8 flex-grow">
                 {getFeaturesForPlan(pkg.slug).map((feature, index) => (
                   <div key={index} className="flex items-start">
                     <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
@@ -354,7 +354,7 @@ export default function PlansTab() {
                 ))}
               </div>
 
-              {/* Action Button - Always present for symmetry */}
+              {/* Action Button - Always at bottom for symmetry */}
               <button
                 onClick={() => handleSubscribe(pkg.id)}
                 disabled={pkg.is_current || subscribing === pkg.id}
@@ -362,7 +362,7 @@ export default function PlansTab() {
                   pkg.is_current
                     ? 'bg-[#4BB543]/10 text-[#4BB543] cursor-not-allowed border border-[#4BB543]/20'
                     : pkg.is_popular
-                    ? 'bg-[#3D8BFF] text-white hover:bg-[#2563eb] hover:shadow-md'
+                    ? 'bg-[#1A1A1A] text-white hover:bg-[#2C2C2E] hover:shadow-md'
                     : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
                 } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
