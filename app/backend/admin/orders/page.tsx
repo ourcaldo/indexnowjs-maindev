@@ -158,13 +158,13 @@ export default function AdminOrdersPage() {
       case 'pending':
         return <Badge variant="secondary" className="bg-[#F0A202] text-white"><Clock className="w-3 h-3 mr-1" />Pending</Badge>
       case 'proof_uploaded':
-        return <Badge variant="secondary" className="bg-[#3D8BFF] text-white"><AlertCircle className="w-3 h-3 mr-1" />Proof Uploaded</Badge>
+        return <Badge variant="secondary" className="bg-[#F0A202] text-white"><AlertCircle className="w-3 h-3 mr-1" />Proof Uploaded</Badge>
       case 'completed':
         return <Badge variant="secondary" className="bg-[#4BB543] text-white"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>
       case 'failed':
         return <Badge variant="secondary" className="bg-[#E63946] text-white"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>
       default:
-        return <Badge variant="secondary">{status}</Badge>
+        return <Badge variant="secondary" className="bg-[#6C757D] text-white">{status}</Badge>
     }
   }
 
@@ -192,7 +192,7 @@ export default function AdminOrdersPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A] mx-auto mb-4"></div>
           <p className="text-[#6C757D]">Loading orders...</p>
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function AdminOrdersPage() {
           <XCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Orders</h3>
           <p className="text-[#6C757D] mb-4">{error}</p>
-          <Button onClick={loadOrders} className="bg-[#3D8BFF] hover:bg-[#2A6BFF] text-white">
+          <Button onClick={loadOrders} className="bg-[#1C2331] hover:bg-[#0d1b2a] text-white">
             Try Again
           </Button>
         </div>
@@ -378,7 +378,7 @@ export default function AdminOrdersPage() {
                   <TableCell>
                     <button
                       onClick={() => handleViewOrder(order.id)}
-                      className="text-[#3D8BFF] hover:underline font-medium"
+                      className="text-[#1A1A1A] hover:underline font-medium"
                     >
                       #{order.payment_reference}
                     </button>

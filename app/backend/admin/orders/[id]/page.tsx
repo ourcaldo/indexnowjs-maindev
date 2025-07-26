@@ -244,7 +244,7 @@ export default function AdminOrderDetailPage() {
         )
       case 'proof_uploaded':
         return (
-          <Badge className="bg-[#3D8BFF] text-white border-[#3D8BFF]">
+          <Badge className="bg-[#F0A202] text-white border-[#F0A202]">
             <AlertCircle className="w-3 h-3 mr-1" />
             Proof Uploaded
           </Badge>
@@ -277,7 +277,7 @@ export default function AdminOrderDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A] mx-auto mb-4"></div>
           <p className="text-[#6C757D]">Loading order details...</p>
         </div>
       </div>
@@ -296,7 +296,7 @@ export default function AdminOrderDetailPage() {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Go Back
             </Button>
-            <Button onClick={loadOrderDetail} className="bg-[#3D8BFF] hover:bg-[#2A6BFF] text-white">
+            <Button onClick={loadOrderDetail} className="bg-[#1C2331] hover:bg-[#0d1b2a] text-white">
               Try Again
             </Button>
           </div>
