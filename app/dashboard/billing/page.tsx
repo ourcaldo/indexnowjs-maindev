@@ -392,25 +392,20 @@ export default function BillingPage() {
   }
 
   const togglePlanDetails = (planId: string) => {
-    setShowDetails(prev => ({
-      ...prev,
-      [planId]: !prev[planId]
-    }))
+    // When not in compare mode, only expand the clicked plan and collapse others
+    if (!showComparePlans) {
+      setShowDetails({
+        [planId]: !showDetails[planId]
+      })
+    }
   }
 
   const toggleComparePlans = () => {
     const newShowComparePlans = !showComparePlans
     setShowComparePlans(newShowComparePlans)
 
-    if (newShowComparePlans) {
-      // Show all plan details when comparing
-      const allExpanded: Record<string, boolean> = {}
-      packagesData?.packages.forEach(pkg => {
-        allExpanded[pkg.id] = true
-      })
-      setShowDetails(allExpanded)
-    } else {
-      // Hide all details when not comparing
+    if (!newShowComparePlans) {
+      // Hide all details when exiting compare mode
       setShowDetails({})
     }
   }
