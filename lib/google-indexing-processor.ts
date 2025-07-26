@@ -261,17 +261,37 @@ export class GoogleIndexingProcessor {
     try {
       console.log(`📊 Creating ${urls.length} URL submission records (PRESERVING HISTORY)`);
       
-      // Get count of existing runs for this job to track run number
+      // Get existing submissions to check if this is a resume or new run
       const { data: existingSubmissions, error: countError } = await supabaseAdmin
         .from('indb_indexing_url_submissions')
-        .select('response_data')
-        .eq('job_id', jobId);
+        .select('*')
+        .eq('job_id', jobId)
+        .order('created_at');
 
       if (countError) {
-        console.warn('Warning: Could not count existing submissions, continuing with run_number = 1');
+        console.warn('Warning: Could not fetch existing submissions, continuing with new run');
       }
 
-      // Calculate run number based on existing submissions
+      // Check job status to determine if this is a resume
+      const { data: job } = await supabaseAdmin
+        .from('indb_indexing_jobs')
+        .select('status, processed_urls')
+        .eq('id', jobId)
+        .single();
+
+      const isResume = job?.status === 'running' && existingSubmissions && existingSubmissions.length > 0;
+      const pendingSubmissions = existingSubmissions?.filter(sub => sub.status === 'pending') || [];
+
+      if (isResume && pendingSubmissions.length > 0) {
+        console.log(`🔄 RESUMING job ${jobId} - found ${pendingSubmissions.length} pending submissions to continue from`);
+        console.log(`📍 Job will resume from URL index ${job?.processed_urls || 0} onwards`);
+        
+        // For resume: don't create new submissions, use existing pending ones
+        // The processing will continue from the last processed URL
+        return;
+      }
+
+      // Calculate run number based on existing submissions for NEW run
       let runNumber = 1;
       if (existingSubmissions && existingSubmissions.length > 0) {
         const existingRunNumbers = existingSubmissions
@@ -280,7 +300,7 @@ export class GoogleIndexingProcessor {
         runNumber = existingRunNumbers.length > 0 ? Math.max(...existingRunNumbers) + 1 : 1;
       }
 
-      console.log(`🔄 Creating submissions for run #${runNumber} (preserving ${existingSubmissions?.length || 0} historical records)`);
+      console.log(`🔄 Creating submissions for NEW run #${runNumber} (preserving ${existingSubmissions?.length || 0} historical records)`);
       
       const submissions = urls.map((url, index) => ({
         job_id: jobId,
@@ -309,7 +329,7 @@ export class GoogleIndexingProcessor {
         }
       }
 
-      // Update job with current run info (reset progress for new run)
+      // Update job with current run info (reset progress ONLY for new runs, not resume)
       await supabaseAdmin
         .from('indb_indexing_jobs')
         .update({ 
@@ -375,6 +395,28 @@ export class GoogleIndexingProcessor {
       // Process each URL submission
       for (const submission of submissions) {
         try {
+          // Check if job is still running (immediate pause/stop detection)
+          const { data: currentJob } = await supabaseAdmin
+            .from('indb_indexing_jobs')
+            .select('status')
+            .eq('id', job.id)
+            .single();
+
+          if (currentJob?.status !== 'running') {
+            console.log(`🛑 Job ${job.id} was ${currentJob?.status || 'stopped'} - stopping processing immediately`);
+            await this.jobLogger.logJobEvent({
+              job_id: job.id,
+              level: 'INFO',
+              message: `Job processing stopped - status changed to ${currentJob?.status || 'unknown'}`,
+              metadata: {
+                processed_count: processed,
+                total_submissions: submissions.length,
+                stopped_at_url: submission.url
+              }
+            });
+            break; // Stop processing immediately
+          }
+
           // Round-robin service account selection for load balancing
           const serviceAccount = serviceAccounts[processed % serviceAccounts.length];
           

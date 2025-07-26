@@ -17,6 +17,25 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 
 ## Recent Changes  
 
+**JOB CONTROL & URL DISPLAY FIXES COMPLETE (January 26, 2025)**
+- ✅ **URL SUBMISSIONS DISPLAY IMPROVEMENTS**: Enhanced job detail page URL submissions table
+  - **Removed "Retry X" Labels**: Completely eliminated retry count labels from URL submissions history
+  - **2-Line URL Format**: Long URLs now display in 2 lines to save space (first 60 chars, remainder on second line)
+  - **Improved Layout**: Better visual alignment with proper text wrapping and color contrast
+- ✅ **IMMEDIATE JOB PAUSE/STOP FUNCTIONALITY**: Fixed job control responsiveness  
+  - **Real-time Status Detection**: Google indexing processor now checks job status before processing each URL
+  - **Immediate Stop Response**: Jobs stop processing immediately when user clicks pause/stop buttons
+  - **Proper Job State Management**: System detects job status changes and logs stopping events with detailed metadata
+- ✅ **INTELLIGENT JOB RESUME SYSTEM**: Fixed resume to continue from last processed URL
+  - **Resume vs Retry Detection**: System distinguishes between job resume (paused→running) and retry (completed/failed→pending)
+  - **Progress Preservation**: Resume operations preserve existing progress without resetting counters
+  - **Pending URL Continuation**: Resume jobs continue processing existing pending URL submissions instead of creating new ones
+  - **Smart URL Creation Logic**: Only creates new URL submissions for fresh runs, not resume operations
+- ✅ **ENHANCED API ROUTE HANDLING**:
+  - **Resume Logging**: Dedicated logging for job resume events with proper metadata tracking
+  - **Status Validation**: Improved job status change validation and error handling
+  - **Progress Conservation**: Resume operations maintain processed_urls, successful_urls, and failed_urls counts
+
 **GOOGLE API QUOTA MANAGEMENT & RATE LIMITING SYSTEM COMPLETE (January 26, 2025)**
 - ✅ **SERVICE ACCOUNT QUOTA EXHAUSTION HANDLING**: Comprehensive system for Google Indexing API quota management
   - **Instant Job Pausing**: Jobs are immediately paused when Google API returns "Quota exceeded" errors

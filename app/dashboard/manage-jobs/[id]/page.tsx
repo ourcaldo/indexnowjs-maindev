@@ -709,17 +709,19 @@ export default function JobDetailsPage() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-[#1A1A1A] flex-shrink-0" />
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium text-[#1A1A1A] truncate">
-                              {submission.url}
+                        <div className="flex items-start gap-2">
+                          <Globe className="h-4 w-4 text-[#1A1A1A] flex-shrink-0 mt-0.5" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium text-[#1A1A1A] leading-tight break-all">
+                              {submission.url.length > 60 ? (
+                                <>
+                                  <div>{submission.url.slice(0, 60)}</div>
+                                  <div className="text-[#6C757D]">{submission.url.slice(60)}</div>
+                                </>
+                              ) : (
+                                submission.url
+                              )}
                             </div>
-                            {submission.retry_count > 0 && (
-                              <div className="text-xs text-[#1A1A1A]">
-                                Retry {submission.retry_count}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </td>

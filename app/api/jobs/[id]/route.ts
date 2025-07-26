@@ -102,6 +102,7 @@ export async function PUT(
       .single();
 
     const isRetry = (currentJob?.status === 'completed' || currentJob?.status === 'failed') && body.status === 'pending';
+    const isResume = currentJob?.status === 'paused' && body.status === 'running';
 
     // Prepare update data
     const updateData: any = {
@@ -137,6 +138,20 @@ export async function PUT(
       // CRITICAL: NEVER DELETE URL SUBMISSIONS - PRESERVE HISTORY
       // Old URL submissions remain in database for complete audit trail
       // New submissions will be created with incremented run_number
+    } else if (isResume) {
+      // Log job resume action (don't reset progress - continue from where left off)
+      const jobLogger = JobLoggingService.getInstance();
+      await jobLogger.logJobEvent({
+        job_id: jobId,
+        level: 'INFO',
+        message: 'Job resumed - continuing from last processed URL',
+        metadata: {
+          event_type: 'job_resume',
+          user_id: user.id,
+          triggered_by: 'api_endpoint',
+          note: 'Progress preserved, will continue from last processed URL'
+        }
+      });
     }
 
     // Update job status and progress if needed
