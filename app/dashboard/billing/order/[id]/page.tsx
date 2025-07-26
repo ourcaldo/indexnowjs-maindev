@@ -64,7 +64,7 @@ export default function OrderCompletedPage() {
 
   const fetchTransactionDetails = async () => {
     try {
-      const supabase = supabaseBrowser()
+      const supabase = supabaseBrowser
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
@@ -130,7 +130,7 @@ export default function OrderCompletedPage() {
 
     setUploading(true)
     try {
-      const supabase = supabaseBrowser()
+      const supabase = supabaseBrowser
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
