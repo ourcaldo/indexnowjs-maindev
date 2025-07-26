@@ -9,19 +9,29 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    // Get authenticated user
-    const user = await authService.getCurrentUser()
-    if (!user) {
+    // Get authenticated user from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { success: false, message: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    const body = await request.json()
-    const { package_id, billing_period, customer_info, payment_method } = body
+    const token = authHeader.split(' ')[1]
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid authentication token' },
+        { status: 401 }
+      )
+    }
 
-    if (!package_id || !billing_period || !customer_info || !payment_method) {
+    const body = await request.json()
+    const { package_id, billing_period, customer_info, payment_gateway_id } = body
+
+    if (!package_id || !billing_period || !customer_info || !payment_gateway_id) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
         { status: 400 }
@@ -46,7 +56,7 @@ export async function POST(request: NextRequest) {
     const { data: gatewayData, error: gatewayError } = await supabase
       .from('indb_payment_gateways')
       .select('*')
-      .eq('id', payment_method)
+      .eq('id', payment_gateway_id)
       .single()
 
     if (gatewayError || !gatewayData) {
@@ -72,7 +82,7 @@ export async function POST(request: NextRequest) {
         id: crypto.randomUUID(),
         user_id: user.id,
         package_id: package_id,
-        gateway_id: payment_method,
+        gateway_id: payment_gateway_id,
         transaction_type: 'subscription',
         transaction_status: 'pending',
         amount: finalPrice,

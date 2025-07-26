@@ -17,6 +17,25 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 
 ## Recent Changes  
 
+**BILLING CHECKOUT FIXES & OPTIONAL ADDRESS FIELDS (January 26, 2025)**
+- ✅ **BILLING ADDRESS MADE OPTIONAL**: Updated checkout form to make all billing address fields optional for user convenience
+  - **Field Labels Updated**: Changed all address field labels from "required (*)" to "optional" with clear indications
+  - **HTML Validation Removed**: Removed `required` attributes from address, city, state, zip_code fields
+  - **User-Friendly Placeholders**: Updated placeholder text to indicate fields are optional
+  - **Section Header Updated**: Changed "Billing Address" to "Billing Address (Optional)" with explanatory text
+- ✅ **AUTHENTICATION ERROR FIXED**: Resolved "Authentication required" error in checkout API endpoint
+  - **Token Authentication Added**: Added proper Bearer token authentication to checkout API request
+  - **API Authentication Enhanced**: Updated checkout API to use Authorization header instead of deprecated authService
+  - **Parameter Name Fixed**: Corrected payment_method parameter to payment_gateway_id in API
+  - **Error Handling Improved**: Added proper token validation and user-friendly error messages
+- ✅ **CHECKOUT FORM VALIDATION STREAMLINED**: 
+  - **Only Essential Fields Required**: Now only personal information (name, email, phone) and payment method are required
+  - **Flexible Address Input**: Users can provide as much or as little address information as needed
+  - **Enhanced User Experience**: Reduced form friction while maintaining necessary customer information
+- ✅ **API PARAMETER CONSISTENCY**: Fixed parameter naming inconsistency between frontend and backend
+  - **Frontend-Backend Alignment**: Both systems now use consistent parameter names
+  - **Database Integration Fixed**: Proper parameter mapping to database fields
+
 **REPLIT AGENT MIGRATION & CHECKOUT PAGE FIXES (January 26, 2025)**
 - ✅ **SUCCESSFUL MIGRATION TO REPLIT**: Completed migration from Replit Agent to standard Replit environment
   - **Node.js 20 Installation**: Successfully installed Node.js runtime and package managers

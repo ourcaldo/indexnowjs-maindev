@@ -213,10 +213,23 @@ export default function CheckoutPage() {
     setSubmitting(true)
     
     try {
+      // Get authentication token
+      const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
+      if (!token) {
+        addToast({
+          title: "Authentication error", 
+          description: "Please log in again to continue.",
+          type: "error"
+        })
+        router.push('/login')
+        return
+      }
+
       const response = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           package_id: selectedPackage.id,
@@ -385,72 +398,69 @@ export default function CheckoutPage() {
               {/* Billing Address */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Billing Address</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Billing Address (Optional)</CardTitle>
+                  <p className="text-sm text-[#6C757D] mt-1">You can skip this section if not needed</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="address" className="text-sm font-medium text-[#1A1A1A]">
-                      Street Address *
+                      Street Address (Optional)
                     </Label>
                     <Input
                       id="address"
                       type="text"
-                      required
                       value={form.address}
                       onChange={(e) => setForm(prev => ({ ...prev, address: e.target.value }))}
                       className="mt-1"
-                      placeholder="Enter your street address"
+                      placeholder="Enter your street address (optional)"
                     />
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A]">
-                        City *
+                        City (Optional)
                       </Label>
                       <Input
                         id="city"
                         type="text"
-                        required
                         value={form.city}
                         onChange={(e) => setForm(prev => ({ ...prev, city: e.target.value }))}
                         className="mt-1"
-                        placeholder="City"
+                        placeholder="City (optional)"
                       />
                     </div>
                     <div>
                       <Label htmlFor="state" className="text-sm font-medium text-[#1A1A1A]">
-                        State/Province *
+                        State/Province (Optional)
                       </Label>
                       <Input
                         id="state"
                         type="text"
-                        required
                         value={form.state}
                         onChange={(e) => setForm(prev => ({ ...prev, state: e.target.value }))}
                         className="mt-1"
-                        placeholder="State"
+                        placeholder="State (optional)"
                       />
                     </div>
                     <div>
                       <Label htmlFor="zip_code" className="text-sm font-medium text-[#1A1A1A]">
-                        ZIP Code *
+                        ZIP Code (Optional)
                       </Label>
                       <Input
                         id="zip_code"
                         type="text"
-                        required
                         value={form.zip_code}
                         onChange={(e) => setForm(prev => ({ ...prev, zip_code: e.target.value }))}
                         className="mt-1"
-                        placeholder="ZIP"
+                        placeholder="ZIP (optional)"
                       />
                     </div>
                   </div>
 
                   <div>
                     <Label htmlFor="country" className="text-sm font-medium text-[#1A1A1A]">
-                      Country *
+                      Country (Optional)
                     </Label>
                     <Select value={form.country} onValueChange={(value) => setForm(prev => ({ ...prev, country: value }))}>
                       <SelectTrigger className="mt-1">
