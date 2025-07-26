@@ -209,8 +209,10 @@ export default function PlansTab() {
   }
 
   const toggleComparePlans = () => {
-    setShowComparePlans(!showComparePlans)
-    if (!showComparePlans) {
+    const newShowComparePlans = !showComparePlans
+    setShowComparePlans(newShowComparePlans)
+    
+    if (newShowComparePlans) {
       // Show all plan details when comparing
       const allExpanded: Record<string, boolean> = {}
       packagesData?.packages.forEach(pkg => {
@@ -224,6 +226,9 @@ export default function PlansTab() {
   }
 
   const togglePlanDetails = (planId: string) => {
+    // Don't allow individual toggle when compare mode is active
+    if (showComparePlans) return
+    
     setExpandedPlans(prev => ({
       ...prev,
       [planId]: !prev[planId]
@@ -367,15 +372,17 @@ export default function PlansTab() {
                 ))}
               </div>
 
-              {/* Show Details Button */}
-              <div className="mb-4">
-                <button 
-                  onClick={() => togglePlanDetails(pkg.id)}
-                  className="text-[#6C757D] hover:text-[#1A1A1A] text-sm font-medium transition-colors"
-                >
-                  {expandedPlans[pkg.id] ? 'Hide details' : 'Show details'}
-                </button>
-              </div>
+              {/* Show Details Button - only show when not in compare mode */}
+              {!showComparePlans && (
+                <div className="mb-4">
+                  <button 
+                    onClick={() => togglePlanDetails(pkg.id)}
+                    className="text-[#6C757D] hover:text-[#1A1A1A] text-sm font-medium transition-colors"
+                  >
+                    {expandedPlans[pkg.id] ? 'Hide details' : 'Show details'}
+                  </button>
+                </div>
+              )}
 
               {/* Expanded Details */}
               {expandedPlans[pkg.id] && (

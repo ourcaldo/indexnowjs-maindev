@@ -712,7 +712,7 @@ export default function BillingPage() {
                   </td>
                   <td className="py-3 px-4 text-left">
                     <span className="text-sm text-[#1A1A1A] font-mono">
-                      #{transaction.id.slice(0, 8)}
+                      #{transaction.payment_reference || transaction.id.slice(0, 8)}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-left">
@@ -786,12 +786,12 @@ export default function BillingPage() {
                 {selectedInvoices.length} invoices selected
               </span>
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/20">
-                  <Download className="h-4 w-4" />
+                <button className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors border border-white/20 text-sm">
+                  <Download className="h-3.5 w-3.5" />
                   Download CSV
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/20">
-                  <Download className="h-4 w-4" />
+                <button className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors border border-white/20 text-sm">
+                  <Download className="h-3.5 w-3.5" />
                   Download PDF
                 </button>
               </div>
