@@ -404,7 +404,14 @@ export default function BillingPage() {
     const newShowComparePlans = !showComparePlans
     setShowComparePlans(newShowComparePlans)
 
-    if (!newShowComparePlans) {
+    if (newShowComparePlans) {
+      // Show all plan details when comparing
+      const allExpanded: Record<string, boolean> = {}
+      packagesData?.packages.forEach(pkg => {
+        allExpanded[pkg.id] = true
+      })
+      setShowDetails(allExpanded)
+    } else {
       // Hide all details when exiting compare mode
       setShowDetails({})
     }
@@ -564,26 +571,24 @@ export default function BillingPage() {
                     ) : isCurrentPlan ? 'Current plan' : 'Switch plan'}
                   </button>
 
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      if (!showComparePlans) {
+                  {!showComparePlans && (
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
                         togglePlanDetails(pkg.id)
-                      }
-                    }}
-                    disabled={showComparePlans}
-                    className={`w-full py-1 text-xs ${
-                      showComparePlans ? 'opacity-50 cursor-not-allowed' : 
-                      isCurrentPlan ? 'text-gray-300 hover:text-white' : 'text-[#6C757D] hover:text-[#1A1A1A]'
-                    } transition-colors flex items-center justify-center gap-1`}
-                  >
-                    {(showComparePlans || showDetails[pkg.id]) ? (
-                      <>Hide details <ChevronUp className="h-3 w-3" /></>
-                    ) : (
-                      <>Show details <ChevronDown className="h-3 w-3" /></>
-                    )}
-                  </button>
+                      }}
+                      className={`w-full py-1 text-xs ${
+                        isCurrentPlan ? 'text-gray-300 hover:text-white' : 'text-[#6C757D] hover:text-[#1A1A1A]'
+                      } transition-colors flex items-center justify-center gap-1`}
+                    >
+                      {showDetails[pkg.id] ? (
+                        <>Hide details <ChevronUp className="h-3 w-3" /></>
+                      ) : (
+                        <>Show details <ChevronDown className="h-3 w-3" /></>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             )
