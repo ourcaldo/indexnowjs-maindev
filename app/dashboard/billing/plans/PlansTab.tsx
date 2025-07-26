@@ -37,9 +37,12 @@ interface PaymentPackage {
   billing_period: string
   features: string[]
   quota_limits: {
-    daily_quota_limit: number
-    service_accounts_limit: number
-    concurrent_jobs_limit: number
+    daily_urls?: number
+    daily_quota_limit?: number
+    service_accounts?: number
+    service_accounts_limit?: number
+    concurrent_jobs?: number
+    concurrent_jobs_limit?: number
   }
   is_popular: boolean
   is_current: boolean
@@ -116,6 +119,22 @@ export default function PlansTab() {
       }
     }
     return { price: pkg.price }
+  }
+
+  // Helper function to safely get quota values from the database structure
+  const getQuotaValue = (pkg: PaymentPackage, type: 'daily' | 'service_accounts' | 'concurrent_jobs'): number => {
+    if (!pkg.quota_limits) return 0
+    
+    switch (type) {
+      case 'daily':
+        return pkg.quota_limits.daily_urls ?? pkg.quota_limits.daily_quota_limit ?? 0
+      case 'service_accounts':
+        return pkg.quota_limits.service_accounts ?? pkg.quota_limits.service_accounts_limit ?? 0
+      case 'concurrent_jobs':
+        return pkg.quota_limits.concurrent_jobs ?? pkg.quota_limits.concurrent_jobs_limit ?? 0
+      default:
+        return 0
+    }
   }
 
   const handleSubscribe = async (packageId: string) => {
@@ -303,19 +322,19 @@ export default function PlansTab() {
                     <div className="flex justify-between">
                       <span className="text-[#6C757D]">Daily Quota:</span>
                       <span className="font-medium text-[#1A1A1A]">
-                        {pkg.quota_limits.daily_quota_limit.toLocaleString()} URLs
+                        {getQuotaValue(pkg, 'daily') === -1 ? 'Unlimited' : `${getQuotaValue(pkg, 'daily').toLocaleString()} URLs`}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#6C757D]">Service Accounts:</span>
                       <span className="font-medium text-[#1A1A1A]">
-                        {pkg.quota_limits.service_accounts_limit}
+                        {getQuotaValue(pkg, 'service_accounts') === -1 ? 'Unlimited' : getQuotaValue(pkg, 'service_accounts')}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#6C757D]">Concurrent Jobs:</span>
                       <span className="font-medium text-[#1A1A1A]">
-                        {pkg.quota_limits.concurrent_jobs_limit}
+                        {getQuotaValue(pkg, 'concurrent_jobs') === -1 ? 'Unlimited' : getQuotaValue(pkg, 'concurrent_jobs')}
                       </span>
                     </div>
                   </div>
