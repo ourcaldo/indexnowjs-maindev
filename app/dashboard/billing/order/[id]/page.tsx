@@ -66,7 +66,7 @@ export default function OrderCompletedPage() {
     try {
       const supabase = supabaseBrowser
       const { data: { session } } = await supabase.auth.getSession()
-      
+
       if (!session) {
         router.push('/auth/login')
         return
@@ -132,7 +132,7 @@ export default function OrderCompletedPage() {
     try {
       const supabase = supabaseBrowser
       const { data: { session } } = await supabase.auth.getSession()
-      
+
       if (!session) {
         throw new Error('Authentication required')
       }
@@ -154,7 +154,7 @@ export default function OrderCompletedPage() {
       }
 
       const result = await response.json()
-      
+
       // Update transaction status
       setTransaction(prev => prev ? {
         ...prev,
@@ -249,7 +249,7 @@ export default function OrderCompletedPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Billing
           </Button>
-          
+
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-[#1A1A1A]">Order Completed</h1>
@@ -272,7 +272,7 @@ export default function OrderCompletedPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Order ID</p>
-                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference}</p>
+                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Order Date</p>
@@ -307,7 +307,7 @@ export default function OrderCompletedPage() {
                     <h3 className="font-semibold text-[#1A1A1A]">{transaction.package.name}</h3>
                     <p className="text-sm text-[#6C757D] mt-1">{transaction.package.description}</p>
                   </div>
-                  
+
                   <div>
                     <p className="font-medium text-[#1A1A1A] mb-2">Package Features:</p>
                     <ul className="space-y-1">
@@ -321,7 +321,7 @@ export default function OrderCompletedPage() {
                   </div>
 
                   <Separator />
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-[#1A1A1A]">Total Amount</span>
                     <span className="text-xl font-bold text-[#1A1A1A]">{formatCurrency(transaction.amount)}</span>
@@ -381,7 +381,7 @@ export default function OrderCompletedPage() {
                     <p className="text-sm font-medium text-[#1A1A1A]">Payment Method</p>
                     <p className="text-sm text-[#6C757D]">{transaction.gateway.name}</p>
                   </div>
-                  
+
                   {transaction.gateway.configuration?.bank_name && (
                     <>
                       <div>
@@ -398,15 +398,15 @@ export default function OrderCompletedPage() {
                       </div>
                     </>
                   )}
-                  
+
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Amount to Pay</p>
                     <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(transaction.amount)}</p>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Reference Number</p>
-                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference}</p>
+                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference || 'N/A'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -439,7 +439,7 @@ export default function OrderCompletedPage() {
                     <p className="text-sm text-[#6C757D] text-center">
                       Upload bukti transfermu disini untuk mempercepat verifikasi pembayaran.
                     </p>
-                    
+
                     <Button
                       onClick={() => setShowUploadForm(!showUploadForm)}
                       className="w-full bg-[#4BB543] hover:bg-[#45a83a] text-white"

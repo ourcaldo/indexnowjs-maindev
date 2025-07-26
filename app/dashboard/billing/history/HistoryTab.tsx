@@ -315,7 +315,7 @@ export default function HistoryTab() {
                         <div>
                           <span className="text-[#6C757D]">Order ID: </span>
                           <span className="text-[#1A1A1A] font-mono text-xs">
-                            {transaction.payment_reference}
+                            {transaction.payment_reference || 'N/A'}
                           </span>
                         </div>
                         <div>
