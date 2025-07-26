@@ -578,24 +578,7 @@ export default function BillingPage() {
                     ) : isCurrentPlan ? 'Current plan' : 'Switch plan'}
                   </button>
 
-                  {!showComparePlans && (
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        togglePlanDetails(pkg.id)
-                      }}
-                      className={`w-full py-1 text-xs ${
-                        isCurrentPlan ? 'text-gray-300 hover:text-white' : 'text-[#6C757D] hover:text-[#1A1A1A]'
-                      } transition-colors flex items-center justify-center gap-1`}
-                    >
-                      {showDetails[pkg.id] ? (
-                        <>Hide details <ChevronUp className="h-3 w-3" /></>
-                      ) : (
-                        <>Show details <ChevronDown className="h-3 w-3" /></>
-                      )}
-                    </button>
-                  )}
+
                 </div>
               </div>
             )

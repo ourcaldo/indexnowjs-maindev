@@ -373,22 +373,7 @@ export default function PlansTab() {
                 ))}
               </div>
 
-              {/* Show Details Button - only show when not in compare mode */}
-              {!showComparePlans && (
-                <div className="mb-4">
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      togglePlanDetails(pkg.id)
-                    }}
-                    className="text-[#6C757D] hover:text-[#1A1A1A] text-sm font-medium transition-colors"
-                    type="button"
-                  >
-                    {expandedPlans[pkg.id] ? 'Hide details' : 'Show details'}
-                  </button>
-                </div>
-              )}
+
 
               {/* Expanded Details */}
               {expandedPlans[pkg.id] && (
