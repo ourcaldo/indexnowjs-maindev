@@ -348,12 +348,11 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <Label htmlFor="last_name" className="text-sm font-medium text-[#1A1A1A]">
-                        Last Name *
+                        Last Name
                       </Label>
                       <Input
                         id="last_name"
                         type="text"
-                        required
                         value={form.last_name}
                         onChange={(e) => setForm(prev => ({ ...prev, last_name: e.target.value }))}
                         className="mt-1"
@@ -398,13 +397,13 @@ export default function CheckoutPage() {
               {/* Billing Address */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Billing Address (Optional)</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Billing Address</CardTitle>
                   <p className="text-sm text-[#6C757D] mt-1">You can skip this section if not needed</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="address" className="text-sm font-medium text-[#1A1A1A]">
-                      Street Address (Optional)
+                      Street Address
                     </Label>
                     <Input
                       id="address"
@@ -412,14 +411,14 @@ export default function CheckoutPage() {
                       value={form.address}
                       onChange={(e) => setForm(prev => ({ ...prev, address: e.target.value }))}
                       className="mt-1"
-                      placeholder="Enter your street address (optional)"
+                      placeholder="Enter your street address"
                     />
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A]">
-                        City (Optional)
+                        City
                       </Label>
                       <Input
                         id="city"
@@ -427,12 +426,12 @@ export default function CheckoutPage() {
                         value={form.city}
                         onChange={(e) => setForm(prev => ({ ...prev, city: e.target.value }))}
                         className="mt-1"
-                        placeholder="City (optional)"
+                        placeholder="City"
                       />
                     </div>
                     <div>
                       <Label htmlFor="state" className="text-sm font-medium text-[#1A1A1A]">
-                        State/Province (Optional)
+                        State/Province
                       </Label>
                       <Input
                         id="state"
@@ -440,12 +439,12 @@ export default function CheckoutPage() {
                         value={form.state}
                         onChange={(e) => setForm(prev => ({ ...prev, state: e.target.value }))}
                         className="mt-1"
-                        placeholder="State (optional)"
+                        placeholder="State"
                       />
                     </div>
                     <div>
                       <Label htmlFor="zip_code" className="text-sm font-medium text-[#1A1A1A]">
-                        ZIP Code (Optional)
+                        ZIP Code
                       </Label>
                       <Input
                         id="zip_code"
@@ -453,14 +452,14 @@ export default function CheckoutPage() {
                         value={form.zip_code}
                         onChange={(e) => setForm(prev => ({ ...prev, zip_code: e.target.value }))}
                         className="mt-1"
-                        placeholder="ZIP (optional)"
+                        placeholder="ZIP"
                       />
                     </div>
                   </div>
 
                   <div>
                     <Label htmlFor="country" className="text-sm font-medium text-[#1A1A1A]">
-                      Country (Optional)
+                      Country
                     </Label>
                     <Select value={form.country} onValueChange={(value) => setForm(prev => ({ ...prev, country: value }))}>
                       <SelectTrigger className="mt-1">
