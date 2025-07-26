@@ -1,3 +1,5 @@
+CAUTIONS: WRITE THE RECENT CHANGES/CHANGELOGS IN "RECENT CHANGES PART" OF THIS DOCUMENTATION, NOT IN TOP OF THIS DOCUMENT! 
+
 # IndexNow Pro - Professional Web Application
 
 ## Project Overview
@@ -14,6 +16,607 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 - **Comprehensive Monitoring**: Real-time job tracking, quota monitoring, and detailed analytics
 - **Professional Email Notifications**: Branded email reports for job completion, failures, and quota alerts
 - **Enterprise Security**: Role-based access control, input validation, and security auditing
+
+## CRITICAL PROJECT CAUTIONS - ALWAYS REMEMBER
+
+⚠️ **ARCHITECTURE REQUIREMENTS:**
+1. **Next.js ONLY** - This project uses Next.js with NO VITE. Never suggest or implement Vite migration.
+2. **Supabase Self-Hosted** - Database is hosted at https://base.indexnow.studio
+   - Do NOT install PostgreSQL locally
+   - Do NOT push database changes locally
+   - For any database updates/changes/additions/removals, provide SQL queries for user to run in Supabase SQL Editor
+   - You must be follow this prefix "indb_{collections}_{table-name}" "collections" is like same collections, for example like "security" collection which have tables "indb_security_event", "indb_security_log" and so-on.
+3. **Project Color Scheme ONLY** - Use ONLY this project's color scheme:
+   - Background: #FFFFFF (Pure White), #F7F9FC (Light Gray)
+   - Primary: #1A1A1A (Graphite), #2C2C2E (Charcoal)
+   - Accent: #3D8BFF (Soft Blue)
+   - Text: #6C757D (Slate Gray)
+   - Success: #4BB543 (Mint Green)
+   - Warning: #F0A202 (Amber)
+   - Error: #E63946 (Rose Red)
+   - Borders: #E0E6ED (Cool Gray)
+   - Button Colors: #1C2331, #0d1b2a, #22333b, #1E1E1E
+   - If user sends reference images, they are for layout/UI inspiration ONLY - still use project colors
+
+## Current Database Schema (Supabase Tables)
+If an updates affectig the database and RLS. You need to provide the SQL Query for me to run in Supabase SQL Editor. Keep in mind that to make new tables, you must be follow this prefix "indb_{collections}_{table-name}" "collections" is like same collections, for example like "security" collection which have tables "indb_security_event", "indb_security_log" and so-on.
+
+All tables use `indb_` prefix and are located at https://base.indexnow.studio:
+
+| table_name                     | column_name                 | data_type                | is_nullable |
+| ------------------------------ | --------------------------- | ------------------------ | ----------- |
+| admin_dashboard_stats          | total_users                 | bigint                   | YES         |
+| admin_dashboard_stats          | regular_users               | bigint                   | YES         |
+| admin_dashboard_stats          | admin_users                 | bigint                   | YES         |
+| admin_dashboard_stats          | super_admin_users           | bigint                   | YES         |
+| admin_dashboard_stats          | total_jobs                  | bigint                   | YES         |
+| admin_dashboard_stats          | active_jobs                 | bigint                   | YES         |
+| admin_dashboard_stats          | completed_jobs              | bigint                   | YES         |
+| admin_dashboard_stats          | failed_jobs                 | bigint                   | YES         |
+| admin_dashboard_stats          | total_service_accounts      | bigint                   | YES         |
+| admin_dashboard_stats          | active_service_accounts     | bigint                   | YES         |
+| admin_dashboard_stats          | daily_api_requests          | bigint                   | YES         |
+| admin_dashboard_stats          | published_posts             | bigint                   | YES         |
+| admin_dashboard_stats          | published_pages             | bigint                   | YES         |
+| indb_analytics_daily_stats     | id                          | uuid                     | NO          |
+| indb_analytics_daily_stats     | user_id                     | uuid                     | NO          |
+| indb_analytics_daily_stats     | date                        | date                     | NO          |
+| indb_analytics_daily_stats     | total_jobs                  | integer                  | YES         |
+| indb_analytics_daily_stats     | completed_jobs              | integer                  | YES         |
+| indb_analytics_daily_stats     | failed_jobs                 | integer                  | YES         |
+| indb_analytics_daily_stats     | total_urls_submitted        | integer                  | YES         |
+| indb_analytics_daily_stats     | total_urls_indexed          | integer                  | YES         |
+| indb_analytics_daily_stats     | total_urls_failed           | integer                  | YES         |
+| indb_analytics_daily_stats     | quota_usage                 | integer                  | YES         |
+| indb_analytics_daily_stats     | created_at                  | timestamp with time zone | YES         |
+| indb_analytics_daily_stats     | updated_at                  | timestamp with time zone | YES         |
+| indb_analytics_error_stats     | error_date                  | date                     | YES         |
+| indb_analytics_error_stats     | user_id                     | uuid                     | YES         |
+| indb_analytics_error_stats     | error_type                  | text                     | YES         |
+| indb_analytics_error_stats     | severity                    | text                     | YES         |
+| indb_analytics_error_stats     | error_count                 | bigint                   | YES         |
+| indb_analytics_error_stats     | affected_endpoints          | bigint                   | YES         |
+| indb_analytics_error_stats     | last_occurrence             | timestamp with time zone | YES         |
+| indb_auth_user_profiles        | id                          | uuid                     | NO          |
+| indb_auth_user_profiles        | user_id                     | uuid                     | NO          |
+| indb_auth_user_profiles        | full_name                   | text                     | YES         |
+| indb_auth_user_profiles        | role                        | text                     | YES         |
+| indb_auth_user_profiles        | email_notifications         | boolean                  | YES         |
+| indb_auth_user_profiles        | created_at                  | timestamp with time zone | YES         |
+| indb_auth_user_profiles        | updated_at                  | timestamp with time zone | YES         |
+| indb_auth_user_profiles        | phone_number                | text                     | YES         |
+| indb_auth_user_profiles        | package_id                  | uuid                     | YES         |
+| indb_auth_user_profiles        | subscribed_at               | timestamp with time zone | YES         |
+| indb_auth_user_profiles        | expires_at                  | timestamp with time zone | YES         |
+| indb_auth_user_profiles        | daily_quota_used            | integer                  | YES         |
+| indb_auth_user_profiles        | daily_quota_reset_date      | date                     | YES         |
+| indb_auth_user_settings        | id                          | uuid                     | NO          |
+| indb_auth_user_settings        | user_id                     | uuid                     | NO          |
+| indb_auth_user_settings        | timeout_duration            | integer                  | YES         |
+| indb_auth_user_settings        | retry_attempts              | integer                  | YES         |
+| indb_auth_user_settings        | email_job_completion        | boolean                  | YES         |
+| indb_auth_user_settings        | email_job_failure           | boolean                  | YES         |
+| indb_auth_user_settings        | email_quota_alerts          | boolean                  | YES         |
+| indb_auth_user_settings        | created_at                  | timestamp with time zone | YES         |
+| indb_auth_user_settings        | updated_at                  | timestamp with time zone | YES         |
+| indb_auth_user_settings        | default_schedule            | text                     | YES         |
+| indb_auth_user_settings        | email_daily_report          | boolean                  | YES         |
+| indb_cms_pages                 | id                          | uuid                     | NO          |
+| indb_cms_pages                 | title                       | text                     | NO          |
+| indb_cms_pages                 | slug                        | text                     | NO          |
+| indb_cms_pages                 | content                     | text                     | YES         |
+| indb_cms_pages                 | template                    | text                     | YES         |
+| indb_cms_pages                 | featured_image_url          | text                     | YES         |
+| indb_cms_pages                 | author_id                   | uuid                     | YES         |
+| indb_cms_pages                 | status                      | text                     | YES         |
+| indb_cms_pages                 | is_homepage                 | boolean                  | YES         |
+| indb_cms_pages                 | meta_title                  | text                     | YES         |
+| indb_cms_pages                 | meta_description            | text                     | YES         |
+| indb_cms_pages                 | custom_css                  | text                     | YES         |
+| indb_cms_pages                 | custom_js                   | text                     | YES         |
+| indb_cms_pages                 | published_at                | timestamp with time zone | YES         |
+| indb_cms_pages                 | created_at                  | timestamp with time zone | YES         |
+| indb_cms_pages                 | updated_at                  | timestamp with time zone | YES         |
+| indb_cms_posts                 | id                          | uuid                     | NO          |
+| indb_cms_posts                 | title                       | text                     | NO          |
+| indb_cms_posts                 | slug                        | text                     | NO          |
+| indb_cms_posts                 | content                     | text                     | YES         |
+| indb_cms_posts                 | excerpt                     | text                     | YES         |
+| indb_cms_posts                 | featured_image_url          | text                     | YES         |
+| indb_cms_posts                 | author_id                   | uuid                     | YES         |
+| indb_cms_posts                 | status                      | text                     | YES         |
+| indb_cms_posts                 | post_type                   | text                     | YES         |
+| indb_cms_posts                 | meta_title                  | text                     | YES         |
+| indb_cms_posts                 | meta_description            | text                     | YES         |
+| indb_cms_posts                 | tags                        | jsonb                    | YES         |
+| indb_cms_posts                 | published_at                | timestamp with time zone | YES         |
+| indb_cms_posts                 | created_at                  | timestamp with time zone | YES         |
+| indb_cms_posts                 | updated_at                  | timestamp with time zone | YES         |
+| indb_error_analytics           | error_date                  | date                     | YES         |
+| indb_error_analytics           | user_id                     | uuid                     | YES         |
+| indb_error_analytics           | error_type                  | text                     | YES         |
+| indb_error_analytics           | severity                    | text                     | YES         |
+| indb_error_analytics           | error_count                 | bigint                   | YES         |
+| indb_error_analytics           | affected_endpoints          | bigint                   | YES         |
+| indb_error_analytics           | last_occurrence             | timestamp with time zone | YES         |
+| indb_google_quota_alerts       | id                          | uuid                     | NO          |
+| indb_google_quota_alerts       | service_account_id          | uuid                     | NO          |
+| indb_google_quota_alerts       | alert_type                  | text                     | NO          |
+| indb_google_quota_alerts       | threshold_percentage        | integer                  | NO          |
+| indb_google_quota_alerts       | is_active                   | boolean                  | YES         |
+| indb_google_quota_alerts       | last_triggered_at           | timestamp with time zone | YES         |
+| indb_google_quota_alerts       | created_at                  | timestamp with time zone | YES         |
+| indb_google_quota_alerts       | updated_at                  | timestamp with time zone | YES         |
+| indb_google_quota_usage        | id                          | uuid                     | NO          |
+| indb_google_quota_usage        | service_account_id          | uuid                     | NO          |
+| indb_google_quota_usage        | date                        | date                     | NO          |
+| indb_google_quota_usage        | requests_made               | integer                  | YES         |
+| indb_google_quota_usage        | requests_successful         | integer                  | YES         |
+| indb_google_quota_usage        | requests_failed             | integer                  | YES         |
+| indb_google_quota_usage        | last_request_at             | timestamp with time zone | YES         |
+| indb_google_quota_usage        | created_at                  | timestamp with time zone | YES         |
+| indb_google_quota_usage        | updated_at                  | timestamp with time zone | YES         |
+| indb_google_quota_usage        | user_id                     | uuid                     | YES         |
+| indb_google_service_accounts   | id                          | uuid                     | NO          |
+| indb_google_service_accounts   | user_id                     | uuid                     | NO          |
+| indb_google_service_accounts   | name                        | text                     | NO          |
+| indb_google_service_accounts   | email                       | text                     | NO          |
+| indb_google_service_accounts   | encrypted_credentials       | text                     | NO          |
+| indb_google_service_accounts   | is_active                   | boolean                  | YES         |
+| indb_google_service_accounts   | daily_quota_limit           | integer                  | YES         |
+| indb_google_service_accounts   | minute_quota_limit          | integer                  | YES         |
+| indb_google_service_accounts   | created_at                  | timestamp with time zone | YES         |
+| indb_google_service_accounts   | updated_at                  | timestamp with time zone | YES         |
+| indb_google_service_accounts   | encrypted_access_token      | text                     | YES         |
+| indb_google_service_accounts   | access_token_expires_at     | timestamp with time zone | YES         |
+| indb_indexing_job_logs         | id                          | uuid                     | NO          |
+| indb_indexing_job_logs         | job_id                      | uuid                     | NO          |
+| indb_indexing_job_logs         | level                       | text                     | NO          |
+| indb_indexing_job_logs         | message                     | text                     | NO          |
+| indb_indexing_job_logs         | metadata                    | jsonb                    | YES         |
+| indb_indexing_job_logs         | created_at                  | timestamp with time zone | YES         |
+| indb_indexing_job_logs         | correlation_id              | uuid                     | YES         |
+| indb_indexing_job_logs         | error_severity              | text                     | YES         |
+| indb_indexing_jobs             | id                          | uuid                     | NO          |
+| indb_indexing_jobs             | user_id                     | uuid                     | NO          |
+| indb_indexing_jobs             | name                        | text                     | NO          |
+| indb_indexing_jobs             | type                        | text                     | NO          |
+| indb_indexing_jobs             | status                      | text                     | YES         |
+| indb_indexing_jobs             | schedule_type               | text                     | YES         |
+| indb_indexing_jobs             | cron_expression             | text                     | YES         |
+| indb_indexing_jobs             | source_data                 | jsonb                    | YES         |
+| indb_indexing_jobs             | total_urls                  | integer                  | YES         |
+| indb_indexing_jobs             | processed_urls              | integer                  | YES         |
+| indb_indexing_jobs             | successful_urls             | integer                  | YES         |
+| indb_indexing_jobs             | failed_urls                 | integer                  | YES         |
+| indb_indexing_jobs             | progress_percentage         | numeric                  | YES         |
+| indb_indexing_jobs             | started_at                  | timestamp with time zone | YES         |
+| indb_indexing_jobs             | completed_at                | timestamp with time zone | YES         |
+| indb_indexing_jobs             | next_run_at                 | timestamp with time zone | YES         |
+| indb_indexing_jobs             | error_message               | text                     | YES         |
+| indb_indexing_jobs             | created_at                  | timestamp with time zone | YES         |
+| indb_indexing_jobs             | updated_at                  | timestamp with time zone | YES         |
+| indb_indexing_jobs             | locked_at                   | timestamp with time zone | YES         |
+| indb_indexing_jobs             | locked_by                   | text                     | YES         |
+| indb_indexing_url_submissions  | id                          | uuid                     | NO          |
+| indb_indexing_url_submissions  | job_id                      | uuid                     | NO          |
+| indb_indexing_url_submissions  | service_account_id          | uuid                     | YES         |
+| indb_indexing_url_submissions  | url                         | text                     | NO          |
+| indb_indexing_url_submissions  | status                      | text                     | YES         |
+| indb_indexing_url_submissions  | submitted_at                | timestamp with time zone | YES         |
+| indb_indexing_url_submissions  | indexed_at                  | timestamp with time zone | YES         |
+| indb_indexing_url_submissions  | response_data               | jsonb                    | YES         |
+| indb_indexing_url_submissions  | error_message               | text                     | YES         |
+| indb_indexing_url_submissions  | retry_count                 | integer                  | YES         |
+| indb_indexing_url_submissions  | created_at                  | timestamp with time zone | YES         |
+| indb_indexing_url_submissions  | updated_at                  | timestamp with time zone | YES         |
+| indb_notifications_dashboard   | id                          | uuid                     | NO          |
+| indb_notifications_dashboard   | user_id                     | uuid                     | NO          |
+| indb_notifications_dashboard   | type                        | text                     | NO          |
+| indb_notifications_dashboard   | title                       | text                     | NO          |
+| indb_notifications_dashboard   | message                     | text                     | NO          |
+| indb_notifications_dashboard   | is_read                     | boolean                  | YES         |
+| indb_notifications_dashboard   | action_url                  | text                     | YES         |
+| indb_notifications_dashboard   | metadata                    | jsonb                    | YES         |
+| indb_notifications_dashboard   | expires_at                  | timestamp with time zone | YES         |
+| indb_notifications_dashboard   | created_at                  | timestamp with time zone | YES         |
+| indb_notifications_email_queue | id                          | uuid                     | NO          |
+| indb_notifications_email_queue | user_id                     | uuid                     | NO          |
+| indb_notifications_email_queue | template_type               | text                     | NO          |
+| indb_notifications_email_queue | to_email                    | text                     | NO          |
+| indb_notifications_email_queue | subject                     | text                     | NO          |
+| indb_notifications_email_queue | html_content                | text                     | NO          |
+| indb_notifications_email_queue | status                      | text                     | YES         |
+| indb_notifications_email_queue | attempts                    | integer                  | YES         |
+| indb_notifications_email_queue | sent_at                     | timestamp with time zone | YES         |
+| indb_notifications_email_queue | error_message               | text                     | YES         |
+| indb_notifications_email_queue | metadata                    | jsonb                    | YES         |
+| indb_notifications_email_queue | created_at                  | timestamp with time zone | YES         |
+| indb_notifications_email_queue | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_gateways          | id                          | uuid                     | NO          |
+| indb_payment_gateways          | name                        | text                     | NO          |
+| indb_payment_gateways          | slug                        | text                     | NO          |
+| indb_payment_gateways          | description                 | text                     | YES         |
+| indb_payment_gateways          | is_active                   | boolean                  | YES         |
+| indb_payment_gateways          | is_default                  | boolean                  | YES         |
+| indb_payment_gateways          | configuration               | jsonb                    | YES         |
+| indb_payment_gateways          | api_credentials             | jsonb                    | YES         |
+| indb_payment_gateways          | created_at                  | timestamp with time zone | YES         |
+| indb_payment_gateways          | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_invoices          | id                          | uuid                     | NO          |
+| indb_payment_invoices          | user_id                     | uuid                     | NO          |
+| indb_payment_invoices          | subscription_id             | uuid                     | YES         |
+| indb_payment_invoices          | transaction_id              | uuid                     | YES         |
+| indb_payment_invoices          | invoice_number              | text                     | NO          |
+| indb_payment_invoices          | invoice_status              | text                     | NO          |
+| indb_payment_invoices          | subtotal                    | numeric                  | NO          |
+| indb_payment_invoices          | tax_amount                  | numeric                  | YES         |
+| indb_payment_invoices          | discount_amount             | numeric                  | YES         |
+| indb_payment_invoices          | total_amount                | numeric                  | NO          |
+| indb_payment_invoices          | currency                    | text                     | NO          |
+| indb_payment_invoices          | due_date                    | date                     | YES         |
+| indb_payment_invoices          | paid_at                     | timestamp with time zone | YES         |
+| indb_payment_invoices          | invoice_data                | jsonb                    | NO          |
+| indb_payment_invoices          | created_at                  | timestamp with time zone | YES         |
+| indb_payment_invoices          | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_packages          | id                          | uuid                     | NO          |
+| indb_payment_packages          | name                        | text                     | NO          |
+| indb_payment_packages          | slug                        | text                     | NO          |
+| indb_payment_packages          | description                 | text                     | YES         |
+| indb_payment_packages          | price                       | numeric                  | NO          |
+| indb_payment_packages          | currency                    | text                     | YES         |
+| indb_payment_packages          | billing_period              | text                     | YES         |
+| indb_payment_packages          | features                    | jsonb                    | YES         |
+| indb_payment_packages          | quota_limits                | jsonb                    | YES         |
+| indb_payment_packages          | is_active                   | boolean                  | YES         |
+| indb_payment_packages          | sort_order                  | integer                  | YES         |
+| indb_payment_packages          | created_at                  | timestamp with time zone | YES         |
+| indb_payment_packages          | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_packages          | is_popular                  | boolean                  | YES         |
+| indb_payment_packages          | pricing_tiers               | jsonb                    | YES         |
+| indb_payment_subscriptions     | id                          | uuid                     | NO          |
+| indb_payment_subscriptions     | user_id                     | uuid                     | NO          |
+| indb_payment_subscriptions     | package_id                  | uuid                     | NO          |
+| indb_payment_subscriptions     | gateway_id                  | uuid                     | NO          |
+| indb_payment_subscriptions     | subscription_status         | text                     | NO          |
+| indb_payment_subscriptions     | billing_period              | text                     | NO          |
+| indb_payment_subscriptions     | amount_paid                 | numeric                  | NO          |
+| indb_payment_subscriptions     | currency                    | text                     | NO          |
+| indb_payment_subscriptions     | started_at                  | timestamp with time zone | YES         |
+| indb_payment_subscriptions     | expires_at                  | timestamp with time zone | YES         |
+| indb_payment_subscriptions     | auto_renew                  | boolean                  | YES         |
+| indb_payment_subscriptions     | payment_reference           | text                     | YES         |
+| indb_payment_subscriptions     | metadata                    | jsonb                    | YES         |
+| indb_payment_subscriptions     | created_at                  | timestamp with time zone | YES         |
+| indb_payment_subscriptions     | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_transactions      | id                          | uuid                     | NO          |
+| indb_payment_transactions      | user_id                     | uuid                     | NO          |
+| indb_payment_transactions      | subscription_id             | uuid                     | YES         |
+| indb_payment_transactions      | package_id                  | uuid                     | NO          |
+| indb_payment_transactions      | gateway_id                  | uuid                     | NO          |
+| indb_payment_transactions      | transaction_type            | text                     | NO          |
+| indb_payment_transactions      | transaction_status          | text                     | NO          |
+| indb_payment_transactions      | amount                      | numeric                  | NO          |
+| indb_payment_transactions      | currency                    | text                     | NO          |
+| indb_payment_transactions      | payment_method              | text                     | YES         |
+| indb_payment_transactions      | payment_reference           | text                     | YES         |
+| indb_payment_transactions      | payment_proof_url           | text                     | YES         |
+| indb_payment_transactions      | gateway_transaction_id      | text                     | YES         |
+| indb_payment_transactions      | gateway_response            | jsonb                    | YES         |
+| indb_payment_transactions      | processed_at                | timestamp with time zone | YES         |
+| indb_payment_transactions      | verified_by                 | uuid                     | YES         |
+| indb_payment_transactions      | verified_at                 | timestamp with time zone | YES         |
+| indb_payment_transactions      | notes                       | text                     | YES         |
+| indb_payment_transactions      | metadata                    | jsonb                    | YES         |
+| indb_payment_transactions      | created_at                  | timestamp with time zone | YES         |
+| indb_payment_transactions      | updated_at                  | timestamp with time zone | YES         |
+| indb_security_activity_logs    | id                          | uuid                     | NO          |
+| indb_security_activity_logs    | user_id                     | uuid                     | YES         |
+| indb_security_activity_logs    | event_type                  | text                     | NO          |
+| indb_security_activity_logs    | action_description          | text                     | NO          |
+| indb_security_activity_logs    | target_type                 | text                     | YES         |
+| indb_security_activity_logs    | target_id                   | uuid                     | YES         |
+| indb_security_activity_logs    | ip_address                  | inet                     | YES         |
+| indb_security_activity_logs    | user_agent                  | text                     | YES         |
+| indb_security_activity_logs    | device_info                 | jsonb                    | YES         |
+| indb_security_activity_logs    | location_data               | jsonb                    | YES         |
+| indb_security_activity_logs    | success                     | boolean                  | YES         |
+| indb_security_activity_logs    | error_message               | text                     | YES         |
+| indb_security_activity_logs    | metadata                    | jsonb                    | YES         |
+| indb_security_activity_logs    | created_at                  | timestamp with time zone | YES         |
+| indb_security_audit_logs       | id                          | uuid                     | NO          |
+| indb_security_audit_logs       | user_id                     | uuid                     | YES         |
+| indb_security_audit_logs       | event_type                  | text                     | NO          |
+| indb_security_audit_logs       | description                 | text                     | NO          |
+| indb_security_audit_logs       | ip_address                  | inet                     | YES         |
+| indb_security_audit_logs       | user_agent                  | text                     | YES         |
+| indb_security_audit_logs       | success                     | boolean                  | YES         |
+| indb_security_audit_logs       | metadata                    | jsonb                    | YES         |
+| indb_security_audit_logs       | created_at                  | timestamp with time zone | YES         |
+| indb_security_rate_limits      | id                          | uuid                     | NO          |
+| indb_security_rate_limits      | identifier                  | text                     | NO          |
+| indb_security_rate_limits      | endpoint                    | text                     | NO          |
+| indb_security_rate_limits      | requests_count              | integer                  | YES         |
+| indb_security_rate_limits      | window_start                | timestamp with time zone | YES         |
+| indb_security_rate_limits      | created_at                  | timestamp with time zone | YES         |
+| indb_security_rate_limits      | updated_at                  | timestamp with time zone | YES         |
+| indb_site_settings             | id                          | uuid                     | NO          |
+| indb_site_settings             | site_name                   | text                     | NO          |
+| indb_site_settings             | site_description            | text                     | YES         |
+| indb_site_settings             | site_logo_url               | text                     | YES         |
+| indb_site_settings             | site_icon_url               | text                     | YES         |
+| indb_site_settings             | site_favicon_url            | text                     | YES         |
+| indb_site_settings             | contact_email               | text                     | YES         |
+| indb_site_settings             | support_email               | text                     | YES         |
+| indb_site_settings             | maintenance_mode            | boolean                  | YES         |
+| indb_site_settings             | registration_enabled        | boolean                  | YES         |
+| indb_site_settings             | created_at                  | timestamp with time zone | YES         |
+| indb_site_settings             | updated_at                  | timestamp with time zone | YES         |
+| indb_system_error_logs         | id                          | uuid                     | NO          |
+| indb_system_error_logs         | user_id                     | uuid                     | YES         |
+| indb_system_error_logs         | error_type                  | text                     | NO          |
+| indb_system_error_logs         | severity                    | text                     | NO          |
+| indb_system_error_logs         | message                     | text                     | NO          |
+| indb_system_error_logs         | user_message                | text                     | NO          |
+| indb_system_error_logs         | endpoint                    | text                     | YES         |
+| indb_system_error_logs         | http_method                 | text                     | YES         |
+| indb_system_error_logs         | status_code                 | integer                  | YES         |
+| indb_system_error_logs         | metadata                    | jsonb                    | YES         |
+| indb_system_error_logs         | stack_trace                 | text                     | YES         |
+| indb_system_error_logs         | created_at                  | timestamp with time zone | YES         |
+| indb_system_error_logs         | updated_at                  | timestamp with time zone | YES         |
+| recent_jobs_with_stats         | id                          | uuid                     | YES         |
+| recent_jobs_with_stats         | user_id                     | uuid                     | YES         |
+| recent_jobs_with_stats         | name                        | text                     | YES         |
+| recent_jobs_with_stats         | type                        | text                     | YES         |
+| recent_jobs_with_stats         | status                      | text                     | YES         |
+| recent_jobs_with_stats         | schedule_type               | text                     | YES         |
+| recent_jobs_with_stats         | cron_expression             | text                     | YES         |
+| recent_jobs_with_stats         | source_data                 | jsonb                    | YES         |
+| recent_jobs_with_stats         | total_urls                  | integer                  | YES         |
+| recent_jobs_with_stats         | processed_urls              | integer                  | YES         |
+| recent_jobs_with_stats         | successful_urls             | integer                  | YES         |
+| recent_jobs_with_stats         | failed_urls                 | integer                  | YES         |
+| recent_jobs_with_stats         | progress_percentage         | numeric                  | YES         |
+| recent_jobs_with_stats         | started_at                  | timestamp with time zone | YES         |
+| recent_jobs_with_stats         | completed_at                | timestamp with time zone | YES         |
+| recent_jobs_with_stats         | next_run_at                 | timestamp with time zone | YES         |
+| recent_jobs_with_stats         | error_message               | text                     | YES         |
+| recent_jobs_with_stats         | created_at                  | timestamp with time zone | YES         |
+| recent_jobs_with_stats         | updated_at                  | timestamp with time zone | YES         |
+| recent_jobs_with_stats         | locked_at                   | timestamp with time zone | YES         |
+| recent_jobs_with_stats         | locked_by                   | text                     | YES         |
+| recent_jobs_with_stats         | submission_count            | bigint                   | YES         |
+| recent_jobs_with_stats         | successful_count            | bigint                   | YES         |
+| recent_jobs_with_stats         | failed_count                | bigint                   | YES         |
+| user_billing_summary           | user_id                     | uuid                     | YES         |
+| user_billing_summary           | full_name                   | text                     | YES         |
+| user_billing_summary           | package_id                  | uuid                     | YES         |
+| user_billing_summary           | package_name                | text                     | YES         |
+| user_billing_summary           | package_slug                | text                     | YES         |
+| user_billing_summary           | subscribed_at               | timestamp with time zone | YES         |
+| user_billing_summary           | expires_at                  | timestamp with time zone | YES         |
+| user_billing_summary           | subscription_status         | text                     | YES         |
+| user_billing_summary           | current_subscription_status | text                     | YES         |
+| user_billing_summary           | total_payments              | bigint                   | YES         |
+| user_billing_summary           | total_spent                 | numeric                  | YES         |
+| user_dashboard_stats           | user_id                     | uuid                     | YES         |
+| user_dashboard_stats           | total_urls_indexed          | bigint                   | YES         |
+| user_dashboard_stats           | active_jobs                 | bigint                   | YES         |
+| user_dashboard_stats           | scheduled_jobs              | bigint                   | YES         |
+| user_dashboard_stats           | success_rate                | integer                  | YES         |
+| user_quota_summary             | user_id                     | uuid                     | YES         |
+| user_quota_summary             | total_quota_used            | bigint                   | YES         |
+| user_quota_summary             | service_account_count       | bigint                   | YES         |
+| user_quota_summary             | total_quota_limit           | bigint                   | YES         |
+| user_quota_summary             | package_name                | text                     | YES         |
+| user_quota_summary             | daily_quota_limit           | integer                  | YES         |
+| user_quota_summary             | service_accounts_limit      | integer                  | YES         |
+| user_quota_summary             | concurrent_jobs_limit       | integer                  | YES         |
+| user_quota_summary             | daily_quota_used            | bigint                   | YES         |
+| user_quota_summary             | daily_quota_reset_date      | date                     | YES         |
+| user_quota_summary             | is_unlimited                | boolean                  | YES         |
+
+Button Colors: #1C2331 (primary), #0d1b2a, #22333b, #1E1E1E
+Background: Clean whites (#FFFFFF, #F7F9FC)
+Text: Black/dark colors (#1A1A1A, #2C2C2E, #6C757D)
+Project: IndexNow Pro inspired by RankMath WordPress plugin instant indexing functionality
+Build System: Next.js with built-in build system (NO Vite allowed)
+Authentication: Supabase Auth with JWT tokens and automatic session management
+
+## System Architecture
+
+### Overall Structure
+The application follows a Next.js App Router structure with Express server integration:
+- `app/` - Next.js App Router pages and layouts
+- `server/` - Express.js backend API integration for Google API calls
+- `shared/` - Common TypeScript types and schemas
+- `components/` - Reusable UI components
+- `lib/` - Utility functions and configurations
+- `attached_assets/` - Project assets and documentation
+
+### Frontend Architecture
+- **Framework**: Next.js with React 18 and TypeScript
+- **Build System**: Next.js built-in build system (NO Vite allowed)
+- **UI Framework**: Radix UI headless components with shadcn/ui styling system
+- **State Management**: TanStack React Query v5 for server state management and caching
+- **Routing**: Wouter for lightweight client-side routing
+- **Form Handling**: React Hook Form with Zod validation
+- **Styling**: Tailwind CSS with clean white backgrounds and PROPER dark palette accents (slate-900, stone-900, gray-800, neutral-800)
+- **Authentication**: Supabase Auth with JWT tokens and automatic session management
+
+### Backend Architecture
+- **Runtime**: Node.js 20+ with Express.js framework
+- **Language**: TypeScript with ES modules
+- **API Design**: RESTful API with comprehensive middleware architecture
+- **Database**: Supabase with type-safe database operations
+- **External Integrations**: Google Indexing API, Google Auth Library, XML parsing for sitemaps
+- **Job Processing**: Node-cron for scheduled job execution with WebSocket real-time updates
+- **Email System**: Nodemailer with custom HTML templates and SMTP configuration
+- **Security**: Multi-layered security with input validation, rate limiting, and audit logging
+
+## Key Components & Features
+
+### 1. User Management & Authentication
+- **Appwrite Authentication**: Secure JWT-based authentication with automatic token refresh
+- **User Profiles**: Full name, email, role assignment, and preference management
+- **Role System**: Three-tier role hierarchy (user, admin, super_admin) for future admin features
+- **Settings Management**: Granular control over email notifications, timeouts, and retry attempts
+
+### 2. Service Account Management
+- **JSON Upload & Validation**: Secure upload of Google service account JSON files
+- **Credential Encryption**: AES-256-CBC encryption for sensitive data storage
+- **Quota Tracking**: Daily (200 requests) and per-minute (60 requests) quota monitoring
+- **Load Balancing**: Automatic distribution of requests across multiple service accounts
+- **Token Caching**: JWT token caching with 5-minute expiry buffer for efficiency
+
+### 3. Indexing Job System
+- **Job Creation Methods**:
+  - Sitemap parsing with automatic URL extraction
+  - Manual URL list submission with batch processing
+- **Scheduling Options**: One-time, hourly, daily, weekly, monthly with cron expressions
+- **Status Tracking**: Pending, running, completed, failed, paused, cancelled states
+- **Progress Monitoring**: Real-time updates via WebSocket connections
+- **Bulk Operations**: Select and delete multiple jobs with confirmation dialogs
+
+### 4. Google API Integration
+- **Google Indexing API**: Direct integration with Google's URL submission service
+- **Service Account Authentication**: JWT-based authentication with automatic token refresh
+- **Error Handling**: Comprehensive error catching with retry logic and quota management
+- **Rate Limiting**: Respect for Google's API rate limits with intelligent queuing
+
+### 5. Email Notification System
+- **Professional Templates**: Modern, responsive email templates with IndexNow branding
+- **Notification Types**:
+  - Job completion with success/failure statistics
+  - Job failure notifications with error details
+  - Daily quota reports with usage analytics
+  - Quota alerts (warning, critical, exhausted levels)
+- **SMTP Configuration**: Flexible SMTP setup with TLS encryption
+
+### 6. Security Features
+- **Input Validation**: Comprehensive Zod schema validation for all inputs
+- **SQL Injection Prevention**: Parameterized queries and input sanitization
+- **Rate Limiting**: Per-user rate limiting to prevent abuse
+- **CORS Configuration**: Environment-based CORS with allowed origins
+- **Security Headers**: Comprehensive security headers for production deployment
+- **Audit Logging**: Detailed logging of all security-relevant events
+- **Role-based Authorization**: Middleware for role-based access control
+
+## Data Flow & Architecture
+
+### Database Schema (Appwrite Collections)
+The application uses a prefixed collection structure (`indb_*`) with core entities:
+
+#### Core Tables (Supabase)
+1. **indb_auth_user_profiles**: User accounts with roles, preferences, and settings
+2. **indb_google_service_accounts**: Google service account configurations with encrypted credentials
+3. **indb_indexing_jobs**: Job definitions with scheduling, status tracking, and progress metrics
+4. **indb_indexing_url_submissions**: Individual URL submission records with status and error tracking
+5. **indb_google_quota_usage**: Daily API quota tracking per service account
+6. **indb_google_quota_alerts**: Quota monitoring alerts with thresholds
+7. **indb_notifications_dashboard**: In-app notification system
+8. **indb_analytics_daily_stats**: Daily analytics and reporting data
+
+### User Journey Flow
+1. **Authentication**: User signs up/logs in via Supabase Auth
+2. **Service Account Setup**: Upload Google service account JSON files
+3. **Job Creation**: Create indexing jobs from sitemaps or manual URL lists
+4. **Processing**: System parses URLs and queues them for submission
+5. **Execution**: Jobs execute according to schedule with real-time updates
+6. **Monitoring**: Users monitor progress via dashboard and receive email notifications
+7. **Analytics**: System tracks quota usage and provides detailed reporting
+
+### API Request Flow
+1. **Authentication Middleware**: Validates JWT tokens and populates user context
+2. **Input Validation**: Validates request data against Zod schemas
+3. **Authorization**: Checks user permissions and ownership
+4. **Business Logic**: Executes core application functionality
+5. **Database Operations**: Type-safe database queries via Supabase client
+6. **External API Calls**: Google API integration with error handling
+7. **Response Formatting**: Consistent API response structure
+
+### Job Processing Flow
+1. **Job Creation**: Jobs stored in database with pending status
+2. **Scheduler Pickup**: Node-cron monitor detects pending jobs
+3. **URL Processing**: Sitemap parsing or manual URL list processing
+4. **Google API Submission**: Submit URLs to Google Indexing API with quota management
+5. **Real-time Updates**: WebSocket updates for progress tracking
+6. **Email Notifications**: Send completion/failure notifications
+
+## External Dependencies & Integrations
+
+### Core Services
+- **Supabase**: Backend-as-a-Service for database, authentication, and user management
+- **Google Indexing API**: Direct integration with Google's URL submission service
+- **Google Auth Library**: JWT authentication for Google services
+
+### Key Libraries
+- **Frontend**: React 18, Next.js, TanStack React Query v5, React Hook Form, Wouter
+- **Backend**: Express, Node-cron, Nodemailer, Google APIs client library
+- **UI**: Radix UI components, shadcn/ui styling, Tailwind CSS, Lucide React icons
+- **Validation**: Zod for comprehensive schema validation
+- **Utilities**: xml2js (sitemap parsing), date-fns, clsx, class-variance-authority, framer-motion
+- **Development**: TypeScript, tsx, esbuild
+
+### Google API Integration
+- **googleapis**: Official Google API client library
+- **google-auth-library**: JWT authentication for Google services
+- **Quota Management**: Daily (200 requests) and per-minute (60 requests) limits
+- **Error Handling**: Comprehensive error catching with retry logic
+
+## Environment Configuration
+
+### Required Environment Variables
+```bash
+# Supabase Configuration
+SUPABASE_URL=https://base.indexnow.studio
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzUzMDMwODAwLCJleHAiOjE5MTA3OTcyMDB9.druA2hNMG5tlToENwA6diLetpMm9GdJgaSRwi75iTW0
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTMwMzA4MDAsImV4cCI6MTkxMDc5NzIwMH0.LIQX0iP6uE6PsrDCA7ia4utqKBWOTa6dRpq6AZJ5O7U
+
+# Next.js Frontend Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://base.indexnow.studio
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzUzMDMwODAwLCJleHAiOjE5MTA3OTcyMDB9.druA2hNMG5tlToENwA6diLetpMm9GdJgaSRwi75iTW0
+
+# API Configuration
+BACKEND_URL=http://localhost:3001
+API_BASE_URL=http://localhost:3001/api
+
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=[email]
+SMTP_PASS=[app-password]
+SMTP_FROM_NAME=IndexNow Pro
+SMTP_FROM_EMAIL=[from-email]
+
+# Security
+ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
+ENCRYPTION_KEY=[32-character-key]
+JWT_SECRET=[jwt-secret-key]
+```
+
+### User Interface Design
+- **Main Color**: Clean white backgrounds (#FFFFFF)
+- **Accent Colors**: PROPER dark palette ONLY - slate-900/800, stone-900/800, gray-800/900, neutral-800/900 (NO bright colors like blue-500, green-500, purple-500, etc.)
+- **Typography**: Clean, readable fonts with proper hierarchy
+- **Layout**: Dashboard-style interface with collapsible left-aligned sidebar navigation
+- **Responsive Design**: Mobile-first approach with responsive breakpoints
+- **Theme**: Professional appearance optimized for SEO professionals
+
+### Key Pages Structure
+1. **Dashboard**: Overview statistics, recent jobs, quick actions
+2. **IndexNow**: Job creation interface for sitemaps and manual URLs
+3. **Manage Jobs**: Paginated job listing with filtering, searching, and bulk operations
+4. **Job Details**: Individual job monitoring with URL-level status tracking
+5. **Settings**: User preferences, notification settings, and system configuration
+
+### Deployment Strategy
+- **Build System**: Next.js built-in build system (NO Vite)
+- **Development**: Next.js dev server with hot reload
+- **Production**: Next.js production build with static optimization
+- **Hosting**: Designed for Replit deployment with proper environment variable configuration
+- **Database**: Supabase cloud service for scalability and reliability
 
 ## Recent Changes  
 
@@ -398,545 +1001,6 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 - ✅ Ensured consistent authentication across all admin endpoints (dashboard, users, user detail, password reset, suspend)
 - ✅ Admin dashboard now fully functional with working user management features
 - ✅ Migration from Replit Agent to standard Replit environment completed successfully
-
-## CRITICAL PROJECT CAUTIONS - ALWAYS REMEMBER
-
-⚠️ **ARCHITECTURE REQUIREMENTS:**
-1. **Next.js ONLY** - This project uses Next.js with NO VITE. Never suggest or implement Vite migration.
-2. **Supabase Self-Hosted** - Database is hosted at https://base.indexnow.studio
-   - Do NOT install PostgreSQL locally
-   - Do NOT push database changes locally
-   - For any database updates/changes/additions/removals, provide SQL queries for user to run in Supabase SQL Editor
-   - You must be follow this prefix "indb_{collections}_{table-name}" "collections" is like same collections, for example like "security" collection which have tables "indb_security_event", "indb_security_log" and so-on.
-3. **Project Color Scheme ONLY** - Use ONLY this project's color scheme:
-   - Background: #FFFFFF (Pure White), #F7F9FC (Light Gray)
-   - Primary: #1A1A1A (Graphite), #2C2C2E (Charcoal)
-   - Accent: #3D8BFF (Soft Blue)
-   - Text: #6C757D (Slate Gray)
-   - Success: #4BB543 (Mint Green)
-   - Warning: #F0A202 (Amber)
-   - Error: #E63946 (Rose Red)
-   - Borders: #E0E6ED (Cool Gray)
-   - Button Colors: #1C2331, #0d1b2a, #22333b, #1E1E1E
-   - If user sends reference images, they are for layout/UI inspiration ONLY - still use project colors
-
-## Current Database Schema (Supabase Tables)
-If an updates affectig the database and RLS. You need to provide the SQL Query for me to run in Supabase SQL Editor. Keep in mind that to make new tables, you must be follow this prefix "indb_{collections}_{table-name}" "collections" is like same collections, for example like "security" collection which have tables "indb_security_event", "indb_security_log" and so-on.
-
-All tables use `indb_` prefix and are located at https://base.indexnow.studio:
-
-| table_name                     | column_name             | data_type                | is_nullable |
-| ------------------------------ | ----------------------- | ------------------------ | ----------- |
-| admin_dashboard_stats          | total_users             | bigint                   | YES         |
-| admin_dashboard_stats          | regular_users           | bigint                   | YES         |
-| admin_dashboard_stats          | admin_users             | bigint                   | YES         |
-| admin_dashboard_stats          | super_admin_users       | bigint                   | YES         |
-| admin_dashboard_stats          | total_jobs              | bigint                   | YES         |
-| admin_dashboard_stats          | active_jobs             | bigint                   | YES         |
-| admin_dashboard_stats          | completed_jobs          | bigint                   | YES         |
-| admin_dashboard_stats          | failed_jobs             | bigint                   | YES         |
-| admin_dashboard_stats          | total_service_accounts  | bigint                   | YES         |
-| admin_dashboard_stats          | active_service_accounts | bigint                   | YES         |
-| admin_dashboard_stats          | daily_api_requests      | bigint                   | YES         |
-| admin_dashboard_stats          | published_posts         | bigint                   | YES         |
-| admin_dashboard_stats          | published_pages         | bigint                   | YES         |
-| indb_analytics_daily_stats     | id                      | uuid                     | NO          |
-| indb_analytics_daily_stats     | user_id                 | uuid                     | NO          |
-| indb_analytics_daily_stats     | date                    | date                     | NO          |
-| indb_analytics_daily_stats     | total_jobs              | integer                  | YES         |
-| indb_analytics_daily_stats     | completed_jobs          | integer                  | YES         |
-| indb_analytics_daily_stats     | failed_jobs             | integer                  | YES         |
-| indb_analytics_daily_stats     | total_urls_submitted    | integer                  | YES         |
-| indb_analytics_daily_stats     | total_urls_indexed      | integer                  | YES         |
-| indb_analytics_daily_stats     | total_urls_failed       | integer                  | YES         |
-| indb_analytics_daily_stats     | quota_usage             | integer                  | YES         |
-| indb_analytics_daily_stats     | created_at              | timestamp with time zone | YES         |
-| indb_analytics_daily_stats     | updated_at              | timestamp with time zone | YES         |
-| indb_analytics_error_stats     | error_date              | date                     | YES         |
-| indb_analytics_error_stats     | user_id                 | uuid                     | YES         |
-| indb_analytics_error_stats     | error_type              | text                     | YES         |
-| indb_analytics_error_stats     | severity                | text                     | YES         |
-| indb_analytics_error_stats     | error_count             | bigint                   | YES         |
-| indb_analytics_error_stats     | affected_endpoints      | bigint                   | YES         |
-| indb_analytics_error_stats     | last_occurrence         | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | id                      | uuid                     | NO          |
-| indb_auth_user_profiles        | user_id                 | uuid                     | NO          |
-| indb_auth_user_profiles        | full_name               | text                     | YES         |
-| indb_auth_user_profiles        | role                    | text                     | YES         |
-| indb_auth_user_profiles        | email_notifications     | boolean                  | YES         |
-| indb_auth_user_profiles        | created_at              | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | updated_at              | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | phone_number            | text                     | YES         |
-| indb_auth_user_profiles        | package_id              | uuid                     | YES         |
-| indb_auth_user_profiles        | subscribed_at           | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | expires_at              | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | daily_quota_used        | integer                  | YES         |
-| indb_auth_user_profiles        | daily_quota_reset_date  | date                     | YES         |
-| indb_auth_user_settings        | id                      | uuid                     | NO          |
-| indb_auth_user_settings        | user_id                 | uuid                     | NO          |
-| indb_auth_user_settings        | timeout_duration        | integer                  | YES         |
-| indb_auth_user_settings        | retry_attempts          | integer                  | YES         |
-| indb_auth_user_settings        | email_job_completion    | boolean                  | YES         |
-| indb_auth_user_settings        | email_job_failure       | boolean                  | YES         |
-| indb_auth_user_settings        | email_quota_alerts      | boolean                  | YES         |
-| indb_auth_user_settings        | created_at              | timestamp with time zone | YES         |
-| indb_auth_user_settings        | updated_at              | timestamp with time zone | YES         |
-| indb_auth_user_settings        | default_schedule        | text                     | YES         |
-| indb_auth_user_settings        | email_daily_report      | boolean                  | YES         |
-| indb_cms_pages                 | id                      | uuid                     | NO          |
-| indb_cms_pages                 | title                   | text                     | NO          |
-| indb_cms_pages                 | slug                    | text                     | NO          |
-| indb_cms_pages                 | content                 | text                     | YES         |
-| indb_cms_pages                 | template                | text                     | YES         |
-| indb_cms_pages                 | featured_image_url      | text                     | YES         |
-| indb_cms_pages                 | author_id               | uuid                     | YES         |
-| indb_cms_pages                 | status                  | text                     | YES         |
-| indb_cms_pages                 | is_homepage             | boolean                  | YES         |
-| indb_cms_pages                 | meta_title              | text                     | YES         |
-| indb_cms_pages                 | meta_description        | text                     | YES         |
-| indb_cms_pages                 | custom_css              | text                     | YES         |
-| indb_cms_pages                 | custom_js               | text                     | YES         |
-| indb_cms_pages                 | published_at            | timestamp with time zone | YES         |
-| indb_cms_pages                 | created_at              | timestamp with time zone | YES         |
-| indb_cms_pages                 | updated_at              | timestamp with time zone | YES         |
-| indb_cms_posts                 | id                      | uuid                     | NO          |
-| indb_cms_posts                 | title                   | text                     | NO          |
-| indb_cms_posts                 | slug                    | text                     | NO          |
-| indb_cms_posts                 | content                 | text                     | YES         |
-| indb_cms_posts                 | excerpt                 | text                     | YES         |
-| indb_cms_posts                 | featured_image_url      | text                     | YES         |
-| indb_cms_posts                 | author_id               | uuid                     | YES         |
-| indb_cms_posts                 | status                  | text                     | YES         |
-| indb_cms_posts                 | post_type               | text                     | YES         |
-| indb_cms_posts                 | meta_title              | text                     | YES         |
-| indb_cms_posts                 | meta_description        | text                     | YES         |
-| indb_cms_posts                 | tags                    | jsonb                    | YES         |
-| indb_cms_posts                 | published_at            | timestamp with time zone | YES         |
-| indb_cms_posts                 | created_at              | timestamp with time zone | YES         |
-| indb_cms_posts                 | updated_at              | timestamp with time zone | YES         |
-| indb_error_analytics           | error_date              | date                     | YES         |
-| indb_error_analytics           | user_id                 | uuid                     | YES         |
-| indb_error_analytics           | error_type              | text                     | YES         |
-| indb_error_analytics           | severity                | text                     | YES         |
-| indb_error_analytics           | error_count             | bigint                   | YES         |
-| indb_error_analytics           | affected_endpoints      | bigint                   | YES         |
-| indb_error_analytics           | last_occurrence         | timestamp with time zone | YES         |
-| indb_google_quota_alerts       | id                      | uuid                     | NO          |
-| indb_google_quota_alerts       | service_account_id      | uuid                     | NO          |
-| indb_google_quota_alerts       | alert_type              | text                     | NO          |
-| indb_google_quota_alerts       | threshold_percentage    | integer                  | NO          |
-| indb_google_quota_alerts       | is_active               | boolean                  | YES         |
-| indb_google_quota_alerts       | last_triggered_at       | timestamp with time zone | YES         |
-| indb_google_quota_alerts       | created_at              | timestamp with time zone | YES         |
-| indb_google_quota_alerts       | updated_at              | timestamp with time zone | YES         |
-| indb_google_quota_usage        | id                      | uuid                     | NO          |
-| indb_google_quota_usage        | service_account_id      | uuid                     | NO          |
-| indb_google_quota_usage        | date                    | date                     | NO          |
-| indb_google_quota_usage        | requests_made           | integer                  | YES         |
-| indb_google_quota_usage        | requests_successful     | integer                  | YES         |
-| indb_google_quota_usage        | requests_failed         | integer                  | YES         |
-| indb_google_quota_usage        | last_request_at         | timestamp with time zone | YES         |
-| indb_google_quota_usage        | created_at              | timestamp with time zone | YES         |
-| indb_google_quota_usage        | updated_at              | timestamp with time zone | YES         |
-| indb_google_service_accounts   | id                      | uuid                     | NO          |
-| indb_google_service_accounts   | user_id                 | uuid                     | NO          |
-| indb_google_service_accounts   | name                    | text                     | NO          |
-| indb_google_service_accounts   | email                   | text                     | NO          |
-| indb_google_service_accounts   | encrypted_credentials   | text                     | NO          |
-| indb_google_service_accounts   | is_active               | boolean                  | YES         |
-| indb_google_service_accounts   | daily_quota_limit       | integer                  | YES         |
-| indb_google_service_accounts   | minute_quota_limit      | integer                  | YES         |
-| indb_google_service_accounts   | created_at              | timestamp with time zone | YES         |
-| indb_google_service_accounts   | updated_at              | timestamp with time zone | YES         |
-| indb_google_service_accounts   | encrypted_access_token  | text                     | YES         |
-| indb_google_service_accounts   | access_token_expires_at | timestamp with time zone | YES         |
-| indb_indexing_job_logs         | id                      | uuid                     | NO          |
-| indb_indexing_job_logs         | job_id                  | uuid                     | NO          |
-| indb_indexing_job_logs         | level                   | text                     | NO          |
-| indb_indexing_job_logs         | message                 | text                     | NO          |
-| indb_indexing_job_logs         | metadata                | jsonb                    | YES         |
-| indb_indexing_job_logs         | created_at              | timestamp with time zone | YES         |
-| indb_indexing_job_logs         | correlation_id          | uuid                     | YES         |
-| indb_indexing_job_logs         | error_severity          | text                     | YES         |
-| indb_indexing_jobs             | id                      | uuid                     | NO          |
-| indb_indexing_jobs             | user_id                 | uuid                     | NO          |
-| indb_indexing_jobs             | name                    | text                     | NO          |
-| indb_indexing_jobs             | type                    | text                     | NO          |
-| indb_indexing_jobs             | status                  | text                     | YES         |
-| indb_indexing_jobs             | schedule_type           | text                     | YES         |
-| indb_indexing_jobs             | cron_expression         | text                     | YES         |
-| indb_indexing_jobs             | source_data             | jsonb                    | YES         |
-| indb_indexing_jobs             | total_urls              | integer                  | YES         |
-| indb_indexing_jobs             | processed_urls          | integer                  | YES         |
-| indb_indexing_jobs             | successful_urls         | integer                  | YES         |
-| indb_indexing_jobs             | failed_urls             | integer                  | YES         |
-| indb_indexing_jobs             | progress_percentage     | numeric                  | YES         |
-| indb_indexing_jobs             | started_at              | timestamp with time zone | YES         |
-| indb_indexing_jobs             | completed_at            | timestamp with time zone | YES         |
-| indb_indexing_jobs             | next_run_at             | timestamp with time zone | YES         |
-| indb_indexing_jobs             | error_message           | text                     | YES         |
-| indb_indexing_jobs             | created_at              | timestamp with time zone | YES         |
-| indb_indexing_jobs             | updated_at              | timestamp with time zone | YES         |
-| indb_indexing_jobs             | locked_at               | timestamp with time zone | YES         |
-| indb_indexing_jobs             | locked_by               | text                     | YES         |
-| indb_indexing_url_submissions  | id                      | uuid                     | NO          |
-| indb_indexing_url_submissions  | job_id                  | uuid                     | NO          |
-| indb_indexing_url_submissions  | service_account_id      | uuid                     | YES         |
-| indb_indexing_url_submissions  | url                     | text                     | NO          |
-| indb_indexing_url_submissions  | status                  | text                     | YES         |
-| indb_indexing_url_submissions  | submitted_at            | timestamp with time zone | YES         |
-| indb_indexing_url_submissions  | indexed_at              | timestamp with time zone | YES         |
-| indb_indexing_url_submissions  | response_data           | jsonb                    | YES         |
-| indb_indexing_url_submissions  | error_message           | text                     | YES         |
-| indb_indexing_url_submissions  | retry_count             | integer                  | YES         |
-| indb_indexing_url_submissions  | created_at              | timestamp with time zone | YES         |
-| indb_indexing_url_submissions  | updated_at              | timestamp with time zone | YES         |
-| indb_notifications_dashboard   | id                      | uuid                     | NO          |
-| indb_notifications_dashboard   | user_id                 | uuid                     | NO          |
-| indb_notifications_dashboard   | type                    | text                     | NO          |
-| indb_notifications_dashboard   | title                   | text                     | NO          |
-| indb_notifications_dashboard   | message                 | text                     | NO          |
-| indb_notifications_dashboard   | is_read                 | boolean                  | YES         |
-| indb_notifications_dashboard   | action_url              | text                     | YES         |
-| indb_notifications_dashboard   | metadata                | jsonb                    | YES         |
-| indb_notifications_dashboard   | expires_at              | timestamp with time zone | YES         |
-| indb_notifications_dashboard   | created_at              | timestamp with time zone | YES         |
-| indb_notifications_email_queue | id                      | uuid                     | NO          |
-| indb_notifications_email_queue | user_id                 | uuid                     | NO          |
-| indb_notifications_email_queue | template_type           | text                     | NO          |
-| indb_notifications_email_queue | to_email                | text                     | NO          |
-| indb_notifications_email_queue | subject                 | text                     | NO          |
-| indb_notifications_email_queue | html_content            | text                     | NO          |
-| indb_notifications_email_queue | status                  | text                     | YES         |
-| indb_notifications_email_queue | attempts                | integer                  | YES         |
-| indb_notifications_email_queue | sent_at                 | timestamp with time zone | YES         |
-| indb_notifications_email_queue | error_message           | text                     | YES         |
-| indb_notifications_email_queue | metadata                | jsonb                    | YES         |
-| indb_notifications_email_queue | created_at              | timestamp with time zone | YES         |
-| indb_notifications_email_queue | updated_at              | timestamp with time zone | YES         |
-| indb_payment_gateways          | id                      | uuid                     | NO          |
-| indb_payment_gateways          | name                    | text                     | NO          |
-| indb_payment_gateways          | slug                    | text                     | NO          |
-| indb_payment_gateways          | description             | text                     | YES         |
-| indb_payment_gateways          | is_active               | boolean                  | YES         |
-| indb_payment_gateways          | is_default              | boolean                  | YES         |
-| indb_payment_gateways          | configuration           | jsonb                    | YES         |
-| indb_payment_gateways          | api_credentials         | jsonb                    | YES         |
-| indb_payment_gateways          | created_at              | timestamp with time zone | YES         |
-| indb_payment_gateways          | updated_at              | timestamp with time zone | YES         |
-| indb_payment_packages          | id                      | uuid                     | NO          |
-| indb_payment_packages          | name                    | text                     | NO          |
-| indb_payment_packages          | slug                    | text                     | NO          |
-| indb_payment_packages          | description             | text                     | YES         |
-| indb_payment_packages          | price                   | numeric                  | NO          |
-| indb_payment_packages          | currency                | text                     | YES         |
-| indb_payment_packages          | billing_period          | text                     | YES         |
-| indb_payment_packages          | features                | jsonb                    | YES         |
-| indb_payment_packages          | quota_limits            | jsonb                    | YES         |
-| indb_payment_packages          | is_active               | boolean                  | YES         |
-| indb_payment_packages          | sort_order              | integer                  | YES         |
-| indb_payment_packages          | created_at              | timestamp with time zone | YES         |
-| indb_payment_packages          | updated_at              | timestamp with time zone | YES         |
-| indb_payment_packages          | is_popular              | boolean                  | YES         |
-| indb_payment_packages          | pricing_tiers           | jsonb                    | YES         |
-| indb_security_activity_logs    | id                      | uuid                     | NO          |
-| indb_security_activity_logs    | user_id                 | uuid                     | YES         |
-| indb_security_activity_logs    | event_type              | text                     | NO          |
-| indb_security_activity_logs    | action_description      | text                     | NO          |
-| indb_security_activity_logs    | target_type             | text                     | YES         |
-| indb_security_activity_logs    | target_id               | uuid                     | YES         |
-| indb_security_activity_logs    | ip_address              | inet                     | YES         |
-| indb_security_activity_logs    | user_agent              | text                     | YES         |
-| indb_security_activity_logs    | device_info             | jsonb                    | YES         |
-| indb_security_activity_logs    | location_data           | jsonb                    | YES         |
-| indb_security_activity_logs    | success                 | boolean                  | YES         |
-| indb_security_activity_logs    | error_message           | text                     | YES         |
-| indb_security_activity_logs    | metadata                | jsonb                    | YES         |
-| indb_security_activity_logs    | created_at              | timestamp with time zone | YES         |
-| indb_security_audit_logs       | id                      | uuid                     | NO          |
-| indb_security_audit_logs       | user_id                 | uuid                     | YES         |
-| indb_security_audit_logs       | event_type              | text                     | NO          |
-| indb_security_audit_logs       | description             | text                     | NO          |
-| indb_security_audit_logs       | ip_address              | inet                     | YES         |
-| indb_security_audit_logs       | user_agent              | text                     | YES         |
-| indb_security_audit_logs       | success                 | boolean                  | YES         |
-| indb_security_audit_logs       | metadata                | jsonb                    | YES         |
-| indb_security_audit_logs       | created_at              | timestamp with time zone | YES         |
-| indb_security_rate_limits      | id                      | uuid                     | NO          |
-| indb_security_rate_limits      | identifier              | text                     | NO          |
-| indb_security_rate_limits      | endpoint                | text                     | NO          |
-| indb_security_rate_limits      | requests_count          | integer                  | YES         |
-| indb_security_rate_limits      | window_start            | timestamp with time zone | YES         |
-| indb_security_rate_limits      | created_at              | timestamp with time zone | YES         |
-| indb_security_rate_limits      | updated_at              | timestamp with time zone | YES         |
-| indb_site_settings             | id                      | uuid                     | NO          |
-| indb_site_settings             | site_name               | text                     | NO          |
-| indb_site_settings             | site_description        | text                     | YES         |
-| indb_site_settings             | site_logo_url           | text                     | YES         |
-| indb_site_settings             | site_icon_url           | text                     | YES         |
-| indb_site_settings             | site_favicon_url        | text                     | YES         |
-| indb_site_settings             | contact_email           | text                     | YES         |
-| indb_site_settings             | support_email           | text                     | YES         |
-| indb_site_settings             | maintenance_mode        | boolean                  | YES         |
-| indb_site_settings             | registration_enabled    | boolean                  | YES         |
-| indb_site_settings             | created_at              | timestamp with time zone | YES         |
-| indb_site_settings             | updated_at              | timestamp with time zone | YES         |
-| indb_system_error_logs         | id                      | uuid                     | NO          |
-| indb_system_error_logs         | user_id                 | uuid                     | YES         |
-| indb_system_error_logs         | error_type              | text                     | NO          |
-| indb_system_error_logs         | severity                | text                     | NO          |
-| indb_system_error_logs         | message                 | text                     | NO          |
-| indb_system_error_logs         | user_message            | text                     | NO          |
-| indb_system_error_logs         | endpoint                | text                     | YES         |
-| indb_system_error_logs         | http_method             | text                     | YES         |
-| indb_system_error_logs         | status_code             | integer                  | YES         |
-| indb_system_error_logs         | metadata                | jsonb                    | YES         |
-| indb_system_error_logs         | stack_trace             | text                     | YES         |
-| indb_system_error_logs         | created_at              | timestamp with time zone | YES         |
-| indb_system_error_logs         | updated_at              | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | id                      | uuid                     | YES         |
-| recent_jobs_with_stats         | user_id                 | uuid                     | YES         |
-| recent_jobs_with_stats         | name                    | text                     | YES         |
-| recent_jobs_with_stats         | type                    | text                     | YES         |
-| recent_jobs_with_stats         | status                  | text                     | YES         |
-| recent_jobs_with_stats         | schedule_type           | text                     | YES         |
-| recent_jobs_with_stats         | cron_expression         | text                     | YES         |
-| recent_jobs_with_stats         | source_data             | jsonb                    | YES         |
-| recent_jobs_with_stats         | total_urls              | integer                  | YES         |
-| recent_jobs_with_stats         | processed_urls          | integer                  | YES         |
-| recent_jobs_with_stats         | successful_urls         | integer                  | YES         |
-| recent_jobs_with_stats         | failed_urls             | integer                  | YES         |
-| recent_jobs_with_stats         | progress_percentage     | numeric                  | YES         |
-| recent_jobs_with_stats         | started_at              | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | completed_at            | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | next_run_at             | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | error_message           | text                     | YES         |
-| recent_jobs_with_stats         | created_at              | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | updated_at              | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | locked_at               | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | locked_by               | text                     | YES         |
-| recent_jobs_with_stats         | submission_count        | bigint                   | YES         |
-| recent_jobs_with_stats         | successful_count        | bigint                   | YES         |
-| recent_jobs_with_stats         | failed_count            | bigint                   | YES         |
-| user_dashboard_stats           | user_id                 | uuid                     | YES         |
-| user_dashboard_stats           | total_urls_indexed      | bigint                   | YES         |
-| user_dashboard_stats           | active_jobs             | bigint                   | YES         |
-| user_dashboard_stats           | scheduled_jobs          | bigint                   | YES         |
-| user_dashboard_stats           | success_rate            | integer                  | YES         |
-| user_quota_summary             | user_id                 | uuid                     | YES         |
-| user_quota_summary             | total_quota_used        | bigint                   | YES         |
-| user_quota_summary             | service_account_count   | bigint                   | YES         |
-| user_quota_summary             | total_quota_limit       | bigint                   | YES         |
-| user_quota_summary             | package_name            | text                     | YES         |
-| user_quota_summary             | daily_quota_limit       | integer                  | YES         |
-| user_quota_summary             | service_accounts_limit  | integer                  | YES         |
-| user_quota_summary             | concurrent_jobs_limit   | integer                  | YES         |
-| user_quota_summary             | daily_quota_used        | integer                  | YES         |
-| user_quota_summary             | daily_quota_reset_date  | date                     | YES         |
-| user_quota_summary             | is_unlimited            | boolean                  | YES         |
-
-Button Colors: #1C2331 (primary), #0d1b2a, #22333b, #1E1E1E
-Background: Clean whites (#FFFFFF, #F7F9FC)
-Text: Black/dark colors (#1A1A1A, #2C2C2E, #6C757D)
-Project: IndexNow Pro inspired by RankMath WordPress plugin instant indexing functionality
-Build System: Next.js with built-in build system (NO Vite allowed)
-Authentication: Supabase Auth with JWT tokens and automatic session management
-
-## System Architecture
-
-### Overall Structure
-The application follows a Next.js App Router structure with Express server integration:
-- `app/` - Next.js App Router pages and layouts
-- `server/` - Express.js backend API integration for Google API calls
-- `shared/` - Common TypeScript types and schemas
-- `components/` - Reusable UI components
-- `lib/` - Utility functions and configurations
-- `attached_assets/` - Project assets and documentation
-
-### Frontend Architecture
-- **Framework**: Next.js with React 18 and TypeScript
-- **Build System**: Next.js built-in build system (NO Vite allowed)
-- **UI Framework**: Radix UI headless components with shadcn/ui styling system
-- **State Management**: TanStack React Query v5 for server state management and caching
-- **Routing**: Wouter for lightweight client-side routing
-- **Form Handling**: React Hook Form with Zod validation
-- **Styling**: Tailwind CSS with clean white backgrounds and PROPER dark palette accents (slate-900, stone-900, gray-800, neutral-800)
-- **Authentication**: Supabase Auth with JWT tokens and automatic session management
-
-### Backend Architecture
-- **Runtime**: Node.js 20+ with Express.js framework
-- **Language**: TypeScript with ES modules
-- **API Design**: RESTful API with comprehensive middleware architecture
-- **Database**: Supabase with type-safe database operations
-- **External Integrations**: Google Indexing API, Google Auth Library, XML parsing for sitemaps
-- **Job Processing**: Node-cron for scheduled job execution with WebSocket real-time updates
-- **Email System**: Nodemailer with custom HTML templates and SMTP configuration
-- **Security**: Multi-layered security with input validation, rate limiting, and audit logging
-
-## Key Components & Features
-
-### 1. User Management & Authentication
-- **Appwrite Authentication**: Secure JWT-based authentication with automatic token refresh
-- **User Profiles**: Full name, email, role assignment, and preference management
-- **Role System**: Three-tier role hierarchy (user, admin, super_admin) for future admin features
-- **Settings Management**: Granular control over email notifications, timeouts, and retry attempts
-
-### 2. Service Account Management
-- **JSON Upload & Validation**: Secure upload of Google service account JSON files
-- **Credential Encryption**: AES-256-CBC encryption for sensitive data storage
-- **Quota Tracking**: Daily (200 requests) and per-minute (60 requests) quota monitoring
-- **Load Balancing**: Automatic distribution of requests across multiple service accounts
-- **Token Caching**: JWT token caching with 5-minute expiry buffer for efficiency
-
-### 3. Indexing Job System
-- **Job Creation Methods**:
-  - Sitemap parsing with automatic URL extraction
-  - Manual URL list submission with batch processing
-- **Scheduling Options**: One-time, hourly, daily, weekly, monthly with cron expressions
-- **Status Tracking**: Pending, running, completed, failed, paused, cancelled states
-- **Progress Monitoring**: Real-time updates via WebSocket connections
-- **Bulk Operations**: Select and delete multiple jobs with confirmation dialogs
-
-### 4. Google API Integration
-- **Google Indexing API**: Direct integration with Google's URL submission service
-- **Service Account Authentication**: JWT-based authentication with automatic token refresh
-- **Error Handling**: Comprehensive error catching with retry logic and quota management
-- **Rate Limiting**: Respect for Google's API rate limits with intelligent queuing
-
-### 5. Email Notification System
-- **Professional Templates**: Modern, responsive email templates with IndexNow branding
-- **Notification Types**:
-  - Job completion with success/failure statistics
-  - Job failure notifications with error details
-  - Daily quota reports with usage analytics
-  - Quota alerts (warning, critical, exhausted levels)
-- **SMTP Configuration**: Flexible SMTP setup with TLS encryption
-
-### 6. Security Features
-- **Input Validation**: Comprehensive Zod schema validation for all inputs
-- **SQL Injection Prevention**: Parameterized queries and input sanitization
-- **Rate Limiting**: Per-user rate limiting to prevent abuse
-- **CORS Configuration**: Environment-based CORS with allowed origins
-- **Security Headers**: Comprehensive security headers for production deployment
-- **Audit Logging**: Detailed logging of all security-relevant events
-- **Role-based Authorization**: Middleware for role-based access control
-
-## Data Flow & Architecture
-
-### Database Schema (Appwrite Collections)
-The application uses a prefixed collection structure (`indb_*`) with core entities:
-
-#### Core Tables (Supabase)
-1. **indb_auth_user_profiles**: User accounts with roles, preferences, and settings
-2. **indb_google_service_accounts**: Google service account configurations with encrypted credentials
-3. **indb_indexing_jobs**: Job definitions with scheduling, status tracking, and progress metrics
-4. **indb_indexing_url_submissions**: Individual URL submission records with status and error tracking
-5. **indb_google_quota_usage**: Daily API quota tracking per service account
-6. **indb_google_quota_alerts**: Quota monitoring alerts with thresholds
-7. **indb_notifications_dashboard**: In-app notification system
-8. **indb_analytics_daily_stats**: Daily analytics and reporting data
-
-### User Journey Flow
-1. **Authentication**: User signs up/logs in via Supabase Auth
-2. **Service Account Setup**: Upload Google service account JSON files
-3. **Job Creation**: Create indexing jobs from sitemaps or manual URL lists
-4. **Processing**: System parses URLs and queues them for submission
-5. **Execution**: Jobs execute according to schedule with real-time updates
-6. **Monitoring**: Users monitor progress via dashboard and receive email notifications
-7. **Analytics**: System tracks quota usage and provides detailed reporting
-
-### API Request Flow
-1. **Authentication Middleware**: Validates JWT tokens and populates user context
-2. **Input Validation**: Validates request data against Zod schemas
-3. **Authorization**: Checks user permissions and ownership
-4. **Business Logic**: Executes core application functionality
-5. **Database Operations**: Type-safe database queries via Supabase client
-6. **External API Calls**: Google API integration with error handling
-7. **Response Formatting**: Consistent API response structure
-
-### Job Processing Flow
-1. **Job Creation**: Jobs stored in database with pending status
-2. **Scheduler Pickup**: Node-cron monitor detects pending jobs
-3. **URL Processing**: Sitemap parsing or manual URL list processing
-4. **Google API Submission**: Submit URLs to Google Indexing API with quota management
-5. **Real-time Updates**: WebSocket updates for progress tracking
-6. **Email Notifications**: Send completion/failure notifications
-
-## External Dependencies & Integrations
-
-### Core Services
-- **Supabase**: Backend-as-a-Service for database, authentication, and user management
-- **Google Indexing API**: Direct integration with Google's URL submission service
-- **Google Auth Library**: JWT authentication for Google services
-
-### Key Libraries
-- **Frontend**: React 18, Next.js, TanStack React Query v5, React Hook Form, Wouter
-- **Backend**: Express, Node-cron, Nodemailer, Google APIs client library
-- **UI**: Radix UI components, shadcn/ui styling, Tailwind CSS, Lucide React icons
-- **Validation**: Zod for comprehensive schema validation
-- **Utilities**: xml2js (sitemap parsing), date-fns, clsx, class-variance-authority, framer-motion
-- **Development**: TypeScript, tsx, esbuild
-
-### Google API Integration
-- **googleapis**: Official Google API client library
-- **google-auth-library**: JWT authentication for Google services
-- **Quota Management**: Daily (200 requests) and per-minute (60 requests) limits
-- **Error Handling**: Comprehensive error catching with retry logic
-
-## Environment Configuration
-
-### Required Environment Variables
-```bash
-# Supabase Configuration
-SUPABASE_URL=https://base.indexnow.studio
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzUzMDMwODAwLCJleHAiOjE5MTA3OTcyMDB9.druA2hNMG5tlToENwA6diLetpMm9GdJgaSRwi75iTW0
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NTMwMzA4MDAsImV4cCI6MTkxMDc5NzIwMH0.LIQX0iP6uE6PsrDCA7ia4utqKBWOTa6dRpq6AZJ5O7U
-
-# Next.js Frontend Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://base.indexnow.studio
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzUzMDMwODAwLCJleHAiOjE5MTA3OTcyMDB9.druA2hNMG5tlToENwA6diLetpMm9GdJgaSRwi75iTW0
-
-# API Configuration
-BACKEND_URL=http://localhost:3001
-API_BASE_URL=http://localhost:3001/api
-
-# Email Configuration (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=[email]
-SMTP_PASS=[app-password]
-SMTP_FROM_NAME=IndexNow Pro
-SMTP_FROM_EMAIL=[from-email]
-
-# Security
-ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
-ENCRYPTION_KEY=[32-character-key]
-JWT_SECRET=[jwt-secret-key]
-```
-
-### User Interface Design
-- **Main Color**: Clean white backgrounds (#FFFFFF)
-- **Accent Colors**: PROPER dark palette ONLY - slate-900/800, stone-900/800, gray-800/900, neutral-800/900 (NO bright colors like blue-500, green-500, purple-500, etc.)
-- **Typography**: Clean, readable fonts with proper hierarchy
-- **Layout**: Dashboard-style interface with collapsible left-aligned sidebar navigation
-- **Responsive Design**: Mobile-first approach with responsive breakpoints
-- **Theme**: Professional appearance optimized for SEO professionals
-
-### Key Pages Structure
-1. **Dashboard**: Overview statistics, recent jobs, quick actions
-2. **IndexNow**: Job creation interface for sitemaps and manual URLs
-3. **Manage Jobs**: Paginated job listing with filtering, searching, and bulk operations
-4. **Job Details**: Individual job monitoring with URL-level status tracking
-5. **Settings**: User preferences, notification settings, and system configuration
-
-### Deployment Strategy
-- **Build System**: Next.js built-in build system (NO Vite)
-- **Development**: Next.js dev server with hot reload
-- **Production**: Next.js production build with static optimization
-- **Hosting**: Designed for Replit deployment with proper environment variable configuration
-- **Database**: Supabase cloud service for scalability and reliability
-
-## Recent Changes
 
 ### 2025-01-25: CRITICAL FIX - Admin Authentication System Completely Resolved ✅
 - **✅ RESOLVED: Critical Admin Authentication Issue - FINAL SOLUTION**:
