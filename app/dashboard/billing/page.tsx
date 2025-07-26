@@ -535,6 +535,7 @@ export default function BillingPage() {
                   {(showDetails[pkg.id] || showComparePlans) && (
                     <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
                       <div className="space-y-3">
+                        {/* Standard Features */}
                         {pkg.features.map((feature, index) => (
                           <div key={index} className="flex items-center gap-2">
                             <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
@@ -543,16 +544,36 @@ export default function BillingPage() {
                             </span>
                           </div>
                         ))}
-                        <div className={`pt-2 border-t ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
-                          <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
-                            Daily URLs: {pkg.quota_limits?.daily_quota_limit?.toLocaleString() || 'Unlimited'}
-                          </p>
-                          <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
-                            Service Accounts: {pkg.quota_limits?.service_accounts_limit || 'Unlimited'}
-                          </p>
-                          <p className={`text-xs ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
-                            Concurrent Jobs: {pkg.quota_limits?.concurrent_jobs_limit || 'Unlimited'}
-                          </p>
+                        
+                        {/* Quota Features */}
+                        <div className="flex items-center gap-2">
+                          <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
+                          <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                            {pkg.quota_limits?.daily_quota_limit 
+                              ? `${pkg.quota_limits.daily_quota_limit.toLocaleString()} Daily URLs`
+                              : 'Unlimited Daily URLs'
+                            }
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
+                          <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                            {pkg.quota_limits?.service_accounts_limit 
+                              ? `Max ${pkg.quota_limits.service_accounts_limit} Service Account${pkg.quota_limits.service_accounts_limit > 1 ? 's' : ''}`
+                              : 'Unlimited Service Accounts'
+                            }
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
+                          <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                            {pkg.quota_limits?.concurrent_jobs_limit 
+                              ? `${pkg.quota_limits.concurrent_jobs_limit} Concurrent Job${pkg.quota_limits.concurrent_jobs_limit > 1 ? 's' : ''}`
+                              : 'Unlimited Concurrent Jobs'
+                            }
+                          </span>
                         </div>
                       </div>
                     </div>
