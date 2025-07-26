@@ -93,9 +93,9 @@ export default function AdminOrdersPage() {
   
   // Filters
   const [currentPage, setCurrentPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [customerSearch, setCustomerSearch] = useState<string>('')
-  const [packageFilter, setPackageFilter] = useState<string>('')
+  const [packageFilter, setPackageFilter] = useState<string>('all')
   
   const router = useRouter()
   const { addToast } = useToast()
@@ -119,9 +119,9 @@ export default function AdminOrdersPage() {
         limit: '25'
       })
 
-      if (statusFilter) params.append('status', statusFilter)
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter)
       if (customerSearch) params.append('customer', customerSearch)
-      if (packageFilter) params.append('package_id', packageFilter)
+      if (packageFilter && packageFilter !== 'all') params.append('package_id', packageFilter)
 
       const response = await fetch(`/api/admin/orders?${params}`, {
         headers: {
@@ -285,7 +285,7 @@ export default function AdminOrdersPage() {
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="proof_uploaded">Proof Uploaded</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
@@ -311,7 +311,7 @@ export default function AdminOrdersPage() {
                   <SelectValue placeholder="All packages" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All packages</SelectItem>
+                  <SelectItem value="all">All packages</SelectItem>
                   {/* Add package options dynamically */}
                 </SelectContent>
               </Select>
@@ -320,9 +320,9 @@ export default function AdminOrdersPage() {
             <div className="flex items-end">
               <Button 
                 onClick={() => {
-                  setStatusFilter('')
+                  setStatusFilter('all')
                   setCustomerSearch('')
-                  setPackageFilter('')
+                  setPackageFilter('all')
                   setCurrentPage(1)
                 }}
                 variant="outline"
