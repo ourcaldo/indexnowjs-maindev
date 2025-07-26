@@ -1,44 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import nodemailer from 'nodemailer'
+import { authService } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-interface CheckoutRequest {
-  package_id: string
-  billing_period: string
-  payment_gateway_id: string
-  customer_info: {
-    first_name: string
-    last_name: string
-    email: string
-    phone: string
-    address: string
-    city: string
-    state: string
-    zip_code: string
-    country: string
-    description?: string
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const body: CheckoutRequest = await request.json()
-    const { package_id, billing_period, payment_gateway_id, customer_info } = body
-
-    // Validate required fields
-    if (!package_id || !billing_period || !payment_gateway_id || !customer_info.email) {
-      return NextResponse.json({
-        success: false,
-        message: 'Missing required fields'
-      }, { status: 400 })
+    // Get authenticated user
+    const user = await authService.getCurrentUser()
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: 'Authentication required' },
+        { status: 401 }
+      )
     }
 
-    // Fetch package details
+    const body = await request.json()
+    const { package_id, billing_period, customer_info, payment_method } = body
+
+    if (!package_id || !billing_period || !customer_info || !payment_method) {
+      return NextResponse.json(
+        { success: false, message: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    // Get package details
     const { data: packageData, error: packageError } = await supabase
       .from('indb_payment_packages')
       .select('*')
@@ -46,261 +36,217 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (packageError || !packageData) {
-      return NextResponse.json({
-        success: false,
-        message: 'Package not found'
-      }, { status: 404 })
+      return NextResponse.json(
+        { success: false, message: 'Package not found' },
+        { status: 404 }
+      )
     }
 
-    // Fetch payment gateway details
+    // Get payment gateway details
     const { data: gatewayData, error: gatewayError } = await supabase
       .from('indb_payment_gateways')
       .select('*')
-      .eq('id', payment_gateway_id)
+      .eq('id', payment_method)
       .single()
 
     if (gatewayError || !gatewayData) {
-      return NextResponse.json({
-        success: false,
-        message: 'Payment gateway not found'
-      }, { status: 404 })
+      return NextResponse.json(
+        { success: false, message: 'Payment method not found' },
+        { status: 404 }
+      )
     }
 
-    // Calculate pricing
-    let finalPrice = packageData.price
-    let discount = 0
-    
-    if (packageData.pricing_tiers && packageData.pricing_tiers[billing_period]) {
-      const tier = packageData.pricing_tiers[billing_period]
-      finalPrice = tier.promo_price || tier.regular_price
-      if (tier.promo_price) {
-        discount = Math.round(((tier.regular_price - tier.promo_price) / tier.regular_price) * 100)
-      }
-    }
+    // Calculate price based on billing period
+    const pricingTiers = packageData.pricing_tiers || {}
+    const regularPrice = pricingTiers.regular?.[billing_period] || packageData.price
+    const promoPrice = pricingTiers.promo?.[billing_period]
+    const finalPrice = promoPrice || regularPrice
 
-    // Create order record (you might want to create an orders table)
-    const orderData = {
-      id: crypto.randomUUID(),
-      package_id,
-      billing_period,
-      payment_gateway_id,
-      customer_info,
-      amount: finalPrice,
-      currency: packageData.currency || 'IDR',
-      status: 'pending',
-      created_at: new Date().toISOString()
+    // Generate unique order ID
+    const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+
+    // Create transaction record
+    const { data: transaction, error: transactionError } = await supabase
+      .from('indb_billing_transactions')
+      .insert({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        package_id: package_id,
+        order_id: orderId,
+        transaction_type: 'subscription',
+        amount: finalPrice,
+        currency: packageData.currency || 'IDR',
+        billing_period: billing_period,
+        transaction_status: 'pending',
+        payment_method: payment_method,
+        customer_info: customer_info,
+        gateway_info: {
+          gateway_id: gatewayData.id,
+          gateway_name: gatewayData.name,
+          configuration: gatewayData.configuration
+        },
+        metadata: {
+          package_name: packageData.name,
+          package_description: packageData.description,
+          original_price: regularPrice,
+          promo_price: promoPrice,
+          discount_applied: promoPrice ? (regularPrice - promoPrice) : 0
+        }
+      })
+      .select()
+      .single()
+
+    if (transactionError) {
+      console.error('Transaction creation error:', transactionError)
+      return NextResponse.json(
+        { success: false, message: 'Failed to create transaction' },
+        { status: 500 }
+      )
     }
 
     // Send email notification
     try {
-      await sendOrderConfirmationEmail({
-        customer_info,
+      await sendCheckoutEmailNotification({
+        user: user,
+        transaction: transaction,
         package: packageData,
-        billing_period,
-        amount: finalPrice,
-        currency: packageData.currency || 'IDR',
-        discount,
-        payment_gateway: gatewayData,
-        order_id: orderData.id
+        gateway: gatewayData,
+        customer_info: customer_info
       })
     } catch (emailError) {
-      console.error('Email sending failed:', emailError)
-      // Continue with the process even if email fails
+      console.error('Email notification error:', emailError)
+      // Don't fail the checkout for email errors
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Order submitted successfully',
-      order_id: orderData.id
+      message: 'Order created successfully',
+      data: {
+        order_id: orderId,
+        transaction_id: transaction.id,
+        amount: finalPrice,
+        currency: packageData.currency || 'IDR',
+        payment_instructions: gatewayData.configuration,
+        package_name: packageData.name
+      }
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Checkout API error:', error)
-    return NextResponse.json({
-      success: false,
-      message: 'Internal server error'
-    }, { status: 500 })
+    return NextResponse.json(
+      { success: false, message: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
-async function sendOrderConfirmationEmail({
-  customer_info,
-  package: pkg,
-  billing_period,
-  amount,
-  currency,
-  discount,
-  payment_gateway,
-  order_id
-}: {
-  customer_info: any
-  package: any
-  billing_period: string
-  amount: number
-  currency: string
-  discount: number
-  payment_gateway: any
-  order_id: string
-}) {
-  // Create SMTP transporter
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  })
+async function sendCheckoutEmailNotification({ user, transaction, package: pkg, gateway, customer_info }: any) {
+  // Use existing SMTP configuration from .env
+  try {
+    const nodemailer = require('nodemailer')
+    
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn('SMTP configuration not complete, skipping email notification')
+      return
+    }
 
-  // Generate payment instructions based on gateway type
-  let paymentInstructions = ''
-  
-  if (payment_gateway.slug === 'bank_transfer' && payment_gateway.configuration) {
-    const config = payment_gateway.configuration
-    paymentInstructions = `
-      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h3 style="color: #1a1a1a; margin: 0 0 15px 0;">Bank Transfer Details</h3>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 8px 0; color: #6c757d; font-weight: 500;">Bank Name:</td>
-            <td style="padding: 8px 0; color: #1a1a1a; font-weight: 600;">${config.bank_name}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; color: #6c757d; font-weight: 500;">Account Name:</td>
-            <td style="padding: 8px 0; color: #1a1a1a; font-weight: 600;">${config.account_name}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; color: #6c757d; font-weight: 500;">Account Number:</td>
-            <td style="padding: 8px 0; color: #1a1a1a; font-weight: 600; font-family: monospace;">${config.account_number}</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px 0; color: #6c757d; font-weight: 500;">Amount:</td>
-            <td style="padding: 8px 0; color: #1a1a1a; font-weight: 600; font-size: 18px;">Rp ${amount.toLocaleString()}</td>
-          </tr>
-        </table>
-        <p style="color: #6c757d; font-size: 14px; margin: 15px 0 0 0;">
-          Please include <strong>Order ID: ${order_id}</strong> in the transfer description.
-        </p>
-      </div>
-    `
-  }
+    // Create transporter using existing SMTP settings
+    const transporter = nodemailer.createTransporter({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    })
 
-  const emailHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Order Confirmation - IndexNow Pro</title>
-    </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333;">
-      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <!-- Header -->
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #1a1a1a; font-size: 28px; margin: 0;">IndexNow Pro</h1>
-          <p style="color: #6c757d; margin: 5px 0 0 0;">Professional URL Indexing Service</p>
-        </div>
+    const bankConfig = gateway.configuration || {}
+    const formatCurrency = (amount: number) => {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount)
+    }
 
-        <!-- Order Confirmation -->
-        <div style="background: #ffffff; border: 1px solid #e0e6ed; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
-          <h2 style="color: #1a1a1a; font-size: 24px; margin: 0 0 10px 0;">Order Confirmation</h2>
-          <p style="color: #6c757d; margin: 0 0 20px 0;">
-            Thank you for upgrading to <strong>${pkg.name} Plan</strong>! Your order has been received and is being processed.
-          </p>
-
-          <!-- Order Details -->
-          <div style="background: #f7f9fc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1a1a1a; margin: 0 0 15px 0;">Order Details</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; color: #6c757d;">Order ID:</td>
-                <td style="padding: 8px 0; color: #1a1a1a; font-weight: 600; font-family: monospace;">${order_id}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #6c757d;">Plan:</td>
-                <td style="padding: 8px 0; color: #1a1a1a; font-weight: 600;">${pkg.name} Plan</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #6c757d;">Billing Period:</td>
-                <td style="padding: 8px 0; color: #1a1a1a; font-weight: 600; text-transform: capitalize;">${billing_period}</td>
-              </tr>
-              ${discount > 0 ? `
-              <tr>
-                <td style="padding: 8px 0; color: #6c757d;">Discount:</td>
-                <td style="padding: 8px 0; color: #4bb543; font-weight: 600;">${discount}% OFF</td>
-              </tr>
-              ` : ''}
-              <tr style="border-top: 1px solid #e0e6ed;">
-                <td style="padding: 15px 0 8px 0; color: #1a1a1a; font-weight: 600; font-size: 16px;">Total Amount:</td>
-                <td style="padding: 15px 0 8px 0; color: #1a1a1a; font-weight: 700; font-size: 18px;">Rp ${amount.toLocaleString()}</td>
-              </tr>
-            </table>
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Order Confirmation - IndexNow Pro</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #1A1A1A; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; background: #f9f9f9; }
+          .order-details { background: white; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .payment-info { background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #ffc107; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>IndexNow Pro</h1>
+            <h2>Order Confirmation</h2>
           </div>
-
-          <!-- Customer Information -->
-          <div style="background: #f7f9fc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1a1a1a; margin: 0 0 15px 0;">Customer Information</h3>
-            <p style="margin: 5px 0; color: #1a1a1a;"><strong>Name:</strong> ${customer_info.first_name} ${customer_info.last_name}</p>
-            <p style="margin: 5px 0; color: #1a1a1a;"><strong>Email:</strong> ${customer_info.email}</p>
-            <p style="margin: 5px 0; color: #1a1a1a;"><strong>Phone:</strong> ${customer_info.phone}</p>
-            <p style="margin: 5px 0; color: #1a1a1a;"><strong>Address:</strong> ${customer_info.address}, ${customer_info.city}, ${customer_info.state} ${customer_info.zip_code}, ${customer_info.country}</p>
-          </div>
-
-          <!-- Payment Instructions -->
-          <h3 style="color: #1a1a1a; margin: 30px 0 15px 0;">Payment Instructions</h3>
-          <p style="color: #6c757d; margin: 0 0 15px 0;">
-            Please complete your payment using the method below. Your subscription will be activated once payment is confirmed.
-          </p>
           
-          ${paymentInstructions}
-
-          <!-- Next Steps -->
-          <div style="background: #e8f4fd; border-left: 4px solid #3d8bff; padding: 20px; margin: 30px 0;">
-            <h4 style="color: #1a1a1a; margin: 0 0 10px 0;">What happens next?</h4>
-            <ol style="color: #6c757d; margin: 0; padding-left: 20px;">
-              <li style="margin: 5px 0;">Complete the payment using the instructions above</li>
-              <li style="margin: 5px 0;">Send payment confirmation to this email</li>
-              <li style="margin: 5px 0;">We'll verify and activate your subscription within 2-4 hours</li>
-              <li style="margin: 5px 0;">You'll receive an activation confirmation email</li>
-            </ol>
-          </div>
-
-          <!-- Features Reminder -->
-          <div style="margin: 30px 0;">
-            <h3 style="color: #1a1a1a; margin: 0 0 15px 0;">Your New Plan Features</h3>
-            <div style="display: grid; gap: 8px;">
-              ${pkg.features ? pkg.features.slice(0, 5).map((feature: string) => `
-                <div style="display: flex; align-items: center; color: #6c757d;">
-                  <span style="color: #4bb543; margin-right: 8px;">✓</span>
-                  ${feature}
-                </div>
-              `).join('') : ''}
+          <div class="content">
+            <p>Dear ${customer_info.first_name} ${customer_info.last_name},</p>
+            
+            <p>Thank you for your order! We've received your subscription request and are processing it.</p>
+            
+            <div class="order-details">
+              <h3>Order Details</h3>
+              <p><strong>Order ID:</strong> ${transaction.order_id}</p>
+              <p><strong>Package:</strong> ${pkg.name}</p>
+              <p><strong>Billing Period:</strong> ${transaction.billing_period}</p>
+              <p><strong>Amount:</strong> ${formatCurrency(transaction.amount)}</p>
+              <p><strong>Status:</strong> Pending Payment</p>
             </div>
+            
+            <div class="payment-info">
+              <h3>Payment Instructions</h3>
+              <p><strong>Payment Method:</strong> ${gateway.name}</p>
+              ${bankConfig.bank_name ? `
+                <p><strong>Bank:</strong> ${bankConfig.bank_name}</p>
+                <p><strong>Account Name:</strong> ${bankConfig.account_name}</p>
+                <p><strong>Account Number:</strong> ${bankConfig.account_number}</p>
+              ` : ''}
+              <p><strong>Amount to Pay:</strong> ${formatCurrency(transaction.amount)}</p>
+              <p>Please include your Order ID (${transaction.order_id}) in the payment reference.</p>
+            </div>
+            
+            <p>Once we receive your payment, we'll activate your subscription and send you a confirmation email.</p>
+            
+            <p>If you have any questions, please contact our support team.</p>
+            
+            <p>Best regards,<br>The IndexNow Pro Team</p>
+          </div>
+          
+          <div class="footer">
+            <p>This is an automated email. Please do not reply.</p>
           </div>
         </div>
+      </body>
+      </html>
+    `
 
-        <!-- Footer -->
-        <div style="text-align: center; padding: 20px 0; border-top: 1px solid #e0e6ed; margin-top: 30px;">
-          <p style="color: #6c757d; margin: 0 0 10px 0;">
-            Need help? Contact our support team at <a href="mailto:support@indexnow.studio" style="color: #3d8bff;">support@indexnow.studio</a>
-          </p>
-          <p style="color: #6c757d; font-size: 14px; margin: 0;">
-            © 2025 IndexNow Pro. All rights reserved.
-          </p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `
+    const mailOptions = {
+      from: `${process.env.SMTP_FROM_NAME || 'IndexNow Pro'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+      to: customer_info.email,
+      subject: `Order Confirmation - ${pkg.name} Subscription`,
+      html: emailHtml
+    }
 
-  // Send email
-  const mailOptions = {
-    from: `${process.env.SMTP_FROM_NAME} <${process.env.SMTP_FROM_EMAIL}>`,
-    to: customer_info.email,
-    subject: `Order Confirmation - ${pkg.name} Plan Upgrade`,
-    html: emailHTML,
+    await transporter.sendMail(mailOptions)
+    console.log('Checkout confirmation email sent successfully via SMTP')
+
+  } catch (error) {
+    console.error('Failed to send checkout email:', error)
+    throw error
   }
-
-  await transporter.sendMail(mailOptions)
 }
