@@ -687,12 +687,9 @@ export default function BillingPage() {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-left">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-[#6C757D]" />
-                      <span className="text-sm text-[#1A1A1A]">
-                        {formatDate(transaction.created_at)}
-                      </span>
-                    </div>
+                    <span className="text-sm text-[#1A1A1A]">
+                      {formatDate(transaction.created_at)}
+                    </span>
                   </td>
                   <td className="py-3 px-4 text-left">
                     <span className="text-sm text-[#1A1A1A]">
@@ -700,16 +697,13 @@ export default function BillingPage() {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      {getStatusIcon(transaction.transaction_status)}
-                      <span className={`text-xs px-2 py-1 rounded-full border ${
-                        transaction.transaction_status === 'pending' || transaction.transaction_status === 'proof_uploaded'
-                          ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
-                          : getStatusColor(transaction.transaction_status).bg + ' ' + getStatusColor(transaction.transaction_status).text + ' ' + getStatusColor(transaction.transaction_status).border
-                      }`}>
-                        {getStatusText(transaction.transaction_status)}
-                      </span>
-                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full border ${
+                      transaction.transaction_status === 'pending' || transaction.transaction_status === 'proof_uploaded'
+                        ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                        : getStatusColor(transaction.transaction_status).bg + ' ' + getStatusColor(transaction.transaction_status).text + ' ' + getStatusColor(transaction.transaction_status).border
+                    }`}>
+                      {getStatusText(transaction.transaction_status)}
+                    </span>
                   </td>
                 </tr>
               ))}
