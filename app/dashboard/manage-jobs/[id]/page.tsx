@@ -716,15 +716,8 @@ export default function JobDetailsPage() {
                         <div className="flex items-start gap-2">
                           <Globe className="h-4 w-4 text-[#1A1A1A] flex-shrink-0 mt-0.5" />
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm font-medium text-[#1A1A1A] leading-tight break-all">
-                              {submission.url.length > 80 ? (
-                                <>
-                                  <div>{submission.url.slice(0, 80)}</div>
-                                  <div className="text-[#6C757D]">{submission.url.slice(80)}</div>
-                                </>
-                              ) : (
-                                submission.url
-                              )}
+                            <div className="text-sm font-medium text-[#1A1A1A] leading-tight break-words">
+                              {submission.url}
                             </div>
                           </div>
                         </div>

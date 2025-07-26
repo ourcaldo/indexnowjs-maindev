@@ -17,6 +17,19 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 
 ## Recent Changes  
 
+**JOB DETAILS PAGE UI ENHANCEMENTS - FINAL FIXES (January 26, 2025)**
+- ✅ **PROPORTIONAL URL DISPLAY FIXED**: Enhanced URL submissions table for better space utilization
+  - **Natural URL Breaking**: Changed from `break-all` to `break-words` for professional URL display without awkward word splitting
+  - **Proportional Column Widths**: Set proper table column proportions (URL: 40%, Status: auto, Date: 16%, Error: 33%)
+  - **Eliminated Background Colors**: Removed excessive background colors from URL display for cleaner appearance
+- ✅ **SOURCE CARD SPACE OPTIMIZATION**: Fixed source section to use space more efficiently
+  - **Compact URL Display**: Show only 2 URLs with ellipsis for long URLs (50+ chars truncated)
+  - **"+X more URLs" Summary**: Display remaining URL count instead of individual boxes to save space
+  - **Clean Border Design**: Replaced background colors with subtle borders for better visual hierarchy
+- ✅ **DATE DISPLAY BUG FIXED**: Resolved "01/01/1970, 07:00:00" date issue for failed requests
+  - **Proper Date Validation**: Check for invalid dates and show "-" instead of epoch date
+  - **Enhanced Error Messages**: Truncate error messages to 100 characters with ellipsis for better table layout
+
 **UI/UX IMPROVEMENTS & ADMIN FIXES (January 26, 2025)**
 - ✅ **JOB DETAILS PAGE UI ENHANCEMENTS**: Fixed proportional layout issues in single job details
   - **Source Card Optimization**: Reduced space usage by showing only 2 URLs with proper ellipsis, then "+X more URLs" summary
