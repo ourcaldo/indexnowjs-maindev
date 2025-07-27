@@ -308,7 +308,7 @@ export default function AdminOrderDetailPage() {
   if (!orderData) return null
 
   const { order, activity_history } = orderData
-  const canUpdateStatus = order.transaction_status === 'proof_uploaded'
+  const canUpdateStatus = ['proof_uploaded', 'pending', 'failed'].includes(order.transaction_status)
 
   return (
     <div className="space-y-6">
@@ -572,6 +572,7 @@ export default function AdminOrderDetailPage() {
               <div className="text-center">
                 <div className="mb-4">
                   {getStatusBadge(order.transaction_status)}
+                  <p className="text-xs text-[#6C757D] mt-1">Status: {order.transaction_status}</p>
                 </div>
                 
                 {canUpdateStatus && (
