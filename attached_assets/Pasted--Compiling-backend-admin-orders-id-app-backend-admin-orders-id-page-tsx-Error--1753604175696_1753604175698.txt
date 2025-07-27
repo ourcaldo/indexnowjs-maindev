@@ -1,0 +1,74 @@
+ ○ Compiling /backend/admin/orders/[id] ...
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got 'open'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+     ·               ────
+ 769 │           <DialogContent>
+ 770 │             <DialogHeader>
+ 771 │               <DialogTitle>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got 'open'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+     ·               ────
+ 769 │           <DialogContent>
+ 770 │             <DialogHeader>
+ 771 │               <DialogTitle>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got 'open'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+     ·               ────
+ 769 │           <DialogContent>
+ 770 │             <DialogHeader>
+ 771 │               <DialogTitle>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got 'open'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+     ·               ────
+ 769 │           <DialogContent>
+ 770 │             <DialogHeader>
+ 771 │               <DialogTitle>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx
+ GET / 500 in 2966ms

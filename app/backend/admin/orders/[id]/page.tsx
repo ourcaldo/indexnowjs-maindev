@@ -766,67 +766,67 @@ export default function AdminOrderDetailPage() {
       </div>
 
       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
-              </DialogTitle>
-              <DialogDescription>
-                {statusAction === 'completed' 
-                  ? 'This will immediately activate the customer\'s subscription and grant access to their selected plan.'
-                  : 'This will mark the payment as failed and notify the customer.'
-                }
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4">
-              <div className="p-4 bg-[#F7F9FC] rounded-lg">
-                <h4 className="font-medium text-[#1A1A1A] mb-2">Order Summary</h4>
-                <div className="text-sm space-y-1">
-                  <p><span className="text-[#6C757D]">Order:</span> #{order.payment_reference}</p>
-                  <p><span className="text-[#6C757D]">Customer:</span> {order.user.email}</p>
-                  <p><span className="text-[#6C757D]">Package:</span> {order.package.name} ({order.metadata?.billing_period})</p>
-                  <p><span className="text-[#6C757D]">Amount:</span> {formatCurrency(order.amount, order.currency)}</p>
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">
-                  Notes (optional)
-                </label>
-                <Textarea
-                  placeholder={statusAction === 'completed' 
-                    ? 'Payment verified and approved...' 
-                    : 'Payment rejected due to...'
-                  }
-                  value={statusNotes}
-                  onChange={(e) => setStatusNotes(e.target.value)}
-                  className="border-[#E0E6ED]"
-                />
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
+            </DialogTitle>
+            <DialogDescription>
+              {statusAction === 'completed' 
+                ? 'This will immediately activate the customer\'s subscription and grant access to their selected plan.'
+                : 'This will mark the payment as failed and notify the customer.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-[#F7F9FC] rounded-lg">
+              <h4 className="font-medium text-[#1A1A1A] mb-2">Order Summary</h4>
+              <div className="text-sm space-y-1">
+                <p><span className="text-[#6C757D]">Order:</span> #{order.payment_reference}</p>
+                <p><span className="text-[#6C757D]">Customer:</span> {order.user.email}</p>
+                <p><span className="text-[#6C757D]">Package:</span> {order.package.name} ({order.metadata?.billing_period})</p>
+                <p><span className="text-[#6C757D]">Amount:</span> {formatCurrency(order.amount, order.currency)}</p>
               </div>
             </div>
-
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setStatusModalOpen(false)}
-                disabled={updating}
-                className="border-[#E0E6ED]"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleStatusUpdate}
-                disabled={updating}
-                className={statusAction === 'completed' 
-                  ? 'bg-[#4BB543] hover:bg-[#3DA53A] text-white' 
-                  : 'bg-[#E63946] hover:bg-[#CC2936] text-white'
+            
+            <div>
+              <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">
+                Notes (optional)
+              </label>
+              <Textarea
+                placeholder={statusAction === 'completed' 
+                  ? 'Payment verified and approved...' 
+                  : 'Payment rejected due to...'
                 }
-              >
-                {updating ? 'Processing...' : statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
+                value={statusNotes}
+                onChange={(e) => setStatusNotes(e.target.value)}
+                className="border-[#E0E6ED]"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setStatusModalOpen(false)}
+              disabled={updating}
+              className="border-[#E0E6ED]"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleStatusUpdate}
+              disabled={updating}
+              className={statusAction === 'completed' 
+                ? 'bg-[#4BB543] hover:bg-[#3DA53A] text-white' 
+                : 'bg-[#E63946] hover:bg-[#CC2936] text-white'
+              }
+            >
+              {updating ? 'Processing...' : statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   )
