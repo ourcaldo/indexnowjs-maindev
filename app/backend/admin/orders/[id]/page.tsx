@@ -765,20 +765,19 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {statusModalOpen && (
-        <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
-              </DialogTitle>
-              <DialogDescription>
-                {statusAction === 'completed' 
-                  ? 'This will immediately activate the customer\'s subscription and grant access to their selected plan.'
-                  : 'This will mark the payment as failed and notify the customer.'
-                }
-              </DialogDescription>
-            </DialogHeader>
+      <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
+            </DialogTitle>
+            <DialogDescription>
+              {statusAction === 'completed' 
+                ? 'This will immediately activate the customer\'s subscription and grant access to their selected plan.'
+                : 'This will mark the payment as failed and notify the customer.'
+              }
+            </DialogDescription>
+          </DialogHeader>
           
           <div className="space-y-4">
             <div className="p-4 bg-[#F7F9FC] rounded-lg">
@@ -826,10 +825,9 @@ export default function AdminOrderDetailPage() {
             >
               {updating ? 'Processing...' : statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
             </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
