@@ -30,13 +30,21 @@ export default function DashboardLayout({
     let isMounted = true
 
     const checkAuth = async () => {
+      // Skip auth check for login page
+      if (window.location.pathname === '/dashboard/login') {
+        if (isMounted) {
+          setLoading(false)
+        }
+        return
+      }
+
       try {
         const currentUser = await authService.getCurrentUser()
         
         if (!isMounted) return
 
         if (!currentUser) {
-          router.push('/')
+          router.push('/dashboard/login')
           return
         }
 
@@ -59,8 +67,13 @@ export default function DashboardLayout({
     const { data: { subscription } } = authService.onAuthStateChange((user) => {
       if (!isMounted) return
       
+      // Skip auth redirect for login page
+      if (window.location.pathname === '/dashboard/login') {
+        return
+      }
+      
       if (!user) {
-        router.push('/')
+        router.push('/dashboard/login')
       } else {
         setUser(user)
         setLoading(false)
@@ -72,6 +85,11 @@ export default function DashboardLayout({
       subscription?.unsubscribe()
     }
   }, [router])
+
+  // For login page, render without authentication checks
+  if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/login') {
+    return children
+  }
 
   if (loading) {
     return (
