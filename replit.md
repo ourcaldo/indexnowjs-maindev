@@ -626,6 +626,11 @@ JWT_SECRET=[jwt-secret-key]
   - **Solution**: Changed validation to allow updates from any status EXCEPT 'completed' or 'failed'
   - **Business Logic**: Admins can now update orders from pending, proof_uploaded, or any other status to completed/failed
   - **Error Message Updated**: Clear error message when trying to update already completed/failed orders
+- ✅ **ACTIVITY DISPLAY FIXED**: Resolved issue where activity box wasn't showing transaction history data
+  - **Root Cause**: API was only fetching from `indb_security_activity_logs` instead of the dedicated `indb_payment_transactions_history` table
+  - **Solution**: Updated API to fetch from both tables and merge transaction history with general activity logs
+  - **Enhanced Display**: Transaction history now shows status changes, admin notes, and user actions in chronological order
+  - **Timeline View**: Combined activity feed with timeline dots, status transitions, and role-based indicators
 - ✅ **ADMIN ORDER DETAIL PAGE LAYOUT REDESIGN & TRANSACTION HISTORY TABLE COMPLETE**
 - ✅ **COMPLETELY REDESIGNED ADMIN ORDER DETAIL PAGE**: Fixed all layout, organization, and color scheme issues
   - **Eliminated Masonry Layout Issues**: Replaced problematic 2-column uneven layout with properly organized stacked sections

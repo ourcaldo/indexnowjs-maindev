@@ -111,6 +111,29 @@ export async function GET(
       .order('created_at', { ascending: false })
       .limit(20)
 
+    // Get transaction history from the dedicated history table
+    const { data: transactionHistory, error: transactionHistoryError } = await supabaseAdmin
+      .from('indb_payment_transactions_history')
+      .select(`
+        id,
+        transaction_id,
+        old_status,
+        new_status,
+        action_type,
+        action_description,
+        changed_by,
+        changed_by_type,
+        notes,
+        metadata,
+        created_at,
+        user:indb_auth_user_profiles!changed_by(
+          full_name,
+          role
+        )
+      `)
+      .eq('transaction_id', orderId)
+      .order('created_at', { ascending: false })
+
     // Log admin activity
     try {
       await ActivityLogger.logAdminAction(
@@ -134,7 +157,8 @@ export async function GET(
     return NextResponse.json({
       success: true,
       order: orderWithEmail,
-      activity_history: activityHistory || []
+      activity_history: activityHistory || [],
+      transaction_history: transactionHistory || []
     })
 
   } catch (error: any) {

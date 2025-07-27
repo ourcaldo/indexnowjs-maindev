@@ -328,7 +328,7 @@ export default function AdminOrderDetailPage() {
 
   if (!orderData) return null
 
-  const { order, activity_history } = orderData
+  const { order, activity_history, transaction_history } = orderData
   const canUpdateStatus = ['proof_uploaded', 'pending'].includes(order.transaction_status)
 
   return (
@@ -516,39 +516,87 @@ export default function AdminOrderDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4 max-h-96 overflow-y-auto">
-                {activity_history.length > 0 ? (
-                  <div className="relative">
-                    {/* Timeline line */}
-                    <div className="absolute left-2 top-0 bottom-0 w-px bg-[#E0E6ED]"></div>
-                    
-                    {activity_history.map((activity, index) => (
-                      <div key={activity.id} className="relative flex items-start space-x-3 pb-4">
-                        {/* Timeline dot */}
-                        <div className="flex-shrink-0 w-4 h-4 bg-[#3D8BFF] rounded-full border-2 border-white relative z-10"></div>
-                        
-                        {/* Activity content */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[#1A1A1A]">{activity.action_description}</p>
-                          <div className="flex items-center space-x-1 text-xs text-[#6C757D] mt-1">
-                            <CalendarDays className="w-3 h-3" />
-                            <span>{formatRelativeTime(activity.created_at)}</span>
-                            {activity.user?.full_name && (
-                              <>
-                                <span>•</span>
-                                <span>{activity.user.full_name}</span>
-                              </>
+                {(() => {
+                  // Combine and sort all activity data
+                  const allActivity = [
+                    // Transaction history from dedicated table
+                    ...(transaction_history || []).map(th => ({
+                      id: th.id,
+                      type: 'transaction',
+                      event_type: th.action_type,
+                      action_description: th.action_description,
+                      created_at: th.created_at,
+                      user: th.user || { full_name: th.changed_by_type === 'admin' ? 'Admin User' : 'System', role: th.changed_by_type },
+                      metadata: { 
+                        old_status: th.old_status, 
+                        new_status: th.new_status,
+                        notes: th.notes,
+                        ...th.metadata 
+                      }
+                    })),
+                    // General activity history
+                    ...(activity_history || []).map(ah => ({
+                      id: ah.id,
+                      type: 'activity',
+                      event_type: ah.event_type,
+                      action_description: ah.action_description,
+                      created_at: ah.created_at,
+                      user: ah.user || { full_name: 'System', role: 'system' },
+                      metadata: ah.metadata
+                    }))
+                  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+                  return allActivity.length > 0 ? (
+                    <div className="relative">
+                      {/* Timeline line */}
+                      <div className="absolute left-2 top-0 bottom-0 w-px bg-[#E0E6ED]"></div>
+                      
+                      {allActivity.map((activity, index) => (
+                        <div key={activity.id} className="relative flex items-start space-x-3 pb-4">
+                          {/* Timeline dot */}
+                          <div className="flex-shrink-0 w-4 h-4 bg-[#3D8BFF] rounded-full border-2 border-white relative z-10"></div>
+                          
+                          {/* Activity content */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-[#1A1A1A]">{activity.action_description}</p>
+                            
+                            {/* Enhanced display for transaction history */}
+                            {activity.type === 'transaction' && activity.metadata?.old_status && (
+                              <p className="text-xs text-[#6C757D] mt-1">
+                                Status: {activity.metadata.old_status} → {activity.metadata.new_status}
+                              </p>
                             )}
+                            
+                            {activity.metadata?.notes && (
+                              <p className="text-xs text-[#6C757D] mt-1 italic">
+                                "{activity.metadata.notes}"
+                              </p>
+                            )}
+                            
+                            <div className="flex items-center space-x-1 text-xs text-[#6C757D] mt-1">
+                              <CalendarDays className="w-3 h-3" />
+                              <span>{formatRelativeTime(activity.created_at)}</span>
+                              {activity.user?.full_name && (
+                                <>
+                                  <span>•</span>
+                                  <span>{activity.user.full_name}</span>
+                                  {activity.user.role && (
+                                    <span className="text-[#3D8BFF]">({activity.user.role})</span>
+                                  )}
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Activity className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
-                    <p className="text-sm text-[#6C757D]">No activity yet</p>
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Activity className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
+                      <p className="text-sm text-[#6C757D]">No activity yet</p>
+                    </div>
+                  )
+                })()}
               </div>
             </CardContent>
           </Card>
