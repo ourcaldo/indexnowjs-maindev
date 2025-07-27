@@ -44,7 +44,7 @@ export default function LandingPage() {
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
-  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<{[key: string]: string}>({})
+  const [globalBillingPeriod, setGlobalBillingPeriod] = useState('monthly')
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
 
   // Refs for sections
@@ -160,27 +160,13 @@ export default function LandingPage() {
     }).format(price)
   }
 
-  // Initialize billing periods when packages load
-  useEffect(() => {
-    if (packages.length > 0) {
-      const defaultPeriods: {[key: string]: string} = {}
-      packages.forEach(pkg => {
-        if (pkg.pricing_tiers && pkg.pricing_tiers.length > 0) {
-          defaultPeriods[pkg.id] = pkg.pricing_tiers[0].period
-        }
-      })
-      setSelectedBillingPeriod(defaultPeriods)
-    }
-  }, [packages])
-
-  // Get current price for a package based on selected billing period
+  // Get current price for a package based on global billing period
   const getCurrentPrice = (pkg: Package) => {
     if (!pkg.pricing_tiers || pkg.pricing_tiers.length === 0) {
       return { price: pkg.price, period: pkg.billing_period }
     }
     
-    const selectedPeriod = selectedBillingPeriod[pkg.id] || pkg.pricing_tiers[0].period
-    const tier = pkg.pricing_tiers.find(t => t.period === selectedPeriod)
+    const tier = pkg.pricing_tiers.find(t => t.period === globalBillingPeriod)
     
     if (tier) {
       return { 
@@ -191,6 +177,12 @@ export default function LandingPage() {
     }
     
     return { price: pkg.price, period: pkg.billing_period }
+  }
+
+  // Get available billing periods from any package that has pricing tiers
+  const getBillingPeriods = () => {
+    const packageWithTiers = packages.find(pkg => pkg.pricing_tiers && pkg.pricing_tiers.length > 0)
+    return packageWithTiers?.pricing_tiers || []
   }
 
   const handleAuthAction = () => {
@@ -360,17 +352,16 @@ export default function LandingPage() {
                 </h1>
                 
                 <p className="text-xl text-gray-300 leading-relaxed">
-                  While you're waiting 2-4 weeks for Google to discover your content, 
-                  your competitors are getting indexed in minutes and capturing your traffic.
+                  Get your content indexed in minutes, not weeks.
                 </p>
               </div>
 
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold text-white">
-                  Meet IndexNow Pro - Your Professional Indexing Guide
+                  IndexNow Pro - Professional URL Indexing
                 </h2>
                 <p className="text-gray-300">
-                  Join thousands who've improved their indexing speed by 95% with our proven system.
+                  The fastest way to get Google to index your content.
                 </p>
               </div>
 
@@ -481,8 +472,7 @@ export default function LandingPage() {
               The Complete Indexing Solution
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Manual indexing is broken. Google Search Console limits you to 200 URLs per day. 
-              Your content gets buried while competitors steal your rankings. Our proven 3-step system solves this:
+              While you're waiting 2-4 weeks for Google to discover your content, competitors are getting indexed in minutes and capturing your traffic. Manual indexing is broken. Google Search Console limits you to 200 URLs per day. Our proven 3-step system solves this:
             </p>
             <div className="grid md:grid-cols-3 gap-6 mt-8 max-w-4xl mx-auto">
               <div className="text-center">
@@ -589,6 +579,32 @@ export default function LandingPage() {
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Start getting your content indexed instantly. No setup fees, no hidden costs, cancel anytime.
             </p>
+            
+            {/* Global Billing Period Selector */}
+            {getBillingPeriods().length > 0 && (
+              <div className="flex justify-center mb-8">
+                <div className="bg-white/5 backdrop-blur-sm rounded-full p-2 border border-white/10">
+                  {getBillingPeriods().map((tier) => (
+                    <button
+                      key={tier.period}
+                      onClick={() => setGlobalBillingPeriod(tier.period)}
+                      className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                        globalBillingPeriod === tier.period
+                          ? 'bg-white text-black'
+                          : 'text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {tier.period_label}
+                      {tier.promo_price < tier.regular_price && (
+                        <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                          Save {Math.round((1 - tier.promo_price / tier.regular_price) * 100)}%
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -617,23 +633,6 @@ export default function LandingPage() {
                     <h3 className="text-2xl font-bold mb-3 text-white">{pkg.name}</h3>
                     <p className="text-gray-300 mb-6 leading-relaxed">{pkg.description}</p>
                     
-                    {/* Billing Period Selector */}
-                    {pkg.pricing_tiers && pkg.pricing_tiers.length > 0 && (
-                      <div className="mb-4">
-                        <select 
-                          value={selectedBillingPeriod[pkg.id] || pkg.pricing_tiers[0].period}
-                          onChange={(e) => setSelectedBillingPeriod(prev => ({...prev, [pkg.id]: e.target.value}))}
-                          className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-white/40"
-                        >
-                          {pkg.pricing_tiers.map(tier => (
-                            <option key={tier.period} value={tier.period} className="bg-black text-white">
-                              {tier.period_label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    
                     <div className="mb-6">
                       <div className="flex items-center justify-center space-x-2">
                         <span className="text-5xl font-bold text-white">
@@ -645,9 +644,6 @@ export default function LandingPage() {
                           </span>
                         )}
                       </div>
-                      {pkg.price > 0 && (
-                        <span className="text-gray-400 text-lg">/{currentPrice.period}</span>
-                      )}
                     </div>
                   </div>
 
