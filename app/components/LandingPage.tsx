@@ -6,6 +6,13 @@ import { ChevronUp, Menu, X, BarChart3, Zap, Shield, Users, ArrowRight, CheckCir
 import DashboardPreview from './DashboardPreview'
 import CompanyLogos from './CompanyLogos'
 
+interface PricingTier {
+  period: string
+  period_label: string
+  regular_price: number
+  promo_price: number
+}
+
 interface Package {
   id: string
   name: string
@@ -20,6 +27,7 @@ interface Package {
     concurrent_jobs_limit?: number
   }
   is_popular: boolean
+  pricing_tiers?: PricingTier[]
 }
 
 interface SiteSettings {
@@ -36,6 +44,8 @@ export default function LandingPage() {
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<{[key: string]: string}>({})
+  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
 
   // Refs for sections
   const heroRef = useRef<HTMLElement>(null)
@@ -150,6 +160,39 @@ export default function LandingPage() {
     }).format(price)
   }
 
+  // Initialize billing periods when packages load
+  useEffect(() => {
+    if (packages.length > 0) {
+      const defaultPeriods: {[key: string]: string} = {}
+      packages.forEach(pkg => {
+        if (pkg.pricing_tiers && pkg.pricing_tiers.length > 0) {
+          defaultPeriods[pkg.id] = pkg.pricing_tiers[0].period
+        }
+      })
+      setSelectedBillingPeriod(defaultPeriods)
+    }
+  }, [packages])
+
+  // Get current price for a package based on selected billing period
+  const getCurrentPrice = (pkg: Package) => {
+    if (!pkg.pricing_tiers || pkg.pricing_tiers.length === 0) {
+      return { price: pkg.price, period: pkg.billing_period }
+    }
+    
+    const selectedPeriod = selectedBillingPeriod[pkg.id] || pkg.pricing_tiers[0].period
+    const tier = pkg.pricing_tiers.find(t => t.period === selectedPeriod)
+    
+    if (tier) {
+      return { 
+        price: tier.promo_price || tier.regular_price, 
+        period: tier.period_label,
+        originalPrice: tier.regular_price !== tier.promo_price ? tier.regular_price : null
+      }
+    }
+    
+    return { price: pkg.price, period: pkg.billing_period }
+  }
+
   const handleAuthAction = () => {
     if (user) {
       window.location.href = '/dashboard'
@@ -168,12 +211,20 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Elegant background effects */}
+      {/* Black glossy background with subtle patterns */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"></div>
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-white/[0.01] to-transparent rounded-full"></div>
+        <div className="absolute inset-0 bg-black"></div>
+        {/* Glossy gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90"></div>
+        {/* Subtle dot pattern */}
+        <div className="absolute inset-0 opacity-[0.015]" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+          backgroundSize: '50px 50px'
+        }}></div>
+        {/* Glossy light effects */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+        <div className="absolute top-0 left-1/3 w-96 h-96 bg-white/[0.008] rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-white/[0.008] rounded-full blur-3xl"></div>
       </div>
 
       {/* Header */}
@@ -312,11 +363,6 @@ export default function LandingPage() {
                   While you're waiting 2-4 weeks for Google to discover your content, 
                   your competitors are getting indexed in minutes and capturing your traffic.
                 </p>
-                
-                <p className="text-lg text-gray-400">
-                  Manual indexing is broken. Google Search Console limits you to 200 URLs per day. 
-                  Your content gets buried while competitors steal your rankings.
-                </p>
               </div>
 
               <div className="space-y-4">
@@ -324,22 +370,8 @@ export default function LandingPage() {
                   Meet IndexNow Pro - Your Professional Indexing Guide
                 </h2>
                 <p className="text-gray-300">
-                  Join thousands who've improved their indexing speed by 95% with our proven 3-step plan:
+                  Join thousands who've improved their indexing speed by 95% with our proven system.
                 </p>
-                <div className="space-y-2 text-sm text-gray-400">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-xs font-bold">1</div>
-                    <span>Connect your Google Search Console</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-xs font-bold">2</div>
-                    <span>Submit URLs in bulk or schedule automatic submissions</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-xs font-bold">3</div>
-                    <span>Monitor real-time indexing progress and success rates</span>
-                  </div>
-                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -358,9 +390,8 @@ export default function LandingPage() {
               </div>
 
               <div className="pt-4 border-t border-white/10">
-                <p className="text-sm text-gray-500 mb-2">Trusted by industry leaders</p>
-                <p className="text-xs text-gray-600">
-                  Don't let slow indexing hurt your search rankings. Join professionals who've improved traffic by 340%.
+                <p className="text-sm text-gray-500">
+                  Trusted by industry leaders • 98.7% success rate • 95% faster indexing
                 </p>
               </div>
             </div>
@@ -447,11 +478,35 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Professional Features That Actually Work
+              The Complete Indexing Solution
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Built for SEO professionals who need reliable, scalable indexing automation without the technical headaches.
+              Manual indexing is broken. Google Search Console limits you to 200 URLs per day. 
+              Your content gets buried while competitors steal your rankings. Our proven 3-step system solves this:
             </p>
+            <div className="grid md:grid-cols-3 gap-6 mt-8 max-w-4xl mx-auto">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-lg font-bold">1</span>
+                </div>
+                <h3 className="font-semibold mb-2">Connect Google</h3>
+                <p className="text-sm text-gray-400">Secure API integration</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-lg font-bold">2</span>
+                </div>
+                <h3 className="font-semibold mb-2">Submit URLs</h3>
+                <p className="text-sm text-gray-400">Bulk or scheduled indexing</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-lg font-bold">3</span>
+                </div>
+                <h3 className="font-semibold mb-2">Get Results</h3>
+                <p className="text-sm text-gray-400">Real-time progress tracking</p>
+              </div>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -537,65 +592,94 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {packages.map((pkg) => (
-              <div
-                key={pkg.id}
-                className={`relative rounded-3xl p-8 border-2 transition-all duration-300 hover:scale-105 ${
-                  pkg.is_popular 
-                    ? 'border-white bg-white/10 backdrop-blur-sm shadow-2xl' 
-                    : 'border-white/20 bg-white/5 backdrop-blur-sm hover:border-white/40'
-                }`}
-              >
-                {pkg.is_popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-white text-black px-6 py-2 rounded-full text-sm font-semibold flex items-center space-x-1">
-                      <Star className="w-4 h-4" />
-                      <span>Most Popular</span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold mb-3 text-white">{pkg.name}</h3>
-                  <p className="text-gray-300 mb-6 leading-relaxed">{pkg.description}</p>
-                  <div className="mb-6">
-                    <span className="text-5xl font-bold text-white">
-                      {pkg.price === 0 ? 'Free' : formatPrice(pkg.price)}
-                    </span>
-                    {pkg.price > 0 && (
-                      <span className="text-gray-400 text-lg">/{pkg.billing_period}</span>
-                    )}
-                  </div>
-                </div>
-
-                <ul className="space-y-4 mb-8">
-                  {pkg.features && pkg.features.length > 0 ? (
-                    pkg.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
-                        <span className="text-gray-300 leading-relaxed">{feature}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
-                      <span className="text-gray-300">Features loading...</span>
-                    </li>
-                  )}
-                </ul>
-
-                <button
-                  onClick={handleGetStarted}
-                  className={`w-full py-4 px-6 rounded-full font-semibold text-lg transition-all duration-300 ${
-                    pkg.is_popular
-                      ? 'bg-white text-black hover:bg-gray-100 shadow-lg'
-                      : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+            {packages.map((pkg) => {
+              const currentPrice = getCurrentPrice(pkg)
+              
+              return (
+                <div
+                  key={pkg.id}
+                  className={`relative rounded-3xl p-8 border-2 transition-all duration-300 hover:scale-105 flex flex-col h-full ${
+                    pkg.is_popular 
+                      ? 'border-white bg-white/10 backdrop-blur-sm shadow-2xl' 
+                      : 'border-white/20 bg-white/5 backdrop-blur-sm hover:border-white/40'
                   }`}
                 >
-                  {pkg.price === 0 ? 'Start Free' : 'Get Started'}
-                </button>
-              </div>
-            ))}
+                  {pkg.is_popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <div className="bg-white text-black px-6 py-2 rounded-full text-sm font-semibold flex items-center space-x-1">
+                        <Star className="w-4 h-4" />
+                        <span>Most Popular</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold mb-3 text-white">{pkg.name}</h3>
+                    <p className="text-gray-300 mb-6 leading-relaxed">{pkg.description}</p>
+                    
+                    {/* Billing Period Selector */}
+                    {pkg.pricing_tiers && pkg.pricing_tiers.length > 0 && (
+                      <div className="mb-4">
+                        <select 
+                          value={selectedBillingPeriod[pkg.id] || pkg.pricing_tiers[0].period}
+                          onChange={(e) => setSelectedBillingPeriod(prev => ({...prev, [pkg.id]: e.target.value}))}
+                          className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-white/40"
+                        >
+                          {pkg.pricing_tiers.map(tier => (
+                            <option key={tier.period} value={tier.period} className="bg-black text-white">
+                              {tier.period_label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    
+                    <div className="mb-6">
+                      <div className="flex items-center justify-center space-x-2">
+                        <span className="text-5xl font-bold text-white">
+                          {pkg.price === 0 ? 'Free' : formatPrice(currentPrice.price)}
+                        </span>
+                        {currentPrice.originalPrice && (
+                          <span className="text-2xl text-gray-500 line-through">
+                            {formatPrice(currentPrice.originalPrice)}
+                          </span>
+                        )}
+                      </div>
+                      {pkg.price > 0 && (
+                        <span className="text-gray-400 text-lg">/{currentPrice.period}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <ul className="space-y-4 mb-8 flex-grow">
+                    {pkg.features && pkg.features.length > 0 ? (
+                      pkg.features.map((feature, index) => (
+                        <li key={index} className="flex items-start">
+                          <CheckCircle className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
+                          <span className="text-gray-300 leading-relaxed">{feature}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="flex items-start">
+                        <CheckCircle className="w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0" />
+                        <span className="text-gray-300">Features loading...</span>
+                      </li>
+                    )}
+                  </ul>
+
+                  <button
+                    onClick={handleGetStarted}
+                    className={`w-full py-4 px-6 rounded-full font-semibold text-lg transition-all duration-300 mt-auto ${
+                      pkg.is_popular
+                        ? 'bg-white text-black hover:bg-gray-100 shadow-lg'
+                        : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                    }`}
+                  >
+                    {pkg.price === 0 ? 'Start Free' : 'Get Started'}
+                  </button>
+                </div>
+              )
+            })}
           </div>
 
           <div className="text-center mt-16">
@@ -623,70 +707,52 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="space-y-8">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <HelpCircle className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-3">How is this different from Google Search Console?</h3>
-                  <p className="text-gray-300 leading-relaxed">
-                    Google Search Console limits you to 200 URLs per day and requires manual submission. 
-                    IndexNow Pro uses Google's official Indexing API to submit thousands of URLs automatically 
-                    with enterprise-grade service accounts, achieving 95% faster indexing times.
-                  </p>
-                </div>
+          <div className="space-y-6">
+            {[
+              {
+                question: "How is this different from Google Search Console?",
+                answer: "Google Search Console limits you to 200 URLs per day and requires manual submission. IndexNow Pro uses Google's official Indexing API to submit thousands of URLs automatically with enterprise-grade service accounts, achieving 95% faster indexing times."
+              },
+              {
+                question: "Is this similar to RankMath's Instant Indexing?",
+                answer: "Yes! IndexNow Pro provides the same instant indexing capabilities as RankMath's plugin, but as a standalone web platform. We offer advanced features like multi-account management, scheduled jobs, team collaboration, and enterprise security that WordPress plugins can't provide."
+              },
+              {
+                question: "What's the success rate for indexing?",
+                answer: "Our platform achieves a 98.7% success rate with an average indexing time of under 24 minutes. We use multiple Google service accounts for load balancing and have built-in retry mechanisms for maximum reliability."
+              },
+              {
+                question: "Can I cancel anytime?",
+                answer: "Absolutely. There are no long-term contracts or cancellation fees. You can upgrade, downgrade, or cancel your subscription at any time. We also offer a 30-day money-back guarantee for your peace of mind."
+              }
+            ].map((faq, index) => (
+              <div key={index} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+                <button
+                  onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
+                  className="w-full p-8 text-left hover:bg-white/5 transition-all duration-300 flex items-center justify-between"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <HelpCircle className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-white">{faq.question}</h3>
+                  </div>
+                  <ChevronUp className={`w-5 h-5 text-white transition-transform duration-300 ${
+                    expandedFAQ === index ? 'rotate-180' : ''
+                  }`} />
+                </button>
+                
+                {expandedFAQ === index && (
+                  <div className="px-8 pb-8 pt-0">
+                    <div className="pl-12">
+                      <p className="text-gray-300 leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <HelpCircle className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-3">Is this similar to RankMath's Instant Indexing?</h3>
-                  <p className="text-gray-300 leading-relaxed">
-                    Yes! IndexNow Pro provides the same instant indexing capabilities as RankMath's plugin, 
-                    but as a standalone web platform. We offer advanced features like multi-account management, 
-                    scheduled jobs, team collaboration, and enterprise security that WordPress plugins can't provide.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <HelpCircle className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-3">What's the success rate for indexing?</h3>
-                  <p className="text-gray-300 leading-relaxed">
-                    Our platform achieves a 98.7% success rate with an average indexing time of under 24 minutes. 
-                    We use multiple Google service accounts for load balancing and have built-in retry mechanisms 
-                    for maximum reliability.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <HelpCircle className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-3">Can I cancel anytime?</h3>
-                  <p className="text-gray-300 leading-relaxed">
-                    Absolutely. There are no long-term contracts or cancellation fees. 
-                    You can upgrade, downgrade, or cancel your subscription at any time. 
-                    We also offer a 30-day money-back guarantee for your peace of mind.
-                  </p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>

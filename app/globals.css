@@ -3,6 +3,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Continuous scrolling animation for company logos */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-40px * 6 - 48px * 6)); /* width + margin for 6 items */
+  }
+}
+
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+}
+
 :root {
   /* New Color Palette - Professional Dark Theme */
   --pure-white: #FFFFFF;

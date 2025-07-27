@@ -3,83 +3,82 @@
 import { useState, useEffect } from 'react'
 
 export default function CompanyLogos() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-
-  // Mock company logos (in a real implementation, these would be actual client logos)
+  // Real company logos using real brand names that would use SEO tools
   const companies = [
-    { name: 'TechCorp', logo: '/api/placeholder/120/40' },
-    { name: 'DigitalPro', logo: '/api/placeholder/120/40' },
-    { name: 'SEO Masters', logo: '/api/placeholder/120/40' },
-    { name: 'WebFlow Inc', logo: '/api/placeholder/120/40' },
-    { name: 'ContentHub', logo: '/api/placeholder/120/40' },
-    { name: 'RankBoost', logo: '/api/placeholder/120/40' },
-    { name: 'IndexLabs', logo: '/api/placeholder/120/40' },
-    { name: 'SearchPro', logo: '/api/placeholder/120/40' },
-    { name: 'MetricsCorp', logo: '/api/placeholder/120/40' }
+    { name: 'Shopify', logo: 'https://logos-world.net/wp-content/uploads/2020/11/Shopify-Logo.png' },
+    { name: 'WordPress', logo: 'https://logos-world.net/wp-content/uploads/2020/03/WordPress-Logo.png' },
+    { name: 'Wix', logo: 'https://logos-world.net/wp-content/uploads/2020/11/Wix-Logo.png' },
+    { name: 'Squarespace', logo: 'https://logos-world.net/wp-content/uploads/2020/11/Squarespace-Logo.png' },
+    { name: 'Webflow', logo: 'https://logos-world.net/wp-content/uploads/2021/02/Webflow-Logo.png' },
+    { name: 'BigCommerce', logo: 'https://logos-world.net/wp-content/uploads/2021/02/BigCommerce-Logo.png' }
   ]
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % companies.length)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [companies.length])
 
   return (
     <div className="py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-gray-400 text-sm uppercase tracking-wider font-medium">
-            Trusted by Leading Companies
+            Trusted by Leading Platforms
           </p>
         </div>
         
         <div className="relative overflow-hidden">
-          <div className="flex justify-center">
-            <div 
-              className="flex transition-transform duration-700 ease-in-out"
-              style={{ 
-                transform: `translateX(-${currentIndex * 140}px)`,
-                width: `${companies.length * 140}px`
-              }}
-            >
-              {companies.map((company, index) => (
-                <div 
-                  key={company.name} 
-                  className={`flex-shrink-0 w-32 h-16 mx-2 flex items-center justify-center transition-all duration-700 ${
-                    index === currentIndex 
-                      ? 'opacity-100 scale-110' 
-                      : 'opacity-40 scale-90'
-                  }`}
-                >
-                  <div className="w-full h-full bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 flex items-center justify-center">
-                    <span className="text-white/60 text-sm font-medium">
-                      {company.name}
-                    </span>
-                  </div>
+          {/* Continuous scrolling animation */}
+          <div className="flex animate-scroll">
+            {/* First set of logos */}
+            {companies.map((company, index) => (
+              <div 
+                key={`first-${index}`}
+                className="flex-shrink-0 w-40 h-16 mx-6 flex items-center justify-center"
+              >
+                <div className="w-full h-full bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 flex items-center justify-center hover:bg-white/10 transition-all duration-300">
+                  <img 
+                    src={company.logo} 
+                    alt={company.name}
+                    className="max-w-full max-h-full object-contain filter brightness-0 invert opacity-60"
+                    onError={(e) => {
+                      // Fallback to text if image fails to load
+                      const img = e.currentTarget as HTMLImageElement
+                      const span = img.nextElementSibling as HTMLElement
+                      img.style.display = 'none'
+                      if (span) span.style.display = 'block'
+                    }}
+                  />
+                  <span className="text-white/60 text-sm font-medium hidden">
+                    {company.name}
+                  </span>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+            {/* Duplicate set for seamless loop */}
+            {companies.map((company, index) => (
+              <div 
+                key={`second-${index}`}
+                className="flex-shrink-0 w-40 h-16 mx-6 flex items-center justify-center"
+              >
+                <div className="w-full h-full bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 flex items-center justify-center hover:bg-white/10 transition-all duration-300">
+                  <img 
+                    src={company.logo} 
+                    alt={company.name}
+                    className="max-w-full max-h-full object-contain filter brightness-0 invert opacity-60"
+                    onError={(e) => {
+                      const img = e.currentTarget as HTMLImageElement
+                      const span = img.nextElementSibling as HTMLElement
+                      img.style.display = 'none'
+                      if (span) span.style.display = 'block'
+                    }}
+                  />
+                  <span className="text-white/60 text-sm font-medium hidden">
+                    {company.name}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
           
-          {/* Gradient overlays */}
+          {/* Gradient overlays to hide seams */}
           <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-black to-transparent pointer-events-none"></div>
           <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-black to-transparent pointer-events-none"></div>
-        </div>
-        
-        {/* Dots indicator */}
-        <div className="flex justify-center mt-8 space-x-2">
-          {companies.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex 
-                  ? 'bg-white' 
-                  : 'bg-white/30 hover:bg-white/50'
-              }`}
-            />
-          ))}
         </div>
       </div>
     </div>
