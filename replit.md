@@ -635,6 +635,31 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes  
 
+**LANDING PAGE PRICING ALIGNMENT & HERO COPYWRITING REFINEMENTS (January 27, 2025)**
+- ✅ **FIXED PRICING CARD ALIGNMENT ISSUES**: Resolved pricing display offset problems in pricing cards
+  - **Root Cause**: Flex alignment was not properly centering prices with original/promo price combinations
+  - **Solution**: Restructured pricing display with proper baseline alignment using `items-baseline justify-center`
+  - **Free Plan Fix**: Separated Free plan pricing display logic from paid plans for consistent centering
+  - **Result**: All pricing now displays perfectly centered in cards regardless of promo pricing presence
+- ✅ **RESTORED LONGER HERO COPYWRITING**: Brought back detailed hero section text while removing specific subtitle
+  - **User Request**: Remove "IndexNow Pro - Professional URL Indexing - The fastest way to get Google to index your content"
+  - **Enhanced Copy**: Restored "While you're waiting 2-4 weeks for Google to discover your content, competitors are getting indexed in minutes"
+  - **Professional Messaging**: Updated to "Meet IndexNow Pro - Your Professional Indexing Guide" with engagement stats
+  - **Balanced Approach**: Maintains detailed value proposition while removing redundant subtitle text
+- ✅ **SEAMLESS COMPANY LOGO ANIMATION PERFECTED**: Fixed CSS animation to eliminate jumping back to start
+  - **CSS Animation Fix**: Updated keyframes to use `transform: translateX(-50%)` for true seamless looping
+  - **Duration Optimization**: Set animation duration to 25s for smooth, readable logo scrolling
+  - **No More Jumping**: Company logos now scroll infinitely without any visual interruption or reset jumping
+- ✅ **GLOBAL BILLING PERIOD SELECTOR IMPLEMENTED**: Unified pricing control above all pricing cards
+  - **Single Control Point**: Added one billing period selector that controls all pricing cards simultaneously
+  - **Removed Individual Selectors**: Eliminated dropdown menus from each pricing card for cleaner design
+  - **Dynamic Pricing Updates**: All plans update prices instantly when billing period is changed
+  - **Clean Display**: Removed "/monthly" and other period text from cards since it's shown in global selector
+- ✅ **USER EXPERIENCE CONSISTENCY**: Maintained professional black glossy background and project color scheme
+  - **Design Preservation**: Kept user-approved black glossy background with gradient patterns intact
+  - **Color Compliance**: All elements continue using project-specific color palette (#1A1A1A, #6C757D, #F7F9FC)
+  - **Professional Polish**: Enhanced overall landing page cohesion with unified pricing controls
+
 **ROLE-BASED ACCESS CONTROL FOR TEST BACKEND IMPLEMENTED (January 27, 2025)**
 - ✅ **CREATED USER PROFILE HOOK**: Implemented `useUserProfile` hook to fetch user profile with role information
   - **User Profile Hook**: Created `hooks/useUserProfile.ts` with comprehensive user profile fetching and role detection

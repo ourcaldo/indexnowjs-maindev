@@ -352,16 +352,17 @@ export default function LandingPage() {
                 </h1>
                 
                 <p className="text-xl text-gray-300 leading-relaxed">
-                  Get your content indexed in minutes, not weeks.
+                  While you're waiting 2-4 weeks for Google to discover your content, 
+                  your competitors are getting indexed in minutes and capturing your traffic.
                 </p>
               </div>
 
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold text-white">
-                  IndexNow Pro - Professional URL Indexing
+                  Meet IndexNow Pro - Your Professional Indexing Guide
                 </h2>
                 <p className="text-gray-300">
-                  The fastest way to get Google to index your content.
+                  Join thousands who've improved their indexing speed by 95% with our proven system.
                 </p>
               </div>
 
@@ -634,16 +635,24 @@ export default function LandingPage() {
                     <p className="text-gray-300 mb-6 leading-relaxed">{pkg.description}</p>
                     
                     <div className="mb-6">
-                      <div className="flex items-center justify-center space-x-2">
-                        <span className="text-5xl font-bold text-white">
-                          {pkg.price === 0 ? 'Free' : formatPrice(currentPrice.price)}
-                        </span>
-                        {currentPrice.originalPrice && (
-                          <span className="text-2xl text-gray-500 line-through">
-                            {formatPrice(currentPrice.originalPrice)}
-                          </span>
-                        )}
-                      </div>
+                      {pkg.price === 0 ? (
+                        <div className="text-center">
+                          <span className="text-5xl font-bold text-white">Free</span>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <div className="flex items-baseline justify-center space-x-2">
+                            <span className="text-5xl font-bold text-white">
+                              {formatPrice(currentPrice.price)}
+                            </span>
+                            {currentPrice.originalPrice && (
+                              <span className="text-2xl text-gray-500 line-through">
+                                {formatPrice(currentPrice.originalPrice)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
