@@ -87,8 +87,8 @@ async function createUrlSubmissions(job: any) {
     if (job.type === 'manual' && job.source_data?.urls) {
       urls = job.source_data.urls;
     } else if (job.type === 'sitemap' && job.source_data?.sitemap_url) {
-      // For now, use a mock URL extraction - implement proper sitemap parsing later
-      urls = [`${job.source_data.sitemap_url}/page1`, `${job.source_data.sitemap_url}/page2`];
+      // Parse sitemap URL to extract actual URLs
+      urls = await parseSitemapUrls(job.source_data.sitemap_url);
     }
 
     if (urls.length === 0) {
@@ -134,5 +134,50 @@ async function createUrlSubmissions(job: any) {
   } catch (error) {
     console.error('Error in createUrlSubmissions:', error);
     throw error;
+  }
+}
+
+/**
+ * Parse sitemap XML to extract all URLs
+ */
+async function parseSitemapUrls(sitemapUrl: string): Promise<string[]> {
+  try {
+    console.log(`🔍 Fetching sitemap: ${sitemapUrl}`);
+    const response = await fetch(sitemapUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sitemap: ${response.status} ${response.statusText}`);
+    }
+
+    const xmlContent = await response.text();
+    const xml2js = await import('xml2js');
+    const parser = new xml2js.Parser();
+    const parsedXml = await parser.parseStringPromise(xmlContent);
+
+    const urls: string[] = [];
+    
+    // Handle regular sitemap with URL entries
+    if (parsedXml.urlset?.url) {
+      parsedXml.urlset.url.forEach((urlEntry: any) => {
+        if (urlEntry.loc?.[0]) {
+          urls.push(urlEntry.loc[0]);
+        }
+      });
+    }
+    
+    // Handle sitemap index with nested sitemaps
+    if (parsedXml.sitemapindex?.sitemap) {
+      for (const sitemapEntry of parsedXml.sitemapindex.sitemap) {
+        if (sitemapEntry.loc?.[0]) {
+          const nestedUrls = await parseSitemapUrls(sitemapEntry.loc[0]);
+          urls.push(...nestedUrls);
+        }
+      }
+    }
+
+    console.log(`✅ Extracted ${urls.length} URLs from sitemap`);
+    return urls;
+  } catch (error) {
+    console.error('Error parsing sitemap:', error);
+    throw new Error(`Sitemap parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

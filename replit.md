@@ -674,6 +674,29 @@ JWT_SECRET=[jwt-secret-key]
   - **Border Colors**: #E0E6ED throughout for consistent visual hierarchy
   - **Activity Timeline**: #3D8BFF for timeline dots (only approved accent color usage)
 
+**SITEMAP URL PROCESSING BUG FIXED - CRITICAL BACKEND PROCESSING ISSUE RESOLVED (January 27, 2025)** 
+- ✅ **IDENTIFIED ROOT CAUSE OF SITEMAP JOB FAILURES**: Found critical property name mismatch in sitemap URL processing
+  - **Database Schema**: Jobs store sitemap URL as `sitemap_url` (snake_case) in `source_data` JSONB column
+  - **Frontend API**: Correctly sends `sitemapUrl` (camelCase) and API converts to `sitemap_url` when saving
+  - **Processing Bug**: GoogleIndexingProcessor was looking for `sitemapUrl` instead of `sitemap_url` causing "No sitemap URL found" errors
+- ✅ **FIXED GOOGLE INDEXING PROCESSOR**: Updated URL extraction logic to use correct property name
+  - **File**: `lib/google-indexing-processor.ts` line 222 - Changed from `job.source_data?.sitemapUrl` to `job.source_data?.sitemap_url`
+  - **Method**: `extractUrlsFromJobSource()` now properly extracts sitemap URL from job source data
+  - **Result**: Sitemap jobs can now successfully parse XML sitemaps and extract URLs for indexing
+- ✅ **ENHANCED SITEMAP PARSING FUNCTIONALITY**: Added comprehensive sitemap XML parsing with recursive support
+  - **XML Parser**: Uses xml2js library to parse sitemap XML into structured data
+  - **URL Extraction**: Handles both regular sitemaps (`<urlset>`) and sitemap indexes (`<sitemapindex>`)
+  - **Recursive Processing**: Automatically processes nested sitemaps found in sitemap indexes
+  - **Error Handling**: Comprehensive error handling with detailed error messages for debugging
+- ✅ **ADDED MISSING SITEMAP PARSING TO LEGACY ROUTE**: Fixed `app/api/jobs/[id]/process/route.ts` mock implementation
+  - **Removed Mock**: Replaced hardcoded mock URLs with actual sitemap parsing function
+  - **Added Function**: `parseSitemapUrls()` function with same logic as GoogleIndexingProcessor
+  - **Consistency**: Both processing paths now use identical sitemap parsing logic
+- ✅ **VERIFIED SITEMAP COMPATIBILITY**: Tested with user's actual sitemap URL `https://nexjob.tech/sitemap-loker-1.xml`
+  - **Valid XML Structure**: Confirmed sitemap uses standard XML format with `<urlset>` and `<url>` entries
+  - **URL Format**: Each URL entry contains `<loc>`, `<lastmod>`, `<changefreq>`, and `<priority>` elements
+  - **Parser Support**: XML parser correctly handles this format and extracts all job listing URLs
+
 **REPLIT MIGRATION COMPLETED & ADMIN SYNTAX ERROR FIXED (January 27, 2025)**
 - ✅ **SUCCESSFUL REPLIT MIGRATION**: Completed full migration from Replit Agent to standard Replit environment
   - **Node.js 20 Runtime**: Successfully installed and configured Node.js 20 with all package managers

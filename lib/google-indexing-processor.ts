@@ -216,7 +216,7 @@ export class GoogleIndexingProcessor {
         return urls;
       } else if (job.type === 'sitemap') {
         // For sitemap jobs, parse the sitemap URL
-        const sitemapUrl = job.source_data?.sitemapUrl;
+        const sitemapUrl = job.source_data?.sitemap_url;
         if (!sitemapUrl) {
           throw new Error('No sitemap URL found in job source data');
         }
