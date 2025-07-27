@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useEffect } from "react"
@@ -6,14 +5,14 @@ import { useRouter } from "next/navigation"
 import { authService } from "@/lib/auth"
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
-// import DashboardPreview from '../components/DashboardPreview'
+import DashboardPreview from '../../components/DashboardPreview'
 
 export default function Register() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [name, setName] = useState("")
+  const [fullName, setFullName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -49,7 +48,7 @@ export default function Register() {
     }
 
     try {
-      await authService.signUp(email, password, name)
+      await authService.signUp(email, password, fullName)
       setSuccess(true)
     } catch (error: any) {
       setError(error.message || "Registration failed")
@@ -95,7 +94,7 @@ export default function Register() {
             We've sent you a confirmation link at <strong>{email}</strong>. Click the link to verify your account.
           </p>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/dashboard/login')}
             style={{
               width: '100%',
               padding: '12px 24px',
@@ -126,7 +125,7 @@ export default function Register() {
       {isMobile && (
         <div style={{
           backgroundColor: '#1a1a1a',
-          padding: '40px 20px',
+          padding: '80px 20px 40px 20px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -139,50 +138,27 @@ export default function Register() {
             top: '20px',
             left: '20px',
             display: 'flex',
-            alignItems: 'center',
-            marginBottom: '20px'
+            alignItems: 'center'
           }}>
-            {logoUrl ? (
-              <img 
-                src={logoUrl} 
-                alt={`${siteName} Logo`}
-                style={{
-                  height: '54px',
-                  width: 'auto',
-                  maxWidth: '270px',
-                  filter: 'brightness(0) invert(1)' // Make logo white for dark background
-                }}
-              />
-            ) : (
-              <span style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#ffffff'
-              }}>
-                {siteName}
-              </span>
-            )}
+            <span style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#ffffff'
+            }}>
+              IndexNow
+            </span>
           </div>
           
-          <div style={{
-            padding: '40px',
-            textAlign: 'center'
+          <div style={{ 
+            overflow: 'hidden', 
+            width: '100%',
+            position: 'relative'
           }}>
-            <h2 style={{
-              fontSize: '24px',
-              fontWeight: '600',
-              color: '#ffffff',
-              marginBottom: '16px'
-            }}>
-              Join thousands of developers getting results.
-            </h2>
-            <p style={{
-              fontSize: '16px',
-              color: 'rgba(255, 255, 255, 0.8)',
-              lineHeight: '1.5'
-            }}>
-              Create your account and start indexing your URLs instantly with powerful analytics.
-            </p>
+            <DashboardPreview 
+              title="Join thousands of developers getting results."
+              subtitle="Create your account and start indexing your URLs instantly with powerful analytics."
+              variant="register"
+            />
           </div>
         </div>
       )}
@@ -267,8 +243,8 @@ export default function Register() {
               </label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -366,23 +342,10 @@ export default function Register() {
                     color: '#9ca3af',
                     cursor: 'pointer',
                     fontSize: '14px',
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    padding: '4px'
                   }}
                 >
-                  {showPassword ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M1 1l22 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                  )}
+                  {showPassword ? '🙈' : '👁️'}
                 </button>
               </div>
             </div>
@@ -433,60 +396,26 @@ export default function Register() {
                     color: '#9ca3af',
                     cursor: 'pointer',
                     fontSize: '14px',
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    padding: '4px'
                   }}
                 >
-                  {showConfirmPassword ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M1 1l22 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                  )}
+                  {showConfirmPassword ? '🙈' : '👁️'}
                 </button>
               </div>
             </div>
 
-            {/* Register Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '14px 24px',
-                backgroundColor: '#1a1a1a',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                marginBottom: '24px',
-                opacity: isLoading ? 0.7 : 1
-              }}
-            >
-              {isLoading ? "Creating Account..." : "Create Account"}
-            </button>
-
             {/* Error Message */}
             {error && (
               <div style={{
+                padding: '12px 16px',
                 backgroundColor: '#fef2f2',
                 border: '1px solid #fecaca',
                 borderRadius: '8px',
-                padding: '12px',
                 marginBottom: '24px'
               }}>
                 <p style={{
-                  color: '#dc2626',
                   fontSize: '14px',
+                  color: '#dc2626',
                   margin: '0'
                 }}>
                   {error}
@@ -494,117 +423,75 @@ export default function Register() {
               </div>
             )}
 
-            {/* Or Register With */}
-            <div style={{
-              textAlign: 'center',
-              marginBottom: '24px'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                color: '#9ca3af'
-              }}>
-                Or Use Magic Link
-              </span>
-            </div>
-
-            {/* Magic Link Button */}
+            {/* Submit Button */}
             <button
-              type="button"
-              onClick={async () => {
-                if (!email) {
-                  setError("Please enter your email address first.")
-                  return
-                }
-                setIsLoading(true)
-                try {
-                  await authService.createMagicLink(email, `${window.location.origin}/dashboard`)
-                  alert("Magic link sent to your email!")
-                } catch (error: any) {
-                  setError(error.message || "Failed to send magic link")
-                } finally {
-                  setIsLoading(false)
-                }
-              }}
+              type="submit"
+              disabled={isLoading}
               style={{
                 width: '100%',
-                padding: '12px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #d1d5db',
+                padding: '14px 20px',
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#ffffff',
+                backgroundColor: isLoading ? '#9ca3af' : '#1a1a1a',
+                border: 'none',
                 borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                fontSize: '14px',
-                color: '#374151',
-                marginBottom: '32px'
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.2s'
               }}
             >
-              <span style={{ marginRight: '8px' }}>✨</span>
-              Send Magic Link
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
 
             {/* Sign In Link */}
-            <div style={{ textAlign: 'center' }}>
+            <div style={{
+              textAlign: 'center',
+              marginTop: '24px'
+            }}>
               <span style={{
                 fontSize: '14px',
                 color: '#6b7280'
               }}>
-                Already Have An Account?{' '}
+                Already have an account?{' '}
               </span>
-              <button
-                type="button"
-                onClick={() => router.push("/")}
+              <a
+                href="/dashboard/login"
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#1a1a1a',
                   fontSize: '14px',
-                  cursor: 'pointer',
+                  color: '#1a1a1a',
                   textDecoration: 'none',
-                  fontWeight: '500'
+                  fontWeight: '600'
                 }}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.textDecoration = 'underline'}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.textDecoration = 'none'}
               >
-                Sign In Instead.
-              </button>
+                Sign In
+              </a>
             </div>
           </form>
         </div>
       </div>
 
-      {/* Desktop: Right Side - Feature Showcase */}
+      {/* Right Side - Dashboard Preview (Desktop Only) */}
       {!isMobile && (
         <div style={{
           width: '50%',
           backgroundColor: '#1a1a1a',
-          padding: '60px',
+          padding: '80px 60px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           color: '#ffffff',
           position: 'relative'
         }}>
-          <div style={{
-            padding: '40px',
-            textAlign: 'center'
+          <div style={{ 
+            overflow: 'hidden', 
+            width: '100%',
+            position: 'relative'
           }}>
-            <h2 style={{
-              fontSize: '24px',
-              fontWeight: '600',
-              color: '#ffffff',
-              marginBottom: '16px'
-            }}>
-              Join thousands of developers getting results.
-            </h2>
-            <p style={{
-              fontSize: '16px',
-              color: 'rgba(255, 255, 255, 0.8)',
-              lineHeight: '1.5'
-            }}>
-              Create your account and start indexing your URLs instantly with powerful analytics.
-            </p>
+            <DashboardPreview 
+              title="Join thousands of developers getting results."
+              subtitle="Create your account and start indexing your URLs instantly with powerful analytics."
+              variant="register"
+            />
           </div>
         </div>
       )}
