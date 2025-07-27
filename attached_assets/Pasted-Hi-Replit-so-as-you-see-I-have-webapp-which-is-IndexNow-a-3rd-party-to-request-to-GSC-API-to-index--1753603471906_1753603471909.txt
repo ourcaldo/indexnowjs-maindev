@@ -1,0 +1,50 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before I want you to more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things (from database to all changelogs) that you should know.
+
+There's an error when I open admin dashboard when I open single order menu, which the error is regarding syntax error. This error is still appear even when we do some changes and fix.
+
+Now, please do deep dive in single order page in admin dashboard and fix this issue now.
+
+Error log:
+ ○ Compiling /backend/admin/orders/[id] ...
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got 'open'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+     ·               ────
+ 769 │         <DialogContent>
+ 770 │           <DialogHeader>
+ 771 │             <DialogTitle>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx
+ ⨯ ./app/backend/admin/orders/[id]/page.tsx
+Error:   × Expected ',', got 'open'
+     ╭─[/home/runner/workspace/app/backend/admin/orders/[id]/page.tsx:768:1]
+ 765 │         </div>
+ 766 │       </div>
+ 767 │ 
+ 768 │       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+     ·               ────
+ 769 │         <DialogContent>
+ 770 │           <DialogHeader>
+ 771 │             <DialogTitle>
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/backend/admin/orders/[id]/page.tsx

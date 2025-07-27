@@ -765,8 +765,7 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {statusModalOpen && (
-        <Dialog open onOpenChange={setStatusModalOpen}>
+      <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -828,8 +827,7 @@ export default function AdminOrderDetailPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
-      )}
+      </Dialog>
     </div>
   )
 }
