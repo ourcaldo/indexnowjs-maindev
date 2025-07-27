@@ -1,0 +1,45 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before I want you to more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things (from database to all changelogs) that you should know.
+
+Then, before we already made homepage for this website, which using reference but it's still have a lots to-do.
+
+1. First, this is related to copywriting, your copywriting is just like trash, no emotion at all. First, I want you to deep dive into this project to know what exactly this project about, the feature, and everythings.
+After that, to make the copywriting you should use StoryBrand framework from Donald Miller which is you need to turn this into copywriting user-centered focused.
+Framework Application:
+A Character (Hero): "SEO professionals and website owners struggling with slow URL indexing"
+Has a Problem: "Manual indexing takes hours, search engines miss important content, rankings suffer"
+And Meets a Guide: "IndexNow Pro - the professional's choice for automated indexing"
+Who Gives Them a Plan:
+Step 1: Connect your Google Search Console
+Step 2: Submit URLs in bulk or schedule automatic submissions
+Step 3: Monitor real-time indexing progress and success rates
+And Calls Them to Action: "Start Your Free Trial" / "Get IndexNow Pro"
+That Helps Them Avoid Failure: "Don't let slow indexing hurt your search rankings"
+And Ends in Success: "Join thousands of professionals who've improved their indexing speed by 95%"
+
+2. Then related to the layout, before I said to add elements like statistical, analytics dashboard or this overview dashboard, that's why i need you to do deep dive to make it. 
+For the layout, please make best recommandation for user experience, but for the hero section, i want you to make 2 column, left is copywriting, right is the dashboard/analytics dashboard or any elements that give view to this project.
+
+3. Now for the color, I don't like that you're using zig zag color in the background. Which black, then other color, then black again. I talk about main background color for entire page, not just background for card product or elements.
+So, for the entire page background, DON'T use zig-zag color, but use 1 dark color, WHICH is BLACK. Don't use black then gradient color to black, then black again, DON'T ZIG ZAG LIKE THAT.
+You also need to make this background color not plain, flat, boring, you can play with the glossy, transparency and others that made the color more elegant.
+
+4. Font and font color, please use simple as it can. I don't want you to use too much color in text, use rainbox color, or anything that made it look childish and unprofesional
+
+5. Now, for color accent, I don't want you to use dark color for background entire page, and white for the button and some text, and bit light grey for the support text. For the accent, don't use too much different color than that, no red, pink, yellow, orange, i don't want that.
+
+6. Last for the content section use this:
+- Hero section 
+- After the hero section, then slow auto slide company that use us (use no-color logo, 6-9 logo, with each slide is slide 1 item)
+- Then Unique value proposition section we can use statistical, numbered, data or anything related to this project.
+- Features
+- Pricing (make it correct, we have different price related to month plans)
+- FAQs
+- CTA
+- CTA Question (like "Have Questions?") and support form (2 column left and right)
+* You can also add another section from the StoryBrand Framework (Point 1)
