@@ -26,6 +26,7 @@ import {
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 
 interface PricingTier {
   period: string
@@ -138,6 +139,10 @@ interface BillingHistoryData {
 export default function BillingPage() {
   const [billingData, setBillingData] = useState<BillingData | null>(null)
   const [packagesData, setPackagesData] = useState<PackagesData | null>(null)
+  
+  // Log page view and billing activities
+  usePageViewLogger('/dashboard/billing', 'Billing & Subscriptions', { section: 'billing_management' })
+  const { logBillingActivity } = useActivityLogger()
   const [historyData, setHistoryData] = useState<BillingHistoryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

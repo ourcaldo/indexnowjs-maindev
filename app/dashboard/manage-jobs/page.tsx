@@ -31,6 +31,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
+import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger';
 
 interface Job {
   id: string;
@@ -82,6 +83,10 @@ const getStatusIcon = (status: string) => {
 export default function ManageJobsPage() {
   const { addToast } = useToast();
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
+  
+  // Log page view and job management activities
+  usePageViewLogger('/dashboard/manage-jobs', 'Manage Jobs', { section: 'job_management' })
+  const { logJobActivity } = useActivityLogger();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [scheduleFilter, setScheduleFilter] = useState('All Schedules');
@@ -245,6 +250,16 @@ export default function ManageJobsPage() {
           description: 'Job deleted successfully',
           type: 'success'
         });
+        
+        // Log job deletion activity
+        const job = jobs.find(j => j.id === jobId);
+        logJobActivity('job_delete', jobId, `Deleted job: ${job?.name || jobId}`, {
+          job_id: jobId,
+          job_name: job?.name,
+          job_type: job?.type,
+          action: 'delete'
+        });
+        
         loadJobs(); // Reload jobs list
       } else {
         addToast({

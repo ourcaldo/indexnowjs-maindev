@@ -55,6 +55,8 @@ export const ActivityEventTypes = {
   // Profile Management
   PROFILE_UPDATE: 'profile_update',
   SETTINGS_CHANGE: 'settings_change',
+  SETTINGS_VIEW: 'settings_view',
+  NOTIFICATION_SETTINGS_UPDATE: 'notification_settings_update',
   
   // Job Management
   JOB_CREATE: 'job_create',
@@ -64,11 +66,30 @@ export const ActivityEventTypes = {
   JOB_PAUSE: 'job_pause',
   JOB_RESUME: 'job_resume',
   JOB_CANCEL: 'job_cancel',
+  JOB_VIEW: 'job_view',
   
   // Service Account Management
   SERVICE_ACCOUNT_ADD: 'service_account_add',
   SERVICE_ACCOUNT_UPDATE: 'service_account_update',
   SERVICE_ACCOUNT_DELETE: 'service_account_delete',
+  SERVICE_ACCOUNT_VIEW: 'service_account_view',
+  
+  // Billing & Payment Events
+  CHECKOUT_INITIATED: 'checkout_initiated',
+  ORDER_CREATED: 'order_created',
+  PAYMENT_PROOF_UPLOADED: 'payment_proof_uploaded',
+  SUBSCRIPTION_UPGRADE: 'subscription_upgrade',
+  BILLING_VIEW: 'billing_view',
+  BILLING_HISTORY_VIEW: 'billing_history_view',
+  ORDER_VIEW: 'order_view',
+  PACKAGE_SELECTION: 'package_selection',
+  
+  // Dashboard Activities
+  DASHBOARD_VIEW: 'dashboard_view',
+  DASHBOARD_STATS_VIEW: 'dashboard_stats_view',
+  QUOTA_VIEW: 'quota_view',
+  INDEXNOW_PAGE_VIEW: 'indexnow_page_view',
+  MANAGE_JOBS_VIEW: 'manage_jobs_view',
   
   // API Calls
   API_CALL: 'api_call',
@@ -86,8 +107,6 @@ export const ActivityEventTypes = {
   
   // Page Views & Navigation
   PAGE_VIEW: 'page_view',
-  DASHBOARD_VIEW: 'dashboard_view',
-  SETTINGS_VIEW: 'settings_view',
   ADMIN_PANEL_ACCESS: 'admin_panel_access',
   USER_SECURITY_VIEW: 'user_security_view',
   USER_ACTIVITY_VIEW: 'user_activity_view',
@@ -311,6 +330,80 @@ export class ActivityLogger {
         pagePath,
         pageTitle,
         pageView: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log billing and payment activities
+   */
+  static async logBillingActivity(userId: string, eventType: string, details: string, request?: NextRequest, metadata?: Record<string, any>) {
+    const actionDescriptions = {
+      [ActivityEventTypes.CHECKOUT_INITIATED]: `Initiated checkout: ${details}`,
+      [ActivityEventTypes.ORDER_CREATED]: `Created order: ${details}`,
+      [ActivityEventTypes.PAYMENT_PROOF_UPLOADED]: `Uploaded payment proof: ${details}`,
+      [ActivityEventTypes.SUBSCRIPTION_UPGRADE]: `Upgraded subscription: ${details}`,
+      [ActivityEventTypes.BILLING_VIEW]: `Viewed billing dashboard: ${details}`,
+      [ActivityEventTypes.BILLING_HISTORY_VIEW]: `Viewed billing history: ${details}`,
+      [ActivityEventTypes.ORDER_VIEW]: `Viewed order details: ${details}`,
+      [ActivityEventTypes.PACKAGE_SELECTION]: `Selected package: ${details}`,
+    }
+
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription: actionDescriptions[eventType as keyof typeof actionDescriptions] || `Billing activity: ${details}`,
+      request,
+      metadata: {
+        billingActivity: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log profile and settings activities
+   */
+  static async logProfileActivity(userId: string, eventType: string, details: string, request?: NextRequest, metadata?: Record<string, any>) {
+    const actionDescriptions = {
+      [ActivityEventTypes.PROFILE_UPDATE]: `Updated profile: ${details}`,
+      [ActivityEventTypes.SETTINGS_CHANGE]: `Changed settings: ${details}`,
+      [ActivityEventTypes.SETTINGS_VIEW]: `Viewed settings page: ${details}`,
+      [ActivityEventTypes.NOTIFICATION_SETTINGS_UPDATE]: `Updated notification settings: ${details}`,
+    }
+
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription: actionDescriptions[eventType as keyof typeof actionDescriptions] || `Profile activity: ${details}`,
+      request,
+      metadata: {
+        profileActivity: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log dashboard activities
+   */
+  static async logDashboardActivity(userId: string, eventType: string, details?: string, request?: NextRequest, metadata?: Record<string, any>) {
+    const actionDescriptions = {
+      [ActivityEventTypes.DASHBOARD_VIEW]: 'Viewed main dashboard',
+      [ActivityEventTypes.DASHBOARD_STATS_VIEW]: 'Viewed dashboard statistics',
+      [ActivityEventTypes.QUOTA_VIEW]: 'Viewed quota information',
+      [ActivityEventTypes.INDEXNOW_PAGE_VIEW]: 'Viewed IndexNow job creation page',
+      [ActivityEventTypes.MANAGE_JOBS_VIEW]: 'Viewed job management page',
+    }
+
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription: details ? `${actionDescriptions[eventType as keyof typeof actionDescriptions] || eventType}: ${details}` : actionDescriptions[eventType as keyof typeof actionDescriptions] || eventType,
+      request,
+      metadata: {
+        dashboardActivity: true,
         ...metadata
       }
     })

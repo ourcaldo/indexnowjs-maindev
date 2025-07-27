@@ -112,6 +112,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Log billing activity
+    try {
+      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/activity-logger')
+      await ActivityLogger.logBillingActivity(
+        user.id,
+        ActivityEventTypes.ORDER_CREATED,
+        `${packageData.name} (${billing_period}) - ${finalPrice} ${packageData.currency}`,
+        request,
+        {
+          package_id,
+          package_name: packageData.name,
+          billing_period,
+          amount: finalPrice,
+          currency: packageData.currency,
+          order_id: orderId,
+          payment_gateway: gatewayData.name
+        }
+      )
+    } catch (logError) {
+      console.error('Failed to log order creation activity:', logError)
+    }
+
     // Send email notification
     try {
       await sendCheckoutEmailNotification({

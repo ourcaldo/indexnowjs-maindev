@@ -6,6 +6,7 @@ import { useSocketIO } from '@/hooks/useSocketIO'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import QuotaCard from '@/components/QuotaCard'
+import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 
 interface DashboardStats {
   totalUrlsIndexed: number;
@@ -63,6 +64,10 @@ export default function Dashboard() {
   const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Log page view and dashboard activities
+  usePageViewLogger('/dashboard', 'Dashboard', { section: 'main_dashboard' })
+  const { logDashboardActivity } = useActivityLogger()
 
   // Socket.io for real-time updates
   const { isConnected } = useSocketIO({
@@ -170,6 +175,12 @@ export default function Dashboard() {
           ...statsData,
           quotaUsed: quotaData.quota.daily_quota_used || 0,
           quotaLimit: quotaData.quota.is_unlimited ? 999999 : (quotaData.quota.daily_quota_limit || 200)
+        });
+
+        // Log dashboard stats view activity
+        logDashboardActivity('dashboard_stats_view', 'Loaded dashboard statistics', {
+          stats: statsData,
+          quota: quotaData.quota
         });
       } else if (statsResponse.ok) {
         // Fallback to just stats if quota fails

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, CreditCard, Building2, Check, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { authService } from '@/lib/auth'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 
@@ -68,6 +69,10 @@ export default function CheckoutPage() {
   const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  
+  // Log page view and checkout activities
+  usePageViewLogger('/dashboard/billing/checkout', 'Checkout', { section: 'billing_checkout' })
+  const { logBillingActivity } = useActivityLogger()
   
   const [form, setForm] = useState<CheckoutForm>({
     first_name: '',

@@ -37,6 +37,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Log password change activity
+    try {
+      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/activity-logger')
+      await ActivityLogger.logActivity({
+        userId: user.id,
+        eventType: ActivityEventTypes.PASSWORD_CHANGE,
+        actionDescription: 'Changed account password',
+        request,
+        metadata: {
+          passwordChange: true,
+          security_event: true
+        }
+      })
+    } catch (logError) {
+      console.error('Failed to log password change activity:', logError)
+    }
+
     return NextResponse.json({
       message: 'Password changed successfully',
     })

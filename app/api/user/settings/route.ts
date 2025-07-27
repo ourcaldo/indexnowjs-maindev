@@ -120,6 +120,24 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Log settings update activity
+    try {
+      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/activity-logger')
+      const changedFields = Object.keys(result.data).join(', ')
+      await ActivityLogger.logProfileActivity(
+        user.id,
+        ActivityEventTypes.SETTINGS_CHANGE,
+        `Updated: ${changedFields}`,
+        request,
+        {
+          updated_fields: result.data,
+          fields_changed: Object.keys(result.data)
+        }
+      )
+    } catch (logError) {
+      console.error('Failed to log settings update activity:', logError)
+    }
+
     return NextResponse.json({
       settings,
       message: 'Settings updated successfully',

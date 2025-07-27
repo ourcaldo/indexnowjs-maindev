@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { 
   Settings as SettingsIcon, 
   Mail, 
@@ -23,6 +24,10 @@ import {
 export default function SettingsPage() {
   const { addToast } = useToast()
   const [loading, setLoading] = useState(true)
+  
+  // Log page view and settings activities
+  usePageViewLogger('/dashboard/settings', 'Settings', { section: 'user_settings' })
+  const { logProfileActivity, logServiceAccountActivity } = useActivityLogger()
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingSettings, setSavingSettings] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)

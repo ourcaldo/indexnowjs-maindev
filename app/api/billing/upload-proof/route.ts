@@ -114,6 +114,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Log payment proof upload activity
+    try {
+      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/activity-logger')
+      await ActivityLogger.logBillingActivity(
+        user.id,
+        ActivityEventTypes.PAYMENT_PROOF_UPLOADED,
+        `Order #${transaction.payment_reference || transactionId.slice(0, 8)} - ${fileName}`,
+        request,
+        {
+          transaction_id: transactionId,
+          file_name: fileName,
+          file_size: proofFile.size,
+          file_type: proofFile.type,
+          order_reference: transaction.payment_reference,
+          storage_path: filePath
+        }
+      )
+    } catch (logError) {
+      console.error('Failed to log payment proof upload activity:', logError)
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Payment proof uploaded successfully',
