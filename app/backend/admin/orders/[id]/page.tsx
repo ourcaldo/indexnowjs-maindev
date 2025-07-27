@@ -355,56 +355,55 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {/* Main Layout - Three sections stacked properly */}
-      <div className="space-y-6">
+      {/* Main 2-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Top Section: Order Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-[#1A1A1A]">
-              <FileText className="w-5 h-5 mr-2" />
-              Order Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Order ID</label>
-                <p className="font-mono text-sm text-[#1A1A1A]">{order.payment_reference}</p>
+        {/* COLUMN 1 */}
+        <div className="space-y-6">
+          {/* Order Details Box */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-[#1A1A1A]">
+                <FileText className="w-5 h-5 mr-2" />
+                Order Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Order ID</label>
+                  <p className="font-mono text-sm text-[#1A1A1A]">{order.payment_reference}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Amount</label>
+                  <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Created</label>
+                  <p className="text-sm text-[#1A1A1A]">{formatDate(order.created_at)}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Last Updated</label>
+                  <p className="text-sm text-[#1A1A1A]">{formatRelativeTime(order.updated_at)}</p>
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Amount</label>
-                <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Created</label>
-                <p className="text-sm text-[#1A1A1A]">{formatDate(order.created_at)}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Last Updated</label>
-                <p className="text-sm text-[#1A1A1A]">{formatRelativeTime(order.updated_at)}</p>
-              </div>
-            </div>
-            
-            {order.verified_by && order.verified_at && (
-              <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
-                <label className="text-sm font-medium text-[#6C757D]">Verified</label>
-                <p className="text-sm text-[#1A1A1A]">
-                  {formatDate(order.verified_at)}
-                  {order.verifier && (
-                    <span className="text-[#6C757D]"> by {order.verifier.full_name}</span>
-                  )}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              
+              {order.verified_by && order.verified_at && (
+                <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
+                  <label className="text-sm font-medium text-[#6C757D]">Verified</label>
+                  <p className="text-sm text-[#1A1A1A]">
+                    {formatDate(order.verified_at)}
+                    {order.verifier && (
+                      <span className="text-[#6C757D]"> by {order.verifier.full_name}</span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Middle Section: Two equal columns for Customer & Payment Info */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
           {/* Customer Information */}
-          <Card className="h-fit">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-[#1A1A1A]">
                 <User className="w-5 h-5 mr-2" />
@@ -463,8 +462,153 @@ export default function AdminOrderDetailPage() {
             </CardContent>
           </Card>
 
+          {/* Package Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-[#1A1A1A]">
+                <Package className="w-5 h-5 mr-2" />
+                Package Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Package Name</label>
+                  <p className="font-medium text-[#1A1A1A]">{order.package.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Billing Period</label>
+                  <p className="text-sm text-[#1A1A1A]">{order.metadata?.billing_period || order.package.billing_period}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Amount</label>
+                  <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Description</label>
+                <p className="text-sm text-[#6C757D]">{order.package.description}</p>
+              </div>
+              
+              {order.package.features && Array.isArray(order.package.features) && (
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D] mb-2 block">Features</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {order.package.features.map((feature, index) => (
+                      <div key={index} className="flex items-center text-sm">
+                        <CheckCircle className="w-3 h-3 mr-2 text-[#4BB543] flex-shrink-0" />
+                        <span className="text-[#1A1A1A]">{typeof feature === 'string' ? feature : feature.name || 'Feature'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-[#1A1A1A]">
+                <Activity className="w-5 h-5 mr-2" />
+                Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {activity_history.length > 0 ? (
+                  <div className="relative">
+                    {/* Timeline line */}
+                    <div className="absolute left-2 top-0 bottom-0 w-px bg-[#E0E6ED]"></div>
+                    
+                    {activity_history.map((activity, index) => (
+                      <div key={activity.id} className="relative flex items-start space-x-3 pb-4">
+                        {/* Timeline dot */}
+                        <div className="flex-shrink-0 w-4 h-4 bg-[#3D8BFF] rounded-full border-2 border-white relative z-10"></div>
+                        
+                        {/* Activity content */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-[#1A1A1A]">{activity.action_description}</p>
+                          <div className="flex items-center space-x-1 text-xs text-[#6C757D] mt-1">
+                            <CalendarDays className="w-3 h-3" />
+                            <span>{formatRelativeTime(activity.created_at)}</span>
+                            {activity.user?.full_name && (
+                              <>
+                                <span>•</span>
+                                <span>{activity.user.full_name}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Activity className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
+                    <p className="text-sm text-[#6C757D]">No activity yet</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* COLUMN 2 */}
+        <div className="space-y-6">
+          {/* Admin Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-[#1A1A1A]">Admin Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {canUpdateStatus && (
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => openStatusModal('completed')}
+                    className="w-full bg-[#4BB543] hover:bg-[#3DA53A] text-white"
+                    disabled={updating}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Approve Payment
+                  </Button>
+                  <Button
+                    onClick={() => openStatusModal('failed')}
+                    variant="outline"
+                    className="w-full border-[#E63946] text-[#E63946] hover:bg-[#E63946] hover:text-white"
+                    disabled={updating}
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Reject Payment
+                  </Button>
+                </div>
+              )}
+              
+              <Separator className="bg-[#E0E6ED]" />
+              
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                  onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Contact Customer
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                  onClick={() => router.push(`/backend/admin/users?search=${order.user.email}`)}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  View User Profile
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Payment Information */}
-          <Card className="h-fit">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-[#1A1A1A]">
                 <CreditCard className="w-5 h-5 mr-2" />
@@ -496,211 +640,71 @@ export default function AdminOrderDetailPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Package Details Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-[#1A1A1A]">
-              <Package className="w-5 h-5 mr-2" />
-              Package Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Package Name</label>
-                <p className="font-medium text-[#1A1A1A]">{order.package.name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Billing Period</label>
-                <p className="text-sm text-[#1A1A1A]">{order.metadata?.billing_period || order.package.billing_period}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#6C757D]">Amount</label>
-                <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-[#6C757D]">Description</label>
-              <p className="text-sm text-[#6C757D]">{order.package.description}</p>
-            </div>
-            
-            {order.package.features && Array.isArray(order.package.features) && (
-              <div>
-                <label className="text-sm font-medium text-[#6C757D] mb-2 block">Features</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {order.package.features.map((feature, index) => (
-                    <div key={index} className="flex items-center text-sm">
-                      <CheckCircle className="w-3 h-3 mr-2 text-[#4BB543] flex-shrink-0" />
-                      <span className="text-[#1A1A1A]">{typeof feature === 'string' ? feature : feature.name || 'Feature'}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Admin Actions & Activity - Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Admin Actions */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-[#1A1A1A]">Admin Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {canUpdateStatus && (
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => openStatusModal('completed')}
-                      className="w-full bg-[#4BB543] hover:bg-[#3DA53A] text-white"
-                      disabled={updating}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Approve Payment
-                    </Button>
-                    <Button
-                      onClick={() => openStatusModal('failed')}
-                      variant="outline"
-                      className="w-full border-[#E63946] text-[#E63946] hover:bg-[#E63946] hover:text-white"
-                      disabled={updating}
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Reject Payment
-                    </Button>
-                  </div>
-                )}
-                
-                <Separator className="bg-[#E0E6ED]" />
-                
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
-                    onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
-                  >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Contact Customer
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
-                    onClick={() => router.push(`/backend/admin/users?search=${order.user.email}`)}
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    View User Profile
-                  </Button>
-                </div>
-
-                {/* Admin Notes */}
-                {order.notes && (
-                  <>
-                    <Separator className="bg-[#E0E6ED]" />
-                    <div>
-                      <label className="text-sm font-medium text-[#6C757D]">Admin Notes</label>
-                      <p className="text-sm bg-[#F7F9FC] p-3 rounded-lg mt-1 text-[#1A1A1A]">{order.notes}</p>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Payment Proof (under Admin Actions) */}
+          {/* Payment Proof */}
           {order.payment_proof_url && (
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-[#1A1A1A]">
-                    <ImageIcon className="w-5 h-5 mr-2" />
-                    Payment Proof
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="aspect-video bg-[#F7F9FC] rounded-lg flex items-center justify-center">
-                      <img
-                        src={order.payment_proof_url}
-                        alt="Payment Proof"
-                        className="max-w-full max-h-full object-contain rounded-lg"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden')
-                        }}
-                      />
-                      <div className="hidden text-center">
-                        <FileText className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
-                        <p className="text-sm text-[#6C757D]">Unable to preview file</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-center">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(order.payment_proof_url, '_blank')}
-                        className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Activity Timeline */}
-          <div className="lg:col-span-1">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-[#1A1A1A]">
-                  <Activity className="w-5 h-5 mr-2" />
-                  Activity
+                  <ImageIcon className="w-5 h-5 mr-2" />
+                  Payment Proof
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {activity_history.length > 0 ? (
-                    <div className="relative">
-                      {/* Timeline line */}
-                      <div className="absolute left-2 top-0 bottom-0 w-px bg-[#E0E6ED]"></div>
-                      
-                      {activity_history.map((activity, index) => (
-                        <div key={activity.id} className="relative flex items-start space-x-3 pb-4">
-                          {/* Timeline dot */}
-                          <div className="flex-shrink-0 w-4 h-4 bg-[#3D8BFF] rounded-full border-2 border-white relative z-10"></div>
-                          
-                          {/* Activity content */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-[#1A1A1A]">{activity.action_description}</p>
-                            <div className="flex items-center space-x-1 text-xs text-[#6C757D] mt-1">
-                              <CalendarDays className="w-3 h-3" />
-                              <span>{formatRelativeTime(activity.created_at)}</span>
-                              {activity.user?.full_name && (
-                                <>
-                                  <span>•</span>
-                                  <span>{activity.user.full_name}</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                <div className="space-y-4">
+                  <div className="aspect-video bg-[#F7F9FC] rounded-lg flex items-center justify-center">
+                    <img
+                      src={order.payment_proof_url}
+                      alt="Payment Proof"
+                      className="max-w-full max-h-full object-contain rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                      }}
+                    />
+                    <div className="hidden text-center">
+                      <FileText className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
+                      <p className="text-sm text-[#6C757D]">Unable to preview file</p>
                     </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Activity className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
-                      <p className="text-sm text-[#6C757D]">No activity yet</p>
-                    </div>
-                  )}
+                  </div>
+                  <div className="flex justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(order.payment_proof_url, '_blank')}
+                      className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          )}
+
+          {/* Notes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-[#1A1A1A]">
+                <FileText className="w-5 h-5 mr-2" />
+                Notes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {order.notes ? (
+                <div>
+                  <label className="text-sm font-medium text-[#6C757D]">Admin Notes</label>
+                  <p className="text-sm bg-[#F7F9FC] p-3 rounded-lg mt-1 text-[#1A1A1A]">{order.notes}</p>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
+                  <p className="text-sm text-[#6C757D]">No notes added yet</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
