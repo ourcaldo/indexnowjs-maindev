@@ -635,6 +635,29 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes  
 
+**ROLE-BASED ACCESS CONTROL FOR TEST BACKEND IMPLEMENTED (January 27, 2025)**
+- ✅ **CREATED USER PROFILE HOOK**: Implemented `useUserProfile` hook to fetch user profile with role information
+  - **User Profile Hook**: Created `hooks/useUserProfile.ts` with comprehensive user profile fetching and role detection
+  - **Role Information**: Hook provides `role`, `isAdmin`, and `isSuperAdmin` properties for access control
+  - **Loading States**: Proper loading and error handling for smooth user experience
+  - **Database Integration**: Fetches role information from `indb_auth_user_profiles` table using Supabase
+- ✅ **SIDEBAR MENU ROLE PROTECTION**: Enhanced sidebar component with conditional menu item rendering
+  - **Conditional Rendering**: "Test Backend" menu item now only appears for users with `super_admin` role
+  - **Dynamic Menu Generation**: Menu items array built dynamically based on user role permissions
+  - **Seamless Integration**: Existing menu functionality preserved while adding role-based filtering
+  - **TypeScript Safety**: Fixed pathname null safety issues with proper optional chaining
+- ✅ **PAGE-LEVEL ROUTE PROTECTION**: Added comprehensive access control to Test Backend page
+  - **Role Verification**: Page checks user role on component mount using useUserProfile hook
+  - **Access Denied UI**: Professional access denied page with clear messaging and visual indicators
+  - **Auto Redirect**: Non-authorized users automatically redirected to dashboard after 3 seconds
+  - **Loading States**: Proper loading spinner while checking user permissions
+  - **Security Enhancement**: Prevents direct URL access to Test Backend functionality
+- ✅ **SECURITY IMPLEMENTATION**: Complete role-based access control system for sensitive features
+  - **Menu Level**: Test Backend menu item hidden from sidebar for non-super_admin users
+  - **Page Level**: Direct page access blocked with user-friendly error message and redirect
+  - **Role Detection**: Leverages existing user profile system and database role assignments
+  - **Professional UX**: Clean access denied interface following project color scheme
+
 **ADMIN ORDER STATUS UPDATE FIX & LAYOUT REDESIGN COMPLETE (January 27, 2025)**
 - ✅ **FIXED ORDER STATUS UPDATE VALIDATION**: Resolved critical issue preventing status changes from 'pending' to 'completed'
   - **Root Cause**: API validation was only allowing updates from 'proof_uploaded' status

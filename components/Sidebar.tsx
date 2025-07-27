@@ -21,6 +21,7 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
+import { useUserProfile } from '@/hooks/useUserProfile'
 
 // Simple Button component using new color palette
 const Button = ({ children, className = '', variant = 'ghost', size = 'sm', onClick, ...props }: any) => {
@@ -69,6 +70,9 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   // Site settings hooks
   const siteName = useSiteName()
   const logoUrl = useSiteLogo(!isCollapsed) // Full logo when expanded, icon when collapsed
+  
+  // Get user profile with role information
+  const { user: userProfile } = useUserProfile()
 
   const handleLogout = async () => {
     try {
@@ -79,7 +83,8 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
     }
   }
 
-  const menuItems = [
+  // Define menu items with conditional Test Backend item
+  const baseMenuItems = [
     {
       label: 'Dashboard',
       href: '/dashboard',
@@ -111,21 +116,28 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       label: 'Billing & Payment',
       href: '/dashboard/billing',
       icon: CreditCard,
-      active: pathname.startsWith('/dashboard/billing')
+      active: pathname?.startsWith('/dashboard/billing') || false
     },
     {
       label: 'Settings',
       href: '/dashboard/settings',
       icon: Settings,
       active: pathname === '/dashboard/settings'
-    },
-    {
-      label: 'Test Backend',
-      href: '/dashboard/test-backend',
-      icon: Activity,
-      active: pathname === '/dashboard/test-backend'
     }
   ]
+
+  // Add Test Backend menu item only for super_admin users
+  const menuItems = userProfile?.isSuperAdmin 
+    ? [
+        ...baseMenuItems,
+        {
+          label: 'Test Backend',
+          href: '/dashboard/test-backend',
+          icon: Activity,
+          active: pathname === '/dashboard/test-backend'
+        }
+      ]
+    : baseMenuItems
 
   return (
     <>
