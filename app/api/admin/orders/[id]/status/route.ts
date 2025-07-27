@@ -119,10 +119,10 @@ export async function PATCH(
     // Attach user data to transaction
     currentTransaction.user = userProfile
 
-    // Validate current status - only allow updates from 'proof_uploaded'
-    if (currentTransaction.transaction_status !== 'proof_uploaded') {
+    // Validate current status - can't update if already completed or failed
+    if (currentTransaction.transaction_status === 'completed' || currentTransaction.transaction_status === 'failed') {
       return NextResponse.json(
-        { error: 'Can only update transactions with status "proof_uploaded"' },
+        { error: 'Cannot update transactions that are already completed or failed' },
         { status: 400 }
       )
     }

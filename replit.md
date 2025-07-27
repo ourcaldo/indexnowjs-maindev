@@ -620,7 +620,13 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes  
 
-**ADMIN ORDER DETAIL PAGE LAYOUT REDESIGN & TRANSACTION HISTORY TABLE COMPLETE (January 27, 2025)**
+**ADMIN ORDER STATUS UPDATE FIX & LAYOUT REDESIGN COMPLETE (January 27, 2025)**
+- ✅ **FIXED ORDER STATUS UPDATE VALIDATION**: Resolved critical issue preventing status changes from 'pending' to 'completed'
+  - **Root Cause**: API validation was only allowing updates from 'proof_uploaded' status
+  - **Solution**: Changed validation to allow updates from any status EXCEPT 'completed' or 'failed'
+  - **Business Logic**: Admins can now update orders from pending, proof_uploaded, or any other status to completed/failed
+  - **Error Message Updated**: Clear error message when trying to update already completed/failed orders
+- ✅ **ADMIN ORDER DETAIL PAGE LAYOUT REDESIGN & TRANSACTION HISTORY TABLE COMPLETE**
 - ✅ **COMPLETELY REDESIGNED ADMIN ORDER DETAIL PAGE**: Fixed all layout, organization, and color scheme issues
   - **Eliminated Masonry Layout Issues**: Replaced problematic 2-column uneven layout with properly organized stacked sections
   - **Removed Status Duplication**: Eliminated redundant status display from Admin Actions section, now only shown in header and order details
