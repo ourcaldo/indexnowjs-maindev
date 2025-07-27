@@ -657,11 +657,13 @@ JWT_SECRET=[jwt-secret-key]
   - **Page Level**: Direct page access blocked with user-friendly error message and redirect
   - **Role Detection**: Leverages existing user profile system and database role assignments
   - **Professional UX**: Clean access denied interface following project color scheme
-- ✅ **DASHBOARD UI BUG FIX**: Fixed schedule text wrapping issue in Recent Jobs table
+- ✅ **DASHBOARD UI BUG FIXES**: Fixed schedule text wrapping and job name display issues in Recent Jobs table
   - **Schedule Badge Fix**: Added `whitespace-nowrap` to schedule badge in dashboard Recent Jobs table
   - **Single Line Display**: "one-time" schedule text now displays properly in single line instead of splitting
+  - **Job Name Display**: Changed job name column to show actual job names instead of truncated IDs
+  - **Fallback Logic**: Uses job name when available, falls back to ID format if name is missing
   - **Visual Consistency**: Maintains clean table layout with proper badge styling throughout dashboard
-  - **User Experience**: Improved readability and professional appearance of job schedule information
+  - **User Experience**: Improved readability and professional appearance of job information
 
 **ADMIN ORDER STATUS UPDATE FIX & LAYOUT REDESIGN COMPLETE (January 27, 2025)**
 - ✅ **FIXED ORDER STATUS UPDATE VALIDATION**: Resolved critical issue preventing status changes from 'pending' to 'completed'

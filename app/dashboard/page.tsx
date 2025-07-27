@@ -531,7 +531,7 @@ export default function Dashboard() {
                   onMouseLeave={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = 'transparent'}
                 >
                   <td className="py-3 px-4 font-bold" style={{color: '#1A1A1A'}}>
-                    #{job.id.slice(-12)}
+                    {job.name || `#${job.id.slice(-12)}`}
                   </td>
                   <td className="py-3 px-4" style={{color: '#6C757D'}}>
                     {formatDate(job.created_at)}
