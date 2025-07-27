@@ -15,6 +15,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Allow public routes (landing page, register, etc.)
+  const publicRoutes = ['/', '/register', '/forgot-password', '/dashboard/login']
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next()
+  }
+
   // Handle regular routes
   let response = NextResponse.next({
     request: {
