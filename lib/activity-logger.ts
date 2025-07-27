@@ -97,13 +97,47 @@ export const ActivityEventTypes = {
   
   // Admin Activities
   ADMIN_LOGIN: 'admin_login',
+  ADMIN_DASHBOARD_VIEW: 'admin_dashboard_view',
+  ADMIN_STATS_VIEW: 'admin_stats_view',
   USER_MANAGEMENT: 'user_management',
   USER_SUSPEND: 'user_suspend',
   USER_UNSUSPEND: 'user_unsuspend',
   USER_PASSWORD_RESET: 'user_password_reset',
   USER_PROFILE_UPDATE: 'user_profile_update',
   USER_ROLE_CHANGE: 'user_role_change',
+  USER_QUOTA_RESET: 'user_quota_reset',
+  USER_PACKAGE_CHANGE: 'user_package_change',
+  USER_SUBSCRIPTION_EXTEND: 'user_subscription_extend',
+  
+  // Admin Settings
   ADMIN_SETTINGS: 'admin_settings',
+  SITE_SETTINGS_UPDATE: 'site_settings_update',
+  SITE_SETTINGS_VIEW: 'site_settings_view',
+  PAYMENT_GATEWAY_CREATE: 'payment_gateway_create',
+  PAYMENT_GATEWAY_UPDATE: 'payment_gateway_update',
+  PAYMENT_GATEWAY_DELETE: 'payment_gateway_delete',
+  PAYMENT_GATEWAY_VIEW: 'payment_gateway_view',
+  PACKAGE_CREATE: 'package_create',
+  PACKAGE_UPDATE: 'package_update',
+  PACKAGE_DELETE: 'package_delete',
+  PACKAGE_VIEW: 'package_view',
+  
+  // Admin Orders
+  ORDER_MANAGEMENT: 'order_management',
+  ORDER_STATUS_UPDATE: 'order_status_update',
+  ORDER_VIEW: 'admin_order_view',
+  ORDER_APPROVE: 'order_approve',
+  ORDER_REJECT: 'order_reject',
+  
+  // Admin CMS
+  CMS_POST_CREATE: 'cms_post_create',
+  CMS_POST_UPDATE: 'cms_post_update',
+  CMS_POST_DELETE: 'cms_post_delete',
+  CMS_POST_VIEW: 'cms_post_view',
+  CMS_PAGE_CREATE: 'cms_page_create',
+  CMS_PAGE_UPDATE: 'cms_page_update',
+  CMS_PAGE_DELETE: 'cms_page_delete',
+  CMS_PAGE_VIEW: 'cms_page_view',
   
   // Page Views & Navigation
   PAGE_VIEW: 'page_view',
@@ -430,6 +464,12 @@ export class ActivityLogger {
       eventType = ActivityEventTypes.USER_SECURITY_VIEW
     } else if (action.includes('activity')) {
       eventType = ActivityEventTypes.USER_ACTIVITY_VIEW
+    } else if (action.includes('quota')) {
+      eventType = ActivityEventTypes.USER_QUOTA_RESET
+    } else if (action.includes('package')) {
+      eventType = ActivityEventTypes.USER_PACKAGE_CHANGE
+    } else if (action.includes('extend')) {
+      eventType = ActivityEventTypes.USER_SUBSCRIPTION_EXTEND
     }
 
     return this.logActivity({
@@ -529,5 +569,75 @@ export class ActivityLogger {
       logger.error({ error: error.message }, 'Exception while fetching all activity logs')
       return []
     }
+  }
+
+  /**
+   * Log admin dashboard activities
+   */
+  static async logAdminDashboardActivity(userId: string, eventType: string, actionDescription: string, request?: NextRequest, metadata?: Record<string, any>) {
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription,
+      request,
+      metadata: {
+        adminDashboard: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log admin settings activities
+   */
+  static async logAdminSettingsActivity(userId: string, eventType: string, actionDescription: string, request?: NextRequest, metadata?: Record<string, any>) {
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription,
+      targetType: 'settings',
+      request,
+      metadata: {
+        adminSettings: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log admin order activities
+   */
+  static async logAdminOrderActivity(userId: string, eventType: string, orderId: string, actionDescription: string, request?: NextRequest, metadata?: Record<string, any>) {
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription,
+      targetType: 'order',
+      targetId: orderId,
+      request,
+      metadata: {
+        adminOrderManagement: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log admin CMS activities
+   */
+  static async logAdminCMSActivity(userId: string, eventType: string, contentId: string, contentType: 'post' | 'page', actionDescription: string, request?: NextRequest, metadata?: Record<string, any>) {
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription,
+      targetType: contentType,
+      targetId: contentId,
+      request,
+      metadata: {
+        adminCMS: true,
+        contentType,
+        ...metadata
+      }
+    })
   }
 }

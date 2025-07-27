@@ -41,6 +41,7 @@ const createServiceAccountSchema = z.object({
 
 // Use the same EncryptionService as the main system
 import { EncryptionService } from '@/lib/encryption'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
 
 export const GET = apiRouteWrapper(async (request: NextRequest, auth: AuthenticatedRequest, endpoint: string) => {
   // Fetch user's service accounts with proper error handling
@@ -284,6 +285,28 @@ export const POST = apiRouteWrapper(async (request: NextRequest, auth: Authentic
     email,
     endpoint
   }, 'Service account created successfully')
+
+  // Log service account creation activity
+  try {
+    await ActivityLogger.logServiceAccountActivity(
+      auth.userId,
+      ActivityEventTypes.SERVICE_ACCOUNT_ADD,
+      createResult.data.id,
+      `Added Google service account: ${name} (${email})`,
+      request,
+      {
+        serviceAccountName: name,
+        serviceAccountEmail: email,
+        packageData: packageData?.name,
+        quotaLimits: {
+          dailyQuotaLimit: createResult.data.daily_quota_limit,
+          minuteQuotaLimit: createResult.data.minute_quota_limit
+        }
+      }
+    )
+  } catch (logError) {
+    console.error('Failed to log service account creation activity:', logError)
+  }
 
   return createApiResponse({
     service_account: createResult.data,

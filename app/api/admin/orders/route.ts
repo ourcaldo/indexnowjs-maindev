@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireServerAdminAuth } from '@/lib/server-auth'
 import { createClient } from '@supabase/supabase-js'
-import { ActivityLogger } from '@/lib/activity-logger'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +12,23 @@ export async function GET(request: NextRequest) {
   try {
     // Verify admin authentication
     const adminUser = await requireServerAdminAuth(request)
+    
+    // Log admin order management access
+    try {
+      await ActivityLogger.logAdminDashboardActivity(
+        adminUser.id,
+        ActivityEventTypes.ORDER_MANAGEMENT,
+        'Accessed order management interface',
+        request,
+        {
+          section: 'order_management',
+          action: 'view_orders',
+          adminUser: adminUser.email
+        }
+      )
+    } catch (logError) {
+      console.error('Failed to log admin order activity:', logError)
+    }
 
     // Parse query parameters
     const { searchParams } = new URL(request.url)

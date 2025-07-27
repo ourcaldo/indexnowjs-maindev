@@ -12,6 +12,7 @@ import {
   XCircle
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useAdminDashboardLogger } from '@/hooks/use-admin-activity-logger'
 
 interface DashboardStats {
   total_users: number
@@ -32,9 +33,12 @@ interface DashboardStats {
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const { logDashboardView, logStatsRefresh } = useAdminDashboardLogger()
 
   useEffect(() => {
     fetchDashboardStats()
+    // Log admin dashboard access
+    logDashboardView()
   }, [])
 
   const fetchDashboardStats = async () => {
@@ -58,6 +62,10 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json()
         setStats(data.stats)
+        // Log stats refresh if this is a manual refresh
+        if (stats !== null) {
+          logStatsRefresh()
+        }
       } else {
         console.error('Error fetching dashboard stats:', response.status)
         const errorData = await response.text()

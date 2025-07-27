@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
 
 export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
@@ -50,6 +51,24 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
         { error: 'Failed to delete service account' },
         { status: 500 }
       )
+    }
+
+    // Log service account deletion activity
+    try {
+      await ActivityLogger.logServiceAccountActivity(
+        user.id,
+        ActivityEventTypes.SERVICE_ACCOUNT_DELETE,
+        params.id,
+        `Deleted Google service account: ${serviceAccount.name} (${serviceAccount.email})`,
+        request,
+        {
+          serviceAccountName: serviceAccount.name,
+          serviceAccountEmail: serviceAccount.email,
+          wasActive: serviceAccount.is_active
+        }
+      )
+    } catch (logError) {
+      console.error('Failed to log service account deletion activity:', logError)
     }
 
     return NextResponse.json({

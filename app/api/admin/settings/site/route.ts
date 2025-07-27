@@ -1,11 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireSuperAdminAuth } from '@/lib/admin-auth'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
-    await requireSuperAdminAuth(request)
+    const authResult = await requireSuperAdminAuth(request)
+    
+    // Log admin settings access
+    if (authResult?.id) {
+      try {
+        await ActivityLogger.logAdminSettingsActivity(
+          authResult.id,
+          ActivityEventTypes.SITE_SETTINGS_VIEW,
+          'Accessed site settings configuration',
+          request,
+          {
+            section: 'site_settings',
+            action: 'view_settings',
+            adminEmail: authResult.email
+          }
+        )
+      } catch (logError) {
+        console.error('Failed to log admin settings activity:', logError)
+      }
+    }
 
     // Fetch site settings
     const { data: settings, error } = await supabaseAdmin
@@ -88,23 +108,25 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    // Log admin activity
-    try {
-      await supabaseAdmin
-        .from('indb_admin_activity_logs')
-        .insert({
-          admin_id: adminUser.id,
-          action_type: 'system_settings',
-          action_description: 'Updated site settings',
-          target_type: 'site_settings',
-          target_id: settings.id,
-          metadata: { 
-            changes: Object.keys(body).filter(key => key !== 'id'),
-            site_name 
+    // Log site settings update
+    if (adminUser?.id) {
+      try {
+        await ActivityLogger.logAdminSettingsActivity(
+          adminUser.id,
+          ActivityEventTypes.SITE_SETTINGS_UPDATE,
+          'Updated site settings configuration',
+          request,
+          {
+            section: 'site_settings',
+            action: 'update_settings',
+            adminEmail: adminUser.email,
+            updatedFields: Object.keys(body).filter(key => key !== 'id').join(', '),
+            siteName: site_name
           }
-        })
-    } catch (logError) {
-      console.error('Failed to log admin activity:', logError)
+        )
+      } catch (logError) {
+        console.error('Failed to log site settings update activity:', logError)
+      }
     }
 
     return NextResponse.json({ 
