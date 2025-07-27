@@ -147,9 +147,9 @@ export default function Register() {
                 src={logoUrl} 
                 alt={`${siteName} Logo`}
                 style={{
-                  height: '72px',
+                  height: '54px',
                   width: 'auto',
-                  maxWidth: '360px',
+                  maxWidth: '270px',
                   filter: 'brightness(0) invert(1)' // Make logo white for dark background
                 }}
               />
@@ -212,9 +212,9 @@ export default function Register() {
                 src={logoUrl} 
                 alt={`${siteName} Logo`}
                 style={{
-                  height: '96px',
+                  height: '72px',
                   width: 'auto',
-                  maxWidth: '480px'
+                  maxWidth: '360px'
                 }}
               />
             ) : (

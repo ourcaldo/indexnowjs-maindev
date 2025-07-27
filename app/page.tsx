@@ -142,9 +142,9 @@ export default function Login() {
                 src={logoUrl} 
                 alt={`${siteName} Logo`}
                 style={{
-                  height: '96px',
+                  height: '72px',
                   width: 'auto',
-                  maxWidth: '480px'
+                  maxWidth: '360px'
                 }}
               />
             ) : (
