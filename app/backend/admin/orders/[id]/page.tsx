@@ -308,7 +308,7 @@ export default function AdminOrderDetailPage() {
   if (!orderData) return null
 
   const { order, activity_history } = orderData
-  const canUpdateStatus = ['proof_uploaded', 'pending', 'failed'].includes(order.transaction_status)
+  const canUpdateStatus = ['proof_uploaded', 'pending'].includes(order.transaction_status)
 
   return (
     <div className="space-y-6">
