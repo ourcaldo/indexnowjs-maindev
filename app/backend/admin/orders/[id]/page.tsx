@@ -765,7 +765,6 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {/* Status Change Modal */}
       <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -803,7 +802,6 @@ export default function AdminOrderDetailPage() {
                 value={statusNotes}
                 onChange={(e) => setStatusNotes(e.target.value)}
                 className="border-[#E0E6ED]"
-                rows={3}
               />
             </div>
           </div>
