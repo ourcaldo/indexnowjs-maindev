@@ -43,379 +43,394 @@ If an updates affectig the database and RLS. You need to provide the SQL Query f
 
 All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 
-| table_name                     | column_name                 | data_type                | is_nullable |
-| ------------------------------ | --------------------------- | ------------------------ | ----------- |
-| admin_dashboard_stats          | total_users                 | bigint                   | YES         |
-| admin_dashboard_stats          | regular_users               | bigint                   | YES         |
-| admin_dashboard_stats          | admin_users                 | bigint                   | YES         |
-| admin_dashboard_stats          | super_admin_users           | bigint                   | YES         |
-| admin_dashboard_stats          | total_jobs                  | bigint                   | YES         |
-| admin_dashboard_stats          | active_jobs                 | bigint                   | YES         |
-| admin_dashboard_stats          | completed_jobs              | bigint                   | YES         |
-| admin_dashboard_stats          | failed_jobs                 | bigint                   | YES         |
-| admin_dashboard_stats          | total_service_accounts      | bigint                   | YES         |
-| admin_dashboard_stats          | active_service_accounts     | bigint                   | YES         |
-| admin_dashboard_stats          | daily_api_requests          | bigint                   | YES         |
-| admin_dashboard_stats          | published_posts             | bigint                   | YES         |
-| admin_dashboard_stats          | published_pages             | bigint                   | YES         |
-| indb_analytics_daily_stats     | id                          | uuid                     | NO          |
-| indb_analytics_daily_stats     | user_id                     | uuid                     | NO          |
-| indb_analytics_daily_stats     | date                        | date                     | NO          |
-| indb_analytics_daily_stats     | total_jobs                  | integer                  | YES         |
-| indb_analytics_daily_stats     | completed_jobs              | integer                  | YES         |
-| indb_analytics_daily_stats     | failed_jobs                 | integer                  | YES         |
-| indb_analytics_daily_stats     | total_urls_submitted        | integer                  | YES         |
-| indb_analytics_daily_stats     | total_urls_indexed          | integer                  | YES         |
-| indb_analytics_daily_stats     | total_urls_failed           | integer                  | YES         |
-| indb_analytics_daily_stats     | quota_usage                 | integer                  | YES         |
-| indb_analytics_daily_stats     | created_at                  | timestamp with time zone | YES         |
-| indb_analytics_daily_stats     | updated_at                  | timestamp with time zone | YES         |
-| indb_analytics_error_stats     | error_date                  | date                     | YES         |
-| indb_analytics_error_stats     | user_id                     | uuid                     | YES         |
-| indb_analytics_error_stats     | error_type                  | text                     | YES         |
-| indb_analytics_error_stats     | severity                    | text                     | YES         |
-| indb_analytics_error_stats     | error_count                 | bigint                   | YES         |
-| indb_analytics_error_stats     | affected_endpoints          | bigint                   | YES         |
-| indb_analytics_error_stats     | last_occurrence             | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | id                          | uuid                     | NO          |
-| indb_auth_user_profiles        | user_id                     | uuid                     | NO          |
-| indb_auth_user_profiles        | full_name                   | text                     | YES         |
-| indb_auth_user_profiles        | role                        | text                     | YES         |
-| indb_auth_user_profiles        | email_notifications         | boolean                  | YES         |
-| indb_auth_user_profiles        | created_at                  | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | updated_at                  | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | phone_number                | text                     | YES         |
-| indb_auth_user_profiles        | package_id                  | uuid                     | YES         |
-| indb_auth_user_profiles        | subscribed_at               | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | expires_at                  | timestamp with time zone | YES         |
-| indb_auth_user_profiles        | daily_quota_used            | integer                  | YES         |
-| indb_auth_user_profiles        | daily_quota_reset_date      | date                     | YES         |
-| indb_auth_user_settings        | id                          | uuid                     | NO          |
-| indb_auth_user_settings        | user_id                     | uuid                     | NO          |
-| indb_auth_user_settings        | timeout_duration            | integer                  | YES         |
-| indb_auth_user_settings        | retry_attempts              | integer                  | YES         |
-| indb_auth_user_settings        | email_job_completion        | boolean                  | YES         |
-| indb_auth_user_settings        | email_job_failure           | boolean                  | YES         |
-| indb_auth_user_settings        | email_quota_alerts          | boolean                  | YES         |
-| indb_auth_user_settings        | created_at                  | timestamp with time zone | YES         |
-| indb_auth_user_settings        | updated_at                  | timestamp with time zone | YES         |
-| indb_auth_user_settings        | default_schedule            | text                     | YES         |
-| indb_auth_user_settings        | email_daily_report          | boolean                  | YES         |
-| indb_cms_pages                 | id                          | uuid                     | NO          |
-| indb_cms_pages                 | title                       | text                     | NO          |
-| indb_cms_pages                 | slug                        | text                     | NO          |
-| indb_cms_pages                 | content                     | text                     | YES         |
-| indb_cms_pages                 | template                    | text                     | YES         |
-| indb_cms_pages                 | featured_image_url          | text                     | YES         |
-| indb_cms_pages                 | author_id                   | uuid                     | YES         |
-| indb_cms_pages                 | status                      | text                     | YES         |
-| indb_cms_pages                 | is_homepage                 | boolean                  | YES         |
-| indb_cms_pages                 | meta_title                  | text                     | YES         |
-| indb_cms_pages                 | meta_description            | text                     | YES         |
-| indb_cms_pages                 | custom_css                  | text                     | YES         |
-| indb_cms_pages                 | custom_js                   | text                     | YES         |
-| indb_cms_pages                 | published_at                | timestamp with time zone | YES         |
-| indb_cms_pages                 | created_at                  | timestamp with time zone | YES         |
-| indb_cms_pages                 | updated_at                  | timestamp with time zone | YES         |
-| indb_cms_posts                 | id                          | uuid                     | NO          |
-| indb_cms_posts                 | title                       | text                     | NO          |
-| indb_cms_posts                 | slug                        | text                     | NO          |
-| indb_cms_posts                 | content                     | text                     | YES         |
-| indb_cms_posts                 | excerpt                     | text                     | YES         |
-| indb_cms_posts                 | featured_image_url          | text                     | YES         |
-| indb_cms_posts                 | author_id                   | uuid                     | YES         |
-| indb_cms_posts                 | status                      | text                     | YES         |
-| indb_cms_posts                 | post_type                   | text                     | YES         |
-| indb_cms_posts                 | meta_title                  | text                     | YES         |
-| indb_cms_posts                 | meta_description            | text                     | YES         |
-| indb_cms_posts                 | tags                        | jsonb                    | YES         |
-| indb_cms_posts                 | published_at                | timestamp with time zone | YES         |
-| indb_cms_posts                 | created_at                  | timestamp with time zone | YES         |
-| indb_cms_posts                 | updated_at                  | timestamp with time zone | YES         |
-| indb_error_analytics           | error_date                  | date                     | YES         |
-| indb_error_analytics           | user_id                     | uuid                     | YES         |
-| indb_error_analytics           | error_type                  | text                     | YES         |
-| indb_error_analytics           | severity                    | text                     | YES         |
-| indb_error_analytics           | error_count                 | bigint                   | YES         |
-| indb_error_analytics           | affected_endpoints          | bigint                   | YES         |
-| indb_error_analytics           | last_occurrence             | timestamp with time zone | YES         |
-| indb_google_quota_alerts       | id                          | uuid                     | NO          |
-| indb_google_quota_alerts       | service_account_id          | uuid                     | NO          |
-| indb_google_quota_alerts       | alert_type                  | text                     | NO          |
-| indb_google_quota_alerts       | threshold_percentage        | integer                  | NO          |
-| indb_google_quota_alerts       | is_active                   | boolean                  | YES         |
-| indb_google_quota_alerts       | last_triggered_at           | timestamp with time zone | YES         |
-| indb_google_quota_alerts       | created_at                  | timestamp with time zone | YES         |
-| indb_google_quota_alerts       | updated_at                  | timestamp with time zone | YES         |
-| indb_google_quota_usage        | id                          | uuid                     | NO          |
-| indb_google_quota_usage        | service_account_id          | uuid                     | NO          |
-| indb_google_quota_usage        | date                        | date                     | NO          |
-| indb_google_quota_usage        | requests_made               | integer                  | YES         |
-| indb_google_quota_usage        | requests_successful         | integer                  | YES         |
-| indb_google_quota_usage        | requests_failed             | integer                  | YES         |
-| indb_google_quota_usage        | last_request_at             | timestamp with time zone | YES         |
-| indb_google_quota_usage        | created_at                  | timestamp with time zone | YES         |
-| indb_google_quota_usage        | updated_at                  | timestamp with time zone | YES         |
-| indb_google_quota_usage        | user_id                     | uuid                     | YES         |
-| indb_google_service_accounts   | id                          | uuid                     | NO          |
-| indb_google_service_accounts   | user_id                     | uuid                     | NO          |
-| indb_google_service_accounts   | name                        | text                     | NO          |
-| indb_google_service_accounts   | email                       | text                     | NO          |
-| indb_google_service_accounts   | encrypted_credentials       | text                     | NO          |
-| indb_google_service_accounts   | is_active                   | boolean                  | YES         |
-| indb_google_service_accounts   | daily_quota_limit           | integer                  | YES         |
-| indb_google_service_accounts   | minute_quota_limit          | integer                  | YES         |
-| indb_google_service_accounts   | created_at                  | timestamp with time zone | YES         |
-| indb_google_service_accounts   | updated_at                  | timestamp with time zone | YES         |
-| indb_google_service_accounts   | encrypted_access_token      | text                     | YES         |
-| indb_google_service_accounts   | access_token_expires_at     | timestamp with time zone | YES         |
-| indb_indexing_job_logs         | id                          | uuid                     | NO          |
-| indb_indexing_job_logs         | job_id                      | uuid                     | NO          |
-| indb_indexing_job_logs         | level                       | text                     | NO          |
-| indb_indexing_job_logs         | message                     | text                     | NO          |
-| indb_indexing_job_logs         | metadata                    | jsonb                    | YES         |
-| indb_indexing_job_logs         | created_at                  | timestamp with time zone | YES         |
-| indb_indexing_job_logs         | correlation_id              | uuid                     | YES         |
-| indb_indexing_job_logs         | error_severity              | text                     | YES         |
-| indb_indexing_jobs             | id                          | uuid                     | NO          |
-| indb_indexing_jobs             | user_id                     | uuid                     | NO          |
-| indb_indexing_jobs             | name                        | text                     | NO          |
-| indb_indexing_jobs             | type                        | text                     | NO          |
-| indb_indexing_jobs             | status                      | text                     | YES         |
-| indb_indexing_jobs             | schedule_type               | text                     | YES         |
-| indb_indexing_jobs             | cron_expression             | text                     | YES         |
-| indb_indexing_jobs             | source_data                 | jsonb                    | YES         |
-| indb_indexing_jobs             | total_urls                  | integer                  | YES         |
-| indb_indexing_jobs             | processed_urls              | integer                  | YES         |
-| indb_indexing_jobs             | successful_urls             | integer                  | YES         |
-| indb_indexing_jobs             | failed_urls                 | integer                  | YES         |
-| indb_indexing_jobs             | progress_percentage         | numeric                  | YES         |
-| indb_indexing_jobs             | started_at                  | timestamp with time zone | YES         |
-| indb_indexing_jobs             | completed_at                | timestamp with time zone | YES         |
-| indb_indexing_jobs             | next_run_at                 | timestamp with time zone | YES         |
-| indb_indexing_jobs             | error_message               | text                     | YES         |
-| indb_indexing_jobs             | created_at                  | timestamp with time zone | YES         |
-| indb_indexing_jobs             | updated_at                  | timestamp with time zone | YES         |
-| indb_indexing_jobs             | locked_at                   | timestamp with time zone | YES         |
-| indb_indexing_jobs             | locked_by                   | text                     | YES         |
-| indb_indexing_url_submissions  | id                          | uuid                     | NO          |
-| indb_indexing_url_submissions  | job_id                      | uuid                     | NO          |
-| indb_indexing_url_submissions  | service_account_id          | uuid                     | YES         |
-| indb_indexing_url_submissions  | url                         | text                     | NO          |
-| indb_indexing_url_submissions  | status                      | text                     | YES         |
-| indb_indexing_url_submissions  | submitted_at                | timestamp with time zone | YES         |
-| indb_indexing_url_submissions  | indexed_at                  | timestamp with time zone | YES         |
-| indb_indexing_url_submissions  | response_data               | jsonb                    | YES         |
-| indb_indexing_url_submissions  | error_message               | text                     | YES         |
-| indb_indexing_url_submissions  | retry_count                 | integer                  | YES         |
-| indb_indexing_url_submissions  | created_at                  | timestamp with time zone | YES         |
-| indb_indexing_url_submissions  | updated_at                  | timestamp with time zone | YES         |
-| indb_notifications_dashboard   | id                          | uuid                     | NO          |
-| indb_notifications_dashboard   | user_id                     | uuid                     | NO          |
-| indb_notifications_dashboard   | type                        | text                     | NO          |
-| indb_notifications_dashboard   | title                       | text                     | NO          |
-| indb_notifications_dashboard   | message                     | text                     | NO          |
-| indb_notifications_dashboard   | is_read                     | boolean                  | YES         |
-| indb_notifications_dashboard   | action_url                  | text                     | YES         |
-| indb_notifications_dashboard   | metadata                    | jsonb                    | YES         |
-| indb_notifications_dashboard   | expires_at                  | timestamp with time zone | YES         |
-| indb_notifications_dashboard   | created_at                  | timestamp with time zone | YES         |
-| indb_notifications_email_queue | id                          | uuid                     | NO          |
-| indb_notifications_email_queue | user_id                     | uuid                     | NO          |
-| indb_notifications_email_queue | template_type               | text                     | NO          |
-| indb_notifications_email_queue | to_email                    | text                     | NO          |
-| indb_notifications_email_queue | subject                     | text                     | NO          |
-| indb_notifications_email_queue | html_content                | text                     | NO          |
-| indb_notifications_email_queue | status                      | text                     | YES         |
-| indb_notifications_email_queue | attempts                    | integer                  | YES         |
-| indb_notifications_email_queue | sent_at                     | timestamp with time zone | YES         |
-| indb_notifications_email_queue | error_message               | text                     | YES         |
-| indb_notifications_email_queue | metadata                    | jsonb                    | YES         |
-| indb_notifications_email_queue | created_at                  | timestamp with time zone | YES         |
-| indb_notifications_email_queue | updated_at                  | timestamp with time zone | YES         |
-| indb_payment_gateways          | id                          | uuid                     | NO          |
-| indb_payment_gateways          | name                        | text                     | NO          |
-| indb_payment_gateways          | slug                        | text                     | NO          |
-| indb_payment_gateways          | description                 | text                     | YES         |
-| indb_payment_gateways          | is_active                   | boolean                  | YES         |
-| indb_payment_gateways          | is_default                  | boolean                  | YES         |
-| indb_payment_gateways          | configuration               | jsonb                    | YES         |
-| indb_payment_gateways          | api_credentials             | jsonb                    | YES         |
-| indb_payment_gateways          | created_at                  | timestamp with time zone | YES         |
-| indb_payment_gateways          | updated_at                  | timestamp with time zone | YES         |
-| indb_payment_invoices          | id                          | uuid                     | NO          |
-| indb_payment_invoices          | user_id                     | uuid                     | NO          |
-| indb_payment_invoices          | subscription_id             | uuid                     | YES         |
-| indb_payment_invoices          | transaction_id              | uuid                     | YES         |
-| indb_payment_invoices          | invoice_number              | text                     | NO          |
-| indb_payment_invoices          | invoice_status              | text                     | NO          |
-| indb_payment_invoices          | subtotal                    | numeric                  | NO          |
-| indb_payment_invoices          | tax_amount                  | numeric                  | YES         |
-| indb_payment_invoices          | discount_amount             | numeric                  | YES         |
-| indb_payment_invoices          | total_amount                | numeric                  | NO          |
-| indb_payment_invoices          | currency                    | text                     | NO          |
-| indb_payment_invoices          | due_date                    | date                     | YES         |
-| indb_payment_invoices          | paid_at                     | timestamp with time zone | YES         |
-| indb_payment_invoices          | invoice_data                | jsonb                    | NO          |
-| indb_payment_invoices          | created_at                  | timestamp with time zone | YES         |
-| indb_payment_invoices          | updated_at                  | timestamp with time zone | YES         |
-| indb_payment_packages          | id                          | uuid                     | NO          |
-| indb_payment_packages          | name                        | text                     | NO          |
-| indb_payment_packages          | slug                        | text                     | NO          |
-| indb_payment_packages          | description                 | text                     | YES         |
-| indb_payment_packages          | price                       | numeric                  | NO          |
-| indb_payment_packages          | currency                    | text                     | YES         |
-| indb_payment_packages          | billing_period              | text                     | YES         |
-| indb_payment_packages          | features                    | jsonb                    | YES         |
-| indb_payment_packages          | quota_limits                | jsonb                    | YES         |
-| indb_payment_packages          | is_active                   | boolean                  | YES         |
-| indb_payment_packages          | sort_order                  | integer                  | YES         |
-| indb_payment_packages          | created_at                  | timestamp with time zone | YES         |
-| indb_payment_packages          | updated_at                  | timestamp with time zone | YES         |
-| indb_payment_packages          | is_popular                  | boolean                  | YES         |
-| indb_payment_packages          | pricing_tiers               | jsonb                    | YES         |
-| indb_payment_subscriptions     | id                          | uuid                     | NO          |
-| indb_payment_subscriptions     | user_id                     | uuid                     | NO          |
-| indb_payment_subscriptions     | package_id                  | uuid                     | NO          |
-| indb_payment_subscriptions     | gateway_id                  | uuid                     | NO          |
-| indb_payment_subscriptions     | subscription_status         | text                     | NO          |
-| indb_payment_subscriptions     | billing_period              | text                     | NO          |
-| indb_payment_subscriptions     | amount_paid                 | numeric                  | NO          |
-| indb_payment_subscriptions     | currency                    | text                     | NO          |
-| indb_payment_subscriptions     | started_at                  | timestamp with time zone | YES         |
-| indb_payment_subscriptions     | expires_at                  | timestamp with time zone | YES         |
-| indb_payment_subscriptions     | auto_renew                  | boolean                  | YES         |
-| indb_payment_subscriptions     | payment_reference           | text                     | YES         |
-| indb_payment_subscriptions     | metadata                    | jsonb                    | YES         |
-| indb_payment_subscriptions     | created_at                  | timestamp with time zone | YES         |
-| indb_payment_subscriptions     | updated_at                  | timestamp with time zone | YES         |
-| indb_payment_transactions      | id                          | uuid                     | NO          |
-| indb_payment_transactions      | user_id                     | uuid                     | NO          |
-| indb_payment_transactions      | subscription_id             | uuid                     | YES         |
-| indb_payment_transactions      | package_id                  | uuid                     | NO          |
-| indb_payment_transactions      | gateway_id                  | uuid                     | NO          |
-| indb_payment_transactions      | transaction_type            | text                     | NO          |
-| indb_payment_transactions      | transaction_status          | text                     | NO          |
-| indb_payment_transactions      | amount                      | numeric                  | NO          |
-| indb_payment_transactions      | currency                    | text                     | NO          |
-| indb_payment_transactions      | payment_method              | text                     | YES         |
-| indb_payment_transactions      | payment_reference           | text                     | YES         |
-| indb_payment_transactions      | payment_proof_url           | text                     | YES         |
-| indb_payment_transactions      | gateway_transaction_id      | text                     | YES         |
-| indb_payment_transactions      | gateway_response            | jsonb                    | YES         |
-| indb_payment_transactions      | processed_at                | timestamp with time zone | YES         |
-| indb_payment_transactions      | verified_by                 | uuid                     | YES         |
-| indb_payment_transactions      | verified_at                 | timestamp with time zone | YES         |
-| indb_payment_transactions      | notes                       | text                     | YES         |
-| indb_payment_transactions      | metadata                    | jsonb                    | YES         |
-| indb_payment_transactions      | created_at                  | timestamp with time zone | YES         |
-| indb_payment_transactions      | updated_at                  | timestamp with time zone | YES         |
-| indb_security_activity_logs    | id                          | uuid                     | NO          |
-| indb_security_activity_logs    | user_id                     | uuid                     | YES         |
-| indb_security_activity_logs    | event_type                  | text                     | NO          |
-| indb_security_activity_logs    | action_description          | text                     | NO          |
-| indb_security_activity_logs    | target_type                 | text                     | YES         |
-| indb_security_activity_logs    | target_id                   | uuid                     | YES         |
-| indb_security_activity_logs    | ip_address                  | inet                     | YES         |
-| indb_security_activity_logs    | user_agent                  | text                     | YES         |
-| indb_security_activity_logs    | device_info                 | jsonb                    | YES         |
-| indb_security_activity_logs    | location_data               | jsonb                    | YES         |
-| indb_security_activity_logs    | success                     | boolean                  | YES         |
-| indb_security_activity_logs    | error_message               | text                     | YES         |
-| indb_security_activity_logs    | metadata                    | jsonb                    | YES         |
-| indb_security_activity_logs    | created_at                  | timestamp with time zone | YES         |
-| indb_security_audit_logs       | id                          | uuid                     | NO          |
-| indb_security_audit_logs       | user_id                     | uuid                     | YES         |
-| indb_security_audit_logs       | event_type                  | text                     | NO          |
-| indb_security_audit_logs       | description                 | text                     | NO          |
-| indb_security_audit_logs       | ip_address                  | inet                     | YES         |
-| indb_security_audit_logs       | user_agent                  | text                     | YES         |
-| indb_security_audit_logs       | success                     | boolean                  | YES         |
-| indb_security_audit_logs       | metadata                    | jsonb                    | YES         |
-| indb_security_audit_logs       | created_at                  | timestamp with time zone | YES         |
-| indb_security_rate_limits      | id                          | uuid                     | NO          |
-| indb_security_rate_limits      | identifier                  | text                     | NO          |
-| indb_security_rate_limits      | endpoint                    | text                     | NO          |
-| indb_security_rate_limits      | requests_count              | integer                  | YES         |
-| indb_security_rate_limits      | window_start                | timestamp with time zone | YES         |
-| indb_security_rate_limits      | created_at                  | timestamp with time zone | YES         |
-| indb_security_rate_limits      | updated_at                  | timestamp with time zone | YES         |
-| indb_site_settings             | id                          | uuid                     | NO          |
-| indb_site_settings             | site_name                   | text                     | NO          |
-| indb_site_settings             | site_description            | text                     | YES         |
-| indb_site_settings             | site_logo_url               | text                     | YES         |
-| indb_site_settings             | site_icon_url               | text                     | YES         |
-| indb_site_settings             | site_favicon_url            | text                     | YES         |
-| indb_site_settings             | contact_email               | text                     | YES         |
-| indb_site_settings             | support_email               | text                     | YES         |
-| indb_site_settings             | maintenance_mode            | boolean                  | YES         |
-| indb_site_settings             | registration_enabled        | boolean                  | YES         |
-| indb_site_settings             | created_at                  | timestamp with time zone | YES         |
-| indb_site_settings             | updated_at                  | timestamp with time zone | YES         |
-| indb_system_error_logs         | id                          | uuid                     | NO          |
-| indb_system_error_logs         | user_id                     | uuid                     | YES         |
-| indb_system_error_logs         | error_type                  | text                     | NO          |
-| indb_system_error_logs         | severity                    | text                     | NO          |
-| indb_system_error_logs         | message                     | text                     | NO          |
-| indb_system_error_logs         | user_message                | text                     | NO          |
-| indb_system_error_logs         | endpoint                    | text                     | YES         |
-| indb_system_error_logs         | http_method                 | text                     | YES         |
-| indb_system_error_logs         | status_code                 | integer                  | YES         |
-| indb_system_error_logs         | metadata                    | jsonb                    | YES         |
-| indb_system_error_logs         | stack_trace                 | text                     | YES         |
-| indb_system_error_logs         | created_at                  | timestamp with time zone | YES         |
-| indb_system_error_logs         | updated_at                  | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | id                          | uuid                     | YES         |
-| recent_jobs_with_stats         | user_id                     | uuid                     | YES         |
-| recent_jobs_with_stats         | name                        | text                     | YES         |
-| recent_jobs_with_stats         | type                        | text                     | YES         |
-| recent_jobs_with_stats         | status                      | text                     | YES         |
-| recent_jobs_with_stats         | schedule_type               | text                     | YES         |
-| recent_jobs_with_stats         | cron_expression             | text                     | YES         |
-| recent_jobs_with_stats         | source_data                 | jsonb                    | YES         |
-| recent_jobs_with_stats         | total_urls                  | integer                  | YES         |
-| recent_jobs_with_stats         | processed_urls              | integer                  | YES         |
-| recent_jobs_with_stats         | successful_urls             | integer                  | YES         |
-| recent_jobs_with_stats         | failed_urls                 | integer                  | YES         |
-| recent_jobs_with_stats         | progress_percentage         | numeric                  | YES         |
-| recent_jobs_with_stats         | started_at                  | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | completed_at                | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | next_run_at                 | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | error_message               | text                     | YES         |
-| recent_jobs_with_stats         | created_at                  | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | updated_at                  | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | locked_at                   | timestamp with time zone | YES         |
-| recent_jobs_with_stats         | locked_by                   | text                     | YES         |
-| recent_jobs_with_stats         | submission_count            | bigint                   | YES         |
-| recent_jobs_with_stats         | successful_count            | bigint                   | YES         |
-| recent_jobs_with_stats         | failed_count                | bigint                   | YES         |
-| user_billing_summary           | user_id                     | uuid                     | YES         |
-| user_billing_summary           | full_name                   | text                     | YES         |
-| user_billing_summary           | package_id                  | uuid                     | YES         |
-| user_billing_summary           | package_name                | text                     | YES         |
-| user_billing_summary           | package_slug                | text                     | YES         |
-| user_billing_summary           | subscribed_at               | timestamp with time zone | YES         |
-| user_billing_summary           | expires_at                  | timestamp with time zone | YES         |
-| user_billing_summary           | subscription_status         | text                     | YES         |
-| user_billing_summary           | current_subscription_status | text                     | YES         |
-| user_billing_summary           | total_payments              | bigint                   | YES         |
-| user_billing_summary           | total_spent                 | numeric                  | YES         |
-| user_dashboard_stats           | user_id                     | uuid                     | YES         |
-| user_dashboard_stats           | total_urls_indexed          | bigint                   | YES         |
-| user_dashboard_stats           | active_jobs                 | bigint                   | YES         |
-| user_dashboard_stats           | scheduled_jobs              | bigint                   | YES         |
-| user_dashboard_stats           | success_rate                | integer                  | YES         |
-| user_quota_summary             | user_id                     | uuid                     | YES         |
-| user_quota_summary             | total_quota_used            | bigint                   | YES         |
-| user_quota_summary             | service_account_count       | bigint                   | YES         |
-| user_quota_summary             | total_quota_limit           | bigint                   | YES         |
-| user_quota_summary             | package_name                | text                     | YES         |
-| user_quota_summary             | daily_quota_limit           | integer                  | YES         |
-| user_quota_summary             | service_accounts_limit      | integer                  | YES         |
-| user_quota_summary             | concurrent_jobs_limit       | integer                  | YES         |
-| user_quota_summary             | daily_quota_used            | bigint                   | YES         |
-| user_quota_summary             | daily_quota_reset_date      | date                     | YES         |
-| user_quota_summary             | is_unlimited                | boolean                  | YES         |
+| table_name                        | column_name                 | data_type                | is_nullable |
+| --------------------------------- | --------------------------- | ------------------------ | ----------- |
+| admin_dashboard_stats             | total_users                 | bigint                   | YES         |
+| admin_dashboard_stats             | regular_users               | bigint                   | YES         |
+| admin_dashboard_stats             | admin_users                 | bigint                   | YES         |
+| admin_dashboard_stats             | super_admin_users           | bigint                   | YES         |
+| admin_dashboard_stats             | total_jobs                  | bigint                   | YES         |
+| admin_dashboard_stats             | active_jobs                 | bigint                   | YES         |
+| admin_dashboard_stats             | completed_jobs              | bigint                   | YES         |
+| admin_dashboard_stats             | failed_jobs                 | bigint                   | YES         |
+| admin_dashboard_stats             | total_service_accounts      | bigint                   | YES         |
+| admin_dashboard_stats             | active_service_accounts     | bigint                   | YES         |
+| admin_dashboard_stats             | daily_api_requests          | bigint                   | YES         |
+| admin_dashboard_stats             | published_posts             | bigint                   | YES         |
+| admin_dashboard_stats             | published_pages             | bigint                   | YES         |
+| indb_analytics_daily_stats        | id                          | uuid                     | NO          |
+| indb_analytics_daily_stats        | user_id                     | uuid                     | NO          |
+| indb_analytics_daily_stats        | date                        | date                     | NO          |
+| indb_analytics_daily_stats        | total_jobs                  | integer                  | YES         |
+| indb_analytics_daily_stats        | completed_jobs              | integer                  | YES         |
+| indb_analytics_daily_stats        | failed_jobs                 | integer                  | YES         |
+| indb_analytics_daily_stats        | total_urls_submitted        | integer                  | YES         |
+| indb_analytics_daily_stats        | total_urls_indexed          | integer                  | YES         |
+| indb_analytics_daily_stats        | total_urls_failed           | integer                  | YES         |
+| indb_analytics_daily_stats        | quota_usage                 | integer                  | YES         |
+| indb_analytics_daily_stats        | created_at                  | timestamp with time zone | YES         |
+| indb_analytics_daily_stats        | updated_at                  | timestamp with time zone | YES         |
+| indb_analytics_error_stats        | error_date                  | date                     | YES         |
+| indb_analytics_error_stats        | user_id                     | uuid                     | YES         |
+| indb_analytics_error_stats        | error_type                  | text                     | YES         |
+| indb_analytics_error_stats        | severity                    | text                     | YES         |
+| indb_analytics_error_stats        | error_count                 | bigint                   | YES         |
+| indb_analytics_error_stats        | affected_endpoints          | bigint                   | YES         |
+| indb_analytics_error_stats        | last_occurrence             | timestamp with time zone | YES         |
+| indb_auth_user_profiles           | id                          | uuid                     | NO          |
+| indb_auth_user_profiles           | user_id                     | uuid                     | NO          |
+| indb_auth_user_profiles           | full_name                   | text                     | YES         |
+| indb_auth_user_profiles           | role                        | text                     | YES         |
+| indb_auth_user_profiles           | email_notifications         | boolean                  | YES         |
+| indb_auth_user_profiles           | created_at                  | timestamp with time zone | YES         |
+| indb_auth_user_profiles           | updated_at                  | timestamp with time zone | YES         |
+| indb_auth_user_profiles           | phone_number                | text                     | YES         |
+| indb_auth_user_profiles           | package_id                  | uuid                     | YES         |
+| indb_auth_user_profiles           | subscribed_at               | timestamp with time zone | YES         |
+| indb_auth_user_profiles           | expires_at                  | timestamp with time zone | YES         |
+| indb_auth_user_profiles           | daily_quota_used            | integer                  | YES         |
+| indb_auth_user_profiles           | daily_quota_reset_date      | date                     | YES         |
+| indb_auth_user_settings           | id                          | uuid                     | NO          |
+| indb_auth_user_settings           | user_id                     | uuid                     | NO          |
+| indb_auth_user_settings           | timeout_duration            | integer                  | YES         |
+| indb_auth_user_settings           | retry_attempts              | integer                  | YES         |
+| indb_auth_user_settings           | email_job_completion        | boolean                  | YES         |
+| indb_auth_user_settings           | email_job_failure           | boolean                  | YES         |
+| indb_auth_user_settings           | email_quota_alerts          | boolean                  | YES         |
+| indb_auth_user_settings           | created_at                  | timestamp with time zone | YES         |
+| indb_auth_user_settings           | updated_at                  | timestamp with time zone | YES         |
+| indb_auth_user_settings           | default_schedule            | text                     | YES         |
+| indb_auth_user_settings           | email_daily_report          | boolean                  | YES         |
+| indb_cms_pages                    | id                          | uuid                     | NO          |
+| indb_cms_pages                    | title                       | text                     | NO          |
+| indb_cms_pages                    | slug                        | text                     | NO          |
+| indb_cms_pages                    | content                     | text                     | YES         |
+| indb_cms_pages                    | template                    | text                     | YES         |
+| indb_cms_pages                    | featured_image_url          | text                     | YES         |
+| indb_cms_pages                    | author_id                   | uuid                     | YES         |
+| indb_cms_pages                    | status                      | text                     | YES         |
+| indb_cms_pages                    | is_homepage                 | boolean                  | YES         |
+| indb_cms_pages                    | meta_title                  | text                     | YES         |
+| indb_cms_pages                    | meta_description            | text                     | YES         |
+| indb_cms_pages                    | custom_css                  | text                     | YES         |
+| indb_cms_pages                    | custom_js                   | text                     | YES         |
+| indb_cms_pages                    | published_at                | timestamp with time zone | YES         |
+| indb_cms_pages                    | created_at                  | timestamp with time zone | YES         |
+| indb_cms_pages                    | updated_at                  | timestamp with time zone | YES         |
+| indb_cms_posts                    | id                          | uuid                     | NO          |
+| indb_cms_posts                    | title                       | text                     | NO          |
+| indb_cms_posts                    | slug                        | text                     | NO          |
+| indb_cms_posts                    | content                     | text                     | YES         |
+| indb_cms_posts                    | excerpt                     | text                     | YES         |
+| indb_cms_posts                    | featured_image_url          | text                     | YES         |
+| indb_cms_posts                    | author_id                   | uuid                     | YES         |
+| indb_cms_posts                    | status                      | text                     | YES         |
+| indb_cms_posts                    | post_type                   | text                     | YES         |
+| indb_cms_posts                    | meta_title                  | text                     | YES         |
+| indb_cms_posts                    | meta_description            | text                     | YES         |
+| indb_cms_posts                    | tags                        | jsonb                    | YES         |
+| indb_cms_posts                    | published_at                | timestamp with time zone | YES         |
+| indb_cms_posts                    | created_at                  | timestamp with time zone | YES         |
+| indb_cms_posts                    | updated_at                  | timestamp with time zone | YES         |
+| indb_error_analytics              | error_date                  | date                     | YES         |
+| indb_error_analytics              | user_id                     | uuid                     | YES         |
+| indb_error_analytics              | error_type                  | text                     | YES         |
+| indb_error_analytics              | severity                    | text                     | YES         |
+| indb_error_analytics              | error_count                 | bigint                   | YES         |
+| indb_error_analytics              | affected_endpoints          | bigint                   | YES         |
+| indb_error_analytics              | last_occurrence             | timestamp with time zone | YES         |
+| indb_google_quota_alerts          | id                          | uuid                     | NO          |
+| indb_google_quota_alerts          | service_account_id          | uuid                     | NO          |
+| indb_google_quota_alerts          | alert_type                  | text                     | NO          |
+| indb_google_quota_alerts          | threshold_percentage        | integer                  | NO          |
+| indb_google_quota_alerts          | is_active                   | boolean                  | YES         |
+| indb_google_quota_alerts          | last_triggered_at           | timestamp with time zone | YES         |
+| indb_google_quota_alerts          | created_at                  | timestamp with time zone | YES         |
+| indb_google_quota_alerts          | updated_at                  | timestamp with time zone | YES         |
+| indb_google_quota_usage           | id                          | uuid                     | NO          |
+| indb_google_quota_usage           | service_account_id          | uuid                     | NO          |
+| indb_google_quota_usage           | date                        | date                     | NO          |
+| indb_google_quota_usage           | requests_made               | integer                  | YES         |
+| indb_google_quota_usage           | requests_successful         | integer                  | YES         |
+| indb_google_quota_usage           | requests_failed             | integer                  | YES         |
+| indb_google_quota_usage           | last_request_at             | timestamp with time zone | YES         |
+| indb_google_quota_usage           | created_at                  | timestamp with time zone | YES         |
+| indb_google_quota_usage           | updated_at                  | timestamp with time zone | YES         |
+| indb_google_quota_usage           | user_id                     | uuid                     | YES         |
+| indb_google_service_accounts      | id                          | uuid                     | NO          |
+| indb_google_service_accounts      | user_id                     | uuid                     | NO          |
+| indb_google_service_accounts      | name                        | text                     | NO          |
+| indb_google_service_accounts      | email                       | text                     | NO          |
+| indb_google_service_accounts      | encrypted_credentials       | text                     | NO          |
+| indb_google_service_accounts      | is_active                   | boolean                  | YES         |
+| indb_google_service_accounts      | daily_quota_limit           | integer                  | YES         |
+| indb_google_service_accounts      | minute_quota_limit          | integer                  | YES         |
+| indb_google_service_accounts      | created_at                  | timestamp with time zone | YES         |
+| indb_google_service_accounts      | updated_at                  | timestamp with time zone | YES         |
+| indb_google_service_accounts      | encrypted_access_token      | text                     | YES         |
+| indb_google_service_accounts      | access_token_expires_at     | timestamp with time zone | YES         |
+| indb_indexing_job_logs            | id                          | uuid                     | NO          |
+| indb_indexing_job_logs            | job_id                      | uuid                     | NO          |
+| indb_indexing_job_logs            | level                       | text                     | NO          |
+| indb_indexing_job_logs            | message                     | text                     | NO          |
+| indb_indexing_job_logs            | metadata                    | jsonb                    | YES         |
+| indb_indexing_job_logs            | created_at                  | timestamp with time zone | YES         |
+| indb_indexing_job_logs            | correlation_id              | uuid                     | YES         |
+| indb_indexing_job_logs            | error_severity              | text                     | YES         |
+| indb_indexing_jobs                | id                          | uuid                     | NO          |
+| indb_indexing_jobs                | user_id                     | uuid                     | NO          |
+| indb_indexing_jobs                | name                        | text                     | NO          |
+| indb_indexing_jobs                | type                        | text                     | NO          |
+| indb_indexing_jobs                | status                      | text                     | YES         |
+| indb_indexing_jobs                | schedule_type               | text                     | YES         |
+| indb_indexing_jobs                | cron_expression             | text                     | YES         |
+| indb_indexing_jobs                | source_data                 | jsonb                    | YES         |
+| indb_indexing_jobs                | total_urls                  | integer                  | YES         |
+| indb_indexing_jobs                | processed_urls              | integer                  | YES         |
+| indb_indexing_jobs                | successful_urls             | integer                  | YES         |
+| indb_indexing_jobs                | failed_urls                 | integer                  | YES         |
+| indb_indexing_jobs                | progress_percentage         | numeric                  | YES         |
+| indb_indexing_jobs                | started_at                  | timestamp with time zone | YES         |
+| indb_indexing_jobs                | completed_at                | timestamp with time zone | YES         |
+| indb_indexing_jobs                | next_run_at                 | timestamp with time zone | YES         |
+| indb_indexing_jobs                | error_message               | text                     | YES         |
+| indb_indexing_jobs                | created_at                  | timestamp with time zone | YES         |
+| indb_indexing_jobs                | updated_at                  | timestamp with time zone | YES         |
+| indb_indexing_jobs                | locked_at                   | timestamp with time zone | YES         |
+| indb_indexing_jobs                | locked_by                   | text                     | YES         |
+| indb_indexing_url_submissions     | id                          | uuid                     | NO          |
+| indb_indexing_url_submissions     | job_id                      | uuid                     | NO          |
+| indb_indexing_url_submissions     | service_account_id          | uuid                     | YES         |
+| indb_indexing_url_submissions     | url                         | text                     | NO          |
+| indb_indexing_url_submissions     | status                      | text                     | YES         |
+| indb_indexing_url_submissions     | submitted_at                | timestamp with time zone | YES         |
+| indb_indexing_url_submissions     | indexed_at                  | timestamp with time zone | YES         |
+| indb_indexing_url_submissions     | response_data               | jsonb                    | YES         |
+| indb_indexing_url_submissions     | error_message               | text                     | YES         |
+| indb_indexing_url_submissions     | retry_count                 | integer                  | YES         |
+| indb_indexing_url_submissions     | created_at                  | timestamp with time zone | YES         |
+| indb_indexing_url_submissions     | updated_at                  | timestamp with time zone | YES         |
+| indb_notifications_dashboard      | id                          | uuid                     | NO          |
+| indb_notifications_dashboard      | user_id                     | uuid                     | NO          |
+| indb_notifications_dashboard      | type                        | text                     | NO          |
+| indb_notifications_dashboard      | title                       | text                     | NO          |
+| indb_notifications_dashboard      | message                     | text                     | NO          |
+| indb_notifications_dashboard      | is_read                     | boolean                  | YES         |
+| indb_notifications_dashboard      | action_url                  | text                     | YES         |
+| indb_notifications_dashboard      | metadata                    | jsonb                    | YES         |
+| indb_notifications_dashboard      | expires_at                  | timestamp with time zone | YES         |
+| indb_notifications_dashboard      | created_at                  | timestamp with time zone | YES         |
+| indb_notifications_email_queue    | id                          | uuid                     | NO          |
+| indb_notifications_email_queue    | user_id                     | uuid                     | NO          |
+| indb_notifications_email_queue    | template_type               | text                     | NO          |
+| indb_notifications_email_queue    | to_email                    | text                     | NO          |
+| indb_notifications_email_queue    | subject                     | text                     | NO          |
+| indb_notifications_email_queue    | html_content                | text                     | NO          |
+| indb_notifications_email_queue    | status                      | text                     | YES         |
+| indb_notifications_email_queue    | attempts                    | integer                  | YES         |
+| indb_notifications_email_queue    | sent_at                     | timestamp with time zone | YES         |
+| indb_notifications_email_queue    | error_message               | text                     | YES         |
+| indb_notifications_email_queue    | metadata                    | jsonb                    | YES         |
+| indb_notifications_email_queue    | created_at                  | timestamp with time zone | YES         |
+| indb_notifications_email_queue    | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_gateways             | id                          | uuid                     | NO          |
+| indb_payment_gateways             | name                        | text                     | NO          |
+| indb_payment_gateways             | slug                        | text                     | NO          |
+| indb_payment_gateways             | description                 | text                     | YES         |
+| indb_payment_gateways             | is_active                   | boolean                  | YES         |
+| indb_payment_gateways             | is_default                  | boolean                  | YES         |
+| indb_payment_gateways             | configuration               | jsonb                    | YES         |
+| indb_payment_gateways             | api_credentials             | jsonb                    | YES         |
+| indb_payment_gateways             | created_at                  | timestamp with time zone | YES         |
+| indb_payment_gateways             | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_invoices             | id                          | uuid                     | NO          |
+| indb_payment_invoices             | user_id                     | uuid                     | NO          |
+| indb_payment_invoices             | subscription_id             | uuid                     | YES         |
+| indb_payment_invoices             | transaction_id              | uuid                     | YES         |
+| indb_payment_invoices             | invoice_number              | text                     | NO          |
+| indb_payment_invoices             | invoice_status              | text                     | NO          |
+| indb_payment_invoices             | subtotal                    | numeric                  | NO          |
+| indb_payment_invoices             | tax_amount                  | numeric                  | YES         |
+| indb_payment_invoices             | discount_amount             | numeric                  | YES         |
+| indb_payment_invoices             | total_amount                | numeric                  | NO          |
+| indb_payment_invoices             | currency                    | text                     | NO          |
+| indb_payment_invoices             | due_date                    | date                     | YES         |
+| indb_payment_invoices             | paid_at                     | timestamp with time zone | YES         |
+| indb_payment_invoices             | invoice_data                | jsonb                    | NO          |
+| indb_payment_invoices             | created_at                  | timestamp with time zone | YES         |
+| indb_payment_invoices             | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_packages             | id                          | uuid                     | NO          |
+| indb_payment_packages             | name                        | text                     | NO          |
+| indb_payment_packages             | slug                        | text                     | NO          |
+| indb_payment_packages             | description                 | text                     | YES         |
+| indb_payment_packages             | price                       | numeric                  | NO          |
+| indb_payment_packages             | currency                    | text                     | YES         |
+| indb_payment_packages             | billing_period              | text                     | YES         |
+| indb_payment_packages             | features                    | jsonb                    | YES         |
+| indb_payment_packages             | quota_limits                | jsonb                    | YES         |
+| indb_payment_packages             | is_active                   | boolean                  | YES         |
+| indb_payment_packages             | sort_order                  | integer                  | YES         |
+| indb_payment_packages             | created_at                  | timestamp with time zone | YES         |
+| indb_payment_packages             | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_packages             | is_popular                  | boolean                  | YES         |
+| indb_payment_packages             | pricing_tiers               | jsonb                    | YES         |
+| indb_payment_subscriptions        | id                          | uuid                     | NO          |
+| indb_payment_subscriptions        | user_id                     | uuid                     | NO          |
+| indb_payment_subscriptions        | package_id                  | uuid                     | NO          |
+| indb_payment_subscriptions        | gateway_id                  | uuid                     | NO          |
+| indb_payment_subscriptions        | subscription_status         | text                     | NO          |
+| indb_payment_subscriptions        | billing_period              | text                     | NO          |
+| indb_payment_subscriptions        | amount_paid                 | numeric                  | NO          |
+| indb_payment_subscriptions        | currency                    | text                     | NO          |
+| indb_payment_subscriptions        | started_at                  | timestamp with time zone | YES         |
+| indb_payment_subscriptions        | expires_at                  | timestamp with time zone | YES         |
+| indb_payment_subscriptions        | auto_renew                  | boolean                  | YES         |
+| indb_payment_subscriptions        | payment_reference           | text                     | YES         |
+| indb_payment_subscriptions        | metadata                    | jsonb                    | YES         |
+| indb_payment_subscriptions        | created_at                  | timestamp with time zone | YES         |
+| indb_payment_subscriptions        | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_transactions         | id                          | uuid                     | NO          |
+| indb_payment_transactions         | user_id                     | uuid                     | NO          |
+| indb_payment_transactions         | subscription_id             | uuid                     | YES         |
+| indb_payment_transactions         | package_id                  | uuid                     | NO          |
+| indb_payment_transactions         | gateway_id                  | uuid                     | NO          |
+| indb_payment_transactions         | transaction_type            | text                     | NO          |
+| indb_payment_transactions         | transaction_status          | text                     | NO          |
+| indb_payment_transactions         | amount                      | numeric                  | NO          |
+| indb_payment_transactions         | currency                    | text                     | NO          |
+| indb_payment_transactions         | payment_method              | text                     | YES         |
+| indb_payment_transactions         | payment_reference           | text                     | YES         |
+| indb_payment_transactions         | payment_proof_url           | text                     | YES         |
+| indb_payment_transactions         | gateway_transaction_id      | text                     | YES         |
+| indb_payment_transactions         | gateway_response            | jsonb                    | YES         |
+| indb_payment_transactions         | processed_at                | timestamp with time zone | YES         |
+| indb_payment_transactions         | verified_by                 | uuid                     | YES         |
+| indb_payment_transactions         | verified_at                 | timestamp with time zone | YES         |
+| indb_payment_transactions         | notes                       | text                     | YES         |
+| indb_payment_transactions         | metadata                    | jsonb                    | YES         |
+| indb_payment_transactions         | created_at                  | timestamp with time zone | YES         |
+| indb_payment_transactions         | updated_at                  | timestamp with time zone | YES         |
+| indb_payment_transactions_history | id                          | uuid                     | NO          |
+| indb_payment_transactions_history | transaction_id              | uuid                     | NO          |
+| indb_payment_transactions_history | old_status                  | text                     | YES         |
+| indb_payment_transactions_history | new_status                  | text                     | NO          |
+| indb_payment_transactions_history | action_type                 | text                     | NO          |
+| indb_payment_transactions_history | action_description          | text                     | NO          |
+| indb_payment_transactions_history | changed_by                  | uuid                     | YES         |
+| indb_payment_transactions_history | changed_by_type             | text                     | NO          |
+| indb_payment_transactions_history | old_values                  | jsonb                    | YES         |
+| indb_payment_transactions_history | new_values                  | jsonb                    | YES         |
+| indb_payment_transactions_history | notes                       | text                     | YES         |
+| indb_payment_transactions_history | metadata                    | jsonb                    | YES         |
+| indb_payment_transactions_history | ip_address                  | inet                     | YES         |
+| indb_payment_transactions_history | user_agent                  | text                     | YES         |
+| indb_payment_transactions_history | created_at                  | timestamp with time zone | YES         |
+| indb_security_activity_logs       | id                          | uuid                     | NO          |
+| indb_security_activity_logs       | user_id                     | uuid                     | YES         |
+| indb_security_activity_logs       | event_type                  | text                     | NO          |
+| indb_security_activity_logs       | action_description          | text                     | NO          |
+| indb_security_activity_logs       | target_type                 | text                     | YES         |
+| indb_security_activity_logs       | target_id                   | uuid                     | YES         |
+| indb_security_activity_logs       | ip_address                  | inet                     | YES         |
+| indb_security_activity_logs       | user_agent                  | text                     | YES         |
+| indb_security_activity_logs       | device_info                 | jsonb                    | YES         |
+| indb_security_activity_logs       | location_data               | jsonb                    | YES         |
+| indb_security_activity_logs       | success                     | boolean                  | YES         |
+| indb_security_activity_logs       | error_message               | text                     | YES         |
+| indb_security_activity_logs       | metadata                    | jsonb                    | YES         |
+| indb_security_activity_logs       | created_at                  | timestamp with time zone | YES         |
+| indb_security_audit_logs          | id                          | uuid                     | NO          |
+| indb_security_audit_logs          | user_id                     | uuid                     | YES         |
+| indb_security_audit_logs          | event_type                  | text                     | NO          |
+| indb_security_audit_logs          | description                 | text                     | NO          |
+| indb_security_audit_logs          | ip_address                  | inet                     | YES         |
+| indb_security_audit_logs          | user_agent                  | text                     | YES         |
+| indb_security_audit_logs          | success                     | boolean                  | YES         |
+| indb_security_audit_logs          | metadata                    | jsonb                    | YES         |
+| indb_security_audit_logs          | created_at                  | timestamp with time zone | YES         |
+| indb_security_rate_limits         | id                          | uuid                     | NO          |
+| indb_security_rate_limits         | identifier                  | text                     | NO          |
+| indb_security_rate_limits         | endpoint                    | text                     | NO          |
+| indb_security_rate_limits         | requests_count              | integer                  | YES         |
+| indb_security_rate_limits         | window_start                | timestamp with time zone | YES         |
+| indb_security_rate_limits         | created_at                  | timestamp with time zone | YES         |
+| indb_security_rate_limits         | updated_at                  | timestamp with time zone | YES         |
+| indb_site_settings                | id                          | uuid                     | NO          |
+| indb_site_settings                | site_name                   | text                     | NO          |
+| indb_site_settings                | site_description            | text                     | YES         |
+| indb_site_settings                | site_logo_url               | text                     | YES         |
+| indb_site_settings                | site_icon_url               | text                     | YES         |
+| indb_site_settings                | site_favicon_url            | text                     | YES         |
+| indb_site_settings                | contact_email               | text                     | YES         |
+| indb_site_settings                | support_email               | text                     | YES         |
+| indb_site_settings                | maintenance_mode            | boolean                  | YES         |
+| indb_site_settings                | registration_enabled        | boolean                  | YES         |
+| indb_site_settings                | created_at                  | timestamp with time zone | YES         |
+| indb_site_settings                | updated_at                  | timestamp with time zone | YES         |
+| indb_system_error_logs            | id                          | uuid                     | NO          |
+| indb_system_error_logs            | user_id                     | uuid                     | YES         |
+| indb_system_error_logs            | error_type                  | text                     | NO          |
+| indb_system_error_logs            | severity                    | text                     | NO          |
+| indb_system_error_logs            | message                     | text                     | NO          |
+| indb_system_error_logs            | user_message                | text                     | NO          |
+| indb_system_error_logs            | endpoint                    | text                     | YES         |
+| indb_system_error_logs            | http_method                 | text                     | YES         |
+| indb_system_error_logs            | status_code                 | integer                  | YES         |
+| indb_system_error_logs            | metadata                    | jsonb                    | YES         |
+| indb_system_error_logs            | stack_trace                 | text                     | YES         |
+| indb_system_error_logs            | created_at                  | timestamp with time zone | YES         |
+| indb_system_error_logs            | updated_at                  | timestamp with time zone | YES         |
+| recent_jobs_with_stats            | id                          | uuid                     | YES         |
+| recent_jobs_with_stats            | user_id                     | uuid                     | YES         |
+| recent_jobs_with_stats            | name                        | text                     | YES         |
+| recent_jobs_with_stats            | type                        | text                     | YES         |
+| recent_jobs_with_stats            | status                      | text                     | YES         |
+| recent_jobs_with_stats            | schedule_type               | text                     | YES         |
+| recent_jobs_with_stats            | cron_expression             | text                     | YES         |
+| recent_jobs_with_stats            | source_data                 | jsonb                    | YES         |
+| recent_jobs_with_stats            | total_urls                  | integer                  | YES         |
+| recent_jobs_with_stats            | processed_urls              | integer                  | YES         |
+| recent_jobs_with_stats            | successful_urls             | integer                  | YES         |
+| recent_jobs_with_stats            | failed_urls                 | integer                  | YES         |
+| recent_jobs_with_stats            | progress_percentage         | numeric                  | YES         |
+| recent_jobs_with_stats            | started_at                  | timestamp with time zone | YES         |
+| recent_jobs_with_stats            | completed_at                | timestamp with time zone | YES         |
+| recent_jobs_with_stats            | next_run_at                 | timestamp with time zone | YES         |
+| recent_jobs_with_stats            | error_message               | text                     | YES         |
+| recent_jobs_with_stats            | created_at                  | timestamp with time zone | YES         |
+| recent_jobs_with_stats            | updated_at                  | timestamp with time zone | YES         |
+| recent_jobs_with_stats            | locked_at                   | timestamp with time zone | YES         |
+| recent_jobs_with_stats            | locked_by                   | text                     | YES         |
+| recent_jobs_with_stats            | submission_count            | bigint                   | YES         |
+| recent_jobs_with_stats            | successful_count            | bigint                   | YES         |
+| recent_jobs_with_stats            | failed_count                | bigint                   | YES         |
+| user_billing_summary              | user_id                     | uuid                     | YES         |
+| user_billing_summary              | full_name                   | text                     | YES         |
+| user_billing_summary              | package_id                  | uuid                     | YES         |
+| user_billing_summary              | package_name                | text                     | YES         |
+| user_billing_summary              | package_slug                | text                     | YES         |
+| user_billing_summary              | subscribed_at               | timestamp with time zone | YES         |
+| user_billing_summary              | expires_at                  | timestamp with time zone | YES         |
+| user_billing_summary              | subscription_status         | text                     | YES         |
+| user_billing_summary              | current_subscription_status | text                     | YES         |
+| user_billing_summary              | total_payments              | bigint                   | YES         |
+| user_billing_summary              | total_spent                 | numeric                  | YES         |
+| user_dashboard_stats              | user_id                     | uuid                     | YES         |
+| user_dashboard_stats              | total_urls_indexed          | bigint                   | YES         |
+| user_dashboard_stats              | active_jobs                 | bigint                   | YES         |
+| user_dashboard_stats              | scheduled_jobs              | bigint                   | YES         |
+| user_dashboard_stats              | success_rate                | integer                  | YES         |
+| user_quota_summary                | user_id                     | uuid                     | YES         |
+| user_quota_summary                | total_quota_used            | bigint                   | YES         |
+| user_quota_summary                | service_account_count       | bigint                   | YES         |
+| user_quota_summary                | total_quota_limit           | bigint                   | YES         |
+| user_quota_summary                | package_name                | text                     | YES         |
+| user_quota_summary                | daily_quota_limit           | integer                  | YES         |
+| user_quota_summary                | service_accounts_limit      | integer                  | YES         |
+| user_quota_summary                | concurrent_jobs_limit       | integer                  | YES         |
+| user_quota_summary                | daily_quota_used            | bigint                   | YES         |
+| user_quota_summary                | daily_quota_reset_date      | date                     | YES         |
+| user_quota_summary                | is_unlimited                | boolean                  | YES         |
 
 Button Colors: #1C2331 (primary), #0d1b2a, #22333b, #1E1E1E
 Background: Clean whites (#FFFFFF, #F7F9FC)
