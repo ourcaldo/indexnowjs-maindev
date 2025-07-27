@@ -105,77 +105,24 @@ export default function LandingPage() {
 
   const loadPackages = async () => {
     try {
-      // For public landing page, we'll make a simplified request
-      const response = await fetch('/api/site-settings')
-      // Since packages require auth, let's create a basic structure based on common pricing
-      const mockPackages: Package[] = [
-        {
-          id: '1',
-          name: 'Starter',
-          description: 'Perfect for small websites and blogs',
-          price: 25000,
-          currency: 'IDR',
-          billing_period: 'monthly',
-          features: [
-            '50 URLs per day',
-            '1 Service Account',
-            '2 Concurrent Jobs',
-            'Basic Email Support',
-            'Sitemap Integration'
-          ],
-          quota_limits: {
-            daily_quota_limit: 50,
-            service_accounts_limit: 1,
-            concurrent_jobs_limit: 2
-          },
-          is_popular: false
-        },
-        {
-          id: '2',
-          name: 'Professional',
-          description: 'Ideal for growing businesses and agencies',
-          price: 75000,
-          currency: 'IDR',
-          billing_period: 'monthly',
-          features: [
-            '500 URLs per day',
-            '5 Service Accounts',
-            '10 Concurrent Jobs',
-            'Priority Email Support',
-            'Advanced Scheduling',
-            'Analytics Dashboard'
-          ],
-          quota_limits: {
-            daily_quota_limit: 500,
-            service_accounts_limit: 5,
-            concurrent_jobs_limit: 10
-          },
-          is_popular: true
-        },
-        {
-          id: '3',
-          name: 'Enterprise',
-          description: 'For large organizations with high volume needs',
-          price: 150000,
-          currency: 'IDR',
-          billing_period: 'monthly',
-          features: [
-            'Unlimited URLs per day',
-            'Unlimited Service Accounts',
-            'Unlimited Concurrent Jobs',
-            '24/7 Premium Support',
-            'Custom Integrations',
-            'Dedicated Account Manager'
-          ],
-          quota_limits: {
-            daily_quota_limit: -1,
-            service_accounts_limit: -1,
-            concurrent_jobs_limit: -1
-          },
-          is_popular: false
+      // Use the new public packages endpoint to get real data from database
+      const response = await fetch('/api/public/packages', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
         }
-      ]
-      setPackages(mockPackages)
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.packages) {
+          setPackages(data.packages)
+          return
+        }
+      }
+
+      console.error('Failed to load packages from database')
+      
     } catch (error) {
       console.error('Failed to load packages:', error)
     }
@@ -601,18 +548,29 @@ export default function LandingPage() {
                   <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
                   <p className="text-gray-400 mb-4">{pkg.description}</p>
                   <div className="mb-4">
-                    <span className="text-4xl font-bold">{formatPrice(pkg.price)}</span>
-                    <span className="text-gray-400">/{pkg.billing_period}</span>
+                    <span className="text-4xl font-bold">
+                      {pkg.price === 0 ? 'Free' : formatPrice(pkg.price)}
+                    </span>
+                    {pkg.price > 0 && (
+                      <span className="text-gray-400">/{pkg.billing_period}</span>
+                    )}
                   </div>
                 </div>
 
                 <ul className="space-y-3 mb-8">
-                  {pkg.features.map((feature, index) => (
-                    <li key={index} className="flex items-center">
+                  {pkg.features && pkg.features.length > 0 ? (
+                    pkg.features.map((feature, index) => (
+                      <li key={index} className="flex items-center">
+                        <CheckCircle className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" />
+                        <span className="text-gray-300">{feature}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="flex items-center">
                       <CheckCircle className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" />
-                      <span className="text-gray-300">{feature}</span>
+                      <span className="text-gray-300">Features loading...</span>
                     </li>
-                  ))}
+                  )}
                 </ul>
 
                 <button
