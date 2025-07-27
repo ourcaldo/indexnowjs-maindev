@@ -1,0 +1,27 @@
+Hi Replit, so as you see I have webapp which is IndexNow a 3rd party to request to GSC API to index a link. This webapp is same and inspirated by Instant Indexing wordpress plugin by RankMath.
+
+So, as this webapp is on development stage and for personal use only. I need you to focus to enhance and fix some problem in dashboard and panel.
+
+Before you do make the changes, I need you to do a deep dive into the codebase, so you do have better understanding about this webapp, the current stage and feature and the obstacles.
+
+Before I want you to more in-deepth about this project. Please take time to read all information in replit.md because there's a lot important things (from database to all changelogs) that you should know.
+
+Before, we already fix an error in single order detail for admin dashboard which the error is related to syntax error.
+
+Now, after I carefully review the layout of single order detail, I didn't quite like the layout.
+You sure use 2 column which left and right, but it's a bit feel like massonary, because the size of the box isn't proper, sometime in column 1 is have more small in height but in column 2 is more high.
+
+I want you to rearrange the layout and the elements section that more proper, not too random like the current one, there's also small details that you still miss in current design, which is:
+1. You fucking still use color that shouldn't use in this project. Bcs, I barely fucking said this a thousand times, this project is have this own project color, which you can found in replit.md
+2. In some button inside of single order detail, when I hover it, you're fucking use text white and background color is also white, which I can't see anything
+
+I just need you change the UI and layout, make sure to not make the same mistake twice and don't change the backend function. Just the UI and layout.
+
+For the layout, I want you to make sure:
+1. In admin actions box, get rid of the status order, because it's already placed in in order details section and top right of the page.
+2. Move "Payment Proof" under admin actions
+3. make customer information box is like payment information, then make it side by side.
+4. We have recent activity, change it to Activity which you should put the information in timeline format, like when user placed the order, when upload proof payment, when admin accept/failed the order and other kind activity. But, as we use update/patch when we mark as failed/approve the payment, so made another tables which is indb_payment_transactions_history, which will add the data by trigger of the changes in tables "indb_payment_transactions" the data mostly is same like the "indb_payment_transactions", but's use add row, not patch/update. Please confirm my logic does it correct or not or you have better logic. Then, move the layout in column 1, which is more larger and don't forget in timeline format and have full information like the date, user, accept by which admin and so-on.
+5. Please don't made same mistake that I ponting before, importantly related to color scheme.
+
+Keep in mind, I didn't make the SQL for new table yet, so please also give the SQL for me, with RLS if needed.

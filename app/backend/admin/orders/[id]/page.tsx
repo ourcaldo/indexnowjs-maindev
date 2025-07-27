@@ -16,7 +16,10 @@ import {
   Eye,
   Mail,
   Phone,
-  ExternalLink
+  ExternalLink,
+  CalendarDays,
+  Activity,
+  ImageIcon
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -106,9 +109,27 @@ interface ActivityLog {
   }
 }
 
+interface TransactionHistory {
+  id: string
+  transaction_id: string
+  old_status: string | null
+  new_status: string
+  action_type: string
+  action_description: string
+  changed_by: string | null
+  changed_by_type: string
+  notes: string | null
+  created_at: string
+  user?: {
+    full_name: string
+    role: string
+  }
+}
+
 interface OrderDetailData {
   order: OrderTransaction
   activity_history: ActivityLog[]
+  transaction_history: TransactionHistory[]
 }
 
 export default function AdminOrderDetailPage() {
@@ -319,7 +340,7 @@ export default function AdminOrderDetailPage() {
             onClick={() => router.back()} 
             variant="outline" 
             size="sm"
-            className="border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]"
+            className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
@@ -334,58 +355,58 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main Layout - Three sections stacked properly */}
+      <div className="space-y-6">
         
-        {/* Main Content - Order Information (67%) */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Order Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="w-5 h-5 mr-2" />
-                Order Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Order ID</label>
-                  <p className="font-mono text-sm">{order.payment_reference}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Status</label>
-                  <div className="mt-1">{getStatusBadge(order.transaction_status)}</div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Created</label>
-                  <p className="text-sm">{formatDate(order.created_at)}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Last Updated</label>
-                  <p className="text-sm">{formatRelativeTime(order.updated_at)}</p>
-                </div>
+        {/* Top Section: Order Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center text-[#1A1A1A]">
+              <FileText className="w-5 h-5 mr-2" />
+              Order Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Order ID</label>
+                <p className="font-mono text-sm text-[#1A1A1A]">{order.payment_reference}</p>
               </div>
-              
-              {order.verified_by && order.verified_at && (
-                <div className="pt-2 border-t border-[#E0E6ED]">
-                  <label className="text-sm font-medium text-[#6C757D]">Verified</label>
-                  <p className="text-sm">
-                    {formatDate(order.verified_at)}
-                    {order.verifier && (
-                      <span className="text-[#6C757D]"> by {order.verifier.full_name}</span>
-                    )}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Amount</label>
+                <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Created</label>
+                <p className="text-sm text-[#1A1A1A]">{formatDate(order.created_at)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Last Updated</label>
+                <p className="text-sm text-[#1A1A1A]">{formatRelativeTime(order.updated_at)}</p>
+              </div>
+            </div>
+            
+            {order.verified_by && order.verified_at && (
+              <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
+                <label className="text-sm font-medium text-[#6C757D]">Verified</label>
+                <p className="text-sm text-[#1A1A1A]">
+                  {formatDate(order.verified_at)}
+                  {order.verifier && (
+                    <span className="text-[#6C757D]"> by {order.verifier.full_name}</span>
+                  )}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
+        {/* Middle Section: Two equal columns for Customer & Payment Info */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
           {/* Customer Information */}
-          <Card>
+          <Card className="h-fit">
             <CardHeader>
-              <CardTitle className="flex items-center">
+              <CardTitle className="flex items-center text-[#1A1A1A]">
                 <User className="w-5 h-5 mr-2" />
                 Customer Information
               </CardTitle>
@@ -393,15 +414,16 @@ export default function AdminOrderDetailPage() {
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-[#6C757D]">Full Name</label>
-                <p className="font-medium">{order.user.full_name}</p>
+                <p className="font-medium text-[#1A1A1A]">{order.user.full_name}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-[#6C757D]">Email</label>
                 <div className="flex items-center space-x-2">
-                  <p className="text-sm">{order.user.email}</p>
+                  <p className="text-sm text-[#1A1A1A]">{order.user.email}</p>
                   <Button
                     size="sm"
                     variant="ghost"
+                    className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
                     onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
                   >
                     <Mail className="w-3 h-3" />
@@ -412,10 +434,11 @@ export default function AdminOrderDetailPage() {
                 <div>
                   <label className="text-sm font-medium text-[#6C757D]">Phone</label>
                   <div className="flex items-center space-x-2">
-                    <p className="text-sm">{order.metadata.customer_info.phone_number}</p>
+                    <p className="text-sm text-[#1A1A1A]">{order.metadata.customer_info.phone_number}</p>
                     <Button
                       size="sm"
                       variant="ghost"
+                      className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
                       onClick={() => window.open(`tel:${order.metadata.customer_info.phone_number}`, '_blank')}
                     >
                       <Phone className="w-3 h-3" />
@@ -425,15 +448,13 @@ export default function AdminOrderDetailPage() {
               )}
               <div>
                 <label className="text-sm font-medium text-[#6C757D]">Registration Date</label>
-                <p className="text-sm">{formatDate(order.user.created_at)}</p>
+                <p className="text-sm text-[#1A1A1A]">{formatDate(order.user.created_at)}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-[#6C757D]">Current Plan Status</label>
-                <p className="text-sm">
+                <p className="text-sm text-[#1A1A1A]">
                   {order.user.expires_at ? (
-                    <>
-                      Active until {formatDate(order.user.expires_at)}
-                    </>
+                    <>Active until {formatDate(order.user.expires_at)}</>
                   ) : (
                     'No active subscription'
                   )}
@@ -442,139 +463,95 @@ export default function AdminOrderDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Payment & Customer Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Payment Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Payment Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Gateway</label>
-                  <p className="font-medium">{order.gateway.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Payment Method</label>
-                  <p className="text-sm">{order.payment_method}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Reference Number</label>
-                  <p className="font-mono text-sm">{order.payment_reference}</p>
-                </div>
-                {order.gateway_transaction_id && (
-                  <div>
-                    <label className="text-sm font-medium text-[#6C757D]">Gateway Transaction ID</label>
-                    <p className="font-mono text-sm">{order.gateway_transaction_id}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Package Details */}
-          <Card>
+          {/* Payment Information */}
+          <Card className="h-fit">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Package className="w-5 h-5 mr-2" />
-                Package Details
+              <CardTitle className="flex items-center text-[#1A1A1A]">
+                <CreditCard className="w-5 h-5 mr-2" />
+                Payment Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Package Name</label>
-                  <p className="font-medium">{order.package.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Billing Period</label>
-                  <p className="text-sm">{order.metadata?.billing_period || order.package.billing_period}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Amount</label>
-                  <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
-                </div>
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Gateway</label>
+                <p className="font-medium text-[#1A1A1A]">{order.gateway.name}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Description</label>
-                <p className="text-sm text-[#6C757D]">{order.package.description}</p>
+                <label className="text-sm font-medium text-[#6C757D]">Payment Method</label>
+                <p className="text-sm text-[#1A1A1A]">{order.payment_method}</p>
               </div>
-              
-              {order.package.features && Array.isArray(order.package.features) && (
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Reference Number</label>
+                <p className="font-mono text-sm text-[#1A1A1A]">{order.payment_reference}</p>
+              </div>
+              {order.gateway_transaction_id && (
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D] mb-2 block">Features</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {order.package.features.map((feature, index) => (
-                      <div key={index} className="flex items-center text-sm">
-                        <CheckCircle className="w-3 h-3 mr-2 text-[#4BB543] flex-shrink-0" />
-                        <span>{typeof feature === 'string' ? feature : feature.name || 'Feature'}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <label className="text-sm font-medium text-[#6C757D]">Gateway Transaction ID</label>
+                  <p className="font-mono text-sm text-[#1A1A1A]">{order.gateway_transaction_id}</p>
                 </div>
               )}
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Package</label>
+                <p className="text-sm text-[#1A1A1A]">{order.package.name} ({order.metadata?.billing_period || order.package.billing_period})</p>
+              </div>
             </CardContent>
           </Card>
-
-          {/* Payment Proof */}
-          {order.payment_proof_url && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Proof</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="aspect-video bg-[#F7F9FC] rounded-lg flex items-center justify-center">
-                    <img
-                      src={order.payment_proof_url}
-                      alt="Payment Proof"
-                      className="max-w-full max-h-full object-contain rounded-lg"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden')
-                      }}
-                    />
-                    <div className="hidden text-center">
-                      <FileText className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
-                      <p className="text-sm text-[#6C757D]">Unable to preview file</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(order.payment_proof_url, '_blank')}
-                      className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
-        {/* Sidebar - Admin Actions & Activity (33%) */}
-        <div className="lg:col-span-1 space-y-6">
-          
-          {/* Status Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Admin Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center">
-                <div className="mb-4">
-                  {getStatusBadge(order.transaction_status)}
-                  <p className="text-xs text-[#6C757D] mt-1">Status: {order.transaction_status}</p>
+        {/* Package Details Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center text-[#1A1A1A]">
+              <Package className="w-5 h-5 mr-2" />
+              Package Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Package Name</label>
+                <p className="font-medium text-[#1A1A1A]">{order.package.name}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Billing Period</label>
+                <p className="text-sm text-[#1A1A1A]">{order.metadata?.billing_period || order.package.billing_period}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#6C757D]">Amount</label>
+                <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#6C757D]">Description</label>
+              <p className="text-sm text-[#6C757D]">{order.package.description}</p>
+            </div>
+            
+            {order.package.features && Array.isArray(order.package.features) && (
+              <div>
+                <label className="text-sm font-medium text-[#6C757D] mb-2 block">Features</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {order.package.features.map((feature, index) => (
+                    <div key={index} className="flex items-center text-sm">
+                      <CheckCircle className="w-3 h-3 mr-2 text-[#4BB543] flex-shrink-0" />
+                      <span className="text-[#1A1A1A]">{typeof feature === 'string' ? feature : feature.name || 'Feature'}</span>
+                    </div>
+                  ))}
                 </div>
-                
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Admin Actions & Activity - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Admin Actions */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-[#1A1A1A]">Admin Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 {canUpdateStatus && (
                   <div className="space-y-2">
                     <Button
@@ -597,10 +574,12 @@ export default function AdminOrderDetailPage() {
                   </div>
                 )}
                 
-                <div className="pt-4 space-y-2">
+                <Separator className="bg-[#E0E6ED]" />
+                
+                <div className="space-y-2">
                   <Button
                     variant="outline"
-                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]"
+                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
                     onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
                   >
                     <Mail className="w-4 h-4 mr-2" />
@@ -608,67 +587,132 @@ export default function AdminOrderDetailPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]"
+                    className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
                     onClick={() => router.push(`/backend/admin/users?search=${order.user.email}`)}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View User Profile
                   </Button>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Admin Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Admin Notes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+                {/* Admin Notes */}
                 {order.notes && (
-                  <div>
-                    <label className="text-sm font-medium text-[#6C757D]">Current Notes</label>
-                    <p className="text-sm bg-[#F7F9FC] p-3 rounded-lg mt-1">{order.notes}</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Activity Log */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {activity_history.length > 0 ? (
-                  activity_history.map((activity) => (
-                    <div key={activity.id} className="text-sm">
-                      <p className="font-medium text-[#1A1A1A]">{activity.action_description}</p>
-                      <p className="text-[#6C757D]">
-                        {formatRelativeTime(activity.created_at)} by {activity.user?.full_name || 'System'}
-                      </p>
+                  <>
+                    <Separator className="bg-[#E0E6ED]" />
+                    <div>
+                      <label className="text-sm font-medium text-[#6C757D]">Admin Notes</label>
+                      <p className="text-sm bg-[#F7F9FC] p-3 rounded-lg mt-1 text-[#1A1A1A]">{order.notes}</p>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-[#6C757D]">No recent activity</p>
+                  </>
                 )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Payment Proof (under Admin Actions) */}
+          {order.payment_proof_url && (
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-[#1A1A1A]">
+                    <ImageIcon className="w-5 h-5 mr-2" />
+                    Payment Proof
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="aspect-video bg-[#F7F9FC] rounded-lg flex items-center justify-center">
+                      <img
+                        src={order.payment_proof_url}
+                        alt="Payment Proof"
+                        className="max-w-full max-h-full object-contain rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                        }}
+                      />
+                      <div className="hidden text-center">
+                        <FileText className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
+                        <p className="text-sm text-[#6C757D]">Unable to preview file</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(order.payment_proof_url, '_blank')}
+                        className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Activity Timeline */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-[#1A1A1A]">
+                  <Activity className="w-5 h-5 mr-2" />
+                  Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {activity_history.length > 0 ? (
+                    <div className="relative">
+                      {/* Timeline line */}
+                      <div className="absolute left-2 top-0 bottom-0 w-px bg-[#E0E6ED]"></div>
+                      
+                      {activity_history.map((activity, index) => (
+                        <div key={activity.id} className="relative flex items-start space-x-3 pb-4">
+                          {/* Timeline dot */}
+                          <div className="flex-shrink-0 w-4 h-4 bg-[#3D8BFF] rounded-full border-2 border-white relative z-10"></div>
+                          
+                          {/* Activity content */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-[#1A1A1A]">{activity.action_description}</p>
+                            <div className="flex items-center space-x-1 text-xs text-[#6C757D] mt-1">
+                              <CalendarDays className="w-3 h-3" />
+                              <span>{formatRelativeTime(activity.created_at)}</span>
+                              {activity.user?.full_name && (
+                                <>
+                                  <span>•</span>
+                                  <span>{activity.user.full_name}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Activity className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
+                      <p className="text-sm text-[#6C757D]">No activity yet</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
+      {/* Status Update Modal */}
       {statusModalOpen && (
         <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-[#1A1A1A]">
                 {statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-[#6C757D]">
                 {statusAction === 'completed' 
                   ? 'This will immediately activate the customer\'s subscription and grant access to their selected plan.'
                   : 'This will mark the payment as failed and notify the customer.'
@@ -680,10 +724,10 @@ export default function AdminOrderDetailPage() {
               <div className="p-4 bg-[#F7F9FC] rounded-lg">
                 <h4 className="font-medium text-[#1A1A1A] mb-2">Order Summary</h4>
                 <div className="text-sm space-y-1">
-                  <p><span className="text-[#6C757D]">Order:</span> #{order.payment_reference}</p>
-                  <p><span className="text-[#6C757D]">Customer:</span> {order.user.email}</p>
-                  <p><span className="text-[#6C757D]">Package:</span> {order.package.name} ({order.metadata?.billing_period})</p>
-                  <p><span className="text-[#6C757D]">Amount:</span> {formatCurrency(order.amount, order.currency)}</p>
+                  <p><span className="text-[#6C757D]">Order:</span> <span className="text-[#1A1A1A]">#{order.payment_reference}</span></p>
+                  <p><span className="text-[#6C757D]">Customer:</span> <span className="text-[#1A1A1A]">{order.user.email}</span></p>
+                  <p><span className="text-[#6C757D]">Package:</span> <span className="text-[#1A1A1A]">{order.package.name} ({order.metadata?.billing_period})</span></p>
+                  <p><span className="text-[#6C757D]">Amount:</span> <span className="text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</span></p>
                 </div>
               </div>
               
@@ -708,7 +752,7 @@ export default function AdminOrderDetailPage() {
                 variant="outline" 
                 onClick={() => setStatusModalOpen(false)}
                 disabled={updating}
-                className="border-[#E0E6ED]"
+                className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
               >
                 Cancel
               </Button>
