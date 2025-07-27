@@ -633,19 +633,19 @@ export default function LandingPage() {
                           <span className="text-5xl font-bold text-white">Free</span>
                         </div>
                       ) : (
-                        <div className="text-center">
+                        <div className="text-center px-2">
                           <div className="flex flex-col items-center justify-center">
-                            <div className="flex items-baseline justify-center space-x-2">
-                              <span className="text-5xl font-bold text-white">
+                            <div className="flex flex-col items-center justify-center space-y-1">
+                              <span className="text-4xl font-bold text-white break-words text-center leading-tight">
                                 {formatPrice(currentPrice.price)}
                               </span>
                               {currentPrice.originalPrice && (
-                                <span className="text-2xl text-gray-500 line-through">
+                                <span className="text-xl text-gray-500 line-through break-words text-center">
                                   {formatPrice(currentPrice.originalPrice)}
                                 </span>
                               )}
                             </div>
-                            <div className="text-sm text-gray-400 mt-1">
+                            <div className="text-sm text-gray-400 mt-2">
                               per {currentPrice.period}
                             </div>
                           </div>
