@@ -357,14 +357,7 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold text-white">
-                  Meet IndexNow Pro - Your Professional Indexing Guide
-                </h2>
-                <p className="text-gray-300">
-                  Join thousands who've improved their indexing speed by 95% with our proven system.
-                </p>
-              </div>
+              
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
@@ -641,15 +634,20 @@ export default function LandingPage() {
                         </div>
                       ) : (
                         <div className="text-center">
-                          <div className="flex items-baseline justify-center space-x-2">
-                            <span className="text-5xl font-bold text-white">
-                              {formatPrice(currentPrice.price)}
-                            </span>
-                            {currentPrice.originalPrice && (
-                              <span className="text-2xl text-gray-500 line-through">
-                                {formatPrice(currentPrice.originalPrice)}
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="flex items-baseline justify-center space-x-2">
+                              <span className="text-5xl font-bold text-white">
+                                {formatPrice(currentPrice.price)}
                               </span>
-                            )}
+                              {currentPrice.originalPrice && (
+                                <span className="text-2xl text-gray-500 line-through">
+                                  {formatPrice(currentPrice.originalPrice)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-400 mt-1">
+                              per {currentPrice.period}
+                            </div>
                           </div>
                         </div>
                       )}
