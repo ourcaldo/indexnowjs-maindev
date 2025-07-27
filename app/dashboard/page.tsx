@@ -537,7 +537,7 @@ export default function Dashboard() {
                     {formatDate(job.created_at)}
                   </td>
                   <td className="py-3 px-4">
-                    <span className="text-xs px-2 py-1 rounded-full font-medium" style={{backgroundColor: '#1C2331', color: '#FFFFFF'}}>
+                    <span className="text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap" style={{backgroundColor: '#1C2331', color: '#FFFFFF'}}>
                       {job.schedule_type}
                     </span>
                   </td>
