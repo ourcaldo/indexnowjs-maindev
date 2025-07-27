@@ -146,4 +146,9 @@
   .card-interactive:hover {
     border-left-color: hsl(var(--primary));
   }
+
+  /* Radial gradient utility */
+  .bg-gradient-radial {
+    background: radial-gradient(var(--tw-gradient-stops));
+  }
 }
