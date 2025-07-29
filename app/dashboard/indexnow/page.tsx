@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authService } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
-import ServiceAccountQuotaNotification from '@/components/ServiceAccountQuotaNotification'
+
 import { 
   Zap, 
   Download, 
@@ -377,9 +377,7 @@ export default function IndexNowPage() {
 
   return (
     <div className="space-y-6">
-      {/* Service Account Quota Notification */}
-      <ServiceAccountQuotaNotification />
-      
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{color: '#1A1A1A'}}>IndexNow</h1>
