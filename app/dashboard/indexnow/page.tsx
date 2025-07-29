@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authService } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
-import QuotaExhaustedNotification from '@/components/quota-exhausted-notification'
+import ServiceAccountQuotaNotification from '@/components/ServiceAccountQuotaNotification'
 import { 
   Zap, 
   Download, 
@@ -377,14 +377,8 @@ export default function IndexNowPage() {
 
   return (
     <div className="space-y-6">
-      {/* Quota Exhausted Notification */}
-      <QuotaExhaustedNotification
-        isVisible={showQuotaNotification}
-        remainingQuota={quotaNotificationData.remainingQuota}
-        dailyLimit={quotaNotificationData.dailyLimit}
-        packageName={quotaNotificationData.packageName}
-        onClose={() => setShowQuotaNotification(false)}
-      />
+      {/* Service Account Quota Notification */}
+      <ServiceAccountQuotaNotification />
       
       {/* Header */}
       <div>
