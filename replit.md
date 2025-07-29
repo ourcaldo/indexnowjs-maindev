@@ -633,7 +633,29 @@ JWT_SECRET=[jwt-secret-key]
 - **Hosting**: Designed for Replit deployment with proper environment variable configuration
 - **Database**: Supabase cloud service for scalability and reliability
 
-## Recent Changes  
+## Recent Changes
+
+**JOB RESUMPTION ISSUE ANALYSIS COMPLETE (January 29, 2025)**
+- ✅ **COMPREHENSIVE PROBLEM ANALYSIS**: Created detailed analysis document `JOB_RESUMPTION_ANALYSIS_PLAN.md`
+  - **Root Cause Identified**: Sitemap jobs only store `{"sitemap_url": "..."}` in `source_data`, not parsed URLs
+  - **Issue Details**: When resumed, sitemap jobs re-fetch sitemap and create duplicate submissions instead of continuing from pending URLs
+  - **Quota Types Clarified**: Documented difference between IndexNow Daily Quota (user-level package limits) vs Service Account Quota (Google API limits)
+  - **Implementation Plan**: Phased approach to fix sitemap job resumption by storing parsed URLs in `source_data`
+- ✅ **TECHNICAL ARCHITECTURE UNDERSTANDING**: Deep analysis of current job processing flow
+  - **Working Flow**: Manual jobs work correctly because URLs stored in `source_data.urls`
+  - **Broken Flow**: Sitemap jobs always re-parse URLs causing 100 new "pending" records instead of continuing from URL 51/100
+  - **Database Schema**: Analyzed `indb_indexing_jobs` and `indb_indexing_url_submissions` relationship
+  - **Processing Logic**: Identified issues in `lib/google-indexing-processor.ts` methods
+- ✅ **IMPLEMENTATION STRATEGY**: Created 5-phase plan to fix job resumption
+  - **Phase 1**: Database schema enhancement (extend `source_data` JSONB)
+  - **Phase 2**: Core logic fixes in URL extraction and storage
+  - **Phase 3**: Resume logic enhancement with better state detection
+  - **Phase 4**: API endpoint updates for re-run vs resume operations
+  - **Phase 5**: UI updates for better user experience
+- ✅ **BACKWARD COMPATIBILITY**: Plan ensures existing manual jobs continue working while fixing sitemap jobs
+  - **No Breaking Changes**: Existing API contracts preserved
+  - **Graceful Fallback**: Legacy jobs without parsed URLs will continue working
+  - **Risk Assessment**: Low risk implementation with incremental testing approach
 
 **SERVICE ACCOUNT QUOTA EXHAUSTION NOTIFICATION FIX COMPLETE (January 29, 2025)**
 - ✅ **IDENTIFIED & FIXED ROOT CAUSE OF NOTIFICATION BUG**: Resolved critical database constraint issue preventing quota exhausted notifications
