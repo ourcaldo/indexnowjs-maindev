@@ -167,6 +167,9 @@ export default function DashboardLayout({
             </div>
           </div>
 
+          {/* Service Account Quota Notification */}
+          <ServiceAccountQuotaNotification />
+          
           {/* Page content */}
           <main className="p-6">
             {children}
@@ -175,7 +178,6 @@ export default function DashboardLayout({
         
         {/* Quota Notifications */}
         <QuotaNotification />
-        <ServiceAccountQuotaNotification />
       </div>
     </ToastContainer>
   )
