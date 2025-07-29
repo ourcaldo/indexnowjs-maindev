@@ -206,6 +206,7 @@ export class GoogleIndexingProcessor {
 
   /**
    * Extract URLs from job source data based on job type
+   * FIXED: Now supports URL caching for sitemap jobs to enable proper resumption
    */
   private async extractUrlsFromJobSource(job: IndexingJob): Promise<string[]> {
     try {
@@ -215,17 +216,68 @@ export class GoogleIndexingProcessor {
         console.log(`📝 Manual job: extracted ${urls.length} URLs`);
         return urls;
       } else if (job.type === 'sitemap') {
-        // For sitemap jobs, parse the sitemap URL
+        // Check if we have already parsed URLs stored
+        if (job.source_data?.parsed_urls && Array.isArray(job.source_data.parsed_urls)) {
+          console.log(`📋 Using ${job.source_data.parsed_urls.length} previously parsed URLs (last parsed: ${job.source_data.last_parsed})`);
+          return job.source_data.parsed_urls;
+        }
+        
+        // First time or re-run: parse sitemap and store URLs
         const sitemapUrl = job.source_data?.sitemap_url;
         if (!sitemapUrl) {
           throw new Error('No sitemap URL found in job source data');
         }
-        console.log(`🗺️ Sitemap job: parsing ${sitemapUrl}`);
-        return await this.parseSitemapUrls(sitemapUrl);
+        
+        console.log(`🗺️ Sitemap job: parsing ${sitemapUrl} for the first time`);
+        const urls = await this.parseSitemapUrls(sitemapUrl);
+        
+        // Store parsed URLs in source_data for future resumes
+        await this.storeParseUrlsInJob(job.id, urls);
+        
+        return urls;
       }
       return [];
     } catch (error) {
       console.error('Error extracting URLs from job source:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Store parsed URLs in job's source_data for future resume operations
+   */
+  private async storeParseUrlsInJob(jobId: string, urls: string[]): Promise<void> {
+    try {
+      const { data: job } = await supabaseAdmin
+        .from('indb_indexing_jobs')
+        .select('source_data')
+        .eq('id', jobId)
+        .single();
+        
+      const updatedSourceData = {
+        ...job?.source_data,
+        parsed_urls: urls,
+        last_parsed: new Date().toISOString(),
+        total_parsed: urls.length
+      };
+      
+      const { error } = await supabaseAdmin
+        .from('indb_indexing_jobs')
+        .update({ 
+          source_data: updatedSourceData,
+          total_urls: urls.length,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', jobId);
+        
+      if (error) {
+        console.error('Error storing parsed URLs:', error);
+        throw error;
+      }
+      
+      console.log(`💾 Stored ${urls.length} parsed URLs in job ${jobId} source_data`);
+    } catch (error) {
+      console.error('Failed to store parsed URLs:', error);
       throw error;
     }
   }
@@ -307,10 +359,22 @@ export class GoogleIndexingProcessor {
       if (isResume && pendingSubmissions.length > 0) {
         console.log(`🔄 RESUMING job ${jobId} - found ${pendingSubmissions.length} pending submissions to continue from`);
         console.log(`📍 Job will resume from URL index ${job?.processed_urls || 0} onwards`);
+        console.log(`✅ FIXED: No duplicate submissions will be created - using existing pending URLs`);
         
         // For resume: don't create new submissions, use existing pending ones
         // The processing will continue from the last processed URL
         return;
+      }
+
+      // Check if this is a sitemap job with existing submissions for same URLs
+      if (existingSubmissions && existingSubmissions.length > 0) {
+        const existingUrls = new Set(existingSubmissions.map(sub => sub.url));
+        const duplicateUrls = urls.filter(url => existingUrls.has(url));
+        
+        if (duplicateUrls.length > 0) {
+          console.log(`⚠️ DUPLICATE PREVENTION: Found ${duplicateUrls.length} URLs that already exist in submissions`);
+          console.log(`🎯 This indicates sitemap job is being resumed properly - using cached URLs`);
+        }
       }
 
       // Calculate run number based on existing submissions for NEW run

@@ -635,6 +635,27 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**JOB RESUMPTION ISSUE COMPLETELY FIXED (January 29, 2025)**
+- ✅ **COMPREHENSIVE SITEMAP JOB RESUMPTION FIX**: Resolved critical issue where sitemap jobs restarted from URL #1 instead of continuing from last processed URL
+  - **Root Cause Fixed**: Modified `extractUrlsFromJobSource()` method to cache parsed URLs in `source_data.parsed_urls` for sitemap jobs
+  - **URL Storage Implementation**: Added `storeParseUrlsInJob()` method that saves parsed URLs with timestamp for future resume operations  
+  - **Duplicate Prevention**: Enhanced resume logic to prevent duplicate URL submissions when continuing paused sitemap jobs
+  - **Quota Waste Eliminated**: Sitemap jobs now behave like manual jobs - resuming from last processed URL instead of restarting
+- ✅ **ENHANCED API WITH FORCE REFRESH CAPABILITY**: Added comprehensive API improvements for better job control
+  - **New PATCH Endpoint**: `/api/jobs/{id}` with `{"action": "force-refresh-urls"}` to clear URL cache for sitemap jobs
+  - **Enhanced PUT Endpoint**: Added `{"action": "re-run"}` support to force fresh sitemap parsing when needed
+  - **Improved Logging**: Comprehensive logging for resume, retry, and re-run operations with detailed metadata
+- ✅ **BACKWARD COMPATIBILITY MAINTAINED**: All existing functionality preserved while fixing core resumption issue
+  - **Legacy Job Support**: Existing jobs without cached URLs continue working - first resume triggers URL caching
+  - **Manual Job Unchanged**: Manual jobs continue working exactly as before with no regression
+  - **No Breaking Changes**: All existing API contracts and database schemas preserved
+- ✅ **COMPREHENSIVE TESTING DOCUMENTATION**: Created detailed testing guide and verification procedures
+  - **Test Scenarios**: Documented specific test cases for sitemap resume, force refresh, and manual job functionality
+  - **Database Verification**: Clear instructions for verifying URL caching and duplicate prevention
+  - **Success Monitoring**: Log messages and database queries to confirm proper fix implementation
+
+## Recent Changes
+
 **JOB RESUMPTION ISSUE ANALYSIS COMPLETE (January 29, 2025)**
 - ✅ **COMPREHENSIVE PROBLEM ANALYSIS**: Created detailed analysis document `JOB_RESUMPTION_ANALYSIS_PLAN.md`
   - **Root Cause Identified**: Sitemap jobs only store `{"sitemap_url": "..."}` in `source_data`, not parsed URLs

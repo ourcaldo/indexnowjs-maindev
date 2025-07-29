@@ -110,6 +110,39 @@ export async function PUT(
       updated_at: new Date().toISOString()
     };
 
+    // Handle different action types
+    if (body.action === 're-run' && currentJob?.status !== 'running') {
+      // Force fresh URL parsing for sitemap jobs by clearing parsed_urls
+      const { data: currentJobData } = await supabaseAdmin
+        .from('indb_indexing_jobs')
+        .select('source_data, type')
+        .eq('id', jobId)  
+        .single();
+        
+      if (currentJobData?.type === 'sitemap' && currentJobData?.source_data?.parsed_urls) {
+        const clearedSourceData = {
+          ...currentJobData.source_data,
+          parsed_urls: undefined,
+          last_parsed: undefined,
+          total_parsed: undefined
+        };
+        updateData.source_data = clearedSourceData;
+        
+        // Log URL cache clear
+        const jobLogger = JobLoggingService.getInstance();
+        await jobLogger.logJobEvent({
+          job_id: jobId,
+          level: 'INFO',
+          message: 'Re-run requested - cleared parsed URL cache for fresh sitemap parsing',
+          metadata: {
+            event_type: 'url_cache_cleared',
+            user_id: user.id,
+            action: 're-run'
+          }
+        });
+      }
+    }
+
     // If this is a retry, reset progress and processed counts
     if (isRetry) {
       updateData.progress_percentage = 0;
@@ -174,6 +207,108 @@ export async function PUT(
     return NextResponse.json({ job });
   } catch (error) {
     console.error('Error in job PUT route:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Get auth token from header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.substring(7);
+    
+    // Create client with the user's token
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    // Set the auth token
+    await supabase.auth.setSession({ access_token: token, refresh_token: '' });
+    
+    // Get the user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id: jobId } = await params;
+    const body = await request.json();
+
+    // Handle force refresh URLs action for sitemap jobs
+    if (body.action === 'force-refresh-urls') {
+      const { data: job } = await supabaseAdmin
+        .from('indb_indexing_jobs')
+        .select('source_data, type, status')
+        .eq('id', jobId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (!job) {
+        return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+      }
+
+      if (job.type !== 'sitemap') {
+        return NextResponse.json({ error: 'Force refresh URLs only available for sitemap jobs' }, { status: 400 });
+      }
+
+      if (job.status === 'running') {
+        return NextResponse.json({ error: 'Cannot refresh URLs while job is running' }, { status: 400 });
+      }
+
+      // Clear parsed URLs to force fresh sitemap parsing on next run
+      const clearedSourceData = {
+        ...job.source_data,
+        parsed_urls: undefined,
+        last_parsed: undefined,
+        total_parsed: undefined
+      };
+
+      const { error: updateError } = await supabaseAdmin
+        .from('indb_indexing_jobs')
+        .update({
+          source_data: clearedSourceData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', jobId)
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        console.error('Error clearing URL cache:', updateError);
+        return NextResponse.json({ error: 'Failed to clear URL cache' }, { status: 500 });
+      }
+
+      // Log the action
+      const jobLogger = JobLoggingService.getInstance();
+      await jobLogger.logJobEvent({
+        job_id: jobId,
+        level: 'INFO',
+        message: 'User requested force refresh URLs - cleared parsed URL cache',
+        metadata: {
+          event_type: 'force_refresh_urls',
+          user_id: user.id,
+          triggered_by: 'patch_endpoint',
+          action: 'cleared_url_cache'
+        }
+      });
+
+      return NextResponse.json({ 
+        message: 'URL cache cleared successfully. Next job run will fetch fresh URLs from sitemap.',
+        action: 'force-refresh-urls'
+      });
+    }
+
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+
+  } catch (error) {
+    console.error('Error in job PATCH route:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
