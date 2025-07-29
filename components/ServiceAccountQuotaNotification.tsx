@@ -75,47 +75,39 @@ export default function ServiceAccountQuotaNotification() {
   if (notifications.length === 0) return null
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-2xl w-full px-4">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-[#E63946] text-white shadow-lg">
       {notifications.map((notification) => (
-        <div key={notification.id} className="mb-3">
-          <div className="bg-[#E63946] text-white rounded-lg shadow-lg border p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-3 flex-1">
-                <div className="mt-0.5">
+        <div key={notification.id} className="w-full">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3 flex-1">
+                <div className="flex-shrink-0">
                   <AlertTriangle className="h-5 w-5" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold">
-                    {notification.title}
-                  </h3>
-                  <p className="text-xs mt-1 opacity-90">
-                    {notification.message}
-                  </p>
-                  
-                  {/* Service Account Details */}
-                  <div className="mt-3 p-3 bg-white/10 rounded border border-white/20">
-                    <div className="flex items-center space-x-2 text-xs">
-                      <Clock className="h-3 w-3" />
-                      <span className="font-medium">Service Account:</span>
-                      <span>{notification.metadata.service_account_name}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                    <div className="flex-1">
+                      <span className="font-semibold text-sm">
+                        {notification.title}
+                      </span>
+                      <span className="hidden sm:inline text-sm opacity-90 ml-2">
+                        - Service account "{notification.metadata.service_account_name}" has exhausted its daily quota.
+                      </span>
                     </div>
-                    <div className="text-xs mt-1 opacity-80">
-                      Email: {notification.metadata.service_account_email}
+                    <div className="flex items-center space-x-4 text-xs opacity-90 mt-1 sm:mt-0">
+                      <span>
+                        <Clock className="h-3 w-3 inline mr-1" />
+                        Resets: {notification.metadata.quota_reset_time}
+                      </span>
+                      <span>Jobs will auto-resume</span>
                     </div>
-                    <div className="text-xs mt-1 opacity-80">
-                      Quota resets: {notification.metadata.quota_reset_time}
-                    </div>
-                  </div>
-                  
-                  {/* Auto-resume info */}
-                  <div className="mt-2 text-xs opacity-80">
-                    ✅ Jobs will automatically resume when quota resets
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => dismissNotification(notification.id)}
-                className="ml-3 p-1 rounded hover:bg-white/10 transition-colors"
+                className="flex-shrink-0 ml-4 p-1 rounded hover:bg-white/10 transition-colors"
+                aria-label="Dismiss notification"
               >
                 <X className="h-4 w-4" />
               </button>

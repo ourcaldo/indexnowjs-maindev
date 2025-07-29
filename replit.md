@@ -635,6 +635,24 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes  
 
+**SERVICE ACCOUNT QUOTA EXHAUSTION NOTIFICATION FIX COMPLETE (January 29, 2025)**
+- ✅ **IDENTIFIED & FIXED ROOT CAUSE OF NOTIFICATION BUG**: Resolved critical database constraint issue preventing quota exhausted notifications
+  - **Database Constraint Issue**: Database only allowed notification types: 'info', 'success', 'warning', 'error' but code used 'service_account_quota_exhausted'
+  - **Notification Creation Fix**: Updated notification creation code to use valid 'error' type with metadata.notification_type identifier
+  - **API Query Fix**: Modified API endpoint to correctly query for quota exhaustion notifications using metadata filter
+  - **Verification**: Confirmed service account was properly deactivated when quota exhausted and notifications now create successfully
+- ✅ **CONVERTED FLOATING TO STICKY BAR NOTIFICATION**: Fixed notification UI to display as requested sticky bar instead of floating popup
+  - **User Requirement**: User specifically requested sticky/bar notifications, not floating notifications
+  - **UI Design Change**: Converted from center-floating popup to full-width sticky bar at top of page
+  - **Responsive Design**: Notification bar adapts to mobile (stacked) and desktop (horizontal) layouts
+  - **Essential Information**: Shows service account name, quota reset time, and auto-resume status in compact layout
+  - **Dismiss Functionality**: Maintained dismiss button with proper hover states and accessibility
+- ✅ **COMPREHENSIVE DEBUGGING & TESTING**: Added extensive debugging logs and test utilities to verify notification system
+  - **Database Verification**: Confirmed service account deactivation working properly (indexnow account shows is_active: false)
+  - **Test Notification Created**: Successfully created test notification to verify entire notification pipeline
+  - **API Query Testing**: Verified API endpoint returns notifications correctly with new metadata-based filtering
+  - **Clean Up**: Removed debug files after successful testing as requested by user
+
 **LANDING PAGE PRICING ALIGNMENT & HERO COPYWRITING REFINEMENTS (January 27, 2025)**
 - ✅ **FIXED PRICING CARD ALIGNMENT ISSUES**: Resolved pricing display offset problems in pricing cards
   - **Root Cause**: Flex alignment was not properly centering prices with original/promo price combinations
