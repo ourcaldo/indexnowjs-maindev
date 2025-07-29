@@ -712,31 +712,57 @@ export class GoogleIndexingProcessor {
    */
   private async createQuotaExhaustedNotification(serviceAccountId: string): Promise<void> {
     try {
+      console.log(`🔔 Creating quota exhausted notification for service account: ${serviceAccountId}`);
+      
       // Get service account and user info
-      const { data: serviceAccount } = await supabaseAdmin
+      const { data: serviceAccount, error: fetchError } = await supabaseAdmin
         .from('indb_google_service_accounts')
         .select('user_id, name, email')
         .eq('id', serviceAccountId)
         .single();
       
-      if (serviceAccount) {
-        await supabaseAdmin
-          .from('indb_notifications_dashboard')
-          .insert({
-            user_id: serviceAccount.user_id,
-            type: 'service_account_quota_exhausted',
-            title: 'Service Account Quota Exhausted',
-            message: `Service account "${serviceAccount.name}" (${serviceAccount.email}) has exhausted its daily quota. Jobs have been paused and will resume automatically after quota reset (midnight Pacific Time).`,
-            metadata: {
-              service_account_id: serviceAccountId,
-              service_account_name: serviceAccount.name,
-              service_account_email: serviceAccount.email,
-              quota_reset_time: 'midnight Pacific Time'
-            },
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-            created_at: new Date().toISOString()
-          });
+      if (fetchError) {
+        console.error('Error fetching service account for notification:', fetchError);
+        return;
       }
+      
+      if (!serviceAccount) {
+        console.warn('Service account not found for notification creation:', serviceAccountId);
+        return;
+      }
+      
+      console.log(`📧 Creating notification for user ${serviceAccount.user_id}, service account: ${serviceAccount.name} (${serviceAccount.email})`);
+      
+      const { data: notification, error: insertError } = await supabaseAdmin
+        .from('indb_notifications_dashboard')
+        .insert({
+          user_id: serviceAccount.user_id,
+          type: 'error', // Use valid type - 'error' is appropriate for quota exhaustion
+          title: 'Service Account Quota Exhausted',
+          message: `Service account "${serviceAccount.name}" (${serviceAccount.email}) has exhausted its daily quota. Jobs have been paused and will resume automatically after quota reset (midnight Pacific Time).`,
+          metadata: {
+            notification_type: 'service_account_quota_exhausted', // Store the specific type in metadata
+            service_account_id: serviceAccountId,
+            service_account_name: serviceAccount.name,
+            service_account_email: serviceAccount.email,
+            quota_reset_time: 'midnight Pacific Time'
+          },
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+          created_at: new Date().toISOString(),
+          is_read: false
+        })
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('Error inserting quota exhausted notification:', insertError);
+        return;
+      }
+      
+      if (notification) {
+        console.log(`✅ Successfully created quota exhausted notification:`, notification.id);
+      }
+      
     } catch (error) {
       console.error('Error creating quota exhausted notification:', error);
     }
