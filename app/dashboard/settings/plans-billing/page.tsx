@@ -124,652 +124,649 @@ interface BillingHistoryData {
     completed_transactions: number
     pending_transactions: number
     failed_transactions: number
-    total_amount: number
-    average_transaction: number
+    total_amount_spent: number
   }
   pagination: {
     current_page: number
     total_pages: number
-    total_count: number
-    per_page: number
+    total_items: number
+    items_per_page: number
+    has_next: boolean
+    has_prev: boolean
   }
 }
 
-export default function PlansBillingSettingsPage() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'plans' | 'history'>('overview')
+export default function BillingPage() {
   const [billingData, setBillingData] = useState<BillingData | null>(null)
   const [packagesData, setPackagesData] = useState<PackagesData | null>(null)
+  
+  // Log page view and billing activities
+  usePageViewLogger('/dashboard/billing', 'Billing & Subscriptions', { section: 'billing_management' })
+  const { logBillingActivity } = useActivityLogger()
   const [historyData, setHistoryData] = useState<BillingHistoryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Plans tab states
+  // Plans section state
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<string>('monthly')
   const [subscribing, setSubscribing] = useState<string | null>(null)
-  const [showSuccessNotification, setShowSuccessNotification] = useState(false)
-  const [expandedPlans, setExpandedPlans] = useState<Record<string, boolean>>({})
+  const [expandedPlan, setExpandedPlan] = useState<string | null>(null)
+
+  // History section state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [typeFilter, setTypeFilter] = useState<string>('')
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
+  const [selectAll, setSelectAll] = useState(false)
+  const [showDetails, setShowDetails] = useState<Record<string, boolean>>({})
   const [showComparePlans, setShowComparePlans] = useState(false)
 
-  // History tab states
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [perPage, setPerPage] = useState(10)
-  const [sortBy, setSortBy] = useState<string>('created_at')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-
-  // Activity logging - log as part of settings not separate billing page
-  usePageViewLogger('/dashboard/settings/plans-billing', 'Plans & Billing Settings', { section: 'plans_billing' })
-  const { logActivity } = useActivityLogger()
-
   useEffect(() => {
-    loadBillingData()
+    loadAllData()
   }, [])
 
   useEffect(() => {
-    if (activeTab === 'plans') {
-      loadPackagesData()
-    } else if (activeTab === 'history') {
-      loadHistoryData()
+    if (statusFilter || typeFilter || searchTerm) {
+      loadBillingHistory()
     }
-  }, [activeTab, currentPage, perPage, statusFilter, typeFilter, sortBy, sortOrder, searchTerm])
+  }, [currentPage, statusFilter, typeFilter, searchTerm])
 
-  const loadBillingData = async () => {
+  const loadAllData = async () => {
     try {
       setLoading(true)
-      setError(null)
-      
-      const user = await authService.getCurrentUser()
-      if (!user) return
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
-
-      const response = await fetch('/api/billing/overview', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setBillingData(data)
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Failed to load billing data')
-      }
+      await Promise.all([
+        loadBillingData(),
+        loadPackages(),
+        loadBillingHistory()
+      ])
     } catch (error) {
-      console.error('Error loading billing data:', error)
-      setError('Failed to load billing data')
+      console.error('Error loading data:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const loadPackagesData = async () => {
+  const loadBillingData = async () => {
     try {
       const user = await authService.getCurrentUser()
-      if (!user) return
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
 
       const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
+      if (!token) {
+        throw new Error('No authentication token')
+      }
 
-      const response = await fetch('/api/billing/packages', {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch('/api/billing/overview', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        setPackagesData(data)
+      if (!response.ok) {
+        throw new Error('Failed to load billing data')
       }
+
+      const data = await response.json()
+      setBillingData(data)
     } catch (error) {
-      console.error('Error loading packages data:', error)
+      console.error('Error loading billing data:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load billing data')
     }
   }
 
-  const loadHistoryData = async () => {
+  const loadPackages = async () => {
     try {
       const user = await authService.getCurrentUser()
-      if (!user) return
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
 
       const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
+      if (!token) {
+        throw new Error('No authentication token')
+      }
 
-      const queryParams = new URLSearchParams({
+      const response = await fetch('/api/billing/packages', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to load packages')
+      }
+
+      const data = await response.json()
+      setPackagesData(data)
+    } catch (error) {
+      console.error('Error loading packages:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load packages')
+    }
+  }
+
+  const loadBillingHistory = async () => {
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) {
+        throw new Error('No authentication token')
+      }
+
+      const params = new URLSearchParams({
         page: currentPage.toString(),
-        per_page: perPage.toString(),
-        sort_by: sortBy,
-        sort_order: sortOrder,
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(typeFilter !== 'all' && { type: typeFilter }),
+        limit: '10',
+        ...(statusFilter && { status: statusFilter }),
+        ...(typeFilter && { type: typeFilter }),
         ...(searchTerm && { search: searchTerm })
       })
 
-      const response = await fetch(`/api/billing/history?${queryParams}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`/api/billing/history?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        setHistoryData(data)
+      if (!response.ok) {
+        throw new Error('Failed to load billing history')
       }
+
+      const data = await response.json()
+      setHistoryData(data)
     } catch (error) {
-      console.error('Error loading history data:', error)
+      console.error('Error loading billing history:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load billing history')
     }
   }
 
-  const handleSubscription = async (packageId: string, billingPeriod: string) => {
+  const getBillingPeriodPrice = (pkg: PaymentPackage, period: string): { price: number, originalPrice?: number, discount?: number } => {
+    const tier = pkg.pricing_tiers?.[period]
+    if (tier) {
+      return {
+        price: tier.promo_price || tier.regular_price,
+        originalPrice: tier.promo_price ? tier.regular_price : undefined,
+        discount: tier.discount_percentage
+      }
+    }
+    return { price: pkg.price }
+  }
+
+  const handleSubscribe = async (packageId: string) => {
     try {
       setSubscribing(packageId)
-      
-      const user = await authService.getCurrentUser()
-      if (!user) return
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
-
-      const response = await fetch('/api/billing/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          package_id: packageId,
-          billing_period: billingPeriod
-        })
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        // Handle subscription success - redirect to payment if needed
-        if (data.checkout_url) {
-          window.location.href = data.checkout_url
-        } else {
-          setShowSuccessNotification(true)
-          setTimeout(() => setShowSuccessNotification(false), 5000)
-          loadBillingData()
-          loadPackagesData()
-        }
-      }
+      const checkoutUrl = `/dashboard/billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
+      window.location.href = checkoutUrl
     } catch (error) {
       console.error('Error subscribing:', error)
+      alert(error instanceof Error ? error.message : 'Failed to redirect to checkout')
     } finally {
       setSubscribing(null)
     }
   }
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+  }
+
+  const resetFilters = () => {
+    setStatusFilter('')
+    setTypeFilter('')
+    setSearchTerm('')
+    setCurrentPage(1)
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'confirmed':
+        return <CheckCircle className="h-4 w-4 text-[#4BB543]" />
+      case 'pending':
+      case 'proof_uploaded':
+        return <Clock className="h-4 w-4 text-[#F0A202]" />
+      case 'failed':
+      case 'cancelled':
+        return <AlertCircle className="h-4 w-4 text-[#E63946]" />
+      default:
+        return <Clock className="h-4 w-4 text-[#6C757D]" />
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'proof_uploaded':
+        return 'WAITING FOR CONFIRMATION'
+      default:
+        return status.replace('_', ' ').toUpperCase()
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+      case 'completed':
+      case 'confirmed': 
+        return { bg: 'bg-[#4BB543]/10', text: 'text-[#4BB543]', border: 'border-[#4BB543]/20' }
+      case 'expired':
+      case 'failed':
+      case 'cancelled': 
+        return { bg: 'bg-[#E63946]/10', text: 'text-[#E63946]', border: 'border-[#E63946]/20' }
+      case 'expiring_soon':
+      case 'pending':
+      case 'proof_uploaded': 
+        return { bg: 'bg-[#F0A202]/10', text: 'text-[#F0A202]', border: 'border-[#F0A202]/20' }
+      default: 
+        return { bg: 'bg-[#6C757D]/10', text: 'text-[#6C757D]', border: 'border-[#6C757D]/20' }
+    }
+  }
+
+  const formatCurrency = (amount: number, currency: string = 'IDR') => {
+    return new Intl.NumberFormat('id-ID', {
       style: 'currency',
-      currency: currency
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(amount)
   }
 
+  const handleSelectInvoice = (invoiceId: string) => {
+    if (selectedInvoices.includes(invoiceId)) {
+      setSelectedInvoices(selectedInvoices.filter(id => id !== invoiceId))
+    } else {
+      setSelectedInvoices([...selectedInvoices, invoiceId])
+    }
+  }
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedInvoices([])
+      setSelectAll(false)
+    } else {
+      const allIds = historyData?.transactions.map(t => t.id) || []
+      setSelectedInvoices(allIds)
+      setSelectAll(true)
+    }
+  }
+
+  const togglePlanDetails = (planId: string) => {
+    // When not in compare mode, only expand the clicked plan and collapse others
+    if (!showComparePlans) {
+      setShowDetails(prev => {
+        const newState: Record<string, boolean> = {}
+        // Close all other cards
+        Object.keys(prev).forEach(key => {
+          newState[key] = false
+        })
+        // Toggle only the clicked card
+        newState[planId] = !prev[planId]
+        return newState
+      })
+    }
+  }
+
+  const toggleComparePlans = () => {
+    const newShowComparePlans = !showComparePlans
+    setShowComparePlans(newShowComparePlans)
+
+    if (newShowComparePlans) {
+      // Show all plan details when comparing
+      const allExpanded: Record<string, boolean> = {}
+      packagesData?.packages.forEach(pkg => {
+        allExpanded[pkg.id] = true
+      })
+      setShowDetails(allExpanded)
+    } else {
+      // Hide all details when exiting compare mode
+      setShowDetails({})
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const billingPeriods = [
+    { key: 'monthly', label: 'Monthly', suffix: '/month' },
+    { key: 'quarterly', label: '3 Months', suffix: '/3 months' },
+    { key: 'biannual', label: '6 Months', suffix: '/6 months' },
+    { key: 'annual', label: '12 Months', suffix: '/year' }
+  ]
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner />
-        <span className="ml-2">Loading billing information...</span>
+      <div className="flex items-center justify-center min-h-96">
+        <LoadingSpinner size="lg" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <AlertCircle className="w-8 h-8 text-red-500 mr-2" />
-        <span className="text-red-600">{error}</span>
+      <div className="text-center py-12">
+        <AlertCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Billing Data</h3>
+        <p className="text-[#6C757D] mb-4">{error}</p>
+        <button
+          onClick={loadAllData}
+          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Success notification */}
-      {showSuccessNotification && (
-        <div className="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg" style={{backgroundColor: '#4BB543', color: '#FFFFFF'}}>
-          <div className="flex items-center space-x-2">
-            <CheckCircle className="w-5 h-5" />
-            <span className="font-medium">Subscription updated successfully!</span>
-          </div>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Billing</h1>
+          <p className="text-[#6C757D] mt-1">Manage your plan and billing history here.</p>
         </div>
-      )}
-
-      {/* Tab Navigation */}
-      <div className="border-b" style={{borderColor: '#E0E6ED'}}>
-        <nav className="flex space-x-8">
-          {[
-            { id: 'overview', label: 'Overview', icon: DollarSign },
-            { id: 'plans', label: 'Plans', icon: Package },
-            { id: 'history', label: 'History', icon: Receipt }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-              onClick={() => setActiveTab(tab.id as any)}
-            >
-              <tab.icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </nav>
+        <button
+          onClick={loadAllData}
+          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors flex items-center gap-2"
+        >
+          <TrendingUp className="h-4 w-4" />
+          Refresh
+        </button>
       </div>
 
-      {/* Tab Content */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          {/* Billing Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-              <div className="flex items-center">
-                <div className="p-2 rounded-lg" style={{backgroundColor: '#4BB543'}}>
-                  <DollarSign className="w-6 h-6 text-white" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium" style={{color: '#6C757D'}}>Total Spent</p>
-                  <p className="text-2xl font-bold" style={{color: '#1A1A1A'}}>
-                    {formatCurrency(billingData?.billingStats.total_spent || 0)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-              <div className="flex items-center">
-                <div className="p-2 rounded-lg" style={{backgroundColor: '#3D8BFF'}}>
-                  <Receipt className="w-6 h-6 text-white" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium" style={{color: '#6C757D'}}>Total Payments</p>
-                  <p className="text-2xl font-bold" style={{color: '#1A1A1A'}}>
-                    {billingData?.billingStats.total_payments || 0}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {billingData?.currentSubscription && (
-              <>
-                <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-                  <div className="flex items-center">
-                    <div className="p-2 rounded-lg" style={{backgroundColor: '#F0A202'}}>
-                      <Calendar className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium" style={{color: '#6C757D'}}>Next Billing</p>
-                      <p className="text-2xl font-bold" style={{color: '#1A1A1A'}}>
-                        {billingData?.billingStats.next_billing_date 
-                          ? new Date(billingData.billingStats.next_billing_date).toLocaleDateString()
-                          : 'N/A'
-                        }
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-                  <div className="flex items-center">
-                    <div className="p-2 rounded-lg" style={{backgroundColor: '#E63946'}}>
-                      <Clock className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium" style={{color: '#6C757D'}}>Days Remaining</p>
-                      <p className="text-2xl font-bold" style={{color: '#1A1A1A'}}>
-                        {billingData?.billingStats.days_remaining || 0}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Current Subscription */}
-          {billingData?.currentSubscription ? (
-            <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>Current Subscription</h3>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  billingData.currentSubscription.subscription_status === 'active' 
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {billingData.currentSubscription.subscription_status}
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <p className="text-sm" style={{color: '#6C757D'}}>Plan</p>
-                  <p className="font-semibold" style={{color: '#1A1A1A'}}>{billingData.currentSubscription.package_name}</p>
-                </div>
-                <div>
-                  <p className="text-sm" style={{color: '#6C757D'}}>Amount</p>
-                  <p className="font-semibold" style={{color: '#1A1A1A'}}>
-                    {formatCurrency(billingData.currentSubscription.amount_paid)}
-                    <span className="text-sm font-normal" style={{color: '#6C757D'}}>
-                      /{billingData.currentSubscription.billing_period}
-                    </span>
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm" style={{color: '#6C757D'}}>Expires</p>
-                  <p className="font-semibold" style={{color: '#1A1A1A'}}>
-                    {billingData.currentSubscription.expires_at 
-                      ? new Date(billingData.currentSubscription.expires_at).toLocaleDateString()
-                      : 'Never'
-                    }
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-12" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED', borderRadius: '8px'}}>
-              <Package className="w-12 h-12 mx-auto mb-4" style={{color: '#6C757D'}} />
-              <h3 className="text-lg font-medium mb-2" style={{color: '#1A1A1A'}}>No Active Subscription</h3>
-              <p className="text-sm mb-6" style={{color: '#6C757D'}}>Choose a plan to get started with premium features</p>
-              <button 
-                className="px-6 py-2 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90"
-                style={{backgroundColor: '#1C2331'}}
-                onClick={() => setActiveTab('plans')}
-              >
-                View Plans
-              </button>
-            </div>
-          )}
-
-          {/* Recent Transactions */}
+      {/* Billing Settings Section */}
+      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>Recent Transactions</h3>
-              <button 
-                className="text-sm font-medium transition-colors hover:opacity-80"
-                style={{color: '#3D8BFF'}}
-                onClick={() => setActiveTab('history')}
-              >
-                View All
-              </button>
-            </div>
-            
-            <div className="space-y-3">
-              {billingData?.recentTransactions.length ? (
-                billingData.recentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-4 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg ${
-                        transaction.transaction_status === 'completed' ? 'bg-green-100' :
-                        transaction.transaction_status === 'pending' ? 'bg-yellow-100' :
-                        'bg-red-100'
-                      }`}>
-                        {transaction.transaction_status === 'completed' ? (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                        ) : transaction.transaction_status === 'pending' ? (
-                          <Clock className="w-4 h-4 text-yellow-600" />
-                        ) : (
-                          <AlertCircle className="w-4 h-4 text-red-600" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium" style={{color: '#1A1A1A'}}>{transaction.package_name}</p>
-                        <p className="text-sm" style={{color: '#6C757D'}}>
-                          {new Date(transaction.created_at).toLocaleDateString()} • {transaction.payment_method}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold" style={{color: '#1A1A1A'}}>
-                        {formatCurrency(transaction.amount, transaction.currency)}
-                      </p>
-                      <p className={`text-sm capitalize ${
-                        transaction.transaction_status === 'completed' ? 'text-green-600' :
-                        transaction.transaction_status === 'pending' ? 'text-yellow-600' :
-                        'text-red-600'
-                      }`}>
-                        {transaction.transaction_status}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8" style={{backgroundColor: '#F7F9FC', borderRadius: '8px'}}>
-                  <Receipt className="w-8 h-8 mx-auto mb-2" style={{color: '#6C757D'}} />
-                  <p className="text-sm" style={{color: '#6C757D'}}>No transactions yet</p>
-                </div>
-              )}
-            </div>
+            <h2 className="text-lg font-semibold text-[#1A1A1A]">Billing settings</h2>
+            <p className="text-sm text-[#6C757D]">Manage your plan and billing history here.</p>
           </div>
+          <button 
+            onClick={toggleComparePlans}
+            className="px-4 py-2 border border-[#E0E6ED] rounded-lg text-sm font-medium text-[#1A1A1A] hover:bg-[#F7F9FC] transition-colors flex items-center gap-2"
+          >
+            <Package className="h-4 w-4" />
+            {showComparePlans ? 'Hide comparison' : 'Compare plans'}
+          </button>
         </div>
-      )}
 
-      {activeTab === 'plans' && (
-        <div className="space-y-6">
-          <p className="text-sm" style={{color: '#6C757D'}}>
-            Choose the plan that best fits your indexing needs. All plans include unlimited support and regular updates.
-          </p>
-          
-          {/* Billing Period Toggle */}
-          <div className="flex justify-center">
-            <div className="p-1 rounded-lg" style={{backgroundColor: '#F7F9FC'}}>
-              <div className="flex">
-                {['monthly', 'yearly'].map((period) => (
-                  <button
-                    key={period}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                      selectedBillingPeriod === period
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                    onClick={() => setSelectedBillingPeriod(period)}
-                  >
-                    {period === 'monthly' ? 'Monthly' : 'Yearly'}
-                    {period === 'yearly' && (
-                      <span className="ml-1 text-xs bg-green-100 text-green-800 px-1 rounded">Save 20%</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* Current Plan Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {packagesData?.packages.map((pkg) => {
+            const isCurrentPlan = pkg.is_current
+            const pricing = getBillingPeriodPrice(pkg, selectedBillingPeriod)
 
-          {/* Plans Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {packagesData?.packages.map((pkg) => (
-              <div 
-                key={pkg.id} 
-                className={`relative p-6 rounded-lg border-2 transition-all ${
-                  pkg.is_popular ? 'border-blue-500 transform scale-105' : 'border-gray-200'
-                } ${pkg.is_current ? 'bg-blue-50' : 'bg-white'}`}
-              >
-                {pkg.is_popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="px-3 py-1 text-xs font-medium text-white bg-blue-500 rounded-full">
-                      Most Popular
-                    </span>
+            return (
+              <div key={pkg.id} className={`rounded-lg border p-4 relative flex flex-col h-full ${
+                isCurrentPlan 
+                  ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white' 
+                  : 'border-[#E0E6ED] bg-white hover:border-[#1A1A1A] transition-colors'
+              }`}>
+                {pkg.is_popular && !isCurrentPlan && (
+                  <div className="absolute -top-3 left-4 bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-medium">
+                    Most Popular
                   </div>
                 )}
-                
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-900">{pkg.name}</h3>
-                  <p className="text-sm text-gray-600 mt-2">{pkg.description}</p>
-                  
-                  <div className="mt-4">
-                    <span className="text-3xl font-bold text-gray-900">
-                      {formatCurrency(pkg.price)}
+
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className={`font-semibold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                      {pkg.name}
+                    </h3>
+                    {isCurrentPlan && (
+                      <span className="bg-white text-[#1A1A1A] px-2 py-0.5 rounded text-xs font-medium">
+                        Current plan
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                    {pkg.description}
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <div className="flex items-baseline gap-1">
+                    <span className={`text-2xl font-bold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                      {formatCurrency(pricing.price)}
                     </span>
-                    <span className="text-sm text-gray-600">/{pkg.billing_period}</span>
+                    <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                      per month
+                    </span>
                   </div>
                 </div>
 
-                <ul className="mt-6 space-y-3">
-                  {pkg.features.map((feature, index) => (
-                    <li key={index} className="flex items-start space-x-3">
-                      <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-600">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-8">
-                  {pkg.is_current ? (
-                    <button
-                      disabled
-                      className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-500 bg-gray-50"
-                    >
-                      Current Plan
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleSubscription(pkg.id, selectedBillingPeriod)}
-                      disabled={subscribing === pkg.id}
-                      className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                        pkg.is_popular
-                          ? 'bg-blue-500 text-white hover:bg-blue-600'
-                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                      } disabled:opacity-50`}
-                    >
-                      {subscribing === pkg.id ? 'Processing...' : 'Choose Plan'}
-                    </button>
+                {/* Expandable Features */}
+                <div className="flex-grow">
+                  {(showComparePlans || showDetails[pkg.id]) && (
+                    <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
+                      <div className="space-y-3">
+                        {/* Database Features ONLY - no hardcoded quota features */}
+                        {pkg.features.map((feature, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
+                            <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                              {feature}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
+
+                <div className="mt-auto space-y-2">
+                  <button 
+                    onClick={() => isCurrentPlan ? null : handleSubscribe(pkg.id)}
+                    disabled={isCurrentPlan || subscribing === pkg.id}
+                    className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 ${
+                      isCurrentPlan 
+                        ? 'bg-white text-[#1A1A1A] cursor-default'
+                        : 'bg-[#1A1A1A] text-white hover:bg-[#0d1b2a]'
+                    } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {subscribing === pkg.id ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </div>
+                    ) : isCurrentPlan ? 'Current plan' : 'Switch plan'}
+                  </button>
+
+
+                </div>
               </div>
-            ))}
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Billing History Section */}
+      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-semibold text-[#1A1A1A]">Billing history</h2>
+            <div className="flex items-center gap-4 mt-2">
+              <span className="text-sm text-[#6C757D]">
+                {historyData?.summary.total_transactions || 0} invoices selected
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6C757D]" />
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-[#E0E6ED] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1A1A] focus:border-[#1A1A1A]"
+              />
+            </div>
+            <button className="p-2 border border-[#E0E6ED] rounded-lg hover:bg-[#F7F9FC] transition-colors">
+              <Filter className="h-4 w-4 text-[#6C757D]" />
+            </button>
+            <button className="px-3 py-2 border border-[#E0E6ED] rounded-lg text-sm font-medium text-[#1A1A1A] hover:bg-[#F7F9FC] transition-colors flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Download all
+            </button>
           </div>
         </div>
-      )}
 
-      {activeTab === 'history' && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search transactions..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-                <option value="failed">Failed</option>
-              </select>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Show:</span>
-              <select
-                className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={perPage}
-                onChange={(e) => setPerPage(Number(e.target.value))}
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="p-3 bg-[#F7F9FC] rounded-lg">
+            <p className="text-xl font-bold text-[#1A1A1A]">
+              {formatCurrency(historyData?.summary.total_amount_spent || 0)}
+            </p>
+            <p className="text-xs text-[#6C757D]">Total spent</p>
           </div>
+          <div className="p-3 bg-[#F7F9FC] rounded-lg">
+            <p className="text-xl font-bold text-[#1A1A1A]">
+              {historyData?.summary.completed_transactions || 0}
+            </p>
+            <p className="text-xs text-[#6C757D]">Completed</p>
+          </div>
+          <div className="p-3 bg-[#F7F9FC] rounded-lg">
+            <p className="text-xl font-bold text-[#1A1A1A]">
+              {historyData?.summary.pending_transactions || 0}
+            </p>
+            <p className="text-xs text-[#6C757D]">Pending</p>
+          </div>
+          <div className="p-3 bg-[#F7F9FC] rounded-lg">
+            <p className="text-xl font-bold text-[#1A1A1A]">
+              {historyData?.summary.failed_transactions || 0}
+            </p>
+            <p className="text-xs text-[#6C757D]">Failed</p>
+          </div>
+        </div>
 
-          {/* Transactions Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-600">Transaction</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600">Amount</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600">Date</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600">Method</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600">Actions</th>
+        {/* Transactions Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#E0E6ED]">
+                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-[#E0E6ED]"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Order ID</th>
+                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Billing Date</th>
+                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Plan</th>
+                <th className="text-center py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {historyData?.transactions.map((transaction) => (
+                <tr 
+                  key={transaction.id} 
+                  className="border-b border-[#E0E6ED] hover:bg-[#F7F9FC] cursor-pointer transition-colors"
+                  onClick={() => window.location.href = `/dashboard/billing/order/${transaction.id}`}
+                >
+                  <td className="py-3 px-4">
+                    <input 
+                      type="checkbox" 
+                      className="rounded border-[#E0E6ED]"
+                      checked={selectedInvoices.includes(transaction.id)}
+                      onChange={() => handleSelectInvoice(transaction.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </td>
+                  <td className="py-3 px-4 text-left">
+                    <span className="text-sm text-[#1A1A1A] font-mono">
+                      {transaction.payment_reference}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-left">
+                    <span className="text-sm text-[#1A1A1A]">
+                      {formatDate(transaction.created_at)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-left">
+                    <span className="text-sm text-[#1A1A1A]">
+                      {transaction.package_name || transaction.package?.name || 'Unknown'}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <span className={`text-xs px-2 py-1 rounded-full border ${
+                      transaction.transaction_status === 'pending' || transaction.transaction_status === 'proof_uploaded'
+                        ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                        : getStatusColor(transaction.transaction_status).bg + ' ' + getStatusColor(transaction.transaction_status).text + ' ' + getStatusColor(transaction.transaction_status).border
+                    }`}>
+                      {getStatusText(transaction.transaction_status)}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {historyData?.transactions.map((transaction) => (
-                  <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{transaction.package?.name || 'Unknown Package'}</p>
-                        <p className="text-sm text-gray-600">#{transaction.payment_reference}</p>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 font-medium text-gray-900">
-                      {formatCurrency(transaction.amount, transaction.currency)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                        transaction.transaction_status === 'completed' ? 'bg-green-100 text-green-800' :
-                        transaction.transaction_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {transaction.transaction_status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">
-                      {new Date(transaction.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 px-4 text-gray-600 capitalize">
-                      {transaction.payment_method}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
-                        <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-                          <FileText className="w-4 h-4" />
-                        </button>
-                        <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-                          <Download className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-          {/* Pagination */}
-          {historyData?.pagination && historyData.pagination.total_pages > 1 && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600">
-                Showing {((historyData.pagination.current_page - 1) * historyData.pagination.per_page) + 1} to{' '}
-                {Math.min(historyData.pagination.current_page * historyData.pagination.per_page, historyData.pagination.total_count)} of{' '}
-                {historyData.pagination.total_count} transactions
-              </p>
-              
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage <= 1}
-                  className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  <ChevronLeft className="w-4 h-4" />
+        {/* Pagination */}
+        {historyData?.pagination && historyData.pagination.total_pages > 1 && (
+          <div className="flex items-center justify-between mt-6">
+            <div className="text-sm text-[#6C757D]">
+              Showing {((historyData.pagination.current_page - 1) * historyData.pagination.items_per_page) + 1} to{' '}
+              {Math.min(historyData.pagination.current_page * historyData.pagination.items_per_page, historyData.pagination.total_items)} of{' '}
+              {historyData.pagination.total_items} results
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(historyData.pagination.current_page - 1)}
+                disabled={!historyData.pagination.has_prev}
+                className="p-2 border border-[#E0E6ED] rounded-lg hover:bg-[#F7F9FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="px-3 py-2 text-sm font-medium text-[#1A1A1A]">
+                {historyData.pagination.current_page} of {historyData.pagination.total_pages}
+              </span>
+              <button
+                onClick={() => handlePageChange(historyData.pagination.current_page + 1)}
+                disabled={!historyData.pagination.has_next}
+                className="p-2 border border-[#E0E6ED] rounded-lg hover:bg-[#F7F9FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Action Bar - Only shows when invoices are selected */}
+      {selectedInvoices.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-[#1A1A1A] text-white rounded-xl px-6 py-4 shadow-xl border border-white/10">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-white">
+                {selectedInvoices.length} invoices selected
+              </span>
+              <div className="flex items-center gap-3">
+                <button className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors border border-white/20 text-sm">
+                  <Download className="h-3.5 w-3.5" />
+                  Download CSV
                 </button>
-                
-                <span className="px-3 py-1 text-sm">
-                  Page {historyData.pagination.current_page} of {historyData.pagination.total_pages}
-                </span>
-                
-                <button
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage >= historyData.pagination.total_pages}
-                  className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  <ChevronRight className="w-4 h-4" />
+                <button className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors border border-white/20 text-sm">
+                  <Download className="h-3.5 w-3.5" />
+                  Download PDF
                 </button>
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>
