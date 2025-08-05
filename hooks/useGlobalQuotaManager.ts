@@ -47,8 +47,8 @@ let globalQuotaData: QuotaData = {
 // Subscribers for quota updates
 const quotaSubscribers = new Set<(data: QuotaData) => void>()
 
-// Only fetch when explicitly requested - no automatic polling
-const MIN_FETCH_INTERVAL = 0
+// Minimum time between API calls (30 seconds)
+const MIN_FETCH_INTERVAL = 30000
 
 export function useGlobalQuotaManager() {
   const [quotaData, setQuotaData] = useState<QuotaData>(globalQuotaData)
@@ -70,12 +70,12 @@ export function useGlobalQuotaManager() {
     quotaSubscribers.forEach(subscriber => subscriber(data))
   }, [])
 
-  // Fetch quota data only when explicitly requested
+  // Fetch quota data with intelligent caching
   const fetchQuotaData = useCallback(async (forceRefresh = false) => {
     const now = Date.now()
     
-    // Only fetch when forced refresh (component mount or job creation)
-    if (!forceRefresh) {
+    // Skip if we fetched recently and not forcing refresh
+    if (!forceRefresh && (now - globalQuotaData.lastFetchTime) < MIN_FETCH_INTERVAL) {
       return globalQuotaData
     }
 
