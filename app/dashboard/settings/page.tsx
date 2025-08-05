@@ -80,51 +80,29 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar Navigation */}
-        <div className="lg:col-span-1">
-          <nav className="space-y-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full text-left p-4 rounded-lg transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'font-medium'
-                    : ''
-                }`}
-                style={{
-                  backgroundColor: activeTab === tab.id ? '#F7F9FC' : '#FFFFFF',
-                  border: '1px solid #E0E6ED',
-                  color: activeTab === tab.id ? '#1A1A1A' : '#6C757D'
-                }}
-                onMouseEnter={(e) => {
-                  if (activeTab !== tab.id) {
-                    (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activeTab !== tab.id) {
-                    (e.target as HTMLButtonElement).style.backgroundColor = '#FFFFFF'
-                  }
-                }}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <tab.icon className="w-4 h-4" />
-                  <span className="font-medium">{tab.label}</span>
-                </div>
-                <p className="text-xs" style={{color: '#6C757D'}}>
-                  {tab.description}
-                </p>
-              </button>
-            ))}
-          </nav>
-        </div>
+      {/* Top Tab Navigation */}
+      <div className="mb-6">
+        <nav className="flex space-x-1 border-b" style={{borderColor: '#E0E6ED'}}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                activeTab === tab.id
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
 
-        {/* Content Area */}
-        <div className="lg:col-span-3">
-          {renderTabContent()}
-        </div>
+      {/* Content Area */}
+      <div>
+        {renderTabContent()}
       </div>
     </div>
   )
