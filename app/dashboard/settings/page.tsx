@@ -23,7 +23,7 @@ export default function SettingsPage() {
 
   // Set active tab from URL parameter on load
   useEffect(() => {
-    const tab = searchParams.get('tab')
+    const tab = searchParams?.get('tab')
     if (tab && ['general', 'profile', 'service-accounts', 'plans-billing'].includes(tab)) {
       setActiveTab(tab)
     }

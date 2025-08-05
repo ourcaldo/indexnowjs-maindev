@@ -113,10 +113,10 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       ]
     },
     {
-      label: 'Billing & Payment',
-      href: '/dashboard/settings?tab=plans-billing',
-      icon: CreditCard,
-      active: pathname?.startsWith('/dashboard/settings') && (pathname?.includes('plans-billing') || pathname?.includes('billing')) || false
+      label: 'Settings',
+      href: '/dashboard/settings',
+      icon: Settings,
+      active: pathname?.startsWith('/dashboard/settings') || false
     }
   ]
 

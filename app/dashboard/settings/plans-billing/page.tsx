@@ -675,7 +675,7 @@ export default function BillingPage() {
                 <tr 
                   key={transaction.id} 
                   className="border-b border-[#E0E6ED] hover:bg-[#F7F9FC] cursor-pointer transition-colors"
-                  onClick={() => window.location.href = `/dashboard/billing/order/${transaction.id}`}
+                  onClick={() => window.location.href = `/dashboard/settings/plans-billing/order/${transaction.id}`}
                 >
                   <td className="py-3 px-4">
                     <input 

@@ -291,7 +291,7 @@ export default function HistoryTab() {
                 <div 
                   key={transaction.id} 
                   className="p-6 hover:bg-[#F7F9FC]/50 transition-colors cursor-pointer"
-                  onClick={() => window.location.href = `/dashboard/billing/order/${transaction.id}`}
+                  onClick={() => window.location.href = `/dashboard/settings/plans-billing/order/${transaction.id}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0 mr-4">

@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
         payment_instructions: gatewayData.configuration,
         package_name: packageData.name,
         payment_reference: transaction.payment_reference,
-        redirect_url: `/dashboard/billing/order/${transaction.id}`
+        redirect_url: `/dashboard/settings/plans-billing/order/${transaction.id}`
       }
     })
 

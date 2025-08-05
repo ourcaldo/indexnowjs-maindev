@@ -320,7 +320,7 @@ export default function BillingHistoryPage() {
                     <tr 
                       key={transaction.id} 
                       className="hover:bg-[#F7F9FC]/50 transition-colors cursor-pointer"
-                      onClick={() => window.location.href = `/dashboard/billing/order/${transaction.id}`}
+                      onClick={() => window.location.href = `/dashboard/settings/plans-billing/order/${transaction.id}`}
                     >
                       <td className="py-3 px-4">
                         <div>
