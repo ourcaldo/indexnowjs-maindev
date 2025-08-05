@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authService } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
+import { useQuotaValidation } from '@/hooks/useQuotaValidation'
 
 import { 
   Zap, 
@@ -16,6 +17,7 @@ import {
 
 export default function IndexNowPage() {
   const { addToast } = useToast()
+  const { validateJobCreation, isQuotaNearExhaustion, quotaInfo } = useQuotaValidation()
   const [loading, setLoading] = useState(false)
   const [loadingServiceAccounts, setLoadingServiceAccounts] = useState(true)
   const [parsingSitemap, setParsingSitemap] = useState(false)
@@ -293,6 +295,20 @@ export default function IndexNowPage() {
       addToast({
         title: 'Error',
         description: 'Please select a start time for scheduled jobs',
+        type: 'error'
+      })
+      return
+    }
+
+    // Validate quota before submitting job using global quota manager
+    const urlsToSubmit = activeTab === 'manual' ? urls.split('\n').filter(url => url.trim()) : parsedUrls
+    
+    const quotaValidation = await validateJobCreation(urlsToSubmit.length)
+    
+    if (!quotaValidation.success) {
+      addToast({
+        title: 'Quota Issue',
+        description: quotaValidation.error || 'Unable to create job due to quota limits',
         type: 'error'
       })
       return

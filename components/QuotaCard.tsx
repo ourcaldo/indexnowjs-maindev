@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { TrendingUp, AlertTriangle, Package } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
+import { useQuotaUpdates } from '@/hooks/useGlobalWebSocket'
 
 interface QuotaInfo {
   daily_quota_used: number
@@ -32,42 +33,22 @@ interface QuotaCardProps {
 }
 
 export default function QuotaCard({ userProfile }: QuotaCardProps) {
-  const [quotaInfo, setQuotaInfo] = useState<QuotaInfo | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { quotaInfo, loading, refreshQuota } = useGlobalQuotaManager()
 
+  // Fetch quota data on component mount only
   useEffect(() => {
-    fetchQuotaInfo()
-    
-    // Update quota every 3 seconds for real-time display
-    const interval = setInterval(fetchQuotaInfo, 3000)
-    
-    return () => clearInterval(interval)
-  }, [])
-
-  const fetchQuotaInfo = async () => {
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error || !session) {
-        setLoading(false)
-        return
-      }
-
-      const response = await fetch('/api/user/quota', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setQuotaInfo(data.quota)
-      }
-    } catch (error) {
-      console.error('Failed to fetch quota info:', error)
-    } finally {
-      setLoading(false)
+    if (!quotaInfo) {
+      refreshQuota()
     }
-  }
+  }, [quotaInfo, refreshQuota])
+
+  // Subscribe to real-time quota updates via WebSocket
+  useQuotaUpdates((quotaUpdate) => {
+    // Quota will be automatically updated through the global manager
+    console.log('📊 Received quota update via WebSocket:', quotaUpdate)
+  })
+
+
 
   // Use real-time data if available, fallback to userProfile
   const displayQuotaUsed = quotaInfo?.daily_quota_used ?? userProfile.daily_quota_used ?? 0

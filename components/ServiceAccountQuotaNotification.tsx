@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { AlertTriangle, X, Clock } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
-import { authService } from '@/lib/auth'
+import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
+import { useNotificationUpdates } from '@/hooks/useGlobalWebSocket'
 
 interface QuotaNotification {
   id: string
@@ -19,64 +19,44 @@ interface QuotaNotification {
 }
 
 export default function ServiceAccountQuotaNotification() {
-  const [notifications, setNotifications] = useState<QuotaNotification[]>([])
+  const { notifications } = useGlobalQuotaManager()
+  const [localNotifications, setLocalNotifications] = useState<QuotaNotification[]>([])
 
+  // Initialize notifications from global manager
   useEffect(() => {
-    fetchNotifications()
-    
-    // Check for new notifications every 5 seconds
-    const interval = setInterval(fetchNotifications, 5000)
-    
-    return () => clearInterval(interval)
-  }, [])
-
-  const fetchNotifications = async () => {
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) return
-
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error || !session) return
-
-      const response = await fetch('/api/notifications/service-account-quota', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setNotifications(data.notifications || [])
-      }
-    } catch (error) {
-      console.error('Failed to fetch quota notifications:', error)
+    if (notifications) {
+      setLocalNotifications(notifications)
     }
-  }
+  }, [notifications])
+
+  // Subscribe to real-time notification updates via WebSocket
+  useNotificationUpdates((newNotification) => {
+    console.log('📣 Received new notification via WebSocket:', newNotification)
+    setLocalNotifications(prev => [newNotification, ...prev])
+  })
+
+
 
   const dismissNotification = async (notificationId: string) => {
     try {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error || !session) return
-
-      await fetch(`/api/notifications/${notificationId}/dismiss`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
+      const response = await fetch(`/api/notifications/${notificationId}/dismiss`, {
+        method: 'POST'
       })
 
-      // Remove from local state
-      setNotifications(prev => prev.filter(n => n.id !== notificationId))
+      if (response.ok) {
+        // Remove from local state
+        setLocalNotifications(prev => prev.filter(n => n.id !== notificationId))
+      }
     } catch (error) {
       console.error('Failed to dismiss notification:', error)
     }
   }
 
-  if (notifications.length === 0) return null
+  if (localNotifications.length === 0) return null
 
   return (
     <div className="sticky top-0 left-0 right-0 z-40 bg-[#E63946] text-white shadow-lg">
-      {notifications.map((notification) => (
+      {localNotifications.map((notification) => (
         <div key={notification.id} className="w-full">
           <div className="px-4 py-2">
             <div className="flex items-center justify-between">

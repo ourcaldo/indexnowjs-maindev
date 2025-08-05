@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import GlobalWebSocketProvider from '@/components/GlobalWebSocketProvider'
 
 // Initialize background services on server-side only once
 if (typeof window === 'undefined' && !(global as any).backgroundServicesInitialized) {
@@ -25,7 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
+        <GlobalWebSocketProvider>
+          {children}
+        </GlobalWebSocketProvider>
       </body>
     </html>
   )

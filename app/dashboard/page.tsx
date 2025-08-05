@@ -2,7 +2,7 @@
 
 import { PlusIcon, BellIcon, TrendingUpIcon, CalendarIcon, CheckCircleIcon, Database } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useSocketIO } from '@/hooks/useSocketIO'
+import { useJobUpdates } from '@/hooks/useGlobalWebSocket'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import QuotaCard from '@/components/QuotaCard'
@@ -69,9 +69,9 @@ export default function Dashboard() {
   usePageViewLogger('/dashboard', 'Dashboard', { section: 'main_dashboard' })
   const { logDashboardActivity } = useActivityLogger()
 
-  // Socket.io for real-time updates
-  const { isConnected } = useSocketIO({
-    onJobUpdate: (message) => {
+  // Subscribe to job updates via global WebSocket
+  useJobUpdates((message) => {
+    if (message.jobId) {
       // Update job status in real-time
       setRecentJobs(prevJobs => 
         prevJobs.map(job => {
