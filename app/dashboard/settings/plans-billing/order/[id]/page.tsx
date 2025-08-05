@@ -226,7 +226,7 @@ export default function OrderCompletedPage() {
           <h2 className="text-xl font-semibold text-[#1A1A1A] mb-2">Order Not Found</h2>
           <p className="text-[#6C757D] mb-4">The order you're looking for doesn't exist or you don't have access to it.</p>
           <Button 
-            onClick={() => router.push('/dashboard/billing')}
+            onClick={() => router.push('/dashboard/settings?tab=plans-billing')}
             className="bg-[#1A1A1A] hover:bg-[#2C2C2E] text-white"
           >
             Back to Billing
@@ -243,7 +243,7 @@ export default function OrderCompletedPage() {
         <div className="mb-8">
           <Button
             variant="ghost"
-            onClick={() => router.push('/dashboard/billing')}
+            onClick={() => router.push('/dashboard/settings?tab=plans-billing')}
             className="mb-4 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

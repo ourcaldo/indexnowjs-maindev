@@ -111,12 +111,6 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           active: pathname === '/dashboard/manage-jobs'
         }
       ]
-    },
-    {
-      label: 'Settings',
-      href: '/dashboard/settings',
-      icon: Settings,
-      active: pathname?.startsWith('/dashboard/settings') || false
     }
   ]
 
