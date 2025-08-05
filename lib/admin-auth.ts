@@ -41,32 +41,28 @@ export class AdminAuthService {
 
       // Try to get user profile with role information using direct API call
       try {
-        const response = await fetch(`https://base.indexnow.studio/rest/v1/indb_auth_user_profiles?user_id=eq.${currentUser.id}&select=role,full_name`, {
-          headers: {
-            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-            'Content-Type': 'application/json'
-          }
-        })
+        // Use Supabase client instead of direct REST API call
+        const { data: profiles, error } = await supabase
+          .from('indb_auth_user_profiles')
+          .select('role, full_name')
+          .eq('user_id', currentUser.id)
+          .limit(1)
 
-        if (response.ok) {
-          const profiles = await response.json()
-          if (profiles && profiles.length > 0) {
-            const profile = profiles[0]
-            console.log('Admin auth: Found profile via API:', profile)
-            const role = profile.role || 'user'
-            return {
-              id: currentUser.id,
-              email: currentUser.email,
-              name: profile.full_name || currentUser.name,
-              role,
-              isAdmin: role === 'admin' || role === 'super_admin',
-              isSuperAdmin: role === 'super_admin'
-            }
+        if (!error && profiles && profiles.length > 0) {
+          const profile = profiles[0]
+          console.log('Admin auth: Found profile via Supabase client:', profile)
+          const role = profile.role || 'user'
+          return {
+            id: currentUser.id,
+            email: currentUser.email,
+            name: profile.full_name || currentUser.name,
+            role,
+            isAdmin: role === 'admin' || role === 'super_admin',
+            isSuperAdmin: role === 'super_admin'
           }
         }
       } catch (apiError) {
-        console.error('API call failed:', apiError)
+        console.error('Supabase query failed:', apiError)
       }
 
       // Fallback: create super_admin profile for authenticated users

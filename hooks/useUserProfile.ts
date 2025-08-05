@@ -50,14 +50,10 @@ export function useUserProfile() {
         return
       }
 
-      // Get user profile with role information
-      const { data: profile, error: profileError } = await supabase
-        .from('indb_auth_user_profiles')
-        .select('*')
-        .eq('user_id', authUser.id)
-        .single()
-
-      if (profileError || !profile) {
+      // Get authentication token
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.access_token) {
         // Create a basic user object without role information
         setUser({
           id: authUser.id,
@@ -69,6 +65,30 @@ export function useUserProfile() {
         })
         return
       }
+
+      // Get user profile through API layer instead of direct database call
+      const response = await fetch('/api/user/profile', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok || response.status === 404) {
+        // Create a basic user object without role information
+        setUser({
+          id: authUser.id,
+          email: authUser.email,
+          name: authUser.user_metadata?.full_name,
+          role: 'user',
+          isAdmin: false,
+          isSuperAdmin: false
+        })
+        return
+      }
+
+      const data = await response.json()
+      const profile = data.profile
 
       // Create full user object with role information
       const userWithRole: UserWithRole = {
