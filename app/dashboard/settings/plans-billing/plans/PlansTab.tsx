@@ -79,7 +79,7 @@ export default function PlansTab() {
     if (searchParams?.get('checkout') === 'success') {
       setShowSuccessNotification(true)
       // Remove the query parameter
-      window.history.replaceState({}, '', '/dashboard/billing')
+      window.history.replaceState({}, '', '/dashboard/settings/plans-billing')
     }
   }, [searchParams])
 
@@ -161,7 +161,7 @@ export default function PlansTab() {
       setSubscribing(packageId)
       
       // Redirect to checkout page with package and billing period
-      const checkoutUrl = `/dashboard/billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
       window.location.href = checkoutUrl
       
     } catch (error) {

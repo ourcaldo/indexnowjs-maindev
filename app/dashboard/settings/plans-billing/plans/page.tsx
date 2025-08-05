@@ -128,7 +128,7 @@ export default function PlansPage() {
 
       // Redirect to unified checkout page with selected package and billing period
       // This prevents duplicate transaction creation by using only the checkout API
-      const checkoutUrl = `/dashboard/billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
       window.location.href = checkoutUrl
       
     } catch (error) {

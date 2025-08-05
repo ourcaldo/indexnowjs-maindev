@@ -71,7 +71,7 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   
   // Log page view and checkout activities
-  usePageViewLogger('/dashboard/billing/checkout', 'Checkout', { section: 'billing_checkout' })
+  usePageViewLogger('/dashboard/settings/plans-billing/checkout', 'Checkout', { section: 'billing_checkout' })
   const { logBillingActivity } = useActivityLogger()
   
   const [form, setForm] = useState<CheckoutForm>({
@@ -147,7 +147,7 @@ export default function CheckoutPage() {
             description: "The selected package could not be found.",
             type: "error"
           })
-          router.push('/dashboard/billing')
+          router.push('/dashboard/settings/plans-billing')
           return
         }
         
@@ -183,7 +183,7 @@ export default function CheckoutPage() {
     if (package_id) {
       fetchData()
     } else {
-      router.push('/dashboard/billing')
+      router.push('/dashboard/settings/plans-billing')
     }
   }, [package_id, router, addToast])
 
@@ -301,7 +301,7 @@ export default function CheckoutPage() {
         <div className="text-center">
           <h2 className="text-xl font-semibold text-[#1A1A1A] mb-2">Package not found</h2>
           <p className="text-[#6C757D] mb-4">The selected package could not be found.</p>
-          <Button onClick={() => router.push('/dashboard/billing')} className="bg-[#3D8BFF] hover:bg-[#2C6FCC]">
+          <Button onClick={() => router.push('/dashboard/settings/plans-billing')} className="bg-[#3D8BFF] hover:bg-[#2C6FCC]">
             Back to Billing
           </Button>
         </div>
@@ -318,7 +318,7 @@ export default function CheckoutPage() {
         <div className="mb-8">
           <Button
             variant="ghost"
-            onClick={() => router.push('/dashboard/billing')}
+            onClick={() => router.push('/dashboard/settings/plans-billing')}
             className="mb-4 text-[#6C757D] hover:text-[#1A1A1A]"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

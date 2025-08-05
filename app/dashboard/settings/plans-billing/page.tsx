@@ -141,7 +141,7 @@ export default function BillingPage() {
   const [packagesData, setPackagesData] = useState<PackagesData | null>(null)
   
   // Log page view and billing activities
-  usePageViewLogger('/dashboard/billing', 'Billing & Subscriptions', { section: 'billing_management' })
+  usePageViewLogger('/dashboard/settings/plans-billing', 'Billing & Subscriptions', { section: 'billing_management' })
   const { logBillingActivity } = useActivityLogger()
   const [historyData, setHistoryData] = useState<BillingHistoryData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -303,7 +303,7 @@ export default function BillingPage() {
   const handleSubscribe = async (packageId: string) => {
     try {
       setSubscribing(packageId)
-      const checkoutUrl = `/dashboard/billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
       window.location.href = checkoutUrl
     } catch (error) {
       console.error('Error subscribing:', error)
