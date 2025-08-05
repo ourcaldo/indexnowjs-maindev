@@ -117,12 +117,6 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       href: '/dashboard/billing',
       icon: CreditCard,
       active: pathname?.startsWith('/dashboard/billing') || false
-    },
-    {
-      label: 'Settings',
-      href: '/dashboard/settings',
-      icon: Settings,
-      active: pathname === '/dashboard/settings'
     }
   ]
 
@@ -290,6 +284,40 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
               </div>
             ))}
           </nav>
+        </div>
+
+        {/* Settings Menu Item at Bottom */}
+        <div className="px-3 pb-4">
+          <Link href="/dashboard/settings" onClick={onToggle}>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full h-10 justify-start px-4 transition-all duration-200",
+                pathname === '/dashboard/settings' ? "font-medium" : ""
+              )}
+              style={{
+                color: pathname === '/dashboard/settings' ? '#1A1A1A' : '#6C757D',
+                backgroundColor: pathname === '/dashboard/settings' ? '#F7F9FC' : 'transparent'
+              }}
+              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
+                if (pathname !== '/dashboard/settings') {
+                  (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
+                  ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
+                }
+              }}
+              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
+                if (pathname !== '/dashboard/settings') {
+                  (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
+                  ;(e.target as HTMLButtonElement).style.color = '#6C757D'
+                }
+              }}
+            >
+              <div className="flex items-center w-full">
+                <Settings className="h-4 w-4 mr-3 flex-shrink-0" />
+                <span className="text-left">Settings</span>
+              </div>
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile User Profile at Bottom */}
@@ -508,6 +536,49 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
               </div>
             ))}
           </nav>
+        </div>
+
+        {/* Settings Menu Item at Bottom */}
+        <div className="px-3 pb-4">
+          <Link href="/dashboard/settings">
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full h-10 transition-all duration-200",
+                isCollapsed 
+                  ? "justify-center px-3" 
+                  : "justify-start px-4",
+                pathname === '/dashboard/settings'
+                  ? "font-medium"
+                  : ""
+              )}
+              style={{
+                color: pathname === '/dashboard/settings' ? '#1A1A1A' : '#6C757D',
+                backgroundColor: pathname === '/dashboard/settings' ? '#F7F9FC' : 'transparent'
+              }}
+              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
+                if (pathname !== '/dashboard/settings') {
+                  (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
+                  ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
+                }
+              }}
+              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
+                if (pathname !== '/dashboard/settings') {
+                  (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
+                  ;(e.target as HTMLButtonElement).style.color = '#6C757D'
+                }
+              }}
+            >
+              {isCollapsed ? (
+                <Settings className="h-4 w-4" />
+              ) : (
+                <div className="flex items-center w-full">
+                  <Settings className="h-4 w-4 mr-3 flex-shrink-0" />
+                  <span className="text-left">Settings</span>
+                </div>
+              )}
+            </Button>
+          </Link>
         </div>
 
         {/* Desktop User Profile at Bottom */}
