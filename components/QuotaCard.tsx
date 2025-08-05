@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import React from 'react'
 import { TrendingUp, AlertTriangle, Package } from 'lucide-react'
-import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
+import { useSmartQuotaFetch } from '@/hooks/useSmartQuotaFetch'
 import { useQuotaUpdates } from '@/hooks/useGlobalWebSocket'
 
 interface QuotaInfo {
@@ -33,20 +33,18 @@ interface QuotaCardProps {
 }
 
 export default function QuotaCard({ userProfile }: QuotaCardProps) {
-  const { quotaInfo, loading, refreshQuota } = useGlobalQuotaManager()
-
-  // Fetch quota data on component mount only
-  useEffect(() => {
-    if (!quotaInfo) {
-      refreshQuota()
-    }
-  }, [quotaInfo, refreshQuota])
+  const { quotaInfo } = useSmartQuotaFetch({ 
+    fetchOnMount: true, 
+    componentName: 'QuotaCard' 
+  })
 
   // Subscribe to real-time quota updates via WebSocket
   useQuotaUpdates((quotaUpdate) => {
     // Quota will be automatically updated through the global manager
     console.log('📊 Received quota update via WebSocket:', quotaUpdate)
   })
+
+  const loading = false // No longer needed since we don't poll
 
 
 
