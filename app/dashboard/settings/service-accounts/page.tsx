@@ -71,6 +71,32 @@ export default function ServiceAccountsSettingsPage() {
     }
 
     try {
+      // Parse and validate the JSON
+      let credentials
+      try {
+        credentials = JSON.parse(serviceAccountJson)
+      } catch (error) {
+        addToast({
+          title: 'Invalid JSON',
+          description: 'Please provide valid JSON format for the service account',
+          type: 'error'
+        })
+        return
+      }
+
+      // Extract required fields from the credentials
+      const name = displayName.trim() || credentials.client_email?.split('@')[0] || 'Service Account'
+      const email = credentials.client_email
+
+      if (!email) {
+        addToast({
+          title: 'Invalid Service Account',
+          description: 'Service account JSON must contain client_email field',
+          type: 'error'
+        })
+        return
+      }
+
       setSavingServiceAccount(true)
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
@@ -82,9 +108,9 @@ export default function ServiceAccountsSettingsPage() {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          service_account_json: serviceAccountJson,
-          display_name: displayName,
-          validate: validateAccount
+          name: name,
+          email: email,
+          credentials: credentials
         })
       })
 
