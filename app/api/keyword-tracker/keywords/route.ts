@@ -1,0 +1,309 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
+import { z } from 'zod'
+
+// Validation schemas
+const addKeywordsSchema = z.object({
+  domain_id: z.string().uuid('Invalid domain ID'),
+  keywords: z.array(z.string().min(1)).min(1, 'At least one keyword is required'),
+  device_type: z.enum(['desktop', 'mobile']).default('desktop'),
+  country_id: z.string().uuid('Invalid country ID'),
+  tags: z.array(z.string()).optional().default([])
+})
+
+const getKeywordsSchema = z.object({
+  domain_id: z.string().uuid().optional(),
+  device_type: z.enum(['desktop', 'mobile']).optional(),
+  country_id: z.string().uuid().optional(),
+  tags: z.array(z.string()).optional(),
+  page: z.number().min(1).default(1),
+  limit: z.number().min(1).max(100).default(20)
+})
+
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = supabaseAdmin
+
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Parse query parameters
+    const url = new URL(request.url)
+    const queryParams = {
+      domain_id: url.searchParams.get('domain_id') || undefined,
+      device_type: url.searchParams.get('device_type') as 'desktop' | 'mobile' | undefined,
+      country_id: url.searchParams.get('country_id') || undefined,
+      tags: url.searchParams.get('tags')?.split(',').filter(Boolean) || undefined,
+      page: parseInt(url.searchParams.get('page') || '1'),
+      limit: parseInt(url.searchParams.get('limit') || '20')
+    }
+
+    const validation = getKeywordsSchema.safeParse(queryParams)
+    if (!validation.success) {
+      return NextResponse.json(
+        { success: false, error: validation.error.issues[0].message },
+        { status: 400 }
+      )
+    }
+
+    const { domain_id, device_type, country_id, tags, page, limit } = validation.data
+    const offset = (page - 1) * limit
+
+    // Build query
+    let query = supabase
+      .from('indb_keyword_keywords')
+      .select(`
+        *,
+        domain:indb_keyword_domains(id, domain_name, display_name),
+        country:indb_keyword_countries(id, name, iso2_code),
+        rankings:indb_keyword_rankings(
+          position,
+          url,
+          search_volume,
+          check_date,
+          created_at
+        )
+      `)
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+
+    // Apply filters
+    if (domain_id) query = query.eq('domain_id', domain_id)
+    if (device_type) query = query.eq('device_type', device_type)
+    if (country_id) query = query.eq('country_id', country_id)
+    if (tags && tags.length > 0) {
+      query = query.overlaps('tags', tags)
+    }
+
+    // Get total count
+    const { count } = await query.select('id', { count: 'exact', head: true })
+
+    // Get paginated results
+    const { data: keywords, error } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (error) {
+      console.error('Error fetching keywords:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch keywords' },
+        { status: 500 }
+      )
+    }
+
+    // Process keywords with ranking history
+    const processedKeywords = (keywords || []).map((keyword: any) => {
+      const sortedRankings = (keyword.rankings || []).sort((a: any, b: any) => 
+        new Date(b.check_date).getTime() - new Date(a.check_date).getTime()
+      )
+      
+      const currentRanking = sortedRankings[0]
+      const previousRankings = sortedRankings.slice(1, 4) // Last 3 previous rankings
+      
+      // Calculate position changes
+      const get1DChange = () => {
+        const yesterday = previousRankings.find((r: any) => {
+          const date = new Date(r.check_date)
+          const today = new Date(currentRanking?.check_date || new Date())
+          return Math.abs(today.getTime() - date.getTime()) <= 24 * 60 * 60 * 1000
+        })
+        if (!yesterday || !currentRanking) return null
+        return (yesterday.position || 0) - (currentRanking.position || 0)
+      }
+
+      const get3DChange = () => {
+        const threeDaysAgo = previousRankings.find((r: any) => {
+          const date = new Date(r.check_date)
+          const today = new Date(currentRanking?.check_date || new Date())
+          const diffDays = Math.abs(today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
+          return diffDays >= 2 && diffDays <= 4
+        })
+        if (!threeDaysAgo || !currentRanking) return null
+        return (threeDaysAgo.position || 0) - (currentRanking.position || 0)
+      }
+
+      const get7DChange = () => {
+        const sevenDaysAgo = previousRankings.find((r: any) => {
+          const date = new Date(r.check_date)
+          const today = new Date(currentRanking?.check_date || new Date())
+          const diffDays = Math.abs(today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
+          return diffDays >= 6 && diffDays <= 8
+        })
+        if (!sevenDaysAgo || !currentRanking) return null
+        return (sevenDaysAgo.position || 0) - (currentRanking.position || 0)
+      }
+
+      return {
+        ...keyword,
+        current_position: currentRanking?.position || null,
+        current_url: currentRanking?.url || null,
+        search_volume: currentRanking?.search_volume || null,
+        last_updated: currentRanking?.check_date || null,
+        position_1d: get1DChange(),
+        position_3d: get3DChange(),
+        position_7d: get7DChange(),
+        rankings: undefined // Remove full rankings from response
+      }
+    })
+
+    return NextResponse.json({
+      success: true,
+      data: processedKeywords,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit)
+      }
+    })
+
+  } catch (error) {
+    console.error('Keywords GET API error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = supabaseAdmin
+
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Parse request body
+    const body = await request.json()
+    const validation = addKeywordsSchema.safeParse(body)
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { success: false, error: validation.error.issues[0].message },
+        { status: 400 }
+      )
+    }
+
+    const { domain_id, keywords, device_type, country_id, tags } = validation.data
+
+    // Verify domain belongs to user
+    const { data: domain, error: domainError } = await supabase
+      .from('indb_keyword_domains')
+      .select('id')
+      .eq('id', domain_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (domainError || !domain) {
+      return NextResponse.json(
+        { success: false, error: 'Domain not found or access denied' },
+        { status: 404 }
+      )
+    }
+
+    // Check user's keyword quota
+    const { data: userProfile } = await supabase
+      .from('indb_auth_user_profiles')
+      .select(`
+        *,
+        user_subscriptions:indb_user_subscriptions(
+          package:indb_payment_packages(quota_limits)
+        )
+      `)
+      .eq('user_id', user.id)
+      .single()
+
+    // Get current keyword count for user
+    const { count: currentKeywordCount } = await supabase
+      .from('indb_keyword_keywords')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+
+    // Get quota limits (default to free tier if no subscription)
+    const quotaLimits = userProfile?.user_subscriptions?.[0]?.package?.quota_limits || { keywords_limit: 50 }
+    const keywordLimit = quotaLimits.keywords_limit || 50
+
+    if ((currentKeywordCount || 0) + keywords.length > keywordLimit) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Adding ${keywords.length} keywords would exceed your limit of ${keywordLimit}. Current usage: ${currentKeywordCount || 0}` 
+        },
+        { status: 400 }
+      )
+    }
+
+    // Check for duplicate keywords
+    const { data: existingKeywords } = await supabase
+      .from('indb_keyword_keywords')
+      .select('keyword')
+      .eq('user_id', user.id)
+      .eq('domain_id', domain_id)
+      .eq('device_type', device_type)
+      .eq('country_id', country_id)
+      .in('keyword', keywords)
+
+    const existingKeywordTexts = existingKeywords?.map((k: any) => k.keyword) || []
+    const newKeywords = keywords.filter((k: string) => !existingKeywordTexts.includes(k))
+
+    if (newKeywords.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'All keywords already exist for this domain/device/country combination' },
+        { status: 400 }
+      )
+    }
+
+    // Create keyword entries
+    const keywordEntries = newKeywords.map(keyword => ({
+      user_id: user.id,
+      domain_id,
+      keyword: keyword.trim(),
+      device_type,
+      country_id,
+      tags: tags || []
+    }))
+
+    const { data: insertedKeywords, error } = await supabase
+      .from('indb_keyword_keywords')
+      .insert(keywordEntries)
+      .select(`
+        *,
+        domain:indb_keyword_domains(domain_name, display_name),
+        country:indb_keyword_countries(name, iso2_code)
+      `)
+
+    if (error) {
+      console.error('Error inserting keywords:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to add keywords' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: insertedKeywords,
+      message: `Successfully added ${newKeywords.length} keywords${existingKeywordTexts.length > 0 ? ` (${existingKeywordTexts.length} duplicates skipped)` : ''}`
+    })
+
+  } catch (error) {
+    console.error('Keywords POST API error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

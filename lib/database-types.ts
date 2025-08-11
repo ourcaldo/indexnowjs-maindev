@@ -115,6 +115,175 @@ export interface Database {
           updated_at?: string
         }
       }
+      indb_keyword_countries: {
+        Row: {
+          id: string
+          name: string
+          iso2_code: string
+          iso3_code: string
+          numeric_code: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          iso2_code: string
+          iso3_code: string
+          numeric_code: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          iso2_code?: string
+          iso3_code?: string
+          numeric_code?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      indb_keyword_domains: {
+        Row: {
+          id: string
+          user_id: string
+          domain_name: string
+          display_name: string | null
+          is_active: boolean
+          verification_status: 'pending' | 'verified' | 'failed'
+          verification_code: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          domain_name: string
+          display_name?: string | null
+          is_active?: boolean
+          verification_status?: 'pending' | 'verified' | 'failed'
+          verification_code?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          domain_name?: string
+          display_name?: string | null
+          is_active?: boolean
+          verification_status?: 'pending' | 'verified' | 'failed'
+          verification_code?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      indb_keyword_keywords: {
+        Row: {
+          id: string
+          user_id: string
+          domain_id: string
+          keyword: string
+          device_type: 'desktop' | 'mobile'
+          country_id: string
+          tags: string[]
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          domain_id: string
+          keyword: string
+          device_type?: 'desktop' | 'mobile'
+          country_id: string
+          tags?: string[]
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          domain_id?: string
+          keyword?: string
+          device_type?: 'desktop' | 'mobile'
+          country_id?: string
+          tags?: string[]
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      indb_keyword_rankings: {
+        Row: {
+          id: string
+          keyword_id: string
+          position: number | null
+          url: string | null
+          search_volume: number | null
+          difficulty_score: number | null
+          check_date: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          keyword_id: string
+          position?: number | null
+          url?: string | null
+          search_volume?: number | null
+          difficulty_score?: number | null
+          check_date?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          keyword_id?: string
+          position?: number | null
+          url?: string | null
+          search_volume?: number | null
+          difficulty_score?: number | null
+          check_date?: string
+          created_at?: string
+        }
+      }
+      indb_keyword_usage: {
+        Row: {
+          id: string
+          user_id: string
+          keywords_used: number
+          keywords_limit: number
+          period_start: string
+          period_end: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          keywords_used?: number
+          keywords_limit?: number
+          period_start?: string
+          period_end?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          keywords_used?: number
+          keywords_limit?: number
+          period_start?: string
+          period_end?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
       indb_google_quota_usage: {
         Row: {
           id: string
@@ -362,6 +531,11 @@ export type IndexingJob = Database['public']['Tables']['indb_indexing_jobs']['Ro
 export type UrlSubmission = Database['public']['Tables']['indb_indexing_url_submissions']['Row']
 export type DashboardNotification = Database['public']['Tables']['indb_notifications_dashboard']['Row']
 export type DailyStats = Database['public']['Tables']['indb_analytics_daily_stats']['Row']
+export type KeywordCountry = Database['public']['Tables']['indb_keyword_countries']['Row']
+export type KeywordDomain = Database['public']['Tables']['indb_keyword_domains']['Row']
+export type KeywordKeyword = Database['public']['Tables']['indb_keyword_keywords']['Row']
+export type KeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Row']
+export type KeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Row']
 
 // Insert types
 export type InsertUserProfile = Database['public']['Tables']['indb_auth_user_profiles']['Insert']
@@ -370,6 +544,11 @@ export type InsertServiceAccount = Database['public']['Tables']['indb_google_ser
 export type InsertIndexingJob = Database['public']['Tables']['indb_indexing_jobs']['Insert']
 export type InsertUrlSubmission = Database['public']['Tables']['indb_indexing_url_submissions']['Insert']
 export type InsertDashboardNotification = Database['public']['Tables']['indb_notifications_dashboard']['Insert']
+export type InsertKeywordCountry = Database['public']['Tables']['indb_keyword_countries']['Insert']
+export type InsertKeywordDomain = Database['public']['Tables']['indb_keyword_domains']['Insert']
+export type InsertKeywordKeyword = Database['public']['Tables']['indb_keyword_keywords']['Insert']
+export type InsertKeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Insert']
+export type InsertKeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Insert']
 
 // Update types
 export type UpdateUserProfile = Database['public']['Tables']['indb_auth_user_profiles']['Update']
@@ -377,3 +556,7 @@ export type UpdateUserSettings = Database['public']['Tables']['indb_auth_user_se
 export type UpdateServiceAccount = Database['public']['Tables']['indb_google_service_accounts']['Update']
 export type UpdateIndexingJob = Database['public']['Tables']['indb_indexing_jobs']['Update']
 export type UpdateUrlSubmission = Database['public']['Tables']['indb_indexing_url_submissions']['Update']
+export type UpdateKeywordDomain = Database['public']['Tables']['indb_keyword_domains']['Update']
+export type UpdateKeywordKeyword = Database['public']['Tables']['indb_keyword_keywords']['Update']
+export type UpdateKeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Update']
+export type UpdateKeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Update']
