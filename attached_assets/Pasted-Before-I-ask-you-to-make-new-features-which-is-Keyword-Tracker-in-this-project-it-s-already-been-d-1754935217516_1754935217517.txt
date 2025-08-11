@@ -1,0 +1,67 @@
+Before, I ask you to make new features which is Keyword Tracker in this project, it's already been done, and you fucking didn't need to make it again, but there's an error that we'll deep dive later.
+Again, your task isn't to make the features again, please read all instruction and what I need you to do at very bottom 
+
+First, I need you to do deep dive in this project, read replit.md and all code that inside in this project.
+
+Then, fucking read the instruction that I give you before to make the features
+
+'''
+Fucking read the cautions in replit.md, bcs you fucking always delete all the fucking information that you fucking shouldn't in the replit.md.
+
+Before, we fucking already made new menu in the user dashboard sidebar which is menu label Keyword Tracker with the menu IndexNow that collapsable and have submenu Overview and Add New Keyword.
+
+Now, I fucking need you to add new feature which is to create keyword tracker. In the overview (user dashboard), the display is like the reference (just use fucking the reference as fucking REFERENCE not fucking litterely copy-paste the fucking color scheme).
+
+First, user need to add their domain, after user aleady created a domain user can start to add keyword to track.
+
+For the filter, it's almost same like in the reference, where's there's device type (ajax selectable by icon), tags, location, position, volume.
+
+Then, in the dashboard it's display the keyword, position, 1D 3D and 7D (which is the differentiation rank), Volume, Link, Last update date.
+
+When user want to add a new keyword to track, it's almost same like Semrush, where's user need to put the keyword list (new line seperated), select devices Mobile/Desktop, Country, ttag (optional).
+
+As in this project use Supabase, so don't push/install any locally DB. Bcs you don't have direct access to supabase, give me the SQL to run on supabase to update/changes/add table or column or if you need any information related database. Further tables and column name is on replit.md.
+
+For sure, you need to add limitation on each packages, which the current packages is Free, Pro Premium. The free is can add up to 50 keywords, the Premium is can add up to 250 keyword and the Pro is can have up to 1500 keywords.
+
+Each keyword, devices and country is consume 1 quota, so if user track same keyword but different device its still consume quota, like the semrush.
+
+The current schema for the packages is like this and you should add the limitation on quota_limits column that have data like this:
+
+{"daily_urls": 500, "concurrent_jobs": 3, "service_accounts": 3}
+
+The full scheme:
+create table public.indb_payment_packages (
+id uuid not null default gen_random_uuid (),
+name text not null,
+slug text not null,
+description text null,
+price numeric(10, 2) not null default 0,
+currency text null default 'USD'::text,
+billing_period text null default 'monthly'::text,
+features jsonb null default '[]'::jsonb,
+quota_limits jsonb null default '{}'::jsonb,
+is_active boolean null default true,
+sort_order integer null default 0,
+created_at timestamp with time zone null default now(),
+updated_at timestamp with time zone null default now(),
+is_popular boolean null default false,
+pricing_tiers jsonb null default '[]'::jsonb,
+constraint indb_payment_packages_pkey primary key (id),
+constraint indb_payment_packages_slug_key unique (slug)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_payment_packages_active on public.indb_payment_packages using btree (is_active) TABLESPACE pg_default;
+
+create index IF not exists idx_payment_packages_slug on public.indb_payment_packages using btree (slug) TABLESPACE pg_default;
+
+create index IF not exists idx_payment_packages_sort_order on public.indb_payment_packages using btree (sort_order) TABLESPACE pg_default;
+
+create index IF not exists idx_payment_packages_pricing_tiers on public.indb_payment_packages using gin (pricing_tiers) TABLESPACE pg_default;
+
+1. Don't forget, for the country is have all data country, not just some of it's. See the list of country in country.txt (add it on db)
+2. Don't forget about API layering
+
+'''
+
+For now you need to delete the test-login, which I don't ask for it. Then, if you already do that, tell me and I'll give you the exact problem that you need to fix.
