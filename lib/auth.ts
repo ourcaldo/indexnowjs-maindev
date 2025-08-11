@@ -80,9 +80,14 @@ export class AuthService {
 
     // Transfer session to server-side cookies and set client cookies
     if (data.session) {
-      // Set client-side cookies for server-side auth
+      // Set client-side cookies for server-side auth (without Secure flag for Replit)
       document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
       document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`
+      
+      console.log('Auth: Cookies set for authentication:', {
+        hasAccessToken: !!data.session.access_token,
+        cookiesAfterSet: document.cookie.includes('sb-access-token')
+      })
       
       // Also transfer to server-side session
       await fetch('/api/auth/session', {

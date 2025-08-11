@@ -41,6 +41,8 @@ async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | nu
             })
           )
           accessToken = cookies['sb-access-token']
+          console.log('Server auth: Cookies found:', Object.keys(cookies))
+          console.log('Server auth: Access token from cookies:', accessToken ? 'EXISTS' : 'NOT_FOUND')
         }
       }
     }
