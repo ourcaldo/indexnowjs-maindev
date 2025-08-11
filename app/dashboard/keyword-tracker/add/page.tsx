@@ -17,7 +17,7 @@ export default function AddKeywordPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>Add New Keyword</h1>
-          <p style={{ color: '#6C757D' }}>Track a new keyword for ranking monitoring</p>
+          <p style={{ color: '#6C757D' }}>Add a new keyword for IndexNow tracking and monitoring</p>
         </div>
       </div>
 

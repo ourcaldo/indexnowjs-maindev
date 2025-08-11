@@ -97,8 +97,8 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       active: pathname === '/dashboard'
     },
     {
-      label: 'Keyword Tracker',
-      icon: Search,
+      label: 'IndexNow',
+      icon: Zap,
       expandable: true,
       expanded: indexNowExpanded,
       onToggle: () => setIndexNowExpanded(!indexNowExpanded),
@@ -123,8 +123,8 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       isLabel: true
     },
     {
-      label: 'FastIndexing',
-      icon: Zap,
+      label: 'Keyword Tracker',
+      icon: Search,
       expandable: true,
       expanded: fastIndexingExpanded,
       onToggle: () => setFastIndexingExpanded(!fastIndexingExpanded),

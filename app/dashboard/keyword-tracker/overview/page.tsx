@@ -13,8 +13,8 @@ export default function KeywordTrackerOverview() {
             <TrendingUp className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>Keyword Tracker Overview</h1>
-            <p style={{ color: '#6C757D' }}>Monitor your keyword rankings and performance</p>
+            <h1 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>IndexNow Overview</h1>
+            <p style={{ color: '#6C757D' }}>Monitor your IndexNow keyword rankings and performance</p>
           </div>
         </div>
         
