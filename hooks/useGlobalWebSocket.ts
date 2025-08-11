@@ -51,8 +51,21 @@ async function initializeGlobalWebSocket(): Promise<Socket> {
         return
       }
 
-      const user = await authService.getCurrentUser()
+      // Add retry mechanism for user authentication
+      let user = await authService.getCurrentUser()
       if (!user) {
+        // Try to wait a bit for authentication to complete
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        user = await authService.getCurrentUser()
+      }
+      
+      if (!user) {
+        // Instead of rejecting immediately, log the error and try to reconnect later
+        console.log('🌐 User not authenticated for WebSocket, will retry later')
+        setTimeout(() => {
+          connectionPromise = null
+          initializeGlobalWebSocket()
+        }, 5000)
         reject(new Error('User not authenticated'))
         return
       }

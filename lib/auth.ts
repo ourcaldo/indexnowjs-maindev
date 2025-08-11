@@ -9,8 +9,47 @@ export interface AuthUser {
 }
 
 export class AuthService {
+  private isInitialized = false
+  
+  private async initializeAuth() {
+    if (this.isInitialized || typeof window === 'undefined') {
+      return
+    }
+    
+    try {
+      // Try to restore session from cookies
+      const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split('=')
+        acc[key] = value
+        return acc
+      }, {} as Record<string, string>)
+      
+      const accessToken = cookies['sb-access-token']
+      const refreshToken = cookies['sb-refresh-token']
+      
+      if (accessToken && refreshToken) {
+        // Set the session in Supabase
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        })
+        
+        if (error) {
+          console.log('Failed to restore session from cookies:', error.message)
+        }
+      }
+      
+      this.isInitialized = true
+    } catch (error) {
+      console.error('Auth initialization error:', error)
+      this.isInitialized = true
+    }
+  }
+
   async getCurrentUser(): Promise<AuthUser | null> {
     try {
+      await this.initializeAuth()
+      
       const { data: { user }, error } = await supabase.auth.getUser()
       
       if (error || !user) {
@@ -39,8 +78,13 @@ export class AuthService {
       throw error
     }
 
-    // Transfer session to server-side cookies
+    // Transfer session to server-side cookies and set client cookies
     if (data.session) {
+      // Set client-side cookies for server-side auth
+      document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+      document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`
+      
+      // Also transfer to server-side session
       await fetch('/api/auth/session', {
         method: 'POST',
         headers: {
@@ -76,10 +120,26 @@ export class AuthService {
   }
 
   async signOut() {
+    // Clear client-side cookies
+    if (typeof document !== 'undefined') {
+      document.cookie = 'sb-access-token=; path=/; max-age=0'
+      document.cookie = 'sb-refresh-token=; path=/; max-age=0'
+    }
+    
     const { error } = await supabase.auth.signOut()
     
     if (error) {
       throw error
+    }
+    
+    // Clear session from server
+    try {
+      await fetch('/api/auth/session', {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+    } catch (e) {
+      // Ignore fetch errors during signout
     }
   }
 
