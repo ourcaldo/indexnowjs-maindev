@@ -46,7 +46,6 @@ export default function LandingPage() {
   const [activeSection, setActiveSection] = useState('hero')
   const [globalBillingPeriod, setGlobalBillingPeriod] = useState('monthly')
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
-  const [mounted, setMounted] = useState(false)
 
   // Refs for sections
   const heroRef = useRef<HTMLElement>(null)
@@ -59,7 +58,6 @@ export default function LandingPage() {
   const contactRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    setMounted(true)
     checkAuthStatus()
     loadSiteSettings()
     loadPackages()

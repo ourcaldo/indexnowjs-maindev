@@ -60,11 +60,13 @@ async function initializeGlobalWebSocket(): Promise<Socket> {
       }
       
       if (!user) {
-        // Instead of rejecting immediately, just resolve with null and don't try to reconnect
-        console.log('🌐 User not authenticated for WebSocket, skipping connection')
-        connectionPromise = null
-        // Don't reject, just resolve with null to prevent unhandled promise rejection
-        resolve(null as any)
+        // Instead of rejecting immediately, log the error and try to reconnect later
+        console.log('🌐 User not authenticated for WebSocket, will retry later')
+        setTimeout(() => {
+          connectionPromise = null
+          initializeGlobalWebSocket()
+        }, 5000)
+        reject(new Error('User not authenticated'))
         return
       }
 
@@ -90,7 +92,6 @@ async function initializeGlobalWebSocket(): Promise<Socket> {
         console.log('🔗 Global WebSocket disconnected:', reason)
         if (reason === 'io server disconnect') {
           // Server disconnected, try to reconnect
-          connectionPromise = null
           setTimeout(() => initializeGlobalWebSocket(), 5000)
         }
       })
@@ -155,17 +156,13 @@ export function useGlobalWebSocket() {
 
     initializeGlobalWebSocket()
       .then(socket => {
-        if (socket) {
-          setIsConnected(socket.connected)
-          
-          socket.on('connect', () => setIsConnected(true))
-          socket.on('disconnect', () => setIsConnected(false))
-        } else {
-          setIsConnected(false)
-        }
+        setIsConnected(socket.connected)
+        
+        socket.on('connect', () => setIsConnected(true))
+        socket.on('disconnect', () => setIsConnected(false))
       })
       .catch(error => {
-        // Silently handle auth errors for landing page
+        console.error('Failed to initialize global WebSocket:', error)
         setIsConnected(false)
       })
 

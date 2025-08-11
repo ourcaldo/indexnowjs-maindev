@@ -214,15 +214,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check user's keyword quota
+    // Check user's keyword quota - first from user profile, then subscription
     const { data: userProfile } = await supabaseAdmin
       .from('indb_auth_user_profiles')
       .select(`
         *,
-        user_subscriptions:indb_user_subscriptions(
-          is_active,
-          package:indb_payment_packages(quota_limits)
-        )
+        package:indb_payment_packages(quota_limits)
       `)
       .eq('user_id', user.id)
       .single()
@@ -234,9 +231,25 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .eq('is_active', true)
 
-    // Get quota limits from active subscription
-    const activeSubscription = userProfile?.user_subscriptions?.find((sub: any) => sub.is_active)
-    const quotaLimits = activeSubscription?.package?.quota_limits
+    // Get quota limits - first check direct package assignment, then active subscription
+    let quotaLimits: any = null
+    
+    if (userProfile?.package_id) {
+      // User has direct package assignment
+      quotaLimits = userProfile?.package?.quota_limits
+    } else {
+      // Check active subscription
+      const { data: activeSubscription } = await supabaseAdmin
+        .from('indb_payment_subscriptions')
+        .select(`
+          package:indb_payment_packages(quota_limits)
+        `)
+        .eq('user_id', user.id)
+        .eq('subscription_status', 'active')
+        .single()
+      
+      quotaLimits = activeSubscription?.package?.quota_limits
+    }
     
     // Handle unlimited keywords (-1) or default to free tier limit
     let keywordLimit: number

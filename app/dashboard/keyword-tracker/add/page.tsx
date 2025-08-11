@@ -63,7 +63,7 @@ const Input = ({ placeholder, className = '', value, onChange, ...props }: any) 
       backgroundColor: '#FFFFFF',
       border: '1px solid #E0E6ED',
       color: '#1A1A1A',
-      '--tw-ring-color': '#3D8BFF'
+      ['--tw-ring-color' as any]: '#3D8BFF'
     }}
     placeholder={placeholder}
     value={value}
@@ -79,7 +79,7 @@ const Textarea = ({ placeholder, className = '', value, onChange, rows = 4, ...p
       backgroundColor: '#FFFFFF',
       border: '1px solid #E0E6ED',
       color: '#1A1A1A',
-      '--tw-ring-color': '#3D8BFF'
+      ['--tw-ring-color' as any]: '#3D8BFF'
     }}
     placeholder={placeholder}
     value={value}
@@ -96,7 +96,7 @@ const Select = ({ children, value, onValueChange, placeholder, disabled, ...prop
       backgroundColor: '#FFFFFF',
       border: '1px solid #E0E6ED',
       color: '#1A1A1A',
-      '--tw-ring-color': '#3D8BFF'
+      ['--tw-ring-color' as any]: '#3D8BFF'
     }}
     value={value}
     onChange={(e) => onValueChange?.(e.target.value)}
@@ -349,7 +349,7 @@ export default function AddKeywords() {
                       style={{
                         backgroundColor: selectedDomain === domain.id ? '#F0F9FF' : '#FFFFFF',
                         borderColor: selectedDomain === domain.id ? '#3D8BFF' : '#E0E6ED',
-                        '--tw-ring-color': '#3D8BFF'
+                        ['--tw-ring-color' as any]: '#3D8BFF'
                       }}
                       onClick={() => setSelectedDomain(domain.id)}
                     >
@@ -457,7 +457,7 @@ export default function AddKeywords() {
                       style={{
                         backgroundColor: deviceType === 'desktop' ? '#F0F9FF' : '#FFFFFF',
                         borderColor: deviceType === 'desktop' ? '#3D8BFF' : '#E0E6ED',
-                        '--tw-ring-color': '#3D8BFF'
+                        ['--tw-ring-color' as any]: '#3D8BFF'
                       }}
                       onClick={() => setDeviceType('desktop')}
                     >
@@ -473,7 +473,7 @@ export default function AddKeywords() {
                       style={{
                         backgroundColor: deviceType === 'mobile' ? '#F0F9FF' : '#FFFFFF',
                         borderColor: deviceType === 'mobile' ? '#3D8BFF' : '#E0E6ED',
-                        '--tw-ring-color': '#3D8BFF'
+                        ['--tw-ring-color' as any]: '#3D8BFF'
                       }}
                       onClick={() => setDeviceType('mobile')}
                     >
@@ -495,7 +495,7 @@ export default function AddKeywords() {
                     style={{
                       backgroundColor: selectedCountry ? '#F0F9FF' : '#FFFFFF',
                       borderColor: selectedCountry ? '#3D8BFF' : '#E0E6ED',
-                      '--tw-ring-color': '#3D8BFF',
+                      ['--tw-ring-color' as any]: '#3D8BFF',
                       minHeight: '48px'
                     }}
                   >
