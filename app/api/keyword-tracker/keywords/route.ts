@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerAuthUser } from '@/lib/server-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 
 // Validation schemas
@@ -14,7 +15,7 @@ const addKeywordsSchema = z.object({
 
 const getKeywordsSchema = z.object({
   domain_id: z.string().uuid().optional(),
-  device_type: z.enum(['desktop', 'mobile']).optional(),
+  device_type: z.enum(['desktop', 'mobile']).nullable().optional(),
   country_id: z.string().uuid().optional(),
   tags: z.array(z.string()).optional(),
   page: z.number().min(1).default(1),
@@ -23,14 +24,42 @@ const getKeywordsSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Get authenticated user from server context
-    const user = await getServerAuthUser(request)
-    if (!user) {
+    // Create Supabase client with proper cookie handling
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            const cookieHeader = request.headers.get('cookie')
+            if (!cookieHeader) return undefined
+            
+            const cookies = Object.fromEntries(
+              cookieHeader.split(';').map(cookie => {
+                const [key, value] = cookie.trim().split('=')
+                return [key, decodeURIComponent(value || '')]
+              })
+            )
+            return cookies[name]
+          },
+          set() {},
+          remove() {},
+        },
+      }
+    )
+
+    // Get user from session
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.error('Keywords GET: Authentication failed:', authError?.message || 'No user')
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       )
     }
+
+    console.log('Keywords GET: Authenticated user:', user.id)
 
     // Parse query parameters
     const url = new URL(request.url)
@@ -45,6 +74,7 @@ export async function GET(request: NextRequest) {
 
     const validation = getKeywordsSchema.safeParse(queryParams)
     if (!validation.success) {
+      console.error('Keywords GET: Validation failed:', validation.error.issues)
       return NextResponse.json(
         { success: false, error: validation.error.issues[0].message },
         { status: 400 }
@@ -234,21 +264,24 @@ export async function POST(request: NextRequest) {
     // Get quota limits - first check direct package assignment, then active subscription
     let quotaLimits: any = null
     
-    if (userProfile?.package_id) {
+    if (userProfile?.package_id && userProfile?.package) {
       // User has direct package assignment
-      quotaLimits = userProfile?.package?.quota_limits
+      quotaLimits = userProfile.package.quota_limits
     } else {
       // Check active subscription
-      const { data: activeSubscription } = await supabaseAdmin
+      const { data: activeSubscriptions } = await supabaseAdmin
         .from('indb_payment_subscriptions')
         .select(`
           package:indb_payment_packages(quota_limits)
         `)
         .eq('user_id', user.id)
         .eq('subscription_status', 'active')
-        .single()
       
-      quotaLimits = activeSubscription?.package?.quota_limits
+      // Get quota_limits from first active subscription
+      if (activeSubscriptions && activeSubscriptions.length > 0) {
+        const firstSubscription = activeSubscriptions[0] as any
+        quotaLimits = firstSubscription?.package?.quota_limits
+      }
     }
     
     // Handle unlimited keywords (-1) or default to free tier limit

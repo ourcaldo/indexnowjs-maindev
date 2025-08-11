@@ -18,6 +18,7 @@ import {
   ExternalLink
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 
 // Simple UI Components using project color scheme
 const Card = ({ children, className = '' }: any) => (
@@ -148,7 +149,13 @@ export default function KeywordTrackerOverview() {
   const { data: domainsData } = useQuery({
     queryKey: ['/api/keyword-tracker/domains'],
     queryFn: async () => {
-      const response = await fetch('/api/keyword-tracker/domains')
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/keyword-tracker/domains', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
       if (!response.ok) throw new Error('Failed to fetch domains')
       return response.json()
     }
@@ -158,7 +165,13 @@ export default function KeywordTrackerOverview() {
   const { data: countriesData } = useQuery({
     queryKey: ['/api/keyword-tracker/countries'],
     queryFn: async () => {
-      const response = await fetch('/api/keyword-tracker/countries')
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/keyword-tracker/countries', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
       if (!response.ok) throw new Error('Failed to fetch countries')
       return response.json()
     }
@@ -183,7 +196,13 @@ export default function KeywordTrackerOverview() {
       params.append('page', currentPage.toString())
       params.append('limit', '20')
 
-      const response = await fetch(`/api/keyword-tracker/keywords?${params}`)
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
       if (!response.ok) throw new Error('Failed to fetch keywords')
       return response.json()
     }
