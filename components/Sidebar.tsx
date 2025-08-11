@@ -16,7 +16,10 @@ import {
   User,
   Menu,
   Activity,
-  CreditCard
+  CreditCard,
+  Search,
+  TrendingUp,
+  Wrench
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -66,6 +69,8 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   const pathname = usePathname()
   const router = useRouter()
   const [indexNowExpanded, setIndexNowExpanded] = useState(true)
+  const [toolsExpanded, setToolsExpanded] = useState(true)
+  const [fastIndexingExpanded, setFastIndexingExpanded] = useState(true)
   
   // Site settings hooks
   const siteName = useSiteName()
@@ -92,23 +97,49 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       active: pathname === '/dashboard'
     },
     {
-      label: 'IndexNow',
-      icon: Zap,
+      label: 'Keyword Tracker',
+      icon: Search,
       expandable: true,
       expanded: indexNowExpanded,
       onToggle: () => setIndexNowExpanded(!indexNowExpanded),
       children: [
         {
-          label: 'New Index',
-          href: '/dashboard/indexnow',
+          label: 'Overview',
+          href: '/dashboard/keyword-tracker/overview',
+          icon: TrendingUp,
+          active: pathname === '/dashboard/keyword-tracker/overview'
+        },
+        {
+          label: 'Add New Keyword',
+          href: '/dashboard/keyword-tracker/add',
           icon: Plus,
-          active: pathname === '/dashboard/indexnow'
+          active: pathname === '/dashboard/keyword-tracker/add'
+        }
+      ]
+    },
+    {
+      label: 'Tools',
+      icon: null,
+      isLabel: true
+    },
+    {
+      label: 'FastIndexing',
+      icon: Zap,
+      expandable: true,
+      expanded: fastIndexingExpanded,
+      onToggle: () => setFastIndexingExpanded(!fastIndexingExpanded),
+      children: [
+        {
+          label: 'New Index',
+          href: '/dashboard/tools/fastindexing',
+          icon: Plus,
+          active: pathname === '/dashboard/tools/fastindexing'
         },
         {
           label: 'Manage Jobs',
-          href: '/dashboard/manage-jobs',
+          href: '/dashboard/tools/fastindexing/manage-jobs',
           icon: FileText,
-          active: pathname === '/dashboard/manage-jobs'
+          active: pathname === '/dashboard/tools/fastindexing/manage-jobs'
         }
       ]
     }
@@ -179,7 +210,11 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           <nav className="space-y-1 px-3">
             {menuItems.map((item) => (
               <div key={item.label}>
-                {item.expandable ? (
+                {item.isLabel ? (
+                  <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    {item.label}
+                  </div>
+                ) : item.expandable ? (
                   <div>
                     <Button
                       variant="ghost"
@@ -196,7 +231,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       }}
                     >
                       <div className="flex items-center w-full">
-                        <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
+                        {item.icon && <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />}
                         <span className="text-left flex-1">{item.label}</span>
                         {item.expanded ? (
                           <ChevronDown className="h-4 w-4" />
@@ -269,7 +304,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       }}
                     >
                       <div className="flex items-center w-full">
-                        <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
+                        {item.icon && <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />}
                         <span className="text-left">{item.label}</span>
                       </div>
                     </Button>
@@ -411,7 +446,13 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           <nav className={cn("space-y-1", isCollapsed ? "px-2" : "px-3")}>
             {menuItems.map((item) => (
               <div key={item.label}>
-                {item.expandable ? (
+                {item.isLabel ? (
+                  !isCollapsed && (
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                      {item.label}
+                    </div>
+                  )
+                ) : item.expandable ? (
                   <div>
                     <Button
                       variant="ghost"
@@ -433,10 +474,10 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       }}
                     >
                       {isCollapsed ? (
-                        <item.icon className="h-4 w-4" />
+                        item.icon && <item.icon className="h-4 w-4" />
                       ) : (
                         <div className="flex items-center w-full">
-                          <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
+                          {item.icon && <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />}
                           <span className="text-left flex-1">{item.label}</span>
                           {item.expanded ? (
                             <ChevronDown className="h-4 w-4" />
@@ -517,10 +558,10 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       }}
                     >
                       {isCollapsed ? (
-                        <item.icon className="h-4 w-4" />
+                        item.icon && <item.icon className="h-4 w-4" />
                       ) : (
                         <div className="flex items-center w-full">
-                          <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
+                          {item.icon && <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />}
                           <span className="text-left">{item.label}</span>
                         </div>
                       )}
