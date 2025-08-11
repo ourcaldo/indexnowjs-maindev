@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerAuthUser } from '@/lib/server-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { z } from 'zod'
 
@@ -22,11 +23,9 @@ const getKeywordsSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = supabaseAdmin
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
+    // Get authenticated user from server context
+    const user = await getServerAuthUser(request)
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -56,7 +55,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit
 
     // Build query
-    let query = supabase
+    let query = supabaseAdmin
       .from('indb_keyword_keywords')
       .select(`
         *,
@@ -82,7 +81,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count
-    const { count } = await query.select('id', { count: 'exact', head: true })
+    const { count } = await supabaseAdmin
+      .from('indb_keyword_keywords')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_active', true)
 
     // Get paginated results
     const { data: keywords, error } = await query
@@ -174,11 +177,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = supabaseAdmin
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
+    // Get authenticated user from server context
+    const user = await getServerAuthUser(request)
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -199,7 +200,7 @@ export async function POST(request: NextRequest) {
     const { domain_id, keywords, device_type, country_id, tags } = validation.data
 
     // Verify domain belongs to user
-    const { data: domain, error: domainError } = await supabase
+    const { data: domain, error: domainError } = await supabaseAdmin
       .from('indb_keyword_domains')
       .select('id')
       .eq('id', domain_id)
@@ -214,7 +215,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check user's keyword quota
-    const { data: userProfile } = await supabase
+    const { data: userProfile } = await supabaseAdmin
       .from('indb_auth_user_profiles')
       .select(`
         *,
@@ -226,7 +227,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     // Get current keyword count for user
-    const { count: currentKeywordCount } = await supabase
+    const { count: currentKeywordCount } = await supabaseAdmin
       .from('indb_keyword_keywords')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -247,7 +248,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate keywords
-    const { data: existingKeywords } = await supabase
+    const { data: existingKeywords } = await supabaseAdmin
       .from('indb_keyword_keywords')
       .select('keyword')
       .eq('user_id', user.id)
@@ -276,7 +277,7 @@ export async function POST(request: NextRequest) {
       tags: tags || []
     }))
 
-    const { data: insertedKeywords, error } = await supabase
+    const { data: insertedKeywords, error } = await supabaseAdmin
       .from('indb_keyword_keywords')
       .insert(keywordEntries)
       .select(`

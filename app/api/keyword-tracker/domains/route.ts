@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerAuthUser } from '@/lib/server-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { z } from 'zod'
 
@@ -10,11 +11,9 @@ const createDomainSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = supabaseAdmin
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
+    // Get authenticated user from server context
+    const user = await getServerAuthUser(request)
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's domains
-    const { data: domains, error } = await supabase
+    const { data: domains, error } = await supabaseAdmin
       .from('indb_keyword_domains')
       .select('*')
       .eq('user_id', user.id)
@@ -53,11 +52,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = supabaseAdmin
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
+    // Get authenticated user from server context
+    const user = await getServerAuthUser(request)
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -85,7 +82,7 @@ export async function POST(request: NextRequest) {
       .toLowerCase()
 
     // Check if domain already exists for this user
-    const { data: existingDomain } = await supabase
+    const { data: existingDomain } = await supabaseAdmin
       .from('indb_keyword_domains')
       .select('id')
       .eq('user_id', user.id)
@@ -100,7 +97,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new domain
-    const { data: newDomain, error } = await supabase
+    const { data: newDomain, error } = await supabaseAdmin
       .from('indb_keyword_domains')
       .insert({
         user_id: user.id,
