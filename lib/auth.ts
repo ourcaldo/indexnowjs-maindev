@@ -35,7 +35,7 @@ export class AuthService {
             const authData = JSON.parse(supabaseToken)
             accessToken = authData?.access_token
             refreshToken = authData?.refresh_token
-            console.log('Auth: Found session in localStorage, setting cookies')
+
             
             // Set the cookies so server can access them
             document.cookie = `sb-access-token=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
@@ -103,10 +103,7 @@ export class AuthService {
       document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
       document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`
       
-      console.log('Auth: Cookies set for authentication:', {
-        hasAccessToken: !!data.session.access_token,
-        cookiesAfterSet: document.cookie.includes('sb-access-token')
-      })
+
       
       // Also transfer to server-side session
       await fetch('/api/auth/session', {

@@ -42,8 +42,7 @@ async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | nu
                 return [key, decodeURIComponent(value || '')]
               })
             )
-            console.log('Server auth: Available cookies:', Object.keys(cookies))
-            console.log('Server auth: Looking for cookie:', name)
+
             return cookies[name]
           },
           set() {
@@ -60,18 +59,15 @@ async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | nu
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
-      console.log('Server auth: Token verification failed:', authError?.message || 'No user found')
       return null
     }
-
-    console.log('Server auth: User found:', { id: user.id, email: user.email })
 
     // Check if user is super admin (hardcoded for now)
     const knownSuperAdmins = ['aldodkris@gmail.com']
     const isSuperAdmin = knownSuperAdmins.includes(user.email || '')
     
     if (isSuperAdmin) {
-      console.log('Server auth: Known super_admin user detected')
+  
     }
 
     // Get user profile from database
@@ -82,7 +78,7 @@ async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | nu
       .single()
 
     if (profileError) {
-      console.log('Server auth: Failed to fetch user profile:', profileError.message)
+  
       // For super admins, allow access even if profile doesn't exist
       if (!isSuperAdmin) {
         return null
