@@ -212,11 +212,11 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
 
         {/* Mobile Navigation */}
         <div className="flex-1 overflow-y-auto py-4">
-          <nav className="space-y-1 px-3">
+          <nav className="space-y-2 px-3">
             {menuItems.map((item) => (
               <div key={item.label}>
                 {item.isLabel ? (
-                  <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <div className="px-4 py-3 mt-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                     {item.label}
                   </div>
                 ) : item.expandable ? (
@@ -448,12 +448,12 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
 
         {/* Desktop Navigation */}
         <div className="flex-1 overflow-y-auto py-4">
-          <nav className={cn("space-y-1", isCollapsed ? "px-2" : "px-3")}>
+          <nav className={cn("space-y-2", isCollapsed ? "px-2" : "px-3")}>
             {menuItems.map((item) => (
               <div key={item.label}>
                 {item.isLabel ? (
                   !isCollapsed && (
-                    <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    <div className="px-4 py-3 mt-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                       {item.label}
                     </div>
                   )
