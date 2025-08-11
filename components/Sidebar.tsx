@@ -277,8 +277,8 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       </div>
                     )}
                   </div>
-                ) : (
-                  <Link href={item.href!} onClick={onToggle}>
+                ) : item.href ? (
+                  <Link href={item.href} onClick={onToggle}>
                     <Button
                       variant="ghost"
                       className={cn(
@@ -308,7 +308,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       </div>
                     </Button>
                   </Link>
-                )}
+                ) : null}
               </div>
             ))}
           </nav>
@@ -520,8 +520,8 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       </div>
                     )}
                   </div>
-                ) : (
-                  <Link href={item.href!}>
+                ) : item.href ? (
+                  <Link href={item.href}>
                     <Button
                       variant="ghost"
                       className={cn(
@@ -560,7 +560,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       )}
                     </Button>
                   </Link>
-                )}
+                ) : null}
               </div>
             ))}
           </nav>
