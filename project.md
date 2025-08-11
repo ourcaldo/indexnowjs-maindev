@@ -1711,3 +1711,10 @@ JWT_SECRET=[jwt-secret-key]
 - Updated server auth to use correct Supabase server client with cookie handling
 - Removed all authentication debug logging after confirming successful operation
 - Authentication now working: users can successfully add domains in keyword tracker
+
+### 18:40 - Keyword Tracker UI and Quota Fixes
+- Fixed keyword textarea placeholder to use proper newlines instead of HTML entities
+- Enhanced country field styling to match device type height (48px) and made more prominent with blue highlight
+- Fixed critical quota limit bug: now properly reads Pro plan limit (1500) instead of defaulting to 50
+- Updated quota check to handle unlimited keywords (-1 value) properly for Pro users
+- Quota validation now correctly identifies active subscriptions and their package limits

@@ -488,13 +488,24 @@ export default function AddKeywords() {
                 {/* Country */}
                 <div className="space-y-2">
                   <Label>Country</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{color: '#6C757D'}} />
+                  <div
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      selectedCountry ? 'ring-2' : ''
+                    }`}
+                    style={{
+                      backgroundColor: selectedCountry ? '#F0F9FF' : '#FFFFFF',
+                      borderColor: selectedCountry ? '#3D8BFF' : '#E0E6ED',
+                      '--tw-ring-color': '#3D8BFF',
+                      minHeight: '48px'
+                    }}
+                  >
+                    <MapPin className="w-4 h-4" style={{color: '#3D8BFF'}} />
                     <Select 
                       value={selectedCountry} 
                       onValueChange={setSelectedCountry} 
                       placeholder="Select country"
-                      className="pl-10"
+                      className="border-0 bg-transparent flex-1 focus:ring-0"
+                      style={{ backgroundColor: 'transparent', border: 'none' }}
                     >
                       {countries.map((country: any) => (
                         <option key={country.id} value={country.id}>
@@ -518,7 +529,9 @@ export default function AddKeywords() {
                   </p>
                 </div>
                 <Textarea
-                  placeholder="keyword 1&#10;keyword 2&#10;keyword 3"
+                  placeholder={`keyword 1
+keyword 2  
+keyword 3`}
                   rows={8}
                   value={keywordText}
                   onChange={(e: any) => setKeywordText(e.target.value)}

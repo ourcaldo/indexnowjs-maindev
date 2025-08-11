@@ -220,6 +220,7 @@ export async function POST(request: NextRequest) {
       .select(`
         *,
         user_subscriptions:indb_user_subscriptions(
+          is_active,
           package:indb_payment_packages(quota_limits)
         )
       `)
@@ -233,15 +234,26 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .eq('is_active', true)
 
-    // Get quota limits (default to free tier if no subscription)
-    const quotaLimits = userProfile?.user_subscriptions?.[0]?.package?.quota_limits || { keywords_limit: 50 }
-    const keywordLimit = quotaLimits.keywords_limit || 50
+    // Get quota limits from active subscription
+    const activeSubscription = userProfile?.user_subscriptions?.find((sub: any) => sub.is_active)
+    const quotaLimits = activeSubscription?.package?.quota_limits
+    
+    // Handle unlimited keywords (-1) or default to free tier limit
+    let keywordLimit: number
+    if (quotaLimits?.keywords_limit === -1) {
+      keywordLimit = Infinity // Unlimited
+    } else if (quotaLimits?.keywords_limit) {
+      keywordLimit = quotaLimits.keywords_limit
+    } else {
+      keywordLimit = 50 // Default free tier
+    }
 
-    if ((currentKeywordCount || 0) + keywords.length > keywordLimit) {
+    // Check quota limit (skip check if unlimited)
+    if (keywordLimit !== Infinity && (currentKeywordCount || 0) + keywords.length > keywordLimit) {
       return NextResponse.json(
         { 
           success: false, 
-          error: `Adding ${keywords.length} keywords would exceed your limit of ${keywordLimit}. Current usage: ${currentKeywordCount || 0}` 
+          error: `Adding ${keywords.length} keywords would exceed your limit of ${keywordLimit === Infinity ? 'unlimited' : keywordLimit}. Current usage: ${currentKeywordCount || 0}` 
         },
         { status: 400 }
       )
