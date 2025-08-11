@@ -17,59 +17,50 @@ interface AdminUser {
 }
 
 /**
- * Get server-side admin user from request
+ * Get server-side admin user from request using proper Supabase server client
  */
 async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | null> {
   try {
-    let accessToken: string | undefined
-
-    if (request) {
-      // Try to get token from Authorization header
-      const authHeader = request.headers.get('authorization')
-      if (authHeader?.startsWith('Bearer ')) {
-        accessToken = authHeader.substring(7)
-      }
-      
-      // Try to get token from cookies if not in header
-      if (!accessToken) {
-        const cookieHeader = request.headers.get('cookie')
-        if (cookieHeader) {
-          const cookies = Object.fromEntries(
-            cookieHeader.split(';').map(cookie => {
-              const [name, value] = cookie.trim().split('=')
-              return [name, decodeURIComponent(value)]
-            })
-          )
-          accessToken = cookies['sb-access-token']
-          console.log('Server auth: Cookies found:', Object.keys(cookies))
-          console.log('Server auth: Access token from cookies:', accessToken ? 'EXISTS' : 'NOT_FOUND')
-        }
-      }
-    }
-
-    if (!accessToken) {
-      console.log('Server auth: No access token found')
+    if (!request) {
+      console.log('Server auth: No request provided')
       return null
     }
 
-    // Create server client for token verification
+    // Create proper Supabase server client that handles cookies automatically
     const supabase = createServerClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!,
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get: () => '',
-          set: () => {},
-          remove: () => {},
+          get(name: string) {
+            const cookieHeader = request.headers.get('cookie')
+            if (!cookieHeader) return undefined
+            
+            const cookies = Object.fromEntries(
+              cookieHeader.split(';').map(cookie => {
+                const [key, value] = cookie.trim().split('=')
+                return [key, decodeURIComponent(value || '')]
+              })
+            )
+            console.log('Server auth: Available cookies:', Object.keys(cookies))
+            console.log('Server auth: Looking for cookie:', name)
+            return cookies[name]
+          },
+          set() {
+            // No-op for server-side requests
+          },
+          remove() {
+            // No-op for server-side requests
+          },
         },
       }
     )
 
-    // Verify token and get user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken)
+    // Get user from session (this will automatically handle Supabase cookies)
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
-      console.log('Server auth: Token verification failed:', authError?.message)
+      console.log('Server auth: Token verification failed:', authError?.message || 'No user found')
       return null
     }
 

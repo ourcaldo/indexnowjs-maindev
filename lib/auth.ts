@@ -24,8 +24,27 @@ export class AuthService {
         return acc
       }, {} as Record<string, string>)
       
-      const accessToken = cookies['sb-access-token']
-      const refreshToken = cookies['sb-refresh-token']
+      let accessToken = cookies['sb-access-token']
+      let refreshToken = cookies['sb-refresh-token']
+      
+      // If no custom cookies, try to get from Supabase's localStorage token
+      if (!accessToken) {
+        const supabaseToken = localStorage.getItem('sb-base-auth-token')
+        if (supabaseToken) {
+          try {
+            const authData = JSON.parse(supabaseToken)
+            accessToken = authData?.access_token
+            refreshToken = authData?.refresh_token
+            console.log('Auth: Found session in localStorage, setting cookies')
+            
+            // Set the cookies so server can access them
+            document.cookie = `sb-access-token=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+            document.cookie = `sb-refresh-token=${refreshToken}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`
+          } catch (e) {
+            console.log('Failed to parse Supabase auth token from localStorage')
+          }
+        }
+      }
       
       if (accessToken && refreshToken) {
         // Set the session in Supabase
