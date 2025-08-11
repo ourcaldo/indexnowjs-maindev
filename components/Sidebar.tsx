@@ -213,7 +213,11 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           <nav className="space-y-1 px-3">
             {menuItems.map((item) => (
               <div key={item.label}>
-                {item.expandable ? (
+                {item.isLabel ? (
+                  <div className="px-4 py-3 mt-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    {item.label}
+                  </div>
+                ) : item.expandable ? (
                   <div>
                     <Button
                       variant="ghost"
@@ -445,7 +449,13 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           <nav className={cn("space-y-1", isCollapsed ? "px-2" : "px-3")}>
             {menuItems.map((item) => (
               <div key={item.label}>
-                {item.expandable ? (
+                {item.isLabel ? (
+                  !isCollapsed && (
+                    <div className="px-4 py-3 mt-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                      {item.label}
+                    </div>
+                  )
+                ) : item.expandable ? (
                   <div>
                     <Button
                       variant="ghost"
