@@ -17,7 +17,6 @@ import {
   Menu,
   Activity,
   CreditCard,
-  Search,
   TrendingUp,
   Wrench
 } from 'lucide-react'
@@ -69,7 +68,6 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   const pathname = usePathname()
   const router = useRouter()
   const [indexNowExpanded, setIndexNowExpanded] = useState(true)
-  const [toolsExpanded, setToolsExpanded] = useState(true)
   const [fastIndexingExpanded, setFastIndexingExpanded] = useState(true)
   
   // Site settings hooks
@@ -212,14 +210,10 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
 
         {/* Mobile Navigation */}
         <div className="flex-1 overflow-y-auto py-4">
-          <nav className="space-y-2 px-3">
+          <nav className="space-y-1 px-3">
             {menuItems.map((item) => (
               <div key={item.label}>
-                {item.isLabel ? (
-                  <div className="px-4 py-3 mt-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    {item.label}
-                  </div>
-                ) : item.expandable ? (
+                {item.expandable ? (
                   <div>
                     <Button
                       variant="ghost"
@@ -236,7 +230,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       }}
                     >
                       <div className="flex items-center w-full">
-                        {item.icon && <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />}
+                        <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
                         <span className="text-left flex-1">{item.label}</span>
                         {item.expanded ? (
                           <ChevronDown className="h-4 w-4" />
@@ -448,16 +442,10 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
 
         {/* Desktop Navigation */}
         <div className="flex-1 overflow-y-auto py-4">
-          <nav className={cn("space-y-2", isCollapsed ? "px-2" : "px-3")}>
+          <nav className={cn("space-y-1", isCollapsed ? "px-2" : "px-3")}>
             {menuItems.map((item) => (
               <div key={item.label}>
-                {item.isLabel ? (
-                  !isCollapsed && (
-                    <div className="px-4 py-3 mt-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                      {item.label}
-                    </div>
-                  )
-                ) : item.expandable ? (
+                {item.expandable ? (
                   <div>
                     <Button
                       variant="ghost"
@@ -479,10 +467,10 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       }}
                     >
                       {isCollapsed ? (
-                        item.icon && <item.icon className="h-4 w-4" />
+                        <item.icon className="h-4 w-4" />
                       ) : (
                         <div className="flex items-center w-full">
-                          {item.icon && <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />}
+                          <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
                           <span className="text-left flex-1">{item.label}</span>
                           {item.expanded ? (
                             <ChevronDown className="h-4 w-4" />

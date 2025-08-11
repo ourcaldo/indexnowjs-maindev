@@ -80,72 +80,89 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-const getScheduleTypeColor = (scheduleType: string) => {
-  switch (scheduleType) {
-    case 'one-time':
-      return 'bg-[#6C757D] text-white';
-    case 'hourly':
-      return 'bg-[#3D8BFF] text-white';
-    case 'daily':
-      return 'bg-[#1C2331] text-white';
-    case 'weekly':
-      return 'bg-[#22333b] text-white';
-    case 'monthly':
-      return 'bg-[#1E1E1E] text-white';
-    default:
-      return 'bg-[#6C757D] text-white';
-  }
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
 export default function ManageJobsPage() {
-  // Log page view
-  usePageViewLogger('Visited Manage Jobs');
-  const { logActivity } = useActivityLogger();
-  
   const { addToast } = useToast();
-  const { isConnected } = useSocketIO();
-  
-  // State management
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
+  
+  // Log page view and job management activities
+  usePageViewLogger('/dashboard/manage-jobs', 'Manage Jobs', { section: 'job_management' })
+  const { logJobActivity } = useActivityLogger();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [scheduleFilter, setScheduleFilter] = useState('All Schedules');
-  
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalJobs, setTotalJobs] = useState(0);
-  const itemsPerPage = 20;
+  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const jobsPerPage = 20;
 
-  // Load jobs from API
+  // Memoized callback functions to prevent infinite re-renders
+  const handleJobUpdate = useCallback((message: any) => {
+    console.log('📨 Job update received:', message);
+    // Update the specific job in the list
+    setJobs(prevJobs => 
+      prevJobs.map(job => {
+        if (job.id === message.jobId) {
+          return {
+            ...job,
+            status: (message.status as Job['status']) || job.status,
+            progress_percentage: message.progress?.progress_percentage ?? job.progress_percentage,
+            processed_urls: message.progress?.processed_urls ?? job.processed_urls,
+            successful_urls: message.progress?.successful_urls ?? job.successful_urls,
+            failed_urls: message.progress?.failed_urls ?? job.failed_urls,
+            total_urls: message.progress?.total_urls ?? job.total_urls,
+            updated_at: new Date().toISOString()
+          };
+        }
+        return job;
+      })
+    );
+  }, []);
+
+  const handleJobCompleted = useCallback((message: any) => {
+    console.log('✅ Job completed:', message);
+    addToast({
+      title: 'Job Completed',
+      description: `Job completed successfully!`,
+      type: 'success'
+    });
+  }, [addToast]);
+
+  // Socket.io for real-time updates
+  const { isConnected } = useSocketIO({
+    onJobUpdate: handleJobUpdate,
+    onJobCompleted: handleJobCompleted
+  });
+
+  // Listen for real-time job list updates
+  useEffect(() => {
+    const handleJobListUpdate = (event: any) => {
+      const { detail: updatedJobs } = event;
+      setJobs(updatedJobs);
+    };
+
+    window.addEventListener('job-list-update', handleJobListUpdate);
+    return () => {
+      window.removeEventListener('job-list-update', handleJobListUpdate);
+    };
+  }, []);
+
+  // Memoized loadJobs function to prevent unnecessary re-renders
   const loadJobs = useCallback(async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const user = await authService.getCurrentUser();
       if (!user) return;
 
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
-      // Build query parameters
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
+        limit: jobsPerPage.toString(),
         search: searchTerm,
-        status: statusFilter === 'All Status' ? '' : statusFilter,
-        schedule: scheduleFilter === 'All Schedules' ? '' : scheduleFilter
+        status: statusFilter,
+        schedule: scheduleFilter
       });
 
       const response = await fetch(`/api/jobs?${params}`, {
@@ -154,480 +171,420 @@ export default function ManageJobsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setJobs(data.jobs || []);
-        setTotalPages(data.totalPages || 1);
-        setTotalJobs(data.totalJobs || 0);
+        setJobs(data.jobs);
+        setTotalCount(data.count);
       } else {
         addToast({
-          title: "Error",
-          description: "Failed to load jobs",
-          variant: "destructive"
+          title: 'Error',
+          description: 'Failed to load jobs',
+          type: 'error'
         });
       }
     } catch (error) {
       console.error('Error loading jobs:', error);
       addToast({
-        title: "Error", 
-        description: "Failed to load jobs",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load jobs',
+        type: 'error'
       });
     } finally {
       setLoading(false);
     }
   }, [currentPage, searchTerm, statusFilter, scheduleFilter, addToast]);
 
-  // Load jobs on mount and filter changes
+  // Load jobs data
   useEffect(() => {
     loadJobs();
   }, [loadJobs]);
 
-  // Handle job actions
-  const handleJobAction = async (jobId: string, action: 'pause' | 'resume' | 'cancel' | 'delete') => {
-    try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) return;
-
-      const response = await fetch(`/api/jobs/${jobId}/action`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ action })
-      });
-
-      if (response.ok) {
-        addToast({
-          title: "Success",
-          description: `Job ${action}d successfully`,
-          variant: "default"
-        });
-        
-        // Log the action
-        logActivity('job_action', `${action} job: ${jobId}`);
-        
-        // Reload jobs
-        loadJobs();
-      } else {
-        const errorData = await response.json();
-        addToast({
-          title: "Error",
-          description: errorData.error || `Failed to ${action} job`,
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error(`Error ${action}ing job:`, error);
-      addToast({
-        title: "Error",
-        description: `Failed to ${action} job`,
-        variant: "destructive"
-      });
-    }
+  // Helper functions
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
   };
 
-  // Handle bulk actions
-  const handleBulkAction = async (action: 'pause' | 'resume' | 'cancel' | 'delete') => {
-    if (selectedJobs.length === 0) {
-      addToast({
-        title: "Error",
-        description: "Please select jobs first",
-        variant: "destructive"
-      });
-      return;
-    }
+  const generateJobId = (id: string) => `#${id}`;
 
-    try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) return;
+  // Pagination
+  const totalPages = Math.ceil(totalCount / jobsPerPage);
+  const startIndex = (currentPage - 1) * jobsPerPage;
 
-      const response = await fetch('/api/jobs/bulk-action', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          jobIds: selectedJobs,
-          action 
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        addToast({
-          title: "Success",
-          description: `${action}d ${data.affected} job(s) successfully`,
-          variant: "default"
-        });
-        
-        // Log bulk action
-        logActivity('bulk_job_action', `${action} ${selectedJobs.length} jobs`);
-        
-        setSelectedJobs([]);
-        loadJobs();
-      } else {
-        const errorData = await response.json();
-        addToast({
-          title: "Error",
-          description: errorData.error || `Failed to ${action} jobs`,
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error(`Error in bulk ${action}:`, error);
-      addToast({
-        title: "Error",
-        description: `Failed to ${action} jobs`,
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Handle checkbox selection
-  const handleSelectAll = () => {
-    if (selectedJobs.length === jobs.length) {
-      setSelectedJobs([]);
+  const handleSelectJob = (jobId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedJobs([...selectedJobs, jobId]);
     } else {
-      setSelectedJobs(jobs.map(job => job.id));
+      setSelectedJobs(selectedJobs.filter(id => id !== jobId));
     }
   };
 
-  const handleSelectJob = (jobId: string) => {
-    setSelectedJobs(prev => 
-      prev.includes(jobId) 
-        ? prev.filter(id => id !== jobId)
-        : [...prev, jobId]
-    );
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedJobs(jobs.map(job => job.id));
+    } else {
+      setSelectedJobs([]);
+    }
   };
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, scheduleFilter]);
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch(`/api/jobs/${jobId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        addToast({
+          title: 'Success',
+          description: 'Job deleted successfully',
+          type: 'success'
+        });
+        
+        // Log job deletion activity
+        const job = jobs.find(j => j.id === jobId);
+        logJobActivity('job_delete', jobId, `Deleted job: ${job?.name || jobId}`, {
+          job_id: jobId,
+          job_name: job?.name,
+          job_type: job?.type,
+          action: 'delete'
+        });
+        
+        loadJobs(); // Reload jobs list
+      } else {
+        addToast({
+          title: 'Error',
+          description: 'Failed to delete job',
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      addToast({
+        title: 'Error',
+        description: 'Failed to delete job',
+        type: 'error'
+      });
+    }
+  };
+
+  const handleRerunJob = async (jobId: string) => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch(`/api/jobs/${jobId}`, {
+        method: 'PUT',
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'pending' })
+      });
+
+      if (response.ok) {
+        addToast({
+          title: 'Success',
+          description: 'Job restarted successfully',
+          type: 'success'
+        });
+        loadJobs(); // Reload jobs list
+      } else {
+        addToast({
+          title: 'Error',
+          description: 'Failed to restart job',
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error restarting job:', error);
+      addToast({
+        title: 'Error',
+        description: 'Failed to restart job',
+        type: 'error'
+      });
+    }
+  };
 
   return (
-    <div className="space-y-6" style={{ backgroundColor: '#FFFFFF' }}>
-      {/* Page Header */}
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>Manage Jobs</h1>
-          <p style={{ color: '#6C757D' }}>Monitor and manage your indexing jobs</p>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Manage Jobs</h1>
+          <p className="text-[#6C757D] mt-1">View and manage your indexing jobs</p>
         </div>
-        
-        <div className="flex items-center gap-2">
-          {/* Connection Status */}
-          <div className="flex items-center gap-2 text-sm">
-            <div 
-              className={`w-2 h-2 rounded-full ${isConnected ? 'bg-[#4BB543]' : 'bg-[#E63946]'}`}
-            />
-            <span style={{ color: '#6C757D' }}>
-              {isConnected ? 'Live Updates' : 'Disconnected'}
-            </span>
-          </div>
-          
-          <Button
-            onClick={loadJobs}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
+        {selectedJobs.length > 0 && (
+          <Button 
+            variant="destructive"
+            className="bg-[#E63946] hover:bg-[#d62839] text-white"
           >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
+            <Archive className="h-4 w-4 mr-2" />
+            Delete Selected ({selectedJobs.length})
           </Button>
+        )}
+      </div>
+
+      {/* Filters Section */}
+      <div className="bg-white border border-[#E0E6ED] rounded-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search Jobs */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#1A1A1A]">Search Jobs</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+              <Input
+                placeholder="Search by name or ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-[#E0E6ED] focus:border-[#6C757D] focus:ring-[#6C757D]"
+              />
+            </div>
+          </div>
+
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#1A1A1A]">Status</label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="border-[#E0E6ED] focus:border-[#6C757D] focus:ring-[#6C757D] focus-visible:ring-[#6C757D]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#E0E6ED]">
+                <SelectItem value="All Status" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">All Status</SelectItem>
+                <SelectItem value="completed" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Completed</SelectItem>
+                <SelectItem value="paused" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Paused</SelectItem>
+                <SelectItem value="running" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Running</SelectItem>
+                <SelectItem value="failed" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Failed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Schedule Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#1A1A1A]">Schedule</label>
+            <Select value={scheduleFilter} onValueChange={setScheduleFilter}>
+              <SelectTrigger className="border-[#E0E6ED] focus:border-[#6C757D] focus:ring-[#6C757D] focus-visible:ring-[#6C757D]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#E0E6ED]">
+                <SelectItem value="All Schedules" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">All Schedules</SelectItem>
+                <SelectItem value="one-time" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">One-time</SelectItem>
+                <SelectItem value="daily" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Daily</SelectItem>
+                <SelectItem value="weekly" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Weekly</SelectItem>
+                <SelectItem value="monthly" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search jobs..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            {/* Status Filter */}
-            <div className="w-full md:w-48">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All Status">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="running">Running</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                  <SelectItem value="paused">Paused</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Schedule Filter */}
-            <div className="w-full md:w-48">
-              <Select value={scheduleFilter} onValueChange={setScheduleFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All Schedules">All Schedules</SelectItem>
-                  <SelectItem value="one-time">One-time</SelectItem>
-                  <SelectItem value="hourly">Hourly</SelectItem>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bulk Actions */}
-      {selectedJobs.length > 0 && (
-        <div className="flex items-center gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <span className="text-sm font-medium" style={{ color: '#1A1A1A' }}>
-            {selectedJobs.length} job(s) selected
-          </span>
-          <div className="flex items-center gap-2 ml-auto">
-            <Button
-              onClick={() => handleBulkAction('pause')}
-              size="sm"
-              variant="outline"
-              className="flex items-center gap-1"
-            >
-              <Pause className="h-3 w-3" />
-              Pause
-            </Button>
-            <Button
-              onClick={() => handleBulkAction('resume')}
-              size="sm"
-              variant="outline" 
-              className="flex items-center gap-1"
-            >
-              <Play className="h-3 w-3" />
-              Resume
-            </Button>
-            <Button
-              onClick={() => handleBulkAction('cancel')}
-              size="sm"
-              variant="outline"
-              className="flex items-center gap-1"
-            >
-              <Archive className="h-3 w-3" />
-              Cancel
-            </Button>
-            <Button
-              onClick={() => handleBulkAction('delete')}
-              size="sm"
-              variant="destructive"
-              className="flex items-center gap-1"
-            >
-              <Trash2 className="h-3 w-3" />
-              Delete
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* Jobs Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Jobs ({totalJobs})</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#3D8BFF' }} />
-              <span className="ml-2" style={{ color: '#6C757D' }}>Loading jobs...</span>
-            </div>
-          ) : jobs.length === 0 ? (
-            <div className="text-center py-8">
-              <p style={{ color: '#6C757D' }}>No jobs found matching your criteria</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b" style={{ borderColor: '#E0E6ED' }}>
-                    <th className="text-left py-3 px-4">
-                      <Checkbox
-                        checked={selectedJobs.length === jobs.length && jobs.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: '#1A1A1A' }}>Job Name</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: '#1A1A1A' }}>Type</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: '#1A1A1A' }}>Status</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: '#1A1A1A' }}>Schedule</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: '#1A1A1A' }}>Progress</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: '#1A1A1A' }}>URLs</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: '#1A1A1A' }}>Created</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: '#1A1A1A' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {jobs.map((job) => (
-                    <tr key={job.id} className="border-b hover:bg-gray-50" style={{ borderColor: '#E0E6ED' }}>
-                      <td className="py-3 px-4">
-                        <Checkbox
-                          checked={selectedJobs.includes(job.id)}
-                          onCheckedChange={() => handleSelectJob(job.id)}
-                        />
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="font-medium" style={{ color: '#1A1A1A' }}>{job.name}</div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge variant="secondary" className="capitalize">
-                          {job.type}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge className={`flex items-center gap-1 w-fit ${getStatusColor(job.status)}`}>
-                          {getStatusIcon(job.status)}
-                          <span className="capitalize">{job.status}</span>
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge className={`${getScheduleTypeColor(job.schedule_type)}`}>
-                          {job.schedule_type}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="w-24">
-                          <Progress value={job.progress_percentage} className="h-2" />
-                          <div className="text-xs text-center mt-1" style={{ color: '#6C757D' }}>
-                            {job.progress_percentage}%
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="text-sm">
-                          <div style={{ color: '#1A1A1A' }}>Total: {job.total_urls}</div>
-                          <div style={{ color: '#4BB543' }}>Success: {job.successful_urls}</div>
-                          <div style={{ color: '#E63946' }}>Failed: {job.failed_urls}</div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="text-sm" style={{ color: '#6C757D' }}>
-                          {formatDate(job.created_at)}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <Link href={`/dashboard/tools/fastindexing/manage-jobs/${job.id}`}>
-                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {job.status === 'running' && (
-                                <DropdownMenuItem onClick={() => handleJobAction(job.id, 'pause')}>
-                                  <Pause className="h-4 w-4 mr-2" />
-                                  Pause
-                                </DropdownMenuItem>
-                              )}
-                              {job.status === 'paused' && (
-                                <DropdownMenuItem onClick={() => handleJobAction(job.id, 'resume')}>
-                                  <Play className="h-4 w-4 mr-2" />
-                                  Resume
-                                </DropdownMenuItem>
-                              )}
-                              {(job.status === 'running' || job.status === 'paused' || job.status === 'pending') && (
-                                <DropdownMenuItem onClick={() => handleJobAction(job.id, 'cancel')}>
-                                  <Archive className="h-4 w-4 mr-2" />
-                                  Cancel
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem 
-                                onClick={() => handleJobAction(job.id, 'delete')}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm" style={{ color: '#6C757D' }}>
-            Showing page {currentPage} of {totalPages} ({totalJobs} total jobs)
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              size="sm"
-              variant="outline"
-              className="flex items-center gap-1"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                return (
-                  <Button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    size="sm"
-                    variant={currentPage === pageNum ? "default" : "outline"}
-                    className="w-8"
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              })}
-            </div>
-            
-            <Button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              size="sm"
-              variant="outline"
-              className="flex items-center gap-1"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+      <div className="bg-white border border-[#E0E6ED] rounded-lg">
+        {/* Table Header */}
+        <div className="px-6 py-4 border-b border-[#E0E6ED] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Archive className="h-5 w-5 text-[#1A1A1A]" />
+            <h2 className="text-lg font-semibold text-[#1A1A1A]">Indexing Jobs</h2>
+            <Badge variant="secondary" className="bg-[#F7F9FC] text-[#6C757D]">
+              {totalCount} jobs
+            </Badge>
           </div>
         </div>
-      )}
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
+              <tr>
+                <th className="text-left p-4 w-12">
+                  <Checkbox
+                    checked={selectedJobs.length === jobs.length && jobs.length > 0}
+                    onCheckedChange={handleSelectAll}
+                    className="border-[#E0E6ED]"
+                  />
+                </th>
+                <th className="text-left p-4 font-medium text-[#1A1A1A]">Name</th>
+                <th className="text-left p-4 font-medium text-[#1A1A1A]">Created</th>
+                <th className="text-left p-4 font-medium text-[#1A1A1A] min-w-[120px]">Schedule</th>
+                <th className="text-left p-4 font-medium text-[#1A1A1A]">URLs</th>
+                <th className="text-left p-4 font-medium text-[#1A1A1A]">Status</th>
+                <th className="text-left p-4 font-medium text-[#1A1A1A]">Progress</th>
+                <th className="text-left p-4 font-medium text-[#1A1A1A]">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center">
+                    <div className="text-[#6C757D]">Loading jobs...</div>
+                  </td>
+                </tr>
+              ) : (
+                jobs.map((job) => (
+                  <tr key={job.id} className="border-b border-[#E0E6ED] hover:bg-[#F7F9FC] transition-colors duration-200">
+                    <td className="p-4">
+                      <Checkbox
+                        checked={selectedJobs.includes(job.id)}
+                        onCheckedChange={(checked) => handleSelectJob(job.id, checked as boolean)}
+                        className="border-[#E0E6ED]"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <div>
+                        <Link 
+                          href={`/dashboard/manage-jobs/${job.id}`}
+                          className="font-medium text-[#1A1A1A] hover:text-[#1C2331] hover:underline"
+                        >
+                          {job.name}
+                        </Link>
+                        <p className="text-sm text-[#6C757D] mt-1">{generateJobId(job.id)}</p>
+                      </div>
+                    </td>
+                    <td className="p-4 text-[#1A1A1A]">{formatDate(job.created_at)}</td>
+                    <td className="p-4 min-w-[100px]">
+                      <Badge className="bg-[#1C2331] text-white hover:bg-[#0d1b2a] whitespace-nowrap">
+                        {job.schedule_type}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm">
+                        <div className="text-[#1A1A1A] font-medium">{job.total_urls} total</div>
+                        <div className="text-[#6C757D]">
+                          <span className="text-[#4BB543]">{job.successful_urls} success</span>, <span className="text-[#E63946]">{job.failed_urls} failed</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <Badge className={`${getStatusColor(job.status)} flex items-center gap-1 w-fit`}>
+                        {getStatusIcon(job.status)}
+                        {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div className="space-y-2">
+                        <div className="text-sm text-[#1A1A1A] font-medium">
+                          {job.total_urls > 0 ? `${Math.round(job.progress_percentage)}%` : '0%'} processed
+                        </div>
+                        <Progress 
+                          value={job.progress_percentage || 0} 
+                          className="h-2 w-24"
+                        />
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-white border-[#E0E6ED]">
+                          <DropdownMenuItem asChild className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">
+                            <Link 
+                              href={`/dashboard/manage-jobs/${job.id}`}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <Eye className="h-4 w-4" />
+                              See details
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleRerunJob(job.id)}
+                            className="flex items-center gap-2 cursor-pointer hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]"
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                            Re-run
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteJob(job.id)}
+                            className="flex items-center gap-2 cursor-pointer text-[#E63946] hover:bg-[#fef2f2] focus:bg-[#fef2f2] focus:text-[#E63946]"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {!loading && jobs.length === 0 && (
+          <div className="p-8 text-center">
+            <Archive className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No jobs found</h3>
+            <p className="text-[#6C757D]">
+              {searchTerm || statusFilter !== 'All Status' || scheduleFilter !== 'All Schedules'
+                ? "Try adjusting your filters to see more jobs."
+                : "You haven't created any indexing jobs yet."
+              }
+            </p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-[#E0E6ED] flex items-center justify-between">
+            <div className="text-sm text-[#6C757D]">
+              Showing {startIndex + 1} to {Math.min(startIndex + jobsPerPage, totalCount)} of {totalCount} jobs
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC]"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className={currentPage === page 
+                      ? "bg-[#1C2331] text-white hover:bg-[#0d1b2a]" 
+                      : "border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                    }
+                  >
+                    {page}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC]"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
