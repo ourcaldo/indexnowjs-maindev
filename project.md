@@ -19,6 +19,11 @@
 - User created project.md as dedicated file for all future updates and changes
 - Will use project.md exclusively for all future development updates and timeline tracking
 
+### 18:15 - Documentation Structure Clarification
+- User clarified that all updates should go in project.md file, not replit.md
+- replit.md should never be modified - it contains the master project documentation
+- project.md is the dedicated file for all development updates and timeline tracking
+
 ### Current Status
 - Application fully operational on Replit environment
 - All core systems functioning: authentication, background workers, API endpoints
