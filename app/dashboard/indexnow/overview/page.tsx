@@ -145,6 +145,7 @@ export default function IndexNowOverview() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [showDomainsManager, setShowDomainsManager] = useState(false)
+  const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null)
 
   // Fetch domains
   const { data: domainsData } = useQuery({
@@ -178,10 +179,10 @@ export default function IndexNowOverview() {
     }
   })
 
-  // Fetch keywords with filters
+  // Fetch keywords with filters (for display)
   const { data: keywordsData, isLoading: keywordsLoading, refetch: refetchKeywords } = useQuery({
     queryKey: ['/api/keyword-tracker/keywords', {
-      domain_id: selectedDomain || undefined,
+      domain_id: selectedDomainId || selectedDomain || undefined,
       device_type: selectedDevice || undefined,
       country_id: selectedCountry || undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
@@ -190,7 +191,8 @@ export default function IndexNowOverview() {
     }],
     queryFn: async () => {
       const params = new URLSearchParams()
-      if (selectedDomain) params.append('domain_id', selectedDomain)
+      const domainFilter = selectedDomainId || selectedDomain
+      if (domainFilter) params.append('domain_id', domainFilter)
       if (selectedDevice) params.append('device_type', selectedDevice)
       if (selectedCountry) params.append('country_id', selectedCountry)
       if (selectedTags.length > 0) params.append('tags', selectedTags.join(','))
@@ -209,9 +211,41 @@ export default function IndexNowOverview() {
     }
   })
 
+  // Fetch total keyword counts for each domain
+  const { data: keywordCountsData } = useQuery({
+    queryKey: ['/api/keyword-tracker/keywords-counts'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/keyword-tracker/keywords?page=1&limit=1000', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) throw new Error('Failed to fetch keyword counts')
+      return response.json()
+    }
+  })
+
   const domains = domainsData?.data || []
   const countries = countriesData?.data || []
   const keywords = keywordsData?.data || []
+  const allKeywords = keywordCountsData?.data || []
+
+  // Set default selected domain if none selected
+  React.useEffect(() => {
+    if (!selectedDomainId && domains.length > 0) {
+      setSelectedDomainId(domains[0].id)
+    }
+  }, [domains, selectedDomainId])
+
+  // Get selected domain info
+  const selectedDomainInfo = domains.find(d => d.id === selectedDomainId)
+
+  // Get keyword count for each domain
+  const getDomainKeywordCount = (domainId: string) => {
+    return allKeywords.filter((k: any) => k.domain_id === domainId).length
+  }
   const pagination = keywordsData?.pagination || { page: 1, total: 0, total_pages: 1 }
 
   // Filter keywords by search term
@@ -248,7 +282,7 @@ export default function IndexNowOverview() {
         </Card>
       ) : (
         <>
-          {/* Small Domains Card - Compact like dropdown */}
+          {/* Selected Domain Card - Shows active domain */}
           <div className="inline-block">
             <div 
               className="bg-white rounded-lg border cursor-pointer px-3 py-2 shadow-sm hover:shadow-md transition-shadow min-w-[280px] max-w-[320px]"
@@ -258,21 +292,37 @@ export default function IndexNowOverview() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4" style={{color: '#6C757D'}} />
-                  <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Domains</span>
+                  <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>
+                    {selectedDomainInfo ? (selectedDomainInfo.display_name || selectedDomainInfo.domain_name) : 'Select Domain'}
+                  </span>
                 </div>
-                <span className="text-xs" style={{color: '#6C757D'}}>
-                  Manage Domains
-                </span>
+                <div className="flex items-center gap-2">
+                  {selectedDomainInfo && (
+                    <>
+                      <span className="text-xs" style={{color: '#6C757D'}}>Keywords</span>
+                      <span className="font-bold text-sm" style={{color: '#1A1A1A'}}>
+                        {getDomainKeywordCount(selectedDomainInfo.id)}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
               
-              {/* Expanded Domain List */}
+              {/* Domain Selection List */}
               {showDomainsManager && (
                 <div className="border-t mt-2 pt-2" style={{borderColor: '#E0E6ED'}}>
                   <div className="space-y-1">
                     {domains.map((domain: any) => (
                       <div 
                         key={domain.id} 
-                        className="flex items-center justify-between py-1 text-xs"
+                        className={`flex items-center justify-between py-1 px-2 text-xs rounded cursor-pointer hover:bg-gray-50 ${
+                          selectedDomainId === domain.id ? 'bg-blue-50' : ''
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedDomainId(domain.id)
+                          setShowDomainsManager(false)
+                        }}
                       >
                         <span className="font-medium truncate" style={{color: '#1A1A1A'}}>
                           {domain.display_name || domain.domain_name}
@@ -280,7 +330,7 @@ export default function IndexNowOverview() {
                         <div className="flex items-center gap-1 ml-2">
                           <span style={{color: '#6C757D'}}>Keywords</span>
                           <span className="font-bold px-1 py-0.5 rounded text-xs" style={{color: '#1A1A1A', backgroundColor: '#F7F9FC'}}>
-                            {keywords.filter((k: any) => k.domain_id === domain.id).length}
+                            {getDomainKeywordCount(domain.id)}
                           </span>
                         </div>
                       </div>
