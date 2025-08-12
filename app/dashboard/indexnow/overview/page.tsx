@@ -233,7 +233,7 @@ export default function IndexNowOverview() {
   const allKeywords = keywordCountsData?.data || []
 
   // Set default selected domain if none selected
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedDomainId && domains.length > 0) {
       setSelectedDomainId(domains[0].id)
     }
