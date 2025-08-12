@@ -248,48 +248,45 @@ export default function IndexNowOverview() {
         </Card>
       ) : (
         <>
-          {/* Domains Management Section */}
+          {/* Domains Management Section - Compact */}
           <Card>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Globe className="w-5 h-5" style={{color: '#6C757D'}} />
-                  <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>Domains</h3>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" style={{color: '#6C757D'}} />
+                  <h3 className="text-sm font-medium" style={{color: '#1A1A1A'}}>Domains</h3>
                 </div>
                 <Button 
-                  variant="outline" 
+                  variant="ghost" 
                   size="sm"
+                  className="text-xs"
                   onClick={() => setShowDomainsManager(!showDomainsManager)}
+                  style={{color: '#6C757D'}}
                 >
-                  {showDomainsManager ? 'Hide' : 'Manage'} Domains
+                  {showDomainsManager ? 'Hide' : 'Manage Domains'}
                 </Button>
               </div>
               
-              {/* Domain List */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Compact Domain List - Single Line */}
+              <div className="space-y-1">
                 {domains.map((domain: any) => (
                   <div 
                     key={domain.id} 
-                    className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                    style={{backgroundColor: '#F7F9FC'}}
+                    className="flex items-center justify-between py-1 text-sm"
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium" style={{color: '#1A1A1A'}}>
-                          {domain.display_name || domain.domain_name}
-                        </h4>
-                        <p className="text-sm" style={{color: '#6C757D'}}>
-                          {domain.domain_name}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium" style={{color: '#6C757D'}}>
-                          Keywords
-                        </p>
-                        <p className="text-lg font-bold" style={{color: '#1A1A1A'}}>
-                          {keywords.filter((k: any) => k.domain_id === domain.id).length}
-                        </p>
-                      </div>
+                    <div>
+                      <span className="font-medium" style={{color: '#1A1A1A'}}>
+                        {domain.display_name || domain.domain_name}
+                      </span>
+                      <span className="text-xs ml-1" style={{color: '#6C757D'}}>
+                        {domain.domain_name !== (domain.display_name || domain.domain_name) ? domain.domain_name : ''}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs" style={{color: '#6C757D'}}>Keywords</span>
+                      <span className="font-bold" style={{color: '#1A1A1A'}}>
+                        {keywords.filter((k: any) => k.domain_id === domain.id).length}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -297,10 +294,14 @@ export default function IndexNowOverview() {
 
               {/* Add Domain Section - Only show when managing */}
               {showDomainsManager && (
-                <div className="border-t pt-4" style={{borderColor: '#E0E6ED'}}>
-                  <Button onClick={() => router.push('/dashboard/indexnow/add')}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New Domain
+                <div className="border-t pt-2" style={{borderColor: '#E0E6ED'}}>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => router.push('/dashboard/indexnow/add')}
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Add Domain
                   </Button>
                 </div>
               )}
