@@ -67,7 +67,7 @@ interface SidebarProps {
 const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: SidebarProps) => {
   const pathname = usePathname()
   const router = useRouter()
-  const [indexNowExpanded, setIndexNowExpanded] = useState(true)
+  const [keywordTrackerExpanded, setKeywordTrackerExpanded] = useState(true)
   const [fastIndexingExpanded, setFastIndexingExpanded] = useState(true)
   
   // Site settings hooks
@@ -96,27 +96,22 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
     },
     {
       label: 'Keyword Tracker',
-      icon: null,
-      isLabel: true
-    },
-    {
-      label: 'IndexNow',
       icon: TrendingUp,
       expandable: true,
-      expanded: indexNowExpanded,
-      onToggle: () => setIndexNowExpanded(!indexNowExpanded),
+      expanded: keywordTrackerExpanded,
+      onToggle: () => setKeywordTrackerExpanded(!keywordTrackerExpanded),
       children: [
         {
           label: 'Overview',
-          href: '/dashboard/indexnow/overview',
+          href: '/dashboard/keyword-tracker/overview',
           icon: Activity,
-          active: pathname === '/dashboard/indexnow/overview'
+          active: pathname === '/dashboard/keyword-tracker/overview'
         },
         {
           label: 'Add Keywords',
-          href: '/dashboard/indexnow/add',
+          href: '/dashboard/keyword-tracker/add',
           icon: Plus,
-          active: pathname === '/dashboard/indexnow/add'
+          active: pathname === '/dashboard/keyword-tracker/add'
         }
       ]
     },
