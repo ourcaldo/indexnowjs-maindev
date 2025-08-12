@@ -248,70 +248,63 @@ export default function IndexNowOverview() {
         </Card>
       ) : (
         <>
-          {/* Domains Management Section - Small Collapsible Card */}
-          <Card>
+          {/* Small Domains Card - Compact like dropdown */}
+          <div className="inline-block">
             <div 
-              className="flex items-center justify-between cursor-pointer py-2 px-3"
+              className="bg-white rounded-lg border cursor-pointer px-3 py-2 shadow-sm hover:shadow-md transition-shadow min-w-[280px] max-w-[320px]"
+              style={{borderColor: '#E0E6ED'}}
               onClick={() => setShowDomainsManager(!showDomainsManager)}
             >
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4" style={{color: '#6C757D'}} />
-                <h3 className="text-sm font-medium" style={{color: '#1A1A1A'}}>Domains</h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" style={{color: '#6C757D'}} />
+                  <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Domains</span>
+                </div>
+                <span className="text-xs" style={{color: '#6C757D'}}>
+                  Manage Domains
+                </span>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-xs"
-                style={{color: '#6C757D'}}
-              >
-                Manage Domains
-              </Button>
-            </div>
-            
-            {/* Expanded Domain List - Only show when clicked */}
-            {showDomainsManager && (
-              <div className="border-t px-3 pb-3" style={{borderColor: '#E0E6ED'}}>
-                <div className="space-y-2 mt-3">
-                  {domains.map((domain: any) => (
-                    <div 
-                      key={domain.id} 
-                      className="flex items-center justify-between py-2 text-sm"
-                    >
-                      <div>
-                        <span className="font-medium" style={{color: '#1A1A1A'}}>
+              
+              {/* Expanded Domain List */}
+              {showDomainsManager && (
+                <div className="border-t mt-2 pt-2" style={{borderColor: '#E0E6ED'}}>
+                  <div className="space-y-1">
+                    {domains.map((domain: any) => (
+                      <div 
+                        key={domain.id} 
+                        className="flex items-center justify-between py-1 text-xs"
+                      >
+                        <span className="font-medium truncate" style={{color: '#1A1A1A'}}>
                           {domain.display_name || domain.domain_name}
                         </span>
-                        <span className="text-xs ml-1" style={{color: '#6C757D'}}>
-                          {domain.domain_name !== (domain.display_name || domain.domain_name) ? domain.domain_name : ''}
-                        </span>
+                        <div className="flex items-center gap-1 ml-2">
+                          <span style={{color: '#6C757D'}}>Keywords</span>
+                          <span className="font-bold px-1 py-0.5 rounded text-xs" style={{color: '#1A1A1A', backgroundColor: '#F7F9FC'}}>
+                            {keywords.filter((k: any) => k.domain_id === domain.id).length}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs" style={{color: '#6C757D'}}>Keywords</span>
-                        <span className="font-bold" style={{color: '#1A1A1A'}}>
-                          {keywords.filter((k: any) => k.domain_id === domain.id).length}
-                        </span>
-                      </div>
+                    ))}
+                    
+                    {/* Add Domain Button */}
+                    <div className="pt-1 border-t" style={{borderColor: '#E0E6ED'}}>
+                      <button 
+                        className="text-xs px-2 py-1 rounded hover:bg-gray-50 flex items-center gap-1"
+                        style={{color: '#6C757D'}}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push('/dashboard/indexnow/add')
+                        }}
+                      >
+                        <Plus className="w-3 h-3" />
+                        Add Domain
+                      </button>
                     </div>
-                  ))}
-                  
-                  {/* Add Domain Button */}
-                  <div className="pt-2 border-t" style={{borderColor: '#E0E6ED'}}>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        router.push('/dashboard/indexnow/add')
-                      }}
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      Add Domain
-                    </Button>
                   </div>
                 </div>
-              </div>
-            )}
-          </Card>
+              )}
+            </div>
+          </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
