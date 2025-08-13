@@ -1901,3 +1901,25 @@ indb_keyword_rankings (latest positions)
   - **Multi-Filter Support**: API now handles domain, device, and country filters
   - **Data Structure**: Proper keyword details with device type and country info
   - **Error Handling**: Better empty state messages and loading indicators
+
+### August 13, 2025 14:30 - Rank History Page UI/UX Critical Fixes
+- ✅ **FIXED BACKGROUND COLOR**: Changed page background from dark gray (#E5E7EB) to light gray (#F7F9FC)
+  - **Issue**: Background was too dark, creating poor visual contrast
+  - **Solution**: Updated to project's light gray color (#F7F9FC) as specified in replit.md
+  - **Result**: Professional, clean appearance matching project design guidelines
+- ✅ **REDESIGNED DATE PICKER**: Replaced separate "From/To" inputs with single elegant date range picker
+  - **Old Design**: Two separate date inputs with "From hh/bb/tttt To hh/bb/tttt" format
+  - **New Design**: Single "Custom" button that opens dropdown calendar picker showing "MMM DD - MMM DD" format
+  - **User Experience**: Click Custom → Select start date → Select end date → Apply
+  - **Reference**: Implemented design similar to user's provided Vendy app reference image
+  - **Calendar Integration**: Shows formatted date range in button when custom dates selected
+- ✅ **ENHANCED DATE DISPLAY**: Removed 15-column limitation and added horizontal scrolling
+  - **Issue**: Only 15 date columns visible causing data truncation for 30/60 day ranges
+  - **Solution**: Removed `.slice(0, 15)` limitation from table headers and data rows
+  - **Scrolling**: Added proper horizontal scrolling with `min-w-max` wrapper for full date range display
+  - **Result**: Users can now scroll horizontally to see all dates in selected range (7d, 30d, 60d)
+- ✅ **PROJECT COLOR COMPLIANCE**: All UI elements strictly follow project color scheme
+  - **Background**: Using #F7F9FC (Light Gray) from project specification
+  - **Borders**: #E0E6ED (Cool Gray) for consistent visual hierarchy
+  - **Text Colors**: #1A1A1A (Graphite) for headers, #6C757D (Slate Gray) for secondary text
+  - **Interactive Elements**: Proper hover states and focus management with project colors

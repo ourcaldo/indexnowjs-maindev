@@ -120,6 +120,7 @@ export default function RankHistoryPage() {
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '60d' | 'custom'>('30d')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
+  const [showDatePicker, setShowDatePicker] = useState(false)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const itemsPerPage = 20
 
@@ -266,7 +267,7 @@ export default function RankHistoryPage() {
   const dateColumns = startDate && endDate ? generateDateRange(startDate, endDate) : []
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#E5E7EB' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#F7F9FC' }}>
       <div className="max-w-7xl mx-auto p-6">
         
         <div className="space-y-6">
@@ -368,37 +369,88 @@ export default function RankHistoryPage() {
                   {/* Date Range */}
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1">
-                      {['7d', '30d', '60d', 'custom'].map((range) => (
+                      {['7d', '30d', '60d'].map((range) => (
                         <Button
                           key={range}
                           size="sm"
                           variant={dateRange === range ? 'default' : 'outline'}
-                          onClick={() => setDateRange(range as any)}
+                          onClick={() => {
+                            setDateRange(range as any)
+                            setShowDatePicker(false)
+                          }}
                         >
-                          {range === 'custom' ? 'Custom' : range.toUpperCase()}
+                          {range.toUpperCase()}
                         </Button>
                       ))}
                     </div>
                     
-                    {dateRange === 'custom' && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>From</span>
-                        <Input
-                          type="date"
-                          value={customStartDate}
-                          onChange={(e: any) => setCustomStartDate(e.target.value)}
-                          className="w-32 text-xs"
-                        />
-                        <span className="text-sm" style={{color: '#6C757D'}}>-</span>
-                        <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>To</span>
-                        <Input
-                          type="date"
-                          value={customEndDate}
-                          onChange={(e: any) => setCustomEndDate(e.target.value)}
-                          className="w-32 text-xs"
-                        />
-                      </div>
-                    )}
+                    {/* Single Date Range Picker */}
+                    <div className="relative">
+                      <Button
+                        size="sm"
+                        variant={dateRange === 'custom' ? 'default' : 'outline'}
+                        onClick={() => {
+                          setDateRange('custom')
+                          setShowDatePicker(!showDatePicker)
+                        }}
+                        className="flex items-center gap-1"
+                      >
+                        <Calendar className="w-3 h-3" />
+                        {dateRange === 'custom' && customStartDate && customEndDate 
+                          ? `${new Date(customStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(customEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                          : 'Custom'
+                        }
+                      </Button>
+                      
+                      {showDatePicker && (
+                        <div 
+                          className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg p-4 z-50 min-w-[300px]"
+                          style={{border: '1px solid #E0E6ED'}}
+                        >
+                          <div className="space-y-3">
+                            <div className="text-sm font-medium" style={{color: '#1A1A1A'}}>
+                              Select Date Range
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="text-xs" style={{color: '#6C757D'}}>From</label>
+                                <Input
+                                  type="date"
+                                  value={customStartDate}
+                                  onChange={(e: any) => setCustomStartDate(e.target.value)}
+                                  className="text-xs"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs" style={{color: '#6C757D'}}>To</label>
+                                <Input
+                                  type="date"
+                                  value={customEndDate}
+                                  onChange={(e: any) => setCustomEndDate(e.target.value)}
+                                  className="text-xs"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => setShowDatePicker(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                onClick={() => setShowDatePicker(false)}
+                                disabled={!customStartDate || !customEndDate}
+                              >
+                                Apply
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Device Filter */}
@@ -524,20 +576,21 @@ export default function RankHistoryPage() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
+                    <div className="min-w-max">
+                      <table className="w-full">
+                        <thead>
                         <tr style={{borderBottom: '1px solid #E0E6ED'}}>
                           <th className="text-left py-3 px-2" style={{color: '#1A1A1A', backgroundColor: '#F0F4F8', width: '200px'}}>
                             Keyword
                           </th>
-                          {dateColumns.slice(0, 15).map((date) => (
+                          {dateColumns.map((date) => (
                             <th key={date} className="text-center py-3 px-2 text-xs" style={{color: '#6C757D', minWidth: '60px'}}>
                               {formatDateHeader(date)}
                             </th>
                           ))}
                         </tr>
-                      </thead>
-                      <tbody>
+                        </thead>
+                        <tbody>
                         {paginatedData.map((item: RankHistoryData, index: number) => (
                           <tr key={item.keyword_id} style={{borderBottom: '1px solid #F0F4F8'}}>
                             <td className="py-3 px-2" style={{backgroundColor: '#F8FAFC', borderRight: '1px solid #E0E6ED'}}>
@@ -545,7 +598,7 @@ export default function RankHistoryPage() {
                                 {item.keyword}
                               </div>
                             </td>
-                            {dateColumns.slice(0, 15).map((date) => {
+                            {dateColumns.map((date) => {
                               const dayData = item.history[date]
                               const position = dayData?.position
                               return (
@@ -567,8 +620,9 @@ export default function RankHistoryPage() {
                             })}
                           </tr>
                         ))}
-                      </tbody>
-                    </table>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )}
               </Card>
