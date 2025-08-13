@@ -14,6 +14,7 @@ IndexNow Pro is a professional-grade, full-stack web application designed to aut
 
 ## User Preferences
 
+- **Migration Status:** Project successfully migrated to Replit environment on 2025-08-13. All systems operational.
 - **Architecture:** The project strictly uses Next.js with NO VITE. Database operations require SQL queries for Supabase SQL Editor. Database table names must follow the `indb_{collections}_{table-name}` prefix.
 - **Color Scheme:** Use ONLY the defined project color scheme. Reference images are for layout/UI inspiration ONLY, not color.
   - Background: #FFFFFF (Pure White), #F7F9FC (Light Gray)

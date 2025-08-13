@@ -1,0 +1,34 @@
+Before I ask you to do enhancement/changes, I need you to do:
+1. Deep dive into this project, read all code, file and information, specificly in project.md (not replit.md, but still read the replit.md) where you can get the all related this project, database structure and detailed changes log.
+2. Always and keep remember that you're SHOULDN'T delete any information in project.md, for every update and changes, you should write in Recent Changes inside the project.md with proper timeline format like the other without delete anything.
+3. If you need to make debug/test file to fix the problem, then make it. But keep in mind to delete that file again after it's solved and before you end the action chain.
+4. For after every changes you made, don't forget to add it in timeline changlongs in project.md in Recent Changes section.
+
+Then, I need your help to make another menu for the Keyword Tracker, the menu is under IndexNow menu. So the IndexNow, will be have menu like:
+- Overview
+- Add New Keyword
+- Rank History
+
+The Rank History menu will be have dashboard to show all the keyword with ranking position records. So, the dispay will be like the Overview page, but the tables will be like:
+1. Keyword (freeze)
+2. Sequential date from current date to the oldest 30 days before.
+3. before the table, have date picker so user can choose start and end date, but the default is 30 days from current local time to 30 days before.
+4. No need to fucking add header and description, the fucking dashboard is litterely like the Overview, where have domain section in left corner and everything is almost same. The fucking date picker and filter make it profesional, not too fucking big. AND DON'T FUCKING FORGET DOMAIN SECTION IN FUCKING LEFT TOP CORNER LIKE THE OVERVIEW PAGE
+
+On the Supabase, It's also recorded the position each day/date, and the tables "indb_keyword_rankings" is get latest date position and update it. The current "indb_keyword_rankings" schema is something like this:
+INSERT INTO "public"."indb_keyword_rankings" ("id", "keyword_id", "position", "url", "search_volume", "difficulty_score", "check_date", "created_at") VALUES ('7a6bdd4e-75f2-4ecb-b155-412cf250cbc2', 'd3db5c49-772f-4ad3-aae1-fc86375bb709', '1', 'https://nexjob.tech/', null, null, '2025-08-12', '2025-08-12 19:37:49.673713+00');
+
+The fucking tables for rank history is fucking different from the fucking "indb_keyword_rankings", the data is like on the table "indb_keyword_keywords" but have sequential data position update, the update will be handle by the project server and send it to the Supabase so the position will be inputed there.
+Then, "indb_keyword_rankings" will got latest date position from the new tables.
+INSERT INTO "public"."indb_keyword_keywords" ("id", "user_id", "domain_id", "keyword", "device_type", "country_id", "tags", "is_active", "created_at", "updated_at") VALUES ('05e4ad23-b5af-4d91-b636-12c030558b5c', '915f50e5-0902-466a-b1af-bdf19d789722', '9506479c-6d94-4d81-93f3-65f9180f1032', 'social media specialist loker', 'mobile', '1650e5e6-6ed5-44b3-b253-4353714be8e6', '{"nexjob","loker"}', 'true', '2025-08-11 19:42:54.840783+00', '2025-08-11 19:42:54.840783+00');
+
+So far the POV of the logic is like that, make that happen or fucking made more proper approach.
+
+FUCKING READ IT CAREFULLY, THE FUCKING RANK HISTORY IS FUCKING GET THE KEYWORD FROM FUCKING TABLES "indb_keyword_keywords", WHICH THE TABLE "indb_keyword_keywords" IS FUCKING ADD ROW WHEN USER ADD NEW KEYWORD. SO, WHEN YOU FUCKING MAKE THE NEW TABLES, THE FUCKING TABLES IS SHOULD NOT FUCKING EMPTY!!!!
+THEN, THE FUCKING "indb_keyword_rankings" WHICH FUCKING CONTAINS LATEST POSITION OF THE FUCKING KEYWORD, IS GET THE POSITION AUTO UPDAATE DAILY FROM THE FUCKING NEW TABLES RANK HISTORY. DO YOU FUCKING STILL NOT UNDERSTAND ABOUT THE FUCKING FLOW?
+
+IT'S FUCKING LITTERELY EVERYTHING, I FUCKING TOLD YOU EVERYTHING YOU FUCKING NEED TO KNOW.
+
+So, you need to make an triger in Supabase, so the keyword on "indb_keyword_rankings" will be get position regulary from the records.
+
+I'M SO FUCKING EXHAUSTED, I'M FUCKING LITTERELY ASK YOU TO MAKE THIS FOR 3 TIMES, BUT FUCKING ALL IS WRONG, NO FUCKING ONE IS CORRECT, ALL YOU FUCKING DO ISN'T FUCKING FOLLOWING WHAT I INSTRUCTED BEFORE.
