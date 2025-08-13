@@ -241,14 +241,6 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_keyword_keywords             | created_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_keyword_keywords             | updated_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_keyword_keywords             | last_check_date             | date                     | YES         | null                                                             |
-| indb_keyword_rankings             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_keyword_rankings             | keyword_id                  | uuid                     | NO          | null                                                             |
-| indb_keyword_rankings             | position                    | integer                  | YES         | null                                                             |
-| indb_keyword_rankings             | url                         | text                     | YES         | null                                                             |
-| indb_keyword_rankings             | search_volume               | integer                  | YES         | null                                                             |
-| indb_keyword_rankings             | difficulty_score            | integer                  | YES         | null                                                             |
-| indb_keyword_rankings             | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
-| indb_keyword_rankings             | created_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_keyword_rank_history         | id                          | uuid                     | NO          | gen_random_uuid()                                                |
 | indb_keyword_rank_history         | keyword_id                  | uuid                     | NO          | null                                                             |
 | indb_keyword_rank_history         | position                    | integer                  | YES         | null                                                             |
@@ -258,6 +250,14 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_keyword_rank_history         | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
 | indb_keyword_rank_history         | created_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_keyword_rank_history         | updated_at                  | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_rankings             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_keyword_rankings             | keyword_id                  | uuid                     | NO          | null                                                             |
+| indb_keyword_rankings             | position                    | integer                  | YES         | null                                                             |
+| indb_keyword_rankings             | url                         | text                     | YES         | null                                                             |
+| indb_keyword_rankings             | search_volume               | integer                  | YES         | null                                                             |
+| indb_keyword_rankings             | difficulty_score            | integer                  | YES         | null                                                             |
+| indb_keyword_rankings             | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
+| indb_keyword_rankings             | created_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_keyword_usage                | id                          | uuid                     | NO          | gen_random_uuid()                                                |
 | indb_keyword_usage                | user_id                     | uuid                     | NO          | null                                                             |
 | indb_keyword_usage                | keywords_used               | integer                  | NO          | 0                                                                |
