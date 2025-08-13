@@ -54,13 +54,14 @@ export async function POST(request: NextRequest) {
     const apiKeyManager = new APIKeyManager()
     const availableQuota = await apiKeyManager.getAvailableQuota()
     
-    if (availableQuota <= 0) {
+    if (availableQuota < 100) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'API quota exceeded. Please wait for quota reset or add more quota to your plan.',
+          error: `Insufficient quota: ${availableQuota} remaining. Need 100 quota per request. Contact admin.`,
           quotaInfo: {
             available: availableQuota,
+            required: 100,
             resetInfo: 'Quota resets daily'
           }
         },

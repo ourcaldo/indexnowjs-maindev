@@ -77,6 +77,7 @@ export class APIKeyManager {
       if (!updatedIntegration) return 0
 
       const available = updatedIntegration.api_quota_limit - updatedIntegration.api_quota_used
+      // Check if we have at least 100 quota for the next request
       return Math.max(0, available)
 
     } catch (error) {
@@ -86,7 +87,7 @@ export class APIKeyManager {
   }
 
   /**
-   * Update quota usage after API call (site-level)
+   * Update quota usage after API call (site-level) - consumes 100 quota per request
    */
   async updateQuotaUsage(apiKey: string): Promise<void> {
     try {
@@ -98,7 +99,8 @@ export class APIKeyManager {
         .eq('is_active', true)
         .single()
 
-      const newQuotaUsed = (currentData?.api_quota_used || 0) + 1
+      // Consume 100 quota per successful request
+      const newQuotaUsed = (currentData?.api_quota_used || 0) + 100
 
       const { error } = await supabaseAdmin
         .from('indb_site_integration')
@@ -112,7 +114,7 @@ export class APIKeyManager {
       if (error) {
         logger.error('Error updating quota usage:', error)
       } else {
-        logger.info('Updated site-level quota usage')
+        logger.info(`Updated site-level quota usage: +100 (Total: ${newQuotaUsed})`)
       }
 
     } catch (error) {
