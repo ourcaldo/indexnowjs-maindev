@@ -38,12 +38,12 @@ indb_keyword_countries (id, name, iso2_code, iso3_code, is_active)
 ## Required New Components
 
 ### 1. ScrapingDog API Integration Table
-**New Table Required**: `indb_site_integration`
+**Table Already Exists**: `indb_site_integration` (SITE-LEVEL, NOT PER-USER)
 
 ```sql
+-- Table structure (ALREADY CREATED):
 CREATE TABLE indb_site_integration (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id),
     service_name TEXT NOT NULL DEFAULT 'scrapingdog',
     scrappingdog_apikey TEXT NOT NULL,
     api_quota_limit INTEGER DEFAULT 10000,
@@ -52,13 +52,10 @@ CREATE TABLE indb_site_integration (
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    UNIQUE(user_id, service_name)
+    UNIQUE(service_name)
 );
 
--- RLS Policy
-ALTER TABLE indb_site_integration ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can only access their own integrations" ON indb_site_integration
-    FOR ALL USING (auth.uid() = user_id);
+-- NO RLS POLICY NEEDED - This is site-level system data, not user data
 ```
 
 ### 2. Enhanced Rank History Schema
