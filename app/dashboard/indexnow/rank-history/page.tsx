@@ -12,7 +12,8 @@ import {
   Smartphone,
   Monitor,
   Tag,
-  X
+  X,
+  Plus
 } from 'lucide-react'
 
 // Simple UI Components using project color scheme
@@ -117,7 +118,8 @@ export default function RankHistoryPage() {
   
   // State for date range and pagination
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '60d' | 'custom'>('30d')
-  const [customDate, setCustomDate] = useState<string>('')
+  const [customStartDate, setCustomStartDate] = useState<string>('')
+  const [customEndDate, setCustomEndDate] = useState<string>('')
   const [currentPage, setCurrentPage] = useState<number>(1)
   const itemsPerPage = 20
 
@@ -125,7 +127,7 @@ export default function RankHistoryPage() {
   const getDateRange = () => {
     const today = new Date()
     let startDate: string
-    const endDate = today.toISOString().split('T')[0]
+    let endDate: string = today.toISOString().split('T')[0]
     
     switch (dateRange) {
       case '7d':
@@ -138,7 +140,8 @@ export default function RankHistoryPage() {
         startDate = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         break
       case 'custom':
-        startDate = customDate || endDate
+        startDate = customStartDate || endDate
+        endDate = customEndDate || endDate
         break
       default:
         startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -219,6 +222,17 @@ export default function RankHistoryPage() {
   // Get selected domain info
   const selectedDomainInfo = domains.find((d: any) => d.id === selectedDomainId)
 
+  // Get keyword count for each domain (from rank history data)
+  const getDomainKeywordCount = (domainId: string) => {
+    if (!rankHistory || !Array.isArray(rankHistory)) return 0
+    const uniqueKeywords = new Set(
+      rankHistory
+        .filter((item: any) => item.domain?.id === domainId)
+        .map((item: any) => item.keyword_id)
+    )
+    return uniqueKeywords.size
+  }
+
   // Filter and search logic
   const filteredData = rankHistory.filter((item: RankHistoryData) => {
     // Search filter
@@ -252,7 +266,7 @@ export default function RankHistoryPage() {
   const dateColumns = startDate && endDate ? generateDateRange(startDate, endDate) : []
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F7F9FC' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#E5E7EB' }}>
       <div className="max-w-7xl mx-auto p-6">
         
         <div className="space-y-6">
@@ -274,60 +288,86 @@ export default function RankHistoryPage() {
             </Card>
           ) : (
             <>
-              {/* Domain Section */}
-              <div className="mb-6">
-                <div className="inline-block">
-                  <div 
-                    className="bg-white rounded-lg border cursor-pointer px-3 py-2 shadow-sm hover:shadow-md transition-shadow min-w-[280px] max-w-[320px]"
-                    style={{borderColor: '#E0E6ED'}}
-                    onClick={() => setShowDomainsManager(!showDomainsManager)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4" style={{color: '#6C757D'}} />
-                        <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>
-                          {selectedDomainInfo ? (selectedDomainInfo.display_name || selectedDomainInfo.domain_name) : 'Select Domain'}
-                        </span>
-                      </div>
+              {/* Selected Domain Card - Shows active domain */}
+              <div className="inline-block">
+                <div 
+                  className="bg-white rounded-lg border cursor-pointer px-3 py-2 shadow-sm hover:shadow-md transition-shadow min-w-[280px] max-w-[320px]"
+                  style={{borderColor: '#E0E6ED'}}
+                  onClick={() => setShowDomainsManager(!showDomainsManager)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4" style={{color: '#6C757D'}} />
+                      <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>
+                        {selectedDomainInfo ? (selectedDomainInfo.display_name || selectedDomainInfo.domain_name) : 'Select Domain'}
+                      </span>
                     </div>
-                    
-                    {/* Domain Selection List */}
-                    {showDomainsManager && (
-                      <div className="border-t mt-2 pt-2" style={{borderColor: '#E0E6ED'}}>
-                        <div className="space-y-1">
-                          {domains.map((domain: any) => (
-                            <div 
-                              key={domain.id} 
-                              className={`flex items-center justify-between py-1 px-2 text-xs rounded cursor-pointer hover:bg-gray-50 ${
-                                selectedDomainId === domain.id ? 'bg-blue-50' : ''
-                              }`}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setSelectedDomainId(domain.id)
-                                setShowDomainsManager(false)
-                              }}
-                            >
-                              <span style={{color: '#1A1A1A'}}>
-                                {domain.display_name || domain.domain_name}
+                    <div className="flex items-center gap-2">
+                      {selectedDomainInfo && (
+                        <>
+                          <span className="text-xs" style={{color: '#6C757D'}}>Keywords</span>
+                          <span className="font-bold text-sm" style={{color: '#1A1A1A'}}>
+                            {getDomainKeywordCount(selectedDomainInfo.id)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Domain Selection List */}
+                  {showDomainsManager && (
+                    <div className="border-t mt-2 pt-2" style={{borderColor: '#E0E6ED'}}>
+                      <div className="space-y-1">
+                        {domains.map((domain: any) => (
+                          <div 
+                            key={domain.id} 
+                            className={`flex items-center justify-between py-1 px-2 text-xs rounded cursor-pointer hover:bg-gray-50 ${
+                              selectedDomainId === domain.id ? 'bg-blue-50' : ''
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedDomainId(domain.id)
+                              setShowDomainsManager(false)
+                            }}
+                          >
+                            <span className="font-medium truncate" style={{color: '#1A1A1A'}}>
+                              {domain.display_name || domain.domain_name}
+                            </span>
+                            <div className="flex items-center gap-1 ml-2">
+                              <span style={{color: '#6C757D'}}>Keywords</span>
+                              <span className="font-bold px-1 py-0.5 rounded text-xs" style={{color: '#1A1A1A', backgroundColor: '#F7F9FC'}}>
+                                {getDomainKeywordCount(domain.id)}
                               </span>
                             </div>
-                          ))}
+                          </div>
+                        ))}
+                        
+                        {/* Add Domain Button */}
+                        <div className="pt-1 border-t" style={{borderColor: '#E0E6ED'}}>
+                          <button 
+                            className="text-xs px-2 py-1 rounded hover:bg-gray-50 flex items-center gap-1"
+                            style={{color: '#6C757D'}}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              window.location.href = '/dashboard/indexnow/add'
+                            }}
+                          >
+                            <Plus className="w-3 h-3" />
+                            Add Domain
+                          </button>
                         </div>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Filters Section - Under Domain */}
+              {/* Compact Filters Section - One Line */}
               <Card>
-                <div className="space-y-4">
-                  {/* Date Range Filter */}
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Calendar className="w-4 h-4" style={{color: '#6C757D'}} />
-                    <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Date Range:</span>
-                    
-                    <div className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-4">
+                  {/* Date Range */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
                       {['7d', '30d', '60d', 'custom'].map((range) => (
                         <Button
                           key={range}
@@ -341,107 +381,99 @@ export default function RankHistoryPage() {
                     </div>
                     
                     {dateRange === 'custom' && (
-                      <Input
-                        type="date"
-                        value={customDate}
-                        onChange={(e: any) => setCustomDate(e.target.value)}
-                        className="w-36"
-                      />
-                    )}
-                  </div>
-
-                  {/* Device Filter - AJAX Style */}
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Device:</span>
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant={selectedDevice === '' ? 'default' : 'outline'}
-                          onClick={() => setSelectedDevice('')}
-                          className="flex items-center gap-1"
-                        >
-                          All
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={selectedDevice === 'desktop' ? 'default' : 'outline'}
-                          onClick={() => setSelectedDevice('desktop')}
-                          className="flex items-center gap-1"
-                        >
-                          <Monitor className="w-3 h-3" />
-                          Desktop
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={selectedDevice === 'mobile' ? 'default' : 'outline'}
-                          onClick={() => setSelectedDevice('mobile')}
-                          className="flex items-center gap-1"
-                        >
-                          <Smartphone className="w-3 h-3" />
-                          Mobile
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Search and Tags Filter */}
-                  <div className="flex flex-wrap items-center gap-4">
-                    {/* Search */}
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4" style={{color: '#6C757D'}} />
-                      <Input
-                        placeholder="Search keywords..."
-                        value={searchQuery}
-                        onChange={(e: any) => setSearchQuery(e.target.value)}
-                        className="w-48"
-                      />
-                    </div>
-
-                    {/* Tags Filter */}
-                    <div className="flex items-center gap-2">
-                      <Tag className="w-4 h-4" style={{color: '#6C757D'}} />
-                      <span className="text-sm" style={{color: '#1A1A1A'}}>Tags:</span>
-                      <div className="flex flex-wrap gap-1">
-                        {availableTags.slice(0, 5).map((tag: string) => (
-                          <Button
-                            key={tag}
-                            size="sm"
-                            variant={selectedTags.includes(tag) ? 'default' : 'outline'}
-                            onClick={() => {
-                              if (selectedTags.includes(tag)) {
-                                setSelectedTags(selectedTags.filter(t => t !== tag))
-                              } else {
-                                setSelectedTags([...selectedTags, tag])
-                              }
-                            }}
-                            className="text-xs"
-                          >
-                            {tag}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Active Filters */}
-                    {(selectedTags.length > 0 || searchQuery) && (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs" style={{color: '#6C757D'}}>Active filters:</span>
-                        {searchQuery && (
-                          <div className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                            {searchQuery}
-                            <X className="w-3 h-3 cursor-pointer" onClick={() => setSearchQuery('')} />
-                          </div>
-                        )}
-                        {selectedTags.map((tag) => (
-                          <div key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                            {tag}
-                            <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))} />
-                          </div>
-                        ))}
+                        <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>From</span>
+                        <Input
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e: any) => setCustomStartDate(e.target.value)}
+                          className="w-32 text-xs"
+                        />
+                        <span className="text-sm" style={{color: '#6C757D'}}>-</span>
+                        <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>To</span>
+                        <Input
+                          type="date"
+                          value={customEndDate}
+                          onChange={(e: any) => setCustomEndDate(e.target.value)}
+                          className="w-32 text-xs"
+                        />
                       </div>
                     )}
                   </div>
+
+                  {/* Device Filter */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant={selectedDevice === '' ? 'default' : 'outline'}
+                      onClick={() => setSelectedDevice('')}
+                    >
+                      <Monitor className="w-3 h-3 mr-1" />
+                      All
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={selectedDevice === 'desktop' ? 'default' : 'outline'}
+                      onClick={() => setSelectedDevice('desktop')}
+                    >
+                      <Monitor className="w-3 h-3 mr-1" />
+                      Desktop
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={selectedDevice === 'mobile' ? 'default' : 'outline'}
+                      onClick={() => setSelectedDevice('mobile')}
+                    >
+                      <Smartphone className="w-3 h-3 mr-1" />
+                      Mobile
+                    </Button>
+                  </div>
+
+                  {/* Search */}
+                  <div className="flex items-center gap-1">
+                    <Input
+                      placeholder="Search keywords..."
+                      value={searchQuery}
+                      onChange={(e: any) => setSearchQuery(e.target.value)}
+                      className="w-40 text-sm"
+                    />
+                  </div>
+
+                  {/* Tags Dropdown */}
+                  <div className="relative">
+                    <select
+                      value=""
+                      onChange={(e: any) => {
+                        const tag = e.target.value
+                        if (tag && !selectedTags.includes(tag)) {
+                          setSelectedTags([...selectedTags, tag])
+                        }
+                      }}
+                      className="w-32 text-sm h-9 rounded-md px-3 py-2 border border-gray-300 bg-white text-gray-900"
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E0E6ED',
+                        color: '#1A1A1A'
+                      }}
+                    >
+                      <option value="">Tags</option>
+                      {availableTags.map((tag: string) => (
+                        <option key={tag} value={tag}>{tag}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Selected Tags */}
+                  {selectedTags.length > 0 && (
+                    <div className="flex gap-1">
+                      {selectedTags.map((tag) => (
+                        <div key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                          {tag}
+                          <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </Card>
 
@@ -512,18 +544,6 @@ export default function RankHistoryPage() {
                               <div className="font-medium text-sm" style={{color: '#1A1A1A'}}>
                                 {item.keyword}
                               </div>
-                              {item.tags && item.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {item.tags.slice(0, 2).map((tag, tagIndex) => (
-                                    <span key={tagIndex} className="text-xs px-1 py-0.5 rounded" style={{backgroundColor: '#E0E6ED', color: '#6C757D'}}>
-                                      {tag}
-                                    </span>
-                                  ))}
-                                  {item.tags.length > 2 && (
-                                    <span className="text-xs" style={{color: '#6C757D'}}>+{item.tags.length - 2}</span>
-                                  )}
-                                </div>
-                              )}
                             </td>
                             {dateColumns.slice(0, 15).map((date) => {
                               const dayData = item.history[date]
