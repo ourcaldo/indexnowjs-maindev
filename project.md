@@ -1913,13 +1913,21 @@ indb_keyword_rankings (latest positions)
   - **User Experience**: Click Custom → Select start date → Select end date → Apply
   - **Reference**: Implemented design similar to user's provided Vendy app reference image
   - **Calendar Integration**: Shows formatted date range in button when custom dates selected
-- ✅ **ENHANCED DATE DISPLAY**: Removed 15-column limitation and added horizontal scrolling
+- ✅ **ENHANCED DATE DISPLAY**: Removed 15-column limitation and added horizontal scrolling WITH FROZEN KEYWORD COLUMN
   - **Issue**: Only 15 date columns visible causing data truncation for 30/60 day ranges
   - **Solution**: Removed `.slice(0, 15)` limitation from table headers and data rows
-  - **Scrolling**: Added proper horizontal scrolling with `min-w-max` wrapper for full date range display
-  - **Result**: Users can now scroll horizontally to see all dates in selected range (7d, 30d, 60d)
+  - **Scrolling**: Added proper horizontal scrolling with sticky/frozen keyword column using `position: sticky; left: 0; z-index: 10`
+  - **Frozen Column**: Keyword column remains visible while user scrolls horizontally through dates
+  - **Result**: Users can scroll horizontally to see all dates while keeping keyword column always visible
 - ✅ **PROJECT COLOR COMPLIANCE**: All UI elements strictly follow project color scheme
   - **Background**: Using #F7F9FC (Light Gray) from project specification
   - **Borders**: #E0E6ED (Cool Gray) for consistent visual hierarchy
   - **Text Colors**: #1A1A1A (Graphite) for headers, #6C757D (Slate Gray) for secondary text
   - **Interactive Elements**: Proper hover states and focus management with project colors
+
+### August 13, 2025 14:45 - Keyword Column Sticky Position Fix
+- ✅ **RESTORED FROZEN KEYWORD COLUMN**: Fixed accidental removal of sticky positioning for keyword column
+  - **Issue**: Previous update accidentally removed frozen/sticky positioning of keyword column
+  - **Solution**: Added `sticky left-0 z-10` classes and proper CSS positioning to both header and body cells
+  - **Result**: Keyword column now properly stays frozen while date columns scroll horizontally
+  - **Technical**: Used `position: sticky; left: 0; z-index: 10` with fixed width (200px) for consistent behavior

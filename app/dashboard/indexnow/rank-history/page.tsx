@@ -576,50 +576,66 @@ export default function RankHistoryPage() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <div className="min-w-max">
+                    <div className="relative">
                       <table className="w-full">
                         <thead>
-                        <tr style={{borderBottom: '1px solid #E0E6ED'}}>
-                          <th className="text-left py-3 px-2" style={{color: '#1A1A1A', backgroundColor: '#F0F4F8', width: '200px'}}>
-                            Keyword
-                          </th>
-                          {dateColumns.map((date) => (
-                            <th key={date} className="text-center py-3 px-2 text-xs" style={{color: '#6C757D', minWidth: '60px'}}>
-                              {formatDateHeader(date)}
+                          <tr style={{borderBottom: '1px solid #E0E6ED'}}>
+                            <th 
+                              className="text-left py-3 px-2 sticky left-0 z-10" 
+                              style={{
+                                color: '#1A1A1A', 
+                                backgroundColor: '#F0F4F8', 
+                                width: '200px',
+                                minWidth: '200px'
+                              }}
+                            >
+                              Keyword
                             </th>
-                          ))}
-                        </tr>
+                            {dateColumns.map((date) => (
+                              <th key={date} className="text-center py-3 px-2 text-xs" style={{color: '#6C757D', minWidth: '60px'}}>
+                                {formatDateHeader(date)}
+                              </th>
+                            ))}
+                          </tr>
                         </thead>
                         <tbody>
-                        {paginatedData.map((item: RankHistoryData, index: number) => (
-                          <tr key={item.keyword_id} style={{borderBottom: '1px solid #F0F4F8'}}>
-                            <td className="py-3 px-2" style={{backgroundColor: '#F8FAFC', borderRight: '1px solid #E0E6ED'}}>
-                              <div className="font-medium text-sm" style={{color: '#1A1A1A'}}>
-                                {item.keyword}
-                              </div>
-                            </td>
-                            {dateColumns.map((date) => {
-                              const dayData = item.history[date]
-                              const position = dayData?.position
-                              return (
-                                <td key={date} className="text-center py-3 px-2 text-sm">
-                                  {position ? (
-                                    <span className={`font-medium ${
-                                      position <= 3 ? 'text-green-600' :
-                                      position <= 10 ? 'text-blue-600' :
-                                      position <= 50 ? 'text-orange-600' :
-                                      'text-red-600'
-                                    }`}>
-                                      {position}
-                                    </span>
-                                  ) : (
-                                    <span style={{color: '#E0E6ED'}}>-</span>
-                                  )}
-                                </td>
-                              )
-                            })}
-                          </tr>
-                        ))}
+                          {paginatedData.map((item: RankHistoryData, index: number) => (
+                            <tr key={item.keyword_id} style={{borderBottom: '1px solid #F0F4F8'}}>
+                              <td 
+                                className="py-3 px-2 sticky left-0 z-10" 
+                                style={{
+                                  backgroundColor: '#F8FAFC', 
+                                  borderRight: '1px solid #E0E6ED',
+                                  width: '200px',
+                                  minWidth: '200px'
+                                }}
+                              >
+                                <div className="font-medium text-sm" style={{color: '#1A1A1A'}}>
+                                  {item.keyword}
+                                </div>
+                              </td>
+                              {dateColumns.map((date) => {
+                                const dayData = item.history[date]
+                                const position = dayData?.position
+                                return (
+                                  <td key={date} className="text-center py-3 px-2 text-sm">
+                                    {position ? (
+                                      <span className={`font-medium ${
+                                        position <= 3 ? 'text-green-600' :
+                                        position <= 10 ? 'text-blue-600' :
+                                        position <= 50 ? 'text-orange-600' :
+                                        'text-red-600'
+                                      }`}>
+                                        {position}
+                                      </span>
+                                    ) : (
+                                      <span style={{color: '#E0E6ED'}}>-</span>
+                                    )}
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
