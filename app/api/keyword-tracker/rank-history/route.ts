@@ -96,6 +96,7 @@ export async function GET(request: NextRequest) {
         check_date,
         device_type,
         country_id,
+        tags,
         created_at,
         updated_at,
         indb_keyword_keywords!inner (
