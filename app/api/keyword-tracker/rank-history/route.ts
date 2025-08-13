@@ -14,13 +14,13 @@ const getRankHistorySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Create Supabase client
+    // Create Supabase client with service role key to bypass RLS for authenticated operations
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Get Authorization header for JWT token
+    // Get Authorization header for JWT token to verify user identity
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
@@ -31,11 +31,15 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.replace('Bearer ', '')
     
-    // Set the auth token
-    await supabase.auth.setSession({ access_token: token, refresh_token: '' })
+    // Create a separate client with anon key to verify the user token
+    const authClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
     
-    // Get user from the token
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Set the auth token and verify user
+    await authClient.auth.setSession({ access_token: token, refresh_token: '' })
+    const { data: { user }, error: authError } = await authClient.auth.getUser()
     
     if (authError || !user) {
       console.error('Auth error:', authError)
