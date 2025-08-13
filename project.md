@@ -240,6 +240,7 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_keyword_keywords             | is_active                   | boolean                  | NO          | true                                                             |
 | indb_keyword_keywords             | created_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_keyword_keywords             | updated_at                  | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_keywords             | last_check_date             | date                     | YES         | null                                                             |
 | indb_keyword_rankings             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
 | indb_keyword_rankings             | keyword_id                  | uuid                     | NO          | null                                                             |
 | indb_keyword_rankings             | position                    | integer                  | YES         | null                                                             |
@@ -248,6 +249,15 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_keyword_rankings             | difficulty_score            | integer                  | YES         | null                                                             |
 | indb_keyword_rankings             | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
 | indb_keyword_rankings             | created_at                  | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_rank_history         | id                          | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_keyword_rank_history         | keyword_id                  | uuid                     | NO          | null                                                             |
+| indb_keyword_rank_history         | position                    | integer                  | YES         | null                                                             |
+| indb_keyword_rank_history         | url                         | text                     | YES         | null                                                             |
+| indb_keyword_rank_history         | search_volume               | integer                  | YES         | null                                                             |
+| indb_keyword_rank_history         | difficulty_score            | integer                  | YES         | null                                                             |
+| indb_keyword_rank_history         | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
+| indb_keyword_rank_history         | created_at                  | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_rank_history         | updated_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_keyword_usage                | id                          | uuid                     | NO          | gen_random_uuid()                                                |
 | indb_keyword_usage                | user_id                     | uuid                     | NO          | null                                                             |
 | indb_keyword_usage                | keywords_used               | integer                  | NO          | 0                                                                |
@@ -1777,3 +1787,46 @@ JWT_SECRET=[jwt-secret-key]
   - **Overview Page**: Can now display domains, countries, and keywords data
   - **Add Keywords**: Quota validation working with proper error messages
   - **Complete Resolution**: Both "overview shows nothing" and "400 bad request" issues fixed
+
+### August 13, 2025 08:30 - Keyword Rank History Database Schema Implementation
+- ✅ **NEW DATABASE TABLE**: Created `indb_keyword_rank_history` for daily position tracking
+  - **Schema**: `id`, `keyword_id` (FK), `position`, `url`, `search_volume`, `difficulty_score`, `check_date`, `created_at`, `updated_at`
+  - **Unique Constraint**: One record per keyword per date (`keyword_id`, `check_date`)
+  - **Purpose**: Stores historical ranking positions for each keyword on daily basis
+- ✅ **ENHANCED KEYWORDS TABLE**: Added `last_check_date` column to `indb_keyword_keywords`
+  - **Purpose**: Tracks when each keyword was last processed for daily ranking update
+  - **Logic**: Server skips keywords where `last_check_date = CURRENT_DATE`
+- ✅ **AUTOMATIC RANKING UPDATE**: Created trigger system for latest position management
+  - **Trigger Function**: `update_latest_keyword_ranking()` automatically updates `indb_keyword_rankings`
+  - **Data Flow**: New records in `indb_keyword_rank_history` → automatically update latest position in `indb_keyword_rankings`
+  - **Constraint**: Added unique constraint on `keyword_id` in `indb_keyword_rankings` table
+- ✅ **DATA POPULATION**: Migrated existing keywords to new rank history system
+  - **Process**: Inserted all active keywords from `indb_keyword_keywords` into `indb_keyword_rank_history` with NULL positions
+  - **Result**: Existing user keywords now ready for daily tracking system
+- ✅ **ROW LEVEL SECURITY**: Implemented RLS policies for `indb_keyword_rank_history`
+  - **Policy**: Users can only access rank history for their own keywords
+  - **Security**: Maintains data isolation between users
+
+### DAILY KEYWORD TRACKING LOGIC FLOW:
+
+**Backend Server Process (Daily Execution):**
+1. **Query Keywords to Track**: `SELECT * FROM indb_keyword_keywords WHERE is_active = true AND (last_check_date != CURRENT_DATE OR last_check_date IS NULL)`
+2. **Track Each Keyword**: Call Google Search Console API to get current ranking position
+3. **Store Daily Record**: Insert into `indb_keyword_rank_history` with today's date and position
+4. **Update Last Check**: Set `last_check_date = CURRENT_DATE` in `indb_keyword_keywords`
+5. **Auto-Update Latest**: Trigger automatically updates `indb_keyword_rankings` with latest position
+
+**Data Flow:**
+```
+indb_keyword_keywords (source) 
+    ↓ (daily server process)
+indb_keyword_rank_history (historical data)
+    ↓ (automatic trigger)
+indb_keyword_rankings (latest positions)
+```
+
+**Benefits:**
+- **Performance**: Overview page loads quickly from `indb_keyword_rankings` (latest only)
+- **History**: Rank History page shows 30+ days from `indb_keyword_rank_history`
+- **Efficiency**: Server skips already-tracked keywords using `last_check_date`
+- **Reliability**: Trigger ensures latest rankings always stay synchronized
