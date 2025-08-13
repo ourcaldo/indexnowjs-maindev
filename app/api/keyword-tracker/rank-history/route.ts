@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
           user_id,
           domain_id,
           country_id,
-          tags,
+          tags::text[],
           is_active,
           last_check_date,
           created_at,
