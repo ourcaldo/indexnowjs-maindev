@@ -355,10 +355,56 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Trigger immediate rank checks for newly added keywords if user has API key configured
+    let hasAPIKey = false
+    try {
+      const { APIKeyManager } = await import('@/lib/api-key-manager')
+      const { RankTracker } = await import('@/lib/rank-tracker')
+      
+      const apiKeyManager = new APIKeyManager()
+      const siteAPIKey = await apiKeyManager.getActiveAPIKey()
+      hasAPIKey = !!siteAPIKey
+      
+      if (siteAPIKey && insertedKeywords) {
+        const rankTracker = new RankTracker()
+        
+        // Process each keyword asynchronously (don't wait for completion)
+        const rankCheckPromises = insertedKeywords.map(async (keyword: any) => {
+          try {
+            const keywordData = {
+              id: keyword.id,
+              keyword: keyword.keyword,
+              domain: keyword.domain.domain_name,
+              deviceType: keyword.device_type,
+              countryCode: keyword.country.iso2_code,
+              userId: user.id
+            }
+            
+            await rankTracker.trackKeyword(keywordData)
+            console.log(`Rank check completed for keyword: ${keyword.keyword}`)
+          } catch (error) {
+            console.error(`Rank check failed for keyword ${keyword.keyword}:`, error)
+            // Don't throw - let other keywords process
+          }
+        })
+        
+        // Start the rank checks but don't wait for them to complete
+        // This allows the API to return quickly while processing happens in background
+        Promise.allSettled(rankCheckPromises).then(results => {
+          const successful = results.filter(r => r.status === 'fulfilled').length
+          const failed = results.filter(r => r.status === 'rejected').length
+          console.log(`Rank check batch completed: ${successful} successful, ${failed} failed`)
+        })
+      }
+    } catch (error) {
+      console.error('Error triggering rank checks:', error)
+      // Don't fail the keyword creation if rank checking fails
+    }
+
     return NextResponse.json({
       success: true,
       data: insertedKeywords,
-      message: `Successfully added ${newKeywords.length} keywords${existingKeywordTexts.length > 0 ? ` (${existingKeywordTexts.length} duplicates skipped)` : ''}`
+      message: `Successfully added ${newKeywords.length} keywords${existingKeywordTexts.length > 0 ? ` (${existingKeywordTexts.length} duplicates skipped)` : ''}${hasAPIKey ? '. Rank checking started.' : '. Contact admin to configure ScrapingDog API key.'}`
     })
 
   } catch (error) {

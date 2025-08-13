@@ -49,10 +49,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 5. Check user's quota before proceeding
+    // 5. Check site quota before proceeding
     const { APIKeyManager } = await import('@/lib/api-key-manager')
     const apiKeyManager = new APIKeyManager()
-    const availableQuota = await apiKeyManager.getAvailableQuota(user.id)
+    const availableQuota = await apiKeyManager.getAvailableQuota()
     
     if (availableQuota <= 0) {
       return NextResponse.json(
@@ -137,11 +137,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check if user has ScrapingDog integration configured
+    // Check if site has ScrapingDog integration configured
     const { data: integration, error } = await supabaseAdmin
       .from('indb_site_integration')
       .select('api_quota_limit, api_quota_used, quota_reset_date, is_active')
-      .eq('user_id', user.id)
       .eq('service_name', 'scrapingdog')
       .single()
 
@@ -149,7 +148,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         configured: false,
-        message: 'ScrapingDog API key not configured. Please add your API key in Settings.'
+        message: 'ScrapingDog API key not configured. Please contact admin to configure API key.'
       })
     }
 
