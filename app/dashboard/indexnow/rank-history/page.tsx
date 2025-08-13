@@ -114,6 +114,7 @@ export default function RankHistoryPage() {
   const [selectedDevice, setSelectedDevice] = useState<string>('')
   const [selectedCountry, setSelectedCountry] = useState<string>('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [showTagsDropdown, setShowTagsDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState<string>('')
   
   // State for date range and pagination
@@ -527,27 +528,68 @@ export default function RankHistoryPage() {
 
                   {/* Tags Multi-Select Dropdown */}
                   <div className="relative">
-                    <select
-                      multiple
-                      value={selectedTags}
-                      onChange={(e: any) => {
-                        const selectedOptions = Array.from(e.target.selectedOptions, (option: any) => option.value)
-                        setSelectedTags(selectedOptions)
-                      }}
-                      className="w-32 text-sm h-9 rounded-md px-3 py-2 border border-gray-300 bg-white text-gray-900"
-                      style={{
-                        backgroundColor: '#FFFFFF',
-                        border: '1px solid #E0E6ED',
-                        color: '#1A1A1A'
-                      }}
-                      size={1}
-                    >
-                      {availableTags.map((tag: string) => (
-                        <option key={tag} value={tag} selected={selectedTags.includes(tag)}>
-                          {selectedTags.includes(tag) ? `✓ ${tag}` : tag}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowTagsDropdown(!showTagsDropdown)}
+                        className="flex items-center gap-1 min-w-[100px] justify-between"
+                      >
+                        <div className="flex items-center gap-1">
+                          <Tag className="w-3 h-3" />
+                          <span>Tags {selectedTags.length > 0 && `(${selectedTags.length})`}</span>
+                        </div>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </Button>
+                      
+                      {showTagsDropdown && (
+                        <div 
+                          className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 min-w-[200px] max-h-[200px] overflow-y-auto"
+                          style={{border: '1px solid #E0E6ED'}}
+                        >
+                          <div className="p-2">
+                            {availableTags.length === 0 ? (
+                              <div className="text-xs text-gray-500 py-2">No tags available</div>
+                            ) : (
+                              availableTags.map((tag: string) => (
+                                <label 
+                                  key={tag} 
+                                  className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 cursor-pointer rounded text-xs"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedTags.includes(tag)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedTags([...selectedTags, tag])
+                                      } else {
+                                        setSelectedTags(selectedTags.filter(t => t !== tag))
+                                      }
+                                    }}
+                                    className="w-3 h-3"
+                                  />
+                                  <span style={{color: '#1A1A1A'}}>{tag}</span>
+                                </label>
+                              ))
+                            )}
+                          </div>
+                          {selectedTags.length > 0 && (
+                            <div className="border-t p-2" style={{borderColor: '#E0E6ED'}}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedTags([])}
+                                className="text-xs w-full"
+                              >
+                                Clear All
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
