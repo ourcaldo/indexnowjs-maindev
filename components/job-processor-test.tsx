@@ -1,160 +1,209 @@
-'use client';
+/**
+ * Job Processor Test Component
+ * A development/testing component for triggering manual rank checks
+ * THIS FILE SHOULD BE DELETED AFTER TESTING IS COMPLETE
+ */
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Play, RefreshCw, Activity } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+
+interface JobStatus {
+  isRunning: boolean
+  isScheduled: boolean
+  nextRun: string | null
+}
+
+interface Stats {
+  totalKeywords: number
+  pendingChecks: number
+  checkedToday: number
+  completionRate: string
+}
 
 export function JobProcessorTest() {
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<any>(null);
-  const [systemStatus, setSystemStatus] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false)
+  const [status, setStatus] = useState<JobStatus | null>(null)
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [lastResult, setLastResult] = useState<string | null>(null)
 
-  const triggerJobProcessing = async () => {
-    setLoading(true);
+  const handleTriggerManualCheck = async () => {
+    setIsLoading(true)
+    setLastResult(null)
+
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      
-      const response = await fetch('/api/jobs/trigger-processing', {
+      const response = await fetch('/api/admin/rank-tracker/trigger-manual-check', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
-      });
+      })
+
+      const data = await response.json()
       
-      const data = await response.json();
-      setResults(data);
+      if (data.success) {
+        setLastResult(`✅ Manual rank check triggered at ${data.data.triggeredAt}`)
+        // Refresh status after a short delay
+        setTimeout(checkStatus, 1000)
+      } else {
+        setLastResult(`❌ Failed: ${data.error}`)
+      }
     } catch (error) {
-      console.error('Error triggering job processing:', error);
-      setResults({ error: 'Failed to trigger processing' });
+      setLastResult(`❌ Error: ${error}`)
     } finally {
-      setLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  const getSystemStatus = async () => {
-    setLoading(true);
+  const checkStatus = async () => {
     try {
-      const response = await fetch('/api/system/status');
-      const data = await response.json();
-      setSystemStatus(data);
+      const response = await fetch('/api/admin/rank-tracker/trigger-manual-check')
+      const data = await response.json()
+      
+      if (data.success) {
+        setStatus(data.data.workerStatus.rankCheckJobStatus)
+        setStats(data.data.currentStats)
+      }
     } catch (error) {
-      console.error('Error getting system status:', error);
-      setSystemStatus({ error: 'Failed to get status' });
-    } finally {
-      setLoading(false);
+      console.error('Error checking status:', error)
     }
-  };
+  }
 
-  const getWorkerStatus = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/system/worker-status');
-      const data = await response.json();
-      setSystemStatus(data);
-    } catch (error) {
-      console.error('Error getting worker status:', error);
-      setSystemStatus({ error: 'Failed to get worker status' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const testSingleKeywordCheck = async () => {
+    setIsLoading(true)
+    setLastResult(null)
 
-  const restartWorker = async () => {
-    setLoading(true);
     try {
-      const response = await fetch('/api/system/restart-worker', {
-        method: 'POST'
-      });
-      const data = await response.json();
-      setResults(data);
+      // First, we need to get a keyword ID from the user's keywords
+      // For testing, we'll use a placeholder - in real implementation, 
+      // this would come from the keywords list
+      const testKeywordId = 'test-keyword-id' // Replace with actual keyword ID
+      
+      const response = await fetch('/api/keyword-tracker/check-rank', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          keyword_id: testKeywordId
+        })
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setLastResult(`✅ Single keyword check completed. Position: ${data.data.ranking?.position || 'Not found'}`)
+      } else {
+        setLastResult(`❌ Failed: ${data.error}`)
+      }
     } catch (error) {
-      console.error('Error restarting worker:', error);
-      setResults({ error: 'Failed to restart worker' });
+      setLastResult(`❌ Error: ${error}`)
     } finally {
-      setLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-white border-[#E0E6ED]">
-        <CardHeader>
-          <CardTitle className="text-lg text-[#1A1A1A] flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Backend Processing Test
-          </CardTitle>
-          <p className="text-sm text-[#1A1A1A]">
-            Test the job processing system and view system status
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-3">
-            <Button
-              onClick={triggerJobProcessing}
-              disabled={loading}
-              className="bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:text-white flex items-center gap-2"
-            >
-              {loading ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : (
-                <Play className="h-4 w-4" />
-              )}
-              Trigger Job Processing
-            </Button>
-            
-            <Button
-              onClick={getSystemStatus}
-              disabled={loading}
-              variant="outline"
-              className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A] flex items-center gap-2"
-            >
-              <Activity className="h-4 w-4" />
-              System Status
-            </Button>
-            
-            <Button
-              onClick={getWorkerStatus}
-              disabled={loading}
-              variant="outline"
-              className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A] flex items-center gap-2"
-            >
-              <Activity className="h-4 w-4" />
-              Worker Status
-            </Button>
-            
-            <Button
-              onClick={restartWorker}
-              disabled={loading}
-              variant="outline"
-              className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A] flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Restart Worker
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-red-600">🔧 Rank Tracker Test Panel</CardTitle>
+        <CardDescription className="text-red-500">
+          Development/Testing Component - DELETE AFTER TESTING
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="space-y-6">
+        {/* Status Section */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Job Status</h3>
+          <div className="flex gap-2 mb-3">
+            <Button onClick={checkStatus} variant="outline" size="sm">
+              Refresh Status
             </Button>
           </div>
-
-          {results && (
-            <div className="mt-4 p-4 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
-              <h4 className="font-semibold text-[#1A1A1A] mb-2">Processing Results:</h4>
-              <pre className="text-sm text-[#1A1A1A] whitespace-pre-wrap overflow-x-auto">
-                {JSON.stringify(results, null, 2)}
-              </pre>
+          
+          {status && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Scheduler:</span>
+                  <Badge variant={status.isScheduled ? "default" : "secondary"}>
+                    {status.isScheduled ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Running:</span>
+                  <Badge variant={status.isRunning ? "destructive" : "outline"}>
+                    {status.isRunning ? "Yes" : "No"}
+                  </Badge>
+                </div>
+              </div>
+              <div>
+                <div className="text-sm">
+                  <span className="font-medium">Next Run:</span> {status.nextRun || 'Not scheduled'}
+                </div>
+              </div>
             </div>
           )}
+        </div>
 
-          {systemStatus && (
-            <div className="mt-4 p-4 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
-              <h4 className="font-semibold text-[#1A1A1A] mb-2">System Status:</h4>
-              <pre className="text-sm text-[#1A1A1A] whitespace-pre-wrap overflow-x-auto">
-                {JSON.stringify(systemStatus, null, 2)}
-              </pre>
+        <Separator />
+
+        {/* Stats Section */}
+        {stats && (
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Current Stats</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>Total Keywords: <span className="font-mono">{stats.totalKeywords}</span></div>
+              <div>Pending Checks: <span className="font-mono">{stats.pendingChecks}</span></div>
+              <div>Checked Today: <span className="font-mono">{stats.checkedToday}</span></div>
+              <div>Completion: <span className="font-mono">{stats.completionRate}%</span></div>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
+          </div>
+        )}
+
+        <Separator />
+
+        {/* Actions Section */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Test Actions</h3>
+          <div className="space-y-3">
+            <Button 
+              onClick={handleTriggerManualCheck} 
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? 'Triggering...' : 'Trigger Manual Daily Check'}
+            </Button>
+            
+            <Button 
+              onClick={testSingleKeywordCheck} 
+              disabled={isLoading}
+              variant="outline"
+              className="w-full"
+            >
+              Test Single Keyword Check
+            </Button>
+          </div>
+        </div>
+
+        {/* Results Section */}
+        {lastResult && (
+          <>
+            <Separator />
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Last Result</h3>
+              <div className="bg-gray-50 p-3 rounded text-sm font-mono">
+                {lastResult}
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  )
 }

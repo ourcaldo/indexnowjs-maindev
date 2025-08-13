@@ -192,6 +192,7 @@ export interface Database {
           country_id: string
           tags: string[]
           is_active: boolean
+          last_check_date: string | null
           created_at: string
           updated_at: string
         }
@@ -204,6 +205,7 @@ export interface Database {
           country_id: string
           tags?: string[]
           is_active?: boolean
+          last_check_date?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -216,6 +218,7 @@ export interface Database {
           country_id?: string
           tags?: string[]
           is_active?: boolean
+          last_check_date?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -384,6 +387,44 @@ export interface Database {
           updated_at?: string
         }
       }
+      indb_site_integration: {
+        Row: {
+          id: string
+          user_id: string
+          service_name: string
+          scrappingdog_apikey: string
+          api_quota_limit: number
+          api_quota_used: number
+          quota_reset_date: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          service_name?: string
+          scrappingdog_apikey: string
+          api_quota_limit?: number
+          api_quota_used?: number
+          quota_reset_date?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          service_name?: string
+          scrappingdog_apikey?: string
+          api_quota_limit?: number
+          api_quota_used?: number
+          quota_reset_date?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
       indb_indexing_url_submissions: {
         Row: {
           id: string
@@ -536,6 +577,7 @@ export type KeywordDomain = Database['public']['Tables']['indb_keyword_domains']
 export type KeywordKeyword = Database['public']['Tables']['indb_keyword_keywords']['Row']
 export type KeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Row']
 export type KeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Row']
+export type SiteIntegration = Database['public']['Tables']['indb_site_integration']['Row']
 
 // Insert types
 export type InsertUserProfile = Database['public']['Tables']['indb_auth_user_profiles']['Insert']
@@ -549,6 +591,7 @@ export type InsertKeywordDomain = Database['public']['Tables']['indb_keyword_dom
 export type InsertKeywordKeyword = Database['public']['Tables']['indb_keyword_keywords']['Insert']
 export type InsertKeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Insert']
 export type InsertKeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Insert']
+export type InsertSiteIntegration = Database['public']['Tables']['indb_site_integration']['Insert']
 
 // Update types
 export type UpdateUserProfile = Database['public']['Tables']['indb_auth_user_profiles']['Update']
@@ -560,3 +603,4 @@ export type UpdateKeywordDomain = Database['public']['Tables']['indb_keyword_dom
 export type UpdateKeywordKeyword = Database['public']['Tables']['indb_keyword_keywords']['Update']
 export type UpdateKeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Update']
 export type UpdateKeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Update']
+export type UpdateSiteIntegration = Database['public']['Tables']['indb_site_integration']['Update']

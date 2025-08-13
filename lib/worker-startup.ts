@@ -1,65 +1,132 @@
-import { backgroundWorker } from './background-worker';
-
 /**
- * Worker Startup Module
- * 
- * Initializes background services when the application starts.
- * This should be imported and called once during app initialization.
+ * Worker Startup Service
+ * Initializes background workers and scheduled jobs on server startup
  */
 
-let isStarted = false;
+import { dailyRankCheckJob } from './daily-rank-check-job'
 
-export function startBackgroundServices(): void {
-  if (isStarted) {
-    console.log('Background services already started');
-    return;
-  }
-
-  console.log('🚀 Initializing IndexNow Pro background services...');
-  
-  try {
-    // Start the background worker
-    backgroundWorker.start();
-    isStarted = true;
-    
-    console.log('✅ Background services started successfully');
-  } catch (error) {
-    console.error('❌ Failed to start background services:', error);
-  }
+// Simple console logger for development
+const logger = {
+  info: (message: string, ...args: any[]) => console.log(`[INFO] ${message}`, ...args),
+  warn: (message: string, ...args: any[]) => console.warn(`[WARN] ${message}`, ...args),
+  error: (message: string, ...args: any[]) => console.error(`[ERROR] ${message}`, ...args)
 }
 
-export function stopBackgroundServices(): void {
-  if (!isStarted) {
-    console.log('Background services are not running');
-    return;
-  }
+export class WorkerStartup {
+  private static instance: WorkerStartup | null = null
+  private isInitialized: boolean = false
 
-  console.log('🛑 Stopping IndexNow Pro background services...');
-  
-  try {
-    backgroundWorker.stop();
-    isStarted = false;
-    
-    console.log('✅ Background services stopped successfully');
-  } catch (error) {
-    console.error('❌ Failed to stop background services:', error);
-  }
-}
+  private constructor() {}
 
-export function getBackgroundServicesStatus(): any {
-  return {
-    isStarted,
-    worker: backgroundWorker.getStatus()
-  };
-}
-
-// Auto-start in production or development
-if (typeof window === 'undefined') { // Server-side only
-  // Use process.nextTick to ensure modules are loaded and avoid multiple instances
-  process.nextTick(() => {
-    if (!(global as any).backgroundServicesStarted) {
-      (global as any).backgroundServicesStarted = true;
-      startBackgroundServices();
+  /**
+   * Get singleton instance
+   */
+  static getInstance(): WorkerStartup {
+    if (!WorkerStartup.instance) {
+      WorkerStartup.instance = new WorkerStartup()
     }
-  });
+    return WorkerStartup.instance
+  }
+
+  /**
+   * Initialize all background workers and scheduled jobs
+   */
+  async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      logger.warn('Worker startup already initialized, skipping...')
+      return
+    }
+
+    try {
+      logger.info('Initializing IndexNow Pro backend workers...')
+
+      // 1. Start daily rank check job scheduler
+      await this.initializeRankCheckScheduler()
+
+      // 2. Add any other background workers here
+      // await this.initializeQuotaResetScheduler()
+      // await this.initializeNotificationWorker()
+
+      this.isInitialized = true
+      logger.info('All background workers initialized successfully')
+
+    } catch (error) {
+      logger.error('Failed to initialize background workers:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Initialize daily rank check scheduler
+   */
+  private async initializeRankCheckScheduler(): Promise<void> {
+    try {
+      logger.info('Starting daily rank check job scheduler...')
+      
+      // Start the daily job scheduler
+      dailyRankCheckJob.start()
+      
+      // Get job status for confirmation
+      const status = dailyRankCheckJob.getStatus()
+      logger.info(`Daily rank check scheduler: ${status.isScheduled ? 'ACTIVE' : 'INACTIVE'}`)
+      
+      if (status.nextRun) {
+        logger.info(`Next scheduled run: ${status.nextRun}`)
+      }
+
+      // Get current stats
+      const stats = await dailyRankCheckJob.getStats()
+      logger.info(`Rank tracking stats: ${stats.totalKeywords} total keywords, ${stats.pendingChecks} pending checks`)
+
+    } catch (error) {
+      logger.error('Failed to initialize rank check scheduler:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Stop all workers and jobs (for graceful shutdown)
+   */
+  async shutdown(): Promise<void> {
+    try {
+      logger.info('Shutting down background workers...')
+      
+      // Stop daily rank check job
+      dailyRankCheckJob.stop()
+      
+      this.isInitialized = false
+      logger.info('All background workers stopped')
+
+    } catch (error) {
+      logger.error('Error during worker shutdown:', error)
+    }
+  }
+
+  /**
+   * Get initialization status
+   */
+  getStatus(): {
+    isInitialized: boolean
+    rankCheckJobStatus: any
+  } {
+    return {
+      isInitialized: this.isInitialized,
+      rankCheckJobStatus: dailyRankCheckJob.getStatus()
+    }
+  }
+
+  /**
+   * Manual trigger for rank check job (for testing/admin)
+   */
+  async triggerManualRankCheck(): Promise<void> {
+    if (!this.isInitialized) {
+      throw new Error('Workers not initialized. Call initialize() first.')
+    }
+
+    logger.info('Manually triggering rank check job...')
+    await dailyRankCheckJob.runManually()
+  }
 }
+
+// Export singleton instance
+export const workerStartup = WorkerStartup.getInstance()
