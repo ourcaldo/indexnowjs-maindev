@@ -120,9 +120,9 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
         },
         {
           label: 'Rank History',
-          href: '/dashboard/keyword-tracker/rank-history',
+          href: '/dashboard/indexnow/rank-history',
           icon: Activity,
-          active: pathname === '/dashboard/keyword-tracker/rank-history'
+          active: pathname === '/dashboard/indexnow/rank-history'
         }
       ]
     },

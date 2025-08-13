@@ -5,6 +5,8 @@ import { z } from 'zod'
 // Validation schema
 const getRankHistorySchema = z.object({
   domain_id: z.string().uuid().optional(),
+  device_type: z.string().optional(),
+  country_id: z.string().uuid().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   limit: z.number().min(1).default(100)
@@ -50,6 +52,8 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url)
     const queryParams = {
       domain_id: url.searchParams.get('domain_id') || undefined,
+      device_type: url.searchParams.get('device_type') || undefined,
+      country_id: url.searchParams.get('country_id') || undefined,
       start_date: url.searchParams.get('start_date') || undefined,
       end_date: url.searchParams.get('end_date') || undefined,
       limit: parseInt(url.searchParams.get('limit') || '100')
@@ -63,13 +67,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { domain_id, start_date, end_date, limit } = validation.data
+    const { domain_id, device_type, country_id, start_date, end_date, limit } = validation.data
 
     // Set default date range (30 days from current date)
     const endDate = end_date || new Date().toISOString().split('T')[0]
     const startDate = start_date || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-    // Build query to get rank history data
+    // Build query to get rank history data with full keyword details
     let query = supabase
       .from('indb_keyword_rank_history')
       .select(`
@@ -77,6 +81,8 @@ export async function GET(request: NextRequest) {
         keyword_id,
         position,
         url,
+        search_volume,
+        difficulty_score,
         check_date,
         indb_keyword_keywords!inner (
           id,
@@ -84,6 +90,8 @@ export async function GET(request: NextRequest) {
           device_type,
           user_id,
           domain_id,
+          country_id,
+          tags,
           indb_keyword_domains!inner (
             id,
             domain_name,
@@ -92,7 +100,8 @@ export async function GET(request: NextRequest) {
           indb_keyword_countries (
             id,
             name,
-            iso2_code
+            iso2_code,
+            iso3_code
           )
         )
       `)
@@ -103,9 +112,15 @@ export async function GET(request: NextRequest) {
       .order('check_date', { ascending: false })
       .limit(limit)
 
-    // Add domain filter if specified
+    // Add filters if specified
     if (domain_id) {
       query = query.eq('indb_keyword_keywords.domain_id', domain_id)
+    }
+    if (device_type) {
+      query = query.eq('indb_keyword_keywords.device_type', device_type)
+    }
+    if (country_id) {
+      query = query.eq('indb_keyword_keywords.country_id', country_id)
     }
 
     const { data: rankHistory, error } = await query
@@ -128,6 +143,7 @@ export async function GET(request: NextRequest) {
           keyword_id: keywordId,
           keyword: keywordData.keyword,
           device_type: keywordData.device_type,
+          tags: keywordData.tags || [],
           domain: {
             id: keywordData.indb_keyword_domains.id,
             domain_name: keywordData.indb_keyword_domains.domain_name,
@@ -140,7 +156,9 @@ export async function GET(request: NextRequest) {
       
       acc[keywordId].history[record.check_date] = {
         position: record.position,
-        url: record.url
+        url: record.url,
+        search_volume: record.search_volume,
+        difficulty_score: record.difficulty_score
       }
       
       return acc
