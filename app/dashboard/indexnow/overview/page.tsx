@@ -227,10 +227,34 @@ export default function IndexNowOverview() {
     }
   })
 
+  // Fetch ALL keywords for the selected domain for statistics calculation (independent of pagination)
+  const { data: allDomainKeywordsData } = useQuery({
+    queryKey: ['/api/keyword-tracker/keywords-stats', selectedDomainId],
+    queryFn: async () => {
+      if (!selectedDomainId) return { data: [] }
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams()
+      params.append('domain_id', selectedDomainId)
+      params.append('limit', '1000') // Get all keywords for stats
+      
+      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) throw new Error('Failed to fetch domain keywords for stats')
+      return response.json()
+    },
+    enabled: !!selectedDomainId
+  })
+
   const domains = domainsData?.data || []
   const countries = countriesData?.data || []
   const keywords = keywordsData?.data || []
   const allKeywords = keywordCountsData?.data || []
+  const statsKeywords = allDomainKeywordsData?.data || [] // Keywords for statistics calculation
 
   // Set default selected domain if none selected
   useEffect(() => {
@@ -253,13 +277,13 @@ export default function IndexNowOverview() {
     keyword.keyword.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Stats calculation
+  // Stats calculation using ALL keywords for the domain (not affected by pagination)
   const totalKeywords = pagination.total
-  const avgPosition = keywords.length > 0 
-    ? Math.round(keywords.reduce((sum: number, k: any) => sum + (k.current_position || 100), 0) / keywords.length) 
+  const avgPosition = statsKeywords.length > 0 
+    ? Math.round(statsKeywords.reduce((sum: number, k: any) => sum + (k.current_position || 100), 0) / statsKeywords.length) 
     : 0
-  const topTenCount = keywords.filter((k: any) => k.current_position && k.current_position <= 10).length
-  const improvingCount = keywords.filter((k: any) => k.position_1d && k.position_1d > 0).length
+  const topTenCount = statsKeywords.filter((k: any) => k.current_position && k.current_position <= 10).length
+  const improvingCount = statsKeywords.filter((k: any) => k.position_1d && k.position_1d > 0).length
 
   return (
     <div className="space-y-6">

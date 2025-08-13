@@ -1946,3 +1946,8 @@ indb_keyword_rankings (latest positions)
   - **Solution**: Built custom dropdown with proper checkboxes, hover states, and "Clear All" functionality
   - **Features**: Shows tag count in button, smooth dropdown animation, checkbox selection, overflow scrolling
   - **Result**: Professional multi-select dropdown matching project design standards
+- ✅ **FIXED OVERVIEW PAGE STATISTICS PAGINATION BUG**: Statistics cards now show data for all keywords
+  - **Issue**: Average Position, Top 10 Rankings cards were affected by pagination, showing only current page stats
+  - **Solution**: Created separate API call to fetch ALL keywords for selected domain for statistics calculation
+  - **Technical Fix**: Added `allDomainKeywordsData` query that fetches 1000 keywords independent of pagination
+  - **Result**: Statistics cards remain consistent regardless of which page user is viewing
