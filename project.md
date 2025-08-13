@@ -1931,3 +1931,17 @@ indb_keyword_rankings (latest positions)
   - **Solution**: Added `sticky left-0 z-10` classes and proper CSS positioning to both header and body cells
   - **Result**: Keyword column now properly stays frozen while date columns scroll horizontally
   - **Technical**: Used `position: sticky; left: 0; z-index: 10` with fixed width (200px) for consistent behavior
+
+### August 13, 2025 15:00 - Critical Filter and UI Logic Fixes  
+- ✅ **FIXED DOMAIN KEYWORD COUNT**: Domain keyword count now shows total keywords, unaffected by page filters
+  - **Issue**: Keyword count in domain section was being affected by device/country/date filters  
+  - **Solution**: Added separate API call to fetch total keywords per domain (`/api/keyword-tracker/keywords`)
+  - **Result**: Domain keyword count always shows total keywords for domain, independent of active filters
+- ✅ **FIXED CUSTOM DATE PICKER BEHAVIOR**: Custom date selection no longer triggers premature API calls
+  - **Issue**: Selecting "Custom" immediately triggered API calls before user selected dates
+  - **Solution**: Added `appliedCustomDates` state to store dates only after Apply button click
+  - **Result**: API calls only happen after user selects dates and clicks Apply button
+- ✅ **IMPROVED TAGS DROPDOWN**: Tags now stay inside dropdown, no external display of selected tags
+  - **Issue**: Selected tags were displayed outside dropdown, cluttering the filter interface
+  - **Solution**: Changed to multi-select dropdown with checkmarks (✓) for selected tags inside dropdown
+  - **Result**: Clean filter interface with selected tags visible only inside dropdown

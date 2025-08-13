@@ -121,6 +121,7 @@ export default function RankHistoryPage() {
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
   const [showDatePicker, setShowDatePicker] = useState(false)
+  const [appliedCustomDates, setAppliedCustomDates] = useState<{start: string, end: string} | null>(null)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const itemsPerPage = 20
 
@@ -141,8 +142,13 @@ export default function RankHistoryPage() {
         startDate = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         break
       case 'custom':
-        startDate = customStartDate || endDate
-        endDate = customEndDate || endDate
+        if (appliedCustomDates) {
+          startDate = appliedCustomDates.start
+          endDate = appliedCustomDates.end
+        } else {
+          // Don't return dates until custom dates are applied
+          return { startDate: '', endDate: '' }
+        }
         break
       default:
         startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -185,6 +191,27 @@ export default function RankHistoryPage() {
     }
   })
 
+  // Get all keywords for domain (for keyword count - not affected by filters)
+  const { data: allDomainKeywords = [] } = useQuery({
+    queryKey: ['/api/keyword-tracker/keywords', selectedDomainId],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams()
+      if (selectedDomainId) params.append('domain_id', selectedDomainId)
+      params.append('limit', '1000') // Get all keywords for count
+      
+      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      const data = await response.json()
+      return data.success ? data.data : []
+    },
+    enabled: !!selectedDomainId
+  })
+
   // Fetch rank history data
   const { data: rankHistory = [], isLoading } = useQuery({
     queryKey: ['/api/keyword-tracker/rank-history', selectedDomainId, selectedDevice, selectedCountry, startDate, endDate],
@@ -223,15 +250,13 @@ export default function RankHistoryPage() {
   // Get selected domain info
   const selectedDomainInfo = domains.find((d: any) => d.id === selectedDomainId)
 
-  // Get keyword count for each domain (from rank history data)
+  // Get keyword count for each domain (from all keywords, not affected by filters)
   const getDomainKeywordCount = (domainId: string) => {
-    if (!rankHistory || !Array.isArray(rankHistory)) return 0
-    const uniqueKeywords = new Set(
-      rankHistory
-        .filter((item: any) => item.domain?.id === domainId)
-        .map((item: any) => item.keyword_id)
-    )
-    return uniqueKeywords.size
+    if (domainId === selectedDomainId && allDomainKeywords) {
+      return allDomainKeywords.length
+    }
+    // For non-selected domains, we'll show 0 since we don't have their data
+    return 0
   }
 
   // Filter and search logic
@@ -396,8 +421,8 @@ export default function RankHistoryPage() {
                         className="flex items-center gap-1"
                       >
                         <Calendar className="w-3 h-3" />
-                        {dateRange === 'custom' && customStartDate && customEndDate 
-                          ? `${new Date(customStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(customEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                        {dateRange === 'custom' && appliedCustomDates 
+                          ? `${new Date(appliedCustomDates.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(appliedCustomDates.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
                           : 'Custom'
                         }
                       </Button>
@@ -435,13 +460,22 @@ export default function RankHistoryPage() {
                               <Button 
                                 size="sm" 
                                 variant="outline" 
-                                onClick={() => setShowDatePicker(false)}
+                                onClick={() => {
+                                  setShowDatePicker(false)
+                                  setCustomStartDate('')
+                                  setCustomEndDate('')
+                                }}
                               >
                                 Cancel
                               </Button>
                               <Button 
                                 size="sm" 
-                                onClick={() => setShowDatePicker(false)}
+                                onClick={() => {
+                                  if (customStartDate && customEndDate) {
+                                    setAppliedCustomDates({ start: customStartDate, end: customEndDate })
+                                  }
+                                  setShowDatePicker(false)
+                                }}
                                 disabled={!customStartDate || !customEndDate}
                               >
                                 Apply
@@ -491,15 +525,14 @@ export default function RankHistoryPage() {
                     />
                   </div>
 
-                  {/* Tags Dropdown */}
+                  {/* Tags Multi-Select Dropdown */}
                   <div className="relative">
                     <select
-                      value=""
+                      multiple
+                      value={selectedTags}
                       onChange={(e: any) => {
-                        const tag = e.target.value
-                        if (tag && !selectedTags.includes(tag)) {
-                          setSelectedTags([...selectedTags, tag])
-                        }
+                        const selectedOptions = Array.from(e.target.selectedOptions, (option: any) => option.value)
+                        setSelectedTags(selectedOptions)
                       }}
                       className="w-32 text-sm h-9 rounded-md px-3 py-2 border border-gray-300 bg-white text-gray-900"
                       style={{
@@ -507,25 +540,15 @@ export default function RankHistoryPage() {
                         border: '1px solid #E0E6ED',
                         color: '#1A1A1A'
                       }}
+                      size={1}
                     >
-                      <option value="">Tags</option>
                       {availableTags.map((tag: string) => (
-                        <option key={tag} value={tag}>{tag}</option>
+                        <option key={tag} value={tag} selected={selectedTags.includes(tag)}>
+                          {selectedTags.includes(tag) ? `✓ ${tag}` : tag}
+                        </option>
                       ))}
                     </select>
                   </div>
-
-                  {/* Selected Tags */}
-                  {selectedTags.length > 0 && (
-                    <div className="flex gap-1">
-                      {selectedTags.map((tag) => (
-                        <div key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                          {tag}
-                          <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </Card>
 
