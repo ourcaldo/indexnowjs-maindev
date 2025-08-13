@@ -273,8 +273,8 @@ export default function RankHistoryPage() {
             </Card>
           ) : (
             <>
-              {/* Selected Domain Card (matching overview page) */}
-              <div className="flex items-center justify-between">
+              {/* Domain Section - Left Top Corner */}
+              <div className="mb-6">
                 <div className="inline-block">
                   <div 
                     className="bg-white rounded-lg border cursor-pointer px-3 py-2 shadow-sm hover:shadow-md transition-shadow min-w-[280px] max-w-[320px]"
@@ -300,7 +300,7 @@ export default function RankHistoryPage() {
                       </div>
                     </div>
                     
-                    {/* Domain Selection List (matching overview page) */}
+                    {/* Domain Selection List */}
                     {showDomainsManager && (
                       <div className="border-t mt-2 pt-2" style={{borderColor: '#E0E6ED'}}>
                         <div className="space-y-1">
@@ -339,48 +339,62 @@ export default function RankHistoryPage() {
                     )}
                   </div>
                 </div>
+              </div>
 
-                {/* Compact Date Picker and Filters */}
-                <div className="flex items-center space-x-4">
-                  {/* Date Range Picker */}
-                  <div className="flex items-center space-x-2 bg-white rounded-lg border px-3 py-2" style={{ borderColor: '#E0E6ED' }}>
-                    <Calendar className="w-5 h-5" style={{ color: '#6C757D' }} />
-                    <Input
+              {/* Professional Filters - Right Side */}
+              <div className="flex justify-end mb-6">
+                <div className="flex items-center space-x-3 bg-white rounded-xl border shadow-sm px-4 py-3" style={{ borderColor: '#E0E6ED' }}>
+                  
+                  {/* Date Range */}
+                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED' }}>
+                    <Calendar className="w-4 h-4" style={{ color: '#6C757D' }} />
+                    <input
                       type="date"
                       value={startDate}
                       onChange={(e: any) => setStartDate(e.target.value)}
-                      className="w-32 border-0 p-0 text-xs"
+                      className="border-0 bg-transparent text-xs font-medium outline-none"
+                      style={{ color: '#1A1A1A', width: '110px' }}
                     />
-                    <span className="text-xs" style={{ color: '#6C757D' }}>to</span>
-                    <Input
+                    <span className="text-xs font-medium" style={{ color: '#6C757D' }}>to</span>
+                    <input
                       type="date"
                       value={endDate}
                       onChange={(e: any) => setEndDate(e.target.value)}
-                      className="w-32 border-0 p-0 text-xs"
+                      className="border-0 bg-transparent text-xs font-medium outline-none"
+                      style={{ color: '#1A1A1A', width: '110px' }}
                     />
                   </div>
+
+                  <div className="w-px h-6" style={{ backgroundColor: '#E0E6ED' }}></div>
                   
                   {/* Device Filter */}
-                  <div className="flex items-center space-x-2 bg-white rounded-lg border px-3 py-2" style={{ borderColor: '#E0E6ED' }}>
-                    {selectedDevice === 'mobile' ? <Smartphone className="w-4 h-4" style={{ color: '#6C757D' }} /> : <Monitor className="w-4 h-4" style={{ color: '#6C757D' }} />}
-                    <Select
+                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED' }}>
+                    {selectedDevice === 'mobile' ? 
+                      <Smartphone className="w-4 h-4" style={{ color: '#6C757D' }} /> : 
+                      <Monitor className="w-4 h-4" style={{ color: '#6C757D' }} />
+                    }
+                    <select
                       value={selectedDevice}
                       onChange={(e: any) => setSelectedDevice(e.target.value)}
-                      className="w-24 border-0 p-0 text-xs"
+                      className="border-0 bg-transparent text-xs font-medium outline-none"
+                      style={{ color: '#1A1A1A', width: '80px' }}
                     >
                       <option value="">All Devices</option>
                       <option value="desktop">Desktop</option>
                       <option value="mobile">Mobile</option>
-                    </Select>
+                    </select>
                   </div>
 
+                  <div className="w-px h-6" style={{ backgroundColor: '#E0E6ED' }}></div>
+
                   {/* Country Filter */}
-                  <div className="flex items-center space-x-2 bg-white rounded-lg border px-3 py-2" style={{ borderColor: '#E0E6ED' }}>
+                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED' }}>
                     <Globe className="w-4 h-4" style={{ color: '#6C757D' }} />
-                    <Select
+                    <select
                       value={selectedCountry}
                       onChange={(e: any) => setSelectedCountry(e.target.value)}
-                      className="w-28 border-0 p-0 text-xs"
+                      className="border-0 bg-transparent text-xs font-medium outline-none"
+                      style={{ color: '#1A1A1A', width: '100px' }}
                     >
                       <option value="">All Countries</option>
                       {countries.map((country: any) => (
@@ -388,7 +402,7 @@ export default function RankHistoryPage() {
                           {country.name}
                         </option>
                       ))}
-                    </Select>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -453,6 +467,22 @@ export default function RankHistoryPage() {
                                       </>
                                     )}
                                   </div>
+                                  {(item as any).tags && (item as any).tags.length > 0 && (
+                                    <div className="flex items-center space-x-1">
+                                      <Tag className="w-3 h-3" />
+                                      <div className="flex flex-wrap gap-1">
+                                        {(item as any).tags.map((tag: string, tagIndex: number) => (
+                                          <span 
+                                            key={tagIndex}
+                                            className="px-1 py-0.5 rounded text-xs"
+                                            style={{ backgroundColor: '#F0F9FF', color: '#0369A1', fontSize: '10px' }}
+                                          >
+                                            {tag}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </td>

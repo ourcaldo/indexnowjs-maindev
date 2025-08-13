@@ -72,6 +72,15 @@ export async function GET(request: NextRequest) {
     // Set default date range (30 days from current date)
     const endDate = end_date || new Date().toISOString().split('T')[0]
     const startDate = start_date || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    
+    console.log('Rank History Query Parameters:', {
+      user_id: user.id,
+      domain_id,
+      device_type,
+      country_id,
+      startDate,
+      endDate
+    })
 
     // Build query to get rank history data with full keyword details
     let query = supabase
@@ -84,6 +93,8 @@ export async function GET(request: NextRequest) {
         search_volume,
         difficulty_score,
         check_date,
+        device_type,
+        country_id,
         indb_keyword_keywords!inner (
           id,
           keyword,
@@ -96,13 +107,13 @@ export async function GET(request: NextRequest) {
             id,
             domain_name,
             display_name
-          ),
-          indb_keyword_countries (
-            id,
-            name,
-            iso2_code,
-            iso3_code
           )
+        ),
+        indb_keyword_countries (
+          id,
+          name,
+          iso2_code,
+          iso3_code
         )
       `)
       .eq('indb_keyword_keywords.user_id', user.id)
@@ -110,7 +121,6 @@ export async function GET(request: NextRequest) {
       .gte('check_date', startDate)
       .lte('check_date', endDate)
       .order('check_date', { ascending: false })
-      .limit(limit)
 
     // Add filters if specified
     if (domain_id) {
@@ -123,7 +133,16 @@ export async function GET(request: NextRequest) {
       query = query.eq('indb_keyword_keywords.country_id', country_id)
     }
 
+    // Apply limit after filters
+    query = query.limit(limit)
+
     const { data: rankHistory, error } = await query
+
+    console.log('Supabase Query Result:', {
+      dataCount: rankHistory?.length || 0,
+      error: error?.message,
+      sampleData: rankHistory?.slice(0, 2)
+    })
 
     if (error) {
       console.error('Error fetching rank history:', error)
@@ -133,7 +152,29 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Transform data for easier frontend consumption
+    // Check if we have no data - this means the query is wrong
+    if (!rankHistory || rankHistory.length === 0) {
+      console.error('❌ NO RANK HISTORY DATA FOUND! But we know there are 136 rows in the database!')
+      console.log('Query details:', {
+        userQuery: 'indb_keyword_keywords.user_id =', user.id,
+        dateRange: `${startDate} to ${endDate}`,
+        filters: { domain_id, device_type, country_id }
+      })
+      
+      // Return empty but valid response
+      return NextResponse.json({
+        success: true,
+        data: [],
+        meta: {
+          start_date: startDate,
+          end_date: endDate,
+          total_keywords: 0,
+          debug: 'NO DATA FOUND - Check user_id in keywords table'
+        }
+      })
+    }
+
+    // Transform data for easier frontend consumption - SHOW ALL DATA INCLUDING NULL POSITIONS
     const transformedData = rankHistory?.reduce((acc: any, record: any) => {
       const keywordData = record.indb_keyword_keywords
       const keywordId = keywordData.id
@@ -142,20 +183,21 @@ export async function GET(request: NextRequest) {
         acc[keywordId] = {
           keyword_id: keywordId,
           keyword: keywordData.keyword,
-          device_type: keywordData.device_type,
+          device_type: record.device_type || keywordData.device_type,
           tags: keywordData.tags || [],
           domain: {
             id: keywordData.indb_keyword_domains.id,
             domain_name: keywordData.indb_keyword_domains.domain_name,
             display_name: keywordData.indb_keyword_domains.display_name
           },
-          country: keywordData.indb_keyword_countries,
+          country: record.indb_keyword_countries,
           history: {}
         }
       }
       
+      // ALWAYS add the history entry, even if position is NULL - IT'S HISTORY!
       acc[keywordId].history[record.check_date] = {
-        position: record.position,
+        position: record.position, // Can be NULL - that's fine, it's HISTORY
         url: record.url,
         search_volume: record.search_volume,
         difficulty_score: record.difficulty_score
@@ -169,13 +211,20 @@ export async function GET(request: NextRequest) {
       a.keyword.localeCompare(b.keyword)
     )
 
+    console.log('✅ Successfully transformed rank history data:', {
+      totalKeywords: results.length,
+      totalHistoryEntries: rankHistory.length,
+      sampleEntry: results[0]
+    })
+
     return NextResponse.json({
       success: true,
       data: results,
       meta: {
         start_date: startDate,
         end_date: endDate,
-        total_keywords: results.length
+        total_keywords: results.length,
+        total_history_entries: rankHistory.length
       }
     })
 
