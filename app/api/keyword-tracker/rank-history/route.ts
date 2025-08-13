@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 
 // Validation schema
@@ -14,34 +14,31 @@ const getRankHistorySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Create Supabase client with proper cookie handling
-    const supabase = createServerClient(
+    // Create Supabase client
+    const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            const cookieHeader = request.headers.get('cookie')
-            if (!cookieHeader) return undefined
-            
-            const cookies = Object.fromEntries(
-              cookieHeader.split(';').map(cookie => {
-                const [key, value] = cookie.trim().split('=')
-                return [key, decodeURIComponent(value || '')]
-              })
-            )
-            return cookies[name]
-          },
-          set() {},
-          remove() {},
-        },
-      }
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    // Get user from session
+    // Get Authorization header for JWT token
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { success: false, error: 'Authorization header required' },
+        { status: 401 }
+      )
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    
+    // Set the auth token
+    await supabase.auth.setSession({ access_token: token, refresh_token: '' })
+    
+    // Get user from the token
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
+      console.error('Auth error:', authError)
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -82,7 +79,7 @@ export async function GET(request: NextRequest) {
       endDate
     })
 
-    // Build query to get rank history data with full keyword details
+    // Build query to get rank history data with full keyword details INCLUDING TAGS and all keyword data
     let query = supabase
       .from('indb_keyword_rank_history')
       .select(`
@@ -95,6 +92,8 @@ export async function GET(request: NextRequest) {
         check_date,
         device_type,
         country_id,
+        created_at,
+        updated_at,
         indb_keyword_keywords!inner (
           id,
           keyword,
@@ -103,10 +102,15 @@ export async function GET(request: NextRequest) {
           domain_id,
           country_id,
           tags,
+          is_active,
+          last_check_date,
+          created_at,
+          updated_at,
           indb_keyword_domains!inner (
             id,
             domain_name,
-            display_name
+            display_name,
+            verification_status
           )
         ),
         indb_keyword_countries (
@@ -156,7 +160,8 @@ export async function GET(request: NextRequest) {
     if (!rankHistory || rankHistory.length === 0) {
       console.error('❌ NO RANK HISTORY DATA FOUND! But we know there are 136 rows in the database!')
       console.log('Query details:', {
-        userQuery: 'indb_keyword_keywords.user_id =', user.id,
+        userQuery: 'indb_keyword_keywords.user_id =',
+        userId: user.id,
         dateRange: `${startDate} to ${endDate}`,
         filters: { domain_id, device_type, country_id }
       })
@@ -174,7 +179,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Transform data for easier frontend consumption - SHOW ALL DATA INCLUDING NULL POSITIONS
+    // Transform data for easier frontend consumption - SHOW ALL DATA INCLUDING NULL POSITIONS AND TAGS
     const transformedData = rankHistory?.reduce((acc: any, record: any) => {
       const keywordData = record.indb_keyword_keywords
       const keywordId = keywordData.id
@@ -184,11 +189,14 @@ export async function GET(request: NextRequest) {
           keyword_id: keywordId,
           keyword: keywordData.keyword,
           device_type: record.device_type || keywordData.device_type,
-          tags: keywordData.tags || [],
+          tags: keywordData.tags || [], // INCLUDE TAGS from keywords table
+          is_active: keywordData.is_active,
+          last_check_date: keywordData.last_check_date,
           domain: {
             id: keywordData.indb_keyword_domains.id,
             domain_name: keywordData.indb_keyword_domains.domain_name,
-            display_name: keywordData.indb_keyword_domains.display_name
+            display_name: keywordData.indb_keyword_domains.display_name,
+            verification_status: keywordData.indb_keyword_domains.verification_status
           },
           country: record.indb_keyword_countries,
           history: {}
@@ -200,7 +208,9 @@ export async function GET(request: NextRequest) {
         position: record.position, // Can be NULL - that's fine, it's HISTORY
         url: record.url,
         search_volume: record.search_volume,
-        difficulty_score: record.difficulty_score
+        difficulty_score: record.difficulty_score,
+        created_at: record.created_at,
+        updated_at: record.updated_at
       }
       
       return acc
