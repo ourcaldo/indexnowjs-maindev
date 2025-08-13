@@ -6,6 +6,31 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  webpack: (config, { isServer, webpack }) => {
+    // Suppress critical dependency warnings from Supabase realtime
+    config.plugins.push(
+      new webpack.ContextReplacementPlugin(
+        /\/node_modules\/@supabase\/realtime-js\//,
+        (data) => {
+          delete data.dependencies[0].critical;
+          return data;
+        }
+      )
+    )
+    
+    // Ignore warnings for websocket modules
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module: /node_modules\/@supabase\/realtime-js/,
+      },
+      {
+        message: /Critical dependency: the request of a dependency is an expression/,
+      }
+    ]
+    
+    return config
+  },
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:5000', '0.0.0.0:5000', '*.replit.dev', '*.replit.app', '*.replit.co']

@@ -27,18 +27,33 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         }
       },
     },
+  },
+  db: {
+    schema: 'public'
+  },
+  global: {
+    headers: {
+      'x-client-info': 'indexnow-pro'
+    }
   }
 })
 
-// Server-side client with service role key (for admin operations)
+// Server-side client with service role key (for admin operations)  
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 export const supabaseAdmin = supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
+      },
+      db: {
+        schema: 'public'
       }
     })
-  : createClient(supabaseUrl, supabaseAnonKey) // Fallback to anon key
+  : createClient(supabaseUrl, supabaseAnonKey, {
+      db: {
+        schema: 'public'
+      }
+    }) // Fallback to anon key
 
 export default supabase
