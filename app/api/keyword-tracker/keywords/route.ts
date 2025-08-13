@@ -132,7 +132,10 @@ export async function GET(request: NextRequest) {
 
     // Process keywords with ranking history
     const processedKeywords = (keywords || []).map((keyword: any) => {
-      const sortedRankings = (keyword.rankings || []).sort((a: any, b: any) => 
+      // Ensure rankings is an array before sorting
+      const rankings = Array.isArray(keyword.rankings) ? keyword.rankings : 
+                      keyword.rankings ? [keyword.rankings] : []
+      const sortedRankings = rankings.sort((a: any, b: any) => 
         new Date(b.check_date).getTime() - new Date(a.check_date).getTime()
       )
       

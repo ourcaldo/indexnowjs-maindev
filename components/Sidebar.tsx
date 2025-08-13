@@ -117,6 +117,12 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           href: '/dashboard/indexnow/add',
           icon: Plus,
           active: pathname === '/dashboard/indexnow/add'
+        },
+        {
+          label: 'Rank History',
+          href: '/dashboard/keyword-tracker/rank-history',
+          icon: Activity,
+          active: pathname === '/dashboard/keyword-tracker/rank-history'
         }
       ]
     },
