@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 
 // Validation schema
@@ -14,31 +15,31 @@ const getRankHistorySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Create Supabase client with service role key to bypass RLS for authenticated operations
-    const supabase = createClient(
+    // First, authenticate user with anon key using cookies/session
+    const authClient = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            const cookieHeader = request.headers.get('cookie')
+            if (!cookieHeader) return undefined
+            
+            const cookies = Object.fromEntries(
+              cookieHeader.split(';').map(cookie => {
+                const [key, value] = cookie.trim().split('=')
+                return [key, decodeURIComponent(value || '')]
+              })
+            )
+            return cookies[name]
+          },
+          set() {},
+          remove() {},
+        },
+      }
     )
-
-    // Get Authorization header for JWT token to verify user identity
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { success: false, error: 'Authorization header required' },
-        { status: 401 }
-      )
-    }
-
-    const token = authHeader.replace('Bearer ', '')
     
-    // Create a separate client with anon key to verify the user token
-    const authClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    
-    // Set the auth token and verify user
-    await authClient.auth.setSession({ access_token: token, refresh_token: '' })
+    // Try to get user from session
     const { data: { user }, error: authError } = await authClient.auth.getUser()
     
     if (authError || !user) {
@@ -48,6 +49,12 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    // Now use service role client for data fetching to bypass RLS
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Parse query parameters
     const url = new URL(request.url)
