@@ -516,16 +516,6 @@ export default function RankHistoryPage() {
                     </Button>
                   </div>
 
-                  {/* Search */}
-                  <div className="flex items-center gap-1">
-                    <Input
-                      placeholder="Search keywords..."
-                      value={searchQuery}
-                      onChange={(e: any) => setSearchQuery(e.target.value)}
-                      className="w-40 text-sm"
-                    />
-                  </div>
-
                   {/* Tags Multi-Select Dropdown */}
                   <div className="relative">
                     <div className="relative">
@@ -590,6 +580,16 @@ export default function RankHistoryPage() {
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  {/* Search */}
+                  <div className="flex items-center gap-1">
+                    <Input
+                      placeholder="Search keywords..."
+                      value={searchQuery}
+                      onChange={(e: any) => setSearchQuery(e.target.value)}
+                      className="w-40 text-sm"
+                    />
                   </div>
                 </div>
               </Card>
