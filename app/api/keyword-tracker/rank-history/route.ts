@@ -15,8 +15,8 @@ const getRankHistorySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // First, authenticate user with anon key using cookies/session
-    const authClient = createServerClient(
+    // Create Supabase client with proper cookie handling (same as working keywords API)
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -38,23 +38,19 @@ export async function GET(request: NextRequest) {
         },
       }
     )
-    
-    // Try to get user from session
-    const { data: { user }, error: authError } = await authClient.auth.getUser()
+
+    // Get user from session (same as working keywords API)
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      console.error('Rank History GET: Authentication failed:', authError?.message || 'No user')
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Now use service role client for data fetching to bypass RLS
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    console.log('Rank History GET: Authenticated user:', user.id)
 
     // Parse query parameters
     const url = new URL(request.url)
@@ -113,7 +109,7 @@ export async function GET(request: NextRequest) {
           user_id,
           domain_id,
           country_id,
-          tags::text[],
+          tags,
           is_active,
           last_check_date,
           created_at,

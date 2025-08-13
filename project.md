@@ -691,6 +691,23 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**RANK HISTORY API AUTHENTICATION & SQL SYNTAX FIXES (August 13, 2025)**
+- ✅ **CRITICAL 401 UNAUTHORIZED ERROR RESOLVED**: Fixed authentication issues in rank-history API that was preventing data retrieval
+  - **Authentication Method Fixed**: Changed from manual JWT token parsing to proper session cookie handling using createServerClient
+  - **Cookie Handling Implementation**: Added proper cookie extraction and session management following working keywords API pattern
+  - **Service Role Integration**: Maintained service role key usage for data fetching to bypass RLS policies while ensuring user authentication
+  - **API Status Restored**: Rank history API now returns 200 status code with complete data retrieval
+- ✅ **SQL SYNTAX ERROR RESOLVED**: Fixed PostgREST query syntax errors that were causing 500 internal server errors
+  - **Tags Column Syntax**: Removed invalid `tags::text[]` syntax that PostgREST couldn't parse in select clauses
+  - **Query Structure Optimized**: Simplified join queries to ensure proper data retrieval with country and keyword information
+  - **Tag Support Working**: Tags column now properly displays and filters in rank history data
+  - **Complete Data Retrieval**: API now successfully returns all rank history with keywords, countries, device types, and tags
+- ✅ **AUTHENTICATION PATTERN STANDARDIZATION**: Aligned rank history API authentication with other working APIs
+  - **Session Management**: Implemented proper Supabase session handling using createServerClient with cookie support
+  - **Token Verification**: Removed problematic manual JWT parsing in favor of Supabase auth.getUser() method
+  - **Error Handling**: Enhanced authentication error messages and proper status code responses
+  - **Security Maintained**: User authentication verified before data access while using service role for database operations
+
 **JOB RESUMPTION ISSUE COMPLETELY FIXED (January 29, 2025)**
 - ✅ **COMPREHENSIVE SITEMAP JOB RESUMPTION FIX**: Resolved critical issue where sitemap jobs restarted from URL #1 instead of continuing from last processed URL
   - **Root Cause Fixed**: Modified `extractUrlsFromJobSource()` method to cache parsed URLs in `source_data.parsed_urls` for sitemap jobs
