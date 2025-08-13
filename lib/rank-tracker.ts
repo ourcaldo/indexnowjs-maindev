@@ -45,19 +45,19 @@ export class RankTracker {
     try {
       logger.info(`Starting rank check for keyword: ${keywordData.keyword} (${keywordData.domain})`)
 
-      // 1. Get API key for user
-      const apiKey = await this.apiKeyManager.getActiveAPIKey(keywordData.userId)
+      // 1. Get site-level API key
+      const apiKey = await this.apiKeyManager.getActiveAPIKey()
       if (!apiKey) {
-        throw new Error('No active ScrapingDog API key found. Please add your API key in Settings.')
+        throw new Error('No active ScrapingDog API key found. Please configure the API key in admin settings.')
       }
 
-      // 2. Check remaining quota
-      const availableQuota = await this.apiKeyManager.getAvailableQuota(keywordData.userId)
+      // 2. Check remaining quota (site-level)
+      const availableQuota = await this.apiKeyManager.getAvailableQuota()
       if (availableQuota <= 0) {
-        throw new Error('API quota exceeded. Please wait for quota reset or upgrade your plan.')
+        throw new Error('API quota exceeded. Please wait for quota reset.')
       }
 
-      logger.info(`User ${keywordData.userId} has ${availableQuota} API calls remaining`)
+      logger.info(`Site has ${availableQuota} API calls remaining`)
 
       // 3. Initialize ScrapingDog service
       this.scrapingDogService = new ScrapingDogService(apiKey)
@@ -73,8 +73,8 @@ export class RankTracker {
       // 5. Store result in database
       await this.storeRankResult(keywordData.id, rankResult)
 
-      // 6. Update API quota usage
-      await this.apiKeyManager.updateQuotaUsage(keywordData.userId, apiKey)
+      // 6. Update API quota usage (site-level)
+      await this.apiKeyManager.updateQuotaUsage(apiKey)
 
       // 7. Update last check date
       await this.updateLastCheckDate(keywordData.id)

@@ -20,25 +20,24 @@ interface APIKeyInfo {
 
 export class APIKeyManager {
   /**
-   * Get active API key for user
+   * Get active API key (site-level configuration)
    */
-  async getActiveAPIKey(userId: string): Promise<string | null> {
+  async getActiveAPIKey(): Promise<string | null> {
     try {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('user_id', userId)
         .eq('service_name', 'scrapingdog')
         .eq('is_active', true)
         .single()
 
       if (error || !integration) {
-        logger.warn(`No active ScrapingDog API key found for user ${userId}`)
+        logger.warn('No active ScrapingDog API key found at site level')
         return null
       }
 
       // Check if quota reset is needed
-      await this.checkAndResetQuota(userId, integration)
+      await this.checkAndResetQuota(integration)
 
       return integration.scrappingdog_apikey
 
@@ -49,14 +48,13 @@ export class APIKeyManager {
   }
 
   /**
-   * Get available quota for user
+   * Get available quota (site-level)
    */
-  async getAvailableQuota(userId: string): Promise<number> {
+  async getAvailableQuota(): Promise<number> {
     try {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('api_quota_limit, api_quota_used, quota_reset_date')
-        .eq('user_id', userId)
         .eq('service_name', 'scrapingdog')
         .eq('is_active', true)
         .single()
@@ -66,13 +64,12 @@ export class APIKeyManager {
       }
 
       // Check if quota reset is needed
-      await this.checkAndResetQuota(userId, integration)
+      await this.checkAndResetQuota(integration)
 
       // Refresh data after potential reset
       const { data: updatedIntegration } = await supabaseAdmin
         .from('indb_site_integration')
         .select('api_quota_limit, api_quota_used')
-        .eq('user_id', userId)
         .eq('service_name', 'scrapingdog')
         .eq('is_active', true)
         .single()
@@ -89,16 +86,16 @@ export class APIKeyManager {
   }
 
   /**
-   * Update quota usage after API call
+   * Update quota usage after API call (site-level)
    */
-  async updateQuotaUsage(userId: string, apiKey: string): Promise<void> {
+  async updateQuotaUsage(apiKey: string): Promise<void> {
     try {
       // First get current quota usage
       const { data: currentData } = await supabaseAdmin
         .from('indb_site_integration')
         .select('api_quota_used')
-        .eq('user_id', userId)
         .eq('scrappingdog_apikey', apiKey)
+        .eq('is_active', true)
         .single()
 
       const newQuotaUsed = (currentData?.api_quota_used || 0) + 1
@@ -109,13 +106,13 @@ export class APIKeyManager {
           api_quota_used: newQuotaUsed,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', userId)
         .eq('scrappingdog_apikey', apiKey)
+        .eq('is_active', true)
 
       if (error) {
         logger.error('Error updating quota usage:', error)
       } else {
-        logger.info(`Updated quota usage for user ${userId}`)
+        logger.info('Updated site-level quota usage')
       }
 
     } catch (error) {
@@ -124,15 +121,15 @@ export class APIKeyManager {
   }
 
   /**
-   * Check if quota needs to be reset (daily reset)
+   * Check if quota needs to be reset (daily reset) - site level
    */
-  private async checkAndResetQuota(userId: string, integration: any): Promise<void> {
+  private async checkAndResetQuota(integration: any): Promise<void> {
     try {
       const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
       const quotaResetDate = integration.quota_reset_date
 
       if (quotaResetDate !== today) {
-        logger.info(`Resetting quota for user ${userId} (last reset: ${quotaResetDate}, today: ${today})`)
+        logger.info(`Resetting site-level quota (last reset: ${quotaResetDate}, today: ${today})`)
         
         const { error } = await supabaseAdmin
           .from('indb_site_integration')
@@ -141,13 +138,13 @@ export class APIKeyManager {
             quota_reset_date: today,
             updated_at: new Date().toISOString()
           })
-          .eq('user_id', userId)
           .eq('service_name', 'scrapingdog')
+          .eq('is_active', true)
 
         if (error) {
           logger.error('Error resetting quota:', error)
         } else {
-          logger.info(`Quota reset successful for user ${userId}`)
+          logger.info('Site-level quota reset successful')
         }
       }
 
@@ -157,14 +154,13 @@ export class APIKeyManager {
   }
 
   /**
-   * Get API key information with quota details
+   * Get API key information with quota details (site-level)
    */
-  async getAPIKeyInfo(userId: string): Promise<APIKeyInfo | null> {
+  async getAPIKeyInfo(): Promise<APIKeyInfo | null> {
     try {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('user_id', userId)
         .eq('service_name', 'scrapingdog')
         .eq('is_active', true)
         .single()
@@ -174,13 +170,12 @@ export class APIKeyManager {
       }
 
       // Check and reset quota if needed
-      await this.checkAndResetQuota(userId, integration)
+      await this.checkAndResetQuota(integration)
 
       // Get fresh data after potential reset
       const { data: freshIntegration } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('user_id', userId)
         .eq('service_name', 'scrapingdog')
         .eq('is_active', true)
         .single()

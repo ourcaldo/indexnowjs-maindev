@@ -390,7 +390,6 @@ export interface Database {
       indb_site_integration: {
         Row: {
           id: string
-          user_id: string
           service_name: string
           scrappingdog_apikey: string
           api_quota_limit: number
@@ -402,7 +401,6 @@ export interface Database {
         }
         Insert: {
           id?: string
-          user_id: string
           service_name?: string
           scrappingdog_apikey: string
           api_quota_limit?: number
@@ -414,7 +412,6 @@ export interface Database {
         }
         Update: {
           id?: string
-          user_id?: string
           service_name?: string
           scrappingdog_apikey?: string
           api_quota_limit?: number

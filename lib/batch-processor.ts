@@ -146,7 +146,7 @@ export class BatchProcessor {
     logger.info(`Processing ${keywords.length} keywords for user ${userId}`)
 
     // Check user's available quota first
-    const availableQuota = await this.apiKeyManager.getAvailableQuota(userId)
+    const availableQuota = await this.apiKeyManager.getAvailableQuota()
     const keywordsToProcess = keywords.slice(0, availableQuota)
 
     if (keywordsToProcess.length < keywords.length) {
