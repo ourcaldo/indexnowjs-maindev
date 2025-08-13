@@ -5,16 +5,14 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { 
   Calendar, 
-  Filter, 
-  TrendingUp, 
-  TrendingDown, 
-  Minus,
+  Search,
   ChevronLeft,
   ChevronRight,
   Globe,
   Smartphone,
   Monitor,
-  Tag
+  Tag,
+  X
 } from 'lucide-react'
 
 // Simple UI Components using project color scheme
@@ -71,23 +69,6 @@ const Input = ({ placeholder, className = '', value, onChange, type = 'text', ..
   />
 )
 
-const Select = ({ children, value, onChange, className = '', ...props }: any) => (
-  <select 
-    className={`flex h-9 w-full rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-    style={{
-      backgroundColor: '#FFFFFF',
-      border: '1px solid #E0E6ED',
-      color: '#1A1A1A',
-      ['--tw-ring-color' as any]: '#3D8BFF'
-    }}
-    value={value}
-    onChange={onChange}
-    {...props}
-  >
-    {children}
-  </select>
-)
-
 interface Domain {
   id: string
   domain_name: string
@@ -98,6 +79,7 @@ interface RankHistoryData {
   keyword_id: string
   keyword: string
   device_type: string
+  tags: string[]
   domain: Domain
   country: any
   history: { [date: string]: { position: number | null, url: string | null } }
@@ -122,20 +104,8 @@ const formatDateHeader = (dateStr: string): string => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-// Get position trend indicator
-const getPositionTrend = (currentPos: number | null, previousPos: number | null) => {
-  if (!currentPos || !previousPos) return null
-  
-  if (currentPos < previousPos) {
-    return <TrendingUp className="w-4 h-4 text-green-600" />
-  } else if (currentPos > previousPos) {
-    return <TrendingDown className="w-4 h-4 text-red-600" />
-  }
-  return <Minus className="w-4 h-4" style={{ color: '#6C757D' }} />
-}
-
 export default function RankHistoryPage() {
-  // State for domain management (matching overview page)
+  // State for domain management
   const [selectedDomainId, setSelectedDomainId] = useState<string>('')
   const [showDomainsManager, setShowDomainsManager] = useState(false)
   
@@ -143,21 +113,43 @@ export default function RankHistoryPage() {
   const [selectedDevice, setSelectedDevice] = useState<string>('')
   const [selectedCountry, setSelectedCountry] = useState<string>('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState<string>('')
   
-  // State for date range
-  const [startDate, setStartDate] = useState<string>('')
-  const [endDate, setEndDate] = useState<string>('')
-  
-  // Set default date range (30 days)
-  useEffect(() => {
-    const today = new Date()
-    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
-    
-    setEndDate(today.toISOString().split('T')[0])
-    setStartDate(thirtyDaysAgo.toISOString().split('T')[0])
-  }, [])
+  // State for date range and pagination
+  const [dateRange, setDateRange] = useState<'7d' | '30d' | '60d' | 'custom'>('30d')
+  const [customDate, setCustomDate] = useState<string>('')
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const itemsPerPage = 20
 
-  // Fetch domains (matching overview page)
+  // Calculate actual date range based on selection
+  const getDateRange = () => {
+    const today = new Date()
+    let startDate: string
+    const endDate = today.toISOString().split('T')[0]
+    
+    switch (dateRange) {
+      case '7d':
+        startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        break
+      case '30d':
+        startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        break
+      case '60d':
+        startDate = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        break
+      case 'custom':
+        startDate = customDate || endDate
+        break
+      default:
+        startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    }
+    
+    return { startDate, endDate }
+  }
+
+  const { startDate, endDate } = getDateRange()
+
+  // Fetch domains
   const { data: domainsData } = useQuery({
     queryKey: ['/api/keyword-tracker/domains'],
     queryFn: async () => {
@@ -173,7 +165,7 @@ export default function RankHistoryPage() {
     }
   })
 
-  // Fetch countries (matching overview page)
+  // Fetch countries
   const { data: countriesData } = useQuery({
     queryKey: ['/api/keyword-tracker/countries'],
     queryFn: async () => {
@@ -200,7 +192,7 @@ export default function RankHistoryPage() {
       if (selectedCountry) params.append('country_id', selectedCountry)
       if (startDate) params.append('start_date', startDate)
       if (endDate) params.append('end_date', endDate)
-      params.append('limit', '1000') // Show more data by default
+      params.append('limit', '1000')
       
       const response = await fetch(`/api/keyword-tracker/rank-history?${params}`, {
         headers: {
@@ -211,52 +203,60 @@ export default function RankHistoryPage() {
       const data = await response.json()
       return data.success ? data.data : []
     },
-    enabled: !!startDate && !!endDate
-  })
-
-  // Fetch total keyword counts for each domain (matching overview page)
-  const { data: keywordCountsData } = useQuery({
-    queryKey: ['/api/keyword-tracker/keywords-counts'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/keywords?page=1&limit=1000', {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) throw new Error('Failed to fetch keyword counts')
-      return response.json()
-    }
+    enabled: !!startDate && !!endDate && !!selectedDomainId
   })
 
   const domains = domainsData?.data || []
   const countries = countriesData?.data || []
-  const allKeywords = keywordCountsData?.data || []
 
-  // Set default selected domain if none selected (matching overview page)
+  // Set default selected domain
   useEffect(() => {
     if (!selectedDomainId && domains.length > 0) {
       setSelectedDomainId(domains[0].id)
     }
   }, [domains, selectedDomainId])
 
-  // Get selected domain info (matching overview page)
+  // Get selected domain info
   const selectedDomainInfo = domains.find((d: any) => d.id === selectedDomainId)
 
-  // Get keyword count for each domain (matching overview page)
-  const getDomainKeywordCount = (domainId: string) => {
-    return allKeywords.filter((k: any) => k.domain_id === domainId).length
-  }
+  // Filter and search logic
+  const filteredData = rankHistory.filter((item: RankHistoryData) => {
+    // Search filter
+    if (searchQuery && !item.keyword.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false
+    }
+    
+    // Tags filter
+    if (selectedTags.length > 0) {
+      const hasMatchingTag = selectedTags.some(tag => 
+        item.tags?.some(itemTag => itemTag.toLowerCase().includes(tag.toLowerCase()))
+      )
+      if (!hasMatchingTag) return false
+    }
+    
+    return true
+  })
 
-  const dateRange = startDate && endDate ? generateDateRange(startDate, endDate) : []
+  // Pagination logic
+  const totalItems = filteredData.length
+  const totalPages = Math.ceil(totalItems / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedData = filteredData.slice(startIndex, endIndex)
+
+  // Get unique tags for filter
+  const availableTags = Array.from(new Set(
+    rankHistory.flatMap((item: RankHistoryData) => item.tags || [])
+  )).filter(Boolean) as string[]
+
+  const dateColumns = startDate && endDate ? generateDateRange(startDate, endDate) : []
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F7F9FC' }}>
       <div className="max-w-7xl mx-auto p-6">
         
         <div className="space-y-6">
-          {/* Check if user has domains (matching overview page) */}
+          {/* Check if user has domains */}
           {domains.length === 0 ? (
             <Card>
               <div className="text-center py-12">
@@ -274,7 +274,7 @@ export default function RankHistoryPage() {
             </Card>
           ) : (
             <>
-              {/* Domain Section - Left Top Corner */}
+              {/* Domain Section */}
               <div className="mb-6">
                 <div className="inline-block">
                   <div 
@@ -288,16 +288,6 @@ export default function RankHistoryPage() {
                         <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>
                           {selectedDomainInfo ? (selectedDomainInfo.display_name || selectedDomainInfo.domain_name) : 'Select Domain'}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {selectedDomainInfo && (
-                          <>
-                            <span className="text-xs" style={{color: '#6C757D'}}>Keywords</span>
-                            <span className="font-bold text-sm" style={{color: '#1A1A1A'}}>
-                              {getDomainKeywordCount(selectedDomainInfo.id)}
-                            </span>
-                          </>
-                        )}
                       </div>
                     </div>
                     
@@ -320,21 +310,8 @@ export default function RankHistoryPage() {
                               <span style={{color: '#1A1A1A'}}>
                                 {domain.display_name || domain.domain_name}
                               </span>
-                              <span style={{color: '#6C757D'}}>
-                                {getDomainKeywordCount(domain.id)}
-                              </span>
                             </div>
                           ))}
-                          <div 
-                            className="flex items-center py-1 px-2 text-xs rounded cursor-pointer hover:bg-gray-50 border-t"
-                            style={{borderColor: '#E0E6ED', color: '#3D8BFF'}}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              window.location.href = '/dashboard/indexnow/add'
-                            }}
-                          >
-                            <span>+ Add New Domain</span>
-                          </div>
                         </div>
                       </div>
                     )}
@@ -342,168 +319,228 @@ export default function RankHistoryPage() {
                 </div>
               </div>
 
-              {/* Professional Filters - Right Side */}
-              <div className="flex justify-end mb-6">
-                <div className="flex items-center space-x-3 bg-white rounded-xl border shadow-sm px-4 py-3" style={{ borderColor: '#E0E6ED' }}>
-                  
-                  {/* Date Range */}
-                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED' }}>
-                    <Calendar className="w-4 h-4" style={{ color: '#6C757D' }} />
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e: any) => setStartDate(e.target.value)}
-                      className="border-0 bg-transparent text-xs font-medium outline-none"
-                      style={{ color: '#1A1A1A', width: '110px' }}
-                    />
-                    <span className="text-xs font-medium" style={{ color: '#6C757D' }}>to</span>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e: any) => setEndDate(e.target.value)}
-                      className="border-0 bg-transparent text-xs font-medium outline-none"
-                      style={{ color: '#1A1A1A', width: '110px' }}
-                    />
-                  </div>
-
-                  <div className="w-px h-6" style={{ backgroundColor: '#E0E6ED' }}></div>
-                  
-                  {/* Device Filter */}
-                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED' }}>
-                    {selectedDevice === 'mobile' ? 
-                      <Smartphone className="w-4 h-4" style={{ color: '#6C757D' }} /> : 
-                      <Monitor className="w-4 h-4" style={{ color: '#6C757D' }} />
-                    }
-                    <select
-                      value={selectedDevice}
-                      onChange={(e: any) => setSelectedDevice(e.target.value)}
-                      className="border-0 bg-transparent text-xs font-medium outline-none"
-                      style={{ color: '#1A1A1A', width: '80px' }}
-                    >
-                      <option value="">All Devices</option>
-                      <option value="desktop">Desktop</option>
-                      <option value="mobile">Mobile</option>
-                    </select>
-                  </div>
-
-                  <div className="w-px h-6" style={{ backgroundColor: '#E0E6ED' }}></div>
-
-                  {/* Country Filter */}
-                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED' }}>
-                    <Globe className="w-4 h-4" style={{ color: '#6C757D' }} />
-                    <select
-                      value={selectedCountry}
-                      onChange={(e: any) => setSelectedCountry(e.target.value)}
-                      className="border-0 bg-transparent text-xs font-medium outline-none"
-                      style={{ color: '#1A1A1A', width: '100px' }}
-                    >
-                      <option value="">All Countries</option>
-                      {countries.map((country: any) => (
-                        <option key={country.id} value={country.id}>
-                          {country.name}
-                        </option>
+              {/* Filters Section - Under Domain */}
+              <Card>
+                <div className="space-y-4">
+                  {/* Date Range Filter */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Calendar className="w-4 h-4" style={{color: '#6C757D'}} />
+                    <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Date Range:</span>
+                    
+                    <div className="flex gap-2">
+                      {['7d', '30d', '60d', 'custom'].map((range) => (
+                        <Button
+                          key={range}
+                          size="sm"
+                          variant={dateRange === range ? 'default' : 'outline'}
+                          onClick={() => setDateRange(range as any)}
+                        >
+                          {range === 'custom' ? 'Custom' : range.toUpperCase()}
+                        </Button>
                       ))}
-                    </select>
+                    </div>
+                    
+                    {dateRange === 'custom' && (
+                      <Input
+                        type="date"
+                        value={customDate}
+                        onChange={(e: any) => setCustomDate(e.target.value)}
+                        className="w-36"
+                      />
+                    )}
+                  </div>
+
+                  {/* Device Filter - AJAX Style */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Device:</span>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant={selectedDevice === '' ? 'default' : 'outline'}
+                          onClick={() => setSelectedDevice('')}
+                          className="flex items-center gap-1"
+                        >
+                          All
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={selectedDevice === 'desktop' ? 'default' : 'outline'}
+                          onClick={() => setSelectedDevice('desktop')}
+                          className="flex items-center gap-1"
+                        >
+                          <Monitor className="w-3 h-3" />
+                          Desktop
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={selectedDevice === 'mobile' ? 'default' : 'outline'}
+                          onClick={() => setSelectedDevice('mobile')}
+                          className="flex items-center gap-1"
+                        >
+                          <Smartphone className="w-3 h-3" />
+                          Mobile
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Search and Tags Filter */}
+                  <div className="flex flex-wrap items-center gap-4">
+                    {/* Search */}
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4" style={{color: '#6C757D'}} />
+                      <Input
+                        placeholder="Search keywords..."
+                        value={searchQuery}
+                        onChange={(e: any) => setSearchQuery(e.target.value)}
+                        className="w-48"
+                      />
+                    </div>
+
+                    {/* Tags Filter */}
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4" style={{color: '#6C757D'}} />
+                      <span className="text-sm" style={{color: '#1A1A1A'}}>Tags:</span>
+                      <div className="flex flex-wrap gap-1">
+                        {availableTags.slice(0, 5).map((tag: string) => (
+                          <Button
+                            key={tag}
+                            size="sm"
+                            variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                            onClick={() => {
+                              if (selectedTags.includes(tag)) {
+                                setSelectedTags(selectedTags.filter(t => t !== tag))
+                              } else {
+                                setSelectedTags([...selectedTags, tag])
+                              }
+                            }}
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Active Filters */}
+                    {(selectedTags.length > 0 || searchQuery) && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs" style={{color: '#6C757D'}}>Active filters:</span>
+                        {searchQuery && (
+                          <div className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                            {searchQuery}
+                            <X className="w-3 h-3 cursor-pointer" onClick={() => setSearchQuery('')} />
+                          </div>
+                        )}
+                        {selectedTags.map((tag) => (
+                          <div key={tag} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                            {tag}
+                            <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedTags(selectedTags.filter(t => t !== tag))} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
+              </Card>
+
+              {/* Results and Pagination Info */}
+              <div className="flex justify-between items-center">
+                <span className="text-sm" style={{color: '#6C757D'}}>
+                  Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
+                </span>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    
+                    <span className="text-sm" style={{color: '#1A1A1A'}}>
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Rank History Table */}
               <Card>
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center">
-                      <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-                      <p style={{ color: '#6C757D' }}>Loading rank history...</p>
-                    </div>
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{borderColor: '#3D8BFF'}}></div>
+                    <p className="mt-2" style={{color: '#6C757D'}}>Loading rank history...</p>
                   </div>
-                ) : rankHistory.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Calendar className="w-16 h-16 mx-auto mb-4" style={{color: '#6C757D'}} />
-                    <h3 className="text-lg font-semibold mb-2" style={{color: '#1A1A1A'}}>
-                      No Rank History Data
-                    </h3>
-                    <p style={{ color: '#6C757D' }} className="mb-4">
-                      No rank history data found for the selected period and filters.
-                    </p>
-                    <div className="text-sm" style={{ color: '#6C757D' }}>
-                      Try adjusting your date range or removing some filters.
-                    </div>
+                ) : paginatedData.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p style={{color: '#6C757D'}}>No rank history data found for the selected filters.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr style={{ borderBottom: '1px solid #E0E6ED' }}>
-                          <th className="sticky left-0 z-10 px-4 py-3 text-left text-sm font-medium" style={{ backgroundColor: '#F7F9FC', color: '#1A1A1A' }}>
-                            Keyword Details
+                        <tr style={{borderBottom: '1px solid #E0E6ED'}}>
+                          <th className="text-left py-3 px-2" style={{color: '#1A1A1A', backgroundColor: '#F0F4F8', width: '200px'}}>
+                            Keyword
                           </th>
-                          {dateRange.slice(0, 30).map((date) => (
-                            <th key={date} className="px-3 py-3 text-center text-xs font-medium" style={{ color: '#6C757D', minWidth: '60px' }}>
+                          {dateColumns.slice(0, 15).map((date) => (
+                            <th key={date} className="text-center py-3 px-2 text-xs" style={{color: '#6C757D', minWidth: '60px'}}>
                               {formatDateHeader(date)}
                             </th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {rankHistory.map((item: RankHistoryData, index: number) => (
-                          <tr key={item.keyword_id} style={{ borderBottom: index < rankHistory.length - 1 ? '1px solid #E0E6ED' : 'none' }}>
-                            <td className="sticky left-0 z-10 px-4 py-4" style={{ backgroundColor: '#FFFFFF' }}>
-                              <div>
-                                <div className="font-medium text-sm" style={{ color: '#1A1A1A' }}>
-                                  {item.keyword}
-                                </div>
-                                <div className="text-xs mt-1 space-y-1" style={{ color: '#6C757D' }}>
-                                  <div>{item.domain.display_name || item.domain.domain_name}</div>
-                                  <div className="flex items-center space-x-2">
-                                    {item.device_type === 'mobile' ? 
-                                      <Smartphone className="w-3 h-3" /> : 
-                                      <Monitor className="w-3 h-3" />
-                                    }
-                                    <span>{item.device_type}</span>
-                                    {item.country && (
-                                      <>
-                                        <span>•</span>
-                                        <span>{item.country.name}</span>
-                                      </>
-                                    )}
-                                  </div>
-                                  {(item as any).tags && (item as any).tags.length > 0 && (
-                                    <div className="flex items-center space-x-1">
-                                      <Tag className="w-3 h-3" />
-                                      <div className="flex flex-wrap gap-1">
-                                        {(item as any).tags.map((tag: string, tagIndex: number) => (
-                                          <span 
-                                            key={tagIndex}
-                                            className="px-1 py-0.5 rounded text-xs"
-                                            style={{ backgroundColor: '#F0F9FF', color: '#0369A1', fontSize: '10px' }}
-                                          >
-                                            {tag}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    </div>
+                        {paginatedData.map((item: RankHistoryData, index: number) => (
+                          <tr key={item.keyword_id} style={{borderBottom: '1px solid #F0F4F8'}}>
+                            <td className="py-3 px-2" style={{backgroundColor: '#F8FAFC', borderRight: '1px solid #E0E6ED'}}>
+                              <div className="font-medium text-sm" style={{color: '#1A1A1A'}}>
+                                {item.keyword}
+                              </div>
+                              {item.tags && item.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {item.tags.slice(0, 2).map((tag, tagIndex) => (
+                                    <span key={tagIndex} className="text-xs px-1 py-0.5 rounded" style={{backgroundColor: '#E0E6ED', color: '#6C757D'}}>
+                                      {tag}
+                                    </span>
+                                  ))}
+                                  {item.tags.length > 2 && (
+                                    <span className="text-xs" style={{color: '#6C757D'}}>+{item.tags.length - 2}</span>
                                   )}
                                 </div>
-                              </div>
+                              )}
                             </td>
-                            {dateRange.slice(0, 30).map((date, dateIndex) => {
-                              const historyData = item.history[date]
-                              const position = historyData?.position
-                              const previousData = dateIndex < dateRange.length - 1 ? item.history[dateRange[dateIndex + 1]] : null
-                              const trend = getPositionTrend(position, previousData?.position || null)
-                              
+                            {dateColumns.slice(0, 15).map((date) => {
+                              const dayData = item.history[date]
+                              const position = dayData?.position
                               return (
-                                <td key={date} className="px-3 py-4 text-center">
+                                <td key={date} className="text-center py-3 px-2 text-sm">
                                   {position ? (
-                                    <div className="flex items-center justify-center space-x-1">
-                                      <span className="text-sm font-medium" style={{ color: '#1A1A1A' }}>
-                                        {position}
-                                      </span>
-                                      {trend}
-                                    </div>
+                                    <span className={`font-medium ${
+                                      position <= 3 ? 'text-green-600' :
+                                      position <= 10 ? 'text-blue-600' :
+                                      position <= 50 ? 'text-orange-600' :
+                                      'text-red-600'
+                                    }`}>
+                                      {position}
+                                    </span>
                                   ) : (
-                                    <span className="text-xs" style={{ color: '#6C757D' }}>-</span>
+                                    <span style={{color: '#E0E6ED'}}>-</span>
                                   )}
                                 </td>
                               )
@@ -515,6 +552,49 @@ export default function RankHistoryPage() {
                   </div>
                 )}
               </Card>
+
+              {/* Bottom Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    
+                    <div className="flex gap-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i
+                        return (
+                          <Button
+                            key={pageNum}
+                            size="sm"
+                            variant={currentPage === pageNum ? 'default' : 'outline'}
+                            onClick={() => setCurrentPage(pageNum)}
+                          >
+                            {pageNum}
+                          </Button>
+                        )
+                      })}
+                    </div>
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
