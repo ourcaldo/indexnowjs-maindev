@@ -200,6 +200,7 @@ export default function RankHistoryPage() {
       if (selectedCountry) params.append('country_id', selectedCountry)
       if (startDate) params.append('start_date', startDate)
       if (endDate) params.append('end_date', endDate)
+      params.append('limit', '1000') // Show more data by default
       
       const response = await fetch(`/api/keyword-tracker/rank-history?${params}`, {
         headers: {

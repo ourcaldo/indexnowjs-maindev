@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
+import { supabaseAdmin } from '@/lib/supabase'
 import { z } from 'zod'
 
 // Validation schema
@@ -86,8 +86,8 @@ export async function GET(request: NextRequest) {
       endDate
     })
 
-    // Build query to get rank history data with full keyword details INCLUDING TAGS and all keyword data
-    let query = supabase
+    // Build query using supabaseAdmin (like keywords API) to get rank history data
+    let query = supabaseAdmin
       .from('indb_keyword_rank_history')
       .select(`
         id,
@@ -99,7 +99,6 @@ export async function GET(request: NextRequest) {
         check_date,
         device_type,
         country_id,
-        tags,
         created_at,
         updated_at,
         indb_keyword_keywords!inner (
