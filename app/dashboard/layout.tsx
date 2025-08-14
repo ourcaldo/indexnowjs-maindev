@@ -9,7 +9,7 @@ import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 import QuotaNotification from '@/components/QuotaNotification'
 import ServiceAccountQuotaNotification from '@/components/ServiceAccountQuotaNotification'
 import QueryProvider from '@/components/QueryProvider'
-import ClientOnlyWrapper from '@/components/ClientOnlyWrapper'
+
 
 export default function DashboardLayout({
   children,
@@ -99,13 +99,9 @@ export default function DashboardLayout({
     return children
   }
 
-  // Prevent hydration mismatch by not rendering complex content on server
+  // Don't render anything until mounted to prevent hydration issues
   if (!mounted) {
-    return (
-      <div className="min-h-screen bg-[#F7F9FC]">
-        {children}
-      </div>
-    )
+    return null
   }
 
   if (loading) {
@@ -131,27 +127,19 @@ export default function DashboardLayout({
     <QueryProvider>
       <ToastContainer>
         <div className="min-h-screen bg-[#F7F9FC]">
-          <ClientOnlyWrapper fallback={
-            <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
-              <div className="text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A]"></div>
-                <p className="mt-4 text-[#6C757D]">Loading...</p>
-              </div>
-            </div>
-          }>
-            {/* Sidebar */}
-            <Sidebar 
-              isOpen={sidebarOpen}
-              onToggle={() => setSidebarOpen(!sidebarOpen)}
-              onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-              user={user}
-              isCollapsed={sidebarCollapsed}
-            />
+          {/* Sidebar */}
+          <Sidebar 
+            isOpen={sidebarOpen}
+            onToggle={() => setSidebarOpen(!sidebarOpen)}
+            onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+            user={user}
+            isCollapsed={sidebarCollapsed}
+          />
 
-            {/* Main content */}
-            <div className={`transition-all duration-300 ml-0 ${
-              sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
-            }`}>
+          {/* Main content */}
+          <div className={`transition-all duration-300 ml-0 ${
+            sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+          }`}>
             {/* Mobile header - always show on mobile */}
             <div className="lg:hidden bg-white border-b border-[#E0E6ED] px-4 py-3 flex items-center justify-between">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
@@ -206,8 +194,6 @@ export default function DashboardLayout({
           
           {/* Quota Notifications */}
           <QuotaNotification />
-            </div>
-          </ClientOnlyWrapper>
         </div>
       </ToastContainer>
     </QueryProvider>

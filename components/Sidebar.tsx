@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { authService } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import {
@@ -67,8 +67,13 @@ interface SidebarProps {
 const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: SidebarProps) => {
   const pathname = usePathname()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [indexNowExpanded, setIndexNowExpanded] = useState(true)
   const [fastIndexingExpanded, setFastIndexingExpanded] = useState(true)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   
   // Site settings hooks
   const siteName = useSiteName()
@@ -166,6 +171,11 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
         }
       ]
     : baseMenuItems
+
+  // Don't render sidebar until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return null
+  }
 
   return (
     <>
