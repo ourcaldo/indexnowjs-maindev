@@ -105,6 +105,13 @@ The application is built with Next.js App Router and integrates with an Express 
 **BACKEND IMPLEMENTATION STATUS: COMPLETE** 🎉
 All backend services are now fully implemented with proper error handling, logging, quota management, batch processing, and automatic startup capabilities. The system is ready for database setup and testing.
 
+### 2025-08-14: Critical Sidebar Loading & API Key Management Fixes ✅
+- ✅ **FIXED CRITICAL SIDEBAR HYDRATION ISSUE**: Resolved first-login sidebar loading problem requiring page reload
+- ✅ **CORRECTED SCRAPINGDOG API CREDITS**: Fixed business logic bug from 100 to 10 credits per request
+- ✅ **IMPLEMENTED API KEY AUTO-SWITCHING**: Added intelligent API key rotation when quota exhausted
+- ✅ **ENHANCED WEBSOCKET ERROR HANDLING**: Reduced console spam and improved error management
+- ✅ **FIXED MULTIPLE SUPABASE CLIENT WARNINGS**: Implemented singleton pattern to prevent instance conflicts
+
 **User Interface Design:**
 - **Main Color:** Clean white backgrounds.
 - **Accent Colors:** PROPER dark palette (slate-900/800, stone-900/800, gray-800/900, neutral-800/900).

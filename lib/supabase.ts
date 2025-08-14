@@ -3,40 +3,48 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    storageKey: 'sb-auth-token',
-    storage: {
-      getItem: (key: string) => {
-        if (typeof window !== 'undefined') {
-          return window.localStorage.getItem(key)
-        }
-        return null
+// Create singleton Supabase client to prevent multiple instances warning
+let supabaseInstance: any = null
+
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        storageKey: 'sb-auth-token',
+        storage: {
+          getItem: (key: string) => {
+            if (typeof window !== 'undefined') {
+              return window.localStorage.getItem(key)
+            }
+            return null
+          },
+          setItem: (key: string, value: string) => {
+            if (typeof window !== 'undefined') {
+              window.localStorage.setItem(key, value)
+            }
+          },
+          removeItem: (key: string) => {
+            if (typeof window !== 'undefined') {
+              window.localStorage.removeItem(key)
+            }
+          },
+        },
       },
-      setItem: (key: string, value: string) => {
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem(key, value)
-        }
+      db: {
+        schema: 'public'
       },
-      removeItem: (key: string) => {
-        if (typeof window !== 'undefined') {
-          window.localStorage.removeItem(key)
+      global: {
+        headers: {
+          'x-client-info': 'indexnow-pro'
         }
-      },
-    },
-  },
-  db: {
-    schema: 'public'
-  },
-  global: {
-    headers: {
-      'x-client-info': 'indexnow-pro'
-    }
+      }
+    })
   }
-})
+  return supabaseInstance
+})()
 
 // Server-side client with service role key (for admin operations)  
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY

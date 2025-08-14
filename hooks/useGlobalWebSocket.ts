@@ -64,8 +64,10 @@ async function initializeGlobalWebSocket(): Promise<Socket> {
         console.log('🌐 User not authenticated for WebSocket, will retry later')
         setTimeout(() => {
           connectionPromise = null
-          initializeGlobalWebSocket()
-        }, 5000)
+          if (typeof window !== 'undefined') {
+            initializeGlobalWebSocket().catch(() => {}) // Silently catch to prevent unhandled rejection
+          }
+        }, 10000) // Increased delay to 10 seconds to reduce log spam
         reject(new Error('User not authenticated'))
         return
       }

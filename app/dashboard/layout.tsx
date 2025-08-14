@@ -18,6 +18,7 @@ export default function DashboardLayout({
   const router = useRouter()
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   
@@ -26,6 +27,11 @@ export default function DashboardLayout({
   const logoUrl = useSiteLogo(!sidebarCollapsed) // Use expanded logo when sidebar is not collapsed
   const iconUrl = useSiteLogo(false) // Always get icon for mobile header
   useFavicon() // Automatically updates favicon
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -88,8 +94,17 @@ export default function DashboardLayout({
   }, [router])
 
   // For login page, render without authentication checks
-  if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/login') {
+  if (mounted && typeof window !== 'undefined' && window.location.pathname === '/dashboard/login') {
     return children
+  }
+
+  // Prevent hydration mismatch by not rendering complex content on server
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#F7F9FC]">
+        {children}
+      </div>
+    )
   }
 
   if (loading) {
@@ -104,7 +119,11 @@ export default function DashboardLayout({
   }
 
   if (!user) {
-    return null
+    return (
+      <div className="min-h-screen bg-[#F7F9FC]">
+        {children}
+      </div>
+    )
   }
 
   return (

@@ -5,22 +5,19 @@ import { useGlobalWebSocket } from '@/hooks/useGlobalWebSocket'
 
 export default function GlobalWebSocketProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
-  const { isConnected } = useGlobalWebSocket()
-
+  
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Initialize WebSocket only after mount and on dashboard pages
+  const { isConnected } = useGlobalWebSocket()
+
   useEffect(() => {
-    if (mounted) {
+    if (mounted && typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard')) {
       console.log(`🌐 Global WebSocket status: ${isConnected ? 'Connected' : 'Disconnected'}`)
     }
   }, [isConnected, mounted])
-
-  // Prevent hydration mismatch by not rendering children until mounted
-  if (!mounted) {
-    return <>{children}</>
-  }
 
   return <>{children}</>
 }

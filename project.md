@@ -1970,6 +1970,32 @@ indb_keyword_rankings (latest positions)
   - **Technical Fix**: Added `allDomainKeywordsData` query that fetches 1000 keywords independent of pagination
   - **Result**: Statistics cards remain consistent regardless of which page user is viewing
 
+### August 14, 2025 16:30 - Critical Sidebar Loading & API Key Management Fixes
+- ✅ **FIXED CRITICAL SIDEBAR HYDRATION ISSUE**: Resolved first-login sidebar loading problem that required page reload
+  - **Root Cause**: Next.js hydration mismatch between server-rendered content (no sidebar) and client-rendered content (with sidebar)
+  - **Solution**: Implemented proper SSR-safe hydration with `mounted` state to prevent content mismatch
+  - **Technical Fix**: Added `mounted` state check before rendering complex authentication-dependent content
+  - **Result**: Sidebar now appears immediately on first login without requiring page reload
+- ✅ **FIXED MULTIPLE SUPABASE CLIENT WARNINGS**: Eliminated "Multiple GoTrueClient instances" browser warnings
+  - **Issue**: Multiple Supabase client instances being created causing undefined behavior warnings
+  - **Solution**: Implemented singleton pattern for Supabase client creation
+  - **Technical**: Used closure pattern to ensure only one instance of Supabase client exists
+- ✅ **ENHANCED WEBSOCKET ERROR HANDLING**: Reduced unhandled promise rejection spam in console
+  - **Issue**: WebSocket authentication retries causing unhandled promise rejections every 5 seconds
+  - **Solution**: Added proper error catching and increased retry delay to 10 seconds
+  - **Result**: Cleaner console output with less frequent retry attempts
+- ✅ **CORRECTED SCRAPINGDOG API CREDIT CONSUMPTION**: Fixed business logic bug from 100 to 10 credits per request
+  - **Critical Bug**: System was consuming 100 credits per API request instead of correct 10 credits
+  - **Impact**: Users were losing 10x more credits than expected, causing rapid quota exhaustion
+  - **Solution**: Updated all credit consumption logic throughout `lib/api-key-manager.ts` and `lib/rank-tracker.ts`
+  - **Technical**: Changed quota checks, consumption tracking, and error messages to use 10 credits
+- ✅ **IMPLEMENTED AUTOMATIC API KEY SWITCHING**: Added intelligent API key rotation when quota exhausted
+  - **Feature**: System now automatically deactivates exhausted API keys and switches to next available key
+  - **Logic**: When API key quota reaches limit, system sets `is_active: false` and activates backup key
+  - **Fallback**: If no backup keys available, system logs comprehensive error for admin intervention
+  - **Monitoring**: Enhanced logging shows quota usage, key switching, and availability status
+  - **Business Value**: Continuous operation even when individual API keys run out of quota
+
 ### August 14, 2025 - ScrapingDog API Credit Consumption Fix & API Key Auto-Switching
 - ✅ **CORRECTED CREDIT CONSUMPTION**: Fixed ScrapingDog API credit usage from 100 to 10 credits per request
   - **Issue**: Implementation had incorrect credit consumption of 100 per request instead of accurate 10 credits
