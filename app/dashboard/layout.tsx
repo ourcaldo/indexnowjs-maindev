@@ -38,7 +38,7 @@ export default function DashboardLayout({
 
     const checkAuth = async () => {
       // Skip auth check for login page
-      if (window.location.pathname === '/dashboard/login') {
+      if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/login') {
         if (isMounted) {
           setLoading(false)
         }
@@ -75,7 +75,7 @@ export default function DashboardLayout({
       if (!isMounted) return
       
       // Skip auth redirect for login page
-      if (window.location.pathname === '/dashboard/login') {
+      if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/login') {
         return
       }
       
@@ -130,23 +130,27 @@ export default function DashboardLayout({
     <QueryProvider>
       <ToastContainer>
         <div className="min-h-screen bg-[#F7F9FC]">
-
-
-          {/* Sidebar */}
-          <Sidebar 
-            isOpen={sidebarOpen}
-            onToggle={() => setSidebarOpen(!sidebarOpen)}
-            onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-            user={user}
-            isCollapsed={sidebarCollapsed}
-          />
+          {/* Only render sidebar and layout when mounted and user is authenticated */}
+          {mounted && user && (
+            <>
+              {/* Sidebar */}
+              <Sidebar 
+                isOpen={sidebarOpen}
+                onToggle={() => setSidebarOpen(!sidebarOpen)}
+                onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                user={user}
+                isCollapsed={sidebarCollapsed}
+              />
+            </>
+          )}
 
           {/* Main content */}
           <div className={`transition-all duration-300 ml-0 ${
-            sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+            mounted && user ? (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64') : ''
           }`}>
-            {/* Mobile header - always show on mobile */}
-            <div className="lg:hidden bg-white border-b border-[#E0E6ED] px-4 py-3 flex items-center justify-between">
+            {/* Mobile header - only show when mounted and authenticated */}
+            {mounted && user && (
+              <div className="lg:hidden bg-white border-b border-[#E0E6ED] px-4 py-3 flex items-center justify-between">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
                 {iconUrl ? (
                   <img 
@@ -186,7 +190,8 @@ export default function DashboardLayout({
                 </svg>
                 </button>
               </div>
-            </div>
+              </div>
+            )}
 
             {/* Service Account Quota Notification */}
             <ServiceAccountQuotaNotification />

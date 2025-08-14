@@ -129,17 +129,26 @@ const slides = [
 
 export default function DashboardPreview({ title, subtitle, variant = 'login' }: DashboardPreviewProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length)
     }, 4000) // 4 seconds per slide
 
     return () => clearInterval(interval)
-  }, [])
+  }, [mounted])
 
   useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return
+    
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth <= 768)
     }
@@ -148,7 +157,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
     window.addEventListener('resize', checkIfMobile)
     
     return () => window.removeEventListener('resize', checkIfMobile)
-  }, [])
+  }, [mounted])
 
   const currentData = slides[currentSlide]
 

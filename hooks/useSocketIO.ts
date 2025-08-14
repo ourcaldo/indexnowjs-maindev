@@ -202,7 +202,7 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<SocketMessage | null>(null);
-  const hookId = useRef(Math.random().toString(36).substr(2, 9));
+  const hookId = useRef(typeof window !== 'undefined' ? Math.random().toString(36).substr(2, 9) : 'ssr-hook');
   const socketManager = SocketManager.getInstance();
 
   // Get current user once
