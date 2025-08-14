@@ -1110,6 +1110,29 @@ JWT_SECRET=[jwt-secret-key]
   - **Security Headers**: All security headers properly set in Next.js config
   - **Environment Variables**: All Supabase and API configurations loaded correctly
 
+**SCRAPINGDOG API CREDITS & QUOTA MANAGEMENT FIXES (August 14, 2025)**
+- ✅ **CORRECTED API CREDITS CONSUMPTION**: Fixed critical business logic error in ScrapingDog API quota calculation
+  - **Credits Per Request Fix**: Corrected from 100 credits to 10 credits per API request as per ScrapingDog documentation
+  - **Quota Consumption Logic**: Only consume quota on successful API requests, not on failed requests
+  - **Error Handling**: Failed requests (HTTP 400, 500, etc.) no longer consume API quota incorrectly
+- ✅ **REMOVED DAILY QUOTA RESET LOGIC**: Eliminated incorrect daily quota reset functionality
+  - **Total Quota Model**: ScrapingDog quotas are TOTAL quotas until exhausted, not daily quotas
+  - **No Reset Function**: Removed `checkAndResetQuota()` daily reset logic that was incorrectly resetting usage
+  - **Permanent Quota**: Once quota hits limit, API key becomes inactive permanently until manually reset
+- ✅ **ENHANCED API KEY AUTO-SWITCHING**: Implemented intelligent API key rotation when quota exhausted
+  - **Smart Key Detection**: Automatically finds and activates next available API key with sufficient quota (≥10 credits)
+  - **Seamless Switching**: When active key reaches quota limit, automatically deactivates and switches to next available
+  - **Recursive Key Management**: If no active key found, automatically attempts to activate first available key
+  - **Quota Verification**: Checks available quota before activation to ensure key has minimum required credits
+- ✅ **FIXED SCRAPINGDOG API REQUEST FORMAT**: Resolved HTTP 400 Bad Request errors
+  - **Country Code Format**: Fixed country parameter to use lowercase ISO2 codes (e.g., "id" instead of "ID")
+  - **Request Structure Compliance**: Ensured all API parameters match ScrapingDog documentation requirements
+  - **Parameter Validation**: Added proper lowercase conversion for country codes in API requests
+- ✅ **IMPROVED ERROR HANDLING & LOGGING**: Enhanced debugging and error tracking capabilities
+  - **Detailed Logging**: Added comprehensive logging for quota consumption, API key switching, and error states
+  - **Error Classification**: Distinguish between API errors (don't consume quota) vs successful requests (consume quota)
+  - **Debugging Support**: Better error messages and logs for troubleshooting API integration issues
+
 **ORDER COMPLETED PAGE & PAYMENT PROOF SYSTEM COMPLETE (January 26, 2025)**
 - ✅ **ORDER COMPLETED PAGE CREATED**: Built comprehensive two-column order details page with payment proof upload
   - **Two-Column Layout**: Left column (60%) shows order details, right column (40%) shows payment instructions and upload form

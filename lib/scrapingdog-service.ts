@@ -63,7 +63,7 @@ export class ScrapingDogService {
         api_key: this.config.apiKey,
         query: request.keyword,
         results: 100, // Check first 100 results
-        country: request.country,
+        country: request.country.toLowerCase(), // Ensure lowercase country code
         mob_search: request.deviceType === 'mobile',
         page: 0
       }

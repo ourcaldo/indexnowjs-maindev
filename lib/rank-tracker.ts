@@ -70,11 +70,16 @@ export class RankTracker {
         deviceType: keywordData.deviceType
       })
 
-      // 5. Store result in database
-      await this.storeRankResult(keywordData.id, rankResult)
+      // 5. Only update quota usage if request was successful (no error)
+      if (!rankResult.errorMessage) {
+        await this.apiKeyManager.updateQuotaUsage(apiKey)
+        logger.info(`API quota consumed for successful request: keyword ${keywordData.keyword}`)
+      } else {
+        logger.warn(`API quota NOT consumed for failed request: ${rankResult.errorMessage}`)
+      }
 
-      // 6. Update API quota usage (site-level)
-      await this.apiKeyManager.updateQuotaUsage(apiKey)
+      // 6. Store result in database (both success and failure)
+      await this.storeRankResult(keywordData.id, rankResult)
 
       // 7. Update last check date
       await this.updateLastCheckDate(keywordData.id)

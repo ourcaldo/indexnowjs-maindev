@@ -21,9 +21,11 @@ interface APIKeyInfo {
 export class APIKeyManager {
   /**
    * Get active API key (site-level configuration)
+   * Automatically switches to next available key if current one is exhausted
    */
   async getActiveAPIKey(): Promise<string | null> {
     try {
+      // First, try to get current active API key
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
@@ -32,12 +34,40 @@ export class APIKeyManager {
         .single()
 
       if (error || !integration) {
-        logger.warn('No active ScrapingDog API key found at site level')
+        logger.warn('No active ScrapingDog API key found. Attempting to activate first available key...')
+        
+        // Try to activate the first available API key
+        const activated = await this.activateNextAvailableAPIKey()
+        if (activated) {
+          // Recursively call to get the newly activated key
+          return await this.getActiveAPIKey()
+        }
+        
+        logger.error('No ScrapingDog API keys available at all')
         return null
       }
 
-      // Check if quota reset is needed
-      await this.checkAndResetQuota(integration)
+      // Check if current key has quota available
+      const hasQuota = integration.api_quota_used < integration.api_quota_limit
+      if (!hasQuota) {
+        logger.warn(`Current API key exhausted (${integration.api_quota_used}/${integration.api_quota_limit}). Switching to next available key...`)
+        
+        // Deactivate current exhausted key
+        await supabaseAdmin
+          .from('indb_site_integration')
+          .update({ is_active: false })
+          .eq('id', integration.id)
+        
+        // Try to activate next available key
+        const activated = await this.activateNextAvailableAPIKey()
+        if (activated) {
+          // Recursively call to get the newly activated key
+          return await this.getActiveAPIKey()
+        }
+        
+        logger.error('No alternative API keys with available quota found')
+        return null
+      }
 
       return integration.scrappingdog_apikey
 
@@ -48,13 +78,13 @@ export class APIKeyManager {
   }
 
   /**
-   * Get available quota (site-level)
+   * Get available quota (site-level) - NO MORE DAILY RESET
    */
   async getAvailableQuota(): Promise<number> {
     try {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
-        .select('api_quota_limit, api_quota_used, quota_reset_date')
+        .select('api_quota_limit, api_quota_used')
         .eq('service_name', 'scrapingdog')
         .eq('is_active', true)
         .single()
@@ -63,21 +93,8 @@ export class APIKeyManager {
         return 0
       }
 
-      // Check if quota reset is needed
-      await this.checkAndResetQuota(integration)
-
-      // Refresh data after potential reset
-      const { data: updatedIntegration } = await supabaseAdmin
-        .from('indb_site_integration')
-        .select('api_quota_limit, api_quota_used')
-        .eq('service_name', 'scrapingdog')
-        .eq('is_active', true)
-        .single()
-
-      if (!updatedIntegration) return 0
-
-      const available = updatedIntegration.api_quota_limit - updatedIntegration.api_quota_used
-      // Check if we have at least 10 quota for the next request
+      const available = integration.api_quota_limit - integration.api_quota_used
+      // Check if we have at least 10 quota for the next request (each request consumes 10 credits)
       return Math.max(0, available)
 
     } catch (error) {
@@ -87,28 +104,33 @@ export class APIKeyManager {
   }
 
   /**
-   * Update quota usage after API call (site-level) - consumes 10 quota per request
-   * If quota is exhausted, deactivates current API key and switches to next available one
+   * Update quota usage after SUCCESSFUL API call (site-level) - consumes 10 quota per request
+   * If quota will be exhausted, deactivates current API key and switches to next available one
    */
   async updateQuotaUsage(apiKey: string): Promise<void> {
     try {
-      // First get current quota usage and limit
+      // First get current quota usage and limit for the specific API key
       const { data: currentData } = await supabaseAdmin
         .from('indb_site_integration')
-        .select('api_quota_used, api_quota_limit')
+        .select('id, api_quota_used, api_quota_limit')
         .eq('scrappingdog_apikey', apiKey)
         .eq('is_active', true)
         .single()
 
-      // Consume 10 quota per successful request
-      const newQuotaUsed = (currentData?.api_quota_used || 0) + 10
-      const quotaLimit = currentData?.api_quota_limit || 0
+      if (!currentData) {
+        logger.error(`No active API key found matching: ${apiKey}`)
+        return
+      }
 
-      // Check if quota is exhausted after this request
+      // Consume 10 quota per successful request
+      const newQuotaUsed = (currentData.api_quota_used || 0) + 10
+      const quotaLimit = currentData.api_quota_limit || 0
+
+      // Check if quota will be exhausted after this request
       const isQuotaExhausted = newQuotaUsed >= quotaLimit
 
       if (isQuotaExhausted) {
-        logger.warn(`API key quota exhausted: ${newQuotaUsed}/${quotaLimit}. Deactivating API key and switching to next available.`)
+        logger.warn(`API key quota exhausted: ${newQuotaUsed}/${quotaLimit}. Deactivating API key.`)
         
         // Deactivate current API key
         await supabaseAdmin
@@ -118,10 +140,17 @@ export class APIKeyManager {
             is_active: false, // Deactivate exhausted API key
             updated_at: new Date().toISOString()
           })
-          .eq('scrappingdog_apikey', apiKey)
+          .eq('id', currentData.id)
 
+        logger.info(`API key deactivated. Attempting to activate next available key...`)
+        
         // Try to activate next available API key
-        await this.activateNextAvailableAPIKey()
+        const activated = await this.activateNextAvailableAPIKey()
+        if (activated) {
+          logger.info('Successfully switched to next available API key')
+        } else {
+          logger.error('No more API keys available. All quota exhausted.')
+        }
 
       } else {
         // Normal quota update
@@ -131,8 +160,7 @@ export class APIKeyManager {
             api_quota_used: newQuotaUsed,
             updated_at: new Date().toISOString()
           })
-          .eq('scrappingdog_apikey', apiKey)
-          .eq('is_active', true)
+          .eq('id', currentData.id)
 
         if (error) {
           logger.error('Error updating quota usage:', error)
@@ -147,40 +175,19 @@ export class APIKeyManager {
   }
 
   /**
-   * Check if quota needs to be reset (daily reset) - site level
+   * REMOVED: Daily quota reset logic
+   * ScrapingDog quotas are TOTAL quotas until exhausted, not daily quotas
+   * When quota hits limit, API key becomes inactive and we switch to next available key
    */
   private async checkAndResetQuota(integration: any): Promise<void> {
-    try {
-      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-      const quotaResetDate = integration.quota_reset_date
-
-      if (quotaResetDate !== today) {
-        logger.info(`Resetting site-level quota (last reset: ${quotaResetDate}, today: ${today})`)
-        
-        const { error } = await supabaseAdmin
-          .from('indb_site_integration')
-          .update({
-            api_quota_used: 0,
-            quota_reset_date: today,
-            updated_at: new Date().toISOString()
-          })
-          .eq('service_name', 'scrapingdog')
-          .eq('is_active', true)
-
-        if (error) {
-          logger.error('Error resetting quota:', error)
-        } else {
-          logger.info('Site-level quota reset successful')
-        }
-      }
-
-    } catch (error) {
-      logger.error('Error checking quota reset:', error)
-    }
+    // No quota reset - quotas are total until exhausted
+    // This method is kept for backward compatibility but does nothing
+    return
   }
 
   /**
    * Activate next available API key when current one is exhausted
+   * Fixed to properly find keys with available quota (no more daily reset logic)
    */
   private async activateNextAvailableAPIKey(): Promise<boolean> {
     try {
@@ -197,18 +204,11 @@ export class APIKeyManager {
         return false
       }
 
-      // Find the first key with available quota
+      // Find the first key with available quota (no quota reset, just check current quota)
       for (const key of availableKeys) {
-        await this.checkAndResetQuota(key)
+        const availableQuota = key.api_quota_limit - key.api_quota_used
         
-        // Refresh key data after potential quota reset
-        const { data: refreshedKey } = await supabaseAdmin
-          .from('indb_site_integration')
-          .select('*')
-          .eq('id', key.id)
-          .single()
-
-        if (refreshedKey && refreshedKey.api_quota_used < refreshedKey.api_quota_limit) {
+        if (availableQuota >= 10) { // Need at least 10 credits for next request
           // Activate this API key
           const { error: activateError } = await supabaseAdmin
             .from('indb_site_integration')
@@ -216,14 +216,16 @@ export class APIKeyManager {
               is_active: true,
               updated_at: new Date().toISOString()
             })
-            .eq('id', refreshedKey.id)
+            .eq('id', key.id)
 
           if (!activateError) {
-            logger.info(`Successfully activated alternative API key with ${refreshedKey.api_quota_limit - refreshedKey.api_quota_used} quota remaining`)
+            logger.info(`Successfully activated alternative API key with ${availableQuota} quota remaining`)
             return true
           } else {
             logger.error('Error activating alternative API key:', activateError)
           }
+        } else {
+          logger.info(`Skipping API key with insufficient quota: ${availableQuota}/10 required`)
         }
       }
 
