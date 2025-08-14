@@ -77,7 +77,7 @@ export class APIKeyManager {
       if (!updatedIntegration) return 0
 
       const available = updatedIntegration.api_quota_limit - updatedIntegration.api_quota_used
-      // Check if we have at least 100 quota for the next request
+      // Check if we have at least 10 quota for the next request
       return Math.max(0, available)
 
     } catch (error) {
@@ -87,34 +87,58 @@ export class APIKeyManager {
   }
 
   /**
-   * Update quota usage after API call (site-level) - consumes 100 quota per request
+   * Update quota usage after API call (site-level) - consumes 10 quota per request
+   * If quota is exhausted, deactivates current API key and switches to next available one
    */
   async updateQuotaUsage(apiKey: string): Promise<void> {
     try {
-      // First get current quota usage
+      // First get current quota usage and limit
       const { data: currentData } = await supabaseAdmin
         .from('indb_site_integration')
-        .select('api_quota_used')
+        .select('api_quota_used, api_quota_limit')
         .eq('scrappingdog_apikey', apiKey)
         .eq('is_active', true)
         .single()
 
-      // Consume 100 quota per successful request
-      const newQuotaUsed = (currentData?.api_quota_used || 0) + 100
+      // Consume 10 quota per successful request
+      const newQuotaUsed = (currentData?.api_quota_used || 0) + 10
+      const quotaLimit = currentData?.api_quota_limit || 0
 
-      const { error } = await supabaseAdmin
-        .from('indb_site_integration')
-        .update({
-          api_quota_used: newQuotaUsed,
-          updated_at: new Date().toISOString()
-        })
-        .eq('scrappingdog_apikey', apiKey)
-        .eq('is_active', true)
+      // Check if quota is exhausted after this request
+      const isQuotaExhausted = newQuotaUsed >= quotaLimit
 
-      if (error) {
-        logger.error('Error updating quota usage:', error)
+      if (isQuotaExhausted) {
+        logger.warn(`API key quota exhausted: ${newQuotaUsed}/${quotaLimit}. Deactivating API key and switching to next available.`)
+        
+        // Deactivate current API key
+        await supabaseAdmin
+          .from('indb_site_integration')
+          .update({
+            api_quota_used: newQuotaUsed,
+            is_active: false, // Deactivate exhausted API key
+            updated_at: new Date().toISOString()
+          })
+          .eq('scrappingdog_apikey', apiKey)
+
+        // Try to activate next available API key
+        await this.activateNextAvailableAPIKey()
+
       } else {
-        logger.info(`Updated site-level quota usage: +100 (Total: ${newQuotaUsed})`)
+        // Normal quota update
+        const { error } = await supabaseAdmin
+          .from('indb_site_integration')
+          .update({
+            api_quota_used: newQuotaUsed,
+            updated_at: new Date().toISOString()
+          })
+          .eq('scrappingdog_apikey', apiKey)
+          .eq('is_active', true)
+
+        if (error) {
+          logger.error('Error updating quota usage:', error)
+        } else {
+          logger.info(`Updated site-level quota usage: +10 (Total: ${newQuotaUsed}/${quotaLimit})`)
+        }
       }
 
     } catch (error) {
@@ -152,6 +176,63 @@ export class APIKeyManager {
 
     } catch (error) {
       logger.error('Error checking quota reset:', error)
+    }
+  }
+
+  /**
+   * Activate next available API key when current one is exhausted
+   */
+  private async activateNextAvailableAPIKey(): Promise<boolean> {
+    try {
+      // Find next available ScrapingDog API key that is inactive but has quota remaining
+      const { data: availableKeys, error } = await supabaseAdmin
+        .from('indb_site_integration')
+        .select('*')
+        .eq('service_name', 'scrapingdog')
+        .eq('is_active', false)
+        .order('created_at', { ascending: true })
+
+      if (error || !availableKeys || availableKeys.length === 0) {
+        logger.error('No alternative API keys available. All ScrapingDog API keys exhausted.')
+        return false
+      }
+
+      // Find the first key with available quota
+      for (const key of availableKeys) {
+        await this.checkAndResetQuota(key)
+        
+        // Refresh key data after potential quota reset
+        const { data: refreshedKey } = await supabaseAdmin
+          .from('indb_site_integration')
+          .select('*')
+          .eq('id', key.id)
+          .single()
+
+        if (refreshedKey && refreshedKey.api_quota_used < refreshedKey.api_quota_limit) {
+          // Activate this API key
+          const { error: activateError } = await supabaseAdmin
+            .from('indb_site_integration')
+            .update({
+              is_active: true,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', refreshedKey.id)
+
+          if (!activateError) {
+            logger.info(`Successfully activated alternative API key with ${refreshedKey.api_quota_limit - refreshedKey.api_quota_used} quota remaining`)
+            return true
+          } else {
+            logger.error('Error activating alternative API key:', activateError)
+          }
+        }
+      }
+
+      logger.error('No API keys with available quota found. All ScrapingDog API keys exhausted.')
+      return false
+
+    } catch (error) {
+      logger.error('Error activating next available API key:', error)
+      return false
     }
   }
 
@@ -194,6 +275,46 @@ export class APIKeyManager {
     } catch (error) {
       logger.error('Error getting API key info:', error)
       return null
+    }
+  }
+
+  /**
+   * Get total number of available API keys and quota status
+   */
+  async getAPIKeysSummary(): Promise<{
+    totalKeys: number
+    activeKeys: number
+    totalQuota: number
+    usedQuota: number
+    availableQuota: number
+  }> {
+    try {
+      const { data: allKeys, error } = await supabaseAdmin
+        .from('indb_site_integration')
+        .select('*')
+        .eq('service_name', 'scrapingdog')
+
+      if (error || !allKeys) {
+        return { totalKeys: 0, activeKeys: 0, totalQuota: 0, usedQuota: 0, availableQuota: 0 }
+      }
+
+      const totalKeys = allKeys.length
+      const activeKeys = allKeys.filter(key => key.is_active).length
+      const totalQuota = allKeys.reduce((sum, key) => sum + (key.api_quota_limit || 0), 0)
+      const usedQuota = allKeys.reduce((sum, key) => sum + (key.api_quota_used || 0), 0)
+      const availableQuota = totalQuota - usedQuota
+
+      return {
+        totalKeys,
+        activeKeys,
+        totalQuota,
+        usedQuota,
+        availableQuota
+      }
+
+    } catch (error) {
+      logger.error('Error getting API keys summary:', error)
+      return { totalKeys: 0, activeKeys: 0, totalQuota: 0, usedQuota: 0, availableQuota: 0 }
     }
   }
 }

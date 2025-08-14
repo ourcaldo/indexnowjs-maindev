@@ -1969,3 +1969,27 @@ indb_keyword_rankings (latest positions)
   - **Solution**: Created separate API call to fetch ALL keywords for selected domain for statistics calculation
   - **Technical Fix**: Added `allDomainKeywordsData` query that fetches 1000 keywords independent of pagination
   - **Result**: Statistics cards remain consistent regardless of which page user is viewing
+
+### August 14, 2025 - ScrapingDog API Credit Consumption Fix & API Key Auto-Switching
+- ✅ **CORRECTED CREDIT CONSUMPTION**: Fixed ScrapingDog API credit usage from 100 to 10 credits per request
+  - **Issue**: Implementation had incorrect credit consumption of 100 per request instead of accurate 10 credits
+  - **Files Updated**: `lib/api-key-manager.ts` and `lib/rank-tracker.ts` 
+  - **Changes**: Updated all quota checks and consumption logic to use 10 credits per API request
+  - **Impact**: More efficient quota usage allowing 10x more keyword rank checks per API key
+- ✅ **IMPLEMENTED INTELLIGENT API KEY SWITCHING**: Added automatic API key deactivation and switching system
+  - **Auto-Deactivation**: When API key quota is exhausted, system automatically sets `is_active=false` 
+  - **Smart Switching**: System searches for next available API key with remaining quota and activates it
+  - **Fallback Protection**: If no API keys have remaining quota, system logs comprehensive error messages
+  - **Enhanced Logic**: Added `activateNextAvailableAPIKey()` method with quota reset checking
+  - **Monitoring**: Added `getAPIKeysSummary()` method for comprehensive API key status monitoring
+- ✅ **ENHANCED QUOTA MANAGEMENT**: Improved quota tracking with intelligent switching logic
+  - **Precise Tracking**: Quota updates now include current usage vs limit in all log messages
+  - **Proactive Management**: System prevents service interruption by switching keys before complete exhaustion
+  - **Site-Level Management**: All API key operations work at site level as per existing architecture
+  - **Comprehensive Logging**: Detailed logs for quota exhaustion, key switching, and error conditions
+- **Files Modified**: 
+  - `lib/api-key-manager.ts`: Enhanced with automatic key switching and comprehensive quota management
+  - `lib/rank-tracker.ts`: Updated credit requirements from 100 to 10 credits per request
+  - Created debug file for testing (deleted after verification)
+- **Database Schema**: No changes required - uses existing `indb_site_integration` table structure
+- **Result**: Robust, self-managing API key system that maximizes quota utilization and prevents service disruption

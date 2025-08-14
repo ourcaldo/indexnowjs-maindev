@@ -51,10 +51,10 @@ export class RankTracker {
         throw new Error('No active ScrapingDog API key found. Please contact admin to configure API key.')
       }
 
-      // 2. Check remaining quota (site-level) - need at least 100 quota per request
+      // 2. Check remaining quota (site-level) - need at least 10 quota per request
       const availableQuota = await this.apiKeyManager.getAvailableQuota()
-      if (availableQuota < 100) {
-        throw new Error(`Insufficient quota: ${availableQuota} remaining. Need 100 quota per request. Contact admin.`)
+      if (availableQuota < 10) {
+        throw new Error(`Insufficient quota: ${availableQuota} remaining. Need 10 quota per request. Contact admin.`)
       }
 
       logger.info(`Site has ${availableQuota} API calls remaining`)
