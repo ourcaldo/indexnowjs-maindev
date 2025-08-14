@@ -4,6 +4,7 @@
  */
 
 import { dailyRankCheckJob } from './daily-rank-check-job'
+import { quotaMonitor } from './quota-monitor'
 
 // Simple console logger for development
 const logger = {
@@ -43,8 +44,10 @@ export class WorkerStartup {
       // 1. Start daily rank check job scheduler
       await this.initializeRankCheckScheduler()
 
-      // 2. Add any other background workers here
-      // await this.initializeQuotaResetScheduler()
+      // 2. Initialize quota monitoring
+      await this.initializeQuotaMonitoring()
+
+      // 3. Add any other background workers here
       // await this.initializeNotificationWorker()
 
       this.isInitialized = true
@@ -80,6 +83,27 @@ export class WorkerStartup {
 
     } catch (error) {
       logger.error('Failed to initialize rank check scheduler:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Initialize quota monitoring system
+   */
+  private async initializeQuotaMonitoring(): Promise<void> {
+    try {
+      logger.info('Initializing quota monitoring system...')
+      
+      // Check initial quota health
+      const quotaStatus = await quotaMonitor.checkQuotaHealth()
+      logger.info(`Quota Health: ${quotaStatus.status} - ${quotaStatus.utilizationPercentage}% used (${quotaStatus.remainingQuota}/${quotaStatus.totalQuota})`)
+      
+      if (quotaStatus.status === 'critical' || quotaStatus.status === 'exhausted') {
+        logger.warn(`⚠️ QUOTA ALERT: ${quotaStatus.status.toUpperCase()} - Immediate attention required`)
+      }
+
+    } catch (error) {
+      logger.error('Failed to initialize quota monitoring:', error)
       throw error
     }
   }

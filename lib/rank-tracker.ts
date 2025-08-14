@@ -6,6 +6,7 @@
 import { ScrapingDogService } from './scrapingdog-service'
 import { APIKeyManager } from './api-key-manager'
 import { supabaseAdmin } from './supabase'
+import { errorTracker, ErrorTracker } from './error-tracker'
 // Simple console logger for development
 const logger = {
   info: (message: string, ...args: any[]) => console.log(`[INFO] ${message}`, ...args),
@@ -70,12 +71,14 @@ export class RankTracker {
         deviceType: keywordData.deviceType
       })
 
-      // 5. Only update quota usage if request was successful (no error)
+      // 5. Handle API response with error logging
       if (!rankResult.errorMessage) {
         await this.apiKeyManager.updateQuotaUsage(apiKey)
         logger.info(`API quota consumed for successful request: keyword ${keywordData.keyword}`)
       } else {
         logger.warn(`API quota NOT consumed for failed request: ${rankResult.errorMessage}`)
+        // Log API-level errors to error tracking system
+        await this.logRankCheckError(keywordData, rankResult.errorMessage, 'api_error')
       }
 
       // 6. Store result in database (both success and failure)
@@ -87,8 +90,14 @@ export class RankTracker {
       logger.info(`Rank check completed for keyword ${keywordData.id}: Position ${rankResult.position || 'Not found'}`)
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error(`Rank tracking failed for keyword ${keywordData.id}:`, error)
-      await this.storeFailedResult(keywordData.id, error instanceof Error ? error.message : 'Unknown error')
+      
+      // Log error to error tracking system with proper classification
+      await this.logRankCheckError(keywordData, errorMessage, this.classifyError(errorMessage))
+      
+      // Store failed result in database
+      await this.storeFailedResult(keywordData.id, errorMessage)
       throw error // Re-throw to let caller handle
     }
   }
@@ -221,6 +230,59 @@ export class RankTracker {
     } catch (error) {
       logger.error('Error updating last check date:', error)
     }
+  }
+
+  /**
+   * Log rank check error to error tracking system
+   */
+  private async logRankCheckError(
+    keywordData: KeywordToTrack, 
+    errorMessage: string,
+    errorType: 'quota_exceeded' | 'api_error' | 'parsing_error' | 'network_error' | 'authentication_error' = 'api_error'
+  ): Promise<void> {
+    try {
+      await errorTracker.logError({
+        keywordId: keywordData.id,
+        userId: keywordData.userId,
+        errorType,
+        errorMessage,
+        timestamp: new Date(),
+        severity: ErrorTracker.determineSeverity(errorType, errorMessage),
+        context: {
+          keyword: keywordData.keyword,
+          domain: keywordData.domain,
+          deviceType: keywordData.deviceType,
+          countryCode: keywordData.countryCode
+        }
+      })
+    } catch (error) {
+      logger.error('Failed to log rank check error:', error)
+    }
+  }
+
+  /**
+   * Classify error type based on error message
+   */
+  private classifyError(errorMessage: string): 'quota_exceeded' | 'api_error' | 'parsing_error' | 'network_error' | 'authentication_error' {
+    const message = errorMessage.toLowerCase()
+    
+    if (message.includes('quota') || message.includes('limit exceeded') || message.includes('insufficient')) {
+      return 'quota_exceeded'
+    }
+    
+    if (message.includes('unauthorized') || message.includes('invalid api key') || message.includes('authentication')) {
+      return 'authentication_error'
+    }
+    
+    if (message.includes('network') || message.includes('timeout') || message.includes('connection')) {
+      return 'network_error'
+    }
+    
+    if (message.includes('parse') || message.includes('invalid response') || message.includes('unexpected format')) {
+      return 'parsing_error'
+    }
+    
+    return 'api_error' // Default classification
   }
 
   /**
