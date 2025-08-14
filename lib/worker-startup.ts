@@ -150,7 +150,37 @@ export class WorkerStartup {
     logger.info('Manually triggering rank check job...')
     await dailyRankCheckJob.runManually()
   }
+
+  /**
+   * Get comprehensive background services status
+   */
+  getBackgroundServicesStatus(): {
+    isInitialized: boolean
+    rankCheckJob: any
+    quotaHealth: any
+    uptime: number
+    services: string[]
+  } {
+    return {
+      isInitialized: this.isInitialized,
+      rankCheckJob: dailyRankCheckJob.getStatus(),
+      quotaHealth: 'monitoring_active',
+      uptime: process.uptime(),
+      services: [
+        'daily_rank_check_scheduler',
+        'quota_monitoring',
+        'error_tracking'
+      ]
+    }
+  }
 }
 
 // Export singleton instance
 export const workerStartup = WorkerStartup.getInstance()
+
+/**
+ * Get background services status (for API endpoints)
+ */
+export function getBackgroundServicesStatus() {
+  return workerStartup.getBackgroundServicesStatus()
+}
