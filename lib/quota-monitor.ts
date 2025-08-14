@@ -199,10 +199,24 @@ export class QuotaMonitor {
         return
       }
 
+      // Get first admin user for system notifications
+      const { data: adminUser } = await supabaseAdmin
+        .from('indb_user_profiles')
+        .select('user_id')
+        .eq('role', 'super_admin')
+        .limit(1)
+        .single()
+
+      if (!adminUser) {
+        logger.warn('No admin user found for system quota alerts')
+        return
+      }
+
       // Create new dashboard notification
       const { error } = await supabaseAdmin
         .from('indb_notifications_dashboard')
         .insert({
+          user_id: adminUser.user_id, // Use admin user for system alerts
           type: 'error',
           title: 'Quota Alert',
           message: alert.message,
