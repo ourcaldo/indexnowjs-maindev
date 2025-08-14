@@ -172,73 +172,52 @@ export class QuotaMonitor {
       })
     }
 
-    // Store alerts in database for dashboard display
+    // Log alerts for admin monitoring only (NOT user-facing)
     for (const alert of alerts) {
       await this.storeQuotaAlert(alert)
     }
   }
 
   /**
-   * Store quota alert in notifications system
+   * Store quota alert in admin logs only (NOT user notifications)
    */
   private async storeQuotaAlert(alert: QuotaAlert): Promise<void> {
     try {
-      // Check if similar alert already exists today to avoid spam
-      const today = new Date().toISOString().split('T')[0]
-      const { data: existingAlert } = await supabaseAdmin
-        .from('indb_notifications_dashboard')
-        .select('id')
-        .eq('type', 'error')
-        .eq('title', 'Quota Alert')
-        .gte('created_at', `${today}T00:00:00.000Z`)
-        .like('message', `%${alert.level}%`)
-        .single()
-
-      if (existingAlert) {
-        logger.info(`Quota alert already sent today for level: ${alert.level}`)
-        return
+      // Log quota alerts to console and system logs only
+      // This is site-level infrastructure - users should NOT see these alerts
+      if (alert.level === 'critical' || alert.level === 'exhausted') {
+        logger.error(`🚨 ADMIN ALERT: ${alert.message}`)
+      } else {
+        logger.warn(`⚠️ ADMIN WARNING: ${alert.message}`)
       }
 
-      // Get first admin user for system notifications
-      const { data: adminUser } = await supabaseAdmin
-        .from('indb_user_profiles')
-        .select('user_id')
-        .eq('role', 'super_admin')
-        .limit(1)
-        .single()
-
-      if (!adminUser) {
-        logger.warn('No admin user found for system quota alerts')
-        return
-      }
-
-      // Create new dashboard notification
+      // Store in analytics for admin tracking only
       const { error } = await supabaseAdmin
-        .from('indb_notifications_dashboard')
+        .from('indb_analytics_error_stats')
         .insert({
-          user_id: adminUser.user_id, // Use admin user for system alerts
-          type: 'error',
-          title: 'Quota Alert',
-          message: alert.message,
+          error_date: new Date().toISOString().split('T')[0],
+          user_id: '00000000-0000-0000-0000-000000000000', // System user ID
+          error_type: 'system_quota_alert',
+          severity: alert.level === 'critical' || alert.level === 'exhausted' ? 'critical' : 'medium',
+          error_count: 1,
+          affected_endpoints: 1,
+          last_occurrence: new Date().toISOString(),
           metadata: {
             alert_level: alert.level,
             remaining_quota: alert.remainingQuota,
             utilization_percentage: alert.utilizationPercentage,
             affected_keys: alert.affectedKeys,
-            notification_type: 'quota_alert'
-          },
-          action_url: '/dashboard/settings?tab=integrations',
-          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Expire in 7 days
+            notification_type: 'admin_quota_alert',
+            message: alert.message
+          }
         })
 
       if (error) {
-        logger.error('Failed to store quota alert:', error)
-      } else {
-        logger.info(`Quota alert stored: ${alert.level} - ${alert.message}`)
+        logger.error('Failed to log quota alert to analytics:', error)
       }
 
     } catch (error) {
-      logger.error('Error storing quota alert:', error)
+      logger.error('Error logging quota alert:', error)
     }
   }
 

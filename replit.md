@@ -119,7 +119,7 @@ The system includes proper error handling, logging, quota management, batch proc
   - **Cleanup Operations**: Automatic cleanup of old error logs to maintain database performance
 - ✅ **ADVANCED QUOTA MONITORING SYSTEM**: Implemented quota health monitoring and reporting (`lib/quota-monitor.ts`)
   - **Real-time Health Checks**: Continuous monitoring of API key quota usage with status classification
-  - **Intelligent Alerting**: Automatic quota alerts with notification system integration for warning/critical/exhausted states
+  - **Admin-Only Alerting**: System-level quota alerts logged for administrators only (not user-facing notifications)
   - **Comprehensive Reports**: Detailed quota usage reports with efficiency metrics and recommendations
   - **Multiple API Key Support**: Monitors all ScrapingDog API keys with individual status tracking
   - **Performance Analytics**: Success rate tracking, error analysis, and optimization recommendations
