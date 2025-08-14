@@ -188,7 +188,7 @@ export class AuthService {
   }
 
   onAuthStateChange(callback: (user: AuthUser | null) => void) {
-    return supabase.auth.onAuthStateChange(async (event, session) => {
+    return supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       if (session?.user) {
         const authUser: AuthUser = {
           id: session.user.id,
