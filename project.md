@@ -44,7 +44,6 @@ The application provides instant indexing capabilities similar to RankMath's Ins
 If an updates affectig the database and RLS. You need to provide the SQL Query for me to run in Supabase SQL Editor. Keep in mind that to make new tables, you must be follow this prefix "indb_{collections}_{table-name}" "collections" is like same collections, for example like "security" collection which have tables "indb_security_event", "indb_security_log" and so-on.
 
 All tables use `indb_` prefix and are located at https://base.indexnow.studio:
-
 | table_name                        | column_name                 | data_type                | is_nullable | column_default                                                   |
 | --------------------------------- | --------------------------- | ------------------------ | ----------- | ---------------------------------------------------------------- |
 | admin_dashboard_stats             | total_users                 | bigint                   | YES         | null                                                             |
@@ -250,6 +249,9 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_keyword_rank_history         | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
 | indb_keyword_rank_history         | created_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_keyword_rank_history         | updated_at                  | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_rank_history         | device_type                 | text                     | YES         | null                                                             |
+| indb_keyword_rank_history         | country_id                  | uuid                     | YES         | null                                                             |
+| indb_keyword_rank_history         | tags                        | ARRAY                    | YES         | null                                                             |
 | indb_keyword_rankings             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
 | indb_keyword_rankings             | keyword_id                  | uuid                     | NO          | null                                                             |
 | indb_keyword_rankings             | position                    | integer                  | YES         | null                                                             |
@@ -258,6 +260,9 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_keyword_rankings             | difficulty_score            | integer                  | YES         | null                                                             |
 | indb_keyword_rankings             | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
 | indb_keyword_rankings             | created_at                  | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_rankings             | device_type                 | text                     | YES         | null                                                             |
+| indb_keyword_rankings             | country_id                  | uuid                     | YES         | null                                                             |
+| indb_keyword_rankings             | tags                        | ARRAY                    | YES         | null                                                             |
 | indb_keyword_usage                | id                          | uuid                     | NO          | gen_random_uuid()                                                |
 | indb_keyword_usage                | user_id                     | uuid                     | NO          | null                                                             |
 | indb_keyword_usage                | keywords_used               | integer                  | NO          | 0                                                                |
@@ -411,6 +416,15 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | indb_security_rate_limits         | window_start                | timestamp with time zone | YES         | now()                                                            |
 | indb_security_rate_limits         | created_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_security_rate_limits         | updated_at                  | timestamp with time zone | YES         | now()                                                            |
+| indb_site_integration             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_site_integration             | service_name                | text                     | NO          | 'scrapingdog'::text                                              |
+| indb_site_integration             | scrappingdog_apikey         | text                     | NO          | null                                                             |
+| indb_site_integration             | api_quota_limit             | integer                  | YES         | 1000                                                             |
+| indb_site_integration             | api_quota_used              | integer                  | YES         | 0                                                                |
+| indb_site_integration             | quota_reset_date            | date                     | YES         | CURRENT_DATE                                                     |
+| indb_site_integration             | is_active                   | boolean                  | YES         | true                                                             |
+| indb_site_integration             | created_at                  | timestamp with time zone | YES         | now()                                                            |
+| indb_site_integration             | updated_at                  | timestamp with time zone | YES         | now()                                                            |
 | indb_site_settings                | id                          | uuid                     | NO          | gen_random_uuid()                                                |
 | indb_site_settings                | site_name                   | text                     | NO          | 'IndexNow Pro'::text                                             |
 | indb_site_settings                | site_description            | text                     | YES         | 'Professional URL indexing automation platform'::text            |
