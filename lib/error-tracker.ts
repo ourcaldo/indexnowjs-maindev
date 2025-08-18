@@ -39,23 +39,29 @@ export class ErrorTracker {
     try {
       logger.info(`Logging rank check error: ${error.errorType} for keyword ${error.keywordId}`)
 
-      // Store in existing indb_analytics_error_stats table
+      // Store in existing indb_system_error_logs table (which has metadata support)
       const { error: dbError } = await supabaseAdmin
-        .from('indb_analytics_error_stats')
+        .from('indb_system_error_logs')
         .insert({
-          error_date: error.timestamp.toISOString().split('T')[0], // YYYY-MM-DD
+          id: `rank_check_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           user_id: error.userId,
           error_type: `rank_check_${error.errorType}`,
-          severity: error.severity,
-          error_count: 1,
-          affected_endpoints: 1, // Each keyword check is an endpoint
-          last_occurrence: error.timestamp.toISOString(),
+          severity: error.severity.toUpperCase(),
+          message: error.errorMessage,
+          user_message: `Rank check failed: ${error.errorMessage}`,
+          endpoint: '/api/keyword-tracker/check-rank',
+          http_method: 'POST',
+          status_code: 500,
           metadata: {
             keyword_id: error.keywordId,
             error_message: error.errorMessage,
             context: error.context || {},
-            service: 'rank_tracking'
-          }
+            service: 'rank_tracking',
+            error_date: error.timestamp.toISOString().split('T')[0],
+            affected_endpoints: 1
+          },
+          stack_trace: null,
+          created_at: error.timestamp.toISOString()
         })
 
       if (dbError) {
@@ -78,13 +84,13 @@ export class ErrorTracker {
       const endDate = dateRange.end.toISOString().split('T')[0]
 
       const { data: errors, error } = await supabaseAdmin
-        .from('indb_analytics_error_stats')
+        .from('indb_system_error_logs')
         .select('*')
         .eq('user_id', userId)
         .like('error_type', 'rank_check_%')
-        .gte('error_date', startDate)
-        .lte('error_date', endDate)
-        .order('last_occurrence', { ascending: false })
+        .gte('created_at', `${startDate}T00:00:00.000Z`)
+        .lte('created_at', `${endDate}T23:59:59.999Z`)
+        .order('created_at', { ascending: false })
 
       if (error) {
         logger.error('Failed to get user error stats:', error)
@@ -113,17 +119,17 @@ export class ErrorTracker {
   }> {
     try {
       let query = supabaseAdmin
-        .from('indb_analytics_error_stats')
+        .from('indb_system_error_logs')
         .select('*')
         .like('error_type', 'rank_check_%')
 
       if (dateRange) {
-        const startDate = dateRange.start.toISOString().split('T')[0]
-        const endDate = dateRange.end.toISOString().split('T')[0]
-        query = query.gte('error_date', startDate).lte('error_date', endDate)
+        const startDate = dateRange.start.toISOString()
+        const endDate = dateRange.end.toISOString()
+        query = query.gte('created_at', startDate).lte('created_at', endDate)
       }
 
-      const { data: errors, error } = await query.order('last_occurrence', { ascending: false })
+      const { data: errors, error } = await query.order('created_at', { ascending: false })
 
       if (error) {
         logger.error('Failed to get system error stats:', error)
@@ -137,8 +143,8 @@ export class ErrorTracker {
       }
 
       // Calculate comprehensive statistics
-      const totalErrors = (errors || []).reduce((sum, err) => sum + (err.error_count || 0), 0)
-      const criticalErrors = (errors || []).filter(err => err.severity === 'critical').length
+      const totalErrors = (errors || []).length
+      const criticalErrors = (errors || []).filter(err => err.severity === 'CRITICAL').length
       const affectedUsers = new Set((errors || []).map(err => err.user_id)).size
       const errorsByType = this.aggregateErrors(errors || [])
 
@@ -173,12 +179,12 @@ export class ErrorTracker {
       const sinceDate = new Date(Date.now() - hours * 60 * 60 * 1000)
       
       const { data: errors, error } = await supabaseAdmin
-        .from('indb_analytics_error_stats')
+        .from('indb_system_error_logs')
         .select('*')
         .like('error_type', 'rank_check_%')
-        .eq('severity', 'critical')
-        .gte('last_occurrence', sinceDate.toISOString())
-        .order('last_occurrence', { ascending: false })
+        .eq('severity', 'CRITICAL')
+        .gte('created_at', sinceDate.toISOString())
+        .order('created_at', { ascending: false })
         .limit(50)
 
       if (error) {
@@ -203,10 +209,10 @@ export class ErrorTracker {
       const cutoffDateStr = cutoffDate.toISOString().split('T')[0]
 
       const { error } = await supabaseAdmin
-        .from('indb_analytics_error_stats')
+        .from('indb_system_error_logs')
         .delete()
         .like('error_type', 'rank_check_%')
-        .lt('error_date', cutoffDateStr)
+        .lt('created_at', `${cutoffDateStr}T00:00:00.000Z`)
 
       if (error) {
         logger.error('Failed to cleanup old errors:', error)
@@ -241,10 +247,10 @@ export class ErrorTracker {
         keywordIds: new Set()
       }
 
-      existing.count += error.error_count || 1
+      existing.count += 1
       existing.userIds.add(error.user_id)
       
-      const lastOcc = new Date(error.last_occurrence)
+      const lastOcc = new Date(error.created_at)
       if (lastOcc > existing.lastOccurrence) {
         existing.lastOccurrence = lastOcc
         existing.severity = error.severity // Use most recent severity
@@ -275,8 +281,8 @@ export class ErrorTracker {
     const trends: { [date: string]: number } = {}
 
     for (const error of errors) {
-      const date = error.error_date
-      trends[date] = (trends[date] || 0) + (error.error_count || 1)
+      const date = error.created_at.split('T')[0] // Extract YYYY-MM-DD from timestamp
+      trends[date] = (trends[date] || 0) + 1
     }
 
     return trends

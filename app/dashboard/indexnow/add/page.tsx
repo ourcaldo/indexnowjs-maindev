@@ -461,9 +461,17 @@ export default function AddKeywords() {
                       }}
                       onClick={() => setDeviceType('desktop')}
                     >
-                      <div className="flex items-center gap-2">
-                        <Monitor className="w-4 h-4" style={{color: '#3D8BFF'}} />
-                        <span className="font-medium" style={{color: '#1A1A1A'}}>Desktop</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Monitor className="w-4 h-4" style={{color: '#3D8BFF'}} />
+                          <span className="font-medium" style={{color: '#1A1A1A'}}>Desktop</span>
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium" style={{backgroundColor: '#4BB543', color: '#FFFFFF'}}>
+                          <span>Recommended</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-xs" style={{color: '#6C757D'}}>
+                        Most accurate rankings and wider search results
                       </div>
                     </div>
                     <div

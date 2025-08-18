@@ -691,6 +691,21 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**DATABASE ERROR TRACKING FIX & KEYWORD TRACKER UI ENHANCEMENT (August 18, 2025)**
+- ✅ **CRITICAL DATABASE ERROR RESOLVED**: Fixed "metadata column not found" error in rank tracking error logging system
+  - **Root Cause Identified**: Error tracker was attempting to insert metadata into `indb_analytics_error_stats` table which lacks metadata column support
+  - **Solution Implemented**: Updated error tracker to use `indb_system_error_logs` table which has proper metadata column and structure
+  - **Database Migration**: Changed from `indb_analytics_error_stats` to `indb_system_error_logs` for all rank check error logging operations
+  - **Error Schema Updated**: Modified error logging to use proper field mappings (created_at instead of last_occurrence, proper severity formatting)
+  - **Query Updates**: Updated all error retrieval queries to work with new table structure and column names
+  - **Backward Compatibility**: Error tracking functionality preserved while fixing database constraint issues
+- ✅ **KEYWORD TRACKER DEVICE SELECTION ENHANCEMENT**: Added recommendation system for device type selection
+  - **Desktop Recommendation Badge**: Added green "Recommended" badge to desktop device selection option
+  - **Enhanced User Guidance**: Added descriptive text explaining "Most accurate rankings and wider search results" for desktop option
+  - **Improved UI Layout**: Updated device selection cards with better spacing and recommendation display
+  - **User Experience**: Clear visual indication helps users make informed device type selections for optimal rank tracking results
+  - **Professional Design**: Maintained project color scheme with green success color (#4BB543) for recommendation badge
+
 **REPLIT ENVIRONMENT MIGRATION & RANK HISTORY FIX COMPLETED (August 13, 2025)**
 - ✅ **PROJECT SUCCESSFULLY MIGRATED TO REPLIT ENVIRONMENT**: Completed migration from Replit Agent to standard Replit development environment
   - **Next.js Application Running**: Application successfully running on port 5000 with all background services operational
