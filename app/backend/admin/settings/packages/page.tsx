@@ -13,7 +13,8 @@ import {
   Star,
   Clock,
   Users,
-  Zap
+  Zap,
+  Search
 } from 'lucide-react'
 
 interface PricingTier {
@@ -252,7 +253,7 @@ export default function PackageManagement() {
             <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
               Quota Limits
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Service Accounts</label>
                 <input
@@ -282,6 +283,26 @@ export default function PackageManagement() {
                   className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
                   placeholder="1"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+                  <span className="flex items-center gap-2">
+                    Keywords Limit
+                    <span className="px-2 py-1 text-xs bg-[#4BB543]/10 text-[#4BB543] rounded-full border border-[#4BB543]/20">
+                      Rank Tracker
+                    </span>
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  value={formData.quota_limits?.keywords_limit || 0}
+                  onChange={(e) => updateQuotaLimit('keywords_limit', parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="100 (use -1 for unlimited)"
+                />
+                <p className="text-xs text-[#6C757D] mt-1">
+                  Maximum number of keywords that can be tracked simultaneously for rank monitoring
+                </p>
               </div>
             </div>
           </div>
@@ -510,7 +531,7 @@ export default function PackageManagement() {
                       <p className="text-xs text-[#6C757D] mt-1">Slug: {pkg.slug}</p>
                       
                       {/* Package Details */}
-                      <div className="mt-3 flex items-center space-x-6 text-xs text-[#6C757D]">
+                      <div className="mt-3 flex items-center flex-wrap gap-x-6 gap-y-2 text-xs text-[#6C757D]">
                         <div className="flex items-center space-x-1">
                           <Users className="h-4 w-4" />
                           <span>{pkg.quota_limits?.service_accounts === -1 ? 'Unlimited' : pkg.quota_limits?.service_accounts || 0} Service Accounts</span>
@@ -522,6 +543,10 @@ export default function PackageManagement() {
                         <div className="flex items-center space-x-1">
                           <Clock className="h-4 w-4" />
                           <span>{pkg.quota_limits?.concurrent_jobs || 0} Concurrent Jobs</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Search className="h-4 w-4 text-[#4BB543]" />
+                          <span>{pkg.quota_limits?.keywords_limit === -1 ? 'Unlimited' : pkg.quota_limits?.keywords_limit || 0} Keywords</span>
                         </div>
                       </div>
 

@@ -64,7 +64,7 @@ The application is built with Next.js App Router and integrates with an Express 
 - **Google API Integration:** Direct integration with Google Indexing API, service account authentication, comprehensive error handling with retry logic, and rate limiting.
 - **Email Notification System:** Professional, branded email templates for job completion/failure, daily quota reports, and quota alerts.
 - **Security Features:** Comprehensive Zod schema validation, SQL injection prevention, per-user rate limiting, CORS configuration, security headers, audit logging, and role-based authorization.
-- **Rank Tracking Backend:** Implemented ScrapingDog API integration with API key management, quota tracking, daily rank checks, and batch processing. Includes comprehensive error tracking and advanced quota monitoring.
+- **Rank Tracking Backend:** Implemented ScrapingDog API integration with API key management, quota tracking, daily rank checks, and batch processing. Includes comprehensive error tracking and advanced quota monitoring. Enhanced admin package settings to support keyword limits configuration.
 
 **User Interface Design:**
 - **Main Color:** Clean white backgrounds.
