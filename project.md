@@ -691,6 +691,18 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**UUID FORMAT ERROR FIX (August 18, 2025)**
+- ✅ **CRITICAL UUID CONSTRAINT ERROR RESOLVED**: Fixed invalid UUID format error in quota alert and error tracking systems
+  - **Root Cause Identified**: Both quota-monitor.ts and error-tracker.ts were generating invalid UUIDs using timestamp + random string format
+  - **Error Details**: Code was generating strings like "quota_alert_1755499323186_uqlapm9vm" instead of proper UUID format for database UUID columns
+  - **Database Constraint**: `indb_system_error_logs.id` column requires valid UUID format (uses gen_random_uuid() default)
+  - **Quota Monitor Fix**: Removed manual ID generation in quota alert logging - let database auto-generate proper UUIDs
+  - **Error Tracker Fix**: Removed manual ID generation in rank check error logging - let database auto-generate proper UUIDs
+  - **Error Type Compliance**: Updated both services to use proper ErrorType enum values (SYSTEM, EXTERNAL_API) instead of custom strings
+  - **Database Field Compliance**: Removed manual created_at timestamp fields - let database use now() defaults
+  - **System Stability**: Eliminated PostgreSQL constraint errors that were preventing proper error logging and quota monitoring
+  - **VERIFICATION COMPLETE**: Application now running error-free with proper database compliance
+
 **DEVICE RECOMMENDATION POSITIONING REFINEMENT (August 18, 2025)**
 - ✅ **RECOMMENDATION BADGE REPOSITIONED**: Fixed device type recommendation positioning per user requirements  
   - **User Issue Identified**: Recommendation badge was incorrectly positioned as general "Device Type" label rather than specific to desktop option
