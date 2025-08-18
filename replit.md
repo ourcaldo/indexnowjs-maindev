@@ -2,7 +2,7 @@
 
 ## Overview
 
-IndexNow Pro is a professional-grade, full-stack web application designed to automate Google URL indexing through the Google Search Console API. It serves as a comprehensive solution for SEO professionals, digital marketers, and website owners needing efficient, large-scale indexing with advanced monitoring and reporting. The application provides instant indexing capabilities, managing multiple service accounts, scheduled jobs, and enterprise-scale operations.
+IndexNow Pro is a professional-grade, full-stack web application designed to automate Google URL indexing through the Google Search Console API. It provides instant indexing, manages multiple service accounts, schedules jobs, and offers advanced monitoring and reporting for SEO professionals, digital marketers, and website owners. Its vision is to be a comprehensive solution for efficient, large-scale indexing.
 
 **Key Capabilities:**
 - Automated Google Indexing for thousands of URLs.
@@ -14,7 +14,6 @@ IndexNow Pro is a professional-grade, full-stack web application designed to aut
 
 ## User Preferences
 
-- **Migration Status:** Project successfully migrated to Replit environment on 2025-08-13. All systems operational.
 - **Architecture:** The project strictly uses Next.js with NO VITE. Database operations require SQL queries for Supabase SQL Editor. Database table names must follow the `indb_{collections}_{table-name}` prefix.
 - **Color Scheme:** Use ONLY the defined project color scheme. Reference images are for layout/UI inspiration ONLY, not color.
   - Background: #FFFFFF (Pure White), #F7F9FC (Light Gray)
@@ -41,131 +40,49 @@ The application is built with Next.js App Router and integrates with an Express 
 - `lib/`: Utility functions and configurations.
 
 **Frontend Architecture:**
-- **Framework:** Next.js (React 18, TypeScript).
-- **Build System:** Next.js built-in system.
+- **Framework:** Next.js (React 18, TypeScript) with App Router.
 - **UI Framework:** Radix UI headless components with shadcn/ui.
 - **State Management:** TanStack React Query v5.
 - **Routing:** Wouter for client-side routing.
 - **Form Handling:** React Hook Form with Zod validation.
-- **Styling:** Tailwind CSS with a clean white background and dark palette accents (slate-900, stone-900, gray-800, neutral-800).
+- **Styling:** Tailwind CSS with a clean white background and dark palette accents.
 - **Authentication:** Supabase Auth with JWT tokens and automatic session management.
 
 **Backend Architecture:**
 - **Runtime:** Node.js 20+ with Express.js.
 - **Language:** TypeScript with ES modules.
 - **API Design:** RESTful API with comprehensive middleware.
-- **Database:** Supabase with type-safe operations.
+- **Database:** Supabase with type-safe operations, using `indb_` prefixed tables.
 - **Job Processing:** Node-cron for scheduled jobs with WebSocket real-time updates.
 - **Email System:** Nodemailer with custom HTML templates.
 - **Security:** Multi-layered security, input validation, rate limiting, audit logging.
 
 **Key Features:**
-- **User Management & Authentication:** Secure JWT-based authentication, user profiles, three-tier role system (user, admin, super_admin), and granular settings management.
+- **User Management & Authentication:** Secure JWT-based authentication, user profiles, three-tier role system (user, admin, super_admin).
 - **Service Account Management:** Secure JSON upload, AES-256-CBC credential encryption, daily and minute quota tracking, load balancing, and JWT token caching.
 - **Indexing Job System:** Job creation via sitemap parsing or manual URL lists, various scheduling options, status tracking, real-time progress monitoring via WebSockets, and bulk operations.
 - **Google API Integration:** Direct integration with Google Indexing API, service account authentication, comprehensive error handling with retry logic, and rate limiting.
 - **Email Notification System:** Professional, branded email templates for job completion/failure, daily quota reports, and quota alerts.
 - **Security Features:** Comprehensive Zod schema validation, SQL injection prevention, per-user rate limiting, CORS configuration, security headers, audit logging, and role-based authorization.
-- **Database Schema:** Uses `indb_` prefixed tables for authentication, service accounts, indexing jobs, URL submissions, quota usage, notifications, and analytics.
-
-**Data Flow:**
-- **User Journey:** Authentication via Supabase Auth, service account setup, job creation, processing, real-time execution monitoring, and analytics.
-- **API Request Flow:** Authentication middleware, input validation, authorization, business logic execution, database operations via Supabase client, external API calls, and consistent response formatting.
-- **Job Processing Flow:** Job creation in database, Node-cron for scheduling, URL processing (sitemap/manual), Google API submission with quota management, WebSocket updates, and email notifications.
-
-## Recent Changes
-*Latest updates and modifications made to the project*
-
-### 2025-08-13: Project Migration & Rank Tracking Backend Completion ✅
-- ✅ **MIGRATION COMPLETE**: Successfully migrated IndexNow Pro project to Replit environment
-- ✅ **FIXED CRITICAL SQL ISSUES**: Corrected integration table design to be site-level (removed user_id)
-- ✅ **UPDATED API KEY MANAGER**: Changed from per-user to site-level API key management for ScrapingDog
-- ✅ **CORRECTED DATABASE TYPES**: Updated TypeScript interfaces to match site-level architecture  
-- ✅ **FIXED RANK TRACKER**: Updated all service calls to use site-level quota and API key management
-- ✅ **CLEANED SQL QUERIES**: Removed attempts to add existing columns, proper IF NOT EXISTS usage
-- ✅ **ALL LSP ERRORS RESOLVED**: Fixed TypeScript compilation errors across all backend services
-- ✅ **PROVIDED TABLE FIX**: Created `sql-fix-integration-table.sql` to properly convert existing user-level table to site-level
-
-### 2025-01-13: Complete Rank Tracking Backend Implementation ✅
-- ✅ Implemented comprehensive ScrapingDog API integration service (`lib/scrapingdog-service.ts`)
-- ✅ Created API key management system with quota tracking (`lib/api-key-manager.ts`) 
-- ✅ Built core rank tracker service with batch processing (`lib/rank-tracker.ts`)
-- ✅ Added daily rank check job scheduler with cron scheduling (`lib/daily-rank-check-job.ts`)
-- ✅ Created batch processor for handling multiple keywords efficiently (`lib/batch-processor.ts`)
-- ✅ Implemented worker startup service for background job initialization (`lib/worker-startup.ts`)
-- ✅ Added manual rank check API endpoint (`app/api/keyword-tracker/check-rank/route.ts`)
-- ✅ Created admin trigger endpoint for manual rank checks (`app/api/admin/rank-tracker/trigger-manual-check/route.ts`)
-- ✅ Updated database types to include `indb_site_integration` table and `last_check_date` field
-- ✅ Provided comprehensive SQL queries for database setup (`sql-queries-for-rank-tracking.sql`)
-- ✅ Integrated background service initialization into app layout for automatic startup
-- ✅ Added development test component for rank tracker testing (`components/job-processor-test.tsx`)
-- ✅ Fixed TypeScript compilation errors and LSP diagnostics
-- ✅ Properly integrated worker startup into Next.js application lifecycle
-
-**RANK TRACKING BACKEND IMPLEMENTATION STATUS: COMPLETE** 🎉
-All phases (1-5) of the rank tracking backend are now fully implemented:
-- ✅ **Phase 1-3**: ScrapingDog API integration, rank tracking engine, immediate rank checks
-- ✅ **Phase 4**: Scheduled daily processing with automated batch operations  
-- ✅ **Phase 5**: Complete error handling & monitoring system with comprehensive analytics
-
-The system includes proper error handling, logging, quota management, batch processing, automatic startup, comprehensive monitoring, and intelligent alerting capabilities. All backend services are operational and ready for production use.
-
-### 2025-08-14: Phase 5 Error Handling & Monitoring System Implementation Complete ✅
-- ✅ **COMPREHENSIVE ERROR TRACKING SYSTEM**: Implemented complete error tracking infrastructure (`lib/error-tracker.ts`)
-  - **Error Classification**: Automatic categorization of errors (quota_exceeded, api_error, parsing_error, network_error, authentication_error)
-  - **Severity Assessment**: Intelligent severity determination (low, medium, high, critical) based on error type and context
-  - **Analytics Integration**: Stores errors in existing `indb_analytics_error_stats` table with metadata for analysis
-  - **System & User Stats**: Comprehensive error statistics for both system-wide and user-specific monitoring
-  - **Cleanup Operations**: Automatic cleanup of old error logs to maintain database performance
-- ✅ **ADVANCED QUOTA MONITORING SYSTEM**: Implemented quota health monitoring and reporting (`lib/quota-monitor.ts`)
-  - **Real-time Health Checks**: Continuous monitoring of API key quota usage with status classification
-  - **Admin-Only Alerting**: System-level quota alerts logged for administrators only (not user-facing notifications)
-  - **Comprehensive Reports**: Detailed quota usage reports with efficiency metrics and recommendations
-  - **Multiple API Key Support**: Monitors all ScrapingDog API keys with individual status tracking
-  - **Performance Analytics**: Success rate tracking, error analysis, and optimization recommendations
-- ✅ **INTEGRATED ERROR TRACKING INTO RANK TRACKER**: Enhanced core rank tracking service with error monitoring
-  - **Automatic Error Logging**: All rank check failures are automatically logged with proper classification
-  - **Context-Rich Errors**: Error logs include keyword details, user information, and operational context
-  - **API Response Handling**: Enhanced handling of ScrapingDog API errors with proper quota management
-  - **Error Classification Logic**: Intelligent error type detection based on error message analysis
-- ✅ **MONITORING API ENDPOINTS**: Created comprehensive admin API endpoints for monitoring and analysis
-  - **Quota Health**: `/api/admin/quota/health` - Real-time quota status and health metrics
-  - **Quota Reports**: `/api/admin/quota/report` - Detailed usage reports with configurable time periods
-  - **Quota Status**: `/api/admin/quota/status` - Individual API key status and summary statistics  
-  - **Error Statistics**: `/api/admin/errors/stats` - System and user-specific error analytics
-  - **Critical Errors**: `/api/admin/errors/critical` - Recent critical errors requiring immediate attention
-- ✅ **ENHANCED BACKGROUND SERVICES**: Integrated monitoring systems into application startup
-  - **Quota Health Checks**: Automatic quota health assessment on application startup
-  - **Alert Generation**: Immediate notification generation for critical quota states
-  - **Integrated Initialization**: Quota monitoring initialized alongside rank check scheduler
-
-### 2025-08-14: Sidebar Hydration & API Key Management Updates ⚠️
-- ✅ **CORRECTED SCRAPINGDOG API CREDITS**: Fixed business logic bug from 100 to 10 credits per request
-- ✅ **IMPLEMENTED API KEY AUTO-SWITCHING**: Added intelligent API key rotation when quota exhausted
-- ✅ **ENHANCED WEBSOCKET ERROR HANDLING**: Reduced console spam and improved error management
-- ⚠️ **SIDEBAR HYDRATION WORK IN PROGRESS**: Implemented ClientOnlyWrapper solution but issue persists
-- 🔧 **DASHBOARD COMPILATION FIXED**: Resolved syntax errors and JSX structure issues
-- 📋 **REMAINING TASK**: Hydration mismatch still occurring on homepage LandingPage component
+- **Rank Tracking Backend:** Implemented ScrapingDog API integration with API key management, quota tracking, daily rank checks, and batch processing. Includes comprehensive error tracking and advanced quota monitoring.
 
 **User Interface Design:**
 - **Main Color:** Clean white backgrounds.
-- **Accent Colors:** PROPER dark palette (slate-900/800, stone-900/800, gray-800/900, neutral-800/900).
+- **Accent Colors:** Dark palette (slate-900/800, stone-900/800, gray-800/900, neutral-800/900).
 - **Typography:** Clean, readable fonts.
 - **Layout:** Dashboard-style with collapsible left-aligned sidebar navigation.
 - **Responsive Design:** Mobile-first approach.
 - **Theme:** Professional appearance for SEO professionals.
-- **Key Pages:** Dashboard, IndexNow (job creation), Manage Jobs, Job Details, Settings.
 
 ## External Dependencies
 
 - **Supabase:** Backend-as-a-Service for database, authentication, and user management.
 - **Google Indexing API:** Google's URL submission service.
 - **Google Auth Library:** JWT authentication for Google services.
+- **ScrapingDog API:** Used for rank tracking services.
 - **Frontend Libraries:** React 18, Next.js, TanStack React Query v5, React Hook Form, Wouter.
 - **Backend Libraries:** Express, Node-cron, Nodemailer, Google APIs client library.
 - **UI Libraries:** Radix UI components, shadcn/ui styling, Tailwind CSS, Lucide React icons.
 - **Validation:** Zod.
 - **Utilities:** xml2js (for sitemap parsing), date-fns, clsx, class-variance-authority, framer-motion.
 - **Development:** TypeScript, tsx, esbuild.
-- **Email Configuration:** SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS for Nodemailer.
-- **Security Related:** ENCRYPTION_KEY, JWT_SECRET for sensitive data.

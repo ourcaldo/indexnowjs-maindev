@@ -450,7 +450,7 @@ export default function AddKeywords() {
                 <div className="space-y-2">
                   <Label>Device Type</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="relative">
+                    <div className="relative mr-6">
                       <div
                         className={`p-3 rounded-lg border cursor-pointer transition-all ${
                           deviceType === 'desktop' ? 'ring-2' : ''
