@@ -691,6 +691,14 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**DEVICE RECOMMENDATION POSITIONING REFINEMENT (August 18, 2025)**
+- ✅ **RECOMMENDATION BADGE REPOSITIONED**: Fixed device type recommendation positioning per user requirements  
+  - **User Issue Identified**: Recommendation badge was incorrectly positioned as general "Device Type" label rather than specific to desktop option
+  - **Positioning Correction**: Moved "Recommended" badge from general label area to specific desktop device box positioning
+  - **Implementation Details**: Used absolute positioning (-top-2 -right-2) to place badge outside but adjacent to desktop option box
+  - **User Experience Improvement**: Now clearly indicates desktop device type is specifically recommended, not device selection in general
+  - **Design Consistency**: Maintained project color scheme with green success badge (#4BB543) and proper spacing
+
 **DATABASE ERROR TRACKING FIX & KEYWORD TRACKER UI ENHANCEMENT (August 18, 2025)**
 - ✅ **CRITICAL DATABASE ERROR COMPLETELY RESOLVED**: Fixed "metadata column not found" error across all system components
   - **Root Cause Identified**: Multiple components (error tracker + quota monitor) were using `indb_analytics_error_stats` table without metadata column support

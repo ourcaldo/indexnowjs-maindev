@@ -448,27 +448,27 @@ export default function AddKeywords() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Device Type */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>Device Type</Label>
-                    <div className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium" style={{backgroundColor: '#4BB543', color: '#FFFFFF'}}>
-                      <span>Recommended</span>
-                    </div>
-                  </div>
+                  <Label>Device Type</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    <div
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        deviceType === 'desktop' ? 'ring-2' : ''
-                      }`}
-                      style={{
-                        backgroundColor: deviceType === 'desktop' ? '#F0F9FF' : '#FFFFFF',
-                        borderColor: deviceType === 'desktop' ? '#3D8BFF' : '#E0E6ED',
-                        ['--tw-ring-color' as any]: '#3D8BFF'
-                      }}
-                      onClick={() => setDeviceType('desktop')}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Monitor className="w-4 h-4" style={{color: '#3D8BFF'}} />
-                        <span className="font-medium" style={{color: '#1A1A1A'}}>Desktop</span>
+                    <div className="relative">
+                      <div
+                        className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                          deviceType === 'desktop' ? 'ring-2' : ''
+                        }`}
+                        style={{
+                          backgroundColor: deviceType === 'desktop' ? '#F0F9FF' : '#FFFFFF',
+                          borderColor: deviceType === 'desktop' ? '#3D8BFF' : '#E0E6ED',
+                          ['--tw-ring-color' as any]: '#3D8BFF'
+                        }}
+                        onClick={() => setDeviceType('desktop')}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Monitor className="w-4 h-4" style={{color: '#3D8BFF'}} />
+                          <span className="font-medium" style={{color: '#1A1A1A'}}>Desktop</span>
+                        </div>
+                      </div>
+                      <div className="absolute -top-2 -right-2 flex items-center gap-1 px-2 py-1 rounded text-xs font-medium" style={{backgroundColor: '#4BB543', color: '#FFFFFF'}}>
+                        <span>Recommended</span>
                       </div>
                     </div>
                     <div
