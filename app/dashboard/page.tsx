@@ -34,12 +34,15 @@ interface UserProfile {
       daily_urls: number;
       service_accounts: number;
       concurrent_jobs: number;
+      keywords_limit: number;
     };
   };
   daily_quota_used?: number;
   expires_at?: string;
   service_account_count?: number;
   active_jobs_count?: number;
+  keywords_used?: number;
+  keywords_limit?: number;
 }
 
 interface KeywordData {

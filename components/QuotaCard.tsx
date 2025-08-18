@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect } from 'react'
-import { TrendingUp, AlertTriangle, Package } from 'lucide-react'
+import { TrendingUp, AlertTriangle, Package, Search } from 'lucide-react'
 import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
 import { useQuotaUpdates } from '@/hooks/useGlobalWebSocket'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 
 interface QuotaInfo {
   daily_quota_used: number
@@ -21,11 +23,14 @@ interface UserProfile {
       daily_urls: number
       service_accounts: number
       concurrent_jobs: number
+      keywords_limit: number
     }
   }
   daily_quota_used?: number
   service_account_count?: number
   active_jobs_count?: number
+  keywords_used?: number
+  keywords_limit?: number
 }
 
 interface QuotaCardProps {
@@ -46,6 +51,22 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
   useQuotaUpdates((quotaUpdate) => {
     // Quota will be automatically updated through the global manager
     console.log('📊 Received quota update via WebSocket:', quotaUpdate)
+  })
+
+  // Fetch keyword usage data
+  const { data: keywordUsageData, isLoading: keywordUsageLoading } = useQuery({
+    queryKey: ['/api/user/keyword-usage'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/user/keyword-usage', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) throw new Error('Failed to fetch keyword usage')
+      return response.json()
+    }
   })
 
 
@@ -111,7 +132,7 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
         </div>
         
         {/* Always show quota details even when limit reached */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Daily URLs */}
           <div className="bg-[#F7F9FC] rounded-lg p-4">
             <div className="flex items-center justify-between">
@@ -179,13 +200,56 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
               </div>
             </div>
           </div>
+
+          {/* Keywords Tracking */}
+          <div className="bg-[#F7F9FC] rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-[#6C757D]">Keywords Tracking</p>
+                <p className="text-lg font-bold text-[#1A1A1A]">
+                  {keywordUsageLoading ? '...' : (
+                    <>
+                      {keywordUsageData?.keywords_used || 0} / {keywordUsageData?.is_unlimited ? '∞' : (keywordUsageData?.keywords_limit || 0)}
+                    </>
+                  )}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-[#F0A202]/10 flex items-center justify-center">
+                <Search className="w-4 h-4 text-[#F0A202]" />
+              </div>
+            </div>
+            {!keywordUsageData?.is_unlimited && !keywordUsageLoading && keywordUsageData && (
+              <div className="mt-2">
+                <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${Math.min(100, (keywordUsageData.keywords_used / keywordUsageData.keywords_limit) * 100)}%`,
+                      backgroundColor: '#F0A202'
+                    }}
+                  ></div>
+                </div>
+                <p className="text-xs text-[#6C757D] mt-1">
+                  {keywordUsageData.remaining_quota} remaining this month
+                </p>
+              </div>
+            )}
+            {keywordUsageLoading && (
+              <div className="mt-2">
+                <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                  <div className="bg-[#E0E6ED] animate-pulse h-2 rounded-full w-1/3"></div>
+                </div>
+                <p className="text-xs text-[#6C757D] mt-1">Loading...</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-[#E0E6ED]">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-[#E0E6ED]">
       <div className="bg-[#F7F9FC] rounded-lg p-4">
         <div className="flex items-center justify-between">
           <div>
@@ -262,6 +326,49 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
             <TrendingUp className="w-4 h-4 text-[#F0A202]" />
           </div>
         </div>
+      </div>
+
+      {/* Keywords Tracking */}
+      <div className="bg-[#F7F9FC] rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-[#6C757D]">Keywords Tracking</p>
+            <p className="text-lg font-bold text-[#1A1A1A]">
+              {keywordUsageLoading ? '...' : (
+                <>
+                  {keywordUsageData?.keywords_used || 0} / {keywordUsageData?.is_unlimited ? '∞' : (keywordUsageData?.keywords_limit || 0)}
+                </>
+              )}
+            </p>
+          </div>
+          <div className="w-8 h-8 rounded-lg bg-[#F0A202]/10 flex items-center justify-center">
+            <Search className="w-4 h-4 text-[#F0A202]" />
+          </div>
+        </div>
+        {!keywordUsageData?.is_unlimited && !keywordUsageLoading && keywordUsageData && (
+          <div className="mt-2">
+            <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+              <div 
+                className="h-2 rounded-full transition-all duration-300"
+                style={{ 
+                  width: `${Math.min(100, (keywordUsageData.keywords_used / keywordUsageData.keywords_limit) * 100)}%`,
+                  backgroundColor: '#F0A202'
+                }}
+              ></div>
+            </div>
+            <p className="text-xs text-[#6C757D] mt-1">
+              {keywordUsageData.remaining_quota} remaining this month
+            </p>
+          </div>
+        )}
+        {keywordUsageLoading && (
+          <div className="mt-2">
+            <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+              <div className="bg-[#E0E6ED] animate-pulse h-2 rounded-full w-1/3"></div>
+            </div>
+            <p className="text-xs text-[#6C757D] mt-1">Loading...</p>
+          </div>
+        )}
       </div>
     </div>
   )
