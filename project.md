@@ -705,6 +705,16 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**FOREIGN KEY CONSTRAINT ERROR FIX (August 18, 2025)**
+- ✅ **CRITICAL DATABASE CONSTRAINT ERROR RESOLVED**: Fixed foreign key constraint violation in quota alert logging system
+  - **Root Cause Identified**: Quota monitor was using invalid user_id '00000000-0000-0000-0000-000000000000' for system-level alerts
+  - **Error Details**: `indb_system_error_logs.user_id` has foreign key constraint to `users` table, but system UUID didn't exist
+  - **Database Error**: "Key (user_id)=(00000000-0000-0000-0000-000000000000) is not present in table 'users'"
+  - **System Logging Fix**: Changed quota monitor to use NULL user_id for system-level alerts instead of placeholder UUID
+  - **Constraint Compliance**: System alerts now properly handle NULL user_id values as intended for administrative logs
+  - **Error Prevention**: Eliminated PostgreSQL foreign key constraint errors in quota monitoring system
+  - **System Stability**: Quota monitoring and error logging now running without database constraint violations
+
 **UUID FORMAT ERROR FIX (August 18, 2025)**
 - ✅ **CRITICAL UUID CONSTRAINT ERROR RESOLVED**: Fixed invalid UUID format error in quota alert and error tracking systems
   - **Root Cause Identified**: Both quota-monitor.ts and error-tracker.ts were generating invalid UUIDs using timestamp + random string format

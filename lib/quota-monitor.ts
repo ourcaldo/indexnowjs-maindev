@@ -197,7 +197,7 @@ export class QuotaMonitor {
         .from('indb_system_error_logs')
         .insert({
           // Let database generate UUID with gen_random_uuid() - don't set id manually
-          user_id: '00000000-0000-0000-0000-000000000000', // System user ID
+          user_id: null, // System-level alerts have no specific user - use null to avoid foreign key constraint
           error_type: ErrorType.SYSTEM,
           severity: (alert.level === 'critical' || alert.level === 'exhausted' ? 'CRITICAL' : 'MEDIUM'),
           message: alert.message,
