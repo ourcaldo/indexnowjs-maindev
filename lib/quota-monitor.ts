@@ -191,25 +191,30 @@ export class QuotaMonitor {
         logger.warn(`⚠️ ADMIN WARNING: ${alert.message}`)
       }
 
-      // Store in analytics for admin tracking only
+      // Store in system error logs for admin tracking only
       const { error } = await supabaseAdmin
-        .from('indb_analytics_error_stats')
+        .from('indb_system_error_logs')
         .insert({
-          error_date: new Date().toISOString().split('T')[0],
+          id: `quota_alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           user_id: '00000000-0000-0000-0000-000000000000', // System user ID
           error_type: 'system_quota_alert',
-          severity: alert.level === 'critical' || alert.level === 'exhausted' ? 'critical' : 'medium',
-          error_count: 1,
-          affected_endpoints: 1,
-          last_occurrence: new Date().toISOString(),
+          severity: (alert.level === 'critical' || alert.level === 'exhausted' ? 'CRITICAL' : 'MEDIUM'),
+          message: alert.message,
+          user_message: `Quota ${alert.level}: ${alert.message}`,
+          endpoint: '/api/admin/quota/health',
+          http_method: 'GET',
+          status_code: 200,
           metadata: {
             alert_level: alert.level,
             remaining_quota: alert.remainingQuota,
             utilization_percentage: alert.utilizationPercentage,
             affected_keys: alert.affectedKeys,
             notification_type: 'admin_quota_alert',
-            message: alert.message
-          }
+            error_date: new Date().toISOString().split('T')[0],
+            affected_endpoints: 1
+          },
+          stack_trace: null,
+          created_at: new Date().toISOString()
         })
 
       if (error) {
@@ -242,11 +247,11 @@ export class QuotaMonitor {
 
       // Get error statistics for the period
       const { data: errors, error: errorError } = await supabaseAdmin
-        .from('indb_analytics_error_stats')
-        .select('error_type, error_count, error_date')
+        .from('indb_system_error_logs')
+        .select('error_type, created_at')
         .like('error_type', 'rank_check_%')
-        .gte('error_date', startDate.toISOString().split('T')[0])
-        .lte('error_date', endDate.toISOString().split('T')[0])
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString())
 
       if (errorError) {
         logger.error('Failed to get error stats for report:', errorError)
@@ -266,7 +271,7 @@ export class QuotaMonitor {
       const errorCounts = new Map<string, number>()
       for (const error of errors || []) {
         const type = error.error_type.replace('rank_check_', '')
-        errorCounts.set(type, (errorCounts.get(type) || 0) + (error.error_count || 1))
+        errorCounts.set(type, (errorCounts.get(type) || 0) + 1)
       }
       const topErrorTypes = Array.from(errorCounts.entries())
         .map(([type, count]) => ({ type, count }))
