@@ -355,20 +355,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Track keyword usage in indb_keyword_usage table
-    try {
-      const { keywordUsageTracker } = await import('@/lib/keyword-usage-tracker')
-      const trackingSuccess = await keywordUsageTracker.trackKeywordUsage(user.id, newKeywords.length)
-      
-      if (!trackingSuccess) {
-        console.warn(`Failed to track keyword usage for user ${user.id}, but keywords were created successfully`)
-      } else {
-        console.log(`Successfully tracked ${newKeywords.length} keyword usage for user ${user.id}`)
-      }
-    } catch (trackingError) {
-      console.error('Error tracking keyword usage:', trackingError)
-      // Don't fail the keyword creation if tracking fails
-    }
+
 
     // Trigger immediate rank checks for newly added keywords if user has API key configured
     let hasAPIKey = false

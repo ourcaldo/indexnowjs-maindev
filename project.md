@@ -2132,3 +2132,28 @@ indb_keyword_rankings (latest positions)
   - Created debug file for testing (deleted after verification)
 - **Database Schema**: No changes required - uses existing `indb_site_integration` table structure
 - **Result**: Robust, self-managing API key system that maximizes quota utilization and prevents service disruption
+
+### August 18, 2025 - Keyword Usage Tracking Fix (Repository Migration)
+- ✅ **IDENTIFIED KEYWORD USAGE TRACKING BUG**: Resolved missing keyword usage records in `indb_keyword_usage` table
+  - **Issue**: User had 100+ keywords in `indb_keyword_keywords` but zero records in `indb_keyword_usage` tracking table
+  - **Root Cause**: System checked quota limits but never recorded actual usage when keywords were added/removed
+  - **Impact**: Users couldn't track their monthly keyword usage against their package limits
+- ✅ **IMPLEMENTED DATABASE TRIGGER SOLUTION**: Created automated tracking system at database level
+  - **Backfill Query**: SQL query to populate `indb_keyword_usage` with current keyword counts per user
+  - **Automatic Tracking**: Database triggers that update usage when keywords are added/removed/activated/deactivated
+  - **Trigger Function**: `update_keyword_usage()` handles INSERT/UPDATE/DELETE operations on `indb_keyword_keywords`
+  - **User Integration**: Automatic quota limit detection from user packages and subscriptions
+- ✅ **COMPREHENSIVE TRACKING COVERAGE**: All keyword operations now update usage automatically
+  - **Add Keywords**: `keywords_used` increases automatically when new keywords inserted
+  - **Delete Keywords**: `keywords_used` decreases when keywords removed
+  - **Activate/Deactivate**: Usage adjusts when `is_active` field changes on existing keywords
+  - **Monthly Periods**: Usage tracking follows monthly billing cycles with automatic period management
+- ✅ **CONFIRMED WORKING**: User verified that keyword usage records now appear correctly
+  - **Database Level**: Changes in `indb_keyword_keywords` automatically reflect in `indb_keyword_usage`
+  - **No Code Changes**: Solution works without requiring API endpoint modifications
+  - **Real-time Updates**: Usage tracking happens immediately when keywords are modified
+- **Database Changes Applied**: 
+  - Backfill query executed to populate existing user usage
+  - Trigger function `update_keyword_usage()` created
+  - Triggers applied to `indb_keyword_keywords` table for automatic tracking
+- **Result**: Keyword usage tracking now fully functional with automatic database-level synchronization
