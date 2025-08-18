@@ -1,34 +1,24 @@
 'use client'
 
-import { PlusIcon, BellIcon, TrendingUpIcon, CalendarIcon, CheckCircleIcon, Database } from 'lucide-react'
+import { 
+  TrendingUpIcon, 
+  TrendingDownIcon, 
+  Globe, 
+  Search, 
+  Plus,
+  BarChart3,
+  Target,
+  Zap,
+  ChevronRightIcon,
+  ExternalLink
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useJobUpdates } from '@/hooks/useGlobalWebSocket'
+import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import QuotaCard from '@/components/QuotaCard'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
-
-interface DashboardStats {
-  totalUrlsIndexed: number;
-  activeJobs: number;
-  scheduledJobs: number;
-  successRate: number;
-  quotaUsed: number;
-  quotaLimit: number;
-}
-
-interface RecentJob {
-  id: string;
-  name: string;
-  created_at: string;
-  schedule_type: string;
-  total_urls: number;
-  successful_urls: number;
-  failed_urls: number;
-  status: string;
-  progress_percentage: number;
-  processed_urls: number;
-}
 
 interface UserProfile {
   full_name: string | null;
@@ -52,81 +42,44 @@ interface UserProfile {
   active_jobs_count?: number;
 }
 
+interface KeywordData {
+  id: string;
+  keyword: string;
+  current_position: number | null;
+  position_1d: number | null;
+  position_3d: number | null;
+  position_7d: number | null;
+  domain: {
+    display_name: string;
+    domain_name: string;
+  };
+  device_type: string;
+  country: {
+    name: string;
+    iso2_code: string;
+  };
+}
+
+interface RankStats {
+  totalKeywords: number;
+  averagePosition: number;
+  topTenKeywords: number;
+  improvingKeywords: number;
+  decliningKeywords: number;
+  newKeywords: number;
+}
+
 export default function Dashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUrlsIndexed: 0,
-    activeJobs: 0,
-    scheduledJobs: 0,
-    successRate: 0,
-    quotaUsed: 0,
-    quotaLimit: 200
-  });
-  const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
+  const router = useRouter()
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
 
   // Log page view and dashboard activities
   usePageViewLogger('/dashboard', 'Dashboard', { section: 'main_dashboard' })
   const { logDashboardActivity } = useActivityLogger()
 
-  // Subscribe to job updates via global WebSocket
-  useJobUpdates((message) => {
-    if (message.jobId) {
-      // Update job status in real-time
-      setRecentJobs(prevJobs => 
-        prevJobs.map(job => {
-          if (job.id === message.jobId) {
-            return {
-              ...job,
-              status: message.status || job.status,
-              progress_percentage: message.progress?.progress_percentage ?? job.progress_percentage,
-              processed_urls: message.progress?.processed_urls ?? job.processed_urls,
-              successful_urls: message.progress?.successful_urls ?? job.successful_urls,
-              failed_urls: message.progress?.failed_urls ?? job.failed_urls
-            };
-          }
-          return job;
-        })
-      );
-      
-      // Update stats based on job updates
-      loadDashboardStats();
-    }
-  });
-
-  // Listen for real-time dashboard stats updates
-  useEffect(() => {
-    const handleDashboardStatsUpdate = (event: any) => {
-      const { detail: newStats } = event;
-      setStats(prevStats => ({ ...prevStats, ...newStats }));
-    };
-
-    window.addEventListener('dashboard-stats-update', handleDashboardStatsUpdate);
-    return () => {
-      window.removeEventListener('dashboard-stats-update', handleDashboardStatsUpdate);
-    };
-  }, []);
-
-  // Load dashboard data
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      await Promise.all([
-        loadDashboardStats(),
-        loadRecentJobs(),
-        loadUserProfile()
-      ]);
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch user profile
   const loadUserProfile = async () => {
     try {
       const user = await authService.getCurrentUser();
@@ -148,134 +101,150 @@ export default function Dashboard() {
     }
   };
 
-  const loadDashboardStats = async () => {
-    try {
-      const user = await authService.getCurrentUser();
-      if (!user) return;
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) return;
-
-      // Load both dashboard stats and real quota data
-      const [statsResponse, quotaResponse] = await Promise.all([
-        fetch('/api/dashboard/stats', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch('/api/user/quota', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      ]);
-
-      if (statsResponse.ok && quotaResponse.ok) {
-        const statsData = await statsResponse.json();
-        const quotaData = await quotaResponse.json();
-        
-        // Merge stats with real quota data
-        setStats({
-          ...statsData,
-          quotaUsed: quotaData.quota.daily_quota_used || 0,
-          quotaLimit: quotaData.quota.is_unlimited ? 999999 : (quotaData.quota.daily_quota_limit || 200)
-        });
-
-        // Log dashboard stats view activity
-        logDashboardActivity('dashboard_stats_view', 'Loaded dashboard statistics', {
-          stats: statsData,
-          quota: quotaData.quota
-        });
-      } else if (statsResponse.ok) {
-        // Fallback to just stats if quota fails
-        const data = await statsResponse.json();
-        setStats(data);
-      }
-    } catch (error) {
-      console.error('Error loading dashboard stats:', error);
+  // Fetch domains for rank tracking
+  const { data: domainsData } = useQuery({
+    queryKey: ['/api/keyword-tracker/domains'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/keyword-tracker/domains', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) throw new Error('Failed to fetch domains')
+      return response.json()
     }
-  };
+  })
 
-  const loadRecentJobs = async () => {
-    try {
-      const user = await authService.getCurrentUser();
-      if (!user) return;
+  // Fetch top keywords for current domain
+  const { data: keywordsData, isLoading: keywordsLoading } = useQuery({
+    queryKey: ['/api/keyword-tracker/keywords', selectedDomainId],
+    queryFn: async () => {
+      if (!selectedDomainId) return { data: [] }
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams()
+      params.append('domain_id', selectedDomainId)
+      params.append('limit', '6') // Show top 6 keywords
+      
+      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) throw new Error('Failed to fetch keywords')
+      return response.json()
+    },
+    enabled: !!selectedDomainId
+  })
 
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) return;
+  // Fetch all keywords for statistics
+  const { data: allKeywordsData } = useQuery({
+    queryKey: ['/api/keyword-tracker/keywords-all', selectedDomainId],
+    queryFn: async () => {
+      if (!selectedDomainId) return { data: [] }
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams()
+      params.append('domain_id', selectedDomainId)
+      params.append('limit', '1000')
+      
+      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) throw new Error('Failed to fetch all keywords')
+      return response.json()
+    },
+    enabled: !!selectedDomainId
+  })
 
-      const response = await fetch('/api/jobs?limit=5&page=1', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+  const domains = domainsData?.data || []
+  const topKeywords = keywordsData?.data || []
+  const allKeywords = allKeywordsData?.data || []
 
-      if (response.ok) {
-        const data = await response.json();
-        setRecentJobs(data.jobs || []);
-      }
-    } catch (error) {
-      console.error('Error loading recent jobs:', error);
+  // Set default domain
+  useEffect(() => {
+    if (!selectedDomainId && domains.length > 0) {
+      setSelectedDomainId(domains[0].id)
     }
-  };
+  }, [domains, selectedDomainId])
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
+  // Load user data
+  useEffect(() => {
+    loadUserProfile().finally(() => setLoading(false))
+  }, [])
 
-  const getStatusBadgeStyle = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return { backgroundColor: '#4BB543', color: '#FFFFFF' };
-      case 'running':
-        return { backgroundColor: '#3D8BFF', color: '#FFFFFF' };
-      case 'failed':
-        return { backgroundColor: '#E63946', color: '#FFFFFF' };
-      case 'paused':
-        return { backgroundColor: '#F0A202', color: '#FFFFFF' };
-      default:
-        return { backgroundColor: '#6C757D', color: '#FFFFFF' };
+  // Calculate rank statistics
+  const calculateRankStats = (): RankStats => {
+    const totalKeywords = allKeywords.length
+    const keywordsWithPosition = allKeywords.filter((k: KeywordData) => k.current_position !== null)
+    const averagePosition = keywordsWithPosition.length > 0 
+      ? Math.round(keywordsWithPosition.reduce((sum: number, k: KeywordData) => sum + (k.current_position || 100), 0) / keywordsWithPosition.length)
+      : 0
+    
+    const topTenKeywords = allKeywords.filter((k: KeywordData) => k.current_position && k.current_position <= 10).length
+    const improvingKeywords = allKeywords.filter((k: KeywordData) => k.position_1d && k.position_1d > 0).length
+    const decliningKeywords = allKeywords.filter((k: KeywordData) => k.position_1d && k.position_1d < 0).length
+    const newKeywords = allKeywords.filter((k: KeywordData) => !k.position_7d && k.current_position).length
+
+    return {
+      totalKeywords,
+      averagePosition,
+      topTenKeywords,
+      improvingKeywords,
+      decliningKeywords,
+      newKeywords
     }
-  };
+  }
+
+  const rankStats = calculateRankStats()
+  const selectedDomain = domains.find((d: any) => d.id === selectedDomainId)
+
+  // Position change indicator
+  const PositionChange = ({ change }: { change: number | null }) => {
+    if (!change) return <span className="text-xs text-slate-400">No change</span>
+    
+    if (change > 0) {
+      return (
+        <div className="flex items-center text-xs" style={{ color: '#4BB543' }}>
+          <TrendingUpIcon className="w-3 h-3 mr-1" />
+          +{change}
+        </div>
+      )
+    } else {
+      return (
+        <div className="flex items-center text-xs" style={{ color: '#E63946' }}>
+          <TrendingDownIcon className="w-3 h-3 mr-1" />
+          {change}
+        </div>
+      )
+    }
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" style={{color: '#1A1A1A'}}>Dashboard</h1>
-          <p className="mt-1 max-w-xs" style={{color: '#6C757D'}}>Monitor your indexing performance and manage your requests</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button 
-            className="text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all duration-200 hover:opacity-90" 
-            style={{backgroundColor: '#1C2331'}}
-          >
-            <PlusIcon className="w-4 h-4" />
-            New Request
-          </button>
-          {/* Notification icon - hidden on mobile, moved to mobile header */}
-          <button className="hidden lg:block p-2 rounded-lg transition-colors" style={{backgroundColor: '#F7F9FC', color: '#6C757D'}} onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#E0E6ED'} onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'}>
-            <BellIcon className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* User Greeting & Package Information */}
+    <div className="space-y-8">
+      {/* User Profile Card */}
       {userProfile && (
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-12 h-12 bg-[#3D8BFF]/10 rounded-full flex items-center justify-center">
-                  <span className="text-lg font-bold text-[#3D8BFF]">
-                    {userProfile.full_name?.charAt(0) || userProfile.email?.charAt(0) || 'U'}
-                  </span>
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-[#1A1A1A]">
-                    Welcome back, {userProfile.full_name || 'User'}!
-                  </h2>
-                  <p className="text-[#6C757D]">
-                    {new Date().getHours() < 12 ? 'Good morning' : 
-                     new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}! 
-                    Ready to boost your SEO today?
-                  </p>
-                </div>
+        <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+          <div className="flex items-start justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#3D8BFF] to-[#1C2331] rounded-full flex items-center justify-center">
+                <span className="text-lg font-bold text-white">
+                  {userProfile.full_name?.charAt(0) || userProfile.email?.charAt(0) || 'U'}
+                </span>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-[#1A1A1A]">
+                  Welcome back, {userProfile.full_name || 'User'}!
+                </h2>
+                <p className="text-[#6C757D]">
+                  Track your keyword rankings and monitor your SEO performance
+                </p>
               </div>
             </div>
             
@@ -297,299 +266,224 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Real-time Package Quota Overview */}
-          {userProfile && <QuotaCard userProfile={userProfile} />}
-
-          {/* Subscription Status */}
-          {userProfile.package && userProfile.expires_at && userProfile.package.slug !== 'free' && (
-            <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    new Date(userProfile.expires_at) > new Date() ? 'bg-[#4BB543]' : 'bg-[#E63946]'
-                  }`}></div>
-                  <span className="text-sm text-[#6C757D]">
-                    Subscription {new Date(userProfile.expires_at) > new Date() ? 'active' : 'expired'} • 
-                    Expires {new Date(userProfile.expires_at).toLocaleDateString()}
-                  </span>
-                </div>
-                {new Date(userProfile.expires_at) <= new Date() && (
-                  <button className="px-3 py-1 bg-[#3D8BFF] text-white rounded-lg text-sm hover:bg-[#3D8BFF]/90 transition-colors">
-                    Renew Now
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          <QuotaCard userProfile={userProfile} />
         </div>
       )}
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{color: '#6C757D'}}>Total URLs Indexed</p>
-              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>
-                {loading ? '...' : stats.totalUrlsIndexed.toLocaleString()}
-              </p>
-              <p className="text-sm font-semibold mt-1" style={{color: stats.totalUrlsIndexed > 0 ? '#4BB543' : '#6C757D'}}>
-                {stats.totalUrlsIndexed > 0 ? 'Successfully indexed' : 'No URLs indexed yet'}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-              <TrendingUpIcon className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{color: '#6C757D'}}>Active Jobs</p>
-              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>
-                {loading ? '...' : stats.activeJobs}
-              </p>
-              <p className="text-sm font-semibold mt-1" style={{color: stats.scheduledJobs > 0 ? '#F0A202' : '#6C757D'}}>
-                {stats.scheduledJobs} scheduled
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{backgroundColor: '#0d1b2a'}}>
-              <CalendarIcon className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{color: '#6C757D'}}>Success Rate</p>
-              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>
-                {loading ? '...' : `${stats.successRate.toFixed(1)}%`}
-              </p>
-              <p className="text-sm font-semibold mt-1" style={{color: stats.successRate >= 70 ? '#4BB543' : stats.successRate >= 50 ? '#F0A202' : '#E63946'}}>
-                {stats.successRate >= 70 ? 'Excellent' : stats.successRate >= 50 ? 'Good' : 'Needs improvement'}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{backgroundColor: '#22333b'}}>
-              <CheckCircleIcon className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{color: '#6C757D'}}>API Quota Used</p>
-              <p className="text-3xl font-bold mt-2" style={{color: '#1A1A1A'}}>
-                {loading ? '...' : stats.quotaUsed}
-              </p>
-              <p className="text-sm font-semibold mt-1" style={{color: stats.quotaUsed >= stats.quotaLimit * 0.9 ? '#E63946' : stats.quotaUsed >= stats.quotaLimit * 0.7 ? '#F0A202' : '#4BB543'}}>
-                of {stats.quotaLimit} daily limit
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1E1E1E'}}>
-              <Database className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Quick Actions */}
-        <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-          <h2 className="text-lg font-semibold mb-4" style={{color: '#1A1A1A'}}>Quick Actions</h2>
-          <div className="space-y-3">
-            <div 
-              className="flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-all duration-200" 
-              style={{backgroundColor: 'transparent', border: '1px solid #E0E6ED'}}
-              onMouseEnter={(e) => (e.target as HTMLDivElement).style.backgroundColor = '#F7F9FC'}
-              onMouseLeave={(e) => (e.target as HTMLDivElement).style.backgroundColor = 'transparent'}
-            >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-                <PlusIcon className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-medium" style={{color: '#1A1A1A'}}>Submit URLs for Indexing</h3>
-                <p className="text-sm" style={{color: '#6C757D'}}>Manually add URLs or import from sitemap</p>
-              </div>
-            </div>
-            
-            <div 
-              className="flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-all duration-200" 
-              style={{backgroundColor: 'transparent', border: '1px solid #E0E6ED'}}
-              onMouseEnter={(e) => (e.target as HTMLDivElement).style.backgroundColor = '#F7F9FC'}
-              onMouseLeave={(e) => (e.target as HTMLDivElement).style.backgroundColor = 'transparent'}
-            >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{backgroundColor: '#0d1b2a'}}>
-                <Database className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-medium" style={{color: '#1A1A1A'}}>Manage Service Accounts</h3>
-                <p className="text-sm" style={{color: '#6C757D'}}>Add or update Google service accounts</p>
-              </div>
-            </div>
-            
-            <div 
-              className="flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-all duration-200" 
-              style={{backgroundColor: 'transparent', border: '1px solid #E0E6ED'}}
-              onMouseEnter={(e) => (e.target as HTMLDivElement).style.backgroundColor = '#F7F9FC'}
-              onMouseLeave={(e) => (e.target as HTMLDivElement).style.backgroundColor = 'transparent'}
-            >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{backgroundColor: '#22333b'}}>
-                <TrendingUpIcon className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-medium" style={{color: '#1A1A1A'}}>View Job Status</h3>
-                <p className="text-sm" style={{color: '#6C757D'}}>Monitor indexing progress and results</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-          <h2 className="text-lg font-semibold mb-4" style={{color: '#1A1A1A'}}>Recent Activity</h2>
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full mt-2" style={{backgroundColor: '#4BB543'}}></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium" style={{color: '#1A1A1A'}}>45 URLs indexed successfully</p>
-                <p className="text-xs" style={{color: '#6C757D'}}>2 minutes ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full mt-2" style={{backgroundColor: '#1C2331'}}></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium" style={{color: '#1A1A1A'}}>Scheduled job created</p>
-                <p className="text-xs" style={{color: '#6C757D'}}>15 minutes ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full mt-2" style={{backgroundColor: '#2C2C2E'}}></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium" style={{color: '#1A1A1A'}}>New service account added</p>
-                <p className="text-xs" style={{color: '#6C757D'}}>1 hour ago</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full mt-2" style={{backgroundColor: '#1E1E1E'}}></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium" style={{color: '#1A1A1A'}}>Sitemap imported - 120 URLs</p>
-                <p className="text-xs" style={{color: '#6C757D'}}>2 hours ago</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Jobs Table */}
-      <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>Recent Jobs</h2>
+      {/* Domain Selection & Rank Stats */}
+      {domains.length === 0 ? (
+        <div className="bg-white rounded-xl border border-[#E0E6ED] p-12 text-center">
+          <Globe className="w-16 h-16 mx-auto mb-4 text-[#6C757D]" />
+          <h3 className="text-xl font-semibold mb-2 text-[#1A1A1A]">
+            Start Tracking Your Rankings
+          </h3>
+          <p className="text-[#6C757D] mb-6 max-w-md mx-auto">
+            Add your first domain and keywords to start monitoring your search engine rankings and track your SEO progress.
+          </p>
           <button 
-            className="text-sm transition-colors" 
-            style={{color: '#6C757D'}}
-            onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#1A1A1A'}
-            onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#6C757D'}
+            onClick={() => router.push('/dashboard/indexnow/add')}
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#3D8BFF] to-[#1C2331] text-white font-medium rounded-lg hover:opacity-90 transition-all duration-200"
           >
-            View All
+            <Plus className="w-4 h-4 mr-2" />
+            Add Your First Domain
           </button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{borderBottom: '1px solid #E0E6ED'}}>
-                <th className="text-left py-3 px-4 font-medium" style={{color: '#6C757D'}}>Name</th>
-                <th className="text-left py-3 px-4 font-medium" style={{color: '#6C757D'}}>Created</th>
-                <th className="text-left py-3 px-4 font-medium" style={{color: '#6C757D'}}>Schedule</th>
-                <th className="text-left py-3 px-4 font-medium" style={{color: '#6C757D'}}>URLs</th>
-                <th className="text-left py-3 px-4 font-medium" style={{color: '#6C757D'}}>Status</th>
-                <th className="text-left py-3 px-4 font-medium" style={{color: '#6C757D'}}>Progress</th>
-                <th className="text-left py-3 px-4 font-medium" style={{color: '#6C757D'}}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center" style={{color: '#6C757D'}}>
-                    Loading recent jobs...
-                  </td>
-                </tr>
-              ) : recentJobs.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center" style={{color: '#6C757D'}}>
-                    No jobs found. Create your first indexing job to get started.
-                  </td>
-                </tr>
-              ) : recentJobs.map((job) => (
-                <tr 
-                  key={job.id}
-                  className="transition-colors" 
-                  style={{borderBottom: '1px solid #F7F9FC'}}
-                  onMouseEnter={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = '#F7F9FC'}
-                  onMouseLeave={(e) => (e.target as HTMLTableRowElement).style.backgroundColor = 'transparent'}
+      ) : (
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Rank Tracking Section */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Domain Header */}
+            <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#3D8BFF] to-[#1C2331] rounded-lg flex items-center justify-center">
+                    <Globe className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-[#1A1A1A]">
+                      {selectedDomain?.display_name || selectedDomain?.domain_name || 'Select Domain'}
+                    </h3>
+                    <p className="text-sm text-[#6C757D]">{rankStats.totalKeywords} keywords tracked</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button 
+                    onClick={() => router.push('/dashboard/indexnow/add')}
+                    className="inline-flex items-center px-3 py-2 text-sm bg-[#F7F9FC] text-[#1A1A1A] rounded-lg border border-[#E0E6ED] hover:bg-[#E0E6ED] transition-colors"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Keywords
+                  </button>
+                  <button 
+                    onClick={() => router.push('/dashboard/indexnow/overview')}
+                    className="inline-flex items-center px-3 py-2 text-sm bg-[#3D8BFF] text-white rounded-lg hover:bg-[#3D8BFF]/90 transition-colors"
+                  >
+                    View All
+                    <ChevronRightIcon className="w-4 h-4 ml-1" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Rank Statistics Grid */}
+              <div className="grid md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-[#4BB543]/10 to-[#4BB543]/5 rounded-lg p-4 border border-[#4BB543]/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-[#4BB543]">TOP 10 POSITIONS</p>
+                      <p className="text-2xl font-bold text-[#1A1A1A] mt-1">{rankStats.topTenKeywords}</p>
+                    </div>
+                    <Target className="w-5 h-5 text-[#4BB543]" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-[#3D8BFF]/10 to-[#3D8BFF]/5 rounded-lg p-4 border border-[#3D8BFF]/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-[#3D8BFF]">AVERAGE POSITION</p>
+                      <p className="text-2xl font-bold text-[#1A1A1A] mt-1">{rankStats.averagePosition}</p>
+                    </div>
+                    <BarChart3 className="w-5 h-5 text-[#3D8BFF]" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-[#F0A202]/10 to-[#F0A202]/5 rounded-lg p-4 border border-[#F0A202]/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-[#F0A202]">IMPROVING</p>
+                      <p className="text-2xl font-bold text-[#1A1A1A] mt-1">{rankStats.improvingKeywords}</p>
+                    </div>
+                    <TrendingUpIcon className="w-5 h-5 text-[#F0A202]" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-[#1A1A1A]/10 to-[#1A1A1A]/5 rounded-lg p-4 border border-[#1A1A1A]/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-[#1A1A1A]">TOTAL KEYWORDS</p>
+                      <p className="text-2xl font-bold text-[#1A1A1A] mt-1">{rankStats.totalKeywords}</p>
+                    </div>
+                    <Search className="w-5 h-5 text-[#1A1A1A]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Keywords Performance */}
+            <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-[#1A1A1A]">Top Keywords Performance</h3>
+                <button 
+                  onClick={() => router.push('/dashboard/indexnow/rank-history')}
+                  className="text-sm text-[#3D8BFF] hover:text-[#3D8BFF]/80 transition-colors flex items-center"
                 >
-                  <td className="py-3 px-4 font-bold" style={{color: '#1A1A1A'}}>
-                    {job.name || `#${job.id.slice(-12)}`}
-                  </td>
-                  <td className="py-3 px-4" style={{color: '#6C757D'}}>
-                    {formatDate(job.created_at)}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap" style={{backgroundColor: '#1C2331', color: '#FFFFFF'}}>
-                      {job.schedule_type}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-semibold" style={{color: '#1A1A1A'}}>
-                      {job.total_urls} total
-                    </div>
-                    <div className="text-xs" style={{color: job.successful_urls > 0 ? '#4BB543' : job.failed_urls > 0 ? '#E63946' : '#6C757D'}}>
-                      {job.successful_urls} success, {job.failed_urls} failed
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span 
-                      className="text-xs px-2 py-1 rounded-full font-medium" 
-                      style={getStatusBadgeStyle(job.status)}
-                    >
-                      {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    {job.status === 'completed' ? (
-                      <div>
-                        <div className="w-full rounded-full h-2" style={{backgroundColor: '#E0E6ED'}}>
-                          <div className="h-2 rounded-full" style={{width: '100%', backgroundColor: '#4BB543'}}></div>
+                  View History
+                  <ExternalLink className="w-3 h-3 ml-1" />
+                </button>
+              </div>
+
+              {keywordsLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg">
+                        <div className="flex-1">
+                          <div className="h-4 bg-[#E0E6ED] rounded w-1/3 mb-2"></div>
+                          <div className="h-3 bg-[#E0E6ED] rounded w-1/2"></div>
                         </div>
-                        <span className="text-xs font-medium mt-1" style={{color: '#4BB543'}}>
-                          {job.processed_urls}/{job.total_urls} processed
-                        </span>
+                        <div className="w-16 h-8 bg-[#E0E6ED] rounded"></div>
                       </div>
-                    ) : (
-                      <div className="font-semibold" style={{color: '#1A1A1A'}}>
-                        {job.processed_urls}/{job.total_urls} processed
+                    </div>
+                  ))}
+                </div>
+              ) : topKeywords.length === 0 ? (
+                <div className="text-center py-8 text-[#6C757D]">
+                  No keywords found. Add keywords to start tracking.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {topKeywords.map((keyword: KeywordData) => (
+                    <div key={keyword.id} className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED] hover:bg-[#E0E6ED]/50 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-medium text-[#1A1A1A]">{keyword.keyword}</h4>
+                          <span className="text-xs px-2 py-0.5 bg-[#E0E6ED] text-[#6C757D] rounded-full">
+                            {keyword.device_type}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 bg-[#1C2331] text-white rounded-full">
+                            {keyword.country.iso2_code.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <span className="text-sm text-[#6C757D]">
+                            Current: <strong>#{keyword.current_position || 'Not ranked'}</strong>
+                          </span>
+                          <PositionChange change={keyword.position_1d} />
+                        </div>
                       </div>
-                    )}
-                  </td>
-                  <td className="py-3 px-4">
-                    <button 
-                      className="transition-colors" 
-                      style={{color: '#6C757D'}}
-                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#1A1A1A'}
-                      onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#6C757D'}
-                      onClick={() => window.location.href = `/dashboard/manage-jobs/${job.id}`}
-                    >
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-[#1A1A1A]">
+                          {keyword.current_position ? `#${keyword.current_position}` : 'NR'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions Sidebar */}
+          <div className="space-y-6">
+            {/* Primary Actions */}
+            <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+              <h3 className="font-semibold text-[#1A1A1A] mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <button 
+                  onClick={() => router.push('/dashboard/indexnow/add')}
+                  className="w-full flex items-center space-x-3 p-4 bg-gradient-to-r from-[#3D8BFF] to-[#1C2331] text-white rounded-lg hover:opacity-90 transition-all duration-200"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="font-medium">Add New Keywords</span>
+                </button>
+                
+                <button 
+                  onClick={() => router.push('/dashboard/indexnow/overview')}
+                  className="w-full flex items-center space-x-3 p-4 bg-[#F7F9FC] border border-[#E0E6ED] text-[#1A1A1A] rounded-lg hover:bg-[#E0E6ED] transition-colors"
+                >
+                  <Search className="w-5 h-5" />
+                  <span className="font-medium">View All Keywords</span>
+                </button>
+
+                <button 
+                  onClick={() => router.push('/dashboard/indexnow/rank-history')}
+                  className="w-full flex items-center space-x-3 p-4 bg-[#F7F9FC] border border-[#E0E6ED] text-[#1A1A1A] rounded-lg hover:bg-[#E0E6ED] transition-colors"
+                >
+                  <BarChart3 className="w-5 h-5" />
+                  <span className="font-medium">Rank History</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Secondary Tool - FastIndexing */}
+            <div className="bg-gradient-to-br from-[#F7F9FC] to-[#E0E6ED]/30 rounded-xl border border-[#E0E6ED] p-6">
+              <div className="flex items-center space-x-2 mb-3">
+                <Zap className="w-5 h-5 text-[#6C757D]" />
+                <h3 className="font-medium text-[#1A1A1A]">FastIndexing Tool</h3>
+              </div>
+              <p className="text-sm text-[#6C757D] mb-4">
+                Quickly index your URLs with Google for faster discovery.
+              </p>
+              <button 
+                onClick={() => router.push('/dashboard/tools/fastindexing')}
+                className="w-full flex items-center justify-center space-x-2 p-3 bg-white border border-[#E0E6ED] text-[#1A1A1A] rounded-lg hover:bg-[#F7F9FC] transition-colors"
+              >
+                <span className="text-sm font-medium">Open FastIndexing</span>
+                <ExternalLink className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
