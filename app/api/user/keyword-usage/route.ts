@@ -26,19 +26,12 @@ export async function GET(request: NextRequest) {
 
     const userId = payload.sub
 
-    // Get current month's start and end dates
-    const now = new Date()
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-
-    // Fetch current keyword usage for this month
+    // Fetch total keyword usage for the user (no monthly periods)
     const { data: keywordUsage, error: usageError } = await supabaseAdmin
       .from('indb_keyword_usage')
       .select('keywords_used, keywords_limit, period_start, period_end')
       .eq('user_id', userId)
-      .gte('period_start', currentMonthStart.toISOString())
-      .lt('period_start', nextMonthStart.toISOString())
-      .order('period_start', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(1)
       .single()
 
@@ -70,8 +63,8 @@ export async function GET(request: NextRequest) {
         keywords_limit: keywordsLimit,
         is_unlimited: keywordsLimit === -1,
         remaining_quota: keywordsLimit === -1 ? -1 : keywordsLimit,
-        period_start: currentMonthStart.toISOString(),
-        period_end: new Date(nextMonthStart.getTime() - 1).toISOString()
+        period_start: null,
+        period_end: null
       })
     }
 

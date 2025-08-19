@@ -2136,14 +2136,14 @@ indb_keyword_rankings (latest positions)
 ### August 18, 2025 - Keyword Usage Tracking Implementation Complete
 - ✅ **KEYWORD TRACKING QUOTA CARD ADDED**: Added fourth quota card showing monthly keyword usage alongside existing quota cards
   - **Real-time Data**: Fetches usage from `indb_keyword_usage` table and limits from `quota_limits.keywords_limit` 
-  - **Monthly Reset Logic**: Keywords quota resets every calendar month regardless of subscription length
+  - **Package Lifetime Logic**: Keywords quota is lifetime allowance for package duration (no monthly reset)
   - **Professional Design**: Matches existing card design with amber color scheme and progress bar
   - **API Integration**: New `/api/user/keyword-usage` endpoint provides live usage data
-- ✅ **QUOTA PERIOD CLARIFICATION**: Confirmed keyword tracking quotas work on monthly reset cycle
-  - **Monthly Subscription**: 250 keywords/month → resets every month
-  - **6-month Subscription**: 250 keywords/month → resets every month (not 250×6)
-  - **Yearly Subscription**: 250 keywords/month → resets every month (not 250×12)
-  - **Display**: Shows "X remaining this month" to indicate monthly reset behavior
+- ✅ **QUOTA PERIOD CLARIFICATION**: Confirmed keyword tracking quotas work as package lifetime allowance (NO monthly reset)
+  - **Monthly Subscription**: 250 keywords total for package duration (no reset)
+  - **6-month Subscription**: 250 keywords total for package duration (no reset)
+  - **Yearly Subscription**: 250 keywords total for package duration (no reset)
+  - **Display**: Shows "X remaining in package" to indicate lifetime package allowance
 
 ### August 18, 2025 - Keyword Usage Tracking Fix (Repository Migration)
 - ✅ **IDENTIFIED KEYWORD USAGE TRACKING BUG**: Resolved missing keyword usage records in `indb_keyword_usage` table
@@ -2169,4 +2169,4 @@ indb_keyword_rankings (latest positions)
   - Trigger function `update_keyword_usage()` created
   - Triggers applied to `indb_keyword_keywords` table for automatic tracking
 - **Result**: Keyword usage tracking now fully functional with automatic database-level synchronization
-- **Quota Behavior**: Keywords quota resets monthly (not per subscription length) - all packages get monthly keyword allowances
+- **Quota Behavior**: Keywords quota is lifetime allowance per package (no resets) - users get total allowance for package duration

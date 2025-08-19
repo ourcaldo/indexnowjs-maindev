@@ -230,7 +230,7 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
                   ></div>
                 </div>
                 <p className="text-xs text-[#6C757D] mt-1">
-                  {keywordUsageData.remaining_quota} remaining this month
+                  {keywordUsageData.remaining_quota} remaining in package
                 </p>
               </div>
             )}
@@ -357,7 +357,7 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
               ></div>
             </div>
             <p className="text-xs text-[#6C757D] mt-1">
-              {keywordUsageData.remaining_quota} remaining this month
+              {keywordUsageData.remaining_quota} remaining in package
             </p>
           </div>
         )}
