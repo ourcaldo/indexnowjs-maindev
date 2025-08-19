@@ -37,9 +37,22 @@ export class LoginNotificationService {
   async sendLoginNotification(data: LoginNotificationData): Promise<boolean> {
     try {
       console.log('🔐 Preparing to send login notification email to:', data.userEmail)
+      console.log('🔍 Login notification data:', JSON.stringify({
+        userId: data.userId,
+        userEmail: data.userEmail,
+        userName: data.userName,
+        ipAddress: data.ipAddress
+      }))
 
       // Get SMTP configuration from site settings
       const smtpConfig = await this.getEmailConfiguration()
+      console.log('📧 SMTP configuration received:', {
+        enabled: smtpConfig.enabled,
+        host: smtpConfig.host || 'Not set',
+        user: smtpConfig.user || 'Not set',
+        fromEmail: smtpConfig.fromEmail || 'Not set'
+      })
+      
       if (!smtpConfig.enabled) {
         console.log('📧 Email notifications disabled, skipping login notification')
         return false
@@ -149,16 +162,21 @@ export class LoginNotificationService {
         .single()
 
       if (error) {
-        console.error('❌ Database error fetching SMTP settings:', error)
+        console.error('❌ Database error fetching SMTP settings:', error.message || error)
+        console.log('🔄 Database lookup failed, falling back to environment variables...')
         return this.getFallbackEmailConfiguration()
       }
 
       if (!settings?.smtp_enabled) {
-        console.log('📧 SMTP disabled in database settings')
-        return { enabled: false }
+        console.log('📧 SMTP disabled in database settings, falling back to environment variables...')
+        return this.getFallbackEmailConfiguration()
       }
 
-      console.log('✅ SMTP settings retrieved from database')
+      console.log('✅ SMTP settings retrieved from database:', {
+        host: settings.smtp_host,
+        user: settings.smtp_user,
+        fromEmail: settings.smtp_from_email
+      })
       return {
         enabled: true,
         host: settings.smtp_host,

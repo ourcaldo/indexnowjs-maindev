@@ -32,6 +32,17 @@ IndexNow Pro is a professional-grade, full-stack web application designed to aut
 
 The application is built with Next.js App Router and integrates with an Express server for Google API calls.
 
+## Recent Changes (August 19, 2025)
+
+**Login Notification Email System Enhancement:**
+- ✅ Fixed SMTP configuration to retrieve settings from `indb_site_settings` database table
+- ✅ Enhanced email service with comprehensive logging and error handling
+- ✅ Added login notification support for session restoration route (`/api/auth/session`)
+- ✅ Tested email functionality - SMTP connection and email sending working properly
+- ✅ Email notifications now trigger for both direct login and session restoration
+- ✅ SMTP settings fallback to environment variables if database settings unavailable
+- 📧 SMTP configured: mail.indexnow.studio with notifikasi@indexnow.studio
+
 **Overall Structure:**
 - `app/`: Next.js App Router pages and layouts.
 - `server/`: Express.js backend for API integration.

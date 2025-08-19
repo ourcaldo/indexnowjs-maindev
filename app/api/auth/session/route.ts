@@ -75,6 +75,41 @@ export async function POST(request: NextRequest) {
         'User session restored from stored tokens',
         request
       )
+
+      // Send login notification email for session restoration (fire-and-forget)
+      process.nextTick(async () => {
+        try {
+          const { LoginNotificationService } = await import('@/lib/email/login-notification-service')
+          const { getRequestInfo } = await import('@/lib/ip-device-utils')
+          
+          // Extract request information for notification
+          const requestInfo = await getRequestInfo(request)
+          
+          // Send notification asynchronously with timeout protection
+          Promise.race([
+            LoginNotificationService.getInstance().sendLoginNotification({
+              userId: data.session.user.id,
+              userEmail: data.session.user.email || '',
+              userName: data.session.user.user_metadata?.full_name || data.session.user.email?.split('@')[0] || 'User',
+              ipAddress: requestInfo.ipAddress || 'Unknown',
+              userAgent: requestInfo.userAgent || 'Unknown',
+              deviceInfo: requestInfo.deviceInfo || undefined,
+              locationData: requestInfo.locationData || undefined,
+              loginTime: new Date().toISOString()
+            }),
+            // Timeout after 30 seconds
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Email sending timeout')), 30000))
+          ]).then(() => {
+            logger.info({ userId: data.session.user.id }, 'Session restoration login notification email sent successfully')
+          }).catch((notificationError) => {
+            logger.error({ error: notificationError, userId: data.session.user.id }, 'Failed to send session login notification email')
+          })
+          
+        } catch (importError) {
+          logger.error({ error: importError, userId: data.session.user.id }, 'Failed to initialize session login notification service')
+        }
+      })
+
     } catch (logError) {
       logger.error({ error: logError, userId: data.session.user.id }, 'Failed to log session activity')
     }
