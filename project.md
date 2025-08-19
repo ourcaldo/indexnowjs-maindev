@@ -2133,6 +2133,18 @@ indb_keyword_rankings (latest positions)
 - **Database Schema**: No changes required - uses existing `indb_site_integration` table structure
 - **Result**: Robust, self-managing API key system that maximizes quota utilization and prevents service disruption
 
+### August 18, 2025 - Keyword Usage Tracking Implementation Complete
+- ✅ **KEYWORD TRACKING QUOTA CARD ADDED**: Added fourth quota card showing monthly keyword usage alongside existing quota cards
+  - **Real-time Data**: Fetches usage from `indb_keyword_usage` table and limits from `quota_limits.keywords_limit` 
+  - **Monthly Reset Logic**: Keywords quota resets every calendar month regardless of subscription length
+  - **Professional Design**: Matches existing card design with amber color scheme and progress bar
+  - **API Integration**: New `/api/user/keyword-usage` endpoint provides live usage data
+- ✅ **QUOTA PERIOD CLARIFICATION**: Confirmed keyword tracking quotas work on monthly reset cycle
+  - **Monthly Subscription**: 250 keywords/month → resets every month
+  - **6-month Subscription**: 250 keywords/month → resets every month (not 250×6)
+  - **Yearly Subscription**: 250 keywords/month → resets every month (not 250×12)
+  - **Display**: Shows "X remaining this month" to indicate monthly reset behavior
+
 ### August 18, 2025 - Keyword Usage Tracking Fix (Repository Migration)
 - ✅ **IDENTIFIED KEYWORD USAGE TRACKING BUG**: Resolved missing keyword usage records in `indb_keyword_usage` table
   - **Issue**: User had 100+ keywords in `indb_keyword_keywords` but zero records in `indb_keyword_usage` tracking table
@@ -2157,3 +2169,4 @@ indb_keyword_rankings (latest positions)
   - Trigger function `update_keyword_usage()` created
   - Triggers applied to `indb_keyword_keywords` table for automatic tracking
 - **Result**: Keyword usage tracking now fully functional with automatic database-level synchronization
+- **Quota Behavior**: Keywords quota resets monthly (not per subscription length) - all packages get monthly keyword allowances
