@@ -1125,19 +1125,19 @@ JWT_SECRET=[jwt-secret-key]
 - ✅ **ORDER DETAIL PAGE COLOR FIXES**: Removed blue colors from "Proof Uploaded" badge, now uses project color #F0A202 (Amber)
 
 **SMTP ADMIN SETTINGS MIGRATION COMPLETED (August 19, 2025)**
-- ✅ **SMTP SETTINGS MOVED TO ADMIN DASHBOARD**: Successfully migrated SMTP configuration from environment variables to database-managed admin settings
-  - **New Admin Page**: Created `/backend/admin/settings/email` page with comprehensive SMTP configuration interface
-  - **Database Integration**: SMTP settings now stored in `indb_system_smtp_settings` table with encryption support
-  - **Enhanced Email Service**: Created `EnhancedEmailService` class that dynamically fetches settings from database with environment fallback
-  - **API Endpoints**: Built `/api/admin/settings/email` for CRUD operations and `/api/admin/settings/email/test` for testing functionality
-  - **Admin Navigation**: Added "Email Settings" link to admin sidebar navigation under Settings section
+- ✅ **SMTP SETTINGS INTEGRATED INTO EXISTING SITE SETTINGS**: Successfully migrated SMTP configuration to existing `indb_site_settings` table following project conventions
+  - **Existing Table Extension**: Added SMTP fields to `indb_site_settings` table instead of creating new table, following `indb_` prefix convention
+  - **Site Settings Integration**: SMTP configuration now part of main site settings page at `/backend/admin/settings/site`
+  - **Enhanced Site Settings Interface**: Added comprehensive SMTP configuration section to existing site settings page
+  - **API Endpoint**: Built `/api/admin/settings/site/test-email` for testing SMTP functionality
   - **Test Functionality**: Comprehensive email testing with detailed SMTP verification and test email sending
-  - **Security**: Super admin authentication required for all email settings operations with comprehensive activity logging
+  - **Security**: Super admin authentication required for all SMTP operations with comprehensive activity logging
 - ✅ **ENVIRONMENT VARIABLE FALLBACK**: Maintained backward compatibility with existing .env.local SMTP configuration
   - **Graceful Degradation**: System falls back to environment variables if database settings unavailable
   - **Migration Support**: Existing SMTP configuration continues working during transition period
   - **Settings Cache**: 5-minute cache for database settings to optimize performance and reduce database calls
 - ✅ **PROFESSIONAL ADMIN INTERFACE**: Modern, intuitive SMTP configuration interface following project design standards
+  - **Integrated Design**: SMTP settings seamlessly integrated into existing site settings page layout
   - **Real-time Testing**: Test email functionality sends actual emails to admin user for verification
   - **Configuration Validation**: Comprehensive validation for all SMTP fields with clear error messaging
   - **Enable/Disable Toggle**: Master switch to enable/disable email functionality from admin dashboard

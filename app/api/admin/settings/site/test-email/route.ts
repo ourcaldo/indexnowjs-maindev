@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Send test email
     const testEmailOptions = {
-      from: `${smtp_from_name} <${smtp_from_email}>`,
+      from: `${smtp_from_name || 'IndexNow Pro'} <${smtp_from_email}>`,
       to: adminUser?.email || smtp_from_email, // Send to admin user's email
       subject: 'IndexNow Pro - SMTP Test Email',
       html: `
@@ -113,14 +113,14 @@ export async function POST(request: NextRequest) {
         await ActivityLogger.logAdminSettingsActivity(
           adminUser.id,
           ActivityEventTypes.SETTINGS_VIEW,
-          'Tested email settings configuration',
+          'Tested SMTP email configuration',
           request,
           {
-            section: 'email_settings',
-            action: 'test_email',
+            section: 'site_settings',
+            action: 'test_smtp',
             adminEmail: adminUser.email,
             smtpHost: smtp_host,
-            testRecipient: adminUser?.email || 'Admin'
+            testRecipient: adminUser.email
           }
         )
       } catch (logError) {

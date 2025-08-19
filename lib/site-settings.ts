@@ -14,6 +14,14 @@ export interface SiteSettings {
   support_email: string | null
   maintenance_mode: boolean
   registration_enabled: boolean
+  smtp_host: string | null
+  smtp_port: number | null
+  smtp_user: string | null
+  smtp_pass: string | null
+  smtp_from_name: string | null
+  smtp_from_email: string | null
+  smtp_secure: boolean
+  smtp_enabled: boolean
   created_at: string
   updated_at: string
 }
@@ -30,6 +38,14 @@ const DEFAULT_SETTINGS: SiteSettings = {
   support_email: 'help@indexnow.studio',
   maintenance_mode: false,
   registration_enabled: true,
+  smtp_host: null,
+  smtp_port: 465,
+  smtp_user: null,
+  smtp_pass: null,
+  smtp_from_name: 'IndexNow Pro',
+  smtp_from_email: null,
+  smtp_secure: true,
+  smtp_enabled: false,
   created_at: '2025-07-24T18:08:18.048476Z',
   updated_at: '2025-07-25T17:49:10.754Z'
 }
