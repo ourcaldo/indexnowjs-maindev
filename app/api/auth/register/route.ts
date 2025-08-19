@@ -28,10 +28,12 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
     return createErrorResponse(validationResult.error)
   }
 
-  const { name, email, password } = validationResult.data as { 
+  const { name, email, password, phoneNumber, country } = validationResult.data as { 
     name: string; 
     email: string; 
-    password: string 
+    password: string;
+    phoneNumber: string;
+    country: string;
   }
 
   try {
@@ -42,6 +44,8 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       options: {
         data: {
           full_name: name,
+          phone_number: phoneNumber,
+          country: country,
         },
       },
     })

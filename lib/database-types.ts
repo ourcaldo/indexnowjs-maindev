@@ -10,6 +10,7 @@ export interface Database {
           user_id: string
           full_name: string | null
           phone_number: string | null
+          country: string | null
           role: 'user' | 'admin' | 'super_admin'
           email_notifications: boolean
           created_at: string
@@ -20,6 +21,7 @@ export interface Database {
           user_id: string
           full_name?: string | null
           phone_number?: string | null
+          country?: string | null
           role?: 'user' | 'admin' | 'super_admin'
           email_notifications?: boolean
           created_at?: string
@@ -30,6 +32,7 @@ export interface Database {
           user_id?: string
           full_name?: string | null
           phone_number?: string | null
+          country?: string | null
           role?: 'user' | 'admin' | 'super_admin'
           email_notifications?: boolean
           created_at?: string

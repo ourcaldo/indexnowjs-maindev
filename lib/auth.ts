@@ -122,13 +122,15 @@ export class AuthService {
     return data
   }
 
-  async signUp(email: string, password: string, fullName: string) {
+  async signUp(email: string, password: string, fullName: string, phoneNumber?: string, country?: string) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
+          phone_number: phoneNumber || null,
+          country: country || null,
         },
       },
     })

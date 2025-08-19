@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { authService } from "@/lib/auth"
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
+import { countries, findCountryByCode } from '@/lib/countries'
+// We'll use a simple fetch to our detect-location API instead
 
 import DashboardPreview from '../../components/DashboardPreview'
 
@@ -13,6 +15,9 @@ export default function Register() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [fullName, setFullName] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [country, setCountry] = useState("")
+  const [isDetectingCountry, setIsDetectingCountry] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -36,6 +41,32 @@ export default function Register() {
     return () => window.removeEventListener('resize', checkIfMobile)
   }, [])
 
+  // Auto-detect country from IP on component mount
+  useEffect(() => {
+    const detectCountry = async () => {
+      try {
+        const response = await fetch('/api/detect-location')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.countryCode) {
+            setCountry(data.countryCode)
+          } else {
+            setCountry('US') // Fallback to US
+          }
+        } else {
+          setCountry('US') // Fallback to US
+        }
+      } catch (error) {
+        console.warn('Country detection failed:', error)
+        setCountry('US') // Fallback to US
+      } finally {
+        setIsDetectingCountry(false)
+      }
+    }
+
+    detectCountry()
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -48,7 +79,7 @@ export default function Register() {
     }
 
     try {
-      await authService.signUp(email, password, fullName)
+      await authService.signUp(email, password, fullName, phoneNumber, country)
       setSuccess(true)
     } catch (error: any) {
       setError(error.message || "Registration failed")
@@ -294,6 +325,89 @@ export default function Register() {
                 placeholder="you@company.com"
                 required
               />
+            </div>
+
+            {/* Phone Number Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '16px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  color: '#1f2937',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                placeholder="+1 (555) 123-4567"
+                required
+              />
+            </div>
+
+            {/* Country Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Country {isDetectingCountry ? '(Auto-detecting...)' : '(Auto-detected)'}
+              </label>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                disabled={isDetectingCountry}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '16px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  backgroundColor: isDetectingCountry ? '#f9fafb' : '#ffffff',
+                  color: '#1f2937',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  cursor: isDetectingCountry ? 'not-allowed' : 'pointer'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                required
+              >
+                <option value="">Select your country</option>
+                {countries.map((countryOption) => (
+                  <option key={countryOption.code} value={countryOption.code}>
+                    {countryOption.flag} {countryOption.name}
+                  </option>
+                ))}
+              </select>
+              {!isDetectingCountry && country && (
+                <p style={{
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  marginTop: '4px',
+                  marginBottom: '0'
+                }}>
+                  Detected from your location. You can change this if needed.
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
