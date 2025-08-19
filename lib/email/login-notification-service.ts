@@ -92,7 +92,7 @@ export class LoginNotificationService {
       const mailOptions = {
         from: `${smtpConfig.fromName} <${smtpConfig.fromEmail}>`,
         to: data.userEmail,
-        subject: 'Security Alert: New Login to Your IndexNow Pro Account',
+        subject: 'Security Alert: New Login to Your IndexNow Studio Account',
         html: emailHtml
       }
 
@@ -127,21 +127,21 @@ export class LoginNotificationService {
         <body>
           <div class="container">
             <div class="header">
-              <h1>IndexNow Pro</h1>
+              <h1>IndexNow Studio</h1>
             </div>
             <div class="content">
               <p>Hi ${data.userName},</p>
               <div class="alert">
                 <strong>🔐 New login detected on your account</strong>
               </div>
-              <p>We detected a new login to your IndexNow Pro account:</p>
+              <p>We detected a new login to your IndexNow Studio account:</p>
               <ul>
                 <li><strong>Time:</strong> ${loginTime}</li>
                 <li><strong>IP Address:</strong> ${data.ipAddress}</li>
                 <li><strong>Email:</strong> ${data.userEmail}</li>
               </ul>
               <p>If this wasn't you, please secure your account immediately.</p>
-              <p>Best regards,<br>The IndexNow Pro Security Team</p>
+              <p>Best regards,<br>The IndexNow Studio Security Team</p>
             </div>
           </div>
         </body>
@@ -184,7 +184,7 @@ export class LoginNotificationService {
         user: settings.smtp_user,
         pass: settings.smtp_pass,
         secure: settings.smtp_secure !== false,
-        fromName: settings.smtp_from_name || 'IndexNow Pro',
+        fromName: settings.smtp_from_name || 'IndexNow Studio',
         fromEmail: settings.smtp_from_email
       }
 
@@ -215,7 +215,7 @@ export class LoginNotificationService {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
       secure: process.env.SMTP_SECURE !== 'false',
-      fromName: process.env.SMTP_FROM_NAME || 'IndexNow Pro',
+      fromName: process.env.SMTP_FROM_NAME || 'IndexNow Studio',
       fromEmail: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER
     }
   }

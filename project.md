@@ -2,11 +2,11 @@
 
 CAUTIONS: WRITE THE RECENT CHANGES/CHANGELOGS IN "RECENT CHANGES PART" OF THIS DOCUMENTATION, NOT IN TOP OF THIS DOCUMENT! ALSO DO NOT FUCKING CHANGES, RESET, DELETE ALL INFORMATION UNDER THIS FUCKING FILE
 
-# IndexNow Pro - Professional Web Application
+# IndexNow Studio - Professional Web Application
 
 ## Project Overview
 
-IndexNow Pro is a professional-grade, full-stack web application designed to automate Google URL indexing through the Google Search Console API. Built as a comprehensive solution for SEO professionals, digital marketers, and website owners who need efficient large-scale indexing operations with advanced monitoring and reporting.
+IndexNow Studio is a professional-grade, full-stack web application designed to automate Google URL indexing through the Google Search Console API. Built as a comprehensive solution for SEO professionals, digital marketers, and website owners who need efficient large-scale indexing operations with advanced monitoring and reporting.
 
 ### Core Purpose
 The application provides instant indexing capabilities similar to RankMath's Instant Indexing plugin, but as a standalone web platform that handles multiple service accounts, scheduled jobs, and enterprise-scale indexing operations.

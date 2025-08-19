@@ -29,7 +29,7 @@ export interface SiteSettings {
 // Default fallback settings
 const DEFAULT_SETTINGS: SiteSettings = {
   id: '474f9d67-17b5-4e11-9c46-b61614d17a59',
-  site_name: 'IndexNow Pro',
+  site_name: 'IndexNow Studio',
   site_description: 'Professional URL indexing automation platform',
   site_logo_url: 'https://bwkasvyrzbzhcdtvsbyg.supabase.co/storage/v1/object/public/indexnow-bucket/logo/indexnow-black.png',
   site_icon_url: 'https://bwkasvyrzbzhcdtvsbyg.supabase.co/storage/v1/object/public/indexnow-bucket/logo/indexnow-icon-black.png',
@@ -42,7 +42,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   smtp_port: 465,
   smtp_user: null,
   smtp_pass: null,
-  smtp_from_name: 'IndexNow Pro',
+  smtp_from_name: 'IndexNow Studio',
   smtp_from_email: null,
   smtp_secure: true,
   smtp_enabled: false,

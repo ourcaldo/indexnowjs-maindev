@@ -1,8 +1,8 @@
-# IndexNow Pro - Professional Web Application
+# IndexNow Studio - Professional Web Application
 
 ## Overview
 
-IndexNow Pro is a professional-grade, full-stack web application designed to automate Google URL indexing through the Google Search Console API. It provides instant indexing, manages multiple service accounts, schedules jobs, and offers advanced monitoring and reporting for SEO professionals, digital marketers, and website owners. Its vision is to be a comprehensive solution for efficient, large-scale indexing.
+IndexNow Studio is a professional-grade, full-stack web application designed to automate Google URL indexing through the Google Search Console API. It provides instant indexing, manages multiple service accounts, schedules jobs, and offers advanced monitoring and reporting for SEO professionals, digital marketers, and website owners. Its vision is to be a comprehensive solution for efficient, large-scale indexing.
 
 **Key Capabilities:**
 - Automated Google Indexing for thousands of URLs.
@@ -34,7 +34,7 @@ The application is built with Next.js App Router and integrates with an Express 
 
 ## Recent Changes (August 19, 2025)
 
-**Login Notification Email System Enhancement:**
+**Login Notification Email System Enhancement & Branding Update:**
 - ✅ Fixed SMTP configuration to retrieve settings from `indb_site_settings` database table
 - ✅ Enhanced email service with comprehensive logging and error handling  
 - ✅ Added login notification support for session restoration route (`/api/auth/session`)
@@ -42,6 +42,8 @@ The application is built with Next.js App Router and integrates with an Express 
 - ✅ Confirmed email functionality - Successfully sending to user email addresses
 - ✅ Email notifications trigger for both direct login and session restoration
 - ✅ System uses database SMTP settings as primary source
+- ✅ Updated all branding from "IndexNow Pro" to "IndexNow Studio" throughout codebase
+- ✅ Updated email templates, metadata, and UI components with correct branding
 - 📧 SMTP operational: mail.indexnow.studio with notifikasi@indexnow.studio
 
 **Overall Structure:**

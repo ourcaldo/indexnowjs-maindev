@@ -4,7 +4,7 @@ import { QuotaResetMonitor } from './quota-reset-monitor';
 /**
  * Background Worker Service
  * 
- * Manages all background services for the IndexNow Pro application:
+ * Manages all background services for the IndexNow Studio application:
  * - Job monitoring and processing
  * - Cleanup tasks
  * - Health checks
@@ -34,7 +34,7 @@ export class BackgroundWorker {
       return;
     }
 
-    console.log('🚀 Starting IndexNow Pro background worker...');
+    console.log('🚀 Starting IndexNow Studio background worker...');
     
     try {
       // Start job monitor

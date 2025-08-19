@@ -8,7 +8,7 @@ if (typeof window === 'undefined' && !(global as any).backgroundServicesInitiali
   (global as any).backgroundServicesInitialized = true;
   import('../lib/worker-startup').then(({ workerStartup }) => {
     workerStartup.initialize().then(() => {
-      console.log('IndexNow Pro background services initialized successfully');
+      console.log('IndexNow Studio background services initialized successfully');
     }).catch((error) => {
       console.error('Failed to initialize background services:', error);
     });
@@ -18,7 +18,7 @@ if (typeof window === 'undefined' && !(global as any).backgroundServicesInitiali
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'IndexNow Pro',
+  title: 'IndexNow Studio',
   description: 'Professional URL indexing automation platform for Google Search Console',
 }
 
