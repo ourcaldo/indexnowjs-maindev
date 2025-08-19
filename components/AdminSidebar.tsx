@@ -18,7 +18,8 @@ import {
   X,
   LogOut,
   Shield,
-  Receipt
+  Receipt,
+  Mail
 } from 'lucide-react'
 import { AdminUser } from '@/lib/admin-auth'
 import { authService } from '@/lib/auth'
@@ -90,6 +91,12 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           href: '/backend/admin/settings/site',
           icon: Globe,
           active: pathname === '/backend/admin/settings/site'
+        },
+        {
+          label: 'Email Settings',
+          href: '/backend/admin/settings/email',
+          icon: Mail,
+          active: pathname === '/backend/admin/settings/email'
         },
         {
           label: 'Payment Gateway',

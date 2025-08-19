@@ -1123,6 +1123,26 @@ JWT_SECRET=[jwt-secret-key]
 
 **UI COLOR SCHEME COMPLIANCE & BILLING HISTORY IMPROVEMENTS (January 26, 2025)**
 - ✅ **ORDER DETAIL PAGE COLOR FIXES**: Removed blue colors from "Proof Uploaded" badge, now uses project color #F0A202 (Amber)
+
+**SMTP ADMIN SETTINGS MIGRATION COMPLETED (August 19, 2025)**
+- ✅ **SMTP SETTINGS MOVED TO ADMIN DASHBOARD**: Successfully migrated SMTP configuration from environment variables to database-managed admin settings
+  - **New Admin Page**: Created `/backend/admin/settings/email` page with comprehensive SMTP configuration interface
+  - **Database Integration**: SMTP settings now stored in `indb_system_smtp_settings` table with encryption support
+  - **Enhanced Email Service**: Created `EnhancedEmailService` class that dynamically fetches settings from database with environment fallback
+  - **API Endpoints**: Built `/api/admin/settings/email` for CRUD operations and `/api/admin/settings/email/test` for testing functionality
+  - **Admin Navigation**: Added "Email Settings" link to admin sidebar navigation under Settings section
+  - **Test Functionality**: Comprehensive email testing with detailed SMTP verification and test email sending
+  - **Security**: Super admin authentication required for all email settings operations with comprehensive activity logging
+- ✅ **ENVIRONMENT VARIABLE FALLBACK**: Maintained backward compatibility with existing .env.local SMTP configuration
+  - **Graceful Degradation**: System falls back to environment variables if database settings unavailable
+  - **Migration Support**: Existing SMTP configuration continues working during transition period
+  - **Settings Cache**: 5-minute cache for database settings to optimize performance and reduce database calls
+- ✅ **PROFESSIONAL ADMIN INTERFACE**: Modern, intuitive SMTP configuration interface following project design standards
+  - **Real-time Testing**: Test email functionality sends actual emails to admin user for verification
+  - **Configuration Validation**: Comprehensive validation for all SMTP fields with clear error messaging
+  - **Enable/Disable Toggle**: Master switch to enable/disable email functionality from admin dashboard
+  - **Security Indicators**: Visual indicators for SSL/TLS encryption and connection security status
+  - **Project Colors**: Strict adherence to project color scheme (#FFFFFF, #1A1A1A, #3D8BFF, #6C757D)
   - **Badge Text Updated**: Changed "Proof Uploaded" to "Waiting for Confirmation" for better user communication
   - **Project Color Compliance**: All UI elements now use ONLY project-specific colors from replit.md
   - **Hover States Fixed**: Back to Billing button uses correct project colors (text-[#6C757D] hover:text-[#1A1A1A])
