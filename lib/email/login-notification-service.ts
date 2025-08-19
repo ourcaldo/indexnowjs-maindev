@@ -36,7 +36,7 @@ export class LoginNotificationService {
    */
   async sendLoginNotification(data: LoginNotificationData): Promise<boolean> {
     try {
-      console.log('🔐 Preparing to send login notification email...')
+      console.log('🔐 Preparing to send login notification email to:', data.userEmail)
 
       // Get SMTP configuration from site settings
       const smtpConfig = await this.getEmailConfiguration()
@@ -48,10 +48,26 @@ export class LoginNotificationService {
       // Load and process email template
       const emailHtml = await this.prepareEmailTemplate(data)
       if (!emailHtml) {
-        console.error('❌ Failed to prepare email template')
-        return false
+        console.error('❌ Failed to prepare email template, using fallback')
+        // Use simple fallback email content if template fails
+        const fallbackHtml = this.createFallbackEmailContent(data)
+        if (!fallbackHtml) return false
+        return this.sendEmailWithContent(smtpConfig, data, fallbackHtml)
       }
 
+      return await this.sendEmailWithContent(smtpConfig, data, emailHtml)
+
+    } catch (error) {
+      console.error('❌ Failed to send login notification email:', error)
+      return false
+    }
+  }
+
+  /**
+   * Send email with prepared content
+   */
+  private async sendEmailWithContent(smtpConfig: any, data: LoginNotificationData, emailHtml: string): Promise<boolean> {
+    try {
       // Create transporter
       const transporter = await this.createTransporter(smtpConfig)
       if (!transporter) {
@@ -72,9 +88,52 @@ export class LoginNotificationService {
       return true
 
     } catch (error) {
-      console.error('❌ Failed to send login notification email:', error)
+      console.error('❌ Failed to send email:', error)
       return false
     }
+  }
+
+  /**
+   * Create simple fallback email content
+   */
+  private createFallbackEmailContent(data: LoginNotificationData): string {
+    const loginTime = new Date(data.loginTime).toLocaleString()
+    
+    return `
+      <html>
+        <head>
+          <title>Login Notification</title>
+          <style>
+            body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+            .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #1A1A1A; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; border: 1px solid #e0e0e0; }
+            .alert { background-color: #e8f4fd; padding: 15px; margin: 20px 0; border-left: 4px solid #3D8BFF; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>IndexNow Pro</h1>
+            </div>
+            <div class="content">
+              <p>Hi ${data.userName},</p>
+              <div class="alert">
+                <strong>🔐 New login detected on your account</strong>
+              </div>
+              <p>We detected a new login to your IndexNow Pro account:</p>
+              <ul>
+                <li><strong>Time:</strong> ${loginTime}</li>
+                <li><strong>IP Address:</strong> ${data.ipAddress}</li>
+                <li><strong>Email:</strong> ${data.userEmail}</li>
+              </ul>
+              <p>If this wasn't you, please secure your account immediately.</p>
+              <p>Best regards,<br>The IndexNow Pro Security Team</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
   }
 
   /**
@@ -177,7 +236,15 @@ export class LoginNotificationService {
    */
   private async prepareEmailTemplate(data: LoginNotificationData): Promise<string | null> {
     try {
-      const templatePath = path.join(process.cwd(), 'lib', 'email', 'templates', 'login-notification.html')
+      // Use absolute path resolution for Replit environment
+      const templatePath = path.resolve(process.cwd(), 'lib', 'email', 'templates', 'login-notification.html')
+      
+      // Check if file exists first
+      if (!fs.existsSync(templatePath)) {
+        console.error('❌ Login notification template not found at:', templatePath)
+        return null
+      }
+      
       let template = fs.readFileSync(templatePath, 'utf8')
 
       // Extract device information
@@ -228,7 +295,7 @@ export class LoginNotificationService {
         '{{operatingSystem}}': operatingSystem,
         '{{securityRisk}}': securityRisk,
         '{{notificationTime}}': notificationTime,
-        '{{secureAccountUrl}}': `${process.env.NEXT_PUBLIC_APP_URL || 'https://indexnow.pro'}/forgot-password`
+        '{{secureAccountUrl}}': `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/forgot-password`
       }
 
       // Apply replacements
