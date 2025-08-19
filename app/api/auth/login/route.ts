@@ -91,6 +91,31 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       } catch (logError) {
         logger.error({ error: logError, userId: data.user.id }, 'Failed to log successful authentication')
       }
+
+      // Send login notification email (async, don't block response)
+      try {
+        const { loginNotificationService } = await import('@/lib/email/login-notification-service')
+        const { getRequestInfo } = await import('@/lib/ip-device-utils')
+        
+        // Extract request information for notification
+        const requestInfo = await getRequestInfo(request)
+        
+        // Send notification asynchronously
+        loginNotificationService.sendLoginNotification({
+          userId: data.user.id,
+          userEmail: data.user.email || '',
+          userName: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'User',
+          ipAddress: requestInfo.ipAddress || 'Unknown',
+          userAgent: requestInfo.userAgent || 'Unknown',
+          deviceInfo: requestInfo.deviceInfo || undefined,
+          locationData: requestInfo.locationData || undefined,
+          loginTime: new Date().toISOString()
+        }).catch(notificationError => {
+          logger.error({ error: notificationError, userId: data.user.id }, 'Failed to send login notification email')
+        })
+      } catch (importError) {
+        logger.error({ error: importError, userId: data.user.id }, 'Failed to import login notification service')
+      }
     }
 
     // Return user data and session

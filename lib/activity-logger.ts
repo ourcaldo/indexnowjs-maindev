@@ -125,7 +125,7 @@ export const ActivityEventTypes = {
   // Admin Orders
   ORDER_MANAGEMENT: 'order_management',
   ORDER_STATUS_UPDATE: 'order_status_update',
-  ORDER_VIEW: 'admin_order_view',
+  ADMIN_ORDER_VIEW: 'admin_order_view',
   ORDER_APPROVE: 'order_approve',
   ORDER_REJECT: 'order_reject',
   
