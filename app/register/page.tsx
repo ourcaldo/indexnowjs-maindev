@@ -400,16 +400,6 @@ export default function Register() {
                   </option>
                 ))}
               </select>
-              {!isDetectingCountry && country && (
-                <p style={{
-                  fontSize: '12px',
-                  color: '#6b7280',
-                  marginTop: '4px',
-                  marginBottom: '0'
-                }}>
-                  Detected from your location. You can change this if needed.
-                </p>
-              )}
             </div>
 
             {/* Password Field */}
