@@ -369,7 +369,7 @@ export default function Register() {
                 color: '#374151',
                 marginBottom: '8px'
               }}>
-                Country {isDetectingCountry ? '(Auto-detecting...)' : '(Auto-detected)'}
+                Country
               </label>
               <select
                 value={country}
