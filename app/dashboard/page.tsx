@@ -359,13 +359,13 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-[#1A1A1A]/10 to-[#1A1A1A]/5 rounded-lg p-4 border border-[#1A1A1A]/20">
+                <div className="bg-gradient-to-br from-[#8B5CF6]/10 to-[#8B5CF6]/5 rounded-lg p-4 border border-[#8B5CF6]/20">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-[#1A1A1A]">TOTAL KEYWORDS</p>
+                      <p className="text-xs font-medium text-[#8B5CF6]">TOTAL KEYWORDS</p>
                       <p className="text-2xl font-bold text-[#1A1A1A] mt-1">{rankStats.totalKeywords}</p>
                     </div>
-                    <Search className="w-5 h-5 text-[#1A1A1A]" />
+                    <Search className="w-5 h-5 text-[#8B5CF6]" />
                   </div>
                 </div>
               </div>
