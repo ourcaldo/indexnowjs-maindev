@@ -32,8 +32,8 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
     name: string; 
     email: string; 
     password: string;
-    phoneNumber?: string;
-    country?: string;
+    phoneNumber: string;
+    country: string;
   }
 
   try {
@@ -44,8 +44,8 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       options: {
         data: {
           full_name: name,
-          phone_number: phoneNumber && phoneNumber.trim() !== '' ? phoneNumber : null,
-          country: country && country.trim() !== '' ? country : null,
+          phone_number: phoneNumber,
+          country: country,
         },
       },
     })
@@ -81,6 +81,32 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       }
 
       return createErrorResponse(authError)
+    }
+
+    // Create user profile in our database
+    if (data.user?.id) {
+      try {
+        const { error: profileError } = await supabase
+          .from('indb_auth_user_profiles')
+          .insert({
+            user_id: data.user.id,
+            full_name: name,
+            phone_number: phoneNumber,
+            country: country,
+            role: 'user',
+            email_notifications: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+
+        if (profileError) {
+          logger.error({ error: profileError, userId: data.user.id }, 'Failed to create user profile')
+        } else {
+          logger.info({ userId: data.user.id }, 'User profile created successfully')
+        }
+      } catch (profileError) {
+        logger.error({ error: profileError, userId: data.user.id }, 'Failed to create user profile')
+      }
     }
 
     // Log successful registration

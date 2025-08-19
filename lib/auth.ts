@@ -134,7 +134,7 @@ export class AuthService {
         password,
         confirmPassword: password,
         phoneNumber: phoneNumber || '',
-        country: country || '',
+        country: country || ''
       }),
     })
 
