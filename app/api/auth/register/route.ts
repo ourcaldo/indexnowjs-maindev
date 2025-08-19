@@ -32,8 +32,8 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
     name: string; 
     email: string; 
     password: string;
-    phoneNumber: string;
-    country: string;
+    phoneNumber?: string;
+    country?: string;
   }
 
   try {
@@ -44,8 +44,8 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       options: {
         data: {
           full_name: name,
-          phone_number: phoneNumber,
-          country: country,
+          phone_number: phoneNumber && phoneNumber.trim() !== '' ? phoneNumber : null,
+          country: country && country.trim() !== '' ? country : null,
         },
       },
     })

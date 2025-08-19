@@ -123,23 +123,28 @@ export class AuthService {
   }
 
   async signUp(email: string, password: string, fullName: string, phoneNumber?: string, country?: string) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone_number: phoneNumber || null,
-          country: country || null,
-        },
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        name: fullName,
+        email,
+        password,
+        confirmPassword: password,
+        phoneNumber: phoneNumber || '',
+        country: country || '',
+      }),
     })
 
-    if (error) {
-      throw error
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Registration failed')
     }
 
-    return data
+    return result.data
   }
 
   async signOut() {
