@@ -54,19 +54,28 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
   })
 
   // Fetch keyword usage data
-  const { data: keywordUsageData, isLoading: keywordUsageLoading } = useQuery({
+  const { data: keywordUsageData, isLoading: keywordUsageLoading, error: keywordUsageError } = useQuery({
     queryKey: ['/api/user/keyword-usage'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('No auth token available')
+      }
       const response = await fetch('/api/user/keyword-usage', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
         }
       })
-      if (!response.ok) throw new Error('Failed to fetch keyword usage')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Keyword usage API error:', response.status, errorData)
+        throw new Error(`Failed to fetch keyword usage: ${response.status}`)
+      }
       return response.json()
-    }
+    },
+    retry: 1,
+    retryDelay: 1000
   })
 
 
@@ -207,7 +216,7 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
               <div>
                 <p className="text-sm font-medium text-[#6C757D]">Keywords Tracking</p>
                 <p className="text-lg font-bold text-[#1A1A1A]">
-                  {keywordUsageLoading ? '...' : (
+                  {keywordUsageLoading ? '...' : keywordUsageError ? 'Error' : (
                     <>
                       {keywordUsageData?.keywords_used || 0} / {keywordUsageData?.is_unlimited ? '∞' : (keywordUsageData?.keywords_limit || 0)}
                     </>
@@ -218,7 +227,7 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
                 <Search className="w-4 h-4 text-[#F0A202]" />
               </div>
             </div>
-            {!keywordUsageData?.is_unlimited && !keywordUsageLoading && keywordUsageData && (
+            {!keywordUsageError && !keywordUsageData?.is_unlimited && !keywordUsageLoading && keywordUsageData && (
               <div className="mt-2">
                 <div className="w-full bg-[#E0E6ED] rounded-full h-2">
                   <div 
@@ -334,7 +343,7 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
           <div>
             <p className="text-sm font-medium text-[#6C757D]">Keywords Tracking</p>
             <p className="text-lg font-bold text-[#1A1A1A]">
-              {keywordUsageLoading ? '...' : (
+              {keywordUsageLoading ? '...' : keywordUsageError ? 'Error' : (
                 <>
                   {keywordUsageData?.keywords_used || 0} / {keywordUsageData?.is_unlimited ? '∞' : (keywordUsageData?.keywords_limit || 0)}
                 </>
@@ -345,7 +354,7 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
             <Search className="w-4 h-4 text-[#F0A202]" />
           </div>
         </div>
-        {!keywordUsageData?.is_unlimited && !keywordUsageLoading && keywordUsageData && (
+        {!keywordUsageError && !keywordUsageData?.is_unlimited && !keywordUsageLoading && keywordUsageData && (
           <div className="mt-2">
             <div className="w-full bg-[#E0E6ED] rounded-full h-2">
               <div 
