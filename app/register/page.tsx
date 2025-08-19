@@ -209,19 +209,20 @@ export default function Register() {
         {!isMobile && (
           <div style={{
             position: 'absolute',
-            top: '40px',
+            top: '32px',
             left: '60px',
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
+            zIndex: 10
           }}>
             {logoUrl ? (
               <img 
                 src={logoUrl} 
                 alt={`${siteName} Logo`}
                 style={{
-                  height: '72px',
+                  height: '48px',
                   width: 'auto',
-                  maxWidth: '360px'
+                  maxWidth: '280px'
                 }}
               />
             ) : (
@@ -240,7 +241,8 @@ export default function Register() {
         <div style={{ 
           maxWidth: '400px', 
           width: '100%',
-          textAlign: isMobile ? 'center' : 'left'
+          textAlign: isMobile ? 'center' : 'left',
+          marginTop: isMobile ? '0' : '80px'
         }}>
           <h1 style={{
             fontSize: '32px',
