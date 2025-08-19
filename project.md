@@ -2210,3 +2210,18 @@ indb_keyword_rankings (latest positions)
   - Triggers applied to `indb_keyword_keywords` table for automatic tracking
 - **Result**: Keyword usage tracking now fully functional with automatic database-level synchronization
 - **Quota Behavior**: Keywords quota is lifetime allowance per package (no resets) - users get total allowance for package duration
+
+### August 19, 2025 - Critical QueryClient Error Fix After Login Redirect
+- ✅ **RESOLVED DASHBOARD LOADING CRASH**: Fixed "No QueryClient set, use QueryClientProvider to set one" error after login
+  - **Issue**: After successful login redirect to `/dashboard`, application crashed with QueryClient error
+  - **Root Cause**: Dashboard page component used `useQuery` hooks immediately, but `QueryProvider` only wrapped authenticated content
+  - **Timing Problem**: During authentication check phase, `QueryProvider` was not available yet, causing useQuery to fail
+  - **Solution**: Moved `QueryProvider` to wrap ALL dashboard content including login page, loading states, and authentication checks
+- ✅ **IMPROVED AUTHENTICATION FLOW**: Enhanced dashboard layout to handle all authentication states properly
+  - **Universal QueryProvider**: Now wraps all dashboard routes including `/dashboard/login`
+  - **State Management**: Proper handling of mounted state, loading state, authenticated state, and unauthenticated state
+  - **Hydration Safety**: Prevents hydration mismatches between server and client rendering
+  - **User Experience**: Smooth transition from login to dashboard without JavaScript errors
+- **File Modified**: `app/dashboard/layout.tsx` - Restructured QueryProvider placement and authentication state handling
+- **Technical Details**: QueryProvider now initialized at top level of dashboard layout, making TanStack React Query available to all child components immediately
+- **Result**: Login flow now works seamlessly without console errors or application crashes
