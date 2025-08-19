@@ -129,7 +129,7 @@ export class EmailService {
       const renderedHtml = this.renderTemplate(templateHtml, data)
 
       const mailOptions = {
-        from: `${process.env.SMTP_FROM_NAME || 'IndexNow Pro'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+        from: `${process.env.SMTP_FROM_NAME || 'IndexNow Studio'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
         to: email,
         subject: `Order Confirmation - ${data.packageName} Subscription`,
         html: renderedHtml

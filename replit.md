@@ -43,7 +43,9 @@ The application is built with Next.js App Router and integrates with an Express 
 - ✅ Email notifications trigger for both direct login and session restoration
 - ✅ System uses database SMTP settings as primary source
 - ✅ Updated all branding from "IndexNow Pro" to "IndexNow Studio" throughout codebase
-- ✅ Updated email templates, metadata, and UI components with correct branding
+- ✅ Updated HTML email templates with correct "IndexNow Studio" branding
+- ✅ Fixed all references in login notification template (header, footer, content)
+- ✅ Updated metadata, UI components, and service files with correct branding
 - 📧 SMTP operational: mail.indexnow.studio with notifikasi@indexnow.studio
 
 **Overall Structure:**
