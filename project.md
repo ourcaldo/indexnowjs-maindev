@@ -2224,4 +2224,17 @@ indb_keyword_rankings (latest positions)
   - **User Experience**: Smooth transition from login to dashboard without JavaScript errors
 - **File Modified**: `app/dashboard/layout.tsx` - Restructured QueryProvider placement and authentication state handling
 - **Technical Details**: QueryProvider now initialized at top level of dashboard layout, making TanStack React Query available to all child components immediately
-- **Result**: Login flow now works seamlessly without console errors or application crashes
+
+### August 20, 2025 - Registration Database Recursion Fix
+- ✅ **FIXED REGISTRATION INFINITE RECURSION ERROR**: Resolved database policy conflicts preventing user profile creation
+  - **Issue**: Registration failed with "infinite recursion detected in policy" error during profile insertion
+  - **Root Cause**: Conflicting RLS policies and manual timestamp insertion interfering with database triggers
+  - **Database Schema Confirmed**: `phone_number` and `country` columns already exist in `indb_auth_user_profiles` table
+  - **Solution Applied**: Removed manual `created_at` and `updated_at` values to let database defaults handle timestamps
+- ✅ **PROVIDED RLS POLICY FIXES**: SQL queries to resolve recursive policy conflicts
+  - **Policy Reset**: Commands to drop problematic RLS policies and recreate them properly
+  - **Non-Recursive Policies**: New policies using proper `auth.uid()` checks without recursion
+  - **Trigger Compatibility**: Ensured compatibility with existing `sync_user_email` and `assign_default_package` triggers
+- **Files Modified**: `app/api/auth/register/route.ts` - Removed manual timestamp insertion
+- **Database Changes Required**: SQL queries provided to fix RLS policies and prevent recursion
+- **Result**: Registration should now work without database recursion errors when SQL fixes are applied

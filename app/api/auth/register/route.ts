@@ -92,10 +92,9 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
             user_id: data.user.id,
             full_name: name,
             phone_number: phoneNumber,
+            country: country,
             role: 'user',
-            email_notifications: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            email_notifications: true
           })
 
         if (profileError) {
