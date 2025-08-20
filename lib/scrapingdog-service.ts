@@ -145,20 +145,34 @@ export class ScrapingDogService {
     let lastError: Error | null = null
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
+        logger.info(`Custom Tracker: Sending request with headers: X-API-Key: ***masked*** (Host header temporarily removed for testing)`)
+        logger.info(`Custom Tracker: Request body: ${JSON.stringify(requestBody)}`)
+        
         const response = await fetch(url, {
           method: 'POST',
           headers: {
             'X-API-Key': this.config.apiKey,
-            'Host': 'reqbin.com',
             'Content-Type': 'application/json',
             'User-Agent': 'IndexNow-Studio-Rank-Tracker/1.0'
+            // Temporarily removed Host header to test if it's causing 403
+            // 'Host': 'reqbin.com',
           },
           body: JSON.stringify(requestBody),
           timeout: 150000 // 150 second timeout (longer than max_processing_time)
         } as any)
 
+        logger.info(`Custom Tracker: Response status: ${response.status} ${response.statusText}`)
+
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+          // Try to get response body for more details
+          let errorDetails = ''
+          try {
+            errorDetails = await response.text()
+            logger.error(`Custom Tracker: Error response body: ${errorDetails}`)
+          } catch (e) {
+            logger.error('Custom Tracker: Could not read error response body')
+          }
+          throw new Error(`HTTP ${response.status}: ${response.statusText}${errorDetails ? ` - ${errorDetails}` : ''}`)
         }
 
         const data = await response.json()
