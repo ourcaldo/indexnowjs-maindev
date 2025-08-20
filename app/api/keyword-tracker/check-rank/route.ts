@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check if user has Custom Tracker API configured
+// GET endpoint to check if user has IndexNow Rank Tracker API configured
 export async function GET(request: NextRequest) {
   try {
     const user = await getServerAuthUser(request)
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check if site has Custom Tracker integration configured
+    // Check if site has IndexNow Rank Tracker integration configured
     const { data: integration, error } = await supabaseAdmin
       .from('indb_site_integration')
       .select('api_quota_limit, api_quota_used, quota_reset_date, is_active')
@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         configured: false,
-        message: 'Custom Tracker API not configured. Please contact admin to configure API integration.'
+        message: 'IndexNow Rank Tracker API not configured. Please contact admin to configure API integration.'
       })
     }
 

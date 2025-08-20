@@ -1,7 +1,9 @@
 /**
- * Custom Rank Tracker API Integration Service
+ * IndexNow Rank Tracker API Integration Service
  * Handles rank checking via custom backend API at http://160.79.119.44:5000
  */
+
+import { supabaseAdmin } from './supabase'
 
 // Simple console logger for development
 const logger = {
@@ -10,7 +12,7 @@ const logger = {
   error: (message: string, ...args: any[]) => console.error(`[ERROR] ${message}`, ...args)
 }
 
-interface CustomTrackerConfig {
+interface RankTrackerConfig {
   apiKey: string
   baseUrl: string
 }
@@ -42,13 +44,38 @@ interface CustomApiResponse {
   execution_time: number
 }
 
-export class ScrapingDogService {
-  private config: CustomTrackerConfig
+export class RankTrackerService {
+  private config: RankTrackerConfig | null = null
 
-  constructor(apiKey: string) {
-    this.config = {
-      apiKey: '6c95df39-8aa4-40ee-baab-a6192587400f', // Fixed API key as provided
-      baseUrl: 'http://160.79.119.44:5000'
+  /**
+   * Initialize service with API key from database
+   */
+  private async initialize(): Promise<void> {
+    if (this.config) return // Already initialized
+
+    try {
+      // Get API key from database
+      const { data: integration, error } = await supabaseAdmin
+        .from('indb_site_integration')
+        .select('apikey')
+        .eq('service_name', 'custom_tracker')
+        .eq('is_active', true)
+        .single()
+
+      if (error || !integration?.apikey) {
+        throw new Error('No active Custom Tracker API integration found in database')
+      }
+
+      this.config = {
+        apiKey: integration.apikey,
+        baseUrl: 'http://160.79.119.44:5000'
+      }
+
+      logger.info('IndexNow Rank Tracker service initialized with database API key')
+
+    } catch (error) {
+      logger.error('Failed to initialize Rank Tracker service:', error)
+      throw error
     }
   }
 
@@ -57,7 +84,14 @@ export class ScrapingDogService {
    */
   async checkKeywordRank(request: RankCheckRequest): Promise<RankCheckResponse> {
     try {
-      logger.info(`Custom Tracker: Checking rank for keyword "${request.keyword}" domain "${request.domain}"`)
+      // Initialize service if not already done
+      await this.initialize()
+      
+      if (!this.config) {
+        throw new Error('Rank Tracker service not properly initialized')
+      }
+
+      logger.info(`IndexNow Rank Tracker: Checking rank for keyword "${request.keyword}" domain "${request.domain}"`)
 
       // Build API request body for custom backend
       const requestBody = {
@@ -83,7 +117,7 @@ export class ScrapingDogService {
       return this.processResponse(response)
 
     } catch (error) {
-      logger.error('Custom Tracker rank check failed:', error)
+      logger.error('IndexNow Rank Tracker rank check failed:', error)
       return {
         position: null,
         url: null,
@@ -98,10 +132,10 @@ export class ScrapingDogService {
    * Process Custom Tracker API response to extract domain ranking
    */
   private processResponse(response: CustomApiResponse): RankCheckResponse {
-    logger.info(`Custom Tracker: Processing response for keyword "${response.keyword}"`)
+    logger.info(`IndexNow Rank Tracker: Processing response for keyword "${response.keyword}"`)
 
     if (response.rank && response.rank > 0) {
-      logger.info(`Custom Tracker: Found domain at position ${response.rank}`)
+      logger.info(`IndexNow Rank Tracker: Found domain at position ${response.rank}`)
       return {
         position: response.rank,
         url: response.url,
@@ -109,7 +143,7 @@ export class ScrapingDogService {
         totalResults: 50 // Assuming max_pages: 50 means 50*10 = 500 results checked
       }
     } else {
-      logger.info(`Custom Tracker: Domain not found in search results`)
+      logger.info(`IndexNow Rank Tracker: Domain not found in search results`)
       return {
         position: null,
         url: null,
@@ -137,16 +171,20 @@ export class ScrapingDogService {
    * Make HTTP request to Custom Tracker API with error handling and retries
    */
   private async makeRequest(requestBody: any): Promise<CustomApiResponse> {
+    if (!this.config) {
+      throw new Error('Service not initialized')
+    }
+
     const url = `${this.config.baseUrl}/track-keyword`
 
-    logger.info(`Custom Tracker: Making request to ${url} for keyword "${requestBody.keyword}"`)
+    logger.info(`IndexNow Rank Tracker: Making request to ${url} for keyword "${requestBody.keyword}"`)
 
     // Retry logic
     let lastError: Error | null = null
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        logger.info(`Custom Tracker: Sending request with headers: X-API-Key: ***masked***, Host: localhost`)
-        logger.info(`Custom Tracker: Request body: ${JSON.stringify(requestBody)}`)
+        logger.info(`IndexNow Rank Tracker: Sending request with headers: X-API-Key: ***masked***, Host: localhost`)
+        logger.info(`IndexNow Rank Tracker: Request body: ${JSON.stringify(requestBody)}`)
         
         const response = await fetch(url, {
           method: 'POST',
@@ -160,27 +198,27 @@ export class ScrapingDogService {
           timeout: 150000 // 150 second timeout (longer than max_processing_time)
         } as any)
 
-        logger.info(`Custom Tracker: Response status: ${response.status} ${response.statusText}`)
+        logger.info(`IndexNow Rank Tracker: Response status: ${response.status} ${response.statusText}`)
 
         if (!response.ok) {
           // Try to get response body for more details
           let errorDetails = ''
           try {
             errorDetails = await response.text()
-            logger.error(`Custom Tracker: Error response body: ${errorDetails}`)
+            logger.error(`IndexNow Rank Tracker: Error response body: ${errorDetails}`)
           } catch (e) {
-            logger.error('Custom Tracker: Could not read error response body')
+            logger.error('IndexNow Rank Tracker: Could not read error response body')
           }
           throw new Error(`HTTP ${response.status}: ${response.statusText}${errorDetails ? ` - ${errorDetails}` : ''}`)
         }
 
         const data = await response.json()
-        logger.info(`Custom Tracker: Request successful, rank: ${data.rank}, execution time: ${data.execution_time}s`)
+        logger.info(`IndexNow Rank Tracker: Request successful, rank: ${data.rank}, execution time: ${data.execution_time}s`)
         return data
 
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error))
-        logger.warn(`Custom Tracker: Attempt ${attempt}/3 failed:`, lastError.message)
+        logger.warn(`IndexNow Rank Tracker: Attempt ${attempt}/3 failed:`, lastError.message)
         
         if (attempt < 3) {
           // Wait before retry: 5s, 10s (longer delays for custom backend)

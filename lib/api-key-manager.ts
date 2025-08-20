@@ -1,6 +1,6 @@
 /**
  * API Key Manager Service
- * Manages Custom Tracker API integration and quota tracking
+ * Manages IndexNow Rank Tracker API integration and quota tracking
  */
 
 import { supabaseAdmin } from './supabase'
@@ -34,7 +34,7 @@ export class APIKeyManager {
         .single()
 
       if (error || !integration) {
-        logger.warn('No active Custom Tracker API integration found. Attempting to activate first available integration...')
+        logger.warn('No active IndexNow Rank Tracker API integration found. Attempting to activate first available integration...')
         
         // Try to activate the first available API key
         const activated = await this.activateNextAvailableAPIKey()
@@ -43,7 +43,7 @@ export class APIKeyManager {
           return await this.getActiveAPIKey()
         }
         
-        logger.error('No Custom Tracker API integration available at all')
+        logger.error('No IndexNow Rank Tracker API integration available at all')
         return null
       }
 
@@ -69,7 +69,7 @@ export class APIKeyManager {
         return null
       }
 
-      return integration.scrappingdog_apikey
+      return integration.apikey
 
     } catch (error) {
       logger.error('Error getting active API key:', error)
@@ -113,7 +113,7 @@ export class APIKeyManager {
       const { data: currentData } = await supabaseAdmin
         .from('indb_site_integration')
         .select('id, api_quota_used, api_quota_limit')
-        .eq('scrappingdog_apikey', apiKey)
+        .eq('apikey', apiKey)
         .eq('is_active', true)
         .single()
 
@@ -176,7 +176,7 @@ export class APIKeyManager {
 
   /**
    * REMOVED: Daily quota reset logic
-   * Custom Tracker quotas are TOTAL quotas until exhausted, not daily quotas
+   * IndexNow Rank Tracker quotas are TOTAL quotas until exhausted, not daily quotas
    * When quota hits limit, API integration becomes inactive and we switch to next available one
    */
   private async checkAndResetQuota(integration: any): Promise<void> {
@@ -191,7 +191,7 @@ export class APIKeyManager {
    */
   private async activateNextAvailableAPIKey(): Promise<boolean> {
     try {
-      // Find next available Custom Tracker API integration that is inactive but has quota remaining
+      // Find next available IndexNow Rank Tracker API integration that is inactive but has quota remaining
       const { data: availableKeys, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
@@ -268,7 +268,7 @@ export class APIKeyManager {
       if (!freshIntegration) return null
 
       return {
-        apiKey: freshIntegration.scrappingdog_apikey,
+        apiKey: freshIntegration.apikey,
         quotaUsed: freshIntegration.api_quota_used,
         quotaLimit: freshIntegration.api_quota_limit,
         quotaResetDate: freshIntegration.quota_reset_date

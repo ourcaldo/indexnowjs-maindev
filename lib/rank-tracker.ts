@@ -1,9 +1,9 @@
 /**
  * Rank Tracker Service
- * Core service for tracking keyword positions using ScrapingDog API
+ * Core service for tracking keyword positions using IndexNow Rank Tracker API
  */
 
-import { ScrapingDogService } from './scrapingdog-service'
+import { RankTrackerService } from './rank-tracker-service'
 import { APIKeyManager } from './api-key-manager'
 import { supabaseAdmin } from './supabase'
 import { errorTracker, ErrorTracker } from './error-tracker'
@@ -32,7 +32,7 @@ interface RankResult {
 }
 
 export class RankTracker {
-  private scrapingDogService: ScrapingDogService | null = null
+  private rankTrackerService: RankTrackerService | null = null
   private apiKeyManager: APIKeyManager
 
   constructor() {
@@ -46,10 +46,10 @@ export class RankTracker {
     try {
       logger.info(`Starting rank check for keyword: ${keywordData.keyword} (${keywordData.domain})`)
 
-      // 1. Get site-level API key (Custom Tracker uses fixed API key)
+      // 1. Get site-level API key from database
       const apiKey = await this.apiKeyManager.getActiveAPIKey()
       if (!apiKey) {
-        throw new Error('No active Custom Tracker API integration found. Please contact admin to configure API integration.')
+        throw new Error('No active IndexNow Rank Tracker API integration found. Please contact admin to configure API integration.')
       }
 
       // 2. Check remaining quota (site-level) - need at least 10 quota per request
@@ -60,11 +60,11 @@ export class RankTracker {
 
       logger.info(`Site has ${availableQuota} API calls remaining`)
 
-      // 3. Initialize Custom Tracker service
-      this.scrapingDogService = new ScrapingDogService(apiKey)
+      // 3. Initialize IndexNow Rank Tracker service (loads API key from database)
+      this.rankTrackerService = new RankTrackerService()
 
       // 4. Make rank check request
-      const rankResult = await this.scrapingDogService.checkKeywordRank({
+      const rankResult = await this.rankTrackerService.checkKeywordRank({
         keyword: keywordData.keyword,
         domain: keywordData.domain,
         country: keywordData.countryCode,
@@ -125,8 +125,8 @@ export class RankTracker {
           keyword_id: keywordId,
           position: result.position,
           url: result.url,
-          search_volume: null, // Custom Tracker doesn't provide search volume
-          difficulty_score: null, // Custom Tracker doesn't provide difficulty
+          search_volume: null, // IndexNow Rank Tracker doesn't provide search volume
+          difficulty_score: null, // IndexNow Rank Tracker doesn't provide difficulty
           check_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
           device_type: keyword.device_type,
           country_id: keyword.country_id,
