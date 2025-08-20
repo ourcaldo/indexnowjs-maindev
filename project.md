@@ -705,6 +705,20 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**USER REGISTRATION FUNCTIONALITY RESTORED & COUNTRY DISPLAY FIX (August 20, 2025)**
+- ✅ **CRITICAL REGISTRATION ISSUE RESOLVED**: Fixed user registration functionality that was failing to save phone number and country data
+  - **Root Cause Identified**: RLS (Row Level Security) policies were preventing standard Supabase client from accessing user profile table after database triggers created profiles
+  - **Database Error**: Standard client couldn't update profile table due to restrictive RLS policies blocking profile updates after user creation
+  - **Service Role Solution**: Implemented service role client with bypass permissions to update profiles after trigger completion
+  - **Timing Fix**: Added 3-second delay to allow database triggers to complete profile creation before attempting updates
+  - **Comprehensive Logging**: Added detailed logging to track profile creation, existence check, and update operations
+  - **Registration Success**: Phone number and country data now properly saved during user registration process
+- ✅ **COUNTRY DISPLAY FORMAT FIX**: Resolved country field showing country codes instead of full country names
+  - **Issue Identified**: Registration form was using `countryCode` ("ID") instead of full country name ("Indonesia") from location detection API
+  - **Frontend Fix**: Updated registration form to use `data.country` (full name) instead of `data.countryCode` (abbreviation)
+  - **User Experience**: Countries now display as "Indonesia" instead of "ID", "United States" instead of "US", etc.
+  - **Fallback Update**: Changed fallback values from "US" to "United States" for consistency
+
 **FOREIGN KEY CONSTRAINT ERROR FIX (August 18, 2025)**
 - ✅ **CRITICAL DATABASE CONSTRAINT ERROR RESOLVED**: Fixed foreign key constraint violation in quota alert logging system
   - **Root Cause Identified**: Quota monitor was using invalid user_id '00000000-0000-0000-0000-000000000000' for system-level alerts

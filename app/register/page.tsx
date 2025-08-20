@@ -48,17 +48,17 @@ export default function Register() {
         const response = await fetch('/api/detect-location')
         if (response.ok) {
           const data = await response.json()
-          if (data.countryCode) {
-            setCountry(data.countryCode)
+          if (data.country) {
+            setCountry(data.country) // Use full country name instead of countryCode
           } else {
-            setCountry('US') // Fallback to US
+            setCountry('United States') // Fallback to full country name
           }
         } else {
-          setCountry('US') // Fallback to US
+          setCountry('United States') // Fallback to full country name
         }
       } catch (error) {
         console.warn('Country detection failed:', error)
-        setCountry('US') // Fallback to US
+        setCountry('United States') // Fallback to full country name
       } finally {
         setIsDetectingCountry(false)
       }
