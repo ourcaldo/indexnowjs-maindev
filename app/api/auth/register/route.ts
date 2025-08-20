@@ -93,84 +93,79 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
           name 
         }, 'Starting profile update process...')
         
-        // Retry mechanism to wait for triggers to create the profile
-        let existingProfile = null;
-        let retryCount = 0;
-        const maxRetries = 5;
-        const retryDelay = 1000; // 1 second
-
-        while (retryCount < maxRetries && !existingProfile) {
-          await new Promise(resolve => setTimeout(resolve, retryDelay))
-          
-          const { data: profileData, error: checkError } = await supabase
-            .from('indb_auth_user_profiles')
-            .select('*')
-            .eq('user_id', data.user.id)
-            .single()
-
-          if (checkError && checkError.code === 'PGRST116') {
-            // Profile not found yet, retry
-            retryCount++;
-            logger.info({ 
-              userId: data.user.id, 
-              retryCount,
-              maxRetries 
-            }, `Profile not found, retrying... (${retryCount}/${maxRetries})`)
-          } else if (checkError) {
-            // Other error, stop retrying
-            logger.error({ error: checkError, userId: data.user.id, retryCount }, 'Error checking profile, stopping retries')
-            break;
-          } else {
-            // Profile found!
-            existingProfile = profileData;
-            logger.info({ 
-              userId: data.user.id, 
-              retryCount,
-              profile: {
-                id: existingProfile?.id,
-                user_id: existingProfile?.user_id,
-                full_name: existingProfile?.full_name,
-                email: existingProfile?.email,
-                phone_number: existingProfile?.phone_number,
-                country: existingProfile?.country
-              }
-            }, 'Profile found after retries, updating with additional fields...')
-          }
-        }
-
-        if (!existingProfile) {
-          logger.error({ 
-            userId: data.user.id, 
-            retryCount,
-            maxRetries 
-          }, 'Profile not created by triggers after maximum retries')
-          return;
-        }
-
-        // Update the profile with phone_number and country
-        const { data: updateResult, error: updateError } = await supabase
+        // Search for existing profiles with broader search first
+        logger.info({ userId: data.user.id }, 'Searching for profiles...')
+        
+        const { data: allProfiles, error: searchError } = await supabase
           .from('indb_auth_user_profiles')
-          .update({
-            phone_number: phoneNumber,
-            country: country,
-            full_name: name
-          })
-          .eq('user_id', data.user.id)
-          .select()
+          .select('*')
+          .limit(10)
 
-        if (updateError) {
-          logger.error({ 
-            error: updateError, 
-            userId: data.user.id,
-            updateData: { phoneNumber, country, name }
-          }, 'Failed to update user profile with additional fields')
+        if (searchError) {
+          logger.error({ error: searchError }, 'Failed to search profiles')
         } else {
           logger.info({ 
             userId: data.user.id,
-            updateResult,
-            updateData: { phoneNumber, country, name }
-          }, 'User profile updated successfully with phone and country')
+            profileCount: allProfiles?.length || 0,
+            profiles: allProfiles?.map(p => ({ id: p.id, user_id: p.user_id, email: p.email }))
+          }, 'Found profiles in database')
         }
+
+        // Now search specifically for this user
+        await new Promise(resolve => setTimeout(resolve, 2000)) // Wait 2 seconds
+        
+        const { data: userProfile, error: userError } = await supabase
+          .from('indb_auth_user_profiles')
+          .select('*')
+          .eq('user_id', data.user.id)
+          .maybeSingle()
+
+        if (userError) {
+          logger.error({ error: userError, userId: data.user.id }, 'Error searching for user profile')
+        } else if (userProfile) {
+          logger.info({ 
+            userId: data.user.id,
+            profile: {
+              id: userProfile.id,
+              user_id: userProfile.user_id,
+              full_name: userProfile.full_name,
+              email: userProfile.email,
+              phone_number: userProfile.phone_number,
+              country: userProfile.country
+            }
+          }, 'Found existing user profile')
+
+          // Update the profile with phone_number and country
+          const { data: updateResult, error: updateError } = await supabase
+            .from('indb_auth_user_profiles')
+            .update({
+              phone_number: phoneNumber,
+              country: country,
+              full_name: name
+            })
+            .eq('user_id', data.user.id)
+            .select()
+
+          if (updateError) {
+            logger.error({ 
+              error: updateError, 
+              userId: data.user.id,
+              updateData: { phoneNumber, country, name }
+            }, 'Failed to update user profile with additional fields')
+          } else {
+            logger.info({ 
+              userId: data.user.id,
+              updateResult,
+              updateData: { phoneNumber, country, name }
+            }, 'User profile updated successfully with phone and country')
+          }
+        } else {
+          logger.error({ userId: data.user.id }, 'No profile found for user after search')
+        }
+
+
+
+
 
 
       } catch (profileError) {
