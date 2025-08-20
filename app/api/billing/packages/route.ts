@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getUserCurrency, formatCurrency } from '@/lib/currency-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,33 +38,41 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get user's current package
+    // Get user's current package and country information
     const { data: userProfile } = await supabaseAdmin
       .from('indb_auth_user_profiles')
-      .select('package_id, expires_at')
+      .select('package_id, expires_at, country')
       .eq('user_id', user.id)
       .single()
 
-    // Transform packages data
+    // Determine user's currency based on country
+    const userCountry = userProfile?.country
+    const userCurrency = getUserCurrency(userCountry)
+    
+    // Transform packages data with currency-specific pricing
     const transformedPackages = packages?.map(pkg => ({
       id: pkg.id,
       name: pkg.name,
       slug: pkg.slug,
       description: pkg.description,
       price: parseFloat(pkg.price || '0'),
-      currency: pkg.currency,
+      currency: userCurrency,
       billing_period: pkg.billing_period,
       features: pkg.features || [],
       quota_limits: pkg.quota_limits || {},
       is_popular: pkg.is_popular || false,
       is_current: pkg.id === userProfile?.package_id,
-      pricing_tiers: pkg.pricing_tiers || {}
+      pricing_tiers: pkg.pricing_tiers || {},
+      user_currency: userCurrency,
+      user_country: userCountry
     })) || []
 
     return NextResponse.json({
       packages: transformedPackages,
       current_package_id: userProfile?.package_id,
-      expires_at: userProfile?.expires_at
+      expires_at: userProfile?.expires_at,
+      user_currency: userCurrency,
+      user_country: userCountry
     })
 
   } catch (error: any) {

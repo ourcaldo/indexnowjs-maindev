@@ -139,6 +139,7 @@ interface BillingHistoryData {
 export default function BillingPage() {
   const [billingData, setBillingData] = useState<BillingData | null>(null)
   const [packagesData, setPackagesData] = useState<PackagesData | null>(null)
+  const [userCurrency, setUserCurrency] = useState<'USD' | 'IDR'>('USD')
   
   // Log page view and billing activities
   usePageViewLogger('/dashboard/settings/plans-billing', 'Billing & Subscriptions', { section: 'billing_management' })
@@ -243,6 +244,11 @@ export default function BillingPage() {
 
       const data = await response.json()
       setPackagesData(data)
+      
+      // Set user currency from API response
+      if (data.user_currency) {
+        setUserCurrency(data.user_currency)
+      }
     } catch (error) {
       console.error('Error loading packages:', error)
       setError(error instanceof Error ? error.message : 'Failed to load packages')
@@ -368,8 +374,11 @@ export default function BillingPage() {
     }
   }
 
-  const formatCurrency = (amount: number, currency: string = 'IDR') => {
-    return new Intl.NumberFormat('id-ID', {
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    // Determine locale based on currency
+    const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
+    
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
@@ -538,7 +547,7 @@ export default function BillingPage() {
                 <div className="mb-4">
                   <div className="flex items-baseline gap-1">
                     <span className={`text-2xl font-bold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                      {formatCurrency(pricing.price)}
+                      {formatCurrency(pricing.price, userCurrency)}
                     </span>
                     <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
                       per month

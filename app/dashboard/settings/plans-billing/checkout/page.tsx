@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { authService } from '@/lib/auth'
 import { supabaseBrowser } from '@/lib/supabase-browser'
+import { formatCurrency } from '@/lib/currency-utils'
 
 interface PaymentPackage {
   id: string
@@ -69,6 +70,7 @@ export default function CheckoutPage() {
   const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [userCurrency, setUserCurrency] = useState<'USD' | 'IDR'>('USD')
   
   // Log page view and checkout activities
   usePageViewLogger('/dashboard/settings/plans-billing/checkout', 'Checkout', { section: 'billing_checkout' })
@@ -152,6 +154,11 @@ export default function CheckoutPage() {
         }
         
         setSelectedPackage(selected)
+        
+        // Set user currency from API response
+        if (packageData.user_currency) {
+          setUserCurrency(packageData.user_currency)
+        }
         
         // Fetch payment gateways
         const gatewayRes = await fetch('/api/billing/payment-gateways')
@@ -584,7 +591,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-[#6C757D]">Subtotal:</span>
                     <span className="font-medium text-[#1A1A1A]">
-                      Rp {originalPrice.toLocaleString()}
+                      {formatCurrency(originalPrice, userCurrency)}
                     </span>
                   </div>
                   
@@ -592,14 +599,14 @@ export default function CheckoutPage() {
                     <div className="flex justify-between items-center">
                       <span className="text-[#6C757D]">Discount ({discount}%):</span>
                       <span className="font-medium text-[#4BB543]">
-                        -Rp {(originalPrice - price).toLocaleString()}
+                        -{formatCurrency(originalPrice - price, userCurrency)}
                       </span>
                     </div>
                   )}
                   
                   <div className="flex justify-between items-center">
                     <span className="text-[#6C757D]">Tax:</span>
-                    <span className="font-medium text-[#1A1A1A]">Rp 0</span>
+                    <span className="font-medium text-[#1A1A1A]">{formatCurrency(0, userCurrency)}</span>
                   </div>
                   
                   <hr className="border-[#E0E6ED]" />
@@ -607,7 +614,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
                     <span className="text-lg font-bold text-[#1A1A1A]">
-                      Rp {price.toLocaleString()}
+                      {formatCurrency(price, userCurrency)}
                     </span>
                   </div>
                 </div>
