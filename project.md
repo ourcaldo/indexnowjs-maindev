@@ -714,10 +714,12 @@ JWT_SECRET=[jwt-secret-key]
   - **Comprehensive Logging**: Added detailed logging to track profile creation, existence check, and update operations
   - **Registration Success**: Phone number and country data now properly saved during user registration process
 - ✅ **COUNTRY DISPLAY FORMAT FIX**: Resolved country field showing country codes instead of full country names
-  - **Issue Identified**: Registration form was using `countryCode` ("ID") instead of full country name ("Indonesia") from location detection API
-  - **Frontend Fix**: Updated registration form to use `data.country` (full name) instead of `data.countryCode` (abbreviation)
-  - **User Experience**: Countries now display as "Indonesia" instead of "ID", "United States" instead of "US", etc.
-  - **Fallback Update**: Changed fallback values from "US" to "United States" for consistency
+  - **Issue Identified**: Registration form dropdown was using `countryOption.code` as the option value, sending "ID" instead of "Indonesia" to backend
+  - **Root Cause**: HTML select options were configured with `value={countryOption.code}` (country code) instead of `value={countryOption.name}` (full name)
+  - **Frontend Fix**: Updated dropdown options to use `countryOption.name` as values so selections send full country names
+  - **Location Detection Fix**: Updated registration form to use `data.country` (full name) from location API for auto-selection
+  - **API Cleanup**: Simplified detect-location API to only return country name, removed unnecessary countryCode processing
+  - **User Experience**: Country selections now save as "Indonesia" instead of "ID", "United States" instead of "US", etc.
 
 **FOREIGN KEY CONSTRAINT ERROR FIX (August 18, 2025)**
 - ✅ **CRITICAL DATABASE CONSTRAINT ERROR RESOLVED**: Fixed foreign key constraint violation in quota alert logging system

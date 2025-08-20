@@ -11,17 +11,9 @@ export const GET = publicApiRouteWrapper(async (request: NextRequest, endpoint: 
     // Get IP and location information using existing utility
     const requestInfo = await getRequestInfo(request)
     
-    let countryCode = null
-    if (requestInfo.locationData?.country) {
-      // Try to find the country code by name
-      const country = findCountryByName(requestInfo.locationData.country)
-      countryCode = country?.code || null
-    }
-    
     return createApiResponse({
       ip: requestInfo.ipAddress,
       country: requestInfo.locationData?.country || null,
-      countryCode: countryCode,
       region: requestInfo.locationData?.region || null,
       city: requestInfo.locationData?.city || null,
     })
