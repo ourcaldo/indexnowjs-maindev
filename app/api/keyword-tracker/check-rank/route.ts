@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check if user has ScrapingDog API key configured
+// GET endpoint to check if user has Custom Tracker API configured
 export async function GET(request: NextRequest) {
   try {
     const user = await getServerAuthUser(request)
@@ -138,18 +138,18 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check if site has ScrapingDog integration configured
+    // Check if site has Custom Tracker integration configured
     const { data: integration, error } = await supabaseAdmin
       .from('indb_site_integration')
       .select('api_quota_limit, api_quota_used, quota_reset_date, is_active')
-      .eq('service_name', 'scrapingdog')
+      .eq('service_name', 'custom_tracker')
       .single()
 
     if (error || !integration) {
       return NextResponse.json({
         success: true,
         configured: false,
-        message: 'ScrapingDog API key not configured. Please contact admin to configure API key.'
+        message: 'Custom Tracker API not configured. Please contact admin to configure API integration.'
       })
     }
 

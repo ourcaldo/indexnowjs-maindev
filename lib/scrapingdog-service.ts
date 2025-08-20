@@ -1,6 +1,6 @@
 /**
- * ScrapingDog API Integration Service
- * Handles rank checking via ScrapingDog's Google Search API
+ * Custom Rank Tracker API Integration Service
+ * Handles rank checking via custom backend API at http://160.79.119.44:5000
  */
 
 // Simple console logger for development
@@ -10,7 +10,7 @@ const logger = {
   error: (message: string, ...args: any[]) => console.error(`[ERROR] ${message}`, ...args)
 }
 
-interface ScrapingDogConfig {
+interface CustomTrackerConfig {
   apiKey: string
   baseUrl: string
 }
@@ -30,24 +30,25 @@ interface RankCheckResponse {
   errorMessage?: string
 }
 
-interface ScrapingDogApiResponse {
-  organic_results?: Array<{
-    rank: number
-    link: string
-    title: string
-    snippet: string
-  }>
-  error?: string
-  message?: string
+interface CustomApiResponse {
+  keyword: string
+  domain: string
+  device: 'desktop' | 'mobile'
+  country: string
+  rank: number | null
+  url: string | null
+  error: string | null
+  attempts: number
+  execution_time: number
 }
 
 export class ScrapingDogService {
-  private config: ScrapingDogConfig
+  private config: CustomTrackerConfig
 
   constructor(apiKey: string) {
     this.config = {
-      apiKey,
-      baseUrl: 'https://api.scrapingdog.com/google/'
+      apiKey: '6c95df39-8aa4-40ee-baab-a6192587400f', // Fixed API key as provided
+      baseUrl: 'http://160.79.119.44:5000'
     }
   }
 
@@ -56,30 +57,33 @@ export class ScrapingDogService {
    */
   async checkKeywordRank(request: RankCheckRequest): Promise<RankCheckResponse> {
     try {
-      logger.info(`ScrapingDog: Checking rank for keyword "${request.keyword}" domain "${request.domain}"`)
+      logger.info(`Custom Tracker: Checking rank for keyword "${request.keyword}" domain "${request.domain}"`)
 
-      // Build API request parameters
-      const params = {
-        api_key: this.config.apiKey,
-        query: request.keyword,
-        results: 100, // Check first 100 results
-        country: request.country.toLowerCase(), // Ensure lowercase country code
-        mob_search: request.deviceType === 'mobile',
-        page: 0
+      // Build API request body for custom backend
+      const requestBody = {
+        keyword: request.keyword,
+        domain: request.domain,
+        devices: request.deviceType, // "desktop" or "mobile"
+        country: request.country.toUpperCase(), // Ensure uppercase country code (ID, US, etc.)
+        max_pages: 50,
+        headless: true,
+        max_retries: 3,
+        use_proxy: true,
+        max_processing_time: 120
       }
 
       // Make API request
-      const response = await this.makeRequest(params)
+      const response = await this.makeRequest(requestBody)
       
       if (response.error) {
-        throw new Error(response.error || response.message || 'Unknown API error')
+        throw new Error(response.error || 'Unknown API error')
       }
 
-      // Process response to find domain ranking
-      return this.processResponse(response, request.domain)
+      // Process response - custom backend returns rank directly
+      return this.processResponse(response)
 
     } catch (error) {
-      logger.error('ScrapingDog rank check failed:', error)
+      logger.error('Custom Tracker rank check failed:', error)
       return {
         position: null,
         url: null,
@@ -91,35 +95,26 @@ export class ScrapingDogService {
   }
 
   /**
-   * Process ScrapingDog API response to extract domain ranking
+   * Process Custom Tracker API response to extract domain ranking
    */
-  private processResponse(response: ScrapingDogApiResponse, targetDomain: string): RankCheckResponse {
-    const organicResults = response.organic_results || []
-    
-    logger.info(`ScrapingDog: Processing ${organicResults.length} organic results`)
+  private processResponse(response: CustomApiResponse): RankCheckResponse {
+    logger.info(`Custom Tracker: Processing response for keyword "${response.keyword}"`)
 
-    // Find user's domain in results
-    const domainMatch = organicResults.find(result => {
-      const resultDomain = this.extractDomain(result.link)
-      const cleanTargetDomain = this.extractDomain(`https://${targetDomain}`)
-      return resultDomain === cleanTargetDomain
-    })
-
-    if (domainMatch) {
-      logger.info(`ScrapingDog: Found domain match at position ${domainMatch.rank}`)
+    if (response.rank && response.rank > 0) {
+      logger.info(`Custom Tracker: Found domain at position ${response.rank}`)
       return {
-        position: domainMatch.rank,
-        url: domainMatch.link,
+        position: response.rank,
+        url: response.url,
         found: true,
-        totalResults: organicResults.length
+        totalResults: 50 // Assuming max_pages: 50 means 50*10 = 500 results checked
       }
     } else {
-      logger.info(`ScrapingDog: Domain not found in top ${organicResults.length} results`)
+      logger.info(`Custom Tracker: Domain not found in search results`)
       return {
         position: null,
         url: null,
         found: false,
-        totalResults: organicResults.length
+        totalResults: 50
       }
     }
   }
@@ -139,29 +134,27 @@ export class ScrapingDogService {
   }
 
   /**
-   * Make HTTP request to ScrapingDog API with error handling and retries
+   * Make HTTP request to Custom Tracker API with error handling and retries
    */
-  private async makeRequest(params: any): Promise<ScrapingDogApiResponse> {
-    const url = new URL(this.config.baseUrl)
-    
-    // Add query parameters
-    Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.append(key, String(value))
-    })
+  private async makeRequest(requestBody: any): Promise<CustomApiResponse> {
+    const url = `${this.config.baseUrl}/track-keyword`
 
-    logger.info(`ScrapingDog: Making request to ${url.toString().replace(/api_key=[^&]+/, 'api_key=***')}`)
+    logger.info(`Custom Tracker: Making request to ${url} for keyword "${requestBody.keyword}"`)
 
     // Retry logic
     let lastError: Error | null = null
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        const response = await fetch(url.toString(), {
-          method: 'GET',
+        const response = await fetch(url, {
+          method: 'POST',
           headers: {
-            'User-Agent': 'IndexNow-Pro-Rank-Tracker/1.0',
-            'Accept': 'application/json'
+            'X-API-Key': this.config.apiKey,
+            'Host': 'reqbin.com',
+            'Content-Type': 'application/json',
+            'User-Agent': 'IndexNow-Studio-Rank-Tracker/1.0'
           },
-          timeout: 30000 // 30 second timeout
+          body: JSON.stringify(requestBody),
+          timeout: 150000 // 150 second timeout (longer than max_processing_time)
         } as any)
 
         if (!response.ok) {
@@ -169,16 +162,16 @@ export class ScrapingDogService {
         }
 
         const data = await response.json()
-        logger.info('ScrapingDog: Request successful')
+        logger.info(`Custom Tracker: Request successful, rank: ${data.rank}, execution time: ${data.execution_time}s`)
         return data
 
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error))
-        logger.warn(`ScrapingDog: Attempt ${attempt}/3 failed:`, lastError.message)
+        logger.warn(`Custom Tracker: Attempt ${attempt}/3 failed:`, lastError.message)
         
         if (attempt < 3) {
-          // Wait before retry: 2s, 4s
-          await this.delay(attempt * 2000)
+          // Wait before retry: 5s, 10s (longer delays for custom backend)
+          await this.delay(attempt * 5000)
         }
       }
     }

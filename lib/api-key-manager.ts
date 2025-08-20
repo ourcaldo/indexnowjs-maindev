@@ -1,6 +1,6 @@
 /**
  * API Key Manager Service
- * Manages ScrapingDog API keys and quota tracking
+ * Manages Custom Tracker API integration and quota tracking
  */
 
 import { supabaseAdmin } from './supabase'
@@ -29,12 +29,12 @@ export class APIKeyManager {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'scrapingdog')
+        .eq('service_name', 'custom_tracker')
         .eq('is_active', true)
         .single()
 
       if (error || !integration) {
-        logger.warn('No active ScrapingDog API key found. Attempting to activate first available key...')
+        logger.warn('No active Custom Tracker API integration found. Attempting to activate first available integration...')
         
         // Try to activate the first available API key
         const activated = await this.activateNextAvailableAPIKey()
@@ -43,7 +43,7 @@ export class APIKeyManager {
           return await this.getActiveAPIKey()
         }
         
-        logger.error('No ScrapingDog API keys available at all')
+        logger.error('No Custom Tracker API integration available at all')
         return null
       }
 
@@ -85,7 +85,7 @@ export class APIKeyManager {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('api_quota_limit, api_quota_used')
-        .eq('service_name', 'scrapingdog')
+        .eq('service_name', 'custom_tracker')
         .eq('is_active', true)
         .single()
 
@@ -176,8 +176,8 @@ export class APIKeyManager {
 
   /**
    * REMOVED: Daily quota reset logic
-   * ScrapingDog quotas are TOTAL quotas until exhausted, not daily quotas
-   * When quota hits limit, API key becomes inactive and we switch to next available key
+   * Custom Tracker quotas are TOTAL quotas until exhausted, not daily quotas
+   * When quota hits limit, API integration becomes inactive and we switch to next available one
    */
   private async checkAndResetQuota(integration: any): Promise<void> {
     // No quota reset - quotas are total until exhausted
@@ -191,16 +191,16 @@ export class APIKeyManager {
    */
   private async activateNextAvailableAPIKey(): Promise<boolean> {
     try {
-      // Find next available ScrapingDog API key that is inactive but has quota remaining
+      // Find next available Custom Tracker API integration that is inactive but has quota remaining
       const { data: availableKeys, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'scrapingdog')
+        .eq('service_name', 'custom_tracker')
         .eq('is_active', false)
         .order('created_at', { ascending: true })
 
       if (error || !availableKeys || availableKeys.length === 0) {
-        logger.error('No alternative API keys available. All ScrapingDog API keys exhausted.')
+        logger.error('No alternative API integrations available. All Custom Tracker API quota exhausted.')
         return false
       }
 
@@ -229,7 +229,7 @@ export class APIKeyManager {
         }
       }
 
-      logger.error('No API keys with available quota found. All ScrapingDog API keys exhausted.')
+      logger.error('No API integrations with available quota found. All Custom Tracker API quota exhausted.')
       return false
 
     } catch (error) {
@@ -246,7 +246,7 @@ export class APIKeyManager {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'scrapingdog')
+        .eq('service_name', 'custom_tracker')
         .eq('is_active', true)
         .single()
 
@@ -261,7 +261,7 @@ export class APIKeyManager {
       const { data: freshIntegration } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'scrapingdog')
+        .eq('service_name', 'custom_tracker')
         .eq('is_active', true)
         .single()
 
@@ -294,7 +294,7 @@ export class APIKeyManager {
       const { data: allKeys, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'scrapingdog')
+        .eq('service_name', 'custom_tracker')
 
       if (error || !allKeys) {
         return { totalKeys: 0, activeKeys: 0, totalQuota: 0, usedQuota: 0, availableQuota: 0 }

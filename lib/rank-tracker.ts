@@ -46,10 +46,10 @@ export class RankTracker {
     try {
       logger.info(`Starting rank check for keyword: ${keywordData.keyword} (${keywordData.domain})`)
 
-      // 1. Get site-level API key
+      // 1. Get site-level API key (Custom Tracker uses fixed API key)
       const apiKey = await this.apiKeyManager.getActiveAPIKey()
       if (!apiKey) {
-        throw new Error('No active ScrapingDog API key found. Please contact admin to configure API key.')
+        throw new Error('No active Custom Tracker API integration found. Please contact admin to configure API integration.')
       }
 
       // 2. Check remaining quota (site-level) - need at least 10 quota per request
@@ -60,7 +60,7 @@ export class RankTracker {
 
       logger.info(`Site has ${availableQuota} API calls remaining`)
 
-      // 3. Initialize ScrapingDog service
+      // 3. Initialize Custom Tracker service
       this.scrapingDogService = new ScrapingDogService(apiKey)
 
       // 4. Make rank check request
@@ -125,8 +125,8 @@ export class RankTracker {
           keyword_id: keywordId,
           position: result.position,
           url: result.url,
-          search_volume: null, // ScrapingDog doesn't provide search volume
-          difficulty_score: null, // ScrapingDog doesn't provide difficulty
+          search_volume: null, // Custom Tracker doesn't provide search volume
+          difficulty_score: null, // Custom Tracker doesn't provide difficulty
           check_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
           device_type: keyword.device_type,
           country_id: keyword.country_id,
