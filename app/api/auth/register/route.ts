@@ -86,11 +86,41 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
     // Update user profile with additional details after triggers create the basic profile
     if (data.user?.id) {
       try {
+        logger.info({ 
+          userId: data.user.id, 
+          phoneNumber, 
+          country, 
+          name 
+        }, 'Starting profile update process...')
+        
         // Wait a moment for triggers to create the basic profile
         await new Promise(resolve => setTimeout(resolve, 500))
         
+        // First check if profile exists
+        const { data: existingProfile, error: checkError } = await supabase
+          .from('indb_auth_user_profiles')
+          .select('*')
+          .eq('user_id', data.user.id)
+          .single()
+
+        if (checkError) {
+          logger.error({ error: checkError, userId: data.user.id }, 'Failed to check existing profile')
+        } else {
+          logger.info({ 
+            userId: data.user.id, 
+            existingProfile: {
+              id: existingProfile?.id,
+              user_id: existingProfile?.user_id,
+              full_name: existingProfile?.full_name,
+              email: existingProfile?.email,
+              phone_number: existingProfile?.phone_number,
+              country: existingProfile?.country
+            }
+          }, 'Found existing profile before update')
+        }
+        
         // Update the profile with phone_number and country
-        const { error: profileUpdateError } = await supabase
+        const { data: updateResult, error: profileUpdateError } = await supabase
           .from('indb_auth_user_profiles')
           .update({
             phone_number: phoneNumber,
@@ -98,11 +128,20 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
             full_name: name // Ensure full name is set correctly
           })
           .eq('user_id', data.user.id)
+          .select()
 
         if (profileUpdateError) {
-          logger.error({ error: profileUpdateError, userId: data.user.id }, 'Failed to update user profile with additional details')
+          logger.error({ 
+            error: profileUpdateError, 
+            userId: data.user.id,
+            updateData: { phoneNumber, country, name }
+          }, 'Failed to update user profile with additional details')
         } else {
-          logger.info({ userId: data.user.id }, 'User profile updated successfully with phone and country')
+          logger.info({ 
+            userId: data.user.id,
+            updateResult,
+            updateData: { phoneNumber, country, name }
+          }, 'User profile updated successfully with phone and country')
         }
       } catch (profileError) {
         logger.error({ error: profileError, userId: data.user.id }, 'Failed to update user profile')
