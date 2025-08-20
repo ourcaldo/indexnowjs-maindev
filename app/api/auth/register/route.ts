@@ -93,74 +93,45 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
           name 
         }, 'Starting profile update process...')
         
-        // Search for existing profiles with broader search first
-        logger.info({ userId: data.user.id }, 'Searching for profiles...')
-        
-        const { data: allProfiles, error: searchError } = await supabase
-          .from('indb_auth_user_profiles')
-          .select('*')
-          .limit(10)
+        // Use service role client to bypass RLS policies for profile update
+        const serviceSupabase = createClient(
+          process.env.SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
 
-        if (searchError) {
-          logger.error({ error: searchError }, 'Failed to search profiles')
-        } else {
-          logger.info({ 
-            userId: data.user.id,
-            profileCount: allProfiles?.length || 0,
-            profiles: allProfiles?.map(p => ({ id: p.id, user_id: p.user_id, email: p.email }))
-          }, 'Found profiles in database')
-        }
-
-        // Now search specifically for this user
-        await new Promise(resolve => setTimeout(resolve, 2000)) // Wait 2 seconds
+        // Wait for triggers to create the profile
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
-        const { data: userProfile, error: userError } = await supabase
+        logger.info({ userId: data.user.id }, 'Updating profile with service role client...')
+        
+        // Update the profile directly with service role (bypasses RLS)
+        const { data: updateResult, error: updateError } = await serviceSupabase
           .from('indb_auth_user_profiles')
-          .select('*')
+          .update({
+            phone_number: phoneNumber,
+            country: country,
+            full_name: name
+          })
           .eq('user_id', data.user.id)
-          .maybeSingle()
+          .select()
 
-        if (userError) {
-          logger.error({ error: userError, userId: data.user.id }, 'Error searching for user profile')
-        } else if (userProfile) {
+        if (updateError) {
+          logger.error({ 
+            error: updateError, 
+            userId: data.user.id,
+            updateData: { phoneNumber, country, name }
+          }, 'Failed to update user profile with service role')
+        } else if (updateResult && updateResult.length > 0) {
           logger.info({ 
             userId: data.user.id,
-            profile: {
-              id: userProfile.id,
-              user_id: userProfile.user_id,
-              full_name: userProfile.full_name,
-              email: userProfile.email,
-              phone_number: userProfile.phone_number,
-              country: userProfile.country
-            }
-          }, 'Found existing user profile')
-
-          // Update the profile with phone_number and country
-          const { data: updateResult, error: updateError } = await supabase
-            .from('indb_auth_user_profiles')
-            .update({
-              phone_number: phoneNumber,
-              country: country,
-              full_name: name
-            })
-            .eq('user_id', data.user.id)
-            .select()
-
-          if (updateError) {
-            logger.error({ 
-              error: updateError, 
-              userId: data.user.id,
-              updateData: { phoneNumber, country, name }
-            }, 'Failed to update user profile with additional fields')
-          } else {
-            logger.info({ 
-              userId: data.user.id,
-              updateResult,
-              updateData: { phoneNumber, country, name }
-            }, 'User profile updated successfully with phone and country')
-          }
+            updateResult,
+            updateData: { phoneNumber, country, name }
+          }, 'User profile updated successfully with phone and country using service role')
         } else {
-          logger.error({ userId: data.user.id }, 'No profile found for user after search')
+          logger.error({ 
+            userId: data.user.id,
+            updateResult
+          }, 'No rows updated - profile may not exist yet')
         }
 
 
