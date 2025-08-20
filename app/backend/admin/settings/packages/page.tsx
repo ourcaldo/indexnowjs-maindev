@@ -156,39 +156,31 @@ export default function PackageManagement() {
       }))
     }
 
-    const updatePricingTier = (index: number, currency: 'IDR' | 'USD', field: keyof CurrencyPricing, value: any) => {
-      const updatedTiers = [...(formData.pricing_tiers || [])]
-      if (!updatedTiers[index]) {
-        updatedTiers[index] = {
-          period: 'monthly',
-          IDR: { period_label: 'Monthly', regular_price: 0, promo_price: 0 },
-          USD: { period_label: 'Monthly', regular_price: 0, promo_price: 0 }
-        } as PricingTier
+    const updatePricingTierField = (period: string, currency: 'IDR' | 'USD', field: keyof CurrencyPricing, value: any) => {
+      const currentTiers = formData.pricing_tiers || {}
+      
+      // Ensure period object exists
+      if (!currentTiers[period]) {
+        currentTiers[period] = {}
       }
       
-      // Ensure currency object exists
-      if (!updatedTiers[index][currency]) {
-        updatedTiers[index][currency] = { period_label: 'Monthly', regular_price: 0, promo_price: 0 }
+      // Ensure currency object exists for this period
+      if (!currentTiers[period][currency]) {
+        currentTiers[period][currency] = { period_label: period, regular_price: 0, promo_price: 0 }
       }
       
-      updatedTiers[index] = {
-        ...updatedTiers[index],
-        [currency]: { ...updatedTiers[index][currency], [field]: value }
-      }
-      setFormData(prev => ({ ...prev, pricing_tiers: updatedTiers }))
-    }
-
-    const updatePricingTierPeriod = (index: number, period: string) => {
-      const updatedTiers = [...(formData.pricing_tiers || [])]
-      if (!updatedTiers[index]) {
-        updatedTiers[index] = {
-          period: 'monthly',
-          IDR: { period_label: 'Monthly', regular_price: 0, promo_price: 0 },
-          USD: { period_label: 'Monthly', regular_price: 0, promo_price: 0 }
-        } as PricingTier
+      // Update the specific field
+      const updatedTiers = {
+        ...currentTiers,
+        [period]: {
+          ...currentTiers[period],
+          [currency]: {
+            ...currentTiers[period][currency],
+            [field]: value
+          }
+        }
       }
       
-      updatedTiers[index] = { ...updatedTiers[index], period: period as any }
       setFormData(prev => ({ ...prev, pricing_tiers: updatedTiers }))
     }
 
@@ -211,33 +203,29 @@ export default function PackageManagement() {
     }
 
     const initializePricingTiers = () => {
-      const defaultTiers: PricingTier[] = [
-        { 
-          period: 'monthly', 
+      const defaultTiers = {
+        monthly: {
           IDR: { period_label: 'Monthly', regular_price: 0, promo_price: 0 },
           USD: { period_label: 'Monthly', regular_price: 0, promo_price: 0 }
         },
-        { 
-          period: 'quarterly', 
+        quarterly: {
           IDR: { period_label: '3 Months', regular_price: 0, promo_price: 0 },
           USD: { period_label: '3 Months', regular_price: 0, promo_price: 0 }
         },
-        { 
-          period: 'biannual', 
+        biannual: {
           IDR: { period_label: '6 Months', regular_price: 0, promo_price: 0 },
           USD: { period_label: '6 Months', regular_price: 0, promo_price: 0 }
         },
-        { 
-          period: 'annual', 
+        annual: {
           IDR: { period_label: '12 Months', regular_price: 0, promo_price: 0 },
           USD: { period_label: '12 Months', regular_price: 0, promo_price: 0 }
         }
-      ]
+      }
       setFormData(prev => ({ ...prev, pricing_tiers: defaultTiers }))
     }
 
     useEffect(() => {
-      if (formData.slug !== 'free' && (!formData.pricing_tiers || formData.pricing_tiers.length === 0)) {
+      if (formData.slug !== 'free' && (!formData.pricing_tiers || Object.keys(formData.pricing_tiers).length === 0)) {
         initializePricingTiers()
       }
     }, [formData.slug])
@@ -369,107 +357,109 @@ export default function PackageManagement() {
                 Pricing Tiers
               </h3>
               <div className="space-y-6">
-                {(formData.pricing_tiers || []).map((tier, index) => (
-                  <div key={index} className="p-6 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
-                    {/* Period Selection */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Billing Period</label>
-                      <select
-                        value={tier.period}
-                        onChange={(e) => updatePricingTierPeriod(index, e.target.value)}
-                        className="w-full max-w-xs px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
-                      >
-                        <option value="monthly">Monthly</option>
-                        <option value="quarterly">3 Months</option>
-                        <option value="biannual">6 Months</option>
-                        <option value="annual">12 Months</option>
-                      </select>
-                    </div>
-
-                    {/* Currency Pricing Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* IDR Pricing */}
-                      <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-                        <h4 className="text-md font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
-                          <span className="bg-[#4BB543] text-white px-2 py-1 text-xs rounded">IDR</span>
-                          Indonesian Rupiah
+                {[
+                  { period: 'monthly', label: 'Monthly', defaultLabel: 'Monthly' },
+                  { period: 'quarterly', label: '3 Months', defaultLabel: '3 Months' },
+                  { period: 'biannual', label: '6 Months', defaultLabel: '6 Months' },
+                  { period: 'annual', label: '12 Months', defaultLabel: '12 Months' }
+                ].map((periodInfo, index) => {
+                  const tierData = formData.pricing_tiers?.[periodInfo.period] || {}
+                  
+                  return (
+                    <div key={periodInfo.period} className="p-6 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                      {/* Period Header */}
+                      <div className="mb-4">
+                        <h4 className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
+                          <Clock className="h-5 w-5 text-[#3D8BFF]" />
+                          {periodInfo.label} Billing
                         </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <div>
-                            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Period Label</label>
-                            <input
-                              type="text"
-                              value={tier.IDR?.period_label || ''}
-                              onChange={(e) => updatePricingTier(index, 'IDR', 'period_label', e.target.value)}
-                              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
-                              placeholder="Monthly"
-                            />
+                      </div>
+
+                      {/* Currency Pricing Grid */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* IDR Pricing */}
+                        <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
+                          <h4 className="text-md font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                            <span className="bg-[#4BB543] text-white px-2 py-1 text-xs rounded">IDR</span>
+                            Indonesian Rupiah
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Period Label</label>
+                              <input
+                                type="text"
+                                value={tierData.IDR?.period_label || periodInfo.defaultLabel}
+                                onChange={(e) => updatePricingTierField(periodInfo.period, 'IDR', 'period_label', e.target.value)}
+                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                placeholder={periodInfo.defaultLabel}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Regular Price</label>
+                              <input
+                                type="number"
+                                value={tierData.IDR?.regular_price || 0}
+                                onChange={(e) => updatePricingTierField(periodInfo.period, 'IDR', 'regular_price', parseFloat(e.target.value) || 0)}
+                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                placeholder="50000"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Promo Price</label>
+                              <input
+                                type="number"
+                                value={tierData.IDR?.promo_price || 0}
+                                onChange={(e) => updatePricingTierField(periodInfo.period, 'IDR', 'promo_price', parseFloat(e.target.value) || 0)}
+                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                placeholder="25000"
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Regular Price</label>
-                            <input
-                              type="number"
-                              value={tier.IDR?.regular_price || 0}
-                              onChange={(e) => updatePricingTier(index, 'IDR', 'regular_price', parseFloat(e.target.value))}
-                              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
-                              placeholder="50000"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Promo Price</label>
-                            <input
-                              type="number"
-                              value={tier.IDR?.promo_price || 0}
-                              onChange={(e) => updatePricingTier(index, 'IDR', 'promo_price', parseFloat(e.target.value))}
-                              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
-                              placeholder="25000"
-                            />
+                        </div>
+
+                        {/* USD Pricing */}
+                        <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
+                          <h4 className="text-md font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                            <span className="bg-[#3D8BFF] text-white px-2 py-1 text-xs rounded">USD</span>
+                            US Dollar
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Period Label</label>
+                              <input
+                                type="text"
+                                value={tierData.USD?.period_label || periodInfo.defaultLabel}
+                                onChange={(e) => updatePricingTierField(periodInfo.period, 'USD', 'period_label', e.target.value)}
+                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                placeholder={periodInfo.defaultLabel}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Regular Price</label>
+                              <input
+                                type="number"
+                                value={tierData.USD?.regular_price || 0}
+                                onChange={(e) => updatePricingTierField(periodInfo.period, 'USD', 'regular_price', parseFloat(e.target.value) || 0)}
+                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                placeholder="10"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Promo Price</label>
+                              <input
+                                type="number"
+                                value={tierData.USD?.promo_price || 0}
+                                onChange={(e) => updatePricingTierField(periodInfo.period, 'USD', 'promo_price', parseFloat(e.target.value) || 0)}
+                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                placeholder="5"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
-
-                      {/* USD Pricing */}
-                      <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-                        <h4 className="text-md font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
-                          <span className="bg-[#3D8BFF] text-white px-2 py-1 text-xs rounded">USD</span>
-                          US Dollar
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <div>
-                            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Period Label</label>
-                            <input
-                              type="text"
-                              value={tier.USD?.period_label || ''}
-                              onChange={(e) => updatePricingTier(index, 'USD', 'period_label', e.target.value)}
-                              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
-                              placeholder="Monthly"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Regular Price</label>
-                            <input
-                              type="number"
-                              value={tier.USD?.regular_price || 0}
-                              onChange={(e) => updatePricingTier(index, 'USD', 'regular_price', parseFloat(e.target.value))}
-                              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
-                              placeholder="10"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Promo Price</label>
-                            <input
-                              type="number"
-                              value={tier.USD?.promo_price || 0}
-                              onChange={(e) => updatePricingTier(index, 'USD', 'promo_price', parseFloat(e.target.value))}
-                              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
-                              placeholder="5"
-                            />
-                          </div>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
