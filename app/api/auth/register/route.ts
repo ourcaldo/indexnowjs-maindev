@@ -103,9 +103,47 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
           .eq('user_id', data.user.id)
           .single()
 
-        if (checkError) {
+        let profileResult;
+        let profileError;
+
+        if (checkError && checkError.code === 'PGRST116') {
+          // Profile doesn't exist, create it
+          logger.info({ userId: data.user.id }, 'Profile not found, creating new profile...')
+          
+          const { data: createResult, error: createError } = await supabase
+            .from('indb_auth_user_profiles')
+            .insert({
+              user_id: data.user.id,
+              full_name: name,
+              phone_number: phoneNumber,
+              country: country,
+              email: data.user.email,
+              role: 'user',
+              email_notifications: true
+            })
+            .select()
+
+          profileResult = createResult
+          profileError = createError
+          
+          if (createError) {
+            logger.error({ 
+              error: createError, 
+              userId: data.user.id,
+              insertData: { userId: data.user.id, name, phoneNumber, country, email: data.user.email }
+            }, 'Failed to create user profile')
+          } else {
+            logger.info({ 
+              userId: data.user.id,
+              createResult,
+              insertData: { userId: data.user.id, name, phoneNumber, country, email: data.user.email }
+            }, 'User profile created successfully')
+          }
+        } else if (checkError) {
           logger.error({ error: checkError, userId: data.user.id }, 'Failed to check existing profile')
+          profileError = checkError
         } else {
+          // Profile exists, update it
           logger.info({ 
             userId: data.user.id, 
             existingProfile: {
@@ -116,32 +154,46 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
               phone_number: existingProfile?.phone_number,
               country: existingProfile?.country
             }
-          }, 'Found existing profile before update')
-        }
-        
-        // Update the profile with phone_number and country
-        const { data: updateResult, error: profileUpdateError } = await supabase
-          .from('indb_auth_user_profiles')
-          .update({
-            phone_number: phoneNumber,
-            country: country,
-            full_name: name // Ensure full name is set correctly
-          })
-          .eq('user_id', data.user.id)
-          .select()
+          }, 'Found existing profile, updating...')
+          
+          const { data: updateResult, error: updateError } = await supabase
+            .from('indb_auth_user_profiles')
+            .update({
+              phone_number: phoneNumber,
+              country: country,
+              full_name: name
+            })
+            .eq('user_id', data.user.id)
+            .select()
 
-        if (profileUpdateError) {
+          profileResult = updateResult
+          profileError = updateError
+          
+          if (updateError) {
+            logger.error({ 
+              error: updateError, 
+              userId: data.user.id,
+              updateData: { phoneNumber, country, name }
+            }, 'Failed to update user profile')
+          } else {
+            logger.info({ 
+              userId: data.user.id,
+              updateResult,
+              updateData: { phoneNumber, country, name }
+            }, 'User profile updated successfully')
+          }
+        }
+
+        if (profileError) {
           logger.error({ 
-            error: profileUpdateError, 
-            userId: data.user.id,
-            updateData: { phoneNumber, country, name }
-          }, 'Failed to update user profile with additional details')
+            error: profileError, 
+            userId: data.user.id
+          }, 'Failed to create/update user profile')
         } else {
           logger.info({ 
             userId: data.user.id,
-            updateResult,
-            updateData: { phoneNumber, country, name }
-          }, 'User profile updated successfully with phone and country')
+            profileResult
+          }, 'User profile created/updated successfully with all fields')
         }
       } catch (profileError) {
         logger.error({ error: profileError, userId: data.user.id }, 'Failed to update user profile')
