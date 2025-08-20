@@ -170,6 +170,13 @@ export async function getRequestInfo(request?: NextRequest): Promise<{
           if (response.ok) {
             const ipApiData = await response.json()
             if (ipApiData.status === 'success') {
+              // Debug: Log what IP-API actually returns
+              console.log('IP-API Response for', ipAddress, ':', {
+                country: ipApiData.country,
+                countryCode: ipApiData.countryCode,
+                region: ipApiData.regionName
+              })
+              
               locationData = {
                 country: ipApiData.country,
                 region: ipApiData.regionName,
