@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { registerSchema } from '@/shared/schema'
 import { 
   publicApiRouteWrapper,
@@ -96,42 +97,74 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
         // Use service role client to bypass RLS policies for profile update
         const serviceSupabase = createClient(
           process.env.SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
         )
 
         // Wait for triggers to create the profile
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        await new Promise(resolve => setTimeout(resolve, 3000)) // Increased to 3 seconds
         
-        logger.info({ userId: data.user.id }, 'Updating profile with service role client...')
+        logger.info({ 
+          userId: data.user.id,
+          updateData: { phoneNumber, country, name }
+        }, 'Updating profile with service role client...')
         
-        // Update the profile directly with service role (bypasses RLS)
-        const { data: updateResult, error: updateError } = await serviceSupabase
+        // First check if profile exists with service role
+        const { data: existingProfile, error: checkError } = await serviceSupabase
           .from('indb_auth_user_profiles')
-          .update({
-            phone_number: phoneNumber,
-            country: country,
-            full_name: name
-          })
+          .select('*')
           .eq('user_id', data.user.id)
-          .select()
+          .maybeSingle()
 
-        if (updateError) {
-          logger.error({ 
-            error: updateError, 
-            userId: data.user.id,
-            updateData: { phoneNumber, country, name }
-          }, 'Failed to update user profile with service role')
-        } else if (updateResult && updateResult.length > 0) {
+        if (checkError) {
+          logger.error({ error: checkError, userId: data.user.id }, 'Service role failed to check profile')
+        } else if (!existingProfile) {
+          logger.error({ userId: data.user.id }, 'Service role: No profile found to update')
+        } else {
           logger.info({ 
             userId: data.user.id,
-            updateResult,
-            updateData: { phoneNumber, country, name }
-          }, 'User profile updated successfully with phone and country using service role')
-        } else {
-          logger.error({ 
-            userId: data.user.id,
-            updateResult
-          }, 'No rows updated - profile may not exist yet')
+            existingProfile: {
+              id: existingProfile.id,
+              phone_number: existingProfile.phone_number,
+              country: existingProfile.country,
+              full_name: existingProfile.full_name
+            }
+          }, 'Service role found profile, updating...')
+
+          // Update the profile directly with service role (bypasses RLS)
+          const { data: updateResult, error: updateError } = await serviceSupabase
+            .from('indb_auth_user_profiles')
+            .update({
+              phone_number: phoneNumber,
+              country: country,
+              full_name: name
+            })
+            .eq('user_id', data.user.id)
+            .select()
+
+          if (updateError) {
+            logger.error({ 
+              error: updateError, 
+              userId: data.user.id,
+              updateData: { phoneNumber, country, name }
+            }, 'Service role failed to update user profile')
+          } else if (updateResult && updateResult.length > 0) {
+            logger.info({ 
+              userId: data.user.id,
+              updateResult,
+              updateData: { phoneNumber, country, name }
+            }, 'SUCCESS: Profile updated with phone and country using service role')
+          } else {
+            logger.error({ 
+              userId: data.user.id,
+              updateResult
+            }, 'Service role update returned no rows')
+          }
         }
 
 
