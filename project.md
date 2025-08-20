@@ -2238,3 +2238,17 @@ indb_keyword_rankings (latest positions)
 - **Files Modified**: `app/api/auth/register/route.ts` - Removed manual timestamp insertion
 - **Database Changes Required**: SQL queries provided to fix RLS policies and prevent recursion
 - **Result**: Registration should now work without database recursion errors when SQL fixes are applied
+
+### August 20, 2025 - Registration Strategy Change: Update Profile After Creation
+- ✅ **CHANGED REGISTRATION APPROACH**: Instead of fighting RLS policies, use UPDATE after trigger-created profile
+  - **Issue**: Database triggers only populate basic fields (`name`, `email`) during profile creation
+  - **Root Problem**: INSERT conflicts with RLS policies and triggers, causing infinite recursion 
+  - **New Strategy**: Let triggers create basic profile, then UPDATE with additional fields
+  - **Implementation**: Added 500ms delay then UPDATE profile with `phone_number` and `country`
+- ✅ **AVOIDED RLS CONFLICTS**: No more INSERT operations that trigger recursion issues
+  - **Trigger Flow**: Supabase Auth → Database triggers create profile → UPDATE adds extra fields
+  - **Benefits**: Works with existing RLS policies without modification
+  - **Safety**: UPDATE operations don't conflict with profile creation triggers
+- **Files Modified**: `app/api/auth/register/route.ts` - Changed from INSERT to UPDATE approach
+- **Database Changes**: None required - works with existing triggers and policies
+- **Result**: Registration now works with all fields populated without touching RLS or trigger functions

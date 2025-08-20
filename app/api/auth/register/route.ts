@@ -83,27 +83,29 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       return createErrorResponse(authError)
     }
 
-    // Create user profile in our database
+    // Update user profile with additional details after triggers create the basic profile
     if (data.user?.id) {
       try {
-        const { error: profileError } = await supabase
+        // Wait a moment for triggers to create the basic profile
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Update the profile with phone_number and country
+        const { error: profileUpdateError } = await supabase
           .from('indb_auth_user_profiles')
-          .insert({
-            user_id: data.user.id,
-            full_name: name,
+          .update({
             phone_number: phoneNumber,
             country: country,
-            role: 'user',
-            email_notifications: true
+            full_name: name // Ensure full name is set correctly
           })
+          .eq('user_id', data.user.id)
 
-        if (profileError) {
-          logger.error({ error: profileError, userId: data.user.id }, 'Failed to create user profile')
+        if (profileUpdateError) {
+          logger.error({ error: profileUpdateError, userId: data.user.id }, 'Failed to update user profile with additional details')
         } else {
-          logger.info({ userId: data.user.id }, 'User profile created successfully')
+          logger.info({ userId: data.user.id }, 'User profile updated successfully with phone and country')
         }
       } catch (profileError) {
-        logger.error({ error: profileError, userId: data.user.id }, 'Failed to create user profile')
+        logger.error({ error: profileError, userId: data.user.id }, 'Failed to update user profile')
       }
     }
 
