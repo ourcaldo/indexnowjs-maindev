@@ -198,13 +198,31 @@ export default function CheckoutPage() {
   const calculatePrice = () => {
     if (!selectedPackage) return { price: 0, discount: 0, originalPrice: 0 }
     
-    if (selectedPackage.pricing_tiers && selectedPackage.pricing_tiers[billing_period]) {
-      const tier = selectedPackage.pricing_tiers[billing_period]
-      const price = tier.promo_price || tier.regular_price
-      const originalPrice = tier.regular_price
-      const discount = tier.promo_price ? Math.round(((originalPrice - tier.promo_price) / originalPrice) * 100) : 0
+    // Check if package has new multicurrency structure
+    if (selectedPackage.pricing_tiers && typeof selectedPackage.pricing_tiers === 'object' && selectedPackage.pricing_tiers[billing_period]) {
+      const periodTier = selectedPackage.pricing_tiers[billing_period]
       
-      return { price, discount, originalPrice }
+      // New multicurrency format
+      if (periodTier[userCurrency]) {
+        const currencyTier = periodTier[userCurrency]
+        const price = currencyTier.promo_price || currencyTier.regular_price
+        const originalPrice = currencyTier.regular_price
+        const discount = currencyTier.promo_price ? Math.round(((originalPrice - currencyTier.promo_price) / originalPrice) * 100) : 0
+        
+        return { price, discount, originalPrice }
+      }
+      
+      // Legacy array format - check if it's an array
+      if (Array.isArray(selectedPackage.pricing_tiers)) {
+        const tier = selectedPackage.pricing_tiers.find((t: any) => t.period === billing_period)
+        if (tier) {
+          const price = tier.promo_price || tier.regular_price
+          const originalPrice = tier.regular_price
+          const discount = tier.promo_price ? Math.round(((originalPrice - tier.promo_price) / originalPrice) * 100) : 0
+          
+          return { price, discount, originalPrice }
+        }
+      }
     }
     
     return { price: selectedPackage.price, discount: 0, originalPrice: selectedPackage.price }

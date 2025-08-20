@@ -28,11 +28,19 @@ import { supabase } from '@/lib/supabase'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 
+interface CurrencyPricing {
+  regular_price: number
+  promo_price: number
+  period_label: string
+}
+
 interface PricingTier {
   period: string
-  regular_price: number
+  regular_price?: number
   promo_price?: number
   discount_percentage?: number
+  IDR?: CurrencyPricing
+  USD?: CurrencyPricing
 }
 
 interface PaymentPackage {
@@ -51,7 +59,7 @@ interface PaymentPackage {
   }
   is_popular: boolean
   is_current: boolean
-  pricing_tiers: Record<string, PricingTier>
+  pricing_tiers: Record<string, PricingTier> | any
 }
 
 interface Transaction {
@@ -295,14 +303,33 @@ export default function BillingPage() {
   }
 
   const getBillingPeriodPrice = (pkg: PaymentPackage, period: string): { price: number, originalPrice?: number, discount?: number } => {
-    const tier = pkg.pricing_tiers?.[period]
-    if (tier) {
-      return {
-        price: tier.promo_price || tier.regular_price,
-        originalPrice: tier.promo_price ? tier.regular_price : undefined,
-        discount: tier.discount_percentage
+    // Check if package has new multicurrency structure
+    if (pkg.pricing_tiers && typeof pkg.pricing_tiers === 'object' && pkg.pricing_tiers[period]) {
+      const periodTier = pkg.pricing_tiers[period]
+      
+      // New multicurrency format
+      if (periodTier[userCurrency]) {
+        const currencyTier = periodTier[userCurrency]
+        return {
+          price: currencyTier.promo_price || currencyTier.regular_price,
+          originalPrice: currencyTier.promo_price ? currencyTier.regular_price : undefined,
+          discount: currencyTier.promo_price ? Math.round(((currencyTier.regular_price - currencyTier.promo_price) / currencyTier.regular_price) * 100) : undefined
+        }
+      }
+      
+      // Legacy array format - check if it's an array
+      if (Array.isArray(pkg.pricing_tiers)) {
+        const tier = pkg.pricing_tiers.find((t: any) => t.period === period)
+        if (tier) {
+          return {
+            price: tier.promo_price || tier.regular_price,
+            originalPrice: tier.promo_price ? tier.regular_price : undefined,
+            discount: tier.discount_percentage
+          }
+        }
       }
     }
+    
     return { price: pkg.price }
   }
 
