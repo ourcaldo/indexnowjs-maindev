@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { authService } from "@/lib/auth"
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 import { countries, findCountryByCode } from '@/lib/countries'
+import { Eye, EyeOff } from 'lucide-react'
 // We'll use a simple fetch to our detect-location API instead
 
 import DashboardPreview from '../../components/DashboardPreview'
@@ -447,11 +448,13 @@ export default function Register() {
                     border: 'none',
                     color: '#9ca3af',
                     cursor: 'pointer',
-                    fontSize: '14px',
-                    padding: '4px'
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
@@ -501,11 +504,13 @@ export default function Register() {
                     border: 'none',
                     color: '#9ca3af',
                     cursor: 'pointer',
-                    fontSize: '14px',
-                    padding: '4px'
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                 >
-                  {showConfirmPassword ? '🙈' : '👁️'}
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
