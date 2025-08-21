@@ -154,8 +154,59 @@ export default function CheckoutPage() {
         throw new Error('Failed to process card information')
       }
 
-      await handleMidtransRecurringPayment(cardToken, token)
+      // Immediately call our backend API with the token
+      const response = await fetch('/api/billing/midtrans-recurring', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          package_id: selectedPackage!.id,
+          billing_period,
+          customer_info: {
+            first_name: form.first_name,
+            last_name: form.last_name,
+            email: form.email,
+            phone: form.phone,
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            zip_code: form.zip_code,
+            country: form.country,
+            description: form.description
+          },
+          token_id: cardToken
+        }),
+      })
+      
+      const result = await response.json()
+
+      if (result.success) {
+        // Log activity
+        logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
+
+        addToast({
+          title: "Payment successful!",
+          description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
+          type: "success"
+        })
+        
+        // Redirect to payment page or success page
+        setTimeout(() => {
+          if (result.data?.redirect_url) {
+            window.location.href = result.data.redirect_url
+          } else {
+            router.push('/dashboard/settings/plans-billing')
+          }
+        }, 1500)
+      } else {
+        throw new Error(result.message || 'Payment processing failed. Please try again.')
+      }
+      
+      setSubmitting(false)
     } catch (error) {
+      console.error('Payment error:', error)
       addToast({
         title: "Payment failed",
         description: error instanceof Error ? error.message : "Please try again later.",
