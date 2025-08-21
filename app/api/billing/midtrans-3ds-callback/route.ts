@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       
       // Get the original transaction record from our database (contains real customer info from checkout form)
       console.log('🔍 Getting original transaction record from database...')
-      const { data: existingTransaction, error: transactionError } = await supabase
+      const { data: existingTransaction, error: existingTransactionError } = await supabase
         .from('indb_payment_transactions')
         .select('*')
         .eq('gateway_transaction_id', transaction_id)
