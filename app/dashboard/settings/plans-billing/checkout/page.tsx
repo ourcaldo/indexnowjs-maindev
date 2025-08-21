@@ -843,13 +843,11 @@ export default function CheckoutPage() {
                         {/* Credit Card Form - Inside the payment method selection */}
                         {form.payment_method === gateway.id && gateway.slug === 'midtrans' && (
                           <div className="ml-8 mt-4">
-                            <div onClick={(e) => e.stopPropagation()}>
-                              <MidtransCreditCardForm
-                                onSubmit={handleCreditCardSubmit}
-                                loading={submitting}
-                                disabled={submitting}
-                              />
-                            </div>
+                            <MidtransCreditCardForm
+                              onSubmit={handleCreditCardSubmit}
+                              loading={submitting}
+                              disabled={submitting}
+                            />
                           </div>
                         )}
                       </div>
@@ -955,14 +953,38 @@ export default function CheckoutPage() {
 
 
                 
-                {/* Note for Midtrans */}
+                {/* Submit Button for Midtrans */}
                 {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' && (
-                  <div className="w-full bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg p-4 mt-6">
-                    <p className="text-sm text-[#6C757D] text-center">
-                      <CreditCard className="h-4 w-4 inline mr-2" />
-                      Please fill in your credit card details below to setup recurring payment
-                    </p>
-                  </div>
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      setSubmitting(true)
+                      try {
+                        // @ts-ignore - We expose this globally from the credit card form
+                        const success = await window.midtransSubmitCard?.()
+                        if (!success) {
+                          setSubmitting(false)
+                        }
+                      } catch (error) {
+                        console.error('Midtrans payment error:', error)
+                        setSubmitting(false)
+                      }
+                    }}
+                    disabled={submitting || !form.payment_method}
+                    className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12 mt-6"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing Payment...
+                      </>
+                    ) : (
+                      <>
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Complete Payment
+                      </>
+                    )}
+                  </Button>
                 )}
 
                 {/* Security Note */}
