@@ -321,9 +321,7 @@ export async function POST(request: NextRequest) {
         payment_method: 'credit_card',
         payment_reference: recurringPayment.initial_charge.transaction_id,
         gateway_transaction_id: recurringPayment.initial_charge.transaction_id,
-        gateway_order_id: orderId,
         billing_period: billing_period,
-        customer_info: customer_info,
         gateway_response: recurringPayment.initial_charge,
         metadata: {
           subscription_id: recurringPayment.subscription.id,
@@ -331,6 +329,8 @@ export async function POST(request: NextRequest) {
           masked_card: recurringPayment.initial_charge.masked_card,
           subscription_status: recurringPayment.subscription.status,
           next_execution_at: recurringPayment.subscription.schedule.next_execution_at,
+          customer_info: customer_info,
+          order_id: orderId
         },
       })
       .select()

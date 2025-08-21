@@ -216,14 +216,7 @@ export async function POST(request: NextRequest) {
           payment_method: 'credit_card',
           payment_reference: transaction_id,
           gateway_transaction_id: transaction_id,
-          gateway_order_id: order_id,
           billing_period: billing_period,
-          customer_info: {
-            first_name: transactionDetails.customer_details?.first_name || 'Customer',
-            last_name: transactionDetails.customer_details?.last_name || '',
-            email: transactionDetails.customer_details?.email || user.email || '',
-            phone: transactionDetails.customer_details?.phone || '',
-          },
           gateway_response: transactionDetails,
           metadata: {
             subscription_id: subscription.id,
@@ -231,7 +224,14 @@ export async function POST(request: NextRequest) {
             masked_card: transactionDetails.masked_card,
             subscription_status: subscription.status,
             next_execution_at: subscription.schedule?.next_execution_at,
-            processing_method: '3ds_callback'
+            processing_method: '3ds_callback',
+            customer_info: {
+              first_name: transactionDetails.customer_details?.first_name || 'Customer',
+              last_name: transactionDetails.customer_details?.last_name || '',
+              email: transactionDetails.customer_details?.email || user.email || '',
+              phone: transactionDetails.customer_details?.phone || '',
+            },
+            order_id: order_id
           },
         })
         .select()
