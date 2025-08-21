@@ -1,0 +1,67 @@
+🚀 [FRONTEND] Starting credit card submission...
+page.tsx:126 📋 [FRONTEND] Card data received: {has_card_number: true, has_expiry_month: true, has_expiry_year: true, has_cvv: true, has_cardholder_name: true}
+page.tsx:136 🔐 [FRONTEND] Getting authentication...
+useGlobalWebSocket.ts:102 🔗 Global WebSocket connection error: Error: timeout
+    at eval (manager.js:150:25)
+error @ intercept-console-error.js:57
+eval @ useGlobalWebSocket.ts:102
+Emitter.emit @ index.js:140
+onerror @ socket.js:446
+Emitter.emit @ index.js:140
+onError @ manager.js:134
+eval @ manager.js:150Understand this error
+websocket.js:90 WebSocket connection to 'wss://700481c6-9cc6-4d24-a715-224423d63903-00-20l6ci2cyq558.riker.replit.dev/api/socketio/?EIO=4&transport=websocket' failed: WebSocket is closed before the connection is established.
+doClose @ websocket.js:90
+close @ transport.js:64
+_onClose @ socket.js:525
+close @ socket.js:461
+close @ socket.js:490
+eval @ manager.js:151Understand this warning
+useGlobalWebSocket.ts:167 Failed to initialize global WebSocket: Error: timeout
+    at eval (manager.js:150:25)
+error @ intercept-console-error.js:57
+useGlobalWebSocket.useEffect @ useGlobalWebSocket.ts:167Understand this error
+index.js:552  POST https://700481c6-9cc6-4d24-a715-224423d63903-00-20l6ci2cyq558.riker.replit.dev/__nextjs_original-stack-frames 403 (Forbidden)
+eval @ index.js:552
+eval @ index.js:552
+ej @ index.js:552
+i @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+eC @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+tv @ index.js:552
+i @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+s @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+tv @ index.js:552
+i @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+i0 @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+sE @ index.js:541
+eval @ index.js:541
+_ @ index.js:541Understand this error
+page.tsx:142 ✅ [FRONTEND] User authenticated: aldodkris@gmail.com
+page.tsx:150 ✅ [FRONTEND] Got access token: eyJhbGciOiJIUzI1NiIs...
+page.tsx:153 📱 [FRONTEND] Checking Midtrans SDK availability...
+page.tsx:167 ✅ [FRONTEND] Midtrans SDK is ready
+page.tsx:170 🔑 [FRONTEND] Requesting card tokenization from Midtrans...
