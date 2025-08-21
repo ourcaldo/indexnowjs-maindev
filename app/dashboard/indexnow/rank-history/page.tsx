@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { usePageViewLogger } from '@/hooks/useActivityLogger'
 import { 
   Calendar, 
   Search,
@@ -106,6 +107,9 @@ const formatDateHeader = (dateStr: string): string => {
 }
 
 export default function RankHistoryPage() {
+  // Activity logging
+  usePageViewLogger('/dashboard/indexnow/rank-history', 'Rank History', { section: 'keyword_tracker' })
+
   // State for domain management
   const [selectedDomainId, setSelectedDomainId] = useState<string>('')
   const [showDomainsManager, setShowDomainsManager] = useState(false)
@@ -630,6 +634,18 @@ export default function RankHistoryPage() {
 
               {/* Rank History Table */}
               <Card>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>
+                    Rank History
+                  </h3>
+                  <Button 
+                    onClick={() => window.location.href = '/dashboard/indexnow/add'}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Keyword
+                  </Button>
+                </div>
                 {isLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{borderColor: '#3D8BFF'}}></div>

@@ -15,10 +15,15 @@ import {
   Globe,
   Tag,
   Calendar,
-  ExternalLink
+  ExternalLink,
+  Trash2,
+  Check,
+  X
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
+import { ActivityEventTypes } from '@/lib/activity-logger'
 
 // Simple UI Components using project color scheme
 const Card = ({ children, className = '' }: any) => (
@@ -146,6 +151,19 @@ export default function IndexNowOverview() {
   const [currentPage, setCurrentPage] = useState(1)
   const [showDomainsManager, setShowDomainsManager] = useState(false)
   const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null)
+  
+  // New state for multiselect functionality
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
+  const [showActionsMenu, setShowActionsMenu] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showTagModal, setShowTagModal] = useState(false)
+  const [newTag, setNewTag] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isAddingTag, setIsAddingTag] = useState(false)
+
+  // Activity logging
+  usePageViewLogger('/dashboard/indexnow/overview', 'Keywords Overview', { section: 'keyword_tracker' })
+  const { logActivity } = useActivityLogger()
 
   // Fetch domains
   const { data: domainsData } = useQuery({
@@ -262,6 +280,109 @@ export default function IndexNowOverview() {
       setSelectedDomainId(domains[0].id)
     }
   }, [domains, selectedDomainId])
+
+  // Clear selected keywords when domain changes
+  useEffect(() => {
+    setSelectedKeywords([])
+  }, [selectedDomainId])
+
+  // Functions for multiselect and bulk actions
+  const handleKeywordSelect = (keywordId: string) => {
+    setSelectedKeywords(prev => 
+      prev.includes(keywordId) 
+        ? prev.filter(id => id !== keywordId)
+        : [...prev, keywordId]
+    )
+  }
+
+  const handleSelectAll = () => {
+    if (selectedKeywords.length === filteredKeywords.length) {
+      setSelectedKeywords([])
+    } else {
+      setSelectedKeywords(filteredKeywords.map((k: any) => k.id))
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedKeywords.length === 0) return
+    
+    setIsDeleting(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/keyword-tracker/keywords/bulk-delete', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ keywordIds: selectedKeywords })
+      })
+
+      if (response.ok) {
+        // Log activity
+        await logActivity({
+          eventType: ActivityEventTypes.KEYWORD_BULK_DELETE,
+          actionDescription: `Bulk deleted ${selectedKeywords.length} keywords from ${selectedDomainInfo?.domain_name || 'domain'}`,
+          metadata: {
+            keywordCount: selectedKeywords.length,
+            domainId: selectedDomainId,
+            domainName: selectedDomainInfo?.domain_name
+          }
+        })
+
+        setSelectedKeywords([])
+        refetchKeywords()
+        setShowDeleteConfirm(false)
+      }
+    } catch (error) {
+      console.error('Failed to delete keywords:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleAddTag = async () => {
+    if (selectedKeywords.length === 0 || !newTag.trim()) return
+    
+    setIsAddingTag(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/keyword-tracker/keywords/add-tag', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          keywordIds: selectedKeywords,
+          tag: newTag.trim()
+        })
+      })
+
+      if (response.ok) {
+        // Log activity
+        await logActivity({
+          eventType: ActivityEventTypes.KEYWORD_TAG_ADD,
+          actionDescription: `Added tag "${newTag.trim()}" to ${selectedKeywords.length} keywords`,
+          metadata: {
+            tag: newTag.trim(),
+            keywordCount: selectedKeywords.length,
+            domainId: selectedDomainId,
+            domainName: selectedDomainInfo?.domain_name
+          }
+        })
+
+        setSelectedKeywords([])
+        setNewTag('')
+        refetchKeywords()
+        setShowTagModal(false)
+      }
+    } catch (error) {
+      console.error('Failed to add tag:', error)
+    } finally {
+      setIsAddingTag(false)
+    }
+  }
 
   // Get selected domain info
   const selectedDomainInfo = domains.find(d => d.id === selectedDomainId)
@@ -492,11 +613,41 @@ export default function IndexNowOverview() {
           <Card>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>
-                  Keywords ({filteredKeywords.length})
-                </h3>
-                <Button variant="outline" size="sm">
-                  <MoreHorizontal className="w-4 h-4" />
+                <div className="flex items-center gap-4">
+                  <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>
+                    Keywords ({filteredKeywords.length})
+                  </h3>
+                  {selectedKeywords.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm" style={{color: '#6C757D'}}>
+                        {selectedKeywords.length} selected
+                      </span>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowTagModal(true)}
+                      >
+                        <Tag className="w-4 h-4 mr-1" />
+                        Add Tag
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                <Button 
+                  onClick={() => router.push('/dashboard/indexnow/add')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Keyword
                 </Button>
               </div>
 
@@ -519,6 +670,14 @@ export default function IndexNowOverview() {
                   <table className="w-full">
                     <thead>
                       <tr style={{borderBottom: '1px solid #E0E6ED'}}>
+                        <th className="text-left p-3 font-medium w-12" style={{color: '#6C757D'}}>
+                          <input
+                            type="checkbox"
+                            checked={selectedKeywords.length === filteredKeywords.length && filteredKeywords.length > 0}
+                            onChange={handleSelectAll}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </th>
                         <th className="text-left p-3 font-medium" style={{color: '#6C757D'}}>Keyword</th>
                         <th className="text-left p-3 font-medium" style={{color: '#6C757D'}}>Position</th>
                         <th className="text-left p-3 font-medium" style={{color: '#6C757D'}}>1D</th>
@@ -533,6 +692,14 @@ export default function IndexNowOverview() {
                     <tbody>
                       {filteredKeywords.map((keyword: any) => (
                         <tr key={keyword.id} style={{borderBottom: '1px solid #E0E6ED'}}>
+                          <td className="p-3">
+                            <input
+                              type="checkbox"
+                              checked={selectedKeywords.includes(keyword.id)}
+                              onChange={() => handleKeywordSelect(keyword.id)}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                          </td>
                           <td className="p-3">
                             <div className="space-y-1">
                               <div className="font-medium" style={{color: '#1A1A1A'}}>
@@ -649,6 +816,87 @@ export default function IndexNowOverview() {
             </div>
           </Card>
         </>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4" style={{color: '#1A1A1A'}}>
+              Delete Keywords
+            </h3>
+            <p className="mb-6" style={{color: '#6C757D'}}>
+              Are you sure you want to delete {selectedKeywords.length} keyword{selectedKeywords.length > 1 ? 's' : ''}? 
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleBulkDelete}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isDeleting ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                ) : null}
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Tag Modal */}
+      {showTagModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4" style={{color: '#1A1A1A'}}>
+              Add Tag to Keywords
+            </h3>
+            <p className="mb-4" style={{color: '#6C757D'}}>
+              Add a tag to {selectedKeywords.length} selected keyword{selectedKeywords.length > 1 ? 's' : ''}:
+            </p>
+            <Input
+              placeholder="Enter tag name..."
+              value={newTag}
+              onChange={(e: any) => setNewTag(e.target.value)}
+              className="mb-6"
+              onKeyPress={(e: any) => {
+                if (e.key === 'Enter' && newTag.trim()) {
+                  handleAddTag()
+                }
+              }}
+            />
+            <div className="flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowTagModal(false)
+                  setNewTag('')
+                }}
+                disabled={isAddingTag}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAddTag}
+                disabled={isAddingTag || !newTag.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isAddingTag ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                ) : null}
+                {isAddingTag ? 'Adding...' : 'Add Tag'}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

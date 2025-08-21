@@ -145,6 +145,19 @@ export const ActivityEventTypes = {
   USER_SECURITY_VIEW: 'user_security_view',
   USER_ACTIVITY_VIEW: 'user_activity_view',
   
+  // Keyword Tracker Activities
+  KEYWORD_ADD: 'keyword_add',
+  KEYWORD_DELETE: 'keyword_delete',
+  KEYWORD_UPDATE: 'keyword_update',
+  KEYWORD_BULK_DELETE: 'keyword_bulk_delete',
+  KEYWORD_TAG_ADD: 'keyword_tag_add',
+  KEYWORD_TAG_REMOVE: 'keyword_tag_remove',
+  DOMAIN_ADD: 'domain_add',
+  DOMAIN_DELETE: 'domain_delete',
+  DOMAIN_UPDATE: 'domain_update',
+  KEYWORD_TRACKER_VIEW: 'keyword_tracker_view',
+  RANK_HISTORY_VIEW: 'rank_history_view',
+  
   // System Events
   ERROR_OCCURRED: 'error_occurred',
   SECURITY_VIOLATION: 'security_violation',
@@ -414,6 +427,36 @@ export class ActivityLogger {
       request,
       metadata: {
         profileActivity: true,
+        ...metadata
+      }
+    })
+  }
+
+  /**
+   * Log keyword tracker activities
+   */
+  static async logKeywordActivity(userId: string, eventType: string, details: string, request?: NextRequest, metadata?: Record<string, any>) {
+    const actionDescriptions = {
+      [ActivityEventTypes.KEYWORD_ADD]: `Added keyword: ${details}`,
+      [ActivityEventTypes.KEYWORD_DELETE]: `Deleted keyword: ${details}`,
+      [ActivityEventTypes.KEYWORD_UPDATE]: `Updated keyword: ${details}`,
+      [ActivityEventTypes.KEYWORD_BULK_DELETE]: `Bulk deleted keywords: ${details}`,
+      [ActivityEventTypes.KEYWORD_TAG_ADD]: `Added tag to keywords: ${details}`,
+      [ActivityEventTypes.KEYWORD_TAG_REMOVE]: `Removed tag from keywords: ${details}`,
+      [ActivityEventTypes.DOMAIN_ADD]: `Added domain: ${details}`,
+      [ActivityEventTypes.DOMAIN_DELETE]: `Deleted domain: ${details}`,
+      [ActivityEventTypes.DOMAIN_UPDATE]: `Updated domain: ${details}`,
+      [ActivityEventTypes.KEYWORD_TRACKER_VIEW]: `Viewed keyword tracker: ${details}`,
+      [ActivityEventTypes.RANK_HISTORY_VIEW]: `Viewed rank history: ${details}`,
+    }
+
+    return this.logActivity({
+      userId,
+      eventType,
+      actionDescription: actionDescriptions[eventType as keyof typeof actionDescriptions] || `Keyword tracker activity: ${details}`,
+      request,
+      metadata: {
+        keywordTrackerActivity: true,
         ...metadata
       }
     })

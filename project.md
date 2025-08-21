@@ -705,6 +705,36 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**KEYWORD TRACKER MULTISELECT & BULK ACTIONS ENHANCEMENT (August 21, 2025)**
+- ✅ **MULTISELECT FUNCTIONALITY**: Added checkbox-based multiselect functionality to Keywords Overview page
+  - **Select All**: Header checkbox to select/deselect all visible keywords
+  - **Individual Selection**: Individual checkboxes for each keyword row
+  - **Visual Feedback**: Selected count display and action buttons only appear when keywords are selected
+- ✅ **BULK DELETE FUNCTIONALITY**: Implemented bulk delete with comprehensive safety measures
+  - **Confirmation Modal**: User-friendly confirmation dialog with keyword count and warning
+  - **API Endpoint**: New `/api/keyword-tracker/keywords/bulk-delete` endpoint with proper validation
+  - **Data Integrity**: Cascading deletes for rank history and rankings to maintain referential integrity
+  - **Activity Logging**: Complete activity tracking using ActivityEventTypes.KEYWORD_BULK_DELETE
+- ✅ **BULK TAG ADDITION**: Added tag management functionality for multiple keywords
+  - **Add Tag Modal**: Clean interface to add tags to selected keywords with input validation
+  - **API Endpoint**: New `/api/keyword-tracker/keywords/add-tag` endpoint with tag deduplication
+  - **Smart Updates**: Only updates keywords that don't already have the specified tag
+  - **Activity Logging**: Comprehensive logging using ActivityEventTypes.KEYWORD_TAG_ADD
+- ✅ **ADD KEYWORD BUTTONS**: Added "Add Keyword" buttons to both Overview and Rank History pages
+  - **Overview Page**: Blue button in top right of Keywords table section
+  - **Rank History Page**: Matching button in table header for consistency
+  - **Navigation**: Buttons route to `/dashboard/indexnow/add` for keyword creation
+- ✅ **ENHANCED ACTIVITY TRACKING**: Extended activity logging system for keyword tracker operations
+  - **New Event Types**: Added 11 new activity event types for keyword tracking operations
+  - **Specialized Logger**: Created `logKeywordActivity` method in ActivityLogger class
+  - **Page View Tracking**: Added activity logging to Overview and Rank History pages
+  - **Comprehensive Metadata**: Detailed logging with keyword names, counts, domains, and operation details
+- ✅ **USER EXPERIENCE IMPROVEMENTS**: Enhanced interface with better visual feedback
+  - **Action Buttons**: Delete and Add Tag buttons appear only when keywords are selected
+  - **Loading States**: Proper loading indicators for bulk operations with spinning animations
+  - **Error Handling**: Comprehensive error handling with user-friendly messages
+  - **Keyboard Support**: Enter key support in tag input for improved UX
+
 **USER REGISTRATION FUNCTIONALITY RESTORED & COUNTRY DISPLAY FIX (August 20, 2025)**
 - ✅ **CRITICAL REGISTRATION ISSUE RESOLVED**: Fixed user registration functionality that was failing to save phone number and country data
   - **Root Cause Identified**: RLS (Row Level Security) policies were preventing standard Supabase client from accessing user profile table after database triggers created profiles
