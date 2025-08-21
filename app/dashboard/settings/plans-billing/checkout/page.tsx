@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { ArrowLeft, CreditCard, Building2, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Building2, Check, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { authService } from '@/lib/auth'
@@ -962,10 +962,8 @@ export default function CheckoutPage() {
                           <RadioGroupItem value={gateway.id} id={gateway.id} />
                           <div className="flex-1">
                             <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
-                              {gateway.slug === 'bank_transfer' ? (
+                              {gateway.slug === 'bank_transfer' && (
                                 <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
-                              ) : (
-                                <CreditCard className="h-5 w-5 text-[#6C757D] mr-3" />
                               )}
                               <div>
                                 <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
