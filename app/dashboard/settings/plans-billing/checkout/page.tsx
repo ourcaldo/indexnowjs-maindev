@@ -16,6 +16,20 @@ import { authService } from '@/lib/auth'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { formatCurrency } from '@/lib/currency-utils'
 
+// Midtrans Snap type declarations
+declare global {
+  interface Window {
+    snap: {
+      pay: (token: string, options?: {
+        onSuccess?: (result: any) => void;
+        onPending?: (result: any) => void;
+        onError?: (result: any) => void;
+        onClose?: () => void;
+      }) => void;
+    };
+  }
+}
+
 interface PaymentPackage {
   id: string
   name: string
@@ -71,6 +85,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [userCurrency, setUserCurrency] = useState<'USD' | 'IDR'>('USD')
+  const [snapLoaded, setSnapLoaded] = useState(false)
   
   // Log page view and checkout activities
   usePageViewLogger('/dashboard/settings/plans-billing/checkout', 'Checkout', { section: 'billing_checkout' })
@@ -89,6 +104,29 @@ export default function CheckoutPage() {
     description: '',
     payment_method: ''
   })
+
+  // Load Midtrans Snap SDK
+  useEffect(() => {
+    const loadSnapSDK = async () => {
+      if (window.snap) {
+        setSnapLoaded(true)
+        return
+      }
+
+      try {
+        const script = document.createElement('script')
+        script.src = 'https://app.sandbox.midtrans.com/snap/snap.js'
+        script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '')
+        script.onload = () => setSnapLoaded(true)
+        script.onerror = () => console.error('Failed to load Midtrans Snap SDK')
+        document.head.appendChild(script)
+      } catch (error) {
+        console.error('Error loading Midtrans Snap SDK:', error)
+      }
+    }
+
+    loadSnapSDK()
+  }, [])
 
   // Fetch package and payment gateway data
   useEffect(() => {
@@ -255,46 +293,15 @@ export default function CheckoutPage() {
         return
       }
 
-      const response = await fetch('/api/billing/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          package_id: selectedPackage.id,
-          billing_period,
-          payment_gateway_id: form.payment_method,
-          customer_info: {
-            first_name: form.first_name,
-            last_name: form.last_name,
-            email: form.email,
-            phone: form.phone,
-            address: form.address,
-            city: form.city,
-            state: form.state,
-            zip_code: form.zip_code,
-            country: form.country,
-            description: form.description
-          }
-        }),
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        addToast({
-          title: "Order submitted successfully!",
-          description: "Redirecting to order details...",
-          type: "success"
-        })
-        
-        // Redirect to order completed page
-        setTimeout(() => {
-          router.push(result.data.redirect_url)
-        }, 1500)
+      // Check if selected payment method is Midtrans
+      const selectedGateway = paymentGateways.find(gw => gw.id === form.payment_method)
+      
+      if (selectedGateway?.slug === 'midtrans') {
+        // Handle Midtrans credit card payment
+        await handleMidtransPayment(token)
       } else {
-        throw new Error(result.message || 'Checkout failed')
+        // Handle other payment methods (bank transfer, etc.)
+        await handleRegularCheckout(token)
       }
       
     } catch (error) {
@@ -306,6 +313,125 @@ export default function CheckoutPage() {
       })
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleMidtransPayment = async (token: string) => {
+    if (!snapLoaded || !window.snap) {
+      addToast({
+        title: "Payment system not ready",
+        description: "Please wait for the payment system to load and try again.",
+        type: "error"
+      })
+      return
+    }
+
+    const response = await fetch('/api/billing/midtrans/create-payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        package_id: selectedPackage!.id,
+        billing_period,
+        customer_info: {
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          zip_code: form.zip_code,
+          country: form.country,
+          description: form.description
+        }
+      }),
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      // Log activity
+      logBillingActivity(`Initiated Midtrans payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data.order_id})`)
+
+      // Open Midtrans Snap payment
+      window.snap.pay(result.data.snap_token, {
+        onSuccess: (result: any) => {
+          addToast({
+            title: "Payment successful!",
+            description: "Your subscription has been activated.",
+            type: "success"
+          })
+          router.push('/dashboard/settings/plans-billing?payment=success')
+        },
+        onPending: (result: any) => {
+          addToast({
+            title: "Payment pending",
+            description: "Your payment is being processed. You'll receive a notification once completed.",
+            type: "info"
+          })
+          router.push('/dashboard/settings/plans-billing?payment=pending')
+        },
+        onError: (result: any) => {
+          addToast({
+            title: "Payment failed",
+            description: "There was an error processing your payment. Please try again.",
+            type: "error"
+          })
+        },
+        onClose: () => {
+          // User closed the payment popup
+          setSubmitting(false)
+        }
+      })
+    } else {
+      throw new Error(result.error || 'Failed to create Midtrans payment')
+    }
+  }
+
+  const handleRegularCheckout = async (token: string) => {
+    const response = await fetch('/api/billing/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        package_id: selectedPackage!.id,
+        billing_period,
+        payment_gateway_id: form.payment_method,
+        customer_info: {
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          zip_code: form.zip_code,
+          country: form.country,
+          description: form.description
+        }
+      }),
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      addToast({
+        title: "Order submitted successfully!",
+        description: "Redirecting to order details...",
+        type: "success"
+      })
+      
+      // Redirect to order completed page
+      setTimeout(() => {
+        router.push(result.data.redirect_url)
+      }, 1500)
+    } else {
+      throw new Error(result.message || 'Checkout failed')
     }
   }
 
@@ -650,7 +776,13 @@ export default function CheckoutPage() {
                       Processing...
                     </>
                   ) : (
-                    'Complete Order'
+                    <>
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      {paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' 
+                        ? 'Pay with Credit Card'
+                        : 'Complete Order'
+                      }
+                    </>
                   )}
                 </Button>
 
