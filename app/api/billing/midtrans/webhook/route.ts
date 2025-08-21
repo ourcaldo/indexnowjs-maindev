@@ -163,7 +163,6 @@ async function processWebhookTransaction(transaction: any, body: any, supabaseAd
         if (packageError) {
           console.error('❌ Package not found:', packageError)
         } else if (packageData) {
-          // Calculate subscription period - get from metadata if column doesn't exist
           const billingPeriod = transaction.billing_period || 
                                 (transaction.metadata as any)?.billing_period || 
                                 'monthly'
@@ -171,25 +170,103 @@ async function processWebhookTransaction(transaction: any, body: any, supabaseAd
           
           const now = new Date()
           let expiresAt = new Date(now)
+          let nextBillingDate = new Date(now)
 
           switch (billingPeriod) {
             case 'weekly':
               expiresAt.setDate(now.getDate() + 7)
+              nextBillingDate.setDate(now.getDate() + 7)
               break
             case 'monthly':
               expiresAt.setMonth(now.getMonth() + 1)
+              nextBillingDate.setMonth(now.getMonth() + 1)
               break
             case 'quarterly':
               expiresAt.setMonth(now.getMonth() + 3)
+              nextBillingDate.setMonth(now.getMonth() + 3)
               break
             case 'annually':
               expiresAt.setFullYear(now.getFullYear() + 1)
+              nextBillingDate.setFullYear(now.getFullYear() + 1)
               break
           }
 
-          console.log('📊 Package details:', packageData.name, 'Expires:', expiresAt.toISOString())
+          // 1. Store Midtrans transaction record
+          const midtransTransactionData = {
+            transaction_id: body.transaction_id,
+            order_id: body.order_id,
+            user_id: transaction.user_id,
+            package_id: transaction.package_id,
+            amount: parseFloat(body.gross_amount),
+            currency: body.currency || 'IDR',
+            transaction_status: body.transaction_status,
+            payment_type: body.payment_type,
+            fraud_status: body.fraud_status,
+            bank: body.va_numbers?.[0]?.bank || body.bank,
+            va_number: body.va_numbers?.[0]?.va_number,
+            card_type: body.card_type,
+            masked_card: body.masked_card,
+            billing_period: billingPeriod,
+            settlement_time: body.settlement_time ? new Date(body.settlement_time) : null,
+            metadata: {
+              webhook_data: body,
+              original_metadata: transaction.metadata
+            }
+          }
 
-          // Update user profile with new package
+          const { data: midtransTransaction, error: midtransError } = await supabaseAdmin
+            .from('indb_payment_midtrans_transactions')
+            .insert(midtransTransactionData)
+            .select()
+            .single()
+
+          if (midtransError) {
+            console.error('❌ Failed to store Midtrans transaction:', midtransError)
+          } else {
+            console.log('✅ Midtrans transaction stored:', midtransTransaction.id)
+          }
+
+          // 2. Create recurring subscription record
+          const subscriptionId = `SUB-${body.order_id}-${Date.now()}`
+          const subscriptionData = {
+            subscription_id: subscriptionId,
+            user_id: transaction.user_id,
+            package_id: transaction.package_id,
+            transaction_id: midtransTransaction?.id,
+            status: 'active',
+            billing_period: billingPeriod,
+            amount: parseFloat(body.gross_amount),
+            currency: body.currency || 'IDR',
+            started_at: now,
+            next_billing_date: nextBillingDate,
+            expires_at: expiresAt,
+            card_token: body.saved_token_id, // For recurring payments
+            customer_details: {
+              first_name: (transaction.metadata as any)?.customer_info?.first_name,
+              last_name: (transaction.metadata as any)?.customer_info?.last_name,
+              email: (transaction.metadata as any)?.customer_info?.email,
+              phone: (transaction.metadata as any)?.customer_info?.phone
+            },
+            metadata: {
+              auto_renewal: true,
+              subscription_type: 'recurring',
+              midtrans_data: body
+            }
+          }
+
+          const { data: subscription, error: subscriptionError } = await supabaseAdmin
+            .from('indb_payment_midtrans_subscriptions')
+            .insert(subscriptionData)
+            .select()
+            .single()
+
+          if (subscriptionError) {
+            console.error('❌ Failed to create subscription:', subscriptionError)
+          } else {
+            console.log('✅ Recurring subscription created:', subscription.id)
+          }
+
+          // 3. Update user profile with new package
           const { error: profileError } = await supabaseAdmin
             .from('indb_auth_user_profiles')
             .update({
@@ -206,6 +283,7 @@ async function processWebhookTransaction(transaction: any, body: any, supabaseAd
             console.log('✅ Subscription activated successfully for user:', transaction.user_id)
             console.log(`📦 Package: ${packageData.name} (${billingPeriod})`)
             console.log(`⏰ Valid until: ${expiresAt.toISOString()}`)
+            console.log(`🔄 Next billing: ${nextBillingDate.toISOString()}`)
           }
         }
       } catch (error) {

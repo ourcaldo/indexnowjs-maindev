@@ -81,14 +81,15 @@ export async function POST(request: NextRequest) {
     // Create Midtrans service
     const midtransService = createMidtransService(gatewayData)
 
-    // Create Snap payment
+    // Create Snap payment with subscription setup
     const snapPayload = {
       transaction_details: {
         order_id: orderId,
         gross_amount: idrAmount
       },
       credit_card: {
-        secure: true
+        secure: true,
+        save_card: true // Enable card tokenization for recurring payments
       },
       customer_details: {
         first_name: customer_info.first_name,
@@ -114,15 +115,17 @@ export async function POST(request: NextRequest) {
         category: 'Subscription'
       }],
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'}/dashboard/settings/plans-billing?payment=success&order_id=${orderId}`,
-        error: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'}/dashboard/settings/plans-billing?payment=failed&order_id=${orderId}`,
-        pending: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'}/dashboard/settings/plans-billing?payment=pending&order_id=${orderId}`
+        finish: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=success&order_id=${orderId}`,
+        error: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=failed&order_id=${orderId}`,
+        pending: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=pending&order_id=${orderId}`
       },
       metadata: {
         user_id: user.id,
         package_id: package_id,
         billing_period: billing_period,
         usd_amount: usdAmount,
+        subscription_type: 'recurring',
+        auto_renewal: true,
         idr_amount: idrAmount
       }
     }

@@ -5,6 +5,7 @@
 
 import { dailyRankCheckJob } from './daily-rank-check-job'
 import { quotaMonitor } from './quota-monitor'
+import { recurringBillingJob } from './recurring-billing-job'
 
 // Simple console logger for development
 const logger = {
@@ -44,10 +45,13 @@ export class WorkerStartup {
       // 1. Start daily rank check job scheduler
       await this.initializeRankCheckScheduler()
 
-      // 2. Initialize quota monitoring
+      // 2. Start recurring billing job scheduler
+      await this.initializeRecurringBilling()
+
+      // 3. Initialize quota monitoring
       await this.initializeQuotaMonitoring()
 
-      // 3. Add any other background workers here
+      // 4. Add any other background workers here
       // await this.initializeNotificationWorker()
 
       this.isInitialized = true
@@ -104,6 +108,27 @@ export class WorkerStartup {
 
     } catch (error) {
       logger.error('Failed to initialize quota monitoring:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Initialize recurring billing job scheduler
+   */
+  private async initializeRecurringBilling(): Promise<void> {
+    try {
+      logger.info('Starting recurring billing job scheduler...')
+      
+      // Start the billing job scheduler
+      recurringBillingJob.start()
+      
+      // Get job status for confirmation
+      const status = recurringBillingJob.getStatus()
+      logger.info(`Recurring billing scheduler: ${status.isScheduled ? 'ACTIVE' : 'INACTIVE'}`)
+      logger.info(`Next scheduled run: ${status.description}`)
+      
+    } catch (error) {
+      logger.error('Failed to initialize recurring billing:', error)
       throw error
     }
   }
