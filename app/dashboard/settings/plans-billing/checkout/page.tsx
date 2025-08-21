@@ -144,6 +144,19 @@ export default function CheckoutPage() {
         throw new Error('Failed to get authentication token')
       }
 
+      // Wait for Midtrans SDK to be ready
+      let retryCount = 0
+      const maxRetries = 10
+      
+      while (!window.MidtransNew3ds || typeof window.MidtransNew3ds.getCardToken !== 'function') {
+        if (retryCount >= maxRetries) {
+          throw new Error('Midtrans SDK failed to load. Please refresh the page and try again.')
+        }
+        console.log(`⏳ Waiting for Midtrans SDK to initialize... (${retryCount + 1}/${maxRetries})`)
+        await new Promise(resolve => setTimeout(resolve, 500))
+        retryCount++
+      }
+
       // Get token from Midtrans first
       console.log('🔐 Getting card token from Midtrans...')
       const cardToken = await getMidtransCardToken(cardData)
@@ -165,7 +178,7 @@ export default function CheckoutPage() {
     }
   }
 
-  // Get card token from Midtrans SDK
+  // Get card token from Midtrans SDK with improved error handling
   const getMidtransCardToken = (cardData: any): Promise<string> => {
     return new Promise((resolve, reject) => {
       console.log('🔍 Checking Midtrans SDK availability...')
@@ -177,6 +190,12 @@ export default function CheckoutPage() {
         return
       }
 
+      if (typeof window.MidtransNew3ds.getCardToken !== 'function') {
+        console.error('❌ Midtrans getCardToken function not available!')
+        reject(new Error('Midtrans getCardToken function not available. Please refresh the page and try again.'))
+        return
+      }
+
       console.log('✅ Midtrans SDK available, tokenizing card...')
       console.log('Card data for tokenization:', {
         card_number: cardData.card_number.replace(/\s/g, '').substring(0, 6) + '****',
@@ -185,22 +204,27 @@ export default function CheckoutPage() {
         has_cvv: !!cardData.cvv
       })
 
-      window.MidtransNew3ds.getCardToken({
-        card_number: cardData.card_number.replace(/\s/g, ''),
-        card_exp_month: cardData.expiry_month.padStart(2, '0'),
-        card_exp_year: cardData.expiry_year,
-        card_cvv: cardData.cvv,
-      }, (response) => {
-        console.log('🔄 Midtrans tokenization response:', response)
-        
-        if (response.status_code === '200' && response.token_id) {
-          console.log('✅ Card tokenized successfully:', response.token_id.substring(0, 10) + '...')
-          resolve(response.token_id)
-        } else {
-          console.error('❌ Midtrans tokenization failed:', response)
-          reject(new Error(response.status_message || 'Card tokenization failed'))
-        }
-      })
+      try {
+        window.MidtransNew3ds.getCardToken({
+          card_number: cardData.card_number.replace(/\s/g, ''),
+          card_exp_month: cardData.expiry_month.padStart(2, '0'),
+          card_exp_year: cardData.expiry_year,
+          card_cvv: cardData.cvv,
+        }, (response) => {
+          console.log('🔄 Midtrans tokenization response:', response)
+          
+          if (response.status_code === '200' && response.token_id) {
+            console.log('✅ Card tokenized successfully:', response.token_id.substring(0, 10) + '...')
+            resolve(response.token_id)
+          } else {
+            console.error('❌ Midtrans tokenization failed:', response)
+            reject(new Error(response.status_message || 'Card tokenization failed'))
+          }
+        })
+      } catch (error) {
+        console.error('❌ Error calling Midtrans getCardToken:', error)
+        reject(new Error('Failed to process card information. Please try again.'))
+      }
     })
   }
 
@@ -308,11 +332,12 @@ export default function CheckoutPage() {
     }
   }, [package_id, router, addToast])
 
-  // Load Midtrans SDK with credentials from database
+  // Load Midtrans SDK with improved error handling and retry mechanism
   useEffect(() => {
     const loadMidtransSDK = async () => {
       // Check if script already exists
       if (document.querySelector('script[src*="midtrans"]')) {
+        console.log('✅ Midtrans SDK already loaded')
         return
       }
 
@@ -345,19 +370,29 @@ export default function CheckoutPage() {
 
         const { client_key, environment } = configData.data
 
-        // Create script element
+        // Create script element with improved loading
         const script = document.createElement('script')
         script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
         script.async = true
         script.setAttribute('data-environment', environment || 'sandbox')
         script.setAttribute('data-client-key', client_key)
+        script.setAttribute('id', 'midtrans-script')
         
         script.onload = () => {
           console.log('✅ Midtrans SDK loaded successfully with client key:', client_key.substring(0, 10) + '...')
+          
+          // Wait a bit for SDK to initialize
+          setTimeout(() => {
+            if (window.MidtransNew3ds && typeof window.MidtransNew3ds.getCardToken === 'function') {
+              console.log('✅ Midtrans getCardToken function available')
+            } else {
+              console.warn('⚠️ Midtrans getCardToken function not yet available')
+            }
+          }, 1000)
         }
         
-        script.onerror = () => {
-          console.error('❌ Failed to load Midtrans SDK')
+        script.onerror = (error) => {
+          console.error('❌ Failed to load Midtrans SDK:', error)
         }
 
         document.head.appendChild(script)
@@ -434,7 +469,7 @@ export default function CheckoutPage() {
       const selectedGateway = paymentGateways.find(gw => gw.id === form.payment_method)
       
       if (selectedGateway?.slug === 'midtrans') {
-        // Midtrans requires credit card form, handled separately
+        // Midtrans requires credit card form, handled separately - don't proceed with regular form submission
         addToast({
           title: "Credit card information required",
           description: "Please fill in your credit card details below to setup recurring payment.",
@@ -772,35 +807,48 @@ export default function CheckoutPage() {
                 <CardContent>
                   <RadioGroup value={form.payment_method} onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}>
                     {paymentGateways.map((gateway) => (
-                      <div key={gateway.id} className="flex items-start space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#1A1A1A] transition-colors">
-                        <RadioGroupItem value={gateway.id} id={gateway.id} />
-                        <div className="flex-1">
-                          <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
-                            {gateway.slug === 'bank_transfer' ? (
-                              <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
-                            ) : (
-                              <CreditCard className="h-5 w-5 text-[#6C757D] mr-3" />
-                            )}
-                            <div>
-                              <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
-                              <div className="text-sm text-[#6C757D]">{gateway.description}</div>
-                              {gateway.configuration?.bank_name && (
-                                <div className="text-sm text-[#1A1A1A] mt-2 p-2 bg-[#F7F9FC] rounded border">
-                                  <div className="font-semibold">Bank Details:</div>
-                                  <div className="text-xs space-y-1 mt-1">
-                                    <div><span className="font-medium">Bank:</span> {gateway.configuration.bank_name}</div>
-                                    <div><span className="font-medium">Account Name:</span> {gateway.configuration.account_name}</div>
-                                    <div><span className="font-medium">Account Number:</span> {gateway.configuration.account_number}</div>
-                                  </div>
-                                </div>
+                      <div key={gateway.id} className="space-y-4">
+                        <div className="flex items-start space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#1A1A1A] transition-colors">
+                          <RadioGroupItem value={gateway.id} id={gateway.id} />
+                          <div className="flex-1">
+                            <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
+                              {gateway.slug === 'bank_transfer' ? (
+                                <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
+                              ) : (
+                                <CreditCard className="h-5 w-5 text-[#6C757D] mr-3" />
                               )}
-                            </div>
-                          </Label>
+                              <div>
+                                <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
+                                <div className="text-sm text-[#6C757D]">{gateway.description}</div>
+                                {gateway.configuration?.bank_name && (
+                                  <div className="text-sm text-[#1A1A1A] mt-2 p-2 bg-[#F7F9FC] rounded border">
+                                    <div className="font-semibold">Bank Details:</div>
+                                    <div className="text-xs space-y-1 mt-1">
+                                      <div><span className="font-medium">Bank:</span> {gateway.configuration.bank_name}</div>
+                                      <div><span className="font-medium">Account Name:</span> {gateway.configuration.account_name}</div>
+                                      <div><span className="font-medium">Account Number:</span> {gateway.configuration.account_number}</div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </Label>
+                          </div>
+                          {gateway.is_default && (
+                            <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full mt-1">
+                              Recommended
+                            </span>
+                          )}
                         </div>
-                        {gateway.is_default && (
-                          <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full mt-1">
-                            Recommended
-                          </span>
+                        
+                        {/* Credit Card Form - Inside the payment method selection */}
+                        {form.payment_method === gateway.id && gateway.slug === 'midtrans' && (
+                          <div className="ml-8 mt-4">
+                            <MidtransCreditCardForm
+                              onSubmit={handleCreditCardSubmit}
+                              loading={submitting}
+                              disabled={submitting}
+                            />
+                          </div>
                         )}
                       </div>
                     ))}
@@ -810,16 +858,7 @@ export default function CheckoutPage() {
               
             </form>
             
-            {/* Midtrans Credit Card Form - OUTSIDE main form to prevent conflicts */}
-            {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' && (
-              <div className="mt-6">
-                <MidtransCreditCardForm
-                  onSubmit={handleCreditCardSubmit}
-                  loading={submitting}
-                  disabled={submitting}
-                />
-              </div>
-            )}
+            {/* Credit Card Form now moved inside payment method selection above */}
           </div>
 
           {/* Order Summary */}

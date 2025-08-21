@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { CreditCard, Lock } from 'lucide-react'
 
 interface CreditCardFormData {
@@ -134,15 +134,8 @@ export default function MidtransCreditCardForm({
   }
 
   return (
-    <Card className="border-[#E0E6ED]">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-[#1A1A1A]">
-          <CreditCard className="h-5 w-5 text-[#3D8BFF]" />
-          Credit Card Information
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
           {/* Card Number */}
           <div className="space-y-2">
             <Label htmlFor="card_number" className="text-[#1A1A1A] font-medium">
@@ -269,7 +262,6 @@ export default function MidtransCreditCardForm({
             {loading ? 'Processing...' : 'Continue Payment'}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+    </div>
   )
 }
