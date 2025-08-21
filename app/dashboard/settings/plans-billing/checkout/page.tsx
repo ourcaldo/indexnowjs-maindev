@@ -42,6 +42,7 @@ declare global {
         validation_messages?: string[];
       }) => void) => void;
     };
+    midtransSubmitCard?: () => Promise<boolean>;
   }
 }
 
@@ -204,14 +205,16 @@ export default function CheckoutPage() {
         throw new Error(result.message || 'Payment processing failed. Please try again.')
       }
       
-      setSubmitting(false)
     } catch (error) {
-      console.error('Payment error:', error)
+      console.error('💥 FRONTEND: Payment error:', error)
       addToast({
         title: "Payment failed",
         description: error instanceof Error ? error.message : "Please try again later.",
         type: "error"
       })
+    } finally {
+      // Always reset submitting state regardless of success or failure
+      console.log('🔄 FRONTEND: Resetting submitting state')
       setSubmitting(false)
     }
   }
@@ -219,23 +222,36 @@ export default function CheckoutPage() {
   // Get card token from Midtrans SDK with timeout
   const getMidtransCardToken = (cardData: any): Promise<string> => {
     return new Promise((resolve, reject) => {
+      console.log('🔐 FRONTEND: Starting Midtrans card tokenization...')
+      console.log('📝 FRONTEND: Card data preview:', {
+        card_number: cardData.card_number ? cardData.card_number.replace(/\d(?=\d{4})/g, 'X') : 'none',
+        expiry_month: cardData.expiry_month,
+        expiry_year: cardData.expiry_year,
+        has_cvv: !!cardData.cvv
+      })
+      
       // Add timeout to prevent hanging
       const timeout = setTimeout(() => {
+        console.error('⏰ FRONTEND: Card tokenization timeout (15 seconds)')
         reject(new Error('Card tokenization timeout. Please try again.'))
       }, 15000) // 15 second timeout
 
       if (!window.MidtransNew3ds) {
+        console.error('❌ FRONTEND: window.MidtransNew3ds not available')
         clearTimeout(timeout)
         reject(new Error('Payment system not ready. Please refresh the page.'))
         return
       }
 
       if (typeof window.MidtransNew3ds.getCardToken !== 'function') {
+        console.error('❌ FRONTEND: window.MidtransNew3ds.getCardToken is not a function')
         clearTimeout(timeout)
         reject(new Error('Payment system not ready. Please refresh the page.'))
         return
       }
 
+      console.log('✅ FRONTEND: Midtrans SDK available, calling getCardToken...')
+      
       try {
         window.MidtransNew3ds.getCardToken({
           card_number: cardData.card_number.replace(/\s/g, ''),
@@ -244,14 +260,23 @@ export default function CheckoutPage() {
           card_cvv: cardData.cvv,
         }, (response) => {
           clearTimeout(timeout)
+          console.log('🎯 FRONTEND: Midtrans getCardToken callback received:', {
+            status_code: response.status_code,
+            status_message: response.status_message,
+            has_token_id: !!response.token_id,
+            token_preview: response.token_id ? response.token_id.substring(0, 20) + '...' : 'none'
+          })
           
           if (response.status_code === '200' && response.token_id) {
+            console.log('✅ FRONTEND: Card tokenization successful')
             resolve(response.token_id)
           } else {
+            console.error('❌ FRONTEND: Card tokenization failed:', response.status_message)
             reject(new Error(response.status_message || 'Invalid card information. Please check your details and try again.'))
           }
         })
       } catch (error) {
+        console.error('💥 FRONTEND: Exception in getCardToken:', error)
         clearTimeout(timeout)
         reject(new Error('Payment processing failed. Please try again.'))
       }
@@ -984,13 +1009,37 @@ export default function CheckoutPage() {
                     onClick={async () => {
                       setSubmitting(true)
                       try {
+                        console.log('🚀 FRONTEND: Starting Midtrans payment process...')
+                        
+                        // Check if window.midtransSubmitCard exists
+                        if (!window.midtransSubmitCard) {
+                          console.error('❌ FRONTEND: window.midtransSubmitCard not available')
+                          addToast({
+                            title: "Payment system not ready",
+                            description: "Please wait a moment and try again.",
+                            type: "error"
+                          })
+                          setSubmitting(false)
+                          return
+                        }
+
+                        console.log('✅ FRONTEND: window.midtransSubmitCard available, calling it...')
                         // @ts-ignore - We expose this globally from the credit card form
                         const success = await window.midtransSubmitCard?.()
+                        console.log('📝 FRONTEND: midtransSubmitCard returned:', success)
+                        
                         if (!success) {
+                          console.log('❌ FRONTEND: Payment validation failed, resetting submitting state')
                           setSubmitting(false)
                         }
+                        // Note: If success is true, handleCreditCardSubmit will handle the submitting state
                       } catch (error) {
-                        console.error('Midtrans payment error:', error)
+                        console.error('❌ FRONTEND: Midtrans payment error:', error)
+                        addToast({
+                          title: "Payment failed",
+                          description: error instanceof Error ? error.message : "Please try again later.",
+                          type: "error"
+                        })
                         setSubmitting(false)
                       }
                     }}
@@ -1006,6 +1055,106 @@ export default function CheckoutPage() {
                       <>
                         <Building2 className="h-4 w-4 mr-2" />
                         Complete Payment
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {/* Submit Button for Bank Transfer (Non-Midtrans Payment Gateways) */}
+                {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && (
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      setSubmitting(true)
+                      try {
+                        console.log('🏦 FRONTEND: Starting bank transfer payment process...')
+                        
+                        const user = await authService.getCurrentUser()
+                        if (!user) {
+                          throw new Error('Authentication required')
+                        }
+
+                        const { data: { session } } = await supabaseBrowser.auth.getSession()
+                        const token = session?.access_token
+                        if (!token) {
+                          throw new Error('Failed to get authentication token')
+                        }
+
+                        // Call regular checkout API for bank transfer
+                        const response = await fetch('/api/billing/checkout', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({
+                            package_id: selectedPackage!.id,
+                            billing_period,
+                            customer_info: {
+                              first_name: form.first_name,
+                              last_name: form.last_name,
+                              email: form.email,
+                              phone: form.phone,
+                              address: form.address,
+                              city: form.city,
+                              state: form.state,
+                              zip_code: form.zip_code,
+                              country: form.country,
+                              description: form.description
+                            },
+                            payment_gateway_id: form.payment_method
+                          }),
+                        })
+                        
+                        const result = await response.json()
+
+                        if (result.success) {
+                          // Log activity
+                          logBillingActivity('payment_processing', `Setup bank transfer payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
+
+                          addToast({
+                            title: "Payment order created!",
+                            description: result.data?.redirect_url ? "Redirecting to payment instructions..." : "Your payment order has been created successfully.",
+                            type: "success"
+                          })
+                          
+                          // Redirect to payment instructions or order page
+                          setTimeout(() => {
+                            if (result.data?.redirect_url) {
+                              window.location.href = result.data.redirect_url
+                            } else {
+                              router.push('/dashboard/settings/plans-billing')
+                            }
+                          }, 1500)
+                        } else {
+                          throw new Error(result.message || 'Payment processing failed. Please try again.')
+                        }
+                        
+                      } catch (error) {
+                        console.error('💥 FRONTEND: Bank transfer payment error:', error)
+                        addToast({
+                          title: "Payment failed",
+                          description: error instanceof Error ? error.message : "Please try again later.",
+                          type: "error"
+                        })
+                      } finally {
+                        // Always reset submitting state regardless of success or failure
+                        console.log('🔄 FRONTEND: Resetting submitting state (bank transfer)')
+                        setSubmitting(false)
+                      }
+                    }}
+                    disabled={submitting || !form.payment_method}
+                    className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12 mt-6"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing Order...
+                      </>
+                    ) : (
+                      <>
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Complete Order
                       </>
                     )}
                   </Button>
