@@ -908,25 +908,27 @@ The infinite loading was caused by waiting for a callback parameter that never e
 
 ## Recent Changes
 
-**MIDTRANS JSONP TOKENIZATION FIX & INFINITE LOADING RESOLVED (August 21, 2025)**
-- ✅ **ROOT CAUSE IDENTIFIED**: Midtrans uses JSONP (JSON with Padding) callback mechanism, not standard JavaScript callbacks
-  - **Problem**: Code was waiting for a callback parameter that never executed 
-  - **Reality**: Midtrans responds with `MidtransNew3ds.callback({"status_code":"200","token_id":"48111111-1114-8a7994ac-0119-461a-ac23-65ebc5c87730"})`
-  - **Solution**: Temporarily override global `window.MidtransNew3ds.callback` to capture JSONP response
-- ✅ **TECHNICAL IMPLEMENTATION**: Proper JSONP callback handling with state management
-  - **Global Callback Override**: Store original callback → Override with custom handler → Capture token → Restore original
-  - **Timeout Management**: 15-second timeout with proper cleanup and callback restoration on errors
-  - **Type Safety**: Fixed TypeScript errors with proper type casting for global callback access
-  - **State Isolation**: Prevent multiple callback executions and handle concurrent tokenization attempts
-- ✅ **UI/UX IMPROVEMENTS**: Clean user experience without debug pollution
+**MIDTRANS 3DS AUTHENTICATION & PRICING FIX COMPLETED (August 21, 2025)**
+- ✅ **CRITICAL PRICING CALCULATION FIX**: Resolved incorrect pricing structure access causing $140,000 vs $45 issue
+  - **Root Cause**: Code incorrectly accessed pricing tiers as `pricingTiers.regular?.[billing_period]` instead of nested currency structure
+  - **Fix Applied**: Updated to properly access `pricingTiers[billing_period].USD.promo_price` or `regular_price`
+  - **Result**: Pro quarterly plan now correctly uses $45 USD (→ ~736K IDR) instead of $140,000
+  - **Midtrans Compliance**: Amount now within Midtrans 999,999,999.00 IDR limit
+- ✅ **3DS AUTHENTICATION IMPLEMENTATION**: Complete Three Domain Secure (3DS) authentication flow
+  - **Backend 3DS Detection**: API detects redirect_url in charge response and returns `requires_3ds: true` to frontend
+  - **Frontend 3DS Handler**: Implemented `handle3DSAuthentication()` using `MidtransNew3ds.authenticate()` with modal display
+  - **3DS Modal Interface**: Professional iframe modal for 3DS authentication with proper user experience
+  - **Callback API**: Created `/api/billing/midtrans-3ds-callback` to handle post-authentication verification
+  - **Success Flow**: onSuccess → callback API → subscription creation → user profile update → redirect
+- ✅ **ENHANCED MIDTRANS INTEGRATION**: Complete Core API implementation with proper 3DS support
+  - **Core API Configuration**: Added `callback_type: 'js_event'` for JavaScript-based 3DS callbacks
+  - **Transaction Status Check**: Post-3DS verification using `getTransactionStatus()` to confirm payment success
+  - **Error Handling**: Comprehensive error handling for 3DS failure, timeout, and pending states
+  - **TypeScript Declarations**: Extended window.MidtransNew3ds interface with authenticate() method
+- ✅ **JSONP TOKENIZATION SYSTEM**: Maintained existing JSONP callback mechanism for card tokenization
+  - **Global Callback Override**: Temporary override of `window.MidtransNew3ds.callback` to capture token responses
+  - **State Management**: Proper callback restoration and timeout handling to prevent conflicts
   - **Browser Console Cleanup**: Removed all frontend debug logs - debugging moved to server-side only
-  - **Loading State Fix**: Payment button properly resets after completion or timeout errors
-  - **Error Handling**: User-friendly error messages without exposing technical details
-- ✅ **CURRENCY CONVERSION FIX**: Proper USD to IDR conversion for Midtrans payments
-  - **Live Exchange Rates**: Integration with exchange rate API for accurate USD to IDR conversion
-  - **Fallback Rate**: ~15,800 IDR per USD fallback when API unavailable
-  - **Example Conversion**: $49 USD → ~Rp 775,000 IDR using live rates
-  - **Integer Amounts**: Proper rounding to avoid decimal currency issues with Midtrans
 
 **PREVIOUS: MIDTRANS PAYMENT INFINITE LOADING ISSUE RESOLVED (August 21, 2025)**
 - ✅ **CRITICAL PAYMENT LOADING ISSUE FIXED**: Resolved infinite loading state in Midtrans recurring payment checkout process

@@ -214,10 +214,24 @@ export async function POST(request: NextRequest) {
       status_message: chargeTransaction.status_message,
       has_saved_token: !!chargeTransaction.saved_token_id,
       saved_token_preview: chargeTransaction.saved_token_id ? chargeTransaction.saved_token_id.substring(0, 20) + '...' : 'none',
-      masked_card: chargeTransaction.masked_card
+      masked_card: chargeTransaction.masked_card,
+      has_redirect_url: !!(chargeTransaction as any).redirect_url
     })
 
-    // Check if charge was successful
+    // Check if 3DS authentication is required
+    if ((chargeTransaction as any).redirect_url) {
+      console.log('🔐 3DS Authentication required, returning redirect URL to frontend')
+      return NextResponse.json({
+        success: true,
+        requires_3ds: true,
+        redirect_url: (chargeTransaction as any).redirect_url,
+        order_id: chargeTransaction.order_id,
+        transaction_id: chargeTransaction.transaction_id,
+        message: '3DS authentication required'
+      })
+    }
+
+    // Check if charge was successful (for non-3DS transactions)
     if (chargeTransaction.transaction_status !== 'capture' && chargeTransaction.transaction_status !== 'settlement') {
       throw new Error(`Charge transaction failed: ${chargeTransaction.status_message}`)
     }

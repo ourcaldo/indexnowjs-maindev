@@ -41,6 +41,13 @@ declare global {
         token_id?: string;
         validation_messages?: string[];
       }) => void) => void;
+      authenticate: (redirectUrl: string, options: {
+        performAuthentication: (url: string) => void;
+        onSuccess: (response: any) => void;
+        onFailure: (response: any) => void;
+        onPending: (response: any) => void;
+      }) => void;
+      callback?: (response: any) => void;
     };
     midtransSubmitCard?: () => Promise<boolean>;
   }
@@ -102,6 +109,8 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [userCurrency, setUserCurrency] = useState<'USD' | 'IDR'>('USD')
   const [showCreditCardForm, setShowCreditCardForm] = useState(false)
+  const [show3DSModal, setShow3DSModal] = useState(false)
+  const [threeDSUrl, setThreeDSUrl] = useState('')
   
   // Log page view and checkout activities
   usePageViewLogger('/dashboard/settings/plans-billing/checkout', 'Checkout', { section: 'billing_checkout' })
@@ -184,22 +193,24 @@ export default function CheckoutPage() {
       const result = await response.json()
 
       if (result.success) {
-        // Log activity
-        logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
+        // Check if 3DS authentication is required
+        if (result.requires_3ds && result.redirect_url) {
+          handle3DSAuthentication(result.redirect_url, result.transaction_id, result.order_id)
+          return // Don't reset submitting state yet - 3DS is in progress
+        }
+        
+        // Log activity for successful non-3DS payments
+        logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.order_id || 'unknown'})`)
 
         addToast({
           title: "Payment successful!",
-          description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
+          description: "Your subscription has been activated successfully.",
           type: "success"
         })
         
-        // Redirect to payment page or success page
+        // Redirect to success page
         setTimeout(() => {
-          if (result.data?.redirect_url) {
-            window.location.href = result.data.redirect_url
-          } else {
-            router.push('/dashboard/settings/plans-billing')
-          }
+          router.push('/dashboard/settings/plans-billing?success=true')
         }, 1500)
       } else {
         throw new Error(result.message || 'Payment processing failed. Please try again.')
@@ -281,6 +292,96 @@ export default function CheckoutPage() {
         }
       }
     })
+  }
+
+  // Handle 3DS authentication
+  const handle3DSAuthentication = (redirectUrl: string, transactionId: string, orderId: string) => {
+    console.log('🔐 Starting 3DS authentication process')
+    
+    if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
+      throw new Error('3DS authentication not available. Please refresh the page and try again.')
+    }
+
+    const options = {
+      performAuthentication: (url: string) => {
+        // Open 3DS page in modal/iframe
+        console.log('🔐 Opening 3DS authentication page')
+        setThreeDSUrl(url)
+        setShow3DSModal(true)
+      },
+      onSuccess: async (response: any) => {
+        console.log('✅ 3DS Authentication successful:', response)
+        setShow3DSModal(false)
+        
+        // Call our callback API to complete the payment process
+        try {
+          const user = await authService.getCurrentUser()
+          const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
+          
+          const callbackResponse = await fetch('/api/billing/midtrans-3ds-callback', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              transaction_id: transactionId,
+              order_id: orderId
+            }),
+          })
+          
+          const callbackResult = await callbackResponse.json()
+          
+          if (callbackResult.success) {
+            addToast({
+              title: "Payment successful!",
+              description: "Your subscription has been activated successfully.",
+              type: "success"
+            })
+            
+            await logBillingActivity('subscription_created', `Subscription created for ${selectedPackage?.name} (${billing_period}) via 3DS authentication - Transaction: ${transactionId}`)
+            
+            router.push('/dashboard/settings/plans-billing?success=true')
+          } else {
+            throw new Error(callbackResult.message || '3DS authentication callback failed')
+          }
+        } catch (error) {
+          console.error('3DS callback error:', error)
+          addToast({
+            title: "Payment processing failed",
+            description: error instanceof Error ? error.message : "Please contact support.",
+            type: "error"
+          })
+        } finally {
+          setSubmitting(false)
+        }
+      },
+      onFailure: (response: any) => {
+        console.log('❌ 3DS Authentication failed:', response)
+        setShow3DSModal(false)
+        setSubmitting(false)
+        
+        addToast({
+          title: "Payment authentication failed",
+          description: "Please verify your card details and try again.",
+          type: "error"
+        })
+      },
+      onPending: (response: any) => {
+        console.log('⏳ 3DS Authentication pending:', response)
+        setShow3DSModal(false)
+        setSubmitting(false)
+        
+        addToast({
+          title: "Payment pending",
+          description: "Your payment is being processed. You will receive a confirmation email shortly.",
+          type: "info"
+        })
+      }
+    }
+
+    // Trigger 3DS authentication
+    window.MidtransNew3ds.authenticate(redirectUrl, options)
   }
 
   // Fetch package and payment gateway data
@@ -1164,6 +1265,26 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* 3DS Authentication Modal */}
+      {show3DSModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-[#1A1A1A]">Card Authentication</h3>
+              <p className="text-sm text-[#6C757D]">Please complete the authentication process to continue.</p>
+            </div>
+            <div className="relative">
+              <iframe
+                src={threeDSUrl}
+                className="w-full h-[70vh]"
+                frameBorder="0"
+                title="3DS Authentication"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

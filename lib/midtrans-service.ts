@@ -213,6 +213,7 @@ export class MidtransService {
         token_id: orderData.token_id, // Use token from frontend MidtransNew3ds.callback
         save_token_id: true, // CRITICAL: Save card token for subscription
         authentication: true, // Enable 3DS
+        callback_type: 'js_event' // Use JavaScript callback for 3DS
       },
       item_details: [
         {
