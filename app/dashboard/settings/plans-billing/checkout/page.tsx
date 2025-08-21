@@ -122,6 +122,15 @@ export default function CheckoutPage() {
 
   // Handle credit card form submission for Midtrans
   const handleCreditCardSubmit = async (cardData: any) => {
+    console.log('🚀 Credit card form submitted!')
+    console.log('Card data received:', {
+      has_card_number: !!cardData.card_number,
+      has_expiry_month: !!cardData.expiry_month,
+      has_expiry_year: !!cardData.expiry_year,
+      has_cvv: !!cardData.cvv,
+      has_cardholder_name: !!cardData.cardholder_name
+    })
+    
     setSubmitting(true)
     try {
       const user = await authService.getCurrentUser()
@@ -146,7 +155,7 @@ export default function CheckoutPage() {
       console.log('✅ Card token received, processing payment...')
       await handleMidtransRecurringPayment(cardToken, token)
     } catch (error) {
-      console.error('Credit card payment error:', error)
+      console.error('❌ Credit card payment error:', error)
       addToast({
         title: "Payment failed",
         description: error instanceof Error ? error.message : "Please try again later.",
@@ -159,10 +168,22 @@ export default function CheckoutPage() {
   // Get card token from Midtrans SDK
   const getMidtransCardToken = (cardData: any): Promise<string> => {
     return new Promise((resolve, reject) => {
+      console.log('🔍 Checking Midtrans SDK availability...')
+      console.log('window.MidtransNew3ds:', typeof window.MidtransNew3ds)
+      
       if (!window.MidtransNew3ds) {
-        reject(new Error('Midtrans SDK not loaded'))
+        console.error('❌ Midtrans SDK not loaded!')
+        reject(new Error('Midtrans SDK not loaded. Please refresh the page and try again.'))
         return
       }
+
+      console.log('✅ Midtrans SDK available, tokenizing card...')
+      console.log('Card data for tokenization:', {
+        card_number: cardData.card_number.replace(/\s/g, '').substring(0, 6) + '****',
+        card_exp_month: cardData.expiry_month,
+        card_exp_year: cardData.expiry_year,
+        has_cvv: !!cardData.cvv
+      })
 
       window.MidtransNew3ds.getCardToken({
         card_number: cardData.card_number.replace(/\s/g, ''),
@@ -170,10 +191,13 @@ export default function CheckoutPage() {
         card_exp_year: cardData.expiry_year,
         card_cvv: cardData.cvv,
       }, (response) => {
+        console.log('🔄 Midtrans tokenization response:', response)
+        
         if (response.status_code === '200' && response.token_id) {
+          console.log('✅ Card tokenized successfully:', response.token_id.substring(0, 10) + '...')
           resolve(response.token_id)
         } else {
-          console.error('Midtrans tokenization failed:', response)
+          console.error('❌ Midtrans tokenization failed:', response)
           reject(new Error(response.status_message || 'Card tokenization failed'))
         }
       })
