@@ -122,14 +122,6 @@ export default function CheckoutPage() {
 
   // Handle credit card form submission for Midtrans
   const handleCreditCardSubmit = async (cardData: any) => {
-    console.log('🚀 Credit card form submitted!')
-    console.log('Card data received:', {
-      has_card_number: !!cardData.card_number,
-      has_expiry_month: !!cardData.expiry_month,
-      has_expiry_year: !!cardData.expiry_year,
-      has_cvv: !!cardData.cvv,
-      has_cardholder_name: !!cardData.cardholder_name
-    })
     
     setSubmitting(true)
     try {
@@ -152,23 +144,20 @@ export default function CheckoutPage() {
         if (retryCount >= maxRetries) {
           throw new Error('Midtrans SDK failed to load. Please refresh the page and try again.')
         }
-        console.log(`⏳ Waiting for Midtrans SDK to initialize... (${retryCount + 1}/${maxRetries})`)
+        // Waiting for Midtrans SDK to initialize
         await new Promise(resolve => setTimeout(resolve, 500))
         retryCount++
       }
 
       // Get token from Midtrans first
-      console.log('🔐 Getting card token from Midtrans...')
       const cardToken = await getMidtransCardToken(cardData)
       
       if (!cardToken) {
         throw new Error('Failed to tokenize card')
       }
 
-      console.log('✅ Card token received, processing payment...')
       await handleMidtransRecurringPayment(cardToken, token)
     } catch (error) {
-      console.error('❌ Credit card payment error:', error)
       addToast({
         title: "Payment failed",
         description: error instanceof Error ? error.message : "Please try again later.",
@@ -181,28 +170,15 @@ export default function CheckoutPage() {
   // Get card token from Midtrans SDK with improved error handling
   const getMidtransCardToken = (cardData: any): Promise<string> => {
     return new Promise((resolve, reject) => {
-      console.log('🔍 Checking Midtrans SDK availability...')
-      console.log('window.MidtransNew3ds:', typeof window.MidtransNew3ds)
-      
       if (!window.MidtransNew3ds) {
-        console.error('❌ Midtrans SDK not loaded!')
         reject(new Error('Midtrans SDK not loaded. Please refresh the page and try again.'))
         return
       }
 
       if (typeof window.MidtransNew3ds.getCardToken !== 'function') {
-        console.error('❌ Midtrans getCardToken function not available!')
         reject(new Error('Midtrans getCardToken function not available. Please refresh the page and try again.'))
         return
       }
-
-      console.log('✅ Midtrans SDK available, tokenizing card...')
-      console.log('Card data for tokenization:', {
-        card_number: cardData.card_number.replace(/\s/g, '').substring(0, 6) + '****',
-        card_exp_month: cardData.expiry_month,
-        card_exp_year: cardData.expiry_year,
-        has_cvv: !!cardData.cvv
-      })
 
       try {
         window.MidtransNew3ds.getCardToken({
@@ -211,18 +187,13 @@ export default function CheckoutPage() {
           card_exp_year: cardData.expiry_year,
           card_cvv: cardData.cvv,
         }, (response) => {
-          console.log('🔄 Midtrans tokenization response:', response)
-          
           if (response.status_code === '200' && response.token_id) {
-            console.log('✅ Card tokenized successfully:', response.token_id.substring(0, 10) + '...')
             resolve(response.token_id)
           } else {
-            console.error('❌ Midtrans tokenization failed:', response)
             reject(new Error(response.status_message || 'Card tokenization failed'))
           }
         })
       } catch (error) {
-        console.error('❌ Error calling Midtrans getCardToken:', error)
         reject(new Error('Failed to process card information. Please try again.'))
       }
     })
@@ -358,13 +329,11 @@ export default function CheckoutPage() {
         })
 
         if (!response.ok) {
-          console.error('❌ Failed to fetch Midtrans config')
           return
         }
 
         const configData = await response.json()
         if (!configData.success) {
-          console.error('❌ Midtrans config not available:', configData.message)
           return
         }
 
@@ -379,25 +348,16 @@ export default function CheckoutPage() {
         script.setAttribute('id', 'midtrans-script')
         
         script.onload = () => {
-          console.log('✅ Midtrans SDK loaded successfully with client key:', client_key.substring(0, 10) + '...')
-          
-          // Wait a bit for SDK to initialize
-          setTimeout(() => {
-            if (window.MidtransNew3ds && typeof window.MidtransNew3ds.getCardToken === 'function') {
-              console.log('✅ Midtrans getCardToken function available')
-            } else {
-              console.warn('⚠️ Midtrans getCardToken function not yet available')
-            }
-          }, 1000)
+          // Midtrans SDK loaded successfully - no browser console logs
         }
         
         script.onerror = (error) => {
-          console.error('❌ Failed to load Midtrans SDK:', error)
+          // Failed to load Midtrans SDK - error handled silently
         }
 
         document.head.appendChild(script)
       } catch (error) {
-        console.error('❌ Error loading Midtrans SDK:', error)
+        // Error loading Midtrans SDK - handled silently
       }
     }
 
@@ -483,7 +443,6 @@ export default function CheckoutPage() {
       }
       
     } catch (error) {
-      console.error('Checkout error:', error)
       addToast({
         title: "Checkout failed",
         description: error instanceof Error ? error.message : "Please try again later.",
@@ -495,7 +454,7 @@ export default function CheckoutPage() {
   }
 
   const handleMidtransRecurringPayment = async (cardData: any, token: string) => {
-    const response = await fetch('/api/billing/midtrans-recurring', {
+    const response = await fetch('/api/billing/checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -504,6 +463,7 @@ export default function CheckoutPage() {
       body: JSON.stringify({
         package_id: selectedPackage!.id,
         billing_period,
+        payment_gateway_id: form.payment_method,
         customer_info: {
           first_name: form.first_name,
           last_name: form.last_name,
@@ -516,7 +476,8 @@ export default function CheckoutPage() {
           country: form.country,
           description: form.description
         },
-        token_id: cardData
+        credit_card_token: cardData,
+        create_subscription: true // Flag to create subscription after payment
       }),
     })
 
@@ -524,21 +485,27 @@ export default function CheckoutPage() {
 
     if (result.success) {
       // Log activity
-      logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data.order_id})`)
+      logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
 
       addToast({
-        title: "Recurring payment setup successful!",
-        description: `Your ${billing_period} subscription has been activated. Card ending in ${result.data.masked_card?.slice(-4) || 'xxxx'} will be charged automatically.`,
+        title: "Payment successful!",
+        description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
         type: "success"
       })
       
-      // Redirect to order details
+      // Redirect to payment page or success page
       setTimeout(() => {
-        router.push(result.data.redirect_url)
+        if (result.data?.redirect_url) {
+          window.location.href = result.data.redirect_url
+        } else {
+          router.push('/dashboard/settings/plans-billing')
+        }
       }, 1500)
     } else {
-      throw new Error(result.message || 'Failed to setup recurring payment')
+      throw new Error(result.message || 'Failed to process payment')
     }
+    
+    setSubmitting(false)
   }
 
   const handleRegularCheckout = async (token: string) => {

@@ -157,7 +157,7 @@ export default function MidtransCreditCardForm({
       await onSubmit(cardData)
       return true
     } catch (error) {
-      console.error('Credit card submission error:', error)
+      // Credit card submission error handled by parent component
       return false
     }
   }

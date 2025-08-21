@@ -1,0 +1,240 @@
+# Next.js SaaS + Midtrans Recurring Card (Subscription API) Integration
+
+This document explains how to integrate **Midtrans Recurring Card Payment (Subscription API)** into your Next.js SaaS. It includes setup, database schema, first payment + tokenization, subscription creation, webhook handling, and lifecycle management.
+
+---
+
+## Environment Setup
+
+Create `.env.local`:
+
+    MIDTRANS_BASE_URL=https://api.sandbox.midtrans.com
+    MIDTRANS_SERVER_KEY=SB-Mid-server-xxxxxxxx
+    APP_URL=https://your-saas.example
+    WEBHOOK_SHARED_SECRET=super-long-secret
+
+Notes:
+- Switch `MIDTRANS_BASE_URL` to `https://api.midtrans.com` in production.
+- Midtrans requires Basic Auth → `Authorization: Basic Base64(<SERVER_KEY>:)` (include trailing colon).
+
+---
+
+## Database Schema
+
+    CREATE TABLE payment_methods (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id uuid NOT NULL,
+      provider text NOT NULL DEFAULT 'midtrans',
+      type text NOT NULL DEFAULT 'credit_card',
+      saved_token_id text NOT NULL,
+      saved_token_expiry timestamptz,
+      masked_card text,
+      bank text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+
+    CREATE TABLE subscriptions (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id uuid NOT NULL,
+      midtrans_subscription_id text UNIQUE,
+      plan_code text NOT NULL,
+      amount bigint NOT NULL,
+      interval_unit text NOT NULL,
+      interval integer NOT NULL,
+      status text NOT NULL DEFAULT 'inactive',
+      next_execution_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+
+    CREATE TABLE subscription_charges (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      subscription_id uuid NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
+      midtrans_transaction_id text,
+      order_id text,
+      amount bigint NOT NULL,
+      currency text NOT NULL DEFAULT 'IDR',
+      status text NOT NULL,
+      raw jsonb,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+
+---
+
+## Midtrans Utility Library
+
+    // lib/midtrans.ts
+    export function midtransAuthHeader(): string {
+      const key = process.env.MIDTRANS_SERVER_KEY!;
+      const base = Buffer.from(`${key}:`).toString("base64");
+      return `Basic ${base}`;
+    }
+
+    export async function midtransFetch(endpoint: string, options: RequestInit = {}) {
+      const base = process.env.MIDTRANS_BASE_URL!;
+      const url = `${base}${endpoint}`;
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: midtransAuthHeader(),
+        ...options.headers,
+      };
+      const res = await fetch(url, { ...options, headers });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    export async function getTransactionStatus(orderId: string) {
+      return midtransFetch(`/v2/${encodeURIComponent(orderId)}/status`, { method: "GET" });
+    }
+
+    export async function createSubscription(payload: any) {
+      return midtransFetch(`/v1/subscriptions`, {
+        method: "POST",
+        body: JSON.stringify({ currency: "IDR", payment_type: "credit_card", ...payload }),
+      });
+    }
+
+    export async function getSubscription(id: string) {
+      return midtransFetch(`/v1/subscriptions/${id}`, { method: "GET" });
+    }
+
+    export async function enableSubscription(id: string) {
+      return midtransFetch(`/v1/subscriptions/${id}/enable`, { method: "POST" });
+    }
+
+    export async function disableSubscription(id: string) {
+      return midtransFetch(`/v1/subscriptions/${id}/disable`, { method: "POST" });
+    }
+
+    export async function cancelSubscription(id: string) {
+      return midtransFetch(`/v1/subscriptions/${id}/cancel`, { method: "POST" });
+    }
+
+    export async function updateSubscription(id: string, patch: any) {
+      return midtransFetch(`/v1/subscriptions/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+    }
+
+---
+
+## First Payment + Tokenization
+
+You must first charge the customer and get their `saved_token_id`.
+
+Example Next.js route to fetch transaction status:
+
+    // app/api/midtrans/status/[orderId]/route.ts
+    import { getTransactionStatus } from "@/lib/midtrans";
+
+    export async function GET(req: Request, { params }: { params: { orderId: string } }) {
+      const data = await getTransactionStatus(params.orderId);
+      // Save saved_token_id and card info to DB
+      return Response.json(data);
+    }
+
+---
+
+## Create Subscription
+
+    // app/api/subscriptions/create/route.ts
+    import { createSubscription } from "@/lib/midtrans";
+
+    export async function POST(req: Request) {
+      const body = await req.json();
+      const { userId, savedTokenId, plan } = body;
+
+      const payload = {
+        name: plan.name,
+        amount: String(plan.amount),
+        token: savedTokenId,
+        schedule: { interval: plan.interval, interval_unit: plan.interval_unit },
+        metadata: { userId, planCode: plan.code },
+      };
+
+      const sub = await createSubscription(payload);
+      // Save sub.id, sub.status, etc. to DB
+      return Response.json({ subscription: sub });
+    }
+
+---
+
+## Webhook Handling
+
+    // app/api/midtrans/webhook/route.ts
+    import { getTransactionStatus, getSubscription } from "@/lib/midtrans";
+
+    export async function POST(req: Request) {
+      const secret = req.headers.get("x-webhook-secret");
+      if (process.env.WEBHOOK_SHARED_SECRET && secret !== process.env.WEBHOOK_SHARED_SECRET) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+
+      const payload = await req.json();
+      const { order_id, subscription_id } = payload || {};
+
+      if (order_id) {
+        const tx = await getTransactionStatus(order_id);
+        // Save tx status to DB
+        return Response.json({ type: "payment", tx });
+      }
+
+      if (subscription_id) {
+        const sub = await getSubscription(subscription_id);
+        // Update subscription status in DB
+        return Response.json({ type: "subscription", sub });
+      }
+
+      return Response.json({ ok: true });
+    }
+
+---
+
+## Lifecycle Management
+
+Example endpoints:
+
+Enable:
+
+    // app/api/subscriptions/[id]/enable/route.ts
+    import { enableSubscription } from "@/lib/midtrans";
+    export async function POST(_req: Request, { params }: { params: { id: string } }) {
+      const res = await enableSubscription(params.id);
+      return Response.json(res);
+    }
+
+Disable:
+
+    // app/api/subscriptions/[id]/disable/route.ts
+    import { disableSubscription } from "@/lib/midtrans";
+    export async function POST(_req: Request, { params }: { params: { id: string } }) {
+      const res = await disableSubscription(params.id);
+      return Response.json(res);
+    }
+
+Cancel:
+
+    // app/api/subscriptions/[id]/cancel/route.ts
+    import { cancelSubscription } from "@/lib/midtrans";
+    export async function POST(_req: Request, { params }: { params: { id: string } }) {
+      const res = await cancelSubscription(params.id);
+      return Response.json(res);
+    }
+
+Update:
+
+    // app/api/subscriptions/[id]/update/route.ts
+    import { updateSubscription } from "@/lib/midtrans";
+    export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+      const patch = await req.json();
+      const res = await updateSubscription(params.id, patch);
+      return Response.json(res);
+    }
+
+---
+
+## Notes
+
+- Always **verify webhook events** with Midtrans API before trusting them.
+- Use **idempotent writes** when saving transactions (unique constraint on `midtrans_transaction_id`).
+- `amount` must be **integer string** (no decimals).
+- Retry logic is handled by Midtrans, but you should log and handle failures gracefully.
+
+---
