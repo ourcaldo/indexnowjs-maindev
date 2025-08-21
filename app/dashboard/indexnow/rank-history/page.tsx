@@ -319,19 +319,10 @@ export default function RankHistoryPage() {
             </Card>
           ) : (
             <>
-              {/* Header with Add Keyword Button */}
-              <div className="flex items-center justify-end mb-4">
-                <Button 
-                  onClick={() => window.location.href = '/dashboard/indexnow/add'}
-                  style={{ backgroundColor: '#22333b', color: '#FFFFFF' }}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Keyword
-                </Button>
-              </div>
-
-              {/* Selected Domain Card - Shows active domain */}
-              <div className="inline-block">
+              {/* Domain Section and Add Keyword Button - Same Row */}
+              <div className="flex items-center justify-between mb-6">
+                {/* Selected Domain Card - Shows active domain */}
+                <div className="inline-block">
                 <div 
                   className="bg-white rounded-lg border cursor-pointer px-3 py-2 shadow-sm hover:shadow-md transition-shadow min-w-[280px] max-w-[320px]"
                   style={{borderColor: '#E0E6ED'}}
@@ -402,6 +393,16 @@ export default function RankHistoryPage() {
                     </div>
                   )}
                 </div>
+                </div>
+
+                {/* Add Keyword Button */}
+                <Button 
+                  onClick={() => window.location.href = '/dashboard/indexnow/add'}
+                  style={{ backgroundColor: '#22333b', color: '#FFFFFF' }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Keyword
+                </Button>
               </div>
 
               {/* Compact Filters Section - One Line */}
