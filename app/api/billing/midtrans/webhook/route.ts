@@ -105,8 +105,10 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (packageData) {
-          // Calculate subscription period
-          const billingPeriod = transaction.billing_period || 'monthly'
+          // Calculate subscription period - get from metadata if column doesn't exist
+          const billingPeriod = transaction.billing_period || 
+                                (transaction.metadata as any)?.billing_period || 
+                                'monthly'
           const now = new Date()
           let expiresAt = new Date(now)
 

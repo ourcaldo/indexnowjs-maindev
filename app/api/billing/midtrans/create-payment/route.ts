@@ -160,7 +160,6 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         package_id: package_id,
         gateway_id: gatewayData.id,
-        order_id: orderId,
         transaction_type: 'subscription',
         transaction_status: 'pending',
         amount: usdAmount,
@@ -168,19 +167,20 @@ export async function POST(request: NextRequest) {
         payment_method: 'credit_card',
         payment_reference: orderId,
         gateway_transaction_id: snapData.token,
-        billing_period: billing_period,
-        customer_data: customer_info,
+        billing_period: billing_period, // Store billing period if column exists
         gateway_response: {
           snap_token: snapData.token,
           snap_redirect_url: snapData.redirect_url,
-          idr_amount: idrAmount
+          idr_amount: idrAmount,
+          order_id: orderId
         },
         metadata: {
           midtrans_order_id: orderId,
           snap_token: snapData.token,
-          billing_period: billing_period,
+          billing_period: billing_period, // Always store in metadata as backup
           usd_amount: usdAmount,
-          idr_amount: idrAmount
+          idr_amount: idrAmount,
+          customer_info: customer_info
         }
       })
       .select()
