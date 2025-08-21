@@ -1,10 +1,11 @@
 /**
- * Midtrans API Service
+ * Midtrans API Service using Official midtrans-client package
  * Handles Midtrans Core API and Subscription API integration for recurring payments
- * Based on Midtrans Core API and Subscription API documentation
+ * Based on official Midtrans Node.js Client and Core API documentation
  */
 
 import { convertUsdToIdr } from './currency-converter';
+const midtransClient = require('midtrans-client');
 
 interface MidtransConfig {
   merchant_id: string;
@@ -111,61 +112,30 @@ interface MidtransCoreChargeResponse {
 
 export class MidtransService {
   private config: MidtransConfig;
-  private baseUrl: string;
+  private coreApi: any;
+  private subscriptionApi: any;
 
   constructor(config: MidtransConfig) {
     this.config = config;
-    this.baseUrl = config.environment === 'production' 
-      ? 'https://api.midtrans.com' 
-      : 'https://api.sandbox.midtrans.com';
-  }
-
-  /**
-   * Generate Basic Auth header for Midtrans API
-   * Format: Basic base64(server_key:)
-   */
-  private getAuthHeader(): string {
-    const credentials = `${this.config.server_key}:`;
-    const encoded = Buffer.from(credentials).toString('base64');
-    return `Basic ${encoded}`;
-  }
-
-  /**
-   * Make API request to Midtrans
-   */
-  private async makeRequest<T>(
-    endpoint: string, 
-    method: 'GET' | 'POST' | 'PATCH' = 'GET',
-    body?: any
-  ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
     
-    const options: RequestInit = {
-      method,
-      headers: {
-        'Authorization': this.getAuthHeader(),
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    };
+    // Initialize official Midtrans Core API client
+    this.coreApi = new midtransClient.CoreApi({
+      isProduction: config.environment === 'production',
+      serverKey: config.server_key,
+      clientKey: config.client_key
+    });
 
-    if (body && (method === 'POST' || method === 'PATCH')) {
-      options.body = JSON.stringify(body);
-    }
-
-    const response = await fetch(url, options);
-    
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`Midtrans API Error: ${response.status} - ${JSON.stringify(error)}`);
-    }
-
-    return response.json();
+    // Initialize official Midtrans Subscription API client  
+    this.subscriptionApi = new midtransClient.SubscriptionApi({
+      isProduction: config.environment === 'production',
+      serverKey: config.server_key,
+      clientKey: config.client_key
+    });
   }
 
   /**
-   * Create credit card charge using Core API /v2/charge endpoint
-   * Follows Midtrans documentation: /v2/charge with save_token_id: true
+   * Create credit card charge using official midtrans-client Core API
+   * Uses official midtrans-client package for /v2/charge endpoint
    */
   async createChargeTransaction(
     orderData: {
@@ -182,7 +152,7 @@ export class MidtransService {
     // Convert USD to IDR
     const idrAmount = await convertUsdToIdr(orderData.amount_usd);
 
-    const request = {
+    const chargeRequest = {
       payment_type: 'credit_card',
       transaction_details: {
         order_id: orderData.order_id,
@@ -204,12 +174,13 @@ export class MidtransService {
       ],
     };
 
-    return this.makeRequest<MidtransCoreChargeResponse>('/v2/charge', 'POST', request);
+    // Use official midtrans-client Core API
+    return await this.coreApi.charge(chargeRequest);
   }
 
   /**
-   * Get transaction status using Core API /v2/{transaction_id}/status endpoint
-   * Follows Midtrans documentation: GET /v2/{order_id OR transaction_id}/status
+   * Get transaction status using official midtrans-client Core API
+   * Uses official midtrans-client package for transaction status
    */
   async getTransactionStatus(
     transactionId: string
@@ -222,11 +193,13 @@ export class MidtransService {
     transaction_id: string;
     [key: string]: any;
   }> {
-    return this.makeRequest(`/v2/${transactionId}/status`, 'GET');
+    // Use official midtrans-client Core API
+    return await this.coreApi.transaction.status(transactionId);
   }
 
   /**
-   * Create a new subscription using saved token from initial charge
+   * Create a new subscription using official midtrans-client Subscription API
+   * Uses official midtrans-client package for subscription creation
    */
   async createSubscription(
     usdAmount: number,
@@ -247,7 +220,7 @@ export class MidtransService {
     const startTime = subscriptionData.schedule.start_time || new Date();
     const formattedStartTime = this.formatMidtransDateTime(startTime);
 
-    const request: CreateSubscriptionRequest = {
+    const subscriptionRequest: CreateSubscriptionRequest = {
       name: subscriptionData.name,
       amount: Math.round(idrAmount).toString(), // Ensure integer as string
       currency: 'IDR',
@@ -266,7 +239,8 @@ export class MidtransService {
       customer_details: subscriptionData.customer_details,
     };
 
-    return this.makeRequest<MidtransSubscription>('/v1/subscriptions', 'POST', request);
+    // Use official midtrans-client Subscription API
+    return await this.subscriptionApi.createSubscription(subscriptionRequest);
   }
 
   /**
@@ -347,41 +321,41 @@ export class MidtransService {
   }
 
   /**
-   * Get subscription details
+   * Get subscription details using official midtrans-client
    */
   async getSubscription(subscriptionId: string): Promise<MidtransSubscription> {
-    return this.makeRequest<MidtransSubscription>(`/v1/subscriptions/${subscriptionId}`);
+    return await this.subscriptionApi.getSubscription(subscriptionId);
   }
 
   /**
-   * Disable subscription
+   * Disable subscription using official midtrans-client
    */
   async disableSubscription(subscriptionId: string): Promise<{ status_message: string }> {
-    return this.makeRequest(`/v1/subscriptions/${subscriptionId}/disable`, 'POST');
+    return await this.subscriptionApi.disableSubscription(subscriptionId);
   }
 
   /**
-   * Cancel subscription (stops pending retries)
+   * Cancel subscription (stops pending retries) using official midtrans-client
    */
   async cancelSubscription(subscriptionId: string): Promise<{ status_message: string }> {
-    return this.makeRequest(`/v1/subscriptions/${subscriptionId}/cancel`, 'POST');
+    return await this.subscriptionApi.cancelSubscription(subscriptionId);
   }
 
   /**
-   * Enable subscription
+   * Enable subscription using official midtrans-client
    */
   async enableSubscription(subscriptionId: string): Promise<{ status_message: string }> {
-    return this.makeRequest(`/v1/subscriptions/${subscriptionId}/enable`, 'POST');
+    return await this.subscriptionApi.enableSubscription(subscriptionId);
   }
 
   /**
-   * Update subscription
+   * Update subscription using official midtrans-client
    */
   async updateSubscription(
     subscriptionId: string, 
     updates: Partial<CreateSubscriptionRequest>
   ): Promise<{ status_message: string }> {
-    return this.makeRequest(`/v1/subscriptions/${subscriptionId}`, 'PATCH', updates);
+    return await this.subscriptionApi.updateSubscription(subscriptionId, updates);
   }
 
   /**
@@ -401,12 +375,6 @@ export class MidtransService {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${offset}`;
   }
 
-  /**
-   * Get transaction status from Midtrans
-   */
-  async getTransactionStatus(transactionId: string): Promise<any> {
-    return this.makeRequest(`/v2/${transactionId}/status`);
-  }
 }
 
 /**

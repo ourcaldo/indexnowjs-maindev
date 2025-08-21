@@ -453,8 +453,8 @@ export default function CheckoutPage() {
     }
   }
 
-  const handleMidtransRecurringPayment = async (cardData: any, token: string) => {
-    const response = await fetch('/api/billing/checkout', {
+  const handleMidtransRecurringPayment = async (cardToken: string, token: string) => {
+    const response = await fetch('/api/billing/midtrans-recurring', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -463,7 +463,6 @@ export default function CheckoutPage() {
       body: JSON.stringify({
         package_id: selectedPackage!.id,
         billing_period,
-        payment_gateway_id: form.payment_method,
         customer_info: {
           first_name: form.first_name,
           last_name: form.last_name,
@@ -476,8 +475,7 @@ export default function CheckoutPage() {
           country: form.country,
           description: form.description
         },
-        credit_card_token: cardData,
-        create_subscription: true // Flag to create subscription after payment
+        token_id: cardToken // Use the card token from Midtrans SDK
       }),
     })
 

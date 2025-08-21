@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Fetching Midtrans gateway configuration from database...')
     const { data: midtransGateway, error: gatewayError } = await supabase
       .from('indb_payment_gateways')
-      .select('configuration, api_credentials')
+      .select('id, configuration, api_credentials')
       .eq('slug', 'midtrans')
       .eq('is_active', true)
       .single()
