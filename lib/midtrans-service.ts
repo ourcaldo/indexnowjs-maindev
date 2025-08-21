@@ -194,8 +194,14 @@ export class MidtransService {
     }
   ): Promise<MidtransCoreChargeResponse> {
     // Convert USD to IDR
+    console.log('💱 CURRENCY CONVERSION DEBUG:')
+    console.log('  Input USD amount:', orderData.amount_usd)
+    
     const idrAmount = await convertUsdToIdr(orderData.amount_usd);
+    console.log('  Converted IDR amount:', idrAmount)
+    
     const grossAmount = Math.round(idrAmount); // Ensure integer amount
+    console.log('  Final gross amount (rounded):', grossAmount)
 
     const chargeRequest = {
       payment_type: 'credit_card',

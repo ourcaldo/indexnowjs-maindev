@@ -139,11 +139,26 @@ export async function POST(request: NextRequest) {
     // Use the already fetched Midtrans gateway data
     const gatewayData = midtransGateway
 
-    // Calculate price based on billing period
+    // Calculate price based on billing period - handle nested currency structure
     const pricingTiers = packageData.pricing_tiers || {}
-    const regularPrice = pricingTiers.regular?.[billing_period] || packageData.price
-    const promoPrice = pricingTiers.promo?.[billing_period]
+    
+    // Access pricing tiers: pricing_tiers[billing_period][currency][promo_price/regular_price]
+    const periodPricing = pricingTiers[billing_period]
+    const usdPricing = periodPricing?.USD
+    const regularPrice = usdPricing?.regular_price || packageData.price
+    const promoPrice = usdPricing?.promo_price
     const finalPrice = promoPrice || regularPrice
+    
+    // DEBUG: Check pricing calculation
+    console.log('🔍 PRICING DEBUG:')
+    console.log('  packageData.name:', packageData.name)
+    console.log('  packageData.price:', packageData.price)
+    console.log('  billing_period:', billing_period)
+    console.log('  periodPricing:', periodPricing)
+    console.log('  usdPricing:', usdPricing)
+    console.log('  regularPrice:', regularPrice)
+    console.log('  promoPrice:', promoPrice)
+    console.log('  finalPrice:', finalPrice)
 
     // Generate unique order ID
     const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
