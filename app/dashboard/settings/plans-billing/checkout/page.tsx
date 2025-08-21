@@ -122,40 +122,61 @@ export default function CheckoutPage() {
 
   // Handle credit card form submission for Midtrans
   const handleCreditCardSubmit = async (cardData: any) => {
+    console.log('🚀 [FRONTEND] Starting credit card submission...')
+    console.log('📋 [FRONTEND] Card data received:', {
+      has_card_number: !!cardData.card_number,
+      has_expiry_month: !!cardData.expiry_month,
+      has_expiry_year: !!cardData.expiry_year,
+      has_cvv: !!cardData.cvv,
+      has_cardholder_name: !!cardData.cardholder_name
+    })
     
     setSubmitting(true)
     try {
+      console.log('🔐 [FRONTEND] Getting authentication...')
       const user = await authService.getCurrentUser()
       if (!user) {
+        console.error('❌ [FRONTEND] No authenticated user found')
         throw new Error('Authentication required')
       }
+      console.log('✅ [FRONTEND] User authenticated:', user.email)
 
       const { data: { session } } = await supabaseBrowser.auth.getSession()
       const token = session?.access_token
       if (!token) {
+        console.error('❌ [FRONTEND] No access token found')
         throw new Error('Failed to get authentication token')
       }
+      console.log('✅ [FRONTEND] Got access token:', token.substring(0, 20) + '...')
 
       // Wait for Midtrans SDK to be ready
+      console.log('📱 [FRONTEND] Checking Midtrans SDK availability...')
       let retryCount = 0
       const maxRetries = 10
       
       while (!window.MidtransNew3ds || typeof window.MidtransNew3ds.getCardToken !== 'function') {
         if (retryCount >= maxRetries) {
+          console.error('❌ [FRONTEND] Midtrans SDK failed to load after', maxRetries, 'retries')
           throw new Error('Midtrans SDK failed to load. Please refresh the page and try again.')
         }
+        console.log('⏳ [FRONTEND] Waiting for Midtrans SDK... retry', retryCount + 1)
         // Waiting for Midtrans SDK to initialize
         await new Promise(resolve => setTimeout(resolve, 500))
         retryCount++
       }
+      console.log('✅ [FRONTEND] Midtrans SDK is ready')
 
       // Get token from Midtrans first
+      console.log('🔑 [FRONTEND] Requesting card tokenization from Midtrans...')
       const cardToken = await getMidtransCardToken(cardData)
       
       if (!cardToken) {
+        console.error('❌ [FRONTEND] Failed to get card token from Midtrans')
         throw new Error('Failed to tokenize card')
       }
+      console.log('✅ [FRONTEND] Got card token from Midtrans:', cardToken.substring(0, 20) + '...')
 
+      console.log('🚀 [FRONTEND] Calling backend API for recurring payment...')
       await handleMidtransRecurringPayment(cardToken, token)
     } catch (error) {
       addToast({
@@ -187,9 +208,18 @@ export default function CheckoutPage() {
           card_exp_year: cardData.expiry_year,
           card_cvv: cardData.cvv,
         }, (response) => {
+          console.log('📱 [FRONTEND] Midtrans tokenization response:', {
+            status_code: response.status_code,
+            status_message: response.status_message,
+            has_token_id: !!response.token_id,
+            token_preview: response.token_id ? response.token_id.substring(0, 20) + '...' : 'none'
+          })
+          
           if (response.status_code === '200' && response.token_id) {
+            console.log('✅ [FRONTEND] Card tokenization successful')
             resolve(response.token_id)
           } else {
+            console.error('❌ [FRONTEND] Card tokenization failed:', response.status_message)
             reject(new Error(response.status_message || 'Card tokenization failed'))
           }
         })
@@ -454,6 +484,14 @@ export default function CheckoutPage() {
   }
 
   const handleMidtransRecurringPayment = async (cardToken: string, token: string) => {
+    console.log('🌐 [FRONTEND] Making API call to /api/billing/midtrans-recurring...')
+    console.log('📦 [FRONTEND] Request payload:', {
+      package_id: selectedPackage?.id,
+      billing_period: billing_period,
+      has_customer_info: !!form.first_name,
+      token_id_preview: cardToken.substring(0, 20) + '...'
+    })
+    
     const response = await fetch('/api/billing/midtrans-recurring', {
       method: 'POST',
       headers: {
@@ -479,9 +517,18 @@ export default function CheckoutPage() {
       }),
     })
 
+    console.log('📡 [FRONTEND] API response status:', response.status)
+    console.log('📡 [FRONTEND] API response ok:', response.ok)
+    
     const result = await response.json()
+    console.log('📋 [FRONTEND] API response data:', {
+      success: result.success,
+      message: result.message,
+      has_data: !!result.data
+    })
 
     if (result.success) {
+      console.log('✅ [FRONTEND] Payment API call successful!')
       // Log activity
       logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
 
