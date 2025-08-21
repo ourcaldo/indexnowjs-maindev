@@ -808,17 +808,18 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
               
-              {/* Midtrans Credit Card Form */}
-              {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' && (
-                <div className="mt-6">
-                  <MidtransCreditCardForm
-                    onSubmit={handleCreditCardSubmit}
-                    loading={submitting}
-                    disabled={submitting}
-                  />
-                </div>
-              )}
             </form>
+            
+            {/* Midtrans Credit Card Form - OUTSIDE main form to prevent conflicts */}
+            {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' && (
+              <div className="mt-6">
+                <MidtransCreditCardForm
+                  onSubmit={handleCreditCardSubmit}
+                  loading={submitting}
+                  disabled={submitting}
+                />
+              </div>
+            )}
           </div>
 
           {/* Order Summary */}
