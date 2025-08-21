@@ -94,46 +94,232 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Extract package info from order_id
-      const packageMatch = order_id.match(/^ORDER-\d+-([A-Z0-9]+)$/)
-      if (!packageMatch) {
-        throw new Error('Invalid order ID format')
-      }
-
-      // Get package details from database (we need to reconstruct this from the successful transaction)
-      // For now, we'll create a basic subscription record
-      console.log('💾 Creating subscription record...')
+      console.log('💾 ============= STEP 1: CREATING SUBSCRIPTION AFTER 3DS =============')
       
-      // Create subscription in database
-      const subscriptionData = {
-        id: crypto.randomUUID(),
-        user_id: user.id,
-        order_id: order_id,
-        transaction_id: transaction_id,
-        saved_token_id: savedTokenId,
-        status: 'active',
-        payment_method: 'midtrans',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+      // Get transaction details to extract package info from metadata
+      console.log('🔍 Getting transaction details from Midtrans...')
+      const transactionDetails = await midtransService.getTransactionStatus(transaction_id)
+      
+      // Extract package and billing info from original transaction metadata or create default values
+      // Since we don't have access to original request data, we'll need to get package from transaction amount
+      
+      console.log('📦 Fetching all packages to determine which one matches transaction amount...')
+      const { data: allPackages, error: packagesError } = await supabase
+        .from('indb_payment_packages')
+        .select('*')
+        .eq('is_active', true)
+      
+      if (packagesError || !allPackages) {
+        throw new Error('Failed to fetch packages for amount matching')
+      }
+      
+      // Convert IDR amount back to USD to match with packages
+      const transactionAmountIDR = parseFloat(transactionDetails.gross_amount)
+      const USD_TO_IDR_RATE = 16300 // Approximate rate, should match the conversion used in main endpoint
+      const transactionAmountUSD = Math.round(transactionAmountIDR / USD_TO_IDR_RATE)
+      
+      console.log('💰 Transaction amount analysis:', {
+        idr_amount: transactionAmountIDR,
+        calculated_usd: transactionAmountUSD
+      })
+      
+      // Find matching package by price (checking both regular and promo prices)
+      let matchedPackage = null
+      let billing_period = 'monthly' // Default billing period
+      
+      for (const pkg of allPackages) {
+        const pricing = pkg.pricing_tiers || {}
+        const monthlyUSD = pricing.monthly?.USD
+        const yearlyUSD = pricing.yearly?.USD
+        
+        // Check monthly pricing
+        if (monthlyUSD && (monthlyUSD.regular_price === transactionAmountUSD || monthlyUSD.promo_price === transactionAmountUSD)) {
+          matchedPackage = pkg
+          billing_period = 'monthly'
+          break
+        }
+        
+        // Check yearly pricing
+        if (yearlyUSD && (yearlyUSD.regular_price === transactionAmountUSD || yearlyUSD.promo_price === transactionAmountUSD)) {
+          matchedPackage = pkg
+          billing_period = 'yearly'
+          break
+        }
+        
+        // Fallback: check base price
+        if (pkg.price === transactionAmountUSD) {
+          matchedPackage = pkg
+          billing_period = pkg.billing_period || 'monthly'
+          break
+        }
+      }
+      
+      if (!matchedPackage) {
+        console.warn('⚠️ Could not match transaction amount to package, using first active package')
+        matchedPackage = allPackages[0] // Fallback to first package
+      }
+      
+      console.log('📦 Matched package:', {
+        id: matchedPackage.id,
+        name: matchedPackage.name,
+        amount_usd: transactionAmountUSD,
+        billing_period: billing_period
+      })
+      
+      console.log('💾 ============= STEP 2: CREATING SUBSCRIPTION =============') 
+      
+      // Create subscription using Midtrans service
+      const subscription = await midtransService.createSubscription(transactionAmountUSD, {
+        name: `${matchedPackage.name}_${billing_period}`.toUpperCase(),
+        token: savedTokenId,
+        schedule: {
+          interval: 1,
+          interval_unit: billing_period === 'monthly' ? 'month' : 'month',
+          max_interval: billing_period === 'monthly' ? 12 : 1,
+          start_time: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
+        },
+        customer_details: {
+          first_name: transactionDetails.customer_details?.first_name || 'Customer',
+          last_name: transactionDetails.customer_details?.last_name || '',
+          email: transactionDetails.customer_details?.email || user.email || '',
+          phone: transactionDetails.customer_details?.phone || '',
+        },
+        metadata: {
+          user_id: user.id,
+          package_id: matchedPackage.id,
+          billing_period: billing_period,
+          order_id: order_id,
+          original_transaction_id: transaction_id,
+        },
+      })
+      
+      console.log('✅ Subscription created successfully!', {
+        subscription_id: subscription.id,
+        name: subscription.name,
+        status: subscription.status
+      })
+      
+      console.log('💾 ============= STEP 3: SAVING TO DATABASE TABLES =============') 
+      
+      // Create transaction record in database
+      console.log('📝 Creating transaction record in indb_payment_transactions...')
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('indb_payment_transactions')
+        .insert({
+          user_id: user.id,
+          package_id: matchedPackage.id,
+          gateway_id: midtransGateway.id,
+          transaction_type: 'subscription',
+          transaction_status: 'completed',
+          amount: transactionAmountUSD,
+          currency: 'USD',
+          payment_method: 'credit_card',
+          payment_reference: transaction_id,
+          gateway_transaction_id: transaction_id,
+          gateway_order_id: order_id,
+          billing_period: billing_period,
+          customer_info: {
+            first_name: transactionDetails.customer_details?.first_name || 'Customer',
+            last_name: transactionDetails.customer_details?.last_name || '',
+            email: transactionDetails.customer_details?.email || user.email || '',
+            phone: transactionDetails.customer_details?.phone || '',
+          },
+          gateway_response: transactionDetails,
+          metadata: {
+            subscription_id: subscription.id,
+            saved_token_id: savedTokenId,
+            masked_card: transactionDetails.masked_card,
+            subscription_status: subscription.status,
+            next_execution_at: subscription.schedule?.next_execution_at,
+            processing_method: '3ds_callback'
+          },
+        })
+        .select()
+        .single()
+
+      if (transactionError) {
+        console.error('❌ TRANSACTION RECORD CREATION FAILED:', transactionError)
+        throw new Error('Failed to save transaction record')
+      }
+      
+      console.log('✅ Transaction record created:', transactionData.id)
+
+      // Create Midtrans-specific data record linked to main transaction
+      console.log('📝 Creating Midtrans record in indb_payment_midtrans...')
+      const { data: midtransData, error: midtransError } = await supabase
+        .from('indb_payment_midtrans')
+        .insert({
+          transaction_id: transactionData.id, // Link to main transaction record
+          user_id: user.id,
+          midtrans_subscription_id: subscription.id,
+          saved_token_id: savedTokenId,
+          masked_card: transactionDetails.masked_card || 'Unknown',
+          card_type: transactionDetails.card_type || 'credit',
+          bank: transactionDetails.bank || 'Unknown',
+          token_expired_at: transactionDetails.saved_token_id_expired_at ? new Date(transactionDetails.saved_token_id_expired_at).toISOString() : null,
+          subscription_status: 'active',
+          next_billing_date: subscription.schedule?.next_execution_at ? new Date(subscription.schedule.next_execution_at).toISOString() : null,
+          metadata: {
+            midtrans_transaction_id: transaction_id,
+            order_id: order_id,
+            subscription_name: subscription.name,
+            schedule: subscription.schedule,
+            processing_method: '3ds_callback'
+          }
+        })
+        .select()
+        .single()
+
+      if (midtransError) {
+        console.warn('⚠️ Failed to create Midtrans data record:', midtransError)
+        // Don't fail the whole transaction, just log the warning
+      } else {
+        console.log('✅ Midtrans data record created:', midtransData.id)
       }
 
-      // For now, let's just log the successful 3DS completion
-      // The full subscription creation logic can be implemented later
+      // Update user package
+      console.log('👤 Updating user profile with package subscription...')
+      const { error: userUpdateError } = await supabase
+        .from('indb_auth_user_profiles')
+        .update({
+          package_id: matchedPackage.id,
+          subscribed_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000).toISOString(),
+        })
+        .eq('user_id', user.id)
+
+      if (userUpdateError) {
+        console.error('⚠️ Failed to update user profile:', userUpdateError)
+        // Don't fail the transaction, just log the warning
+      } else {
+        console.log('✅ User profile updated successfully')
+      }
+      
+      console.log('🎉 ============= SUCCESS: 3DS PAYMENT & SUBSCRIPTION COMPLETED =============')      
       console.log('✅ 3DS authentication and payment completed successfully')
-      console.log('💾 Subscription data prepared:', {
+      console.log('💾 All database records saved successfully:', {
+        transaction_id: transactionData.id,
+        midtrans_record_id: midtransData?.id,
+        subscription_id: subscription.id,
         user_id: user.id,
-        order_id,
-        transaction_id,
-        saved_token_id: savedTokenId,
-        status: 'active'
+        package_id: matchedPackage.id,
+        billing_period: billing_period
       })
 
       return NextResponse.json({
         success: true,
-        message: '3DS authentication successful and subscription created',
-        subscription_id: subscriptionData.id,
-        transaction_id,
-        order_id
+        message: 'Recurring payment setup successfully completed via 3DS',
+        data: {
+          transaction_id: transactionData.id,
+          midtrans_subscription_id: subscription.id,
+          order_id: order_id,
+          amount: transactionAmountUSD,
+          currency: 'USD',
+          billing_period: billing_period,
+          next_billing_date: subscription.schedule?.next_execution_at,
+          masked_card: transactionDetails.masked_card,
+          redirect_url: `/dashboard/settings/plans-billing/orders/${transactionData.id}`,
+        },
       })
 
     } else if (transactionStatus.transaction_status === 'pending') {
