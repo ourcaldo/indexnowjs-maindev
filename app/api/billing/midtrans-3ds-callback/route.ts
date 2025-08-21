@@ -244,13 +244,44 @@ export async function POST(request: NextRequest) {
       
       console.log('💾 ============= STEP 3: SAVING TO DATABASE TABLES =============') 
       
-      // Create transaction record in database
-      console.log('📝 Creating transaction record in indb_payment_transactions...')
-      const { data: transactionData, error: transactionError } = await supabase
-        .from('indb_payment_transactions')
-        .insert({
-          user_id: user.id,
-          package_id: matchedPackage.id,
+      // Update existing pending transaction or create new one
+      console.log('📝 Updating/creating transaction record in indb_payment_transactions...')
+      
+      let transactionData, transactionError;
+      
+      if (existingTransaction) {
+        // Update existing pending transaction
+        console.log('📝 Updating existing pending transaction:', existingTransaction.id)
+        const { data: updatedTransaction, error: updateError } = await supabase
+          .from('indb_payment_transactions')
+          .update({
+            transaction_status: 'completed',
+            gateway_response: transactionDetails,
+            processed_at: new Date().toISOString(),
+            metadata: {
+              ...existingTransaction.metadata,
+              subscription_id: subscription.id,
+              masked_card: transactionDetails.masked_card,
+              subscription_status: subscription.status,
+              next_execution_at: subscription.schedule?.next_execution_at,
+              processing_method: '3ds_callback',
+              order_id: order_id
+            },
+          })
+          .eq('id', existingTransaction.id)
+          .select()
+          .single()
+        
+        transactionData = updatedTransaction
+        transactionError = updateError
+      } else {
+        // Create new transaction record (fallback)
+        console.log('📝 Creating new transaction record (no pending transaction found)')
+        const { data: newTransaction, error: newError } = await supabase
+          .from('indb_payment_transactions')
+          .insert({
+            user_id: user.id,
+            package_id: matchedPackage.id,
           gateway_id: midtransGateway.id,
           transaction_type: 'subscription',
           transaction_status: 'completed',
@@ -279,6 +310,10 @@ export async function POST(request: NextRequest) {
         })
         .select()
         .single()
+        
+        transactionData = newTransaction
+        transactionError = newError
+      }
 
       if (transactionError) {
         console.error('❌ TRANSACTION RECORD CREATION FAILED:', transactionError)

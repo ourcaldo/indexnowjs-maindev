@@ -220,7 +220,48 @@ export async function POST(request: NextRequest) {
 
     // Check if 3DS authentication is required
     if ((chargeTransaction as any).redirect_url) {
-      console.log('🔐 3DS Authentication required, returning redirect URL to frontend')
+      console.log('🔐 3DS Authentication required, creating pending transaction record first...')
+      
+      // Create pending transaction record so 3DS callback can access customer info
+      const { data: pendingTransaction, error: pendingError } = await supabase
+        .from('indb_payment_transactions')
+        .insert({
+          user_id: user.id,
+          package_id: package_id,
+          gateway_id: midtransGateway.id,
+          transaction_type: 'subscription',
+          transaction_status: 'pending_3ds',
+          amount: finalPrice,
+          currency: 'USD',
+          payment_method: 'credit_card',
+          payment_reference: chargeTransaction.order_id,
+          gateway_transaction_id: chargeTransaction.transaction_id,
+          gateway_response: chargeTransaction,
+          billing_period: billing_period,
+          metadata: {
+            order_id: chargeTransaction.order_id,
+            customer_info: customer_info, // CRITICAL: Save original customer info
+            package_details: {
+              id: packageData.id,
+              name: packageData.name,
+              price: finalPrice
+            },
+            billing_period: billing_period,
+            processing_method: '3ds_pending',
+            requires_3ds: true
+          },
+        })
+        .select()
+        .single()
+
+      if (pendingError) {
+        console.error('❌ Failed to create pending transaction record:', pendingError)
+        // Continue anyway, 3DS callback will use fallback
+      } else {
+        console.log('✅ Pending transaction record created:', pendingTransaction.id)
+      }
+      
+      console.log('🔐 Returning redirect URL to frontend')
       return NextResponse.json({
         success: true,
         requires_3ds: true,
