@@ -642,11 +642,14 @@ export default function IndexNowOverview() {
                   {selectedKeywords.length > 0 && (
                     <>
                       <Button 
-                        variant="outline" 
                         size="sm"
                         onClick={() => setShowDeleteConfirm(true)}
-                        className="border-red-200 hover:bg-red-50"
-                        style={{ color: '#E63946', borderColor: '#E63946' }}
+                        className="hover:bg-red-700"
+                        style={{ 
+                          backgroundColor: '#E63946', 
+                          color: '#FFFFFF',
+                          borderColor: '#E63946'
+                        }}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         Delete ({selectedKeywords.length})
