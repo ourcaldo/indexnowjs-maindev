@@ -8,10 +8,15 @@ const supabase = createClient(
 )
 
 export async function POST(request: NextRequest) {
+  console.log('🚀 Midtrans recurring payment API called')
+  
   try {
     // Get authenticated user from Authorization header
     const authHeader = request.headers.get('authorization')
+    console.log('🔐 Auth header present:', !!authHeader)
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ Authentication failed - missing or invalid auth header')
       return NextResponse.json(
         { success: false, message: 'Authentication required' },
         { status: 401 }
@@ -29,25 +34,68 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('📝 Request body received:', { 
+      package_id: body.package_id, 
+      billing_period: body.billing_period,
+      has_customer_info: !!body.customer_info,
+      has_card_data: !!body.card_data
+    })
+    
     const { 
       package_id, 
       billing_period, 
       customer_info, 
-      card_data 
+      token_id 
     } = body
 
-    if (!package_id || !billing_period || !customer_info || !card_data) {
+    if (!package_id || !billing_period || !customer_info || !token_id) {
+      console.log('❌ Missing required fields:', { package_id, billing_period, customer_info: !!customer_info, token_id: !!token_id })
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
         { status: 400 }
       )
     }
 
-    // Validate card data
-    if (!card_data.card_number || !card_data.expiry_month || !card_data.expiry_year || !card_data.cvv || !card_data.cardholder_name) {
+    // Validate token_id
+    console.log('🔐 Token validation:', {
+      has_token_id: !!token_id,
+      token_length: token_id?.length
+    })
+    
+    if (!token_id || typeof token_id !== 'string' || token_id.length < 10) {
+      console.log('❌ Invalid token_id')
       return NextResponse.json(
-        { success: false, message: 'Complete card information is required' },
+        { success: false, message: 'Valid card token is required' },
         { status: 400 }
+      )
+    }
+
+    // Get Midtrans payment gateway configuration from database
+    console.log('🔍 Fetching Midtrans gateway configuration from database...')
+    const { data: midtransGateway, error: gatewayError } = await supabase
+      .from('indb_payment_gateways')
+      .select('configuration, api_credentials')
+      .eq('slug', 'midtrans')
+      .eq('is_active', true)
+      .single()
+
+    if (gatewayError || !midtransGateway) {
+      console.log('❌ Failed to fetch Midtrans gateway configuration:', gatewayError)
+      return NextResponse.json(
+        { success: false, message: 'Midtrans payment gateway not configured' },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ Midtrans gateway configuration fetched successfully')
+    const { server_key, client_key, merchant_id } = midtransGateway.api_credentials
+    const { environment } = midtransGateway.configuration
+
+    if (!server_key || !client_key) {
+      console.log('❌ Missing Midtrans API credentials in database')
+      return NextResponse.json(
+        { success: false, message: 'Midtrans API credentials not properly configured' },
+        { status: 500 }
       )
     }
 
@@ -65,20 +113,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get Midtrans gateway configuration
-    const { data: gatewayData, error: gatewayError } = await supabase
-      .from('indb_payment_gateways')
-      .select('*')
-      .eq('slug', 'midtrans')
-      .eq('is_active', true)
-      .single()
-
-    if (gatewayError || !gatewayData) {
-      return NextResponse.json(
-        { success: false, message: 'Midtrans payment gateway not available' },
-        { status: 404 }
-      )
-    }
+    // Use the already fetched Midtrans gateway data
+    const gatewayData = midtransGateway
 
     // Calculate price based on billing period
     const pricingTiers = packageData.pricing_tiers || {}
@@ -89,20 +125,22 @@ export async function POST(request: NextRequest) {
     // Generate unique order ID
     const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
-    // Initialize Midtrans service
-    const midtransService = createMidtransService(gatewayData)
+    // Initialize Midtrans service with credentials from database
+    console.log('🏗️ Initializing Midtrans service with database credentials')
+    const midtransService = createMidtransService({
+      server_key,
+      client_key,
+      environment,
+      merchant_id
+    })
 
     // Create recurring payment (initial charge + subscription)
+    console.log('💳 Creating recurring payment for order:', orderId)
     const recurringPayment = await midtransService.createRecurringPayment({
       order_id: orderId,
       amount_usd: finalPrice,
       billing_period: billing_period as 'monthly' | 'yearly',
-      card_data: {
-        card_number: card_data.card_number,
-        expiry_month: card_data.expiry_month,
-        expiry_year: card_data.expiry_year,
-        cvv: card_data.cvv,
-      },
+      token_id: token_id,
       customer_details: {
         first_name: customer_info.first_name,
         last_name: customer_info.last_name,

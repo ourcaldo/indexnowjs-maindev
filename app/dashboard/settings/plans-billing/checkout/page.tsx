@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Head from 'next/head'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,7 +18,7 @@ import { supabaseBrowser } from '@/lib/supabase-browser'
 import { formatCurrency } from '@/lib/currency-utils'
 import MidtransCreditCardForm from '@/components/MidtransCreditCardForm'
 
-// Midtrans Snap type declarations
+// Midtrans type declarations
 declare global {
   interface Window {
     snap: {
@@ -27,6 +28,19 @@ declare global {
         onError?: (result: any) => void;
         onClose?: () => void;
       }) => void;
+    };
+    MidtransNew3ds: {
+      getCardToken: (cardData: {
+        card_number: string;
+        card_exp_month: string;
+        card_exp_year: string;
+        card_cvv: string;
+      }, callback: (response: {
+        status_code: string;
+        status_message: string;
+        token_id?: string;
+        validation_messages?: string[];
+      }) => void) => void;
     };
   }
 }
@@ -115,12 +129,22 @@ export default function CheckoutPage() {
         throw new Error('Authentication required')
       }
 
-      const token = await authService.getToken()
+      const { data: { session } } = await supabaseBrowser.auth.getSession()
+      const token = session?.access_token
       if (!token) {
         throw new Error('Failed to get authentication token')
       }
 
-      await handleMidtransRecurringPayment(cardData, token)
+      // Get token from Midtrans first
+      console.log('🔐 Getting card token from Midtrans...')
+      const cardToken = await getMidtransCardToken(cardData)
+      
+      if (!cardToken) {
+        throw new Error('Failed to tokenize card')
+      }
+
+      console.log('✅ Card token received, processing payment...')
+      await handleMidtransRecurringPayment(cardToken, token)
     } catch (error) {
       console.error('Credit card payment error:', error)
       addToast({
@@ -130,6 +154,30 @@ export default function CheckoutPage() {
       })
       setSubmitting(false)
     }
+  }
+
+  // Get card token from Midtrans SDK
+  const getMidtransCardToken = (cardData: any): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (!window.MidtransNew3ds) {
+        reject(new Error('Midtrans SDK not loaded'))
+        return
+      }
+
+      window.MidtransNew3ds.getCardToken({
+        card_number: cardData.card_number.replace(/\s/g, ''),
+        card_exp_month: cardData.expiry_month.padStart(2, '0'),
+        card_exp_year: cardData.expiry_year,
+        card_cvv: cardData.cvv,
+      }, (response) => {
+        if (response.status_code === '200' && response.token_id) {
+          resolve(response.token_id)
+        } else {
+          console.error('Midtrans tokenization failed:', response)
+          reject(new Error(response.status_message || 'Card tokenization failed'))
+        }
+      })
+    })
   }
 
   // Fetch package and payment gateway data
@@ -235,6 +283,67 @@ export default function CheckoutPage() {
       router.push('/dashboard/settings/plans-billing')
     }
   }, [package_id, router, addToast])
+
+  // Load Midtrans SDK with credentials from database
+  useEffect(() => {
+    const loadMidtransSDK = async () => {
+      // Check if script already exists
+      if (document.querySelector('script[src*="midtrans"]')) {
+        return
+      }
+
+      try {
+        // Get authentication token
+        const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
+        if (!token) {
+          console.log('⚠️ No auth token, skipping Midtrans SDK load')
+          return
+        }
+
+        // Fetch Midtrans configuration from backend
+        const response = await fetch('/api/billing/midtrans-config', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (!response.ok) {
+          console.error('❌ Failed to fetch Midtrans config')
+          return
+        }
+
+        const configData = await response.json()
+        if (!configData.success) {
+          console.error('❌ Midtrans config not available:', configData.message)
+          return
+        }
+
+        const { client_key, environment } = configData.data
+
+        // Create script element
+        const script = document.createElement('script')
+        script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
+        script.async = true
+        script.setAttribute('data-environment', environment || 'sandbox')
+        script.setAttribute('data-client-key', client_key)
+        
+        script.onload = () => {
+          console.log('✅ Midtrans SDK loaded successfully with client key:', client_key.substring(0, 10) + '...')
+        }
+        
+        script.onerror = () => {
+          console.error('❌ Failed to load Midtrans SDK')
+        }
+
+        document.head.appendChild(script)
+      } catch (error) {
+        console.error('❌ Error loading Midtrans SDK:', error)
+      }
+    }
+
+    loadMidtransSDK()
+  }, [])
 
   // Calculate pricing based on selected billing period
   const calculatePrice = () => {
@@ -348,7 +457,7 @@ export default function CheckoutPage() {
           country: form.country,
           description: form.description
         },
-        card_data: cardData
+        token_id: cardData
       }),
     })
 

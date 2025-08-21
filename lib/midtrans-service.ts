@@ -164,19 +164,14 @@ export class MidtransService {
   }
 
   /**
-   * Create initial credit card charge to get saved token for subscription
-   * This is the first step before creating a subscription
+   * Create credit card charge using Core API /v2/charge endpoint
+   * Follows Midtrans documentation: /v2/charge with save_token_id: true
    */
-  async createInitialCharge(
+  async createChargeTransaction(
     orderData: {
       order_id: string;
       amount_usd: number;
-      card_data: {
-        card_number: string;
-        expiry_month: string;
-        expiry_year: string;
-        cvv: string;
-      };
+      token_id: string; // Card token from frontend MidtransNew3ds.getCardToken
       customer_details: MidtransCustomerDetails;
       item_details: {
         name: string;
@@ -187,23 +182,21 @@ export class MidtransService {
     // Convert USD to IDR
     const idrAmount = await convertUsdToIdr(orderData.amount_usd);
 
-    const request: MidtransCoreChargeRequest = {
+    const request = {
       payment_type: 'credit_card',
       transaction_details: {
         order_id: orderData.order_id,
         gross_amount: Math.round(idrAmount), // Ensure integer amount
       },
       credit_card: {
-        card_number: orderData.card_data.card_number.replace(/\s/g, ''), // Remove spaces
-        card_exp_month: orderData.card_data.expiry_month.padStart(2, '0'),
-        card_exp_year: orderData.card_data.expiry_year,
-        card_cvv: orderData.card_data.cvv,
-        save_card: true, // Important: save card for subscription
+        token_id: orderData.token_id, // Use token from frontend
+        authentication: true, // Enable 3DS
+        save_token_id: true, // Save card for subscription
       },
       customer_details: orderData.customer_details,
       item_details: [
         {
-          id: 'subscription_payment',
+          id: 'subscription_setup',
           price: Math.round(idrAmount),
           quantity: 1,
           name: orderData.item_details.name,
@@ -212,6 +205,24 @@ export class MidtransService {
     };
 
     return this.makeRequest<MidtransCoreChargeResponse>('/v2/charge', 'POST', request);
+  }
+
+  /**
+   * Get transaction status using Core API /v2/{transaction_id}/status endpoint
+   * Follows Midtrans documentation: GET /v2/{order_id OR transaction_id}/status
+   */
+  async getTransactionStatus(
+    transactionId: string
+  ): Promise<{
+    saved_token_id?: string;
+    saved_token_id_expired_at?: string;
+    masked_card?: string;
+    transaction_status: string;
+    order_id: string;
+    transaction_id: string;
+    [key: string]: any;
+  }> {
+    return this.makeRequest(`/v2/${transactionId}/status`, 'GET');
   }
 
   /**
@@ -267,12 +278,7 @@ export class MidtransService {
       order_id: string;
       amount_usd: number;
       billing_period: 'monthly' | 'yearly';
-      card_data: {
-        card_number: string;
-        expiry_month: string;
-        expiry_year: string;
-        cvv: string;
-      };
+      token_id: string; // Card token from frontend MidtransNew3ds.getCardToken
       customer_details: MidtransCustomerDetails;
       package_details: {
         name: string;
@@ -284,11 +290,11 @@ export class MidtransService {
     initial_charge: MidtransCoreChargeResponse;
     subscription: MidtransSubscription;
   }> {
-    // Step 1: Create initial charge to get saved token
-    const initialCharge = await this.createInitialCharge({
+    // Step 1: Create charge transaction using token_id from frontend
+    const chargeTransaction = await this.createChargeTransaction({
       order_id: orderData.order_id,
       amount_usd: orderData.amount_usd,
-      card_data: orderData.card_data,
+      token_id: orderData.token_id, // Card token from frontend MidtransNew3ds.getCardToken
       customer_details: orderData.customer_details,
       item_details: {
         name: orderData.package_details.name,
@@ -296,19 +302,30 @@ export class MidtransService {
       },
     });
 
-    // Check if initial charge was successful and token was saved
-    if (initialCharge.transaction_status !== 'capture' && initialCharge.transaction_status !== 'settlement') {
-      throw new Error(`Initial charge failed: ${initialCharge.status_message}`);
+    // Check if charge was successful
+    if (chargeTransaction.transaction_status !== 'capture' && chargeTransaction.transaction_status !== 'settlement') {
+      throw new Error(`Charge transaction failed: ${chargeTransaction.status_message}`);
     }
 
-    if (!initialCharge.saved_token_id) {
-      throw new Error('Card token was not saved from initial transaction');
+    // Step 2: Get transaction status to retrieve saved_token_id (as per Midtrans docs)
+    let savedTokenId = chargeTransaction.saved_token_id;
+    let maskedCard = chargeTransaction.masked_card;
+
+    if (!savedTokenId) {
+      // Get transaction status to retrieve saved_token_id
+      const transactionStatus = await this.getTransactionStatus(chargeTransaction.transaction_id);
+      savedTokenId = transactionStatus.saved_token_id;
+      maskedCard = transactionStatus.masked_card;
     }
 
-    // Step 2: Create subscription using the saved token
+    if (!savedTokenId) {
+      throw new Error('Card token was not saved from transaction. Please try again.');
+    }
+
+    // Step 3: Create subscription using the saved_token_id
     const subscription = await this.createSubscription(orderData.amount_usd, {
       name: `${orderData.package_details.name}_${orderData.billing_period}`.toUpperCase(),
-      token: initialCharge.saved_token_id,
+      token: savedTokenId,
       schedule: {
         interval: 1,
         interval_unit: orderData.billing_period === 'monthly' ? 'month' : 'month',
@@ -320,7 +337,11 @@ export class MidtransService {
     });
 
     return {
-      initial_charge: initialCharge,
+      initial_charge: {
+        ...chargeTransaction,
+        saved_token_id: savedTokenId,
+        masked_card: maskedCard,
+      },
       subscription: subscription,
     };
   }
@@ -391,12 +412,13 @@ export class MidtransService {
 /**
  * Create Midtrans service instance from database configuration
  */
-export function createMidtransService(gatewayConfig: any): MidtransService {
+export function createMidtransService(credentials: any): MidtransService {
+  // Handle both direct credentials and gateway config structure
   const config: MidtransConfig = {
-    merchant_id: gatewayConfig.api_credentials?.merchant_id || '',
-    client_key: gatewayConfig.api_credentials?.client_key || '',
-    server_key: gatewayConfig.api_credentials?.server_key || '',
-    environment: gatewayConfig.configuration?.environment || 'sandbox',
+    merchant_id: credentials.merchant_id || credentials.api_credentials?.merchant_id || '',
+    client_key: credentials.client_key || credentials.api_credentials?.client_key || '',
+    server_key: credentials.server_key || credentials.api_credentials?.server_key || '',
+    environment: credentials.environment || credentials.configuration?.environment || 'sandbox',
   };
 
   return new MidtransService(config);
