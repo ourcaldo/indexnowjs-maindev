@@ -300,6 +300,27 @@ export default function RankHistoryPage() {
     <div className="min-h-screen" style={{ backgroundColor: '#F7F9FC' }}>
       <div className="max-w-7xl mx-auto p-6">
         
+        {/* Page Header with Add Keyword Button */}
+        {domains.length > 0 && (
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold" style={{color: '#1A1A1A'}}>
+                Rank History
+              </h1>
+              <p style={{color: '#6C757D'}}>
+                Track keyword position changes over time
+              </p>
+            </div>
+            <Button 
+              onClick={() => window.location.href = '/dashboard/indexnow/add'}
+              style={{ backgroundColor: '#22333b', color: '#FFFFFF' }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Keyword
+            </Button>
+          </div>
+        )}
+
         <div className="space-y-6">
           {/* Check if user has domains */}
           {domains.length === 0 ? (
@@ -634,17 +655,10 @@ export default function RankHistoryPage() {
 
               {/* Rank History Table */}
               <Card>
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4">
                   <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>
                     Rank History
                   </h3>
-                  <Button 
-                    onClick={() => window.location.href = '/dashboard/indexnow/add'}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Keyword
-                  </Button>
                 </div>
                 {isLoading ? (
                   <div className="text-center py-8">

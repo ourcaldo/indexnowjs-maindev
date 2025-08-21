@@ -569,41 +569,83 @@ export default function IndexNowOverview() {
                 <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>Filters</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{color: '#6C757D'}} />
-                  <Input
-                    placeholder="Search keywords..."
-                    value={searchTerm}
-                    onChange={(e: any) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{color: '#6C757D'}} />
+                    <Input
+                      placeholder="Search keywords..."
+                      value={searchTerm}
+                      onChange={(e: any) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+
+                  {/* Domain Filter */}
+                  <Select value={selectedDomain} onValueChange={setSelectedDomain} placeholder="All Domains">
+                    {domains.map((domain: any) => (
+                      <option key={domain.id} value={domain.id}>
+                        {domain.display_name || domain.domain_name}
+                      </option>
+                    ))}
+                  </Select>
+
+                  {/* Device Filter */}
+                  <Select value={selectedDevice} onValueChange={setSelectedDevice} placeholder="All Devices">
+                    <option value="desktop">Desktop</option>
+                    <option value="mobile">Mobile</option>
+                  </Select>
+
+                  {/* Country Filter */}
+                  <Select value={selectedCountry} onValueChange={setSelectedCountry} placeholder="All Countries">
+                    {countries.map((country: any) => (
+                      <option key={country.id} value={country.id}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
 
-                {/* Domain Filter */}
-                <Select value={selectedDomain} onValueChange={setSelectedDomain} placeholder="All Domains">
-                  {domains.map((domain: any) => (
-                    <option key={domain.id} value={domain.id}>
-                      {domain.display_name || domain.domain_name}
-                    </option>
-                  ))}
-                </Select>
-
-                {/* Device Filter */}
-                <Select value={selectedDevice} onValueChange={setSelectedDevice} placeholder="All Devices">
-                  <option value="desktop">Desktop</option>
-                  <option value="mobile">Mobile</option>
-                </Select>
-
-                {/* Country Filter */}
-                <Select value={selectedCountry} onValueChange={setSelectedCountry} placeholder="All Countries">
-                  {countries.map((country: any) => (
-                    <option key={country.id} value={country.id}>
-                      {country.name}
-                    </option>
-                  ))}
-                </Select>
+                {/* Action Buttons Row - Show after domain selection */}
+                {selectedDomainId && (
+                  <div className="flex items-center justify-end gap-3">
+                    {selectedKeywords.length > 0 && (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setShowDeleteConfirm(true)}
+                          className="border-red-200 hover:bg-red-50"
+                          style={{ color: '#E63946', borderColor: '#E63946' }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Delete ({selectedKeywords.length})
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setShowTagModal(true)}
+                          style={{ 
+                            backgroundColor: '#F0A202', 
+                            color: '#FFFFFF', 
+                            borderColor: '#F0A202' 
+                          }}
+                        >
+                          <Tag className="w-4 h-4 mr-1" />
+                          Add Tag ({selectedKeywords.length})
+                        </Button>
+                      </>
+                    )}
+                    <Button 
+                      onClick={() => router.push('/dashboard/indexnow/add')}
+                      style={{ backgroundColor: '#22333b', color: '#FFFFFF' }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Keyword
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </Card>
@@ -617,37 +659,11 @@ export default function IndexNowOverview() {
                     Keywords ({filteredKeywords.length})
                   </h3>
                   {selectedKeywords.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm" style={{color: '#6C757D'}}>
-                        {selectedKeywords.length} selected
-                      </span>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="text-red-600 border-red-200 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setShowTagModal(true)}
-                      >
-                        <Tag className="w-4 h-4 mr-1" />
-                        Add Tag
-                      </Button>
-                    </div>
+                    <span className="text-sm" style={{color: '#6C757D'}}>
+                      {selectedKeywords.length} selected
+                    </span>
                   )}
                 </div>
-                <Button 
-                  onClick={() => router.push('/dashboard/indexnow/add')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Keyword
-                </Button>
               </div>
 
               {keywordsLoading ? (

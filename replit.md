@@ -32,20 +32,24 @@ IndexNow Studio is a professional-grade, full-stack web application designed to 
 
 The application is built with Next.js App Router and integrates with an Express server for Google API calls.
 
-## Recent Changes (August 19, 2025)
+## Recent Changes (August 21, 2025)
 
-**Login Notification Email System Enhancement & Branding Update:**
-- ✅ Fixed SMTP configuration to retrieve settings from `indb_site_settings` database table
-- ✅ Enhanced email service with comprehensive logging and error handling  
-- ✅ Added login notification support for session restoration route (`/api/auth/session`)
-- ✅ Enabled SMTP in database settings (`smtp_enabled` = true)
-- ✅ Confirmed email functionality - Successfully sending to user email addresses
-- ✅ Email notifications trigger for both direct login and session restoration
-- ✅ System uses database SMTP settings as primary source
+**IndexNow Rank Tracker UI/UX Enhancement & Server-Side Compatibility:**
+- ✅ Successfully migrated project from Replit Agent to standard Replit environment 
+- ✅ Implemented complete multiselect functionality with checkboxes in Keywords Overview page
+- ✅ Added bulk delete and bulk tag addition features with confirmation modals and safety measures
+- ✅ Enhanced activity tracking system with 11 new keyword tracker event types (KEYWORD_ADD, KEYWORD_DELETE, etc.)
+- ✅ Created comprehensive API endpoints for bulk operations (/api/keyword-tracker/keywords/bulk-delete and /api/keyword-tracker/keywords/add-tag)
+- ✅ Resolved server-side compatibility issues with activity logger for browser environments
+- ✅ **Button Repositioning:** Moved bulk action buttons (Delete/Add Tags) to right side after domain selection, with updated color scheme
+- ✅ **Enhanced Color Scheme:** Delete button now uses Error Red (#E63946), Add Tag button uses Amber (#F0A202), Add Keyword uses project dark theme (#22333b)
+- ✅ **Rank History Page Enhancement:** Moved "Add Keyword" button from inside table to top right of main screen with proper page header
+- ✅ **Navigation Cleanup:** Removed "Add Keyword" submenu from sidebar navigation to reduce clutter
+- ✅ Fixed all TypeScript errors and ensured smooth compilation
+
+**Previous Updates (August 19, 2025):**
+- ✅ Login Notification Email System Enhancement & Branding Update
 - ✅ Updated all branding from "IndexNow Pro" to "IndexNow Studio" throughout codebase
-- ✅ Updated HTML email templates with correct "IndexNow Studio" branding
-- ✅ Fixed all references in login notification template (header, footer, content)
-- ✅ Updated metadata, UI components, and service files with correct branding
 - 📧 SMTP operational: mail.indexnow.studio with notifikasi@indexnow.studio
 
 **Overall Structure:**
