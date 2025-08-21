@@ -94,17 +94,30 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Get user profile data for accurate customer information
-      const { data: userProfile } = await supabase
-        .from('indb_auth_user_profiles')
-        .select('full_name, phone_number, email')
-        .eq('user_id', user.id)
-        .single()
-
       console.log('💾 ============= STEP 1: CREATING SUBSCRIPTION AFTER 3DS =============')
       
-      // Get transaction details to extract package info from metadata
-      console.log('🔍 Getting transaction details from Midtrans...')
+      // Get the original transaction record from our database (contains real customer info from checkout form)
+      console.log('🔍 Getting original transaction record from database...')
+      const { data: existingTransaction, error: transactionError } = await supabase
+        .from('indb_payment_transactions')
+        .select('*')
+        .eq('gateway_transaction_id', transaction_id)
+        .single()
+
+      let originalCustomerInfo = null
+      if (existingTransaction && existingTransaction.metadata?.customer_info) {
+        originalCustomerInfo = existingTransaction.metadata.customer_info
+        console.log('✅ Found original customer info from database:', {
+          first_name: originalCustomerInfo.first_name,
+          last_name: originalCustomerInfo.last_name,
+          email: originalCustomerInfo.email,
+          phone: originalCustomerInfo.phone
+        })
+      } else {
+        console.log('⚠️ No existing transaction record found, will use Midtrans details as fallback')
+      }
+      
+      // Get transaction details from Midtrans
       const transactionDetails = await midtransService.getTransactionStatus(transaction_id)
       
       // Extract package and billing info from original transaction metadata or create default values
@@ -186,10 +199,10 @@ export async function POST(request: NextRequest) {
           start_time: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
         },
         customer_details: {
-          first_name: userProfile?.full_name?.split(' ')[0] || user.user_metadata?.full_name?.split(' ')[0] || transactionDetails.customer_details?.first_name || 'Customer',
-          last_name: userProfile?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || transactionDetails.customer_details?.last_name || '',
-          email: userProfile?.email || user.email || '',
-          phone: userProfile?.phone_number || transactionDetails.customer_details?.phone || '',
+          first_name: originalCustomerInfo?.first_name || transactionDetails.customer_details?.first_name || 'Customer',
+          last_name: originalCustomerInfo?.last_name || transactionDetails.customer_details?.last_name || '',
+          email: originalCustomerInfo?.email || transactionDetails.customer_details?.email || user.email || '',
+          phone: originalCustomerInfo?.phone || transactionDetails.customer_details?.phone || '',
         },
         metadata: {
           user_id: user.id,
@@ -233,10 +246,10 @@ export async function POST(request: NextRequest) {
             next_execution_at: subscription.schedule?.next_execution_at,
             processing_method: '3ds_callback',
             customer_info: {
-              first_name: userProfile?.full_name?.split(' ')[0] || user.user_metadata?.full_name?.split(' ')[0] || transactionDetails.customer_details?.first_name || 'Customer',
-              last_name: userProfile?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || transactionDetails.customer_details?.last_name || '',
-              email: userProfile?.email || user.email || '',
-              phone: userProfile?.phone_number || transactionDetails.customer_details?.phone || '',
+              first_name: originalCustomerInfo?.first_name || transactionDetails.customer_details?.first_name || 'Customer',
+              last_name: originalCustomerInfo?.last_name || transactionDetails.customer_details?.last_name || '',
+              email: originalCustomerInfo?.email || transactionDetails.customer_details?.email || user.email || '',
+              phone: originalCustomerInfo?.phone || transactionDetails.customer_details?.phone || '',
             },
             order_id: order_id
           },

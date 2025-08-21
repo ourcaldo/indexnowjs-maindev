@@ -760,11 +760,12 @@ JWT_SECRET=[jwt-secret-key]
 - **Button State Management**: Upload button disabled and shows "Payment Completed" for completed transactions
 - **Dynamic Instructions**: Payment instructions change from "Upload payment proof" to status-appropriate messages
 
-**✅ CUSTOMER DATA COLLECTION ENHANCEMENT**:
-- **Database Profile Integration**: Enhanced customer data collection in 3DS callback to fetch from `indb_auth_user_profiles` table
-- **Name Resolution**: Prioritizes `userProfile.full_name` → `user.user_metadata.full_name` → transaction details → fallback
-- **Phone Number Fix**: Proper phone number collection from `userProfile.phone_number` field
-- **Data Accuracy**: Eliminates "Customer" placeholder names with real user profile data
+**✅ CUSTOMER DATA COLLECTION ENHANCEMENT - CRITICAL FIX**:
+- **Database-First Approach**: 3DS callback now retrieves original customer data from `indb_payment_transactions.metadata.customer_info`
+- **Real Checkout Data**: Uses actual customer information submitted in checkout form (first_name, last_name, phone, email)
+- **Transaction Record Query**: Queries `indb_payment_transactions` using `gateway_transaction_id` to find original submission
+- **Data Accuracy**: Eliminates "Customer" placeholder names with real customer data from checkout form submission
+- **Complete Customer Info**: Preserves all customer details exactly as entered during payment process
 
 **✅ PAYMENT INSTRUCTIONS SMART DISPLAY**:
 - **Status-Based Instructions**: Different payment instruction messages based on transaction status
