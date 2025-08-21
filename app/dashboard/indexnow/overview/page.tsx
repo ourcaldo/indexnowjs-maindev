@@ -23,7 +23,6 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
-import { ActivityEventTypes } from '@/lib/activity-logger'
 
 // Simple UI Components using project color scheme
 const Card = ({ children, className = '' }: any) => (
@@ -321,7 +320,7 @@ export default function IndexNowOverview() {
       if (response.ok) {
         // Log activity
         await logActivity({
-          eventType: ActivityEventTypes.KEYWORD_BULK_DELETE,
+          eventType: 'keyword_bulk_delete',
           actionDescription: `Bulk deleted ${selectedKeywords.length} keywords from ${selectedDomainInfo?.domain_name || 'domain'}`,
           metadata: {
             keywordCount: selectedKeywords.length,
@@ -362,7 +361,7 @@ export default function IndexNowOverview() {
       if (response.ok) {
         // Log activity
         await logActivity({
-          eventType: ActivityEventTypes.KEYWORD_TAG_ADD,
+          eventType: 'keyword_tag_add',
           actionDescription: `Added tag "${newTag.trim()}" to ${selectedKeywords.length} keywords`,
           metadata: {
             tag: newTag.trim(),
@@ -385,7 +384,7 @@ export default function IndexNowOverview() {
   }
 
   // Get selected domain info
-  const selectedDomainInfo = domains.find(d => d.id === selectedDomainId)
+  const selectedDomainInfo = domains.find((d: any) => d.id === selectedDomainId)
 
   // Get keyword count for each domain
   const getDomainKeywordCount = (domainId: string) => {
