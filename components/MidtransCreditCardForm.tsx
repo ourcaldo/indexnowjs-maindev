@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Lock } from 'lucide-react'
 
 interface CreditCardFormData {
   card_number: string
@@ -281,13 +280,6 @@ export default function MidtransCreditCardForm({
         )}
       </div>
 
-      {/* Security Notice */}
-      <div className="flex items-center gap-2 p-3 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
-        <Lock className="h-4 w-4 text-[#4BB543]" />
-        <p className="text-sm text-[#6C757D]">
-          Your payment information is encrypted and secure
-        </p>
-      </div>
     </div>
   )
 }
