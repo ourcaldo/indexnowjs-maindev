@@ -214,7 +214,7 @@ export default function CheckoutPage() {
       })
     } finally {
       // Always reset submitting state regardless of success or failure
-      console.log('🔄 FRONTEND: Resetting submitting state')
+      
       setSubmitting(false)
     }
   }
@@ -239,15 +239,15 @@ export default function CheckoutPage() {
       }
 
       // Store original callback and override it temporarily
-      const originalCallback = window.MidtransNew3ds.callback
+      const originalCallback = (window as any).MidtransNew3ds.callback
       
-      window.MidtransNew3ds.callback = function(response: any) {
+      ;(window as any).MidtransNew3ds.callback = function(response: any) {
         if (!isResolved) {
           isResolved = true
           clearTimeout(timeout)
           
           // Restore original callback
-          window.MidtransNew3ds.callback = originalCallback
+          ;(window as any).MidtransNew3ds.callback = originalCallback
           
           if (response && response.status_code === '200' && response.token_id) {
             resolve(response.token_id)
@@ -276,7 +276,7 @@ export default function CheckoutPage() {
         if (!isResolved) {
           isResolved = true
           // Restore original callback on error
-          window.MidtransNew3ds.callback = originalCallback
+          ;(window as any).MidtransNew3ds.callback = originalCallback
           reject(new Error('Payment processing failed. Please try again.'))
         }
       }
@@ -1009,11 +1009,8 @@ export default function CheckoutPage() {
                     onClick={async () => {
                       setSubmitting(true)
                       try {
-                        console.log('🚀 FRONTEND: Starting Midtrans payment process...')
-                        
                         // Check if window.midtransSubmitCard exists
                         if (!window.midtransSubmitCard) {
-                          console.error('❌ FRONTEND: window.midtransSubmitCard not available')
                           addToast({
                             title: "Payment system not ready",
                             description: "Please wait a moment and try again.",
@@ -1023,18 +1020,14 @@ export default function CheckoutPage() {
                           return
                         }
 
-                        console.log('✅ FRONTEND: window.midtransSubmitCard available, calling it...')
                         // @ts-ignore - We expose this globally from the credit card form
                         const success = await window.midtransSubmitCard?.()
-                        console.log('📝 FRONTEND: midtransSubmitCard returned:', success)
                         
                         if (!success) {
-                          console.log('❌ FRONTEND: Payment validation failed, resetting submitting state')
                           setSubmitting(false)
                         }
                         // Note: If success is true, handleCreditCardSubmit will handle the submitting state
                       } catch (error) {
-                        console.error('❌ FRONTEND: Midtrans payment error:', error)
                         addToast({
                           title: "Payment failed",
                           description: error instanceof Error ? error.message : "Please try again later.",

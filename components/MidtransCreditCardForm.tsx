@@ -149,21 +149,14 @@ export default function MidtransCreditCardForm({
 
   // Expose validation and submit for parent component
   const handleExternalSubmit = async () => {
-    console.log('💳 CARD FORM: Starting validation...')
-    
     if (!validateForm()) {
-      console.log('❌ CARD FORM: Validation failed')
       return false
     }
     
-    console.log('✅ CARD FORM: Validation passed, calling onSubmit...')
-    
     try {
       await onSubmit(cardData)
-      console.log('✅ CARD FORM: onSubmit completed successfully')
       return true
     } catch (error) {
-      console.error('❌ CARD FORM: onSubmit failed:', error)
       // Credit card submission error handled by parent component
       return false
     }
