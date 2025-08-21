@@ -182,30 +182,6 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Got saved_token_id:', savedTokenId)
 
-    // Step 2: Save the token in dedicated table
-    const { data: savedTokenData, error: tokenError } = await supabase
-      .from('indb_midtrans_saved_tokens')
-      .upsert({
-        user_id: user.id,
-        saved_token_id: savedTokenId,
-        masked_card: maskedCard || 'Unknown',
-        card_type: chargeTransaction.card_type || 'credit',
-        bank: chargeTransaction.bank || 'Unknown',
-        token_expired_at: chargeTransaction.saved_token_id_expired_at ? new Date(chargeTransaction.saved_token_id_expired_at).toISOString() : null,
-        is_active: true,
-        metadata: {
-          transaction_id: chargeTransaction.transaction_id,
-          order_id: orderId,
-        }
-      })
-      .select()
-      .single()
-
-    if (tokenError) {
-      console.warn('⚠️ Failed to save token to database:', tokenError)
-      // Don't fail the whole transaction, just log the warning
-    }
-
     console.log('💳 Step 2: Creating subscription with saved_token_id...')
     
     // Step 3: Create subscription using the saved_token_id
@@ -281,13 +257,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create subscription record
+    // Create main subscription record in existing table
     const { data: subscriptionData, error: subscriptionError } = await supabase
       .from('indb_payment_subscriptions')
       .insert({
         user_id: user.id,
         package_id: package_id,
-        transaction_id: transactionData.id,
+        gateway_id: gatewayData.id,
         subscription_status: 'active',
         billing_period: billing_period,
         amount_paid: finalPrice,
@@ -295,18 +271,54 @@ export async function POST(request: NextRequest) {
         started_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000).toISOString(),
         auto_renew: true,
-        payment_reference: recurringPayment.subscription.id,
+        payment_reference: subscription.id, // Midtrans subscription ID
         metadata: {
-          midtrans_subscription_id: recurringPayment.subscription.id,
-          saved_token_id: recurringPayment.initial_charge.saved_token_id,
-          masked_card: recurringPayment.initial_charge.masked_card,
+          order_id: orderId,
+          initial_transaction_id: chargeTransaction.transaction_id,
         },
       })
       .select()
       .single()
 
     if (subscriptionError) {
-      console.error('Failed to create subscription record:', subscriptionError)
+      console.error('❌ Failed to create subscription record:', subscriptionError)
+      return NextResponse.json(
+        { success: false, message: 'Failed to create subscription' },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ Main subscription record created:', subscriptionData.id)
+
+    // Create Midtrans-specific data record
+    const { data: midtransData, error: midtransError } = await supabase
+      .from('indb_payment_midtrans')
+      .insert({
+        subscription_id: subscriptionData.id,
+        user_id: user.id,
+        midtrans_subscription_id: subscription.id,
+        saved_token_id: savedTokenId,
+        masked_card: maskedCard || 'Unknown',
+        card_type: chargeTransaction.card_type || 'credit',
+        bank: chargeTransaction.bank || 'Unknown',
+        token_expired_at: chargeTransaction.saved_token_id_expired_at ? new Date(chargeTransaction.saved_token_id_expired_at).toISOString() : null,
+        subscription_status: 'active',
+        next_billing_date: subscription.schedule?.next_execution_at ? new Date(subscription.schedule.next_execution_at).toISOString() : null,
+        metadata: {
+          transaction_id: chargeTransaction.transaction_id,
+          order_id: orderId,
+          subscription_name: subscription.name,
+          schedule: subscription.schedule,
+        }
+      })
+      .select()
+      .single()
+
+    if (midtransError) {
+      console.warn('⚠️ Failed to create Midtrans data record:', midtransError)
+      // Don't fail the whole transaction, just log the warning
+    } else {
+      console.log('✅ Midtrans data record created:', midtransData.id)
     }
 
     // Update user package
