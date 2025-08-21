@@ -230,10 +230,16 @@ export default function CheckoutPage() {
         has_cvv: !!cardData.cvv
       })
       
+      // Store the resolve and reject functions globally so Midtrans callback can access them
+      let isResolved = false
+      
       // Add timeout to prevent hanging
       const timeout = setTimeout(() => {
-        console.error('⏰ FRONTEND: Card tokenization timeout (15 seconds)')
-        reject(new Error('Card tokenization timeout. Please try again.'))
+        if (!isResolved) {
+          console.error('⏰ FRONTEND: Card tokenization timeout (15 seconds)')
+          isResolved = true
+          reject(new Error('Card tokenization timeout. Please try again.'))
+        }
       }, 15000) // 15 second timeout
 
       if (!window.MidtransNew3ds) {
@@ -253,32 +259,66 @@ export default function CheckoutPage() {
       console.log('✅ FRONTEND: Midtrans SDK available, calling getCardToken...')
       
       try {
+        console.log('🚀 FRONTEND: Calling MidtransNew3ds.getCardToken directly...')
+        console.log('🧪 FRONTEND: Testing card data format:', {
+          card_number: cardData.card_number.replace(/\s/g, ''),
+          card_exp_month: cardData.expiry_month.padStart(2, '0'),
+          card_exp_year: cardData.expiry_year,
+          card_cvv: cardData.cvv
+        })
+
+        // Store the callback function globally for debugging
+        const debugCallback = function(response: any) {
+          console.log('🎯 FRONTEND: *** MIDTRANS CALLBACK RECEIVED ***')
+          console.log('🎯 FRONTEND: Raw response:', response)
+          console.log('🎯 FRONTEND: Response type:', typeof response)
+          console.log('🎯 FRONTEND: Response keys:', Object.keys(response || {}))
+          console.log('🎯 FRONTEND: Status code:', response?.status_code)
+          console.log('🎯 FRONTEND: Status message:', response?.status_message)
+          console.log('🎯 FRONTEND: Token ID:', response?.token_id)
+          
+          clearTimeout(timeout)
+          
+          if (isResolved) {
+            console.log('⚠️ FRONTEND: Callback received after timeout, ignoring')
+            return
+          }
+          
+          isResolved = true
+          
+          // Check for successful response
+          if (response && (response.status_code === '200' || response.status_code === 200) && response.token_id) {
+            console.log('✅ FRONTEND: Card tokenization successful!')
+            console.log('✅ FRONTEND: Token ID received:', response.token_id)
+            resolve(response.token_id)
+          } else {
+            console.error('❌ FRONTEND: Card tokenization failed')
+            console.error('❌ FRONTEND: Status:', response?.status_code)
+            console.error('❌ FRONTEND: Message:', response?.status_message)
+            reject(new Error(response?.status_message || 'Invalid card information. Please check your details and try again.'))
+          }
+        }
+
+        // Store globally for potential manual testing
+        ;(window as any).debugMidtransCallback = debugCallback
+        
+        console.log('📞 FRONTEND: Calling getCardToken with debug callback...')
         window.MidtransNew3ds.getCardToken({
           card_number: cardData.card_number.replace(/\s/g, ''),
           card_exp_month: cardData.expiry_month.padStart(2, '0'),
           card_exp_year: cardData.expiry_year,
           card_cvv: cardData.cvv,
-        }, (response) => {
-          clearTimeout(timeout)
-          console.log('🎯 FRONTEND: Midtrans getCardToken callback received:', {
-            status_code: response.status_code,
-            status_message: response.status_message,
-            has_token_id: !!response.token_id,
-            token_preview: response.token_id ? response.token_id.substring(0, 20) + '...' : 'none'
-          })
-          
-          if (response.status_code === '200' && response.token_id) {
-            console.log('✅ FRONTEND: Card tokenization successful')
-            resolve(response.token_id)
-          } else {
-            console.error('❌ FRONTEND: Card tokenization failed:', response.status_message)
-            reject(new Error(response.status_message || 'Invalid card information. Please check your details and try again.'))
-          }
-        })
+        }, debugCallback)
+        
+        console.log('📤 FRONTEND: getCardToken call completed, waiting for callback...')
+        
       } catch (error) {
         console.error('💥 FRONTEND: Exception in getCardToken:', error)
         clearTimeout(timeout)
-        reject(new Error('Payment processing failed. Please try again.'))
+        if (!isResolved) {
+          isResolved = true
+          reject(new Error('Payment processing failed. Please try again.'))
+        }
       }
     })
   }
@@ -432,11 +472,19 @@ export default function CheckoutPage() {
         script.setAttribute('id', 'midtrans-script')
         
         script.onload = () => {
-          // Midtrans SDK loaded successfully - no browser console logs
+          console.log('🎉 FRONTEND: Midtrans SDK script loaded successfully')
+          console.log('🔍 FRONTEND: Checking window.MidtransNew3ds:', !!window.MidtransNew3ds)
+          console.log('🔍 FRONTEND: Checking getCardToken function:', typeof window.MidtransNew3ds?.getCardToken)
+          
+          // Wait a bit for SDK to fully initialize
+          setTimeout(() => {
+            console.log('🔍 FRONTEND: After timeout - window.MidtransNew3ds:', !!window.MidtransNew3ds)
+            console.log('🔍 FRONTEND: After timeout - getCardToken function:', typeof window.MidtransNew3ds?.getCardToken)
+          }, 1000)
         }
         
         script.onerror = (error) => {
-          // Failed to load Midtrans SDK - error handled silently
+          console.error('💥 FRONTEND: Failed to load Midtrans SDK:', error)
         }
 
         document.head.appendChild(script)
