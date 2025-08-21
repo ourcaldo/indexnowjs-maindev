@@ -257,44 +257,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create main subscription record in existing table
-    const { data: subscriptionData, error: subscriptionError } = await supabase
-      .from('indb_payment_subscriptions')
-      .insert({
-        user_id: user.id,
-        package_id: package_id,
-        gateway_id: gatewayData.id,
-        subscription_status: 'active',
-        billing_period: billing_period,
-        amount_paid: finalPrice,
-        currency: 'USD',
-        started_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000).toISOString(),
-        auto_renew: true,
-        payment_reference: subscription.id, // Midtrans subscription ID
-        metadata: {
-          order_id: orderId,
-          initial_transaction_id: chargeTransaction.transaction_id,
-        },
-      })
-      .select()
-      .single()
-
-    if (subscriptionError) {
-      console.error('❌ Failed to create subscription record:', subscriptionError)
-      return NextResponse.json(
-        { success: false, message: 'Failed to create subscription' },
-        { status: 500 }
-      )
-    }
-
-    console.log('✅ Main subscription record created:', subscriptionData.id)
-
-    // Create Midtrans-specific data record
+    // Create Midtrans-specific data record linked to main transaction
     const { data: midtransData, error: midtransError } = await supabase
       .from('indb_payment_midtrans')
       .insert({
-        subscription_id: subscriptionData.id,
+        transaction_id: transactionData.id, // Link to main transaction record
         user_id: user.id,
         midtrans_subscription_id: subscription.id,
         saved_token_id: savedTokenId,
@@ -305,7 +272,7 @@ export async function POST(request: NextRequest) {
         subscription_status: 'active',
         next_billing_date: subscription.schedule?.next_execution_at ? new Date(subscription.schedule.next_execution_at).toISOString() : null,
         metadata: {
-          transaction_id: chargeTransaction.transaction_id,
+          midtrans_transaction_id: chargeTransaction.transaction_id,
           order_id: orderId,
           subscription_name: subscription.name,
           schedule: subscription.schedule,
@@ -340,14 +307,13 @@ export async function POST(request: NextRequest) {
       message: 'Recurring payment setup successfully',
       data: {
         transaction_id: transactionData.id,
-        subscription_id: subscriptionData?.id,
-        midtrans_subscription_id: recurringPayment.subscription.id,
+        midtrans_subscription_id: subscription.id,
         order_id: orderId,
         amount: finalPrice,
         currency: 'USD',
         billing_period: billing_period,
-        next_billing_date: recurringPayment.subscription.schedule.next_execution_at,
-        masked_card: recurringPayment.initial_charge.masked_card,
+        next_billing_date: subscription.schedule?.next_execution_at,
+        masked_card: maskedCard,
         redirect_url: `/dashboard/settings/plans-billing/orders/${transactionData.id}`,
       },
     })
