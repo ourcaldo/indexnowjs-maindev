@@ -968,7 +968,7 @@ export default function CheckoutPage() {
                               <div>
                                 <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
                                 <div className="text-sm text-[#6C757D]">{gateway.description}</div>
-                                {gateway.configuration?.bank_name && (
+                                {gateway.configuration?.bank_name && form.payment_method === gateway.id && (
                                   <div className="text-sm text-[#1A1A1A] mt-2 p-2 bg-[#F7F9FC] rounded border">
                                     <div className="font-semibold">Bank Details:</div>
                                     <div className="text-xs space-y-1 mt-1">
