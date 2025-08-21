@@ -866,6 +866,39 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+**MIDTRANS RECURRING CREDIT CARD PAYMENT SYSTEM COMPLETED (August 21, 2025)**
+- ✅ **COMPLETE MIDTRANS RECURRING PAYMENT IMPLEMENTATION**: Successfully replaced Snap one-time payments with proper recurring credit card payment system
+  - **Two-Step Payment Process**: Initial credit card charge to get saved token → Create subscription using saved token
+  - **Core API Integration**: Implemented Midtrans Core API for initial charges with card tokenization (save_card: true)
+  - **Subscription API Integration**: Full subscription creation with saved card tokens for automated recurring payments
+  - **Credit Card Form UI**: Professional credit card form component with real-time validation and formatting
+  - **Security Features**: Card number formatting, CVV masking, expiry validation, and PCI-compliant card data handling
+- ✅ **NEW MIDTRANS RECURRING API ENDPOINT**: Created `/api/billing/midtrans-recurring` endpoint for complete payment flow
+  - **Initial Charge Processing**: Creates initial transaction with card details to obtain saved token from Midtrans
+  - **Subscription Creation**: Uses saved token to create recurring subscription with proper billing schedule
+  - **Database Integration**: Records transaction and subscription data in existing payment tables
+  - **Error Handling**: Comprehensive error handling for card failures, token issues, and subscription creation
+  - **User Profile Updates**: Automatically updates user package and expiration dates upon successful payment
+- ✅ **ENHANCED MIDTRANS SERVICE**: Extended MidtransService with Core API and complete recurring payment methods
+  - **createInitialCharge()**: Processes credit card through Core API to get saved token
+  - **createRecurringPayment()**: Complete flow combining initial charge + subscription creation
+  - **Currency Conversion**: Automatic USD to IDR conversion for Midtrans requirements
+  - **Billing Schedule**: Support for monthly/yearly billing with proper next billing date calculation
+  - **Enhanced Error Handling**: Detailed error messages for payment failures and card token issues
+- ✅ **CHECKOUT FLOW REDESIGN**: Completely redesigned checkout page to support credit card form for Midtrans
+  - **Dynamic UI**: Shows credit card form when Midtrans is selected, regular order button for other gateways
+  - **User Experience**: Clear instructions and visual cues for recurring payment setup
+  - **Form Integration**: Seamless integration between customer info form and credit card details
+  - **Status Feedback**: Real-time payment processing status with proper loading states and success messages
+  - **Redirect Flow**: Automatic redirect to order details page upon successful payment setup
+- **Files Created/Modified**:
+  - `components/MidtransCreditCardForm.tsx`: Professional credit card form with validation and formatting
+  - `app/api/billing/midtrans-recurring/route.ts`: Complete recurring payment API endpoint
+  - `lib/midtrans-service.ts`: Enhanced with Core API methods and recurring payment flow
+  - `app/dashboard/settings/plans-billing/checkout/page.tsx`: Updated checkout flow for credit card payments
+- **Legacy Code Removed**: Eliminated all Snap-related code, popup handling, and one-time payment logic
+- **Result**: Users can now set up recurring credit card payments with automatic billing through Midtrans Core API
+
 **MIDTRANS PAYMENT GATEWAY INTEGRATION IMPLEMENTED (August 21, 2025)**
 - ✅ **MIDTRANS RECURRING SUBSCRIPTION GATEWAY ADDED**: Successfully integrated Midtrans payment gateway for automatic recurring credit card payments
   - **Admin Payment Settings Enhanced**: Added comprehensive Midtrans configuration section in backend admin settings

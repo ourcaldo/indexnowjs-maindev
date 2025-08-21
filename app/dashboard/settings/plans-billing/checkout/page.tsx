@@ -15,6 +15,7 @@ import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { authService } from '@/lib/auth'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { formatCurrency } from '@/lib/currency-utils'
+import MidtransCreditCardForm from '@/components/MidtransCreditCardForm'
 
 // Midtrans Snap type declarations
 declare global {
@@ -85,7 +86,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [userCurrency, setUserCurrency] = useState<'USD' | 'IDR'>('USD')
-  const [snapLoaded, setSnapLoaded] = useState(false)
+  const [showCreditCardForm, setShowCreditCardForm] = useState(false)
   
   // Log page view and checkout activities
   usePageViewLogger('/dashboard/settings/plans-billing/checkout', 'Checkout', { section: 'billing_checkout' })
@@ -105,28 +106,31 @@ export default function CheckoutPage() {
     payment_method: ''
   })
 
-  // Load Midtrans Snap SDK
-  useEffect(() => {
-    const loadSnapSDK = async () => {
-      if (window.snap) {
-        setSnapLoaded(true)
-        return
+  // Handle credit card form submission for Midtrans
+  const handleCreditCardSubmit = async (cardData: any) => {
+    setSubmitting(true)
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) {
+        throw new Error('Authentication required')
       }
 
-      try {
-        const script = document.createElement('script')
-        script.src = 'https://app.sandbox.midtrans.com/snap/snap.js'
-        script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '')
-        script.onload = () => setSnapLoaded(true)
-        script.onerror = () => console.error('Failed to load Midtrans Snap SDK')
-        document.head.appendChild(script)
-      } catch (error) {
-        console.error('Error loading Midtrans Snap SDK:', error)
+      const token = await authService.getToken()
+      if (!token) {
+        throw new Error('Failed to get authentication token')
       }
+
+      await handleMidtransRecurringPayment(cardData, token)
+    } catch (error) {
+      console.error('Credit card payment error:', error)
+      addToast({
+        title: "Payment failed",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        type: "error"
+      })
+      setSubmitting(false)
     }
-
-    loadSnapSDK()
-  }, [])
+  }
 
   // Fetch package and payment gateway data
   useEffect(() => {
@@ -297,8 +301,14 @@ export default function CheckoutPage() {
       const selectedGateway = paymentGateways.find(gw => gw.id === form.payment_method)
       
       if (selectedGateway?.slug === 'midtrans') {
-        // Handle Midtrans credit card payment
-        await handleMidtransPayment(token)
+        // Midtrans requires credit card form, handled separately
+        addToast({
+          title: "Credit card information required",
+          description: "Please fill in your credit card details below to setup recurring payment.",
+          type: "info"
+        })
+        setSubmitting(false)
+        return
       } else {
         // Handle other payment methods (bank transfer, etc.)
         await handleRegularCheckout(token)
@@ -316,17 +326,8 @@ export default function CheckoutPage() {
     }
   }
 
-  const handleMidtransPayment = async (token: string) => {
-    if (!snapLoaded || !window.snap) {
-      addToast({
-        title: "Payment system not ready",
-        description: "Please wait for the payment system to load and try again.",
-        type: "error"
-      })
-      return
-    }
-
-    const response = await fetch('/api/billing/midtrans/create-payment', {
+  const handleMidtransRecurringPayment = async (cardData: any, token: string) => {
+    const response = await fetch('/api/billing/midtrans-recurring', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -346,7 +347,8 @@ export default function CheckoutPage() {
           zip_code: form.zip_code,
           country: form.country,
           description: form.description
-        }
+        },
+        card_data: cardData
       }),
     })
 
@@ -354,40 +356,20 @@ export default function CheckoutPage() {
 
     if (result.success) {
       // Log activity
-      logBillingActivity(`Initiated Midtrans payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data.order_id})`)
+      logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data.order_id})`)
 
-      // Open Midtrans Snap payment
-      window.snap.pay(result.data.snap_token, {
-        onSuccess: (result: any) => {
-          addToast({
-            title: "Payment successful!",
-            description: "Your subscription has been activated.",
-            type: "success"
-          })
-          router.push('/dashboard/settings/plans-billing?payment=success')
-        },
-        onPending: (result: any) => {
-          addToast({
-            title: "Payment pending",
-            description: "Your payment is being processed. You'll receive a notification once completed.",
-            type: "info"  
-          })
-          router.push('/dashboard/settings/plans-billing?payment=pending')
-        },
-        onError: (result: any) => {
-          addToast({
-            title: "Payment failed",
-            description: "There was an error processing your payment. Please try again.",
-            type: "error"
-          })
-        },
-        onClose: () => {
-          // User closed the payment popup
-          setSubmitting(false)
-        }
+      addToast({
+        title: "Recurring payment setup successful!",
+        description: `Your ${billing_period} subscription has been activated. Card ending in ${result.data.masked_card?.slice(-4) || 'xxxx'} will be charged automatically.`,
+        type: "success"
       })
+      
+      // Redirect to order details
+      setTimeout(() => {
+        router.push(result.data.redirect_url)
+      }, 1500)
     } else {
-      throw new Error(result.error || 'Failed to create Midtrans payment')
+      throw new Error(result.message || 'Failed to setup recurring payment')
     }
   }
 
@@ -692,6 +674,17 @@ export default function CheckoutPage() {
                   </RadioGroup>
                 </CardContent>
               </Card>
+              
+              {/* Midtrans Credit Card Form */}
+              {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' && (
+                <div className="mt-6">
+                  <MidtransCreditCardForm
+                    onSubmit={handleCreditCardSubmit}
+                    loading={submitting}
+                    disabled={submitting}
+                  />
+                </div>
+              )}
             </form>
           </div>
 
@@ -763,28 +756,37 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  onClick={handleSubmit}
-                  disabled={submitting || !form.payment_method}
-                  className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12 mt-6"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      {paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' 
-                        ? 'Pay with Credit Card'
-                        : 'Complete Order'
-                      }
-                    </>
-                  )}
-                </Button>
+                {/* Submit Button - Only show for non-Midtrans payments */}
+                {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && (
+                  <Button
+                    type="submit"
+                    onClick={handleSubmit}
+                    disabled={submitting || !form.payment_method}
+                    className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12 mt-6"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Complete Order
+                      </>
+                    )}
+                  </Button>
+                )}
+                
+                {/* Note for Midtrans */}
+                {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' && (
+                  <div className="w-full bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg p-4 mt-6">
+                    <p className="text-sm text-[#6C757D] text-center">
+                      <CreditCard className="h-4 w-4 inline mr-2" />
+                      Please fill in your credit card details below to setup recurring payment
+                    </p>
+                  </div>
+                )}
 
                 {/* Security Note */}
                 <div className="text-center">
