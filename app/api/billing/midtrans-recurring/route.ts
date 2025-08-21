@@ -8,12 +8,13 @@ const supabase = createClient(
 )
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 Midtrans recurring payment API called')
+  console.log('\n🚀 ================== MIDTRANS RECURRING PAYMENT STARTED ==================')
+  console.log('⏰ Timestamp:', new Date().toISOString())
   
   try {
     // Get authenticated user from Authorization header
     const authHeader = request.headers.get('authorization')
-    console.log('🔐 Auth header present:', !!authHeader)
+    console.log('🔐 Auth header check - Present:', !!authHeader)
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log('❌ Authentication failed - missing or invalid auth header')
@@ -33,12 +34,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('📥 Starting to parse request body...')
     const body = await request.json()
-    console.log('📝 Request body received:', { 
+    console.log('✅ Request body parsed successfully')
+    console.log('📝 Request body summary:', { 
       package_id: body.package_id, 
       billing_period: body.billing_period,
       has_customer_info: !!body.customer_info,
-      has_card_data: !!body.card_data
+      has_token_id: !!body.token_id,
+      token_id_length: body.token_id?.length || 0,
+      token_id_preview: body.token_id ? body.token_id.substring(0, 20) + '...' : 'none'
     })
     
     const { 
@@ -56,10 +61,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate token_id
-    console.log('🔐 Token validation:', {
-      has_token_id: !!token_id,
-      token_length: token_id?.length
+    console.log('🔍 Validating required fields...')
+    console.log('📋 Field validation:', {
+      package_id: !!package_id,
+      billing_period: !!billing_period,
+      customer_info: !!customer_info,
+      token_id: !!token_id,
+      token_id_length: token_id?.length || 0
     })
     
     if (!token_id || typeof token_id !== 'string' || token_id.length < 10) {
@@ -71,13 +79,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Get Midtrans payment gateway configuration from database
-    console.log('🔍 Fetching Midtrans gateway configuration from database...')
+    console.log('🏪 Fetching Midtrans gateway configuration from database...')
+    console.log('⏳ Database query starting...')
     const { data: midtransGateway, error: gatewayError } = await supabase
       .from('indb_payment_gateways')
       .select('id, configuration, api_credentials')
       .eq('slug', 'midtrans')
       .eq('is_active', true)
       .single()
+    
+    console.log('✅ Database query completed')
+    console.log('📊 Gateway query result:', {
+      found: !!midtransGateway,
+      error: !!gatewayError,
+      error_message: gatewayError?.message
+    })
 
     if (gatewayError || !midtransGateway) {
       console.log('❌ Failed to fetch Midtrans gateway configuration:', gatewayError)
@@ -100,11 +116,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Get package details
+    console.log('📦 Fetching package details for ID:', package_id)
     const { data: packageData, error: packageError } = await supabase
       .from('indb_payment_packages')
       .select('*')
       .eq('id', package_id)
       .single()
+    
+    console.log('📦 Package query result:', {
+      found: !!packageData,
+      error: !!packageError,
+      package_name: packageData?.name
+    })
 
     if (packageError || !packageData) {
       return NextResponse.json(
@@ -126,17 +149,30 @@ export async function POST(request: NextRequest) {
     const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     // Initialize Midtrans service with credentials from database
-    console.log('🏗️ Initializing Midtrans service with database credentials')
+    console.log('🏗️ Initializing Midtrans service...')
+    console.log('🔧 Service config:', {
+      has_server_key: !!server_key,
+      has_client_key: !!client_key,
+      environment: environment,
+      has_merchant_id: !!merchant_id
+    })
+    
     const midtransService = createMidtransService({
       server_key,
       client_key,
       environment,
       merchant_id
     })
+    
+    console.log('✅ Midtrans service initialized successfully')
 
-    console.log('💳 Step 1: Creating initial charge to get saved_token_id...')
+    console.log('\n💳 ============= STEP 1: CREATING CHARGE TRANSACTION =============')
+    console.log('🎯 Order ID:', orderId)
+    console.log('💰 Final price (USD):', finalPrice)
+    console.log('🔑 Token ID preview:', token_id.substring(0, 20) + '...')
     
     // Step 1: Create charge transaction to get saved_token_id
+    console.log('⏳ Calling midtransService.createChargeTransaction...')
     const chargeTransaction = await midtransService.createChargeTransaction({
       order_id: orderId,
       amount_usd: finalPrice,
@@ -153,11 +189,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log('✅ Charge transaction completed!')
     console.log('📋 Charge transaction result:', {
       transaction_id: chargeTransaction.transaction_id,
+      order_id: chargeTransaction.order_id,
       transaction_status: chargeTransaction.transaction_status,
       fraud_status: chargeTransaction.fraud_status,
-      has_saved_token: !!chargeTransaction.saved_token_id
+      status_code: chargeTransaction.status_code,
+      status_message: chargeTransaction.status_message,
+      has_saved_token: !!chargeTransaction.saved_token_id,
+      saved_token_preview: chargeTransaction.saved_token_id ? chargeTransaction.saved_token_id.substring(0, 20) + '...' : 'none',
+      masked_card: chargeTransaction.masked_card
     })
 
     // Check if charge was successful
@@ -182,9 +224,13 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Got saved_token_id:', savedTokenId)
 
-    console.log('💳 Step 2: Creating subscription with saved_token_id...')
+    console.log('\n🔄 ============= STEP 2: CREATING SUBSCRIPTION =============')
+    console.log('🔑 Using saved_token_id:', savedTokenId.substring(0, 20) + '...')
+    console.log('💰 Subscription amount (USD):', finalPrice)
+    console.log('📅 Billing period:', billing_period)
     
     // Step 3: Create subscription using the saved_token_id
+    console.log('⏳ Calling midtransService.createSubscription...')
     const subscription = await midtransService.createSubscription(finalPrice, {
       name: `${packageData.name}_${billing_period}`.toUpperCase(),
       token: savedTokenId,
@@ -208,7 +254,16 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log('✅ Subscription created:', subscription.id)
+    console.log('✅ Subscription created successfully!')
+    console.log('📋 Subscription result:', {
+      subscription_id: subscription.id,
+      name: subscription.name,
+      status: subscription.status,
+      amount: subscription.amount,
+      currency: subscription.currency,
+      next_execution: subscription.schedule?.next_execution_at,
+      created_at: subscription.created_at
+    })
 
     // Combine results for compatibility
     const recurringPayment = {
@@ -220,7 +275,10 @@ export async function POST(request: NextRequest) {
       subscription: subscription,
     }
 
+    console.log('\n💾 ============= STEP 3: SAVING TO DATABASE =============')
+    
     // Create transaction record in database
+    console.log('📝 Creating transaction record in indb_payment_transactions...')
     const { data: transactionData, error: transactionError } = await supabase
       .from('indb_payment_transactions')
       .insert({
@@ -250,14 +308,17 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (transactionError) {
-      console.error('Failed to create transaction record:', transactionError)
+      console.error('❌ TRANSACTION RECORD CREATION FAILED:', transactionError)
       return NextResponse.json(
         { success: false, message: 'Failed to save transaction' },
         { status: 500 }
       )
     }
+    
+    console.log('✅ Transaction record created:', transactionData.id)
 
     // Create Midtrans-specific data record linked to main transaction
+    console.log('📝 Creating Midtrans record in indb_payment_midtrans...')
     const { data: midtransData, error: midtransError } = await supabase
       .from('indb_payment_midtrans')
       .insert({
@@ -302,7 +363,8 @@ export async function POST(request: NextRequest) {
       console.error('Failed to update user profile:', userUpdateError)
     }
 
-    return NextResponse.json({
+    console.log('\n🎉 ============= SUCCESS: PAYMENT COMPLETED =============')
+    const responseData = {
       success: true,
       message: 'Recurring payment setup successfully',
       data: {
@@ -316,10 +378,17 @@ export async function POST(request: NextRequest) {
         masked_card: maskedCard,
         redirect_url: `/dashboard/settings/plans-billing/orders/${transactionData.id}`,
       },
-    })
+    }
+    
+    console.log('📤 Sending success response:', JSON.stringify(responseData, null, 2))
+    console.log('🏁 ================== MIDTRANS PAYMENT COMPLETED ==================\n')
+    
+    return NextResponse.json(responseData)
 
   } catch (error) {
-    console.error('Midtrans recurring payment error:', error)
+    console.error('\n❌ ============= ERROR: PAYMENT FAILED =============')
+    console.error('💥 Error details:', error)
+    console.error('📍 Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     
     let errorMessage = 'Payment processing failed'
     if (error instanceof Error) {
