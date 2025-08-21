@@ -93,6 +93,7 @@ export default function MidtransCreditCardForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     
     if (!validateForm()) {
       return

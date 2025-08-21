@@ -843,11 +843,13 @@ export default function CheckoutPage() {
                         {/* Credit Card Form - Inside the payment method selection */}
                         {form.payment_method === gateway.id && gateway.slug === 'midtrans' && (
                           <div className="ml-8 mt-4">
-                            <MidtransCreditCardForm
-                              onSubmit={handleCreditCardSubmit}
-                              loading={submitting}
-                              disabled={submitting}
-                            />
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <MidtransCreditCardForm
+                                onSubmit={handleCreditCardSubmit}
+                                loading={submitting}
+                                disabled={submitting}
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
@@ -856,6 +858,28 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
               
+              {/* Submit Button - Only show for non-Midtrans payments */}
+              {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && (
+                <div className="mt-6">
+                  <Button
+                    type="submit"
+                    disabled={submitting || !form.payment_method}
+                    className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Complete Order
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
             </form>
             
             {/* Credit Card Form now moved inside payment method selection above */}
@@ -929,27 +953,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Submit Button - Only show for non-Midtrans payments */}
-                {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && (
-                  <Button
-                    type="submit"
-                    onClick={handleSubmit}
-                    disabled={submitting || !form.payment_method}
-                    className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12 mt-6"
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Complete Order
-                      </>
-                    )}
-                  </Button>
-                )}
+
                 
                 {/* Note for Midtrans */}
                 {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' && (
