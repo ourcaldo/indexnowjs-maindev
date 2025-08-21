@@ -1,0 +1,52 @@
+🔐 3DS Authentication required, returning redirect URL to frontend
+ POST /api/billing/midtrans-recurring 200 in 4731ms
+ GET /api/site-settings 200 in 95ms
+ GET /api/public/packages 200 in 102ms
+ ⚠ Blocked cross-origin request from 18d33999-c6b9-4970-9e85-bd8f019c0e20-00-1yg3xsxwzh9cp.spock.replit.dev to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ✓ Compiled /api/billing/midtrans-3ds-callback in 195ms (985 modules)
+
+🔐 ============= 3DS AUTHENTICATION CALLBACK =============
+📋 3DS Callback received: {
+  transaction_id: '7a72a6f7-1f0b-430d-9c6a-f266f527b3e7',
+  order_id: 'ORDER-1755795340755-NKG387YXM'
+}
+🔍 Checking transaction status after 3DS authentication
+🔍 Getting transaction status for: 7a72a6f7-1f0b-430d-9c6a-f266f527b3e7
+🔗 Making GET request to: https://api.sandbox.midtrans.com/v2/7a72a6f7-1f0b-430d-9c6a-f266f527b3e7/status
+📥 Response (200): {
+  "status_code": "200",
+  "transaction_id": "7a72a6f7-1f0b-430d-9c6a-f266f527b3e7",
+  "gross_amount": "732956.00",
+  "currency": "IDR",
+  "order_id": "ORDER-1755795340755-NKG387YXM",
+  "payment_type": "credit_card",
+  "signature_key": "e98082cc21fdc55f4de07f8c3cce076397cf384f41ae5d917b16183c47f9e4207280d7326e1fa0fbf4bc518a4ef6537837a25da9b4b02a9907ed2588f265da59",
+  "transaction_status": "capture",
+  "fraud_status": "accept",
+  "status_message": "Success, Credit Card capture transaction is successful",
+  "merchant_id": "G643888341",
+  "transaction_time": "2025-08-21 23:55:41",
+  "settlement_time": "2025-08-21 23:55:48",
+  "expiry_time": "2025-08-29 23:55:41",
+  "channel_response_code": "00",
+  "channel_response_message": "Approved",
+  "bank": "bni",
+  "approval_code": "1755795348082",
+  "masked_card": "48111111-1114",
+  "card_type": "credit",
+  "channel": "dragon",
+  "three_ds_version": "2",
+  "on_us": false,
+  "challenge_completion": true,
+  "eci": "05",
+  "saved_token_id": "48111111QIoPyduzGNVNUKDdFjYn1114",
+  "saved_token_id_expired_at": "2029-12-31 07:00:00"
+}
+📋 Transaction status after 3DS: {
+  transaction_status: 'capture',
+  fraud_status: 'accept',
+  status_code: '200',
+  status_message: 'Success, Credit Card capture transaction is successful',
+  has_saved_token: true
+}

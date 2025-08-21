@@ -45,462 +45,461 @@ If an updates affectig the database and RLS. You need to provide the SQL Query f
 
 All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | table_name                        | column_name                 | data_type                | is_nullable | column_default                                                   |
-| --------------------------------- | --------------------------- | ------------------------ | ----------- | ---------------------------------------------------------------- |
-| admin_dashboard_stats             | total_users                 | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | regular_users               | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | admin_users                 | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | super_admin_users           | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | total_jobs                  | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | active_jobs                 | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | completed_jobs              | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | failed_jobs                 | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | total_service_accounts      | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | active_service_accounts     | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | daily_api_requests          | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | published_posts             | bigint                   | YES         | null                                                             |
-| admin_dashboard_stats             | published_pages             | bigint                   | YES         | null                                                             |
-| indb_analytics_daily_stats        | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_analytics_daily_stats        | user_id                     | uuid                     | NO          | null                                                             |
-| indb_analytics_daily_stats        | date                        | date                     | NO          | null                                                             |
-| indb_analytics_daily_stats        | total_jobs                  | integer                  | YES         | 0                                                                |
-| indb_analytics_daily_stats        | completed_jobs              | integer                  | YES         | 0                                                                |
-| indb_analytics_daily_stats        | failed_jobs                 | integer                  | YES         | 0                                                                |
-| indb_analytics_daily_stats        | total_urls_submitted        | integer                  | YES         | 0                                                                |
-| indb_analytics_daily_stats        | total_urls_indexed          | integer                  | YES         | 0                                                                |
-| indb_analytics_daily_stats        | total_urls_failed           | integer                  | YES         | 0                                                                |
-| indb_analytics_daily_stats        | quota_usage                 | integer                  | YES         | 0                                                                |
-| indb_analytics_daily_stats        | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_analytics_daily_stats        | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_analytics_error_stats        | error_date                  | date                     | YES         | null                                                             |
-| indb_analytics_error_stats        | user_id                     | uuid                     | YES         | null                                                             |
-| indb_analytics_error_stats        | error_type                  | text                     | YES         | null                                                             |
-| indb_analytics_error_stats        | severity                    | text                     | YES         | null                                                             |
-| indb_analytics_error_stats        | error_count                 | bigint                   | YES         | null                                                             |
-| indb_analytics_error_stats        | affected_endpoints          | bigint                   | YES         | null                                                             |
-| indb_analytics_error_stats        | last_occurrence             | timestamp with time zone | YES         | null                                                             |
-| indb_auth_user_profiles           | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_auth_user_profiles           | user_id                     | uuid                     | NO          | null                                                             |
-| indb_auth_user_profiles           | full_name                   | text                     | YES         | null                                                             |
-| indb_auth_user_profiles           | role                        | text                     | YES         | 'user'::text                                                     |
-| indb_auth_user_profiles           | email_notifications         | boolean                  | YES         | true                                                             |
-| indb_auth_user_profiles           | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_auth_user_profiles           | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_auth_user_profiles           | phone_number                | text                     | YES         | null                                                             |
-| indb_auth_user_profiles           | package_id                  | uuid                     | YES         | null                                                             |
-| indb_auth_user_profiles           | subscribed_at               | timestamp with time zone | YES         | null                                                             |
-| indb_auth_user_profiles           | expires_at                  | timestamp with time zone | YES         | null                                                             |
-| indb_auth_user_profiles           | daily_quota_used            | integer                  | YES         | 0                                                                |
-| indb_auth_user_profiles           | daily_quota_reset_date      | date                     | YES         | CURRENT_DATE                                                     |
-| indb_auth_user_profiles           | email                       | text                     | YES         | null                                                             |
-| indb_auth_user_settings           | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_auth_user_settings           | user_id                     | uuid                     | NO          | null                                                             |
-| indb_auth_user_settings           | timeout_duration            | integer                  | YES         | 30000                                                            |
-| indb_auth_user_settings           | retry_attempts              | integer                  | YES         | 3                                                                |
-| indb_auth_user_settings           | email_job_completion        | boolean                  | YES         | true                                                             |
-| indb_auth_user_settings           | email_job_failure           | boolean                  | YES         | true                                                             |
-| indb_auth_user_settings           | email_quota_alerts          | boolean                  | YES         | true                                                             |
-| indb_auth_user_settings           | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_auth_user_settings           | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_auth_user_settings           | default_schedule            | text                     | YES         | 'one-time'::text                                                 |
-| indb_auth_user_settings           | email_daily_report          | boolean                  | YES         | true                                                             |
-| indb_cms_pages                    | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_cms_pages                    | title                       | text                     | NO          | null                                                             |
-| indb_cms_pages                    | slug                        | text                     | NO          | null                                                             |
-| indb_cms_pages                    | content                     | text                     | YES         | null                                                             |
-| indb_cms_pages                    | template                    | text                     | YES         | 'default'::text                                                  |
-| indb_cms_pages                    | featured_image_url          | text                     | YES         | null                                                             |
-| indb_cms_pages                    | author_id                   | uuid                     | YES         | null                                                             |
-| indb_cms_pages                    | status                      | text                     | YES         | 'draft'::text                                                    |
-| indb_cms_pages                    | is_homepage                 | boolean                  | YES         | false                                                            |
-| indb_cms_pages                    | meta_title                  | text                     | YES         | null                                                             |
-| indb_cms_pages                    | meta_description            | text                     | YES         | null                                                             |
-| indb_cms_pages                    | custom_css                  | text                     | YES         | null                                                             |
-| indb_cms_pages                    | custom_js                   | text                     | YES         | null                                                             |
-| indb_cms_pages                    | published_at                | timestamp with time zone | YES         | null                                                             |
-| indb_cms_pages                    | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_cms_pages                    | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_cms_posts                    | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_cms_posts                    | title                       | text                     | NO          | null                                                             |
-| indb_cms_posts                    | slug                        | text                     | NO          | null                                                             |
-| indb_cms_posts                    | content                     | text                     | YES         | null                                                             |
-| indb_cms_posts                    | excerpt                     | text                     | YES         | null                                                             |
-| indb_cms_posts                    | featured_image_url          | text                     | YES         | null                                                             |
-| indb_cms_posts                    | author_id                   | uuid                     | YES         | null                                                             |
-| indb_cms_posts                    | status                      | text                     | YES         | 'draft'::text                                                    |
-| indb_cms_posts                    | post_type                   | text                     | YES         | 'post'::text                                                     |
-| indb_cms_posts                    | meta_title                  | text                     | YES         | null                                                             |
-| indb_cms_posts                    | meta_description            | text                     | YES         | null                                                             |
-| indb_cms_posts                    | tags                        | jsonb                    | YES         | '[]'::jsonb                                                      |
-| indb_cms_posts                    | published_at                | timestamp with time zone | YES         | null                                                             |
-| indb_cms_posts                    | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_cms_posts                    | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_error_analytics              | error_date                  | date                     | YES         | null                                                             |
-| indb_error_analytics              | user_id                     | uuid                     | YES         | null                                                             |
-| indb_error_analytics              | error_type                  | text                     | YES         | null                                                             |
-| indb_error_analytics              | severity                    | text                     | YES         | null                                                             |
-| indb_error_analytics              | error_count                 | bigint                   | YES         | null                                                             |
-| indb_error_analytics              | affected_endpoints          | bigint                   | YES         | null                                                             |
-| indb_error_analytics              | last_occurrence             | timestamp with time zone | YES         | null                                                             |
-| indb_google_quota_alerts          | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_google_quota_alerts          | service_account_id          | uuid                     | NO          | null                                                             |
-| indb_google_quota_alerts          | alert_type                  | text                     | NO          | null                                                             |
-| indb_google_quota_alerts          | threshold_percentage        | integer                  | NO          | null                                                             |
-| indb_google_quota_alerts          | is_active                   | boolean                  | YES         | true                                                             |
-| indb_google_quota_alerts          | last_triggered_at           | timestamp with time zone | YES         | null                                                             |
-| indb_google_quota_alerts          | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_google_quota_alerts          | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_google_quota_usage           | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_google_quota_usage           | service_account_id          | uuid                     | NO          | null                                                             |
-| indb_google_quota_usage           | date                        | date                     | NO          | null                                                             |
-| indb_google_quota_usage           | requests_made               | integer                  | YES         | 0                                                                |
-| indb_google_quota_usage           | requests_successful         | integer                  | YES         | 0                                                                |
-| indb_google_quota_usage           | requests_failed             | integer                  | YES         | 0                                                                |
-| indb_google_quota_usage           | last_request_at             | timestamp with time zone | YES         | null                                                             |
-| indb_google_quota_usage           | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_google_quota_usage           | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_google_quota_usage           | user_id                     | uuid                     | YES         | null                                                             |
-| indb_google_service_accounts      | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_google_service_accounts      | user_id                     | uuid                     | NO          | null                                                             |
-| indb_google_service_accounts      | name                        | text                     | NO          | null                                                             |
-| indb_google_service_accounts      | email                       | text                     | NO          | null                                                             |
-| indb_google_service_accounts      | encrypted_credentials       | text                     | NO          | null                                                             |
-| indb_google_service_accounts      | is_active                   | boolean                  | YES         | true                                                             |
-| indb_google_service_accounts      | daily_quota_limit           | integer                  | YES         | 200                                                              |
-| indb_google_service_accounts      | minute_quota_limit          | integer                  | YES         | 60                                                               |
-| indb_google_service_accounts      | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_google_service_accounts      | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_google_service_accounts      | encrypted_access_token      | text                     | YES         | null                                                             |
-| indb_google_service_accounts      | access_token_expires_at     | timestamp with time zone | YES         | null                                                             |
-| indb_indexing_job_logs            | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_indexing_job_logs            | job_id                      | uuid                     | NO          | null                                                             |
-| indb_indexing_job_logs            | level                       | text                     | NO          | null                                                             |
-| indb_indexing_job_logs            | message                     | text                     | NO          | null                                                             |
-| indb_indexing_job_logs            | metadata                    | jsonb                    | YES         | null                                                             |
-| indb_indexing_job_logs            | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_indexing_job_logs            | correlation_id              | uuid                     | YES         | null                                                             |
-| indb_indexing_job_logs            | error_severity              | text                     | YES         | null                                                             |
-| indb_indexing_jobs                | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_indexing_jobs                | user_id                     | uuid                     | NO          | null                                                             |
-| indb_indexing_jobs                | name                        | text                     | NO          | null                                                             |
-| indb_indexing_jobs                | type                        | text                     | NO          | null                                                             |
-| indb_indexing_jobs                | status                      | text                     | YES         | 'pending'::text                                                  |
-| indb_indexing_jobs                | schedule_type               | text                     | YES         | 'one-time'::text                                                 |
-| indb_indexing_jobs                | cron_expression             | text                     | YES         | null                                                             |
-| indb_indexing_jobs                | source_data                 | jsonb                    | YES         | null                                                             |
-| indb_indexing_jobs                | total_urls                  | integer                  | YES         | 0                                                                |
-| indb_indexing_jobs                | processed_urls              | integer                  | YES         | 0                                                                |
-| indb_indexing_jobs                | successful_urls             | integer                  | YES         | 0                                                                |
-| indb_indexing_jobs                | failed_urls                 | integer                  | YES         | 0                                                                |
-| indb_indexing_jobs                | progress_percentage         | numeric                  | YES         | 0                                                                |
-| indb_indexing_jobs                | started_at                  | timestamp with time zone | YES         | null                                                             |
-| indb_indexing_jobs                | completed_at                | timestamp with time zone | YES         | null                                                             |
-| indb_indexing_jobs                | next_run_at                 | timestamp with time zone | YES         | null                                                             |
-| indb_indexing_jobs                | error_message               | text                     | YES         | null                                                             |
-| indb_indexing_jobs                | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_indexing_jobs                | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_indexing_jobs                | locked_at                   | timestamp with time zone | YES         | null                                                             |
-| indb_indexing_jobs                | locked_by                   | text                     | YES         | null                                                             |
-| indb_indexing_url_submissions     | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_indexing_url_submissions     | job_id                      | uuid                     | NO          | null                                                             |
-| indb_indexing_url_submissions     | service_account_id          | uuid                     | YES         | null                                                             |
-| indb_indexing_url_submissions     | url                         | text                     | NO          | null                                                             |
-| indb_indexing_url_submissions     | status                      | text                     | YES         | 'pending'::text                                                  |
-| indb_indexing_url_submissions     | submitted_at                | timestamp with time zone | YES         | null                                                             |
-| indb_indexing_url_submissions     | indexed_at                  | timestamp with time zone | YES         | null                                                             |
-| indb_indexing_url_submissions     | response_data               | jsonb                    | YES         | null                                                             |
-| indb_indexing_url_submissions     | error_message               | text                     | YES         | null                                                             |
-| indb_indexing_url_submissions     | retry_count                 | integer                  | YES         | 0                                                                |
-| indb_indexing_url_submissions     | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_indexing_url_submissions     | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_countries            | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_keyword_countries            | name                        | text                     | NO          | null                                                             |
-| indb_keyword_countries            | iso2_code                   | text                     | NO          | null                                                             |
-| indb_keyword_countries            | iso3_code                   | text                     | NO          | null                                                             |
-| indb_keyword_countries            | numeric_code                | text                     | NO          | null                                                             |
-| indb_keyword_countries            | is_active                   | boolean                  | NO          | true                                                             |
-| indb_keyword_countries            | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_countries            | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_domains              | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_keyword_domains              | user_id                     | uuid                     | NO          | null                                                             |
-| indb_keyword_domains              | domain_name                 | text                     | NO          | null                                                             |
-| indb_keyword_domains              | display_name                | text                     | YES         | null                                                             |
-| indb_keyword_domains              | is_active                   | boolean                  | NO          | true                                                             |
-| indb_keyword_domains              | verification_status         | text                     | NO          | 'pending'::text                                                  |
-| indb_keyword_domains              | verification_code           | text                     | YES         | null                                                             |
-| indb_keyword_domains              | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_domains              | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_keywords             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_keyword_keywords             | user_id                     | uuid                     | NO          | null                                                             |
-| indb_keyword_keywords             | domain_id                   | uuid                     | NO          | null                                                             |
-| indb_keyword_keywords             | keyword                     | text                     | NO          | null                                                             |
-| indb_keyword_keywords             | device_type                 | text                     | NO          | 'desktop'::text                                                  |
-| indb_keyword_keywords             | country_id                  | uuid                     | NO          | null                                                             |
-| indb_keyword_keywords             | tags                        | ARRAY                    | YES         | '{}'::text[]                                                     |
-| indb_keyword_keywords             | is_active                   | boolean                  | NO          | true                                                             |
-| indb_keyword_keywords             | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_keywords             | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_keywords             | last_check_date             | date                     | YES         | null                                                             |
-| indb_keyword_rank_history         | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_keyword_rank_history         | keyword_id                  | uuid                     | NO          | null                                                             |
-| indb_keyword_rank_history         | position                    | integer                  | YES         | null                                                             |
-| indb_keyword_rank_history         | url                         | text                     | YES         | null                                                             |
-| indb_keyword_rank_history         | search_volume               | integer                  | YES         | null                                                             |
-| indb_keyword_rank_history         | difficulty_score            | integer                  | YES         | null                                                             |
-| indb_keyword_rank_history         | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
-| indb_keyword_rank_history         | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_rank_history         | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_rank_history         | device_type                 | text                     | YES         | null                                                             |
-| indb_keyword_rank_history         | country_id                  | uuid                     | YES         | null                                                             |
-| indb_keyword_rank_history         | tags                        | ARRAY                    | YES         | null                                                             |
-| indb_keyword_rankings             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_keyword_rankings             | keyword_id                  | uuid                     | NO          | null                                                             |
-| indb_keyword_rankings             | position                    | integer                  | YES         | null                                                             |
-| indb_keyword_rankings             | url                         | text                     | YES         | null                                                             |
-| indb_keyword_rankings             | search_volume               | integer                  | YES         | null                                                             |
-| indb_keyword_rankings             | difficulty_score            | integer                  | YES         | null                                                             |
-| indb_keyword_rankings             | check_date                  | date                     | NO          | CURRENT_DATE                                                     |
-| indb_keyword_rankings             | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_rankings             | device_type                 | text                     | YES         | null                                                             |
-| indb_keyword_rankings             | country_id                  | uuid                     | YES         | null                                                             |
-| indb_keyword_rankings             | tags                        | ARRAY                    | YES         | null                                                             |
-| indb_keyword_usage                | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_keyword_usage                | user_id                     | uuid                     | NO          | null                                                             |
-| indb_keyword_usage                | keywords_used               | integer                  | NO          | 0                                                                |
-| indb_keyword_usage                | keywords_limit              | integer                  | NO          | 0                                                                |
-| indb_keyword_usage                | period_start                | timestamp with time zone | NO          | date_trunc('month'::text, now())                                 |
-| indb_keyword_usage                | period_end                  | timestamp with time zone | NO          | (date_trunc('month'::text, now()) + '1 mon -00:00:01'::interval) |
-| indb_keyword_usage                | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_keyword_usage                | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_notifications_dashboard      | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_notifications_dashboard      | user_id                     | uuid                     | NO          | null                                                             |
-| indb_notifications_dashboard      | type                        | text                     | NO          | null                                                             |
-| indb_notifications_dashboard      | title                       | text                     | NO          | null                                                             |
-| indb_notifications_dashboard      | message                     | text                     | NO          | null                                                             |
-| indb_notifications_dashboard      | is_read                     | boolean                  | YES         | false                                                            |
-| indb_notifications_dashboard      | action_url                  | text                     | YES         | null                                                             |
-| indb_notifications_dashboard      | metadata                    | jsonb                    | YES         | null                                                             |
-| indb_notifications_dashboard      | expires_at                  | timestamp with time zone | YES         | null                                                             |
-| indb_notifications_dashboard      | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_notifications_email_queue    | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_notifications_email_queue    | user_id                     | uuid                     | NO          | null                                                             |
-| indb_notifications_email_queue    | template_type               | text                     | NO          | null                                                             |
-| indb_notifications_email_queue    | to_email                    | text                     | NO          | null                                                             |
-| indb_notifications_email_queue    | subject                     | text                     | NO          | null                                                             |
-| indb_notifications_email_queue    | html_content                | text                     | NO          | null                                                             |
-| indb_notifications_email_queue    | status                      | text                     | YES         | 'pending'::text                                                  |
-| indb_notifications_email_queue    | attempts                    | integer                  | YES         | 0                                                                |
-| indb_notifications_email_queue    | sent_at                     | timestamp with time zone | YES         | null                                                             |
-| indb_notifications_email_queue    | error_message               | text                     | YES         | null                                                             |
-| indb_notifications_email_queue    | metadata                    | jsonb                    | YES         | null                                                             |
-| indb_notifications_email_queue    | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_notifications_email_queue    | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_gateways             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_payment_gateways             | name                        | text                     | NO          | null                                                             |
-| indb_payment_gateways             | slug                        | text                     | NO          | null                                                             |
-| indb_payment_gateways             | description                 | text                     | YES         | null                                                             |
-| indb_payment_gateways             | is_active                   | boolean                  | YES         | true                                                             |
-| indb_payment_gateways             | is_default                  | boolean                  | YES         | false                                                            |
-| indb_payment_gateways             | configuration               | jsonb                    | YES         | '{}'::jsonb                                                      |
-| indb_payment_gateways             | api_credentials             | jsonb                    | YES         | '{}'::jsonb                                                      |
-| indb_payment_gateways             | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_gateways             | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_invoices             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_payment_invoices             | user_id                     | uuid                     | NO          | null                                                             |
-| indb_payment_invoices             | subscription_id             | uuid                     | YES         | null                                                             |
-| indb_payment_invoices             | transaction_id              | uuid                     | YES         | null                                                             |
-| indb_payment_invoices             | invoice_number              | text                     | NO          | null                                                             |
-| indb_payment_invoices             | invoice_status              | text                     | NO          | 'draft'::text                                                    |
-| indb_payment_invoices             | subtotal                    | numeric                  | NO          | null                                                             |
-| indb_payment_invoices             | tax_amount                  | numeric                  | YES         | 0                                                                |
-| indb_payment_invoices             | discount_amount             | numeric                  | YES         | 0                                                                |
-| indb_payment_invoices             | total_amount                | numeric                  | NO          | null                                                             |
-| indb_payment_invoices             | currency                    | text                     | NO          | 'IDR'::text                                                      |
-| indb_payment_invoices             | due_date                    | date                     | YES         | null                                                             |
-| indb_payment_invoices             | paid_at                     | timestamp with time zone | YES         | null                                                             |
-| indb_payment_invoices             | invoice_data                | jsonb                    | NO          | null                                                             |
-| indb_payment_invoices             | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_invoices             | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_packages             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_payment_packages             | name                        | text                     | NO          | null                                                             |
-| indb_payment_packages             | slug                        | text                     | NO          | null                                                             |
-| indb_payment_packages             | description                 | text                     | YES         | null                                                             |
-| indb_payment_packages             | price                       | numeric                  | NO          | 0                                                                |
-| indb_payment_packages             | currency                    | text                     | YES         | 'USD'::text                                                      |
-| indb_payment_packages             | billing_period              | text                     | YES         | 'monthly'::text                                                  |
-| indb_payment_packages             | features                    | jsonb                    | YES         | '[]'::jsonb                                                      |
-| indb_payment_packages             | quota_limits                | jsonb                    | YES         | '{}'::jsonb                                                      |
-| indb_payment_packages             | is_active                   | boolean                  | YES         | true                                                             |
-| indb_payment_packages             | sort_order                  | integer                  | YES         | 0                                                                |
-| indb_payment_packages             | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_packages             | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_packages             | is_popular                  | boolean                  | YES         | false                                                            |
-| indb_payment_packages             | pricing_tiers               | jsonb                    | YES         | '[]'::jsonb                                                      |
-| indb_payment_subscriptions        | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_payment_subscriptions        | user_id                     | uuid                     | NO          | null                                                             |
-| indb_payment_subscriptions        | package_id                  | uuid                     | NO          | null                                                             |
-| indb_payment_subscriptions        | gateway_id                  | uuid                     | NO          | null                                                             |
-| indb_payment_subscriptions        | subscription_status         | text                     | NO          | 'pending'::text                                                  |
-| indb_payment_subscriptions        | billing_period              | text                     | NO          | null                                                             |
-| indb_payment_subscriptions        | amount_paid                 | numeric                  | NO          | null                                                             |
-| indb_payment_subscriptions        | currency                    | text                     | NO          | 'IDR'::text                                                      |
-| indb_payment_subscriptions        | started_at                  | timestamp with time zone | YES         | null                                                             |
-| indb_payment_subscriptions        | expires_at                  | timestamp with time zone | YES         | null                                                             |
-| indb_payment_subscriptions        | auto_renew                  | boolean                  | YES         | false                                                            |
-| indb_payment_subscriptions        | payment_reference           | text                     | YES         | null                                                             |
-| indb_payment_subscriptions        | metadata                    | jsonb                    | YES         | '{}'::jsonb                                                      |
-| indb_payment_subscriptions        | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_subscriptions        | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_transactions         | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_payment_transactions         | user_id                     | uuid                     | NO          | null                                                             |
-| indb_payment_transactions         | subscription_id             | uuid                     | YES         | null                                                             |
-| indb_payment_transactions         | package_id                  | uuid                     | NO          | null                                                             |
-| indb_payment_transactions         | gateway_id                  | uuid                     | NO          | null                                                             |
-| indb_payment_transactions         | transaction_type            | text                     | NO          | null                                                             |
-| indb_payment_transactions         | transaction_status          | text                     | NO          | 'pending'::text                                                  |
-| indb_payment_transactions         | amount                      | numeric                  | NO          | null                                                             |
-| indb_payment_transactions         | currency                    | text                     | NO          | 'IDR'::text                                                      |
-| indb_payment_transactions         | payment_method              | text                     | YES         | null                                                             |
-| indb_payment_transactions         | payment_reference           | text                     | YES         | null                                                             |
-| indb_payment_transactions         | payment_proof_url           | text                     | YES         | null                                                             |
-| indb_payment_transactions         | gateway_transaction_id      | text                     | YES         | null                                                             |
-| indb_payment_transactions         | gateway_response            | jsonb                    | YES         | '{}'::jsonb                                                      |
-| indb_payment_transactions         | processed_at                | timestamp with time zone | YES         | null                                                             |
-| indb_payment_transactions         | verified_by                 | uuid                     | YES         | null                                                             |
-| indb_payment_transactions         | verified_at                 | timestamp with time zone | YES         | null                                                             |
-| indb_payment_transactions         | notes                       | text                     | YES         | null                                                             |
-| indb_payment_transactions         | metadata                    | jsonb                    | YES         | '{}'::jsonb                                                      |
-| indb_payment_transactions         | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_transactions         | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_payment_transactions_history | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_payment_transactions_history | transaction_id              | uuid                     | NO          | null                                                             |
-| indb_payment_transactions_history | old_status                  | text                     | YES         | null                                                             |
-| indb_payment_transactions_history | new_status                  | text                     | NO          | null                                                             |
-| indb_payment_transactions_history | action_type                 | text                     | NO          | null                                                             |
-| indb_payment_transactions_history | action_description          | text                     | NO          | null                                                             |
-| indb_payment_transactions_history | changed_by                  | uuid                     | YES         | null                                                             |
-| indb_payment_transactions_history | changed_by_type             | text                     | NO          | 'user'::text                                                     |
-| indb_payment_transactions_history | old_values                  | jsonb                    | YES         | null                                                             |
-| indb_payment_transactions_history | new_values                  | jsonb                    | YES         | null                                                             |
-| indb_payment_transactions_history | notes                       | text                     | YES         | null                                                             |
-| indb_payment_transactions_history | metadata                    | jsonb                    | YES         | null                                                             |
-| indb_payment_transactions_history | ip_address                  | inet                     | YES         | null                                                             |
-| indb_payment_transactions_history | user_agent                  | text                     | YES         | null                                                             |
-| indb_payment_transactions_history | created_at                  | timestamp with time zone | YES         | timezone('utc'::text, now())                                     |
-| indb_security_activity_logs       | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_security_activity_logs       | user_id                     | uuid                     | YES         | null                                                             |
-| indb_security_activity_logs       | event_type                  | text                     | NO          | null                                                             |
-| indb_security_activity_logs       | action_description          | text                     | NO          | null                                                             |
-| indb_security_activity_logs       | target_type                 | text                     | YES         | null                                                             |
-| indb_security_activity_logs       | target_id                   | uuid                     | YES         | null                                                             |
-| indb_security_activity_logs       | ip_address                  | inet                     | YES         | null                                                             |
-| indb_security_activity_logs       | user_agent                  | text                     | YES         | null                                                             |
-| indb_security_activity_logs       | device_info                 | jsonb                    | YES         | null                                                             |
-| indb_security_activity_logs       | location_data               | jsonb                    | YES         | null                                                             |
-| indb_security_activity_logs       | success                     | boolean                  | YES         | true                                                             |
-| indb_security_activity_logs       | error_message               | text                     | YES         | null                                                             |
-| indb_security_activity_logs       | metadata                    | jsonb                    | YES         | null                                                             |
-| indb_security_activity_logs       | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_security_audit_logs          | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_security_audit_logs          | user_id                     | uuid                     | YES         | null                                                             |
-| indb_security_audit_logs          | event_type                  | text                     | NO          | null                                                             |
-| indb_security_audit_logs          | description                 | text                     | NO          | null                                                             |
-| indb_security_audit_logs          | ip_address                  | inet                     | YES         | null                                                             |
-| indb_security_audit_logs          | user_agent                  | text                     | YES         | null                                                             |
-| indb_security_audit_logs          | success                     | boolean                  | YES         | true                                                             |
-| indb_security_audit_logs          | metadata                    | jsonb                    | YES         | null                                                             |
-| indb_security_audit_logs          | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_security_rate_limits         | id                          | uuid                     | NO          | uuid_generate_v4()                                               |
-| indb_security_rate_limits         | identifier                  | text                     | NO          | null                                                             |
-| indb_security_rate_limits         | endpoint                    | text                     | NO          | null                                                             |
-| indb_security_rate_limits         | requests_count              | integer                  | YES         | 1                                                                |
-| indb_security_rate_limits         | window_start                | timestamp with time zone | YES         | now()                                                            |
-| indb_security_rate_limits         | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_security_rate_limits         | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_site_integration             | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_site_integration             | service_name                | text                     | NO          | 'scrapingdog'::text                                              |
-| indb_site_integration             | scrappingdog_apikey         | text                     | NO          | null                                                             |
-| indb_site_integration             | api_quota_limit             | integer                  | YES         | 1000                                                             |
-| indb_site_integration             | api_quota_used              | integer                  | YES         | 0                                                                |
-| indb_site_integration             | quota_reset_date            | date                     | YES         | CURRENT_DATE                                                     |
-| indb_site_integration             | is_active                   | boolean                  | YES         | true                                                             |
-| indb_site_integration             | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_site_integration             | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_site_settings                | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_site_settings                | site_name                   | text                     | NO          | 'IndexNow Pro'::text                                             |
-| indb_site_settings                | site_description            | text                     | YES         | 'Professional URL indexing automation platform'::text            |
-| indb_site_settings                | site_logo_url               | text                     | YES         | null                                                             |
-| indb_site_settings                | site_icon_url               | text                     | YES         | null                                                             |
-| indb_site_settings                | site_favicon_url            | text                     | YES         | null                                                             |
-| indb_site_settings                | contact_email               | text                     | YES         | null                                                             |
-| indb_site_settings                | support_email               | text                     | YES         | null                                                             |
-| indb_site_settings                | maintenance_mode            | boolean                  | YES         | false                                                            |
-| indb_site_settings                | registration_enabled        | boolean                  | YES         | true                                                             |
-| indb_site_settings                | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_site_settings                | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_system_error_logs            | id                          | uuid                     | NO          | gen_random_uuid()                                                |
-| indb_system_error_logs            | user_id                     | uuid                     | YES         | null                                                             |
-| indb_system_error_logs            | error_type                  | text                     | NO          | null                                                             |
-| indb_system_error_logs            | severity                    | text                     | NO          | null                                                             |
-| indb_system_error_logs            | message                     | text                     | NO          | null                                                             |
-| indb_system_error_logs            | user_message                | text                     | NO          | null                                                             |
-| indb_system_error_logs            | endpoint                    | text                     | YES         | null                                                             |
-| indb_system_error_logs            | http_method                 | text                     | YES         | null                                                             |
-| indb_system_error_logs            | status_code                 | integer                  | YES         | null                                                             |
-| indb_system_error_logs            | metadata                    | jsonb                    | YES         | null                                                             |
-| indb_system_error_logs            | stack_trace                 | text                     | YES         | null                                                             |
-| indb_system_error_logs            | created_at                  | timestamp with time zone | YES         | now()                                                            |
-| indb_system_error_logs            | updated_at                  | timestamp with time zone | YES         | now()                                                            |
-| recent_jobs_with_stats            | id                          | uuid                     | YES         | null                                                             |
-| recent_jobs_with_stats            | user_id                     | uuid                     | YES         | null                                                             |
-| recent_jobs_with_stats            | name                        | text                     | YES         | null                                                             |
-| recent_jobs_with_stats            | type                        | text                     | YES         | null                                                             |
-| recent_jobs_with_stats            | status                      | text                     | YES         | null                                                             |
-| recent_jobs_with_stats            | schedule_type               | text                     | YES         | null                                                             |
-| recent_jobs_with_stats            | cron_expression             | text                     | YES         | null                                                             |
-| recent_jobs_with_stats            | source_data                 | jsonb                    | YES         | null                                                             |
-| recent_jobs_with_stats            | total_urls                  | integer                  | YES         | null                                                             |
-| recent_jobs_with_stats            | processed_urls              | integer                  | YES         | null                                                             |
-| recent_jobs_with_stats            | successful_urls             | integer                  | YES         | null                                                             |
-| recent_jobs_with_stats            | failed_urls                 | integer                  | YES         | null                                                             |
-| recent_jobs_with_stats            | progress_percentage         | numeric                  | YES         | null                                                             |
-| recent_jobs_with_stats            | started_at                  | timestamp with time zone | YES         | null                                                             |
-| recent_jobs_with_stats            | completed_at                | timestamp with time zone | YES         | null                                                             |
-| recent_jobs_with_stats            | next_run_at                 | timestamp with time zone | YES         | null                                                             |
-| recent_jobs_with_stats            | error_message               | text                     | YES         | null                                                             |
-| recent_jobs_with_stats            | created_at                  | timestamp with time zone | YES         | null                                                             |
-| recent_jobs_with_stats            | updated_at                  | timestamp with time zone | YES         | null                                                             |
-| recent_jobs_with_stats            | locked_at                   | timestamp with time zone | YES         | null                                                             |
-| recent_jobs_with_stats            | locked_by                   | text                     | YES         | null                                                             |
-| recent_jobs_with_stats            | submission_count            | bigint                   | YES         | null                                                             |
-| recent_jobs_with_stats            | successful_count            | bigint                   | YES         | null                                                             |
-| recent_jobs_with_stats            | failed_count                | bigint                   | YES         | null                                                             |
-| user_billing_summary              | user_id                     | uuid                     | YES         | null                                                             |
-| user_billing_summary              | full_name                   | text                     | YES         | null                                                             |
-| user_billing_summary              | package_id                  | uuid                     | YES         | null                                                             |
-| user_billing_summary              | package_name                | text                     | YES         | null                                                             |
-| user_billing_summary              | package_slug                | text                     | YES         | null                                                             |
-| user_billing_summary              | subscribed_at               | timestamp with time zone | YES         | null                                                             |
-| user_billing_summary              | expires_at                  | timestamp with time zone | YES         | null                                                             |
-| user_billing_summary              | subscription_status         | text                     | YES         | null                                                             |
-| user_billing_summary              | current_subscription_status | text                     | YES         | null                                                             |
-| user_billing_summary              | total_payments              | bigint                   | YES         | null                                                             |
-| user_billing_summary              | total_spent                 | numeric                  | YES         | null                                                             |
-| user_dashboard_stats              | user_id                     | uuid                     | YES         | null                                                             |
-| user_dashboard_stats              | total_urls_indexed          | bigint                   | YES         | null                                                             |
-| user_dashboard_stats              | active_jobs                 | bigint                   | YES         | null                                                             |
-| user_dashboard_stats              | scheduled_jobs              | bigint                   | YES         | null                                                             |
-| user_dashboard_stats              | success_rate                | integer                  | YES         | null                                                             |
-| user_quota_summary                | user_id                     | uuid                     | YES         | null                                                             |
-| user_quota_summary                | total_quota_used            | bigint                   | YES         | null                                                             |
-| user_quota_summary                | service_account_count       | bigint                   | YES         | null                                                             |
-| user_quota_summary                | total_quota_limit           | bigint                   | YES         | null                                                             |
-| user_quota_summary                | package_name                | text                     | YES         | null                                                             |
-| user_quota_summary                | daily_quota_limit           | integer                  | YES         | null                                                             |
-| user_quota_summary                | service_accounts_limit      | integer                  | YES         | null                                                             |
-| user_quota_summary                | concurrent_jobs_limit       | integer                  | YES         | null                                                             |
-| user_quota_summary                | daily_quota_used            | bigint                   | YES         | null                                                             |
-| user_quota_summary                | daily_quota_reset_date      | date                     | YES         | null                                                             |
-| user_quota_summary                | is_unlimited                | boolean                  | YES         | null                                                             |
+| table_name                        | column_name              | data_type                | is_nullable | column_default                                                   |
+| --------------------------------- | ------------------------ | ------------------------ | ----------- | ---------------------------------------------------------------- |
+| admin_dashboard_stats             | total_users              | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | regular_users            | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | admin_users              | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | super_admin_users        | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | total_jobs               | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | active_jobs              | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | completed_jobs           | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | failed_jobs              | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | total_service_accounts   | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | active_service_accounts  | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | daily_api_requests       | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | published_posts          | bigint                   | YES         | null                                                             |
+| admin_dashboard_stats             | published_pages          | bigint                   | YES         | null                                                             |
+| indb_analytics_daily_stats        | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_analytics_daily_stats        | user_id                  | uuid                     | NO          | null                                                             |
+| indb_analytics_daily_stats        | date                     | date                     | NO          | null                                                             |
+| indb_analytics_daily_stats        | total_jobs               | integer                  | YES         | 0                                                                |
+| indb_analytics_daily_stats        | completed_jobs           | integer                  | YES         | 0                                                                |
+| indb_analytics_daily_stats        | failed_jobs              | integer                  | YES         | 0                                                                |
+| indb_analytics_daily_stats        | total_urls_submitted     | integer                  | YES         | 0                                                                |
+| indb_analytics_daily_stats        | total_urls_indexed       | integer                  | YES         | 0                                                                |
+| indb_analytics_daily_stats        | total_urls_failed        | integer                  | YES         | 0                                                                |
+| indb_analytics_daily_stats        | quota_usage              | integer                  | YES         | 0                                                                |
+| indb_analytics_daily_stats        | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_analytics_daily_stats        | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_analytics_error_stats        | error_date               | date                     | YES         | null                                                             |
+| indb_analytics_error_stats        | user_id                  | uuid                     | YES         | null                                                             |
+| indb_analytics_error_stats        | error_type               | text                     | YES         | null                                                             |
+| indb_analytics_error_stats        | severity                 | text                     | YES         | null                                                             |
+| indb_analytics_error_stats        | error_count              | bigint                   | YES         | null                                                             |
+| indb_analytics_error_stats        | affected_endpoints       | bigint                   | YES         | null                                                             |
+| indb_analytics_error_stats        | last_occurrence          | timestamp with time zone | YES         | null                                                             |
+| indb_auth_user_profiles           | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_auth_user_profiles           | user_id                  | uuid                     | NO          | null                                                             |
+| indb_auth_user_profiles           | full_name                | text                     | YES         | null                                                             |
+| indb_auth_user_profiles           | role                     | text                     | YES         | 'user'::text                                                     |
+| indb_auth_user_profiles           | email_notifications      | boolean                  | YES         | true                                                             |
+| indb_auth_user_profiles           | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_auth_user_profiles           | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_auth_user_profiles           | phone_number             | text                     | YES         | null                                                             |
+| indb_auth_user_profiles           | package_id               | uuid                     | YES         | null                                                             |
+| indb_auth_user_profiles           | subscribed_at            | timestamp with time zone | YES         | null                                                             |
+| indb_auth_user_profiles           | expires_at               | timestamp with time zone | YES         | null                                                             |
+| indb_auth_user_profiles           | daily_quota_used         | integer                  | YES         | 0                                                                |
+| indb_auth_user_profiles           | daily_quota_reset_date   | date                     | YES         | CURRENT_DATE                                                     |
+| indb_auth_user_profiles           | email                    | text                     | YES         | null                                                             |
+| indb_auth_user_profiles           | country                  | text                     | YES         | null                                                             |
+| indb_auth_user_settings           | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_auth_user_settings           | user_id                  | uuid                     | NO          | null                                                             |
+| indb_auth_user_settings           | timeout_duration         | integer                  | YES         | 30000                                                            |
+| indb_auth_user_settings           | retry_attempts           | integer                  | YES         | 3                                                                |
+| indb_auth_user_settings           | email_job_completion     | boolean                  | YES         | true                                                             |
+| indb_auth_user_settings           | email_job_failure        | boolean                  | YES         | true                                                             |
+| indb_auth_user_settings           | email_quota_alerts       | boolean                  | YES         | true                                                             |
+| indb_auth_user_settings           | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_auth_user_settings           | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_auth_user_settings           | default_schedule         | text                     | YES         | 'one-time'::text                                                 |
+| indb_auth_user_settings           | email_daily_report       | boolean                  | YES         | true                                                             |
+| indb_cms_pages                    | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_cms_pages                    | title                    | text                     | NO          | null                                                             |
+| indb_cms_pages                    | slug                     | text                     | NO          | null                                                             |
+| indb_cms_pages                    | content                  | text                     | YES         | null                                                             |
+| indb_cms_pages                    | template                 | text                     | YES         | 'default'::text                                                  |
+| indb_cms_pages                    | featured_image_url       | text                     | YES         | null                                                             |
+| indb_cms_pages                    | author_id                | uuid                     | YES         | null                                                             |
+| indb_cms_pages                    | status                   | text                     | YES         | 'draft'::text                                                    |
+| indb_cms_pages                    | is_homepage              | boolean                  | YES         | false                                                            |
+| indb_cms_pages                    | meta_title               | text                     | YES         | null                                                             |
+| indb_cms_pages                    | meta_description         | text                     | YES         | null                                                             |
+| indb_cms_pages                    | custom_css               | text                     | YES         | null                                                             |
+| indb_cms_pages                    | custom_js                | text                     | YES         | null                                                             |
+| indb_cms_pages                    | published_at             | timestamp with time zone | YES         | null                                                             |
+| indb_cms_pages                    | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_cms_pages                    | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_cms_posts                    | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_cms_posts                    | title                    | text                     | NO          | null                                                             |
+| indb_cms_posts                    | slug                     | text                     | NO          | null                                                             |
+| indb_cms_posts                    | content                  | text                     | YES         | null                                                             |
+| indb_cms_posts                    | excerpt                  | text                     | YES         | null                                                             |
+| indb_cms_posts                    | featured_image_url       | text                     | YES         | null                                                             |
+| indb_cms_posts                    | author_id                | uuid                     | YES         | null                                                             |
+| indb_cms_posts                    | status                   | text                     | YES         | 'draft'::text                                                    |
+| indb_cms_posts                    | post_type                | text                     | YES         | 'post'::text                                                     |
+| indb_cms_posts                    | meta_title               | text                     | YES         | null                                                             |
+| indb_cms_posts                    | meta_description         | text                     | YES         | null                                                             |
+| indb_cms_posts                    | tags                     | jsonb                    | YES         | '[]'::jsonb                                                      |
+| indb_cms_posts                    | published_at             | timestamp with time zone | YES         | null                                                             |
+| indb_cms_posts                    | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_cms_posts                    | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_error_analytics              | error_date               | date                     | YES         | null                                                             |
+| indb_error_analytics              | user_id                  | uuid                     | YES         | null                                                             |
+| indb_error_analytics              | error_type               | text                     | YES         | null                                                             |
+| indb_error_analytics              | severity                 | text                     | YES         | null                                                             |
+| indb_error_analytics              | error_count              | bigint                   | YES         | null                                                             |
+| indb_error_analytics              | affected_endpoints       | bigint                   | YES         | null                                                             |
+| indb_error_analytics              | last_occurrence          | timestamp with time zone | YES         | null                                                             |
+| indb_google_quota_alerts          | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_google_quota_alerts          | service_account_id       | uuid                     | NO          | null                                                             |
+| indb_google_quota_alerts          | alert_type               | text                     | NO          | null                                                             |
+| indb_google_quota_alerts          | threshold_percentage     | integer                  | NO          | null                                                             |
+| indb_google_quota_alerts          | is_active                | boolean                  | YES         | true                                                             |
+| indb_google_quota_alerts          | last_triggered_at        | timestamp with time zone | YES         | null                                                             |
+| indb_google_quota_alerts          | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_google_quota_alerts          | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_google_quota_usage           | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_google_quota_usage           | service_account_id       | uuid                     | NO          | null                                                             |
+| indb_google_quota_usage           | date                     | date                     | NO          | null                                                             |
+| indb_google_quota_usage           | requests_made            | integer                  | YES         | 0                                                                |
+| indb_google_quota_usage           | requests_successful      | integer                  | YES         | 0                                                                |
+| indb_google_quota_usage           | requests_failed          | integer                  | YES         | 0                                                                |
+| indb_google_quota_usage           | last_request_at          | timestamp with time zone | YES         | null                                                             |
+| indb_google_quota_usage           | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_google_quota_usage           | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_google_quota_usage           | user_id                  | uuid                     | YES         | null                                                             |
+| indb_google_service_accounts      | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_google_service_accounts      | user_id                  | uuid                     | NO          | null                                                             |
+| indb_google_service_accounts      | name                     | text                     | NO          | null                                                             |
+| indb_google_service_accounts      | email                    | text                     | NO          | null                                                             |
+| indb_google_service_accounts      | encrypted_credentials    | text                     | NO          | null                                                             |
+| indb_google_service_accounts      | is_active                | boolean                  | YES         | true                                                             |
+| indb_google_service_accounts      | daily_quota_limit        | integer                  | YES         | 200                                                              |
+| indb_google_service_accounts      | minute_quota_limit       | integer                  | YES         | 60                                                               |
+| indb_google_service_accounts      | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_google_service_accounts      | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_google_service_accounts      | encrypted_access_token   | text                     | YES         | null                                                             |
+| indb_google_service_accounts      | access_token_expires_at  | timestamp with time zone | YES         | null                                                             |
+| indb_indexing_job_logs            | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_indexing_job_logs            | job_id                   | uuid                     | NO          | null                                                             |
+| indb_indexing_job_logs            | level                    | text                     | NO          | null                                                             |
+| indb_indexing_job_logs            | message                  | text                     | NO          | null                                                             |
+| indb_indexing_job_logs            | metadata                 | jsonb                    | YES         | null                                                             |
+| indb_indexing_job_logs            | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_indexing_job_logs            | correlation_id           | uuid                     | YES         | null                                                             |
+| indb_indexing_job_logs            | error_severity           | text                     | YES         | null                                                             |
+| indb_indexing_jobs                | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_indexing_jobs                | user_id                  | uuid                     | NO          | null                                                             |
+| indb_indexing_jobs                | name                     | text                     | NO          | null                                                             |
+| indb_indexing_jobs                | type                     | text                     | NO          | null                                                             |
+| indb_indexing_jobs                | status                   | text                     | YES         | 'pending'::text                                                  |
+| indb_indexing_jobs                | schedule_type            | text                     | YES         | 'one-time'::text                                                 |
+| indb_indexing_jobs                | cron_expression          | text                     | YES         | null                                                             |
+| indb_indexing_jobs                | source_data              | jsonb                    | YES         | null                                                             |
+| indb_indexing_jobs                | total_urls               | integer                  | YES         | 0                                                                |
+| indb_indexing_jobs                | processed_urls           | integer                  | YES         | 0                                                                |
+| indb_indexing_jobs                | successful_urls          | integer                  | YES         | 0                                                                |
+| indb_indexing_jobs                | failed_urls              | integer                  | YES         | 0                                                                |
+| indb_indexing_jobs                | progress_percentage      | numeric                  | YES         | 0                                                                |
+| indb_indexing_jobs                | started_at               | timestamp with time zone | YES         | null                                                             |
+| indb_indexing_jobs                | completed_at             | timestamp with time zone | YES         | null                                                             |
+| indb_indexing_jobs                | next_run_at              | timestamp with time zone | YES         | null                                                             |
+| indb_indexing_jobs                | error_message            | text                     | YES         | null                                                             |
+| indb_indexing_jobs                | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_indexing_jobs                | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_indexing_jobs                | locked_at                | timestamp with time zone | YES         | null                                                             |
+| indb_indexing_jobs                | locked_by                | text                     | YES         | null                                                             |
+| indb_indexing_url_submissions     | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_indexing_url_submissions     | job_id                   | uuid                     | NO          | null                                                             |
+| indb_indexing_url_submissions     | service_account_id       | uuid                     | YES         | null                                                             |
+| indb_indexing_url_submissions     | url                      | text                     | NO          | null                                                             |
+| indb_indexing_url_submissions     | status                   | text                     | YES         | 'pending'::text                                                  |
+| indb_indexing_url_submissions     | submitted_at             | timestamp with time zone | YES         | null                                                             |
+| indb_indexing_url_submissions     | indexed_at               | timestamp with time zone | YES         | null                                                             |
+| indb_indexing_url_submissions     | response_data            | jsonb                    | YES         | null                                                             |
+| indb_indexing_url_submissions     | error_message            | text                     | YES         | null                                                             |
+| indb_indexing_url_submissions     | retry_count              | integer                  | YES         | 0                                                                |
+| indb_indexing_url_submissions     | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_indexing_url_submissions     | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_countries            | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_keyword_countries            | name                     | text                     | NO          | null                                                             |
+| indb_keyword_countries            | iso2_code                | text                     | NO          | null                                                             |
+| indb_keyword_countries            | iso3_code                | text                     | NO          | null                                                             |
+| indb_keyword_countries            | numeric_code             | text                     | NO          | null                                                             |
+| indb_keyword_countries            | is_active                | boolean                  | NO          | true                                                             |
+| indb_keyword_countries            | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_countries            | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_domains              | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_keyword_domains              | user_id                  | uuid                     | NO          | null                                                             |
+| indb_keyword_domains              | domain_name              | text                     | NO          | null                                                             |
+| indb_keyword_domains              | display_name             | text                     | YES         | null                                                             |
+| indb_keyword_domains              | is_active                | boolean                  | NO          | true                                                             |
+| indb_keyword_domains              | verification_status      | text                     | NO          | 'pending'::text                                                  |
+| indb_keyword_domains              | verification_code        | text                     | YES         | null                                                             |
+| indb_keyword_domains              | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_domains              | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_keywords             | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_keyword_keywords             | user_id                  | uuid                     | NO          | null                                                             |
+| indb_keyword_keywords             | domain_id                | uuid                     | NO          | null                                                             |
+| indb_keyword_keywords             | keyword                  | text                     | NO          | null                                                             |
+| indb_keyword_keywords             | device_type              | text                     | NO          | 'desktop'::text                                                  |
+| indb_keyword_keywords             | country_id               | uuid                     | NO          | null                                                             |
+| indb_keyword_keywords             | tags                     | ARRAY                    | YES         | '{}'::text[]                                                     |
+| indb_keyword_keywords             | is_active                | boolean                  | NO          | true                                                             |
+| indb_keyword_keywords             | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_keywords             | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_keywords             | last_check_date          | date                     | YES         | null                                                             |
+| indb_keyword_rank_history         | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_keyword_rank_history         | keyword_id               | uuid                     | NO          | null                                                             |
+| indb_keyword_rank_history         | position                 | integer                  | YES         | null                                                             |
+| indb_keyword_rank_history         | url                      | text                     | YES         | null                                                             |
+| indb_keyword_rank_history         | search_volume            | integer                  | YES         | null                                                             |
+| indb_keyword_rank_history         | difficulty_score         | integer                  | YES         | null                                                             |
+| indb_keyword_rank_history         | check_date               | date                     | NO          | CURRENT_DATE                                                     |
+| indb_keyword_rank_history         | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_rank_history         | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_rank_history         | device_type              | text                     | YES         | null                                                             |
+| indb_keyword_rank_history         | country_id               | uuid                     | YES         | null                                                             |
+| indb_keyword_rank_history         | tags                     | ARRAY                    | YES         | null                                                             |
+| indb_keyword_rankings             | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_keyword_rankings             | keyword_id               | uuid                     | NO          | null                                                             |
+| indb_keyword_rankings             | position                 | integer                  | YES         | null                                                             |
+| indb_keyword_rankings             | url                      | text                     | YES         | null                                                             |
+| indb_keyword_rankings             | search_volume            | integer                  | YES         | null                                                             |
+| indb_keyword_rankings             | difficulty_score         | integer                  | YES         | null                                                             |
+| indb_keyword_rankings             | check_date               | date                     | NO          | CURRENT_DATE                                                     |
+| indb_keyword_rankings             | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_rankings             | device_type              | text                     | YES         | null                                                             |
+| indb_keyword_rankings             | country_id               | uuid                     | YES         | null                                                             |
+| indb_keyword_rankings             | tags                     | ARRAY                    | YES         | null                                                             |
+| indb_keyword_usage                | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_keyword_usage                | user_id                  | uuid                     | NO          | null                                                             |
+| indb_keyword_usage                | keywords_used            | integer                  | NO          | 0                                                                |
+| indb_keyword_usage                | keywords_limit           | integer                  | NO          | 0                                                                |
+| indb_keyword_usage                | period_start             | timestamp with time zone | NO          | date_trunc('month'::text, now())                                 |
+| indb_keyword_usage                | period_end               | timestamp with time zone | NO          | (date_trunc('month'::text, now()) + '1 mon -00:00:01'::interval) |
+| indb_keyword_usage                | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_keyword_usage                | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_notifications_dashboard      | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_notifications_dashboard      | user_id                  | uuid                     | NO          | null                                                             |
+| indb_notifications_dashboard      | type                     | text                     | NO          | null                                                             |
+| indb_notifications_dashboard      | title                    | text                     | NO          | null                                                             |
+| indb_notifications_dashboard      | message                  | text                     | NO          | null                                                             |
+| indb_notifications_dashboard      | is_read                  | boolean                  | YES         | false                                                            |
+| indb_notifications_dashboard      | action_url               | text                     | YES         | null                                                             |
+| indb_notifications_dashboard      | metadata                 | jsonb                    | YES         | null                                                             |
+| indb_notifications_dashboard      | expires_at               | timestamp with time zone | YES         | null                                                             |
+| indb_notifications_dashboard      | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_notifications_email_queue    | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_notifications_email_queue    | user_id                  | uuid                     | NO          | null                                                             |
+| indb_notifications_email_queue    | template_type            | text                     | NO          | null                                                             |
+| indb_notifications_email_queue    | to_email                 | text                     | NO          | null                                                             |
+| indb_notifications_email_queue    | subject                  | text                     | NO          | null                                                             |
+| indb_notifications_email_queue    | html_content             | text                     | NO          | null                                                             |
+| indb_notifications_email_queue    | status                   | text                     | YES         | 'pending'::text                                                  |
+| indb_notifications_email_queue    | attempts                 | integer                  | YES         | 0                                                                |
+| indb_notifications_email_queue    | sent_at                  | timestamp with time zone | YES         | null                                                             |
+| indb_notifications_email_queue    | error_message            | text                     | YES         | null                                                             |
+| indb_notifications_email_queue    | metadata                 | jsonb                    | YES         | null                                                             |
+| indb_notifications_email_queue    | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_notifications_email_queue    | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_gateways             | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_payment_gateways             | name                     | text                     | NO          | null                                                             |
+| indb_payment_gateways             | slug                     | text                     | NO          | null                                                             |
+| indb_payment_gateways             | description              | text                     | YES         | null                                                             |
+| indb_payment_gateways             | is_active                | boolean                  | YES         | true                                                             |
+| indb_payment_gateways             | is_default               | boolean                  | YES         | false                                                            |
+| indb_payment_gateways             | configuration            | jsonb                    | YES         | '{}'::jsonb                                                      |
+| indb_payment_gateways             | api_credentials          | jsonb                    | YES         | '{}'::jsonb                                                      |
+| indb_payment_gateways             | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_gateways             | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_invoices             | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_payment_invoices             | user_id                  | uuid                     | NO          | null                                                             |
+| indb_payment_invoices             | subscription_id          | uuid                     | YES         | null                                                             |
+| indb_payment_invoices             | transaction_id           | uuid                     | YES         | null                                                             |
+| indb_payment_invoices             | invoice_number           | text                     | NO          | null                                                             |
+| indb_payment_invoices             | invoice_status           | text                     | NO          | 'draft'::text                                                    |
+| indb_payment_invoices             | subtotal                 | numeric                  | NO          | null                                                             |
+| indb_payment_invoices             | tax_amount               | numeric                  | YES         | 0                                                                |
+| indb_payment_invoices             | discount_amount          | numeric                  | YES         | 0                                                                |
+| indb_payment_invoices             | total_amount             | numeric                  | NO          | null                                                             |
+| indb_payment_invoices             | currency                 | text                     | NO          | 'IDR'::text                                                      |
+| indb_payment_invoices             | due_date                 | date                     | YES         | null                                                             |
+| indb_payment_invoices             | paid_at                  | timestamp with time zone | YES         | null                                                             |
+| indb_payment_invoices             | invoice_data             | jsonb                    | NO          | null                                                             |
+| indb_payment_invoices             | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_invoices             | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_midtrans             | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_payment_midtrans             | transaction_id           | uuid                     | NO          | null                                                             |
+| indb_payment_midtrans             | user_id                  | uuid                     | NO          | null                                                             |
+| indb_payment_midtrans             | midtrans_subscription_id | character varying        | YES         | null                                                             |
+| indb_payment_midtrans             | saved_token_id           | character varying        | NO          | null                                                             |
+| indb_payment_midtrans             | masked_card              | character varying        | YES         | null                                                             |
+| indb_payment_midtrans             | card_type                | character varying        | YES         | null                                                             |
+| indb_payment_midtrans             | bank                     | character varying        | YES         | null                                                             |
+| indb_payment_midtrans             | token_expired_at         | timestamp with time zone | YES         | null                                                             |
+| indb_payment_midtrans             | subscription_status      | character varying        | YES         | 'active'::character varying                                      |
+| indb_payment_midtrans             | next_billing_date        | timestamp with time zone | YES         | null                                                             |
+| indb_payment_midtrans             | metadata                 | jsonb                    | YES         | '{}'::jsonb                                                      |
+| indb_payment_midtrans             | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_midtrans             | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_packages             | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_payment_packages             | name                     | text                     | NO          | null                                                             |
+| indb_payment_packages             | slug                     | text                     | NO          | null                                                             |
+| indb_payment_packages             | description              | text                     | YES         | null                                                             |
+| indb_payment_packages             | price                    | numeric                  | NO          | 0                                                                |
+| indb_payment_packages             | currency                 | text                     | YES         | 'USD'::text                                                      |
+| indb_payment_packages             | billing_period           | text                     | YES         | 'monthly'::text                                                  |
+| indb_payment_packages             | features                 | jsonb                    | YES         | '[]'::jsonb                                                      |
+| indb_payment_packages             | quota_limits             | jsonb                    | YES         | '{}'::jsonb                                                      |
+| indb_payment_packages             | is_active                | boolean                  | YES         | true                                                             |
+| indb_payment_packages             | sort_order               | integer                  | YES         | 0                                                                |
+| indb_payment_packages             | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_packages             | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_packages             | is_popular               | boolean                  | YES         | false                                                            |
+| indb_payment_packages             | pricing_tiers            | jsonb                    | YES         | '[]'::jsonb                                                      |
+| indb_payment_transactions         | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_payment_transactions         | user_id                  | uuid                     | NO          | null                                                             |
+| indb_payment_transactions         | subscription_id          | uuid                     | YES         | null                                                             |
+| indb_payment_transactions         | package_id               | uuid                     | NO          | null                                                             |
+| indb_payment_transactions         | gateway_id               | uuid                     | NO          | null                                                             |
+| indb_payment_transactions         | transaction_type         | text                     | NO          | null                                                             |
+| indb_payment_transactions         | transaction_status       | text                     | NO          | 'pending'::text                                                  |
+| indb_payment_transactions         | amount                   | numeric                  | NO          | null                                                             |
+| indb_payment_transactions         | currency                 | text                     | NO          | 'IDR'::text                                                      |
+| indb_payment_transactions         | payment_method           | text                     | YES         | null                                                             |
+| indb_payment_transactions         | payment_reference        | text                     | YES         | null                                                             |
+| indb_payment_transactions         | payment_proof_url        | text                     | YES         | null                                                             |
+| indb_payment_transactions         | gateway_transaction_id   | text                     | YES         | null                                                             |
+| indb_payment_transactions         | gateway_response         | jsonb                    | YES         | '{}'::jsonb                                                      |
+| indb_payment_transactions         | processed_at             | timestamp with time zone | YES         | null                                                             |
+| indb_payment_transactions         | verified_by              | uuid                     | YES         | null                                                             |
+| indb_payment_transactions         | verified_at              | timestamp with time zone | YES         | null                                                             |
+| indb_payment_transactions         | notes                    | text                     | YES         | null                                                             |
+| indb_payment_transactions         | metadata                 | jsonb                    | YES         | '{}'::jsonb                                                      |
+| indb_payment_transactions         | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_transactions         | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_payment_transactions         | billing_period           | text                     | YES         | null                                                             |
+| indb_payment_transactions_history | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_payment_transactions_history | transaction_id           | uuid                     | NO          | null                                                             |
+| indb_payment_transactions_history | old_status               | text                     | YES         | null                                                             |
+| indb_payment_transactions_history | new_status               | text                     | NO          | null                                                             |
+| indb_payment_transactions_history | action_type              | text                     | NO          | null                                                             |
+| indb_payment_transactions_history | action_description       | text                     | NO          | null                                                             |
+| indb_payment_transactions_history | changed_by               | uuid                     | YES         | null                                                             |
+| indb_payment_transactions_history | changed_by_type          | text                     | NO          | 'user'::text                                                     |
+| indb_payment_transactions_history | old_values               | jsonb                    | YES         | null                                                             |
+| indb_payment_transactions_history | new_values               | jsonb                    | YES         | null                                                             |
+| indb_payment_transactions_history | notes                    | text                     | YES         | null                                                             |
+| indb_payment_transactions_history | metadata                 | jsonb                    | YES         | null                                                             |
+| indb_payment_transactions_history | ip_address               | inet                     | YES         | null                                                             |
+| indb_payment_transactions_history | user_agent               | text                     | YES         | null                                                             |
+| indb_payment_transactions_history | created_at               | timestamp with time zone | YES         | timezone('utc'::text, now())                                     |
+| indb_security_activity_logs       | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_security_activity_logs       | user_id                  | uuid                     | YES         | null                                                             |
+| indb_security_activity_logs       | event_type               | text                     | NO          | null                                                             |
+| indb_security_activity_logs       | action_description       | text                     | NO          | null                                                             |
+| indb_security_activity_logs       | target_type              | text                     | YES         | null                                                             |
+| indb_security_activity_logs       | target_id                | uuid                     | YES         | null                                                             |
+| indb_security_activity_logs       | ip_address               | inet                     | YES         | null                                                             |
+| indb_security_activity_logs       | user_agent               | text                     | YES         | null                                                             |
+| indb_security_activity_logs       | device_info              | jsonb                    | YES         | null                                                             |
+| indb_security_activity_logs       | location_data            | jsonb                    | YES         | null                                                             |
+| indb_security_activity_logs       | success                  | boolean                  | YES         | true                                                             |
+| indb_security_activity_logs       | error_message            | text                     | YES         | null                                                             |
+| indb_security_activity_logs       | metadata                 | jsonb                    | YES         | null                                                             |
+| indb_security_activity_logs       | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_security_audit_logs          | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_security_audit_logs          | user_id                  | uuid                     | YES         | null                                                             |
+| indb_security_audit_logs          | event_type               | text                     | NO          | null                                                             |
+| indb_security_audit_logs          | description              | text                     | NO          | null                                                             |
+| indb_security_audit_logs          | ip_address               | inet                     | YES         | null                                                             |
+| indb_security_audit_logs          | user_agent               | text                     | YES         | null                                                             |
+| indb_security_audit_logs          | success                  | boolean                  | YES         | true                                                             |
+| indb_security_audit_logs          | metadata                 | jsonb                    | YES         | null                                                             |
+| indb_security_audit_logs          | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_security_rate_limits         | id                       | uuid                     | NO          | uuid_generate_v4()                                               |
+| indb_security_rate_limits         | identifier               | text                     | NO          | null                                                             |
+| indb_security_rate_limits         | endpoint                 | text                     | NO          | null                                                             |
+| indb_security_rate_limits         | requests_count           | integer                  | YES         | 1                                                                |
+| indb_security_rate_limits         | window_start             | timestamp with time zone | YES         | now()                                                            |
+| indb_security_rate_limits         | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_security_rate_limits         | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_site_integration             | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_site_integration             | service_name             | text                     | NO          | 'scrapingdog'::text                                              |
+| indb_site_integration             | apikey                   | text                     | NO          | null                                                             |
+| indb_site_integration             | api_quota_limit          | integer                  | YES         | 1000                                                             |
+| indb_site_integration             | api_quota_used           | integer                  | YES         | 0                                                                |
+| indb_site_integration             | quota_reset_date         | date                     | YES         | CURRENT_DATE                                                     |
+| indb_site_integration             | is_active                | boolean                  | YES         | true                                                             |
+| indb_site_integration             | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_site_integration             | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_site_settings                | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_site_settings                | site_name                | text                     | NO          | 'IndexNow Pro'::text                                             |
+| indb_site_settings                | site_description         | text                     | YES         | 'Professional URL indexing automation platform'::text            |
+| indb_site_settings                | site_logo_url            | text                     | YES         | null                                                             |
+| indb_site_settings                | site_icon_url            | text                     | YES         | null                                                             |
+| indb_site_settings                | site_favicon_url         | text                     | YES         | null                                                             |
+| indb_site_settings                | contact_email            | text                     | YES         | null                                                             |
+| indb_site_settings                | support_email            | text                     | YES         | null                                                             |
+| indb_site_settings                | maintenance_mode         | boolean                  | YES         | false                                                            |
+| indb_site_settings                | registration_enabled     | boolean                  | YES         | true                                                             |
+| indb_site_settings                | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_site_settings                | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_site_settings                | smtp_host                | text                     | YES         | null                                                             |
+| indb_site_settings                | smtp_port                | integer                  | YES         | 465                                                              |
+| indb_site_settings                | smtp_user                | text                     | YES         | null                                                             |
+| indb_site_settings                | smtp_pass                | text                     | YES         | null                                                             |
+| indb_site_settings                | smtp_from_name           | text                     | YES         | 'IndexNow Pro'::text                                             |
+| indb_site_settings                | smtp_from_email          | text                     | YES         | null                                                             |
+| indb_site_settings                | smtp_secure              | boolean                  | YES         | true                                                             |
+| indb_site_settings                | smtp_enabled             | boolean                  | YES         | false                                                            |
+| indb_system_error_logs            | id                       | uuid                     | NO          | gen_random_uuid()                                                |
+| indb_system_error_logs            | user_id                  | uuid                     | YES         | null                                                             |
+| indb_system_error_logs            | error_type               | text                     | NO          | null                                                             |
+| indb_system_error_logs            | severity                 | text                     | NO          | null                                                             |
+| indb_system_error_logs            | message                  | text                     | NO          | null                                                             |
+| indb_system_error_logs            | user_message             | text                     | NO          | null                                                             |
+| indb_system_error_logs            | endpoint                 | text                     | YES         | null                                                             |
+| indb_system_error_logs            | http_method              | text                     | YES         | null                                                             |
+| indb_system_error_logs            | status_code              | integer                  | YES         | null                                                             |
+| indb_system_error_logs            | metadata                 | jsonb                    | YES         | null                                                             |
+| indb_system_error_logs            | stack_trace              | text                     | YES         | null                                                             |
+| indb_system_error_logs            | created_at               | timestamp with time zone | YES         | now()                                                            |
+| indb_system_error_logs            | updated_at               | timestamp with time zone | YES         | now()                                                            |
+| recent_jobs_with_stats            | id                       | uuid                     | YES         | null                                                             |
+| recent_jobs_with_stats            | user_id                  | uuid                     | YES         | null                                                             |
+| recent_jobs_with_stats            | name                     | text                     | YES         | null                                                             |
+| recent_jobs_with_stats            | type                     | text                     | YES         | null                                                             |
+| recent_jobs_with_stats            | status                   | text                     | YES         | null                                                             |
+| recent_jobs_with_stats            | schedule_type            | text                     | YES         | null                                                             |
+| recent_jobs_with_stats            | cron_expression          | text                     | YES         | null                                                             |
+| recent_jobs_with_stats            | source_data              | jsonb                    | YES         | null                                                             |
+| recent_jobs_with_stats            | total_urls               | integer                  | YES         | null                                                             |
+| recent_jobs_with_stats            | processed_urls           | integer                  | YES         | null                                                             |
+| recent_jobs_with_stats            | successful_urls          | integer                  | YES         | null                                                             |
+| recent_jobs_with_stats            | failed_urls              | integer                  | YES         | null                                                             |
+| recent_jobs_with_stats            | progress_percentage      | numeric                  | YES         | null                                                             |
+| recent_jobs_with_stats            | started_at               | timestamp with time zone | YES         | null                                                             |
+| recent_jobs_with_stats            | completed_at             | timestamp with time zone | YES         | null                                                             |
+| recent_jobs_with_stats            | next_run_at              | timestamp with time zone | YES         | null                                                             |
+| recent_jobs_with_stats            | error_message            | text                     | YES         | null                                                             |
+| recent_jobs_with_stats            | created_at               | timestamp with time zone | YES         | null                                                             |
+| recent_jobs_with_stats            | updated_at               | timestamp with time zone | YES         | null                                                             |
+| recent_jobs_with_stats            | locked_at                | timestamp with time zone | YES         | null                                                             |
+| recent_jobs_with_stats            | locked_by                | text                     | YES         | null                                                             |
+| recent_jobs_with_stats            | submission_count         | bigint                   | YES         | null                                                             |
+| recent_jobs_with_stats            | successful_count         | bigint                   | YES         | null                                                             |
+| recent_jobs_with_stats            | failed_count             | bigint                   | YES         | null                                                             |
+| user_dashboard_stats              | user_id                  | uuid                     | YES         | null                                                             |
+| user_dashboard_stats              | total_urls_indexed       | bigint                   | YES         | null                                                             |
+| user_dashboard_stats              | active_jobs              | bigint                   | YES         | null                                                             |
+| user_dashboard_stats              | scheduled_jobs           | bigint                   | YES         | null                                                             |
+| user_dashboard_stats              | success_rate             | integer                  | YES         | null                                                             |
+| user_quota_summary                | user_id                  | uuid                     | YES         | null                                                             |
+| user_quota_summary                | total_quota_used         | bigint                   | YES         | null                                                             |
+| user_quota_summary                | service_account_count    | bigint                   | YES         | null                                                             |
+| user_quota_summary                | total_quota_limit        | bigint                   | YES         | null                                                             |
+| user_quota_summary                | package_name             | text                     | YES         | null                                                             |
+| user_quota_summary                | daily_quota_limit        | integer                  | YES         | null                                                             |
+| user_quota_summary                | service_accounts_limit   | integer                  | YES         | null                                                             |
+| user_quota_summary                | concurrent_jobs_limit    | integer                  | YES         | null                                                             |
+| user_quota_summary                | daily_quota_used         | bigint                   | YES         | null                                                             |
+| user_quota_summary                | daily_quota_reset_date   | date                     | YES         | null                                                             |
+| user_quota_summary                | is_unlimited             | boolean                  | YES         | null                                                             |
 
 Button Colors: #1C2331 (primary), #0d1b2a, #22333b, #1E1E1E
 Background: Clean whites (#FFFFFF, #F7F9FC)
