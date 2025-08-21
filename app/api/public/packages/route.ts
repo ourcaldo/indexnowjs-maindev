@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       features: pkg.features || [],
       quota_limits: pkg.quota_limits || {},
       is_popular: pkg.is_popular || false,
-      pricing_tiers: pkg.pricing_tiers || {}
+      pricing_tiers: Array.isArray(pkg.pricing_tiers) ? pkg.pricing_tiers : []
     })) || []
 
     return NextResponse.json({

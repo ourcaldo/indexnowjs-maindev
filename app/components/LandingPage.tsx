@@ -162,7 +162,7 @@ export default function LandingPage() {
 
   // Get current price for a package based on global billing period
   const getCurrentPrice = (pkg: Package) => {
-    if (!pkg.pricing_tiers || pkg.pricing_tiers.length === 0) {
+    if (!pkg.pricing_tiers || !Array.isArray(pkg.pricing_tiers) || pkg.pricing_tiers.length === 0) {
       return { price: pkg.price, period: pkg.billing_period }
     }
     
@@ -181,7 +181,7 @@ export default function LandingPage() {
 
   // Get available billing periods from any package that has pricing tiers
   const getBillingPeriods = () => {
-    const packageWithTiers = packages.find(pkg => pkg.pricing_tiers && pkg.pricing_tiers.length > 0)
+    const packageWithTiers = packages.find(pkg => pkg.pricing_tiers && Array.isArray(pkg.pricing_tiers) && pkg.pricing_tiers.length > 0)
     return packageWithTiers?.pricing_tiers || []
   }
 
