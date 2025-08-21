@@ -370,7 +370,7 @@ export default function CheckoutPage() {
           addToast({
             title: "Payment pending",
             description: "Your payment is being processed. You'll receive a notification once completed.",
-            type: "info"
+            type: "info"  
           })
           router.push('/dashboard/settings/plans-billing?payment=pending')
         },

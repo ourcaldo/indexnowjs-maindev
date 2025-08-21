@@ -114,9 +114,9 @@ export async function POST(request: NextRequest) {
         category: 'Subscription'
       }],
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/settings/plans-billing/payment-success?order_id=${orderId}`,
-        error: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/settings/plans-billing/payment-failed?order_id=${orderId}`,
-        pending: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/settings/plans-billing/payment-pending?order_id=${orderId}`
+        finish: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'}/dashboard/settings/plans-billing?payment=success&order_id=${orderId}`,
+        error: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'}/dashboard/settings/plans-billing?payment=failed&order_id=${orderId}`,
+        pending: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'}/dashboard/settings/plans-billing?payment=pending&order_id=${orderId}`
       },
       metadata: {
         user_id: user.id,
