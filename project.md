@@ -738,6 +738,40 @@ JWT_SECRET=[jwt-secret-key]
 - **Subscription Management**: Midtrans subscriptions created for future billing cycles
 - **Complete Workflow**: Full payment-to-activation pipeline working for 3DS transactions
 
+### August 21, 2025: Midtrans Payment System UI/UX & Environment Configuration Fixes ✅
+
+**✅ CRITICAL: Midtrans Environment Configuration Enhancement**:
+- **Environment Detection**: Verified Midtrans service correctly uses environment configuration (sandbox vs production)
+- **Dynamic URL Switching**: `config.environment === 'production'` → `https://api.midtrans.com` / `https://api.sandbox.midtrans.com`
+- **Admin Control**: Payment gateway environment setting in admin panel properly controls API endpoints
+- **No Hardcoded URLs**: All API calls use dynamic environment-based URL construction
+
+**✅ ORDER DETAIL PAGE COMPREHENSIVE UI/UX FIXES**:
+- **Billing Period Display**: Fixed "N/A" issue - now shows actual billing period (Monthly, Quarterly, etc.) from `transaction.billing_period`
+- **Currency Display Fix**: Fixed "Rp 45" showing for USD transactions - now properly displays "$45" vs "Rp 45,000" based on transaction.currency
+- **Customer Information Enhancement**: Fixed phone number display - now shows phone from multiple sources (customer_info.phone, metadata.customer_info.phone, fallback to 'N/A')
+- **Real Customer Names**: Enhanced customer data collection to use actual names from `indb_auth_user_profiles.full_name` instead of placeholder "Customer"
+- **User Profile Integration**: Added database query to fetch user profile data for accurate customer information display
+
+**✅ PAYMENT CONFIRMATION BOX LOCALIZATION & SMART BEHAVIOR**:
+- **Language Fix**: Changed all Bahasa Indonesia text to English ("Sudah melakukan pembayaran?" → "Payment Confirmation")
+- **Smart Status Detection**: Payment confirmation box now shows different content based on transaction status
+- **Completed Payment Handling**: For completed transactions - shows "Payment has been processed successfully. No further action required."
+- **Button State Management**: Upload button disabled and shows "Payment Completed" for completed transactions
+- **Dynamic Instructions**: Payment instructions change from "Upload payment proof" to status-appropriate messages
+
+**✅ CUSTOMER DATA COLLECTION ENHANCEMENT**:
+- **Database Profile Integration**: Enhanced customer data collection in 3DS callback to fetch from `indb_auth_user_profiles` table
+- **Name Resolution**: Prioritizes `userProfile.full_name` → `user.user_metadata.full_name` → transaction details → fallback
+- **Phone Number Fix**: Proper phone number collection from `userProfile.phone_number` field
+- **Data Accuracy**: Eliminates "Customer" placeholder names with real user profile data
+
+**✅ PAYMENT INSTRUCTIONS SMART DISPLAY**:
+- **Status-Based Instructions**: Different payment instruction messages based on transaction status
+- **Completed Status**: Green success box for completed payments with "Payment Completed Successfully" message
+- **Processing Status**: Yellow warning box for pending payments with "Payment Processing" message
+- **Contextual Guidance**: Instructions match the actual payment method and status, not hardcoded bank transfer text
+
 ### 2025-08-21: Midtrans JSONP Tokenization Fix & Clean UI Implementation ✅
 
 **✅ CRITICAL: Midtrans Infinite Loading Issue Resolved**:

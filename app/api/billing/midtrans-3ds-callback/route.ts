@@ -94,6 +94,13 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // Get user profile data for accurate customer information
+      const { data: userProfile } = await supabase
+        .from('indb_auth_user_profiles')
+        .select('full_name, phone_number, email')
+        .eq('user_id', user.id)
+        .single()
+
       console.log('💾 ============= STEP 1: CREATING SUBSCRIPTION AFTER 3DS =============')
       
       // Get transaction details to extract package info from metadata
@@ -179,10 +186,10 @@ export async function POST(request: NextRequest) {
           start_time: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
         },
         customer_details: {
-          first_name: transactionDetails.customer_details?.first_name || 'Customer',
-          last_name: transactionDetails.customer_details?.last_name || '',
-          email: transactionDetails.customer_details?.email || user.email || '',
-          phone: transactionDetails.customer_details?.phone || '',
+          first_name: userProfile?.full_name?.split(' ')[0] || user.user_metadata?.full_name?.split(' ')[0] || transactionDetails.customer_details?.first_name || 'Customer',
+          last_name: userProfile?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || transactionDetails.customer_details?.last_name || '',
+          email: userProfile?.email || user.email || '',
+          phone: userProfile?.phone_number || transactionDetails.customer_details?.phone || '',
         },
         metadata: {
           user_id: user.id,
@@ -226,10 +233,10 @@ export async function POST(request: NextRequest) {
             next_execution_at: subscription.schedule?.next_execution_at,
             processing_method: '3ds_callback',
             customer_info: {
-              first_name: transactionDetails.customer_details?.first_name || 'Customer',
-              last_name: transactionDetails.customer_details?.last_name || '',
-              email: transactionDetails.customer_details?.email || user.email || '',
-              phone: transactionDetails.customer_details?.phone || '',
+              first_name: userProfile?.full_name?.split(' ')[0] || user.user_metadata?.full_name?.split(' ')[0] || transactionDetails.customer_details?.first_name || 'Customer',
+              last_name: userProfile?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || transactionDetails.customer_details?.last_name || '',
+              email: userProfile?.email || user.email || '',
+              phone: userProfile?.phone_number || transactionDetails.customer_details?.phone || '',
             },
             order_id: order_id
           },

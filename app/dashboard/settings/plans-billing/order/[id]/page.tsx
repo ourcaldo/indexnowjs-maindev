@@ -290,7 +290,7 @@ export default function OrderCompletedPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Billing Period</p>
-                    <p className="text-sm text-[#6C757D]">{transaction.metadata?.billing_period || 'N/A'}</p>
+                    <p className="text-sm text-[#6C757D]">{transaction.billing_period ? transaction.billing_period.charAt(0).toUpperCase() + transaction.billing_period.slice(1) : 'N/A'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -324,7 +324,12 @@ export default function OrderCompletedPage() {
 
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-[#1A1A1A]">Total Amount</span>
-                    <span className="text-xl font-bold text-[#1A1A1A]">{formatCurrency(transaction.amount)}</span>
+                    <span className="text-xl font-bold text-[#1A1A1A]">
+                      {transaction.currency === 'USD' 
+                        ? `$${transaction.amount}` 
+                        : `Rp ${transaction.amount.toLocaleString('id-ID')}`
+                      }
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -349,7 +354,7 @@ export default function OrderCompletedPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Phone</p>
-                    <p className="text-sm text-[#6C757D]">{transaction.customer_info.phone_number}</p>
+                    <p className="text-sm text-[#6C757D]">{transaction.customer_info.phone || transaction.metadata?.customer_info?.phone || 'N/A'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -364,17 +369,31 @@ export default function OrderCompletedPage() {
                 <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Payment Instructions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-[#FFF3CD] border border-[#FFEAA7] rounded-lg p-4">
-                  <div className="flex items-start space-x-2">
-                    <AlertCircle className="w-5 h-5 text-[#F0A202] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-[#1A1A1A] mb-1">Complete the bank transfer</p>
-                      <p className="text-sm text-[#6C757D]">
-                        Transfer the exact amount to the specified bank account and include your order number in the notification.
-                      </p>
+                {transaction.transaction_status === 'completed' ? (
+                  <div className="bg-[#D4EDDA] border border-[#C3E6CB] rounded-lg p-4">
+                    <div className="flex items-start space-x-2">
+                      <CheckCircle className="w-5 h-5 text-[#4BB543] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-[#1A1A1A] mb-1">Payment Completed Successfully</p>
+                        <p className="text-sm text-[#6C757D]">
+                          Your payment has been processed and your package is now active.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-[#FFF3CD] border border-[#FFEAA7] rounded-lg p-4">
+                    <div className="flex items-start space-x-2">
+                      <AlertCircle className="w-5 h-5 text-[#F0A202] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-[#1A1A1A] mb-1">Payment Processing</p>
+                        <p className="text-sm text-[#6C757D]">
+                          Your payment is being processed. You will be notified once it's completed.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-3">
                   <div>
@@ -401,7 +420,12 @@ export default function OrderCompletedPage() {
 
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Amount to Pay</p>
-                    <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(transaction.amount)}</p>
+                    <p className="text-lg font-bold text-[#1A1A1A]">
+                      {transaction.currency === 'USD' 
+                        ? `$${transaction.amount}` 
+                        : `Rp ${transaction.amount.toLocaleString('id-ID')}`
+                      }
+                    </p>
                   </div>
 
                   <div>
@@ -415,7 +439,7 @@ export default function OrderCompletedPage() {
             {/* Payment Proof Upload */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Sudah melakukan pembayaran?</CardTitle>
+                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Payment Confirmation</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {transaction.payment_proof_url ? (
@@ -437,15 +461,16 @@ export default function OrderCompletedPage() {
                 ) : (
                   <>
                     <p className="text-sm text-[#6C757D] text-center">
-                      Upload bukti transfermu disini untuk mempercepat verifikasi pembayaran.
+                      {transaction.transaction_status === 'completed' ? 'Payment has been processed successfully. No further action required.' : 'Upload your payment proof here to speed up payment verification.'}
                     </p>
 
                     <Button
                       onClick={() => setShowUploadForm(!showUploadForm)}
-                      className="w-full bg-[#4BB543] hover:bg-[#45a83a] text-white"
+                      disabled={transaction.transaction_status === 'completed'}
+                      className="w-full bg-[#4BB543] hover:bg-[#45a83a] text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {showUploadForm ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-                      {showUploadForm ? 'Hide Upload Form' : 'Upload Bukti Transfer'}
+                      {transaction.transaction_status === 'completed' ? 'Payment Completed' : (showUploadForm ? 'Hide Upload Form' : 'Upload Payment Proof')}
                     </Button>
 
                     {showUploadForm && (
