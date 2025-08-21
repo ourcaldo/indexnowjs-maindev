@@ -426,8 +426,10 @@ export default function IndexNowOverview() {
         </Card>
       ) : (
         <>
-          {/* Selected Domain Card - Shows active domain */}
-          <div className="inline-block">
+          {/* Domain Section and Add Keyword Button - Same Row */}
+          <div className="flex items-center justify-between mb-6">
+            {/* Selected Domain Card - Shows active domain */}
+            <div className="inline-block">
             <div 
               className="bg-white rounded-lg border cursor-pointer px-3 py-2 shadow-sm hover:shadow-md transition-shadow min-w-[280px] max-w-[320px]"
               style={{borderColor: '#E0E6ED'}}
@@ -498,6 +500,16 @@ export default function IndexNowOverview() {
                 </div>
               )}
             </div>
+            </div>
+
+            {/* Add Keyword Button */}
+            <Button 
+              onClick={() => router.push('/dashboard/indexnow/add')}
+              style={{ backgroundColor: '#22333b', color: '#FFFFFF' }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Keyword
+            </Button>
           </div>
 
           {/* Stats Cards */}
@@ -607,45 +619,7 @@ export default function IndexNowOverview() {
                   </Select>
                 </div>
 
-                {/* Action Buttons Row - Show after domain selection */}
-                {selectedDomainId && (
-                  <div className="flex items-center justify-end gap-3">
-                    {selectedKeywords.length > 0 && (
-                      <>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setShowDeleteConfirm(true)}
-                          className="border-red-200 hover:bg-red-50"
-                          style={{ color: '#E63946', borderColor: '#E63946' }}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete ({selectedKeywords.length})
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setShowTagModal(true)}
-                          style={{ 
-                            backgroundColor: '#F0A202', 
-                            color: '#FFFFFF', 
-                            borderColor: '#F0A202' 
-                          }}
-                        >
-                          <Tag className="w-4 h-4 mr-1" />
-                          Add Tag ({selectedKeywords.length})
-                        </Button>
-                      </>
-                    )}
-                    <Button 
-                      onClick={() => router.push('/dashboard/indexnow/add')}
-                      style={{ backgroundColor: '#22333b', color: '#FFFFFF' }}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Keyword
-                    </Button>
-                  </div>
-                )}
+
               </div>
             </div>
           </Card>
@@ -662,6 +636,35 @@ export default function IndexNowOverview() {
                     <span className="text-sm" style={{color: '#6C757D'}}>
                       {selectedKeywords.length} selected
                     </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {selectedKeywords.length > 0 && (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="border-red-200 hover:bg-red-50"
+                        style={{ color: '#E63946', borderColor: '#E63946' }}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete ({selectedKeywords.length})
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowTagModal(true)}
+                        style={{ 
+                          backgroundColor: '#F0A202', 
+                          color: '#FFFFFF', 
+                          borderColor: '#F0A202' 
+                        }}
+                      >
+                        <Tag className="w-4 h-4 mr-1" />
+                        Add Tag ({selectedKeywords.length})
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
