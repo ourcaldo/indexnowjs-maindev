@@ -134,12 +134,12 @@ export async function POST(request: NextRequest) {
       merchant_id
     })
 
-    // Create recurring payment (initial charge + subscription)
-    console.log('💳 Creating recurring payment for order:', orderId)
-    const recurringPayment = await midtransService.createRecurringPayment({
+    console.log('💳 Step 1: Creating initial charge to get saved_token_id...')
+    
+    // Step 1: Create charge transaction to get saved_token_id
+    const chargeTransaction = await midtransService.createChargeTransaction({
       order_id: orderId,
       amount_usd: finalPrice,
-      billing_period: billing_period as 'monthly' | 'yearly',
       token_id: token_id,
       customer_details: {
         first_name: customer_info.first_name,
@@ -147,9 +147,82 @@ export async function POST(request: NextRequest) {
         email: customer_info.email,
         phone: customer_info.phone,
       },
-      package_details: {
+      item_details: {
         name: packageData.name,
         description: packageData.description,
+      },
+    })
+
+    console.log('📋 Charge transaction result:', {
+      transaction_id: chargeTransaction.transaction_id,
+      transaction_status: chargeTransaction.transaction_status,
+      fraud_status: chargeTransaction.fraud_status,
+      has_saved_token: !!chargeTransaction.saved_token_id
+    })
+
+    // Check if charge was successful
+    if (chargeTransaction.transaction_status !== 'capture' && chargeTransaction.transaction_status !== 'settlement') {
+      throw new Error(`Charge transaction failed: ${chargeTransaction.status_message}`)
+    }
+
+    // Get saved_token_id from charge response
+    let savedTokenId = chargeTransaction.saved_token_id
+    let maskedCard = chargeTransaction.masked_card
+
+    if (!savedTokenId) {
+      console.log('🔍 saved_token_id not in charge response, checking transaction status...')
+      const transactionStatus = await midtransService.getTransactionStatus(chargeTransaction.transaction_id)
+      savedTokenId = transactionStatus.saved_token_id
+      maskedCard = transactionStatus.masked_card
+    }
+
+    if (!savedTokenId) {
+      throw new Error('Card token was not saved from transaction. Please try again.')
+    }
+
+    console.log('✅ Got saved_token_id:', savedTokenId)
+
+    // Step 2: Save the token in dedicated table
+    const { data: savedTokenData, error: tokenError } = await supabase
+      .from('indb_midtrans_saved_tokens')
+      .upsert({
+        user_id: user.id,
+        saved_token_id: savedTokenId,
+        masked_card: maskedCard || 'Unknown',
+        card_type: chargeTransaction.card_type || 'credit',
+        bank: chargeTransaction.bank || 'Unknown',
+        token_expired_at: chargeTransaction.saved_token_id_expired_at ? new Date(chargeTransaction.saved_token_id_expired_at).toISOString() : null,
+        is_active: true,
+        metadata: {
+          transaction_id: chargeTransaction.transaction_id,
+          order_id: orderId,
+        }
+      })
+      .select()
+      .single()
+
+    if (tokenError) {
+      console.warn('⚠️ Failed to save token to database:', tokenError)
+      // Don't fail the whole transaction, just log the warning
+    }
+
+    console.log('💳 Step 2: Creating subscription with saved_token_id...')
+    
+    // Step 3: Create subscription using the saved_token_id
+    const subscription = await midtransService.createSubscription(finalPrice, {
+      name: `${packageData.name}_${billing_period}`.toUpperCase(),
+      token: savedTokenId,
+      schedule: {
+        interval: 1,
+        interval_unit: billing_period === 'monthly' ? 'month' : 'month',
+        max_interval: billing_period === 'monthly' ? 12 : 1,
+        start_time: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
+      },
+      customer_details: {
+        first_name: customer_info.first_name,
+        last_name: customer_info.last_name,
+        email: customer_info.email,
+        phone: customer_info.phone,
       },
       metadata: {
         user_id: user.id,
@@ -158,6 +231,18 @@ export async function POST(request: NextRequest) {
         order_id: orderId,
       },
     })
+
+    console.log('✅ Subscription created:', subscription.id)
+
+    // Combine results for compatibility
+    const recurringPayment = {
+      initial_charge: {
+        ...chargeTransaction,
+        saved_token_id: savedTokenId,
+        masked_card: maskedCard,
+      },
+      subscription: subscription,
+    }
 
     // Create transaction record in database
     const { data: transactionData, error: transactionError } = await supabase
