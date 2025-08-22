@@ -32,11 +32,19 @@ IndexNow Studio is a professional-grade, full-stack web application designed to 
 
 The application is built with Next.js App Router and integrates with an Express server for Google API calls.
 
-## Recent Changes (August 21, 2025)
+## Recent Changes (August 22, 2025)
 
-**CRITICAL: Midtrans Recurring Payment Integration - Official Client Implementation:**
+**LATEST: Midtrans Snap Payment Gateway Integration - Real Popup Implementation:**
+- ✅ **Enhanced admin payment gateway settings** - added "Midtrans Snap" as separate configuration option with environment, merchant ID, client key, and server key fields
+- ✅ **Implemented proper Midtrans Snap API integration** - created `/api/billing/midtrans-snap` endpoint for transaction token generation with dynamic environment-based URLs
+- ✅ **Built comprehensive Snap webhook handler** - `/api/midtrans/snap-webhook` for processing payment notifications and subscription activation
+- ✅ **Integrated real Snap.js popup** - checkout page now displays actual Midtrans Snap payment popup instead of direct pending status
+- ✅ **Added dual SDK loading** - supports both Snap.js (for popup payments) and 3DS SDK (for recurring credit cards) with proper environment detection
+- ✅ **Enhanced checkout flow** - separate payment buttons for Midtrans Snap ("Pay Now") vs Midtrans Recurring ("Complete Payment")
+- ✅ **Improved error handling** - comprehensive server-side logging with frontend debug removal as requested
+- ✅ **Dynamic environment support** - automatic sandbox/production URL switching based on gateway configuration
 
-**PREVIOUS: Midtrans Recurring Payment Integration - Official Client Implementation:**
+**PREVIOUS: Midtrans Recurring Payment Integration - Official Client Implementation (August 21, 2025):**
 - ✅ **Fixed critical checkout loading issue** - corrected API endpoint from `/api/billing/checkout` to `/api/billing/midtrans-recurring`
 - ✅ **Integrated official midtrans-client package** - replaced custom HTTP calls with official Midtrans Node.js client for Core API and Subscription API
 - ✅ **Resolved TypeScript errors** - removed duplicate function implementations and fixed missing database field references

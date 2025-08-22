@@ -217,7 +217,6 @@ export default function CheckoutPage() {
       }
       
     } catch (error) {
-      console.error('💥 FRONTEND: Payment error:', error)
       addToast({
         title: "Payment failed",
         description: error instanceof Error ? error.message : "Please try again later.",
@@ -490,63 +489,56 @@ export default function CheckoutPage() {
 
   // Load Midtrans SDK with improved error handling and retry mechanism
   useEffect(() => {
-    const loadMidtransSDK = async () => {
-      // Check if script already exists
-      if (document.querySelector('script[src*="midtrans"]')) {
-        console.log('✅ Midtrans SDK already loaded')
-        return
-      }
-
+    const loadMidtransSDKs = async () => {
       try {
         // Get authentication token
         const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
         if (!token) {
-          console.log('⚠️ No auth token, skipping Midtrans SDK load')
           return
         }
 
-        // Fetch Midtrans configuration from backend
-        const response = await fetch('/api/billing/midtrans-config', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+        // Load Snap.js for Snap payments
+        if (!document.querySelector('script[src*="snap.js"]')) {
+          const snapScript = document.createElement('script')
+          snapScript.src = 'https://app.sandbox.midtrans.com/snap/snap.js'
+          snapScript.setAttribute('data-client-key', 'your_client_key_will_be_set_dynamically')
+          snapScript.setAttribute('id', 'snap-script')
+          document.head.appendChild(snapScript)
+        }
+
+        // Load 3DS SDK for recurring payments only if needed
+        if (!document.querySelector('script[src*="midtrans-new-3ds"]')) {
+          // Fetch Midtrans configuration from backend
+          const response = await fetch('/api/billing/midtrans-config', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+
+          if (response.ok) {
+            const configData = await response.json()
+            if (configData.success) {
+              const { client_key, environment } = configData.data
+
+              // Create script element for 3DS (recurring payments)
+              const script = document.createElement('script')
+              script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
+              script.async = true
+              script.setAttribute('data-environment', environment || 'sandbox')
+              script.setAttribute('data-client-key', client_key)
+              script.setAttribute('id', 'midtrans-3ds-script')
+              
+              document.head.appendChild(script)
+            }
           }
-        })
-
-        if (!response.ok) {
-          return
         }
-
-        const configData = await response.json()
-        if (!configData.success) {
-          return
-        }
-
-        const { client_key, environment } = configData.data
-
-        // Create script element with improved loading
-        const script = document.createElement('script')
-        script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
-        script.async = true
-        script.setAttribute('data-environment', environment || 'sandbox')
-        script.setAttribute('data-client-key', client_key)
-        script.setAttribute('id', 'midtrans-script')
-        
-        script.onload = () => {
-          // Midtrans SDK loaded successfully
-        }
-        
-        script.onerror = (error) => {
-          // Failed to load Midtrans SDK - handled silently
-        }
-
-        document.head.appendChild(script)
       } catch (error) {
-        // Error loading Midtrans SDK - handled silently
+        // Error loading Midtrans SDKs - handled silently
       }
     }
 
-    loadMidtransSDK()
+    loadMidtransSDKs()
   }, [])
 
   // Calculate pricing based on selected billing period
@@ -614,7 +606,7 @@ export default function CheckoutPage() {
       const selectedGateway = paymentGateways.find(gw => gw.id === form.payment_method)
       
       if (selectedGateway?.slug === 'midtrans') {
-        // Midtrans requires credit card form, handled separately - don't proceed with regular form submission
+        // Midtrans recurring requires credit card form, handled separately
         addToast({
           title: "Credit card information required",
           description: "Please fill in your credit card details below to setup recurring payment.",
@@ -622,6 +614,9 @@ export default function CheckoutPage() {
         })
         setSubmitting(false)
         return
+      } else if (selectedGateway?.slug === 'midtrans_snap') {
+        // Midtrans Snap handles payment through popup
+        await handleMidtransSnapPayment(token)
       } else {
         // Handle other payment methods (bank transfer, etc.)
         await handleRegularCheckout(token)
@@ -689,6 +684,105 @@ export default function CheckoutPage() {
     }
     
     setSubmitting(false)
+  }
+
+  const handleMidtransSnapPayment = async (token: string) => {
+    try {
+      // Create Snap transaction
+      const response = await fetch('/api/billing/midtrans-snap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          package_id: selectedPackage!.id,
+          billing_period,
+          user_data: {
+            full_name: `${form.first_name} ${form.last_name}`.trim(),
+            email: form.email,
+            phone_number: form.phone,
+            country: form.country
+          }
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        const { token: snapToken, client_key, environment } = result.data
+
+        // Update Snap.js client key
+        const snapScript = document.querySelector('#snap-script') as HTMLScriptElement
+        if (snapScript) {
+          snapScript.setAttribute('data-client-key', client_key)
+          snapScript.src = environment === 'production' 
+            ? 'https://app.midtrans.com/snap/snap.js'
+            : 'https://app.sandbox.midtrans.com/snap/snap.js'
+        }
+
+        // Wait for Snap.js to be ready
+        let retryCount = 0
+        const maxRetries = 30
+        
+        while (!window.snap || typeof window.snap.pay !== 'function') {
+          if (retryCount >= maxRetries) {
+            throw new Error('Payment system is not available. Please refresh the page and try again.')
+          }
+          await new Promise(resolve => setTimeout(resolve, 200))
+          retryCount++
+        }
+
+        // Show Snap payment popup
+        window.snap.pay(snapToken, {
+          onSuccess: function(result: any) {
+            addToast({
+              title: "Payment successful!",
+              description: "Your subscription has been activated successfully.",
+              type: "success"
+            })
+            
+            logBillingActivity('payment_completed', `Snap payment completed for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.order_id || 'unknown'})`)
+            
+            setTimeout(() => {
+              router.push('/dashboard/settings/plans-billing?payment=success')
+            }, 1500)
+          },
+          onPending: function(result: any) {
+            addToast({
+              title: "Payment pending",
+              description: "Your payment is being processed. You will receive a confirmation email shortly.",
+              type: "info"
+            })
+            
+            setTimeout(() => {
+              router.push('/dashboard/settings/plans-billing?payment=pending')
+            }, 1500)
+          },
+          onError: function(result: any) {
+            addToast({
+              title: "Payment failed",
+              description: "There was an error processing your payment. Please try again.",
+              type: "error"
+            })
+            setSubmitting(false)
+          },
+          onClose: function() {
+            addToast({
+              title: "Payment cancelled",
+              description: "You cancelled the payment process.",
+              type: "info"
+            })
+            setSubmitting(false)
+          }
+        })
+
+      } else {
+        throw new Error(result.message || 'Failed to create payment session')
+      }
+    } catch (error) {
+      throw error
+    }
   }
 
   const handleRegularCheckout = async (token: string) => {
@@ -1005,7 +1099,7 @@ export default function CheckoutPage() {
               </Card>
               
               {/* Submit Button - Only show for non-Midtrans payments */}
-              {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && (
+              {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans_snap' && (
                 <div className="mt-6">
                   <Button
                     type="submit"
@@ -1021,6 +1115,29 @@ export default function CheckoutPage() {
                       <>
                         <Building2 className="h-4 w-4 mr-2" />
                         Complete Order
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+              
+              {/* Submit Button for Midtrans Snap */}
+              {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans_snap' && (
+                <div className="mt-6">
+                  <Button
+                    type="submit"
+                    disabled={submitting || !form.payment_method}
+                    className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Opening Payment Page...
+                      </>
+                    ) : (
+                      <>
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Pay Now
                       </>
                     )}
                   </Button>
@@ -1153,13 +1270,12 @@ export default function CheckoutPage() {
                 )}
 
                 {/* Submit Button for Bank Transfer (Non-Midtrans Payment Gateways) */}
-                {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && (
+                {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans_snap' && (
                   <Button
                     type="button"
                     onClick={async () => {
                       setSubmitting(true)
                       try {
-                        console.log('🏦 FRONTEND: Starting bank transfer payment process...')
                         
                         const user = await authService.getCurrentUser()
                         if (!user) {

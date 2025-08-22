@@ -235,12 +235,12 @@ export default function PaymentGateways() {
             </>
           )}
 
-          {/* Midtrans Configuration */}
+          {/* Midtrans Recurring Configuration */}
           {formData.slug === 'midtrans' && (
             <>
               <div className="md:col-span-2">
                 <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
-                  Midtrans API Configuration
+                  Midtrans Recurring API Configuration
                 </h3>
                 <p className="text-sm text-[#6C757D] mb-4">
                   Configure your Midtrans credentials for recurring subscription payments. Note: Midtrans only accepts IDR currency.
@@ -325,6 +325,101 @@ export default function PaymentGateways() {
                 />
                 <p className="text-xs text-[#6C757D] mt-1">
                   This webhook URL should be configured in your Midtrans dashboard
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Midtrans Snap Configuration */}
+          {formData.slug === 'midtrans_snap' && (
+            <>
+              <div className="md:col-span-2">
+                <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
+                  Midtrans Snap API Configuration
+                </h3>
+                <p className="text-sm text-[#6C757D] mb-4">
+                  Configure your Midtrans Snap credentials for one-time payments with popup interface. Supports credit cards, bank transfers, e-wallets, and more payment methods.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Environment</label>
+                <select
+                  value={formData.configuration?.environment || 'sandbox'}
+                  onChange={(e) => updateConfigurationField('environment', e.target.value)}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                >
+                  <option value="sandbox">Sandbox</option>
+                  <option value="production">Production</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Merchant ID</label>
+                <input
+                  type="text"
+                  value={formData.api_credentials?.merchant_id || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    api_credentials: {
+                      ...prev.api_credentials,
+                      merchant_id: e.target.value
+                    }
+                  }))}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="G123456789"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Client Key</label>
+                <input
+                  type="text"
+                  value={formData.api_credentials?.client_key || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    api_credentials: {
+                      ...prev.api_credentials,
+                      client_key: e.target.value
+                    }
+                  }))}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="SB-Mid-client-..."
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Server Key</label>
+                <input
+                  type="password"
+                  value={formData.api_credentials?.server_key || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    api_credentials: {
+                      ...prev.api_credentials,
+                      server_key: e.target.value
+                    }
+                  }))}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="SB-Mid-server-..."
+                />
+                <p className="text-xs text-[#6C757D] mt-1">
+                  Server key will be encrypted before storing in database
+                </p>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Webhook URL</label>
+                <input
+                  type="url"
+                  value={formData.configuration?.webhook_url || ''}
+                  onChange={(e) => updateConfigurationField('webhook_url', e.target.value)}
+                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  placeholder="https://yourdomain.com/api/midtrans/snap-webhook"
+                  readOnly
+                />
+                <p className="text-xs text-[#6C757D] mt-1">
+                  This webhook URL should be configured in your Midtrans dashboard for payment notifications
                 </p>
               </div>
             </>
