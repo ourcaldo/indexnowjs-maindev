@@ -490,56 +490,63 @@ export default function CheckoutPage() {
 
   // Load Midtrans SDK with improved error handling and retry mechanism
   useEffect(() => {
-    const loadMidtransSDKs = async () => {
+    const loadMidtransSDK = async () => {
+      // Check if script already exists
+      if (document.querySelector('script[src*="midtrans"]')) {
+        console.log('✅ Midtrans SDK already loaded')
+        return
+      }
+
       try {
         // Get authentication token
         const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
         if (!token) {
+          console.log('⚠️ No auth token, skipping Midtrans SDK load')
           return
         }
 
-        // Load Snap.js for Snap payments
-        if (!document.querySelector('script[src*="snap.js"]')) {
-          const snapScript = document.createElement('script')
-          snapScript.src = 'https://app.sandbox.midtrans.com/snap/snap.js'
-          snapScript.setAttribute('data-client-key', 'your_client_key_will_be_set_dynamically')
-          snapScript.setAttribute('id', 'snap-script')
-          document.head.appendChild(snapScript)
-        }
-
-        // Load 3DS SDK for recurring payments only if needed
-        if (!document.querySelector('script[src*="midtrans-new-3ds"]')) {
-          // Fetch Midtrans configuration from backend
-          const response = await fetch('/api/billing/midtrans-config', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          })
-
-          if (response.ok) {
-            const configData = await response.json()
-            if (configData.success) {
-              const { client_key, environment } = configData.data
-
-              // Create script element for 3DS (recurring payments)
-              const script = document.createElement('script')
-              script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
-              script.async = true
-              script.setAttribute('data-environment', environment || 'sandbox')
-              script.setAttribute('data-client-key', client_key)
-              script.setAttribute('id', 'midtrans-3ds-script')
-              
-              document.head.appendChild(script)
-            }
+        // Fetch Midtrans configuration from backend
+        const response = await fetch('/api/billing/midtrans-config', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
+        })
+
+        if (!response.ok) {
+          return
         }
+
+        const configData = await response.json()
+        if (!configData.success) {
+          return
+        }
+
+        const { client_key, environment } = configData.data
+
+        // Create script element with improved loading
+        const script = document.createElement('script')
+        script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
+        script.async = true
+        script.setAttribute('data-environment', environment || 'sandbox')
+        script.setAttribute('data-client-key', client_key)
+        script.setAttribute('id', 'midtrans-script')
+
+        script.onload = () => {
+          // Midtrans SDK loaded successfully
+        }
+
+        script.onerror = (error) => {
+          // Failed to load Midtrans SDK - handled silently
+        }
+
+        document.head.appendChild(script)
       } catch (error) {
-        // Error loading Midtrans SDKs - handled silently
+        // Error loading Midtrans SDK - handled silently
       }
     }
 
-    loadMidtransSDKs()
+    loadMidtransSDK()
   }, [])
 
   // Calculate pricing based on selected billing period
@@ -615,9 +622,6 @@ export default function CheckoutPage() {
         })
         setSubmitting(false)
         return
-      } else if (selectedGateway?.slug === 'midtrans_snap') {
-        // Midtrans Snap handles payment through popup
-        await handleMidtransSnapPayment(token)
       } else {
         // Handle other payment methods (bank transfer, etc.)
         await handleRegularCheckout(token)
@@ -671,7 +675,7 @@ export default function CheckoutPage() {
         description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
         type: "success"
       })
-      
+
       // Redirect to payment page or success page
       setTimeout(() => {
         if (result.data?.redirect_url) {
@@ -683,107 +687,8 @@ export default function CheckoutPage() {
     } else {
       throw new Error(result.message || 'Payment processing failed. Please try again.')
     }
-    
+
     setSubmitting(false)
-  }
-
-  const handleMidtransSnapPayment = async (token: string) => {
-    try {
-      // Create Snap transaction
-      const response = await fetch('/api/billing/midtrans-snap', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          package_id: selectedPackage!.id,
-          billing_period,
-          user_data: {
-            full_name: `${form.first_name} ${form.last_name}`.trim(),
-            email: form.email,
-            phone_number: form.phone,
-            country: form.country
-          }
-        }),
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        const { token: snapToken, client_key, environment } = result.data
-
-        // Update Snap.js client key
-        const snapScript = document.querySelector('#snap-script') as HTMLScriptElement
-        if (snapScript) {
-          snapScript.setAttribute('data-client-key', client_key)
-          snapScript.src = environment === 'production' 
-            ? 'https://app.midtrans.com/snap/snap.js'
-            : 'https://app.sandbox.midtrans.com/snap/snap.js'
-        }
-
-        // Wait for Snap.js to be ready
-        let retryCount = 0
-        const maxRetries = 30
-        
-        while (!window.snap || typeof window.snap.pay !== 'function') {
-          if (retryCount >= maxRetries) {
-            throw new Error('Payment system is not available. Please refresh the page and try again.')
-          }
-          await new Promise(resolve => setTimeout(resolve, 200))
-          retryCount++
-        }
-
-        // Show Snap payment popup
-        window.snap.pay(snapToken, {
-          onSuccess: function(result: any) {
-            addToast({
-              title: "Payment successful!",
-              description: "Your subscription has been activated successfully.",
-              type: "success"
-            })
-            
-            logBillingActivity('payment_completed', `Snap payment completed for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.order_id || 'unknown'})`)
-            
-            setTimeout(() => {
-              router.push('/dashboard/settings/plans-billing?payment=success')
-            }, 1500)
-          },
-          onPending: function(result: any) {
-            addToast({
-              title: "Payment pending",
-              description: "Your payment is being processed. You will receive a confirmation email shortly.",
-              type: "info"
-            })
-            
-            setTimeout(() => {
-              router.push('/dashboard/settings/plans-billing?payment=pending')
-            }, 1500)
-          },
-          onError: function(result: any) {
-            addToast({
-              title: "Payment failed",
-              description: "There was an error processing your payment. Please try again.",
-              type: "error"
-            })
-            setSubmitting(false)
-          },
-          onClose: function() {
-            addToast({
-              title: "Payment cancelled",
-              description: "You cancelled the payment process.",
-              type: "info"
-            })
-            setSubmitting(false)
-          }
-        })
-
-      } else {
-        throw new Error(result.message || 'Failed to create payment session')
-      }
-    } catch (error) {
-      throw error
-    }
   }
 
   const handleRegularCheckout = async (token: string) => {
@@ -820,7 +725,7 @@ export default function CheckoutPage() {
         description: "Redirecting to order details...",
         type: "success"
       })
-      
+
       // Redirect to order completed page
       setTimeout(() => {
         router.push(result.data.redirect_url)
@@ -931,11 +836,12 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <Label htmlFor="phone" className="text-sm font-medium text-[#1A1A1A]">
-                        Phone Number
+                        Phone Number *
                       </Label>
                       <Input
                         id="phone"
                         type="tel"
+                        required
                         value={form.phone}
                         onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
                         className="mt-1"
@@ -956,17 +862,17 @@ export default function CheckoutPage() {
                     <Label htmlFor="address" className="text-sm font-medium text-[#1A1A1A]">
                       Street Address
                     </Label>
-                    <Textarea
+                    <Input
                       id="address"
+                      type="text"
                       value={form.address}
                       onChange={(e) => setForm(prev => ({ ...prev, address: e.target.value }))}
                       className="mt-1"
-                      placeholder="Enter your address"
-                      rows={3}
+                      placeholder="Enter your street address"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A]">
                         City
@@ -977,7 +883,7 @@ export default function CheckoutPage() {
                         value={form.city}
                         onChange={(e) => setForm(prev => ({ ...prev, city: e.target.value }))}
                         className="mt-1"
-                        placeholder="Enter your city"
+                        placeholder="City"
                       />
                     </div>
                     <div>
@@ -990,15 +896,12 @@ export default function CheckoutPage() {
                         value={form.state}
                         onChange={(e) => setForm(prev => ({ ...prev, state: e.target.value }))}
                         className="mt-1"
-                        placeholder="Enter your state/province"
+                        placeholder="State"
                       />
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="zip_code" className="text-sm font-medium text-[#1A1A1A]">
-                        ZIP/Postal Code
+                        ZIP Code
                       </Label>
                       <Input
                         id="zip_code"
@@ -1006,75 +909,75 @@ export default function CheckoutPage() {
                         value={form.zip_code}
                         onChange={(e) => setForm(prev => ({ ...prev, zip_code: e.target.value }))}
                         className="mt-1"
-                        placeholder="Enter your ZIP/postal code"
+                        placeholder="ZIP"
                       />
-                    </div>
-                    <div>
-                      <Label htmlFor="country" className="text-sm font-medium text-[#1A1A1A]">
-                        Country
-                      </Label>
-                      <Select value={form.country} onValueChange={(value) => setForm(prev => ({ ...prev, country: value }))}>
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select a country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Indonesia">Indonesia</SelectItem>
-                          <SelectItem value="United States">United States</SelectItem>
-                          <SelectItem value="Singapore">Singapore</SelectItem>
-                          <SelectItem value="Malaysia">Malaysia</SelectItem>
-                          <SelectItem value="Thailand">Thailand</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
 
                   <div>
+                    <Label htmlFor="country" className="text-sm font-medium text-[#1A1A1A]">
+                      Country
+                    </Label>
+                    <Select value={form.country} onValueChange={(value) => setForm(prev => ({ ...prev, country: value }))}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Indonesia">Indonesia</SelectItem>
+                        <SelectItem value="Malaysia">Malaysia</SelectItem>
+                        <SelectItem value="Singapore">Singapore</SelectItem>
+                        <SelectItem value="Thailand">Thailand</SelectItem>
+                        <SelectItem value="Philippines">Philippines</SelectItem>
+                        <SelectItem value="Vietnam">Vietnam</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
                     <Label htmlFor="description" className="text-sm font-medium text-[#1A1A1A]">
-                      Additional Notes (Optional)
+                      Additional Notes
                     </Label>
                     <Textarea
                       id="description"
                       value={form.description}
                       onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                       className="mt-1"
-                      placeholder="Any additional information or special requests"
-                      rows={2}
+                      placeholder="Any additional information or special requests..."
+                      rows={3}
                     />
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Payment Method */}
+              {/* Payment Methods */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RadioGroup
-                    value={form.payment_method}
-                    onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}
-                    className="space-y-3"
-                  >
+                  <RadioGroup value={form.payment_method} onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}>
                     {paymentGateways.map((gateway) => (
-                      <div key={gateway.id} className="space-y-2">
-                        <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-[#F7F9FC] transition-colors">
-                          <div className="flex items-center space-x-3 flex-1">
-                            <RadioGroupItem value={gateway.id} id={`payment-${gateway.id}`} />
-                            <Label 
-                              htmlFor={`payment-${gateway.id}`}
-                              className="flex-1 cursor-pointer"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <div className="font-medium text-[#1A1A1A] mb-1">{gateway.name}</div>
-                                  <div className="text-sm text-[#6C757D]">{gateway.description}</div>
-                                  {gateway.configuration && gateway.slug !== 'midtrans' && (
-                                    <div className="mt-2 text-sm text-[#6C757D] space-y-1">
+                      <div key={gateway.id} className="space-y-4">
+                        <div className="flex items-start space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#1A1A1A] transition-colors">
+                          <RadioGroupItem value={gateway.id} id={gateway.id} />
+                          <div className="flex-1">
+                            <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
+                              {gateway.slug === 'bank_transfer' && (
+                                <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
+                              )}
+                              <div>
+                                <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
+                                <div className="text-sm text-[#6C757D]">{gateway.description}</div>
+                                {gateway.configuration?.bank_name && form.payment_method === gateway.id && (
+                                  <div className="text-sm text-[#1A1A1A] mt-2 p-2 bg-[#F7F9FC] rounded border">
+                                    <div className="font-semibold">Bank Details:</div>
+                                    <div className="text-xs space-y-1 mt-1">
                                       <div><span className="font-medium">Bank:</span> {gateway.configuration.bank_name}</div>
+                                      <div><span className="font-medium">Account Name:</span> {gateway.configuration.account_name}</div>
                                       <div><span className="font-medium">Account Number:</span> {gateway.configuration.account_number}</div>
                                     </div>
-                                  )}
-                                </div>
+                                  </div>
+                                )}
                               </div>
                             </Label>
                           </div>
