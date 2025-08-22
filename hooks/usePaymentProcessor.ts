@@ -95,8 +95,8 @@ export function usePaymentProcessor({
   }
 
   /**
-   * Process credit card payment with correct Midtrans recurring flow
-   * For Midtrans recurring: backend creates initial charge → gets saved_token_id → creates subscription
+   * Process credit card payment with proper Midtrans tokenization flow
+   * 1) Tokenize card using Midtrans.min.js → 2) Charge with token → 3) Subscription with saved_token
    */
   const processCreditCardPayment = async (
     paymentData: Omit<PaymentRequest, 'token_id'>, 
@@ -108,15 +108,19 @@ export function usePaymentProcessor({
     onPaymentStart?.()
 
     try {
-      // For Midtrans recurring payments, pass card data directly to backend
-      // Backend will: 1) Create initial charge, 2) Get saved_token_id, 3) Create subscription
-      const paymentWithCardData = {
-        ...paymentData,
-        card_data: cardData  // Pass raw card data instead of pre-tokenizing
+      // Step 1: Load 3DS SDK and get configuration
+      const config = await MidtransClientService.getMidtransConfig(token)
+      await MidtransClientService.load3DSSDK(config.client_key, config.environment)
+
+      // Step 2: Tokenize card using Midtrans JavaScript SDK
+      const cardToken = await MidtransClientService.getCreditCardToken(cardData)
+
+      if (!cardToken) {
+        throw new Error('Failed to process card information')
       }
 
-      // Process payment - backend handles the correct Midtrans flow
-      await processPayment(paymentWithCardData, token)
+      // Step 3: Process payment with token_id (backend will charge → get saved_token → create subscription)
+      await processPayment({ ...paymentData, token_id: cardToken }, token)
 
     } catch (error) {
       console.error('Credit card payment error:', error)

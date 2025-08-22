@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { payment_method, package_id, billing_period, customer_info, token_id, card_data } = body
+    const { payment_method, package_id, billing_period, customer_info, token_id } = body
 
     console.log(`📊 [Payment Router] Routing to channel: ${payment_method}`)
 
@@ -65,13 +65,13 @@ export async function POST(request: NextRequest) {
         break
       
       case 'midtrans_recurring':
-        if (!card_data) {
+        if (!token_id) {
           return NextResponse.json({
             success: false,
-            message: 'Credit card information is required for recurring payments'
+            message: 'Valid card token is required for recurring payments'
           }, { status: 400 })
         }
-        handler = new MidtransRecurringHandler(paymentData, card_data)
+        handler = new MidtransRecurringHandler(paymentData, token_id)
         break
         
       case 'bank_transfer':
