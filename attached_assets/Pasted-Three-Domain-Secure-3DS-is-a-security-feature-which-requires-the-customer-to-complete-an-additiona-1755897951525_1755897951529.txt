@@ -1,0 +1,55 @@
+Three Domain Secure (3DS) is a security feature which requires the customer to complete an additional verification step while making payments using card. 3DS can be enabled/disabled for specific transactions. Always enable 3DS, to prevent unnecessary security and chargeback risks.
+Successful request returns redirect_url to redirect customer to the authentication page. After completing the authentication process, you will receive notification containing the transaction details and 3DS result.
+
+
+
+3DS Charge Request
+Sample Request - 3DS Charge
+
+{
+  "payment_type": "credit_card",
+  "transaction_details": {
+    "order_id": "C17550",
+    "gross_amount": 145000
+  },
+  "credit_card": {
+    "token_id": "< your token ID >",
+    "authentication": true,
+    "callback_type": "js_event"
+  }
+}
+The credit_card object in Charge request to configure 3DS feature is identical with Card Charge Request, with the additional attributes given below.
+
+JSON Attribute	Description	Type	Required
+token_id	Token ID represents customer's card information acquired from Get Card Token response.	String	Required
+authentication	Flag to enable the 3D secure authentication. Default value is false.	Boolean	Optional
+callback_type	Determines how the transaction status is updated to the merchant frontend. Possible values are js_event (default) and form. For more details, refer Handling 3DS Callback.	String	Optional
+
+
+3DS Charge Response and Notifications
+Sample Response
+Success
+Pending after submit OTP 3DS 2.0
+Error Response
+Capture Notification
+Capture Notification after submit OTP 3DS 2.0
+Deny Notification
+Challenge Notification
+Settlement Notification
+
+{
+  "status_code": "201",
+  "status_message": "Success, Credit Card transaction is successful",
+  "transaction_id": "1a1a66f7-27a7-4844-ba1f-d86dcc16ab27",
+  "order_id": "C17550",
+  "redirect_url": "https://api.veritrans.co.id/v2/3ds/redirect/451249-2595-e14aac7f-cfb3-4ab2-98ab-5cc5e70f4b2c",
+  "gross_amount": "145000.00",
+  "currency": "IDR",
+  "payment_type": "credit_card",
+  "transaction_time": "2018-09-12 22:10:23",
+  "transaction_status": "pending",
+  "masked_card": "48111111-1114",
+  "card_type": "credit",
+  "three_ds_version": "2",
+  "on_us": true
+}

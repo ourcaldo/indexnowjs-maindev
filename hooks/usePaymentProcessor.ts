@@ -82,6 +82,13 @@ export function usePaymentProcessor({
       }
     } catch (error) {
       console.error('Payment processing error:', error)
+      
+      // Re-throw 3DS authentication errors so checkout page can handle them
+      if (error && typeof error === 'object' && 'requires_3ds' in error) {
+        console.log('🔐 Re-throwing 3DS authentication error for checkout page to handle')
+        throw error
+      }
+      
       const errorMessage = error instanceof Error ? error.message : 'Payment failed'
       setError(errorMessage)
       onError?.(error as Error)
@@ -144,6 +151,14 @@ export function usePaymentProcessor({
 
     } catch (error) {
       console.error('Credit card payment error:', error)
+      
+      // Re-throw 3DS authentication errors so checkout page can handle them
+      if (error && typeof error === 'object' && 'requires_3ds' in error) {
+        console.log('🔐 Re-throwing 3DS authentication error from credit card payment for checkout page to handle')
+        setSubmitting(false)
+        throw error
+      }
+      
       const errorMessage = error instanceof Error ? error.message : 'Credit card payment failed'
       setError(errorMessage)
       onError?.(error as Error)
@@ -207,6 +222,7 @@ export function usePaymentProcessor({
       } else if (paymentMethod === 'midtrans_recurring') {
         // Handle 3DS authentication if required
         if (result.requires_redirect && result.redirect_url) {
+          console.log('🔐 3DS authentication required - throwing error for component to handle')
           // Throw a special error that the component can catch and handle for 3DS
           const threeDSError = new Error('3DS authentication required') as any
           threeDSError.requires_3ds = true
@@ -216,7 +232,7 @@ export function usePaymentProcessor({
           throw threeDSError
         }
 
-        // Direct success without 3DS
+        // Direct success without 3DS (should be rare - most recurring payments require 3DS)
         addToast({
           title: "Payment successful!",
           description: "Your subscription has been activated.",
