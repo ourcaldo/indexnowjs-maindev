@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import MidtransRecurringHandler from '../channels/midtrans-recurring/handler.js'
+import MidtransRecurringHandler from '../channels/midtrans-recurring/handler'
 import { PaymentData } from '../channels/shared/base-handler'
 
 export async function POST(request: NextRequest) {

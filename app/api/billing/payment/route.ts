@@ -4,9 +4,9 @@ import { cookies } from 'next/headers'
 import { BasePaymentHandler, PaymentData } from '../channels/shared/base-handler'
 
 // Import handlers directly
-import MidtransSnapHandler from '../channels/midtrans-snap/handler.js'
-import MidtransRecurringHandler from '../channels/midtrans-recurring/handler.js'  
-import BankTransferHandler from '../channels/bank-transfer/handler.js'
+import MidtransSnapHandler from '../channels/midtrans-snap/handler'
+import MidtransRecurringHandler from '../channels/midtrans-recurring/handler'  
+import BankTransferHandler from '../channels/bank-transfer/handler'
 
 export async function POST(request: NextRequest) {
   try {
