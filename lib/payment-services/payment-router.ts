@@ -72,7 +72,7 @@ export class PaymentRouter {
    */
   async getPaymentGateways(): Promise<any[]> {
     try {
-      const response = await fetch('/api/billing/gateways', {
+      const response = await fetch('/api/billing/payment-gateways', {
         headers: {
           'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json'
