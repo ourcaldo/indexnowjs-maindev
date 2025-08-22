@@ -488,7 +488,7 @@ export default function CheckoutPage() {
     }
   }, [package_id, router, addToast])
 
-  // Load Midtrans SDK with improved error handling and retry mechanism
+  // Load Midtrans SDKs with improved error handling and retry mechanism
   useEffect(() => {
     const loadMidtransSDKs = async () => {
       try {
@@ -634,59 +634,6 @@ export default function CheckoutPage() {
     }
   }
 
-  const handleMidtransRecurringPayment = async (cardToken: string, token: string) => {
-    const response = await fetch('/api/billing/midtrans-recurring', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        package_id: selectedPackage!.id,
-        billing_period,
-        customer_info: {
-          first_name: form.first_name,
-          last_name: form.last_name,
-          email: form.email,
-          phone: form.phone,
-          address: form.address,
-          city: form.city,
-          state: form.state,
-          zip_code: form.zip_code,
-          country: form.country,
-          description: form.description
-        },
-        token_id: cardToken
-      }),
-    })
-
-    const result = await response.json()
-
-    if (result.success) {
-      // Log activity
-      logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
-
-      addToast({
-        title: "Payment successful!",
-        description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
-        type: "success"
-      })
-      
-      // Redirect to payment page or success page
-      setTimeout(() => {
-        if (result.data?.redirect_url) {
-          window.location.href = result.data.redirect_url
-        } else {
-          router.push('/dashboard/settings/plans-billing')
-        }
-      }, 1500)
-    } else {
-      throw new Error(result.message || 'Payment processing failed. Please try again.')
-    }
-    
-    setSubmitting(false)
-  }
-
   const handleMidtransSnapPayment = async (token: string) => {
     try {
       // Create Snap transaction
@@ -786,6 +733,59 @@ export default function CheckoutPage() {
     }
   }
 
+  const handleMidtransRecurringPayment = async (cardToken: string, token: string) => {
+    const response = await fetch('/api/billing/midtrans-recurring', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        package_id: selectedPackage!.id,
+        billing_period,
+        customer_info: {
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          zip_code: form.zip_code,
+          country: form.country,
+          description: form.description
+        },
+        token_id: cardToken
+      }),
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      // Log activity
+      logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
+
+      addToast({
+        title: "Payment successful!",
+        description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
+        type: "success"
+      })
+
+      // Redirect to payment page or success page
+      setTimeout(() => {
+        if (result.data?.redirect_url) {
+          window.location.href = result.data.redirect_url
+        } else {
+          router.push('/dashboard/settings/plans-billing')
+        }
+      }, 1500)
+    } else {
+      throw new Error(result.message || 'Payment processing failed. Please try again.')
+    }
+
+    setSubmitting(false)
+  }
+
   const handleRegularCheckout = async (token: string) => {
     const response = await fetch('/api/billing/checkout', {
       method: 'POST',
@@ -820,7 +820,7 @@ export default function CheckoutPage() {
         description: "Redirecting to order details...",
         type: "success"
       })
-      
+
       // Redirect to order completed page
       setTimeout(() => {
         router.push(result.data.redirect_url)
@@ -931,11 +931,12 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <Label htmlFor="phone" className="text-sm font-medium text-[#1A1A1A]">
-                        Phone Number
+                        Phone Number *
                       </Label>
                       <Input
                         id="phone"
                         type="tel"
+                        required
                         value={form.phone}
                         onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
                         className="mt-1"
@@ -956,17 +957,17 @@ export default function CheckoutPage() {
                     <Label htmlFor="address" className="text-sm font-medium text-[#1A1A1A]">
                       Street Address
                     </Label>
-                    <Textarea
+                    <Input
                       id="address"
+                      type="text"
                       value={form.address}
                       onChange={(e) => setForm(prev => ({ ...prev, address: e.target.value }))}
                       className="mt-1"
-                      placeholder="Enter your address"
-                      rows={3}
+                      placeholder="Enter your street address"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A]">
                         City
@@ -977,7 +978,7 @@ export default function CheckoutPage() {
                         value={form.city}
                         onChange={(e) => setForm(prev => ({ ...prev, city: e.target.value }))}
                         className="mt-1"
-                        placeholder="Enter your city"
+                        placeholder="City"
                       />
                     </div>
                     <div>
@@ -990,15 +991,12 @@ export default function CheckoutPage() {
                         value={form.state}
                         onChange={(e) => setForm(prev => ({ ...prev, state: e.target.value }))}
                         className="mt-1"
-                        placeholder="Enter your state/province"
+                        placeholder="State"
                       />
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="zip_code" className="text-sm font-medium text-[#1A1A1A]">
-                        ZIP/Postal Code
+                        ZIP Code
                       </Label>
                       <Input
                         id="zip_code"
@@ -1006,75 +1004,75 @@ export default function CheckoutPage() {
                         value={form.zip_code}
                         onChange={(e) => setForm(prev => ({ ...prev, zip_code: e.target.value }))}
                         className="mt-1"
-                        placeholder="Enter your ZIP/postal code"
+                        placeholder="ZIP"
                       />
-                    </div>
-                    <div>
-                      <Label htmlFor="country" className="text-sm font-medium text-[#1A1A1A]">
-                        Country
-                      </Label>
-                      <Select value={form.country} onValueChange={(value) => setForm(prev => ({ ...prev, country: value }))}>
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select a country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Indonesia">Indonesia</SelectItem>
-                          <SelectItem value="United States">United States</SelectItem>
-                          <SelectItem value="Singapore">Singapore</SelectItem>
-                          <SelectItem value="Malaysia">Malaysia</SelectItem>
-                          <SelectItem value="Thailand">Thailand</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
 
                   <div>
+                    <Label htmlFor="country" className="text-sm font-medium text-[#1A1A1A]">
+                      Country
+                    </Label>
+                    <Select value={form.country} onValueChange={(value) => setForm(prev => ({ ...prev, country: value }))}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Indonesia">Indonesia</SelectItem>
+                        <SelectItem value="Malaysia">Malaysia</SelectItem>
+                        <SelectItem value="Singapore">Singapore</SelectItem>
+                        <SelectItem value="Thailand">Thailand</SelectItem>
+                        <SelectItem value="Philippines">Philippines</SelectItem>
+                        <SelectItem value="Vietnam">Vietnam</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
                     <Label htmlFor="description" className="text-sm font-medium text-[#1A1A1A]">
-                      Additional Notes (Optional)
+                      Additional Notes
                     </Label>
                     <Textarea
                       id="description"
                       value={form.description}
                       onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                       className="mt-1"
-                      placeholder="Any additional information or special requests"
-                      rows={2}
+                      placeholder="Any additional information or special requests..."
+                      rows={3}
                     />
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Payment Method */}
+              {/* Payment Methods */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RadioGroup
-                    value={form.payment_method}
-                    onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}
-                    className="space-y-3"
-                  >
+                  <RadioGroup value={form.payment_method} onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}>
                     {paymentGateways.map((gateway) => (
-                      <div key={gateway.id} className="space-y-2">
-                        <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-[#F7F9FC] transition-colors">
-                          <div className="flex items-center space-x-3 flex-1">
-                            <RadioGroupItem value={gateway.id} id={`payment-${gateway.id}`} />
-                            <Label 
-                              htmlFor={`payment-${gateway.id}`}
-                              className="flex-1 cursor-pointer"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <div className="font-medium text-[#1A1A1A] mb-1">{gateway.name}</div>
-                                  <div className="text-sm text-[#6C757D]">{gateway.description}</div>
-                                  {gateway.configuration && gateway.slug !== 'midtrans' && (
-                                    <div className="mt-2 text-sm text-[#6C757D] space-y-1">
+                      <div key={gateway.id} className="space-y-4">
+                        <div className="flex items-start space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#1A1A1A] transition-colors">
+                          <RadioGroupItem value={gateway.id} id={gateway.id} />
+                          <div className="flex-1">
+                            <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
+                              {gateway.slug === 'bank_transfer' && (
+                                <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
+                              )}
+                              <div>
+                                <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
+                                <div className="text-sm text-[#6C757D]">{gateway.description}</div>
+                                {gateway.configuration?.bank_name && form.payment_method === gateway.id && (
+                                  <div className="text-sm text-[#1A1A1A] mt-2 p-2 bg-[#F7F9FC] rounded border">
+                                    <div className="font-semibold">Bank Details:</div>
+                                    <div className="text-xs space-y-1 mt-1">
                                       <div><span className="font-medium">Bank:</span> {gateway.configuration.bank_name}</div>
+                                      <div><span className="font-medium">Account Name:</span> {gateway.configuration.account_name}</div>
                                       <div><span className="font-medium">Account Number:</span> {gateway.configuration.account_number}</div>
                                     </div>
-                                  )}
-                                </div>
+                                  </div>
+                                )}
                               </div>
                             </Label>
                           </div>
