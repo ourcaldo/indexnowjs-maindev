@@ -1,0 +1,93 @@
+🌏 Frontend currency detection: {user_profile_country: undefined, detected_currency: 'USD', form_country_before: 'Indonesia'}
+page.tsx:289 🌏 Frontend currency detection: {user_profile_country: undefined, detected_currency: 'USD', form_country_before: 'Indonesia'}
+midtrans-client-service.ts:88 ✅ 3DS SDK loaded successfully
+midtrans-client-service.ts:50 ✅ Snap SDK loaded successfully
+midtrans-client-service.ts:91 🔍 Checking if window.MidtransNew3ds is available after load...
+midtrans-client-service.ts:92 🔍 window.MidtransNew3ds: true
+midtrans-client-service.ts:94 🔍 Available methods: (8) ['version', 'clientKey', 'url', 'callback', 'authenticate', 'getCardToken', 'redirect', 'registerCard']0: "version"1: "clientKey"2: "url"3: "callback"4: "authenticate"5: "getCardToken"6: "redirect"7: "registerCard"length: 8[[Prototype]]: Array(0)
+midtrans-client-service.ts:95 🔍 getCardToken available: true
+useGlobalWebSocket.ts:102 🔗 Global WebSocket connection error: Error: timeout
+    at eval (manager.js:150:25)
+error @ intercept-console-error.js:57
+eval @ useGlobalWebSocket.ts:102
+Emitter.emit @ index.js:140
+onerror @ socket.js:446
+Emitter.emit @ index.js:140
+onError @ manager.js:134
+eval @ manager.js:150Understand this error
+7WebSocket connection to '<URL>' failed: WebSocket is closed before the connection is established.Understand this warning
+useGlobalWebSocket.ts:167 Failed to initialize global WebSocket: Error: timeout
+    at eval (manager.js:150:25)
+error @ intercept-console-error.js:57
+useGlobalWebSocket.useEffect @ useGlobalWebSocket.ts:167Understand this error
+index.js:552  POST https://0a5d532e-bd87-445b-9da0-88f4a486cbc6-00-16u3hhcoiclu1.sisko.replit.dev/__nextjs_original-stack-frames 403 (Forbidden)
+eval @ index.js:552
+eval @ index.js:552
+ej @ index.js:552
+i @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+eC @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+tv @ index.js:552
+i @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+s @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+tv @ index.js:552
+i @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+eval @ index.js:552
+i0 @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+lj @ index.js:541
+lk @ index.js:541
+sE @ index.js:541
+eval @ index.js:541
+_ @ index.js:541Understand this error
+useGlobalWebSocket.ts:102 🔗 Global WebSocket connection error: Error: timeout
+    at eval (manager.js:150:25)
+error @ intercept-console-error.js:57
+eval @ useGlobalWebSocket.ts:102
+Emitter.emit @ index.js:140
+onerror @ socket.js:446
+Emitter.emit @ index.js:140
+onError @ manager.js:134
+eval @ manager.js:150
+setTimeout
+open @ manager.js:148
+eval @ manager.js:347
+setTimeout
+reconnect @ manager.js:340
+maybeReconnectOnOpen @ manager.js:108
+onError @ manager.js:140
+eval @ manager.js:150Understand this error
+usePaymentProcessor.ts:113 🚀 [Credit Card Payment] Starting credit card payment process...
+usePaymentProcessor.ts:114 📄 [Credit Card Payment] Payment data: {package_id: '0c198382-ecb7-4d05-9676-aa632eb542e9', billing_period: 'monthly', payment_method: 'midtrans_recurring', customer_info: {…}}
+usePaymentProcessor.ts:115 💳 [Credit Card Payment] Card data: {has_card_number: true, exp_month: '12', exp_year: '2029', has_cvv: true}
+usePaymentProcessor.ts:123 🔄 [Credit Card Payment] Getting Midtrans configuration...
+usePaymentProcessor.ts:125 ✅ [Credit Card Payment] Config loaded: {environment: 'sandbox'}
+usePaymentProcessor.ts:127 🔄 [Credit Card Payment] Ensuring 3DS SDK is loaded...
+usePaymentProcessor.ts:129 ✅ [Credit Card Payment] 3DS SDK loaded
+usePaymentProcessor.ts:132 🚀 [Credit Card Payment] Starting card tokenization...
+midtrans-client-service.ts:133 🔄 Starting card tokenization...
+midtrans-client-service.ts:134 🔍 Card data received: {has_card_number: true, exp_month: '12', exp_year: '2029', has_cvv: true}
+midtrans-client-service.ts:159 ✅ window.MidtransNew3ds is available
+midtrans-client-service.ts:160 🔍 Available methods: (8) ['version', 'clientKey', 'url', 'callback', 'authenticate', 'getCardToken', 'redirect', 'registerCard']
+midtrans-client-service.ts:161 🔍 getCardToken function available: true
+midtrans-client-service.ts:165 🔄 Setting up JSONP callback override...
+midtrans-client-service.ts:195 🚀 Calling Midtrans getCardToken with data: {card_number: '****1114', card_exp_month: '12', card_exp_year: '2029', has_cvv: true}

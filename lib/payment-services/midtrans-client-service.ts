@@ -62,40 +62,69 @@ export class MidtransClientService {
 
   /**
    * Load Midtrans 3DS SDK for credit card tokenization
+   * CRITICAL: Must be loaded with proper data-client-key and data-environment for tokenization to work
    */
   static async load3DSSDK(clientKey: string, environment: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Check if already loaded
-      if (document.querySelector('#midtrans-3ds-script') && window.MidtransNew3ds) {
-        resolve()
-        return
-      }
-
-      // Remove existing script if present but not working
+      console.log('🔄 Loading Midtrans 3DS SDK with config:', { clientKey: clientKey.substring(0, 10) + '...', environment })
+      
+      // Check if already loaded AND properly configured
       const existingScript = document.querySelector('#midtrans-3ds-script')
-      if (existingScript) {
-        existingScript.remove()
+      if (existingScript && window.MidtransNew3ds) {
+        const existingClientKey = existingScript.getAttribute('data-client-key')
+        const existingEnv = existingScript.getAttribute('data-environment')
+        if (existingClientKey === clientKey && existingEnv === environment) {
+          console.log('✅ 3DS SDK already loaded with correct configuration')
+          resolve()
+          return
+        }
       }
 
+      // Remove existing script if present (might have wrong config)
+      if (existingScript) {
+        console.log('🗑️ Removing existing SDK script with wrong configuration')
+        existingScript.remove()
+        // Also clean up the global object
+        delete (window as any).MidtransNew3ds
+      }
+
+      console.log('📥 Creating new SDK script element...')
       const script = document.createElement('script')
       script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
       script.setAttribute('data-environment', environment)
       script.setAttribute('data-client-key', clientKey)
       script.setAttribute('id', 'midtrans-3ds-script')
-      script.async = true
+      script.async = false  // Load synchronously to ensure proper initialization
 
       script.onload = () => {
-        console.log('✅ 3DS SDK loaded successfully')
-        // Give the SDK a moment to initialize
+        console.log('✅ 3DS SDK script loaded successfully')
+        // Give the SDK a moment to initialize properly
         setTimeout(() => {
-          console.log('🔍 Checking if window.MidtransNew3ds is available after load...')
-          console.log('🔍 window.MidtransNew3ds:', !!window.MidtransNew3ds)
+          console.log('🔍 Post-load SDK verification...')
+          console.log('🔍 window.MidtransNew3ds available:', !!window.MidtransNew3ds)
+          
           if (window.MidtransNew3ds) {
-            console.log('🔍 Available methods:', Object.keys(window.MidtransNew3ds))
-            console.log('🔍 getCardToken available:', typeof window.MidtransNew3ds.getCardToken === 'function')
+            console.log('🔍 SDK methods:', Object.keys(window.MidtransNew3ds))
+            console.log('🔍 getCardToken function:', typeof window.MidtransNew3ds.getCardToken === 'function')
+            console.log('🔍 SDK clientKey:', (window.MidtransNew3ds as any).clientKey)
+            console.log('🔍 SDK version:', (window.MidtransNew3ds as any).version)
+            console.log('🔍 SDK url:', (window.MidtransNew3ds as any).url)
+          } else {
+            console.error('❌ window.MidtransNew3ds not available after script load!')
           }
+          
+          // Verify the script attributes are set correctly
+          const loadedScript = document.querySelector('#midtrans-3ds-script')
+          if (loadedScript) {
+            console.log('🔍 Script attributes:', {
+              'data-client-key': loadedScript.getAttribute('data-client-key'),
+              'data-environment': loadedScript.getAttribute('data-environment'),
+              'src': loadedScript.getAttribute('src')
+            })
+          }
+          
           resolve()
-        }, 100)
+        }, 200)  // Increased timeout to ensure proper initialization
       }
 
       script.onerror = () => {
@@ -165,7 +194,7 @@ export class MidtransClientService {
       console.log('🔄 Setting up JSONP callback override...')
 
       ;(window as any).MidtransNew3ds.callback = function(response: any) {
-        console.log('📥 Received JSONP callback response:', response)
+        console.log('📥 JSONP callback triggered with response:', JSON.stringify(response, null, 2))
         if (!isResolved) {
           isResolved = true
           clearTimeout(timeout)
@@ -177,9 +206,12 @@ export class MidtransClientService {
             console.log('✅ Tokenization successful, token_id:', response.token_id)
             resolve(response.token_id)
           } else {
-            console.error('❌ Tokenization failed:', response)
-            reject(new Error(response?.status_message || 'Card tokenization failed'))
+            console.error('❌ Tokenization failed with response:', response)
+            const errorMessage = response?.status_message || response?.validation_messages?.join(', ') || 'Card tokenization failed'
+            reject(new Error(errorMessage))
           }
+        } else {
+          console.log('⚠️ Callback called but already resolved')
         }
       }
 
@@ -199,10 +231,26 @@ export class MidtransClientService {
             has_cvv: !!tokenizationData.card_cvv
           })
           
+          // Add a timeout to check if the request is actually made
+          setTimeout(() => {
+            if (!isResolved) {
+              console.warn('⚠️ No JSONP callback received after 2 seconds - checking network tab for tokenization request')
+            }
+          }, 2000)
+          
           window.MidtransNew3ds.getCardToken(tokenizationData, function(response?: any) {
-            console.log('📋 getCardToken direct callback (usually empty):', response)
-            // This callback is required by the API but the actual response comes via global callback
+            console.log('📋 getCardToken direct callback (should be empty):', response)
+            // This callback is required by the API but the actual response comes via global JSONP callback
+            // If this callback receives data, something is wrong with the JSONP setup
+            if (response && response.token_id && !isResolved) {
+              console.log('⚠️ Received token in direct callback instead of JSONP - using it')
+              isResolved = true
+              clearTimeout(timeout)
+              resolve(response.token_id)
+            }
           })
+          
+          console.log('✅ getCardToken called successfully, waiting for JSONP response...')
         } else {
           console.error('❌ getCardToken function not available')
           throw new Error('getCardToken function not available')
