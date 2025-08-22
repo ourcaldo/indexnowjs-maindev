@@ -320,7 +320,7 @@ export default function PaymentGateways() {
                   value={formData.configuration?.webhook_url || ''}
                   onChange={(e) => updateConfigurationField('webhook_url', e.target.value)}
                   className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
-                  placeholder="https://yourdomain.com/api/midtrans/webhook"
+                  placeholder="https://yourdomain.com/api/billing/midtrans/webhook"
                   readOnly
                 />
                 <p className="text-xs text-[#6C757D] mt-1">

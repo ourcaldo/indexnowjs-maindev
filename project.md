@@ -2566,3 +2566,12 @@ indb_keyword_rankings (latest positions)
 - **Files Modified**: `app/api/auth/register/route.ts` - Changed from INSERT to UPDATE approach
 - **Database Changes**: None required - works with existing triggers and policies
 - **Result**: Registration now works with all fields populated without touching RLS or trigger functions
+
+### January 22, 2025 - Midtrans Webhook URL Configuration Fix
+- ✅ **FIXED MIDTRANS RECURRING WEBHOOK URL**: Corrected admin panel webhook URL placeholder to match actual endpoint
+  - **Issue**: Admin panel showed incorrect webhook URL `https://yourdomain.com/api/midtrans/webhook` for Midtrans Recurring
+  - **Root Cause**: Actual webhook endpoint is located at `app/api/billing/midtrans/webhook/route.ts`
+  - **Solution**: Updated admin panel placeholder to show correct URL `https://yourdomain.com/api/billing/midtrans/webhook`
+  - **Verification**: Confirmed Midtrans Snap webhook URL `https://yourdomain.com/api/midtrans/snap-webhook` is already correct
+- **File Modified**: `app/backend/admin/settings/payments/page.tsx` - Updated webhook URL placeholder for Midtrans Recurring
+- **Result**: Admin panel now displays accurate webhook URLs for both Midtrans payment gateways
