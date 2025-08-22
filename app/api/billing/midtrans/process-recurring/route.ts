@@ -9,14 +9,18 @@ export async function POST(request: NextRequest) {
     // Get all active subscriptions that need renewal (next_billing_date <= today)
     const today = new Date()
     const { data: subscriptions, error: subscriptionsError } = await supabaseAdmin
-      .from('indb_payment_midtrans_subscriptions')
+      .from('indb_payment_midtrans')
       .select(`
         *,
-        indb_payment_packages(*)
+        indb_payment_transactions!indb_payment_midtrans_transaction_fkey(
+          id,
+          package_id,
+          indb_payment_packages(*)
+        )
       `)
-      .eq('status', 'active')
+      .eq('subscription_status', 'active')
       .lte('next_billing_date', today.toISOString())
-      .not('card_token', 'is', null)
+      .not('saved_token_id', 'is', null)
 
     if (subscriptionsError) {
       console.error('❌ Failed to fetch subscriptions:', subscriptionsError)
@@ -50,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Process each subscription
     for (const subscription of subscriptions) {
       try {
-        console.log(`🔄 Processing subscription ${subscription.subscription_id}`)
+        console.log(`🔄 Processing subscription ${subscription.midtrans_subscription_id}`)
 
         // Generate new order ID for renewal
         const renewalOrderId = `RENEWAL-${Date.now()}-${subscription.id.substring(0, 8)}`
@@ -63,19 +67,19 @@ export async function POST(request: NextRequest) {
             gross_amount: subscription.amount
           },
           credit_card: {
-            token_id: subscription.card_token,
+            token_id: subscription.saved_token_id,
             authentication: false // Skip 3DS for recurring
           },
-          customer_details: subscription.customer_details,
+          customer_details: subscription.metadata?.customer_details || {},
           item_details: [{
-            id: subscription.package_id,
-            price: subscription.amount,
+            id: subscription.indb_payment_transactions?.package_id,
+            price: subscription.metadata?.amount || 0,
             quantity: 1,
-            name: `${subscription.indb_payment_packages?.name} - ${subscription.billing_period} (Renewal)`,
+            name: `${subscription.indb_payment_transactions?.indb_payment_packages?.name} - Renewal`,
             category: 'Subscription Renewal'
           }],
           metadata: {
-            subscription_id: subscription.subscription_id,
+            subscription_id: subscription.midtrans_subscription_id,
             renewal_type: 'automatic',
             original_user_id: subscription.user_id
           }
@@ -125,10 +129,9 @@ export async function POST(request: NextRequest) {
 
           // Update subscription with new dates
           await supabaseAdmin
-            .from('indb_payment_midtrans_subscriptions')
+            .from('indb_payment_midtrans')
             .update({
               next_billing_date: nextBillingDate.toISOString(),
-              expires_at: newExpiresAt.toISOString(),
               updated_at: now.toISOString()
             })
             .eq('id', subscription.id)
@@ -142,61 +145,51 @@ export async function POST(request: NextRequest) {
             })
             .eq('user_id', subscription.user_id)
 
-          // Store renewal transaction
+          // Update existing transaction record
           await supabaseAdmin
-            .from('indb_payment_midtrans_transactions')
-            .insert({
-              transaction_id: chargeResult.transaction_id,
-              order_id: renewalOrderId,
-              user_id: subscription.user_id,
-              package_id: subscription.package_id,
-              amount: subscription.amount,
-              currency: subscription.currency,
-              transaction_status: 'capture',
-              payment_type: 'credit_card',
-              billing_period: subscription.billing_period,
-              settlement_time: now,
-              metadata: {
-                renewal_data: chargeResult,
-                subscription_id: subscription.subscription_id,
-                auto_renewal: true
-              }
+            .from('indb_payment_transactions')
+            .update({
+              transaction_status: 'completed',
+              processed_at: now.toISOString(),
+              verified_at: now.toISOString(),
+              notes: `Automatic renewal - ${renewalOrderId}`,
+              gateway_response: chargeResult
             })
+            .eq('id', subscription.transaction_id)
 
-          // Store main transaction record
+          // Create new transaction record for renewal
           await supabaseAdmin
             .from('indb_payment_transactions')
             .insert({
               user_id: subscription.user_id,
-              package_id: subscription.package_id,
+              package_id: subscription.indb_payment_transactions?.package_id,
               gateway_id: gatewayData.id,
               transaction_type: 'subscription_renewal',
               transaction_status: 'completed',
-              amount: subscription.amount,
-              currency: subscription.currency,
+              amount: subscription.metadata?.amount || 0,
+              currency: 'IDR',
               payment_method: 'credit_card',
               payment_reference: renewalOrderId,
               gateway_transaction_id: chargeResult.transaction_id,
-              billing_period: subscription.billing_period,
               processed_at: now.toISOString(),
               verified_at: now.toISOString(),
               notes: 'Automatic subscription renewal',
               gateway_response: chargeResult
             })
 
-          console.log(`✅ Subscription ${subscription.subscription_id} renewed successfully`)
+          console.log(`✅ Subscription ${subscription.midtrans_subscription_id} renewed successfully`)
           console.log(`📅 Next billing: ${nextBillingDate.toISOString()}`)
           processedCount++
 
         } else {
           // Payment failed - handle failure
-          console.error(`❌ Renewal failed for ${subscription.subscription_id}:`, chargeResult)
+          console.error(`❌ Renewal failed for ${subscription.midtrans_subscription_id}:`, chargeResult)
           
           // Update subscription status to payment_failed
           await supabaseAdmin
-            .from('indb_payment_midtrans_subscriptions')
+            .from('indb_payment_midtrans')
             .update({
-              status: 'payment_failed',
+              subscription_status: 'payment_failed',
               metadata: {
                 ...subscription.metadata,
                 last_failure: {
@@ -212,7 +205,7 @@ export async function POST(request: NextRequest) {
         }
 
       } catch (error) {
-        console.error(`❌ Error processing subscription ${subscription.subscription_id}:`, error)
+        console.error(`❌ Error processing subscription ${subscription.midtrans_subscription_id}:`, error)
         failedCount++
       }
     }

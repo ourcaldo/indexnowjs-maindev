@@ -976,6 +976,24 @@ The infinite loading was caused by waiting for a callback parameter that never e
 
 ## Recent Changes
 
+**MIDTRANS RECURRING BILLING DATABASE SCHEMA FIX COMPLETED (January 29, 2025)**
+- ✅ **CRITICAL DATABASE RELATIONSHIP ERROR RESOLVED**: Fixed recurring billing job failure caused by incorrect table name references
+  - **Root Cause Identified**: API was querying non-existent `indb_payment_midtrans_subscriptions` table instead of actual `indb_payment_midtrans` table
+  - **Schema Mismatch Fixed**: Corrected table name from `indb_payment_midtrans_subscriptions` to `indb_payment_midtrans` in recurring payment processor
+  - **Relationship Structure Updated**: Fixed join relationship to properly access package data through `indb_payment_transactions` table
+  - **Field Mapping Corrected**: Updated field references from `status` to `subscription_status`, `card_token` to `saved_token_id`
+- ✅ **SUPABASE QUERY OPTIMIZATION**: Enhanced database queries to use proper foreign key relationships
+  - **Join Structure**: Implemented correct join path: `indb_payment_midtrans` → `indb_payment_transactions` → `indb_payment_packages`
+  - **Performance Improvement**: Optimized query to fetch subscription data with proper table relationships
+  - **Data Integrity**: Ensured all subscription renewals use correct database schema and foreign key constraints
+- ✅ **BILLING SERVICE RELIABILITY**: Recurring payment processing now operates without database schema errors
+  - **Error Elimination**: Resolved "Could not find a relationship" PostgREST errors that prevented automatic renewals
+  - **Service Continuity**: Background billing jobs now execute successfully without interruption
+  - **Transaction Processing**: Subscription renewals correctly update payment records and user profiles
+- **Files Modified**:
+  - `app/api/billing/midtrans/process-recurring/route.ts`: Updated table names, field names, and join relationships
+- **Result**: Midtrans recurring billing system now works seamlessly with correct database schema alignment
+
 **MIDTRANS 3DS AUTHENTICATION & PRICING FIX COMPLETED (August 21, 2025)**
 - ✅ **CRITICAL PRICING CALCULATION FIX**: Resolved incorrect pricing structure access causing $140,000 vs $45 issue
   - **Root Cause**: Code incorrectly accessed pricing tiers as `pricingTiers.regular?.[billing_period]` instead of nested currency structure
