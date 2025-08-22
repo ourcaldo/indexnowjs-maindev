@@ -509,7 +509,9 @@ async function handleSubscriptionEvent(body: any, transaction: any, supabaseAdmi
     // Log subscription event to activity log
     if (body.subscription.metadata?.user_id) {
       try {
-        const activityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/activity/log`, {
+        // Use relative URL for server-side API calls
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'
+        const activityResponse = await fetch(`${baseUrl}/api/activity/log`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -528,6 +530,8 @@ async function handleSubscriptionEvent(body: any, transaction: any, supabaseAdmi
 
         if (activityResponse.ok) {
           console.log('✅ [Subscription] Activity logged successfully')
+        } else {
+          console.error('⚠️ [Subscription] Activity logging failed with status:', activityResponse.status)
         }
       } catch (activityError) {
         console.error('⚠️ [Subscription] Failed to log activity:', activityError)
