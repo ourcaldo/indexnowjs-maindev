@@ -413,8 +413,20 @@ export default function CheckoutPage() {
           first_name: firstName,
           last_name: lastName,
           email: user.email || '',
-          phone: (user as any).phone_number || ''
+          phone: (user as any).phone_number || '',
+          country: (user as any).country || '' // Auto-populate country from user profile
         }))
+
+        // Update frontend currency based on user's profile country
+        const { getUserCurrency } = await import('@/lib/currency-utils')
+        const detectedCurrency = getUserCurrency((user as any).country)
+        setUserCurrency(detectedCurrency)
+        
+        console.log('🌏 Frontend currency detection:', {
+          user_profile_country: (user as any).country,
+          detected_currency: detectedCurrency,
+          form_country_before: form.country
+        })
 
         const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
         if (!token) {

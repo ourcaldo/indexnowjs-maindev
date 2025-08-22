@@ -729,7 +729,8 @@ JWT_SECRET=[jwt-secret-key]
 
 **Files Modified**:
 - `app/api/billing/payment/route.ts`: Fixed server key retrieval, enhanced amount calculation, added credential validation, fixed currency detection
-- **Result**: Midtrans Snap payments now work with proper authentication, dynamic pricing, and correct currency detection (USD default, IDR for Indonesia)
+- `app/dashboard/settings/plans-billing/checkout/page.tsx`: Fixed frontend currency detection to match backend, auto-populate country from user profile
+- **Result**: Midtrans Snap payments now work with proper authentication, dynamic pricing, and consistent frontend/backend currency detection (USD default, IDR for Indonesia)
 
 ### August 21, 2025: Midtrans 3DS Payment Database Recording Fix ✅
 

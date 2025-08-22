@@ -116,7 +116,12 @@ async function handleMidtransSnap(data: any, user: any) {
     let amount = 0
     // Import currency detection function
     const { getUserCurrency } = await import('@/lib/currency-utils')
+    
     const userCurrency = getUserCurrency(user_data.country) // USD default, IDR for Indonesia
+    console.log('💱 [Snap Handler] Currency detection:', {
+      input_country: user_data.country,
+      detected_currency: userCurrency
+    })
 
     console.log('💰 [Snap Handler] Debug - Package pricing_tiers:', selectedPackage.pricing_tiers)
     console.log('💰 [Snap Handler] Debug - Billing period:', billing_period)
