@@ -57,13 +57,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('✅ [Unified Webhook] Found transaction:', transaction.id, 'Gateway:', transaction.gateway_type)
+    console.log('✅ [Unified Webhook] Found transaction:', transaction.id, 'Payment method:', transaction.payment_method)
 
     // Determine if this is Recurring or Snap payment
-    const isRecurringPayment = transaction.gateway_type === 'midtrans' || 
-                               (transaction.metadata as any)?.payment_method === 'recurring'
-    const isSnapPayment = transaction.gateway_type === 'midtrans_snap' || 
-                          (transaction.metadata as any)?.payment_method === 'snap'
+    const isRecurringPayment = transaction.payment_method === 'midtrans' || 
+                               transaction.payment_method === 'credit_card' ||
+                               (transaction.metadata as any)?.payment_gateway_type === 'midtrans'
+    const isSnapPayment = transaction.payment_method === 'midtrans_snap' || 
+                          (transaction.metadata as any)?.payment_gateway_type === 'midtrans_snap'
 
     console.log('🔍 [Unified Webhook] Payment type detection:', {
       isRecurringPayment,

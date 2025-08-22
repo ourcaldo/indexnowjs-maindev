@@ -256,6 +256,7 @@ async function handleMidtransSnap(data: any, user: any) {
       .insert({
         user_id: user.id,
         package_id: selectedPackage.id,
+        gateway_id: gateway.id,
         transaction_type: 'payment',
         transaction_status: 'pending',
         amount: finalAmount,
@@ -263,13 +264,13 @@ async function handleMidtransSnap(data: any, user: any) {
         payment_method: 'midtrans_snap',
         payment_reference: orderId, // This is what webhook will search for
         billing_period,
-        gateway_type: 'midtrans_snap', // For unified webhook detection
         metadata: {
           original_amount: amount,
           original_currency: userCurrency,
           converted_amount: finalAmount,
           converted_currency: 'IDR',
-          customer_info: user_data
+          customer_info: user_data,
+          payment_gateway_type: 'midtrans_snap' // Store in metadata for unified webhook detection
         }
       })
 
