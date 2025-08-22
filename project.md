@@ -712,12 +712,14 @@ JWT_SECRET=[jwt-secret-key]
 - **Authentication Success**: Fixed 401 "Access denied due to unauthorized transaction" error by using correct API credentials storage
 - **Implementation**: Updated both Snap token creation and response payload to use credentials from api_credentials column
 
-**✅ AMOUNT CALCULATION HARDCODED BUG RESOLVED**:
-- **Dynamic Pricing Implementation**: Replaced any hardcoded 25000 IDR amounts with proper dynamic pricing calculation
+**✅ AMOUNT CALCULATION & CURRENCY DETECTION BUG RESOLVED**:
+- **Dynamic Pricing Implementation**: Replaced hardcoded IDR currency selection with proper user currency detection logic
+- **Currency Detection Fix**: Fixed hardcoded `userCurrency = 'IDR'` to use `getUserCurrency(country)` - defaults to USD, IDR only for Indonesia
 - **Multi-Structure Support**: Enhanced amount calculation to support multiple pricing_tiers structures (new and legacy formats)
+- **USD to IDR Conversion**: Proper currency conversion using `convertUsdToIdr()` with live exchange rates for Midtrans API
 - **Comprehensive Fallbacks**: Added intelligent fallback logic: pricing_tiers[period][currency] → pricing_tiers.regular[period] → base package price
-- **Currency Handling**: Proper USD to IDR conversion support for international pricing
-- **Debug Logging**: Added detailed logging to identify pricing structure issues and calculation steps
+- **Debug Logging**: Added detailed logging to identify pricing structure and currency conversion steps
+- **Transaction Metadata**: Store both original (USD/IDR) and converted (IDR) amounts in database for audit trail
 
 **✅ UNIFIED PAYMENT API ENHANCED**:
 - **Server Key Validation**: Added credential validation to ensure server_key and client_key exist before API calls
@@ -726,8 +728,8 @@ JWT_SECRET=[jwt-secret-key]
 - **Production Ready**: Robust error handling prevents payment failures due to configuration issues
 
 **Files Modified**:
-- `app/api/billing/payment/route.ts`: Fixed server key retrieval, enhanced amount calculation, added credential validation
-- **Result**: Midtrans Snap payments now work with proper authentication and dynamic pricing
+- `app/api/billing/payment/route.ts`: Fixed server key retrieval, enhanced amount calculation, added credential validation, fixed currency detection
+- **Result**: Midtrans Snap payments now work with proper authentication, dynamic pricing, and correct currency detection (USD default, IDR for Indonesia)
 
 ### August 21, 2025: Midtrans 3DS Payment Database Recording Fix ✅
 

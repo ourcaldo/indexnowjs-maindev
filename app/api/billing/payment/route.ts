@@ -112,9 +112,11 @@ async function handleMidtransSnap(data: any, user: any) {
 
     console.log('✅ [Snap Handler] Package fetched:', selectedPackage.name)
 
-    // Calculate amount based on billing period
+    // Calculate amount based on billing period - detect user currency
     let amount = 0
-    const userCurrency = 'IDR' // Default currency
+    // Import currency detection function
+    const { getUserCurrency } = await import('@/lib/currency-utils')
+    const userCurrency = getUserCurrency(user_data.country) // USD default, IDR for Indonesia
 
     console.log('💰 [Snap Handler] Debug - Package pricing_tiers:', selectedPackage.pricing_tiers)
     console.log('💰 [Snap Handler] Debug - Billing period:', billing_period)
@@ -157,6 +159,19 @@ async function handleMidtransSnap(data: any, user: any) {
     }
 
     console.log('💰 [Snap Handler] Final calculated amount:', amount, userCurrency)
+
+    // Midtrans only accepts IDR, so convert USD to IDR if needed
+    let finalAmount = amount
+    if (userCurrency === 'USD') {
+      const { convertUsdToIdr } = await import('@/lib/currency-converter')
+      finalAmount = await convertUsdToIdr(amount)
+      console.log('💱 [Snap Handler] Currency conversion:', {
+        original_amount: amount,
+        currency: 'USD',
+        converted_amount: finalAmount,
+        converted_currency: 'IDR'
+      })
+    }
 
     // Get Midtrans gateway configuration
     const { data: gateway, error: gatewayError } = await supabaseAdmin
@@ -206,7 +221,7 @@ async function handleMidtransSnap(data: any, user: any) {
     const parameter = {
       transaction_details: {
         order_id: orderId,
-        gross_amount: amount
+        gross_amount: finalAmount
       },
       customer_details: {
         first_name: user_data.full_name.split(' ')[0] || 'Customer',
@@ -216,7 +231,7 @@ async function handleMidtransSnap(data: any, user: any) {
       },
       item_details: [{
         id: selectedPackage.id,
-        price: amount,
+        price: finalAmount,
         quantity: 1,
         name: `${selectedPackage.name} Plan - ${billing_period}`
       }]
@@ -224,7 +239,8 @@ async function handleMidtransSnap(data: any, user: any) {
 
     console.log('📋 [Snap Handler] Transaction parameters prepared:', {
       order_id: orderId,
-      amount,
+      amount: finalAmount,
+      currency: 'IDR',
       customer_email: user.email
     })
 
@@ -244,14 +260,18 @@ async function handleMidtransSnap(data: any, user: any) {
           user_id: user.id,
           package_id: selectedPackage.id,
           gateway_id: gateway.id,
-          amount,
-          currency: userCurrency,
+          amount: finalAmount,
+          currency: 'IDR',
           status: 'pending',
           billing_period,
           transaction_data: parameter,
           metadata: {
             snap_token: transaction.token,
-            redirect_url: transaction.redirect_url
+            redirect_url: transaction.redirect_url,
+            original_amount: amount,
+            original_currency: userCurrency,
+            converted_amount: finalAmount,
+            converted_currency: 'IDR'
           }
         })
       console.log('✅ [Snap Handler] Transaction stored in database')
@@ -310,9 +330,11 @@ async function handleRegularCheckout(data: any, user: any) {
 
     console.log('✅ [Regular Checkout] Package and gateway loaded')
 
-    // Calculate amount with same logic as Snap handler
+    // Calculate amount with same logic as Snap handler - detect user currency
     let amount = 0
-    const userCurrency = 'IDR'
+    // Import currency detection function
+    const { getUserCurrency } = await import('@/lib/currency-utils')
+    const userCurrency = getUserCurrency(customer_info.country) // USD default, IDR for Indonesia
 
     console.log('💰 [Regular Checkout] Debug - Package pricing_tiers:', selectedPackage.pricing_tiers)
     console.log('💰 [Regular Checkout] Debug - Billing period:', billing_period)
