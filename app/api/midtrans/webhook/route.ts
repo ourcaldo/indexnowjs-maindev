@@ -8,13 +8,43 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔔 [Unified Webhook] Received Midtrans notification')
     
-    const body = await request.json()
+    // Check content type to determine parsing method
+    const contentType = request.headers.get('content-type') || ''
+    console.log('📋 [Unified Webhook] Content-Type:', contentType)
+    
+    let body: any = {}
+    
+    if (contentType.includes('application/json')) {
+      // Parse JSON data
+      body = await request.json()
+      console.log('📦 [Unified Webhook] Parsed as JSON')
+    } else if (contentType.includes('application/x-www-form-urlencoded')) {
+      // Parse form-encoded data
+      const formData = await request.formData()
+      body = Object.fromEntries(formData.entries())
+      console.log('📝 [Unified Webhook] Parsed as form data')
+    } else {
+      // Try to parse as text and then JSON
+      const text = await request.text()
+      console.log('📄 [Unified Webhook] Raw text data:', text.substring(0, 200))
+      
+      try {
+        body = JSON.parse(text)
+        console.log('🔄 [Unified Webhook] Parsed text as JSON')
+      } catch (e) {
+        // If it's not JSON, try to parse as query parameters
+        const params = new URLSearchParams(text)
+        body = Object.fromEntries(params.entries())
+        console.log('🔗 [Unified Webhook] Parsed as URL parameters')
+      }
+    }
     
     console.log('📊 [Unified Webhook] Notification data:', {
       order_id: body.order_id,
       transaction_status: body.transaction_status,
       fraud_status: body.fraud_status,
-      payment_type: body.payment_type
+      payment_type: body.payment_type,
+      raw_body_keys: Object.keys(body)
     })
 
     // Find transaction to determine payment method
@@ -87,8 +117,29 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('💥 [Unified Webhook] Error:', error)
+    console.error('💥 [Unified Webhook] Error details:', {
+      message: error.message,
+      stack: error.stack?.substring(0, 500)
+    })
     return NextResponse.json({ status: 'error', message: 'Internal server error' }, { status: 500 })
   }
+}
+
+// Also handle GET requests for verification
+export async function GET(request: NextRequest) {
+  console.log('👀 [Unified Webhook] Received GET request (likely verification)')
+  const url = new URL(request.url)
+  const params = Object.fromEntries(url.searchParams.entries())
+  
+  console.log('📊 [Unified Webhook] GET parameters:', {
+    order_id: params.order_id,
+    transaction_status: params.transaction_status,
+    fraud_status: params.fraud_status,
+    payment_type: params.payment_type,
+    all_params: params
+  })
+  
+  return NextResponse.json({ status: 'ok', message: 'Webhook endpoint active' })
 }
 
 async function handleRecurringPayment(body: any, transaction: any, supabaseAdmin: any) {
