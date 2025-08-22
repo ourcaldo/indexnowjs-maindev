@@ -17,6 +17,9 @@ import { authService } from '@/lib/auth'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { formatCurrency } from '@/lib/currency-utils'
 import MidtransCreditCardForm from '@/components/MidtransCreditCardForm'
+import { PaymentRouter } from '@/lib/payment-services/payment-router'
+import { MidtransClientService } from '@/lib/payment-services/midtrans-client-service'
+import { usePaymentProcessor } from '@/hooks/usePaymentProcessor'
 
 // Midtrans type declarations
 declare global {
@@ -130,260 +133,53 @@ export default function CheckoutPage() {
     payment_method: ''
   })
 
+  // Initialize payment processor hook
+  const paymentProcessor = usePaymentProcessor()
+
   // Handle credit card form submission for Midtrans
   const handleCreditCardSubmit = async (cardData: any) => {
-    setSubmitting(true)
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) {
-        throw new Error('Authentication required')
-      }
-
-      const { data: { session } } = await supabaseBrowser.auth.getSession()
-      const token = session?.access_token
-      if (!token) {
-        throw new Error('Failed to get authentication token')
-      }
-
-      // Wait for Midtrans SDK to be ready with timeout
-      let retryCount = 0
-      const maxRetries = 20
-
-      while (!window.MidtransNew3ds || typeof window.MidtransNew3ds.getCardToken !== 'function') {
-        if (retryCount >= maxRetries) {
-          throw new Error('Midtrans payment system is not available. Please refresh the page and try again.')
-        }
-        await new Promise(resolve => setTimeout(resolve, 300))
-        retryCount++
-      }
-
-      // Get token from Midtrans with timeout
-      const cardToken = await getMidtransCardToken(cardData)
-
-      if (!cardToken) {
-        throw new Error('Failed to process card information')
-      }
-
-      // Call unified payment API with card token
-      const response = await fetch('/api/billing/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          package_id: selectedPackage!.id,
-          billing_period,
-          payment_method: 'midtrans_recurring',
-          customer_info: {
-            first_name: form.first_name,
-            last_name: form.last_name,
-            email: form.email,
-            phone: form.phone,
-            address: form.address,
-            city: form.city,
-            state: form.state,
-            zip_code: form.zip_code,
-            country: form.country,
-            description: form.description
-          },
-          token_id: cardToken
-        }),
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        // Check if 3DS authentication is required
-        if (result.requires_redirect && result.redirect_url) {
-          handle3DSAuthentication(result.redirect_url, result.data?.transaction_id, result.data?.order_id)
-          return // Don't reset submitting state yet - 3DS is in progress
-        }
-
-        // Log activity for successful non-3DS payments
-        logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
-
-        addToast({
-          title: "Payment successful!",
-          description: "Your subscription has been activated successfully.",
-          type: "success"
-        })
-
-        // Redirect to success page
-        setTimeout(() => {
-          router.push('/dashboard/settings/plans-billing?success=true')
-        }, 1500)
-      } else {
-        throw new Error(result.message || 'Payment processing failed. Please try again.')
-      }
-
-    } catch (error) {
-      console.error('💥 FRONTEND: Payment error:', error)
+    if (!selectedPackage) {
       addToast({
-        title: "Payment failed",
-        description: error instanceof Error ? error.message : "Please try again later.",
+        title: "Missing package",
+        description: "Please select a package to continue.",
         type: "error"
       })
-    } finally {
-      // Always reset submitting state regardless of success or failure
-
-      setSubmitting(false)
-    }
-  }
-
-  // Get card token from Midtrans SDK using JSONP callback mechanism
-  const getMidtransCardToken = (cardData: any): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      let isResolved = false
-
-      // Add timeout to prevent hanging
-      const timeout = setTimeout(() => {
-        if (!isResolved) {
-          isResolved = true
-          reject(new Error('Card tokenization timeout. Please try again.'))
-        }
-      }, 15000)
-
-      if (!window.MidtransNew3ds) {
-        clearTimeout(timeout)
-        reject(new Error('Payment system not ready. Please refresh the page.'))
-        return
-      }
-
-      // Store original callback and override it temporarily
-      const originalCallback = (window as any).MidtransNew3ds.callback
-
-      ;(window as any).MidtransNew3ds.callback = function(response: any) {
-        if (!isResolved) {
-          isResolved = true
-          clearTimeout(timeout)
-
-          // Restore original callback
-          ;(window as any).MidtransNew3ds.callback = originalCallback
-
-          if (response && response.status_code === '200' && response.token_id) {
-            resolve(response.token_id)
-          } else {
-            reject(new Error(response?.status_message || 'Card tokenization failed'))
-          }
-        }
-      }
-
-      try {
-        if (typeof window.MidtransNew3ds.getCardToken === 'function') {
-          window.MidtransNew3ds.getCardToken({
-            card_number: cardData.card_number.replace(/\s/g, ''),
-            card_exp_month: cardData.expiry_month.padStart(2, '0'),
-            card_exp_year: cardData.expiry_year,
-            card_cvv: cardData.cvv,
-          }, function() {
-            // This callback is required by the API but the actual response comes via global callback
-          })
-        } else {
-          throw new Error('getCardToken function not available')
-        }
-
-      } catch (error) {
-        clearTimeout(timeout)
-        if (!isResolved) {
-          isResolved = true
-          // Restore original callback on error
-          ;(window as any).MidtransNew3ds.callback = originalCallback
-          reject(new Error('Payment processing failed. Please try again.'))
-        }
-      }
-    })
-  }
-
-  // Handle 3DS authentication
-  const handle3DSAuthentication = (redirectUrl: string, transactionId: string, orderId: string) => {
-    console.log('🔐 Starting 3DS authentication process')
-
-    if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
-      throw new Error('3DS authentication not available. Please refresh the page and try again.')
+      return
     }
 
-    const options = {
-      performAuthentication: (url: string) => {
-        // Open 3DS page in modal/iframe
-        console.log('🔐 Opening 3DS authentication page')
-        setThreeDSUrl(url)
-        setShow3DSModal(true)
-      },
-      onSuccess: async (response: any) => {
-        console.log('✅ 3DS Authentication successful:', response)
-        setShow3DSModal(false)
-
-        // Call our callback API to complete the payment process
-        try {
-          const user = await authService.getCurrentUser()
-          const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
-
-          const callbackResponse = await fetch('/api/billing/midtrans-3ds-callback', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              transaction_id: transactionId,
-              order_id: orderId
-            }),
-          })
-
-          const callbackResult = await callbackResponse.json()
-
-          if (callbackResult.success) {
-            addToast({
-              title: "Payment successful!",
-              description: "Your subscription has been activated successfully.",
-              type: "success"
-            })
-
-            await logBillingActivity('subscription_created', `Subscription created for ${selectedPackage?.name} (${billing_period}) via 3DS authentication - Transaction: ${transactionId}`)
-
-            router.push('/dashboard/settings/plans-billing?success=true')
-          } else {
-            throw new Error(callbackResult.message || '3DS authentication callback failed')
-          }
-        } catch (error) {
-          console.error('3DS callback error:', error)
-          addToast({
-            title: "Payment processing failed",
-            description: error instanceof Error ? error.message : "Please contact support.",
-            type: "error"
-          })
-        } finally {
-          setSubmitting(false)
-        }
-      },
-      onFailure: (response: any) => {
-        console.log('❌ 3DS Authentication failed:', response)
-        setShow3DSModal(false)
-        setSubmitting(false)
-
-        addToast({
-          title: "Payment authentication failed",
-          description: "Please verify your card details and try again.",
-          type: "error"
-        })
-      },
-      onPending: (response: any) => {
-        console.log('⏳ 3DS Authentication pending:', response)
-        setShow3DSModal(false)
-        setSubmitting(false)
-
-        addToast({
-          title: "Payment pending",
-          description: "Your payment is being processed. You will receive a confirmation email shortly.",
-          type: "info"
-        })
+    const paymentRequest = {
+      package_id: selectedPackage.id,
+      billing_period,
+      payment_method: 'midtrans_recurring',
+      customer_info: {
+        first_name: form.first_name,
+        last_name: form.last_name,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        zip_code: form.zip_code,
+        country: form.country,
+        description: form.description
       }
     }
 
-    // Trigger 3DS authentication
-    window.MidtransNew3ds.authenticate(redirectUrl, options)
+    // Get auth token for the payment processor
+    const { data: { session } } = await supabaseBrowser.auth.getSession()
+    const token = session?.access_token
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    await paymentProcessor.processCreditCardPayment(paymentRequest, cardData, token)
+    
+    // Success handling is now managed within the payment processor hook
   }
+
+  // Card tokenization is now handled by MidtransClientService via usePaymentProcessor
+
+  // 3DS authentication is now handled by MidtransClientService via usePaymentProcessor
 
   // Fetch package and payment gateway data
   useEffect(() => {
@@ -440,16 +236,11 @@ export default function CheckoutPage() {
           return
         }
 
-        // Fetch package details with authentication
-        const packageRes = await fetch('/api/billing/packages', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        const packageData = await packageRes.json()
-        const selected = packageData.packages?.find((pkg: PaymentPackage) => pkg.id === package_id)
+        // Initialize PaymentRouter with authentication token
+        const paymentRouter = new PaymentRouter(token)
 
+        // Fetch package details using PaymentRouter
+        const selected = await paymentRouter.getPackage(package_id!)
         if (!selected) {
           addToast({
             title: "Package not found",
@@ -462,17 +253,9 @@ export default function CheckoutPage() {
 
         setSelectedPackage(selected)
 
-        // Set user currency from API response
-        if (packageData.user_currency) {
-          setUserCurrency(packageData.user_currency)
-        }
-
-        // Fetch payment gateways
-        const gatewayRes = await fetch('/api/billing/payment-gateways')
-        const gatewayData = await gatewayRes.json()
-
-        if (gatewayData.success) {
-          const activeGateways = gatewayData.gateways.filter((gw: PaymentGateway) => gw.is_active)
+        // Fetch payment gateways using PaymentRouter
+        const activeGateways = await paymentRouter.getPaymentGateways()
+        if (activeGateways && activeGateways.length > 0) {
           setPaymentGateways(activeGateways)
 
           // Set default payment method
@@ -501,81 +284,31 @@ export default function CheckoutPage() {
     }
   }, [package_id, router, addToast])
 
-  // Load Midtrans SDK with improved error handling and retry mechanism
+  // Load Midtrans SDKs using MidtransClientService
   useEffect(() => {
-    const loadMidtransSDK = async () => {
-      // Check if script already exists
-      if (document.querySelector('script[src*="midtrans"]')) {
-        console.log('✅ Midtrans SDK already loaded')
-        return
-      }
-
+    const loadMidtransSDKs = async () => {
       try {
-        // Get authentication token
+        // Get Midtrans config first
+        // Get auth token for Midtrans config
         const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
-        if (!token) {
-          console.log('⚠️ No auth token, skipping Midtrans SDK load')
-          return
+        if (!token) return
+        
+        const config = await MidtransClientService.getMidtransConfig(token)
+        
+        if (config) {
+          // Load both 3DS and Snap SDKs using the service
+          await Promise.all([
+            MidtransClientService.load3DSSDK(config.client_key, config.environment),
+            MidtransClientService.loadSnapSDK(config.client_key, config.environment)
+          ])
         }
-
-        // Fetch Midtrans configuration from backend
-        const response = await fetch('/api/billing/midtrans-config', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
-
-        if (!response.ok) {
-          return
-        }
-
-        const configData = await response.json()
-        if (!configData.success) {
-          return
-        }
-
-        const { client_key, environment } = configData.data
-
-        // Create script element with improved loading
-        const script = document.createElement('script')
-        script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
-        script.async = true
-        script.setAttribute('data-environment', environment || 'sandbox')
-        script.setAttribute('data-client-key', client_key)
-        script.setAttribute('id', 'midtrans-script')
-
-        script.onload = () => {
-          // Midtrans SDK loaded successfully
-        }
-
-        script.onerror = (error) => {
-          // Failed to load Midtrans SDK - handled silently
-        }
-
-        document.head.appendChild(script)
       } catch (error) {
-        // Error loading Midtrans SDK - handled silently
+        // SDK loading failures are handled silently
+        console.warn('Failed to load Midtrans SDKs:', error)
       }
     }
 
-    loadMidtransSDK()
-  }, [])
-
-  // Load Snap.js SDK for Snap payments
-  useEffect(() => {
-    const loadSnapSDK = async () => {
-      // Load Snap.js for Snap payments
-      if (!document.querySelector('script[src*="snap.js"]')) {
-        const snapScript = document.createElement('script')
-        snapScript.src = 'https://app.sandbox.midtrans.com/snap/snap.js'
-        snapScript.setAttribute('data-client-key', 'your_client_key_will_be_set_dynamically')
-        snapScript.setAttribute('id', 'snap-script')
-        document.head.appendChild(snapScript)
-      }
-    }
-
-    loadSnapSDK()
+    loadMidtransSDKs()
   }, [])
 
   // Calculate pricing based on selected billing period
@@ -658,9 +391,31 @@ export default function CheckoutPage() {
 
   const handleUnifiedPayment = async (token: string, selectedGateway: any) => {
     try {
-      // For Midtrans recurring, we need to get the card token first
+      if (!selectedPackage) return
+
+      // Initialize PaymentRouter with auth token
+      const paymentRouter = new PaymentRouter(token)
+
+      const paymentRequest = {
+        package_id: selectedPackage.id,
+        billing_period,
+        payment_method: selectedGateway?.slug || 'bank_transfer',
+        customer_info: {
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          zip_code: form.zip_code,
+          country: form.country,
+          description: form.description
+        }
+      }
+
+      // For Midtrans recurring, delegate to credit card form
       if (selectedGateway?.slug === 'midtrans') {
-        // Check if window.midtransSubmitCard exists and call it
         if (!window.midtransSubmitCard) {
           addToast({
             title: "Payment system not ready",
@@ -670,99 +425,37 @@ export default function CheckoutPage() {
           setSubmitting(false)
           return
         }
-
-        // Call the credit card form submission
-        const success = await window.midtransSubmitCard()
-        if (!success) {
-          setSubmitting(false)
-        }
-        // Note: If success is true, handleCreditCardSubmit will handle the rest
+        await window.midtransSubmitCard()
         return
       }
 
-      // For all other payment methods, call unified payment API
-      const response = await fetch('/api/billing/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          package_id: selectedPackage!.id,
-          billing_period,
-          payment_method: selectedGateway?.slug,
-          customer_info: {
-            first_name: form.first_name,
-            last_name: form.last_name,
-            email: form.email,
-            phone: form.phone,
-            address: form.address,
-            city: form.city,
-            state: form.state,
-            zip_code: form.zip_code,
-            country: form.country,
-            description: form.description
-          },
-          payment_gateway_id: form.payment_method
-        }),
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        // Handle different response types based on payment method
-        if (selectedGateway?.slug === 'midtrans_snap') {
-          // Handle Snap payment popup
-          const { token: snapToken, client_key, environment } = result.data
-
-          // Update Snap.js client key
-          const snapScript = document.querySelector('#snap-script') as HTMLScriptElement
-          if (snapScript) {
-            snapScript.setAttribute('data-client-key', client_key)
-            snapScript.src = environment === 'production' 
-              ? 'https://app.midtrans.com/snap/snap.js'
-              : 'https://app.sandbox.midtrans.com/snap/snap.js'
-          }
-
-          // Wait for Snap.js to be ready
-          let retryCount = 0
-          const maxRetries = 30
-          
-          while (!window.snap || typeof window.snap.pay !== 'function') {
-            if (retryCount >= maxRetries) {
-              throw new Error('Payment system is not available. Please refresh the page and try again.')
-            }
-            await new Promise(resolve => setTimeout(resolve, 200))
-            retryCount++
-          }
-
-          // Show Snap payment popup
-          window.snap.pay(snapToken, {
-            onSuccess: function(result: any) {
+      // For Snap payments, use MidtransClientService
+      if (selectedGateway?.slug === 'midtrans_snap') {
+        const result = await paymentRouter.processPayment(paymentRequest)
+        
+        if (result.success && result.data?.token) {
+          const snapCallbacks = {
+            onSuccess: (result: any) => {
               addToast({
                 title: "Payment successful!",
                 description: "Your subscription has been activated successfully.",
                 type: "success"
               })
-              
-              logBillingActivity('payment_completed', `Snap payment completed for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.order_id || 'unknown'})`)
-              
               setTimeout(() => {
                 router.push('/dashboard/settings/plans-billing?payment=success')
               }, 1500)
             },
-            onPending: function(result: any) {
+            onPending: (result: any) => {
               addToast({
                 title: "Payment pending",
                 description: "Your payment is being processed. You will receive a confirmation email shortly.",
                 type: "info"
               })
-              
               setTimeout(() => {
                 router.push('/dashboard/settings/plans-billing?payment=pending')
               }, 1500)
             },
-            onError: function(result: any) {
+            onError: (result: any) => {
               addToast({
                 title: "Payment failed",
                 description: "There was an error processing your payment. Please try again.",
@@ -770,7 +463,7 @@ export default function CheckoutPage() {
               })
               setSubmitting(false)
             },
-            onClose: function() {
+            onClose: () => {
               addToast({
                 title: "Payment cancelled",
                 description: "You cancelled the payment process.",
@@ -778,9 +471,17 @@ export default function CheckoutPage() {
               })
               setSubmitting(false)
             }
-          })
+          }
+          
+          await MidtransClientService.showSnapPayment(result.data.token, snapCallbacks)
         } else {
-          // Handle regular payments (bank transfer, etc.)
+          throw new Error(result.message || 'Failed to create Snap payment')
+        }
+      } else {
+        // Handle regular payments (bank transfer, etc.) using PaymentRouter
+        const result = await paymentRouter.processPayment(paymentRequest)
+        
+        if (result.success) {
           addToast({
             title: "Order submitted successfully!",
             description: "Redirecting to order details...",
@@ -794,11 +495,10 @@ export default function CheckoutPage() {
               router.push('/dashboard/settings/plans-billing')
             }
           }, 1500)
+        } else {
+          throw new Error(result.message || 'Payment processing failed')
         }
-      } else {
-        throw new Error(result.message || 'Payment processing failed')
       }
-
     } catch (error) {
       throw error
     }

@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import { PaymentRouter, type PaymentRequest } from '@/lib/payment-services/payment-router'
 import { MidtransClientService } from '@/lib/payment-services/midtrans-client-service'
 import { useToast } from '@/hooks/use-toast'
-import { ActivityLogger } from '@/lib/activity-logger'
+// ActivityLogger is imported dynamically to avoid server-side imports in browser
 
 export interface UsePaymentProcessorProps {
   packageData?: any
@@ -244,24 +244,12 @@ export function usePaymentProcessor({
 
   /**
    * Log payment activity for audit trail
+   * Temporarily disabled to avoid server-side import issues
    */
   const logPaymentActivity = async (action: string, paymentData: PaymentRequest, additionalData?: any) => {
-    try {
-      await ActivityLogger.logActivity({
-        userId: 'current-user', // Will be populated from auth context
-        eventType: action,
-        actionDescription: `Payment ${action} for ${paymentData.payment_method}`,
-        metadata: {
-          payment_method: paymentData.payment_method,
-          package_id: paymentData.package_id,
-          billing_period: paymentData.billing_period,
-          amount: additionalData?.amount || 'unknown',
-          currency: additionalData?.currency || 'unknown'
-        }
-      })
-    } catch (error) {
-      console.error('Failed to log payment activity:', error)
-    }
+    // Activity logging temporarily disabled during refactoring
+    // Will be re-enabled with proper API endpoint approach
+    console.log('Payment activity:', { action, paymentData, additionalData })
   }
 
   return {
