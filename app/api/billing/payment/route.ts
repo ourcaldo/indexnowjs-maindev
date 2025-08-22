@@ -1,0 +1,332 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+const midtransClient = require('midtrans-client')
+
+export async function POST(request: NextRequest) {
+  try {
+    console.log('🚀 [Unified Payment] Starting payment processing')
+    
+    // Get authenticated user
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {}
+          },
+        },
+      }
+    )
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.error('❌ [Unified Payment] Authentication failed:', authError)
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Authentication required' 
+      }, { status: 401 })
+    }
+
+    console.log(`✅ [Unified Payment] User authenticated: ${user.email}`)
+
+    // Parse request body
+    const body = await request.json()
+    const { payment_method, package_id, billing_period, customer_info, payment_gateway_id } = body
+
+    console.log(`📊 [Unified Payment] Processing payment method: ${payment_method}`)
+
+    // Route to appropriate payment handler based on payment method slug
+    switch (payment_method) {
+      case 'midtrans_snap':
+        console.log('🔄 [Unified Payment] Routing to Midtrans Snap handler')
+        return await handleMidtransSnap({
+          package_id,
+          billing_period,
+          user_data: {
+            full_name: `${customer_info.first_name} ${customer_info.last_name}`.trim(),
+            email: customer_info.email,
+            phone_number: customer_info.phone,
+            country: customer_info.country
+          }
+        }, user)
+
+      case 'bank_transfer':
+      default:
+        console.log(`🔄 [Unified Payment] Routing to regular checkout handler for: ${payment_method}`)
+        return await handleRegularCheckout({
+          package_id,
+          billing_period,
+          payment_gateway_id,
+          customer_info
+        }, user)
+    }
+
+  } catch (error) {
+    console.error('💥 [Unified Payment] Error processing payment:', error)
+    return NextResponse.json({ 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Payment processing failed' 
+    }, { status: 500 })
+  }
+}
+
+// Midtrans Snap handler
+async function handleMidtransSnap(data: any, user: any) {
+  console.log('🌟 [Snap Handler] Processing Snap payment')
+  
+  try {
+    // Validate required data
+    const { package_id, billing_period, user_data } = data
+    
+    if (!package_id || !billing_period) {
+      throw new Error('Missing required payment data')
+    }
+
+    console.log('📋 [Snap Handler] Validated request data:', { package_id, billing_period, user_email: user.email })
+
+    // Get package details - use correct table name
+    const { data: selectedPackage, error: packageError } = await supabaseAdmin
+      .from('indb_payment_packages')
+      .select('*')
+      .eq('id', package_id)
+      .eq('is_active', true)
+      .single()
+
+    if (packageError || !selectedPackage) {
+      console.error('❌ [Snap Handler] Package fetch error:', packageError)
+      throw new Error('Package not found')
+    }
+
+    console.log('✅ [Snap Handler] Package fetched:', selectedPackage.name)
+
+    // Calculate amount based on billing period
+    let amount = 0
+    const userCurrency = 'IDR' // Default currency
+
+    if (selectedPackage.pricing_tiers && selectedPackage.pricing_tiers[billing_period]) {
+      const periodTier = selectedPackage.pricing_tiers[billing_period]
+      if (periodTier[userCurrency]) {
+        const currencyTier = periodTier[userCurrency]
+        amount = currencyTier.promo_price || currencyTier.regular_price
+      }
+    }
+
+    if (amount === 0) {
+      throw new Error('Unable to calculate package amount')
+    }
+
+    console.log('💰 [Snap Handler] Calculated amount:', amount, userCurrency)
+
+    // Get Midtrans gateway configuration
+    const { data: gateway, error: gatewayError } = await supabaseAdmin
+      .from('indb_payment_gateways')
+      .select('*')
+      .eq('slug', 'midtrans_snap')
+      .eq('is_active', true)
+      .single()
+
+    if (gatewayError || !gateway) {
+      console.error('❌ [Snap Handler] Gateway fetch error:', gatewayError)
+      throw new Error('Midtrans Snap payment gateway not available')
+    }
+
+    console.log('✅ [Snap Handler] Gateway configuration loaded')
+
+    const config = gateway.configuration as any
+    const isProduction = config.environment === 'production'
+    
+    // Initialize Midtrans
+    const snap = new midtransClient.Snap({
+      isProduction,
+      serverKey: config.server_key,
+      clientKey: config.client_key
+    })
+
+    console.log('🔧 [Snap Handler] Initialized', isProduction ? 'production' : 'sandbox', 'environment')
+
+    // Generate unique order ID
+    const orderId = `SNAP-${Date.now()}-${user.id.split('-')[0]}`
+    
+    // Prepare transaction parameters
+    const parameter = {
+      transaction_details: {
+        order_id: orderId,
+        gross_amount: amount
+      },
+      customer_details: {
+        first_name: user_data.full_name.split(' ')[0] || 'Customer',
+        last_name: user_data.full_name.split(' ').slice(1).join(' ') || '',
+        email: user.email,
+        phone: user_data.phone_number || ''
+      },
+      item_details: [{
+        id: selectedPackage.id,
+        price: amount,
+        quantity: 1,
+        name: `${selectedPackage.name} Plan - ${billing_period}`
+      }]
+    }
+
+    console.log('📋 [Snap Handler] Transaction parameters prepared:', {
+      order_id: orderId,
+      amount,
+      customer_email: user.email
+    })
+
+    // Create transaction token
+    const transaction = await snap.createTransaction(parameter)
+    
+    console.log('✅ [Snap Handler] Transaction token created successfully')
+    console.log('🔗 [Snap Handler] Token:', transaction.token)
+    console.log('🌐 [Snap Handler] Redirect URL:', transaction.redirect_url)
+
+    // Try to store transaction (optional - don't fail if this errors)
+    try {
+      await supabaseAdmin
+        .from('indb_payment_transactions')
+        .insert({
+          id: orderId,
+          user_id: user.id,
+          package_id: selectedPackage.id,
+          gateway_id: gateway.id,
+          amount,
+          currency: userCurrency,
+          status: 'pending',
+          billing_period,
+          transaction_data: parameter,
+          metadata: {
+            snap_token: transaction.token,
+            redirect_url: transaction.redirect_url
+          }
+        })
+      console.log('✅ [Snap Handler] Transaction stored in database')
+    } catch (dbError) {
+      console.warn('⚠️ [Snap Handler] Failed to store transaction:', dbError)
+      // Don't fail the whole process if database storage fails
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Snap payment token created successfully',
+      data: {
+        token: transaction.token,
+        redirect_url: transaction.redirect_url,
+        client_key: config.client_key,
+        environment: config.environment || 'sandbox',
+        order_id: orderId
+      }
+    })
+
+  } catch (error) {
+    console.error('💥 [Snap Handler] Error:', error)
+    throw error
+  }
+}
+
+// Regular checkout handler (bank transfer, etc.)
+async function handleRegularCheckout(data: any, user: any) {
+  console.log('🏦 [Regular Checkout] Processing regular payment')
+  
+  try {
+    const { package_id, billing_period, payment_gateway_id, customer_info } = data
+
+    // Get package details
+    const { data: selectedPackage, error: packageError } = await supabaseAdmin
+      .from('indb_payment_packages')
+      .select('*')
+      .eq('id', package_id)
+      .eq('is_active', true)
+      .single()
+
+    if (packageError || !selectedPackage) {
+      throw new Error('Package not found')
+    }
+
+    // Get payment gateway details
+    const { data: gateway, error: gatewayError } = await supabaseAdmin
+      .from('indb_payment_gateways')
+      .select('*')
+      .eq('id', payment_gateway_id)
+      .single()
+
+    if (gatewayError || !gateway) {
+      throw new Error('Payment gateway not found')
+    }
+
+    console.log('✅ [Regular Checkout] Package and gateway loaded')
+
+    // Calculate amount
+    let amount = 0
+    const userCurrency = 'IDR'
+
+    if (selectedPackage.pricing_tiers && selectedPackage.pricing_tiers[billing_period]) {
+      const periodTier = selectedPackage.pricing_tiers[billing_period]
+      if (periodTier[userCurrency]) {
+        const currencyTier = periodTier[userCurrency]
+        amount = currencyTier.promo_price || currencyTier.regular_price
+      }
+    } else {
+      amount = selectedPackage.price || 0
+    }
+
+    // Generate unique order ID
+    const orderId = `ORDER-${Date.now()}-${user.id.split('-')[0]}`
+
+    // Create payment transaction
+    const { data: transaction, error: transactionError } = await supabaseAdmin
+      .from('indb_payment_transactions')
+      .insert({
+        id: orderId,
+        user_id: user.id,
+        package_id: selectedPackage.id,
+        gateway_id: gateway.id,
+        amount,
+        currency: userCurrency,
+        status: 'pending',
+        billing_period,
+        customer_info,
+        metadata: {
+          payment_method: gateway.slug
+        }
+      })
+      .select()
+      .single()
+
+    if (transactionError) {
+      console.error('❌ [Regular Checkout] Transaction creation failed:', transactionError)
+      throw new Error('Failed to create payment transaction')
+    }
+
+    console.log('✅ [Regular Checkout] Transaction created:', orderId)
+
+    // Return success response with redirect URL
+    const redirectUrl = `/dashboard/settings/plans-billing/orders/${orderId}`
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Order created successfully',
+      data: {
+        order_id: orderId,
+        redirect_url: redirectUrl,
+        transaction
+      }
+    })
+
+  } catch (error) {
+    console.error('💥 [Regular Checkout] Error:', error)
+    throw error
+  }
+}

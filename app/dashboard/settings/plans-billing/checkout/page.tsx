@@ -629,22 +629,8 @@ export default function CheckoutPage() {
       // Check if selected payment method is Midtrans
       const selectedGateway = paymentGateways.find(gw => gw.id === form.payment_method)
 
-      if (selectedGateway?.slug === 'midtrans') {
-        // Midtrans requires credit card form, handled separately - don't proceed with regular form submission
-        addToast({
-          title: "Credit card information required",
-          description: "Please fill in your credit card details below to setup recurring payment.",
-          type: "info"
-        })
-        setSubmitting(false)
-        return
-      } else if (selectedGateway?.slug === 'midtrans_snap') {
-        // Midtrans Snap handles payment through popup
-        await handleMidtransSnapPayment(token)
-      } else {
-        // Handle other payment methods (bank transfer, etc.)
-        await handleRegularCheckout(token)
-      }
+      // Call unified payment API that routes based on payment method
+      await handleUnifiedPayment(token, selectedGateway)
 
     } catch (error) {
       addToast({
@@ -710,10 +696,32 @@ export default function CheckoutPage() {
     setSubmitting(false)
   }
 
-  const handleMidtransSnapPayment = async (token: string) => {
+  const handleUnifiedPayment = async (token: string, selectedGateway: any) => {
     try {
-      // Create Snap transaction
-      const response = await fetch('/api/billing/midtrans-snap', {
+      // For Midtrans recurring, we need to get the card token first
+      if (selectedGateway?.slug === 'midtrans') {
+        // Check if window.midtransSubmitCard exists and call it
+        if (!window.midtransSubmitCard) {
+          addToast({
+            title: "Payment system not ready",
+            description: "Please wait a moment and try again.",
+            type: "error"
+          })
+          setSubmitting(false)
+          return
+        }
+
+        // Call the credit card form submission
+        const success = await window.midtransSubmitCard()
+        if (!success) {
+          setSubmitting(false)
+        }
+        // Note: If success is true, handleCreditCardSubmit will handle the rest
+        return
+      }
+
+      // For all other payment methods, call unified payment API
+      const response = await fetch('/api/billing/payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -722,136 +730,120 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           package_id: selectedPackage!.id,
           billing_period,
-          user_data: {
-            full_name: `${form.first_name} ${form.last_name}`.trim(),
+          payment_method: selectedGateway?.slug,
+          customer_info: {
+            first_name: form.first_name,
+            last_name: form.last_name,
             email: form.email,
-            phone_number: form.phone,
-            country: form.country
-          }
+            phone: form.phone,
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            zip_code: form.zip_code,
+            country: form.country,
+            description: form.description
+          },
+          payment_gateway_id: form.payment_method
         }),
       })
 
       const result = await response.json()
 
       if (result.success) {
-        const { token: snapToken, client_key, environment } = result.data
+        // Handle different response types based on payment method
+        if (selectedGateway?.slug === 'midtrans_snap') {
+          // Handle Snap payment popup
+          const { token: snapToken, client_key, environment } = result.data
 
-        // Update Snap.js client key
-        const snapScript = document.querySelector('#snap-script') as HTMLScriptElement
-        if (snapScript) {
-          snapScript.setAttribute('data-client-key', client_key)
-          snapScript.src = environment === 'production' 
-            ? 'https://app.midtrans.com/snap/snap.js'
-            : 'https://app.sandbox.midtrans.com/snap/snap.js'
-        }
-
-        // Wait for Snap.js to be ready
-        let retryCount = 0
-        const maxRetries = 30
-        
-        while (!window.snap || typeof window.snap.pay !== 'function') {
-          if (retryCount >= maxRetries) {
-            throw new Error('Payment system is not available. Please refresh the page and try again.')
+          // Update Snap.js client key
+          const snapScript = document.querySelector('#snap-script') as HTMLScriptElement
+          if (snapScript) {
+            snapScript.setAttribute('data-client-key', client_key)
+            snapScript.src = environment === 'production' 
+              ? 'https://app.midtrans.com/snap/snap.js'
+              : 'https://app.sandbox.midtrans.com/snap/snap.js'
           }
-          await new Promise(resolve => setTimeout(resolve, 200))
-          retryCount++
-        }
 
-        // Show Snap payment popup
-        window.snap.pay(snapToken, {
-          onSuccess: function(result: any) {
-            addToast({
-              title: "Payment successful!",
-              description: "Your subscription has been activated successfully.",
-              type: "success"
-            })
-            
-            logBillingActivity('payment_completed', `Snap payment completed for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.order_id || 'unknown'})`)
-            
-            setTimeout(() => {
-              router.push('/dashboard/settings/plans-billing?payment=success')
-            }, 1500)
-          },
-          onPending: function(result: any) {
-            addToast({
-              title: "Payment pending",
-              description: "Your payment is being processed. You will receive a confirmation email shortly.",
-              type: "info"
-            })
-            
-            setTimeout(() => {
-              router.push('/dashboard/settings/plans-billing?payment=pending')
-            }, 1500)
-          },
-          onError: function(result: any) {
-            addToast({
-              title: "Payment failed",
-              description: "There was an error processing your payment. Please try again.",
-              type: "error"
-            })
-            setSubmitting(false)
-          },
-          onClose: function() {
-            addToast({
-              title: "Payment cancelled",
-              description: "You cancelled the payment process.",
-              type: "info"
-            })
-            setSubmitting(false)
+          // Wait for Snap.js to be ready
+          let retryCount = 0
+          const maxRetries = 30
+          
+          while (!window.snap || typeof window.snap.pay !== 'function') {
+            if (retryCount >= maxRetries) {
+              throw new Error('Payment system is not available. Please refresh the page and try again.')
+            }
+            await new Promise(resolve => setTimeout(resolve, 200))
+            retryCount++
           }
-        })
 
+          // Show Snap payment popup
+          window.snap.pay(snapToken, {
+            onSuccess: function(result: any) {
+              addToast({
+                title: "Payment successful!",
+                description: "Your subscription has been activated successfully.",
+                type: "success"
+              })
+              
+              logBillingActivity('payment_completed', `Snap payment completed for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.order_id || 'unknown'})`)
+              
+              setTimeout(() => {
+                router.push('/dashboard/settings/plans-billing?payment=success')
+              }, 1500)
+            },
+            onPending: function(result: any) {
+              addToast({
+                title: "Payment pending",
+                description: "Your payment is being processed. You will receive a confirmation email shortly.",
+                type: "info"
+              })
+              
+              setTimeout(() => {
+                router.push('/dashboard/settings/plans-billing?payment=pending')
+              }, 1500)
+            },
+            onError: function(result: any) {
+              addToast({
+                title: "Payment failed",
+                description: "There was an error processing your payment. Please try again.",
+                type: "error"
+              })
+              setSubmitting(false)
+            },
+            onClose: function() {
+              addToast({
+                title: "Payment cancelled",
+                description: "You cancelled the payment process.",
+                type: "info"
+              })
+              setSubmitting(false)
+            }
+          })
+        } else {
+          // Handle regular payments (bank transfer, etc.)
+          addToast({
+            title: "Order submitted successfully!",
+            description: "Redirecting to order details...",
+            type: "success"
+          })
+
+          setTimeout(() => {
+            if (result.data?.redirect_url) {
+              window.location.href = result.data.redirect_url
+            } else {
+              router.push('/dashboard/settings/plans-billing')
+            }
+          }, 1500)
+        }
       } else {
-        throw new Error(result.message || 'Failed to create payment session')
+        throw new Error(result.message || 'Payment processing failed')
       }
+
     } catch (error) {
       throw error
     }
   }
 
-  const handleRegularCheckout = async (token: string) => {
-    const response = await fetch('/api/billing/checkout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        package_id: selectedPackage!.id,
-        billing_period,
-        payment_gateway_id: form.payment_method,
-        customer_info: {
-          first_name: form.first_name,
-          last_name: form.last_name,
-          email: form.email,
-          phone: form.phone,
-          address: form.address,
-          city: form.city,
-          state: form.state,
-          zip_code: form.zip_code,
-          country: form.country,
-          description: form.description
-        }
-      }),
-    })
-
-    const result = await response.json()
-
-    if (result.success) {
-      addToast({
-        title: "Order submitted successfully!",
-        description: "Redirecting to order details...",
-        type: "success"
-      })
-
-      // Redirect to order completed page
-      setTimeout(() => {
-        router.push(result.data.redirect_url)
-      }, 1500)
-    } else {
-      throw new Error(result.message || 'Checkout failed')
-    }
-  }
 
   if (loading) {
     return (
