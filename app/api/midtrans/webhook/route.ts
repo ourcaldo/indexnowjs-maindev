@@ -39,27 +39,47 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    console.log('📊 [Unified Webhook] Notification data:', {
-      order_id: body.order_id,
-      transaction_status: body.transaction_status,
-      fraud_status: body.fraud_status,
-      payment_type: body.payment_type,
+    // Detect notification type and extract order_id accordingly
+    let orderId: string
+    let notificationType: string
+    let isSubscriptionEvent = false
+
+    if (body.subscription && body.event_name) {
+      // Subscription notification
+      isSubscriptionEvent = true
+      notificationType = body.event_name
+      orderId = body.subscription.metadata?.order_id
+      console.log('🔄 [Unified Webhook] Subscription notification detected:', {
+        event_name: body.event_name,
+        subscription_id: body.subscription.id,
+        extracted_order_id: orderId,
+        subscription_status: body.subscription.status
+      })
+    } else {
+      // Payment/transaction notification
+      notificationType = body.transaction_status || 'unknown'
+      orderId = body.order_id
+      console.log('📊 [Unified Webhook] Payment notification detected:', {
+        order_id: orderId,
+        transaction_status: body.transaction_status,
+        fraud_status: body.fraud_status,
+        payment_type: body.payment_type
+      })
+    }
+
+    console.log('🔍 [Unified Webhook] Processed notification:', {
+      type: isSubscriptionEvent ? 'subscription' : 'payment',
+      event: notificationType,
+      order_id: orderId,
       raw_body_keys: Object.keys(body)
     })
 
-    // 🔧 DEBUG: Print full body when order_id is undefined (subscription notifications)
-    if (!body.order_id) {
-      console.log('🚨 [DEBUG] SUBSCRIPTION NOTIFICATION DETECTED - Full Body:')
-      console.log('📋 [DEBUG] Complete webhook payload:', JSON.stringify(body, null, 2))
-      console.log('🔍 [DEBUG] Body keys and values:')
-      Object.entries(body).forEach(([key, value]) => {
-        console.log(`  ${key}:`, typeof value === 'object' ? JSON.stringify(value) : value)
-      })
-      console.log('🚨 [DEBUG] END OF SUBSCRIPTION NOTIFICATION')
+    if (!orderId) {
+      console.error('❌ [Unified Webhook] No order_id found in notification')
+      return NextResponse.json({ error: 'Order ID not found' }, { status: 400 })
     }
 
     // Find transaction to determine payment method
-    const orderId = body.order_id
     let transaction = null
     
     // First try payment_reference
@@ -99,6 +119,12 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ [Unified Webhook] Found transaction:', transaction.id, 'Payment method:', transaction.payment_method)
+
+    // Handle subscription events separately
+    if (isSubscriptionEvent) {
+      console.log('🔄 [Unified Webhook] Processing subscription event')
+      return await handleSubscriptionEvent(body, transaction, supabaseAdmin, notificationType)
+    }
 
     // Determine if this is Recurring or Snap payment
     const isRecurringPayment = transaction.payment_method === 'midtrans' || 
@@ -451,5 +477,97 @@ async function activateSubscription(body: any, transaction: any, supabaseAdmin: 
 
   } catch (error: any) {
     console.error(`💥 [${paymentType.toUpperCase()}] Subscription activation error:`, error)
+  }
+}
+
+async function handleSubscriptionEvent(body: any, transaction: any, supabaseAdmin: any, eventType: string) {
+  try {
+    console.log(`🔔 [Subscription] Processing event: ${eventType}`)
+    console.log(`📋 [Subscription] Subscription ID: ${body.subscription.id}`)
+    console.log(`👤 [Subscription] User ID: ${body.subscription.metadata?.user_id}`)
+    console.log(`📦 [Subscription] Package ID: ${body.subscription.metadata?.package_id}`)
+    console.log(`💰 [Subscription] Amount: ${body.subscription.amount} ${body.subscription.currency}`)
+    console.log(`📅 [Subscription] Status: ${body.subscription.status}`)
+
+    // Update or log subscription status based on event type
+    const subscriptionData = {
+      subscription_id: body.subscription.id,
+      event_type: eventType,
+      subscription_status: body.subscription.status,
+      amount: parseFloat(body.subscription.amount),
+      currency: body.subscription.currency,
+      user_id: body.subscription.metadata?.user_id,
+      package_id: body.subscription.metadata?.package_id,
+      next_execution: body.subscription.schedule?.next_execution_at,
+      metadata: {
+        midtrans_subscription: body.subscription,
+        original_transaction_id: transaction.id,
+        processed_at: new Date().toISOString()
+      }
+    }
+
+    // Log subscription event to activity log
+    if (body.subscription.metadata?.user_id) {
+      try {
+        const activityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/activity/log`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: body.subscription.metadata.user_id,
+            event_type: 'subscription_updated',
+            action: `Subscription ${eventType} - ID: ${body.subscription.id}`,
+            metadata: {
+              subscription_id: body.subscription.id,
+              event_type: eventType,
+              subscription_status: body.subscription.status,
+              amount: body.subscription.amount,
+              currency: body.subscription.currency
+            }
+          })
+        })
+
+        if (activityResponse.ok) {
+          console.log('✅ [Subscription] Activity logged successfully')
+        }
+      } catch (activityError) {
+        console.error('⚠️ [Subscription] Failed to log activity:', activityError)
+      }
+    }
+
+    // Handle different subscription events
+    switch (eventType) {
+      case 'subscription.create':
+        console.log('🎉 [Subscription] New subscription created')
+        break
+      case 'subscription.active':
+        console.log('✅ [Subscription] Subscription activated')
+        break
+      case 'subscription.update':
+        console.log('📝 [Subscription] Subscription updated')
+        break
+      case 'subscription.disable':
+        console.log('⏸️ [Subscription] Subscription disabled')
+        break
+      case 'subscription.enable':
+        console.log('▶️ [Subscription] Subscription enabled')
+        break
+      default:
+        console.log(`ℹ️ [Subscription] Event processed: ${eventType}`)
+    }
+
+    console.log('✅ [Subscription] Event processed successfully')
+    return NextResponse.json({ 
+      status: 'OK', 
+      message: `Subscription event ${eventType} processed successfully`,
+      subscription_id: body.subscription.id
+    })
+
+  } catch (error: any) {
+    console.error('💥 [Subscription] Event processing error:', error)
+    return NextResponse.json({ 
+      status: 'error', 
+      message: 'Subscription event processing failed',
+      error: error.message
+    }, { status: 500 })
   }
 }

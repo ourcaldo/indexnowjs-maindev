@@ -704,6 +704,44 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 22, 2025: Enhanced Midtrans Webhook - Universal Notification Handler ✅
+
+**✅ CRITICAL: Midtrans Webhook Enhanced for All Notification Types**:
+- **Root Issue**: Webhook was only designed for payment notifications, causing 404 errors for subscription lifecycle events
+- **Subscription Events**: Midtrans sends subscription notifications (`subscription.create`, `subscription.active`, etc.) with different structure - no top-level `order_id`
+- **Problem Impact**: Subscription notifications returned 404 "Transaction not found" errors due to undefined `order_id`
+- **Investigation**: Added debug logging to capture full subscription notification payloads and confirm notification structure
+
+**✅ SMART NOTIFICATION DETECTION SYSTEM**:
+- **Dual Detection Logic**: Automatically detects payment vs subscription notifications based on payload structure
+- **Payment Notifications**: Extract `order_id` from top-level fields (existing behavior preserved)
+- **Subscription Notifications**: Extract `order_id` from nested `subscription.metadata.order_id` path
+- **Event Classification**: Proper routing to specialized handlers based on notification type
+- **Comprehensive Logging**: Enhanced console output with notification type, event details, and processing path
+
+**✅ SUBSCRIPTION EVENT HANDLER IMPLEMENTATION**:
+- **Event Processing**: Dedicated `handleSubscriptionEvent()` function for subscription lifecycle management
+- **Event Types Supported**: `subscription.create`, `subscription.active`, `subscription.update`, `subscription.disable`, `subscription.enable`
+- **Activity Integration**: Automatic logging of subscription events to user activity system
+- **Event Acknowledgment**: Proper 200 OK responses with event details instead of 404 errors
+- **Metadata Extraction**: Full subscription data extraction including user_id, package_id, amount, currency, status
+
+**✅ ROBUST ERROR HANDLING & FALLBACKS**:
+- **Multiple Lookup Methods**: Tries payment_reference, metadata search, and gateway_transaction_id matching
+- **Transaction Validation**: Ensures transaction exists before processing any notification type
+- **Graceful Failures**: Detailed error responses with diagnostic information
+- **Safe Processing**: No breaking changes to existing payment notification handling
+
+**Files Modified**:
+- `app/api/midtrans/webhook/route.ts`: Added smart notification detection, subscription event handler, enhanced logging, comprehensive error handling
+
+**✅ RESULT**: Webhook now handles ALL Midtrans notification types seamlessly
+- **Payment Notifications**: Continue working perfectly (no changes to existing flow)
+- **Subscription Notifications**: Properly acknowledged with detailed logging (no more 404 errors)
+- **Activity Tracking**: Subscription events automatically logged to user activity system
+- **Clean Console**: Detailed event information replacing undefined error messages
+- **Production Ready**: Robust notification handling for all Midtrans webhook events
+
 ### August 22, 2025: Unified Payment API Midtrans Snap Integration & Amount Calculation Fix ✅
 
 **✅ CRITICAL: Midtrans Snap Server Key Authentication Issue Resolved**:
