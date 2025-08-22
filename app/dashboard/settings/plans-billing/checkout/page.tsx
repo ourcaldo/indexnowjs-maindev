@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { ArrowLeft, Building2, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Building2, Check, Loader2, Shield } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { authService } from '@/lib/auth'
@@ -1122,8 +1122,8 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
-              {/* Submit Button - Only show for non-Midtrans payments */}
-              {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && (
+              {/* Unified Submit Button - Works for all payment methods */}
+              {form.payment_method && (
                 <div className="mt-6">
                   <Button
                     type="submit"
@@ -1219,162 +1219,12 @@ export default function CheckoutPage() {
 
 
 
-                {/* Submit Button for Midtrans */}
-                {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug === 'midtrans' && (
-                  <Button
-                    type="button"
-                    onClick={async () => {
-                      setSubmitting(true)
-                      try {
-                        // Check if window.midtransSubmitCard exists
-                        if (!window.midtransSubmitCard) {
-                          addToast({
-                            title: "Payment system not ready",
-                            description: "Please wait a moment and try again.",
-                            type: "error"
-                          })
-                          setSubmitting(false)
-                          return
-                        }
 
-                        // @ts-ignore - We expose this globally from the credit card form
-                        const success = await window.midtransSubmitCard?.()
-
-                        if (!success) {
-                          setSubmitting(false)
-                        }
-                        // Note: If success is true, handleCreditCardSubmit will handle the submitting state
-                      } catch (error) {
-                        addToast({
-                          title: "Payment failed",
-                          description: error instanceof Error ? error.message : "Please try again later.",
-                          type: "error"
-                        })
-                        setSubmitting(false)
-                      }
-                    }}
-                    disabled={submitting || !form.payment_method}
-                    className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12 mt-6"
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Processing Payment...
-                      </>
-                    ) : (
-                      <>
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Complete Payment
-                      </>
-                    )}
-                  </Button>
-                )}
-
-                {/* Submit Button for Bank Transfer (Non-Midtrans Payment Gateways) */}
-                {form.payment_method && paymentGateways.find(gw => gw.id === form.payment_method)?.slug !== 'midtrans' && (
-                  <Button
-                    type="button"
-                    onClick={async () => {
-                      setSubmitting(true)
-                      try {
-                        console.log('🏦 FRONTEND: Starting bank transfer payment process...')
-
-                        const user = await authService.getCurrentUser()
-                        if (!user) {
-                          throw new Error('Authentication required')
-                        }
-
-                        const { data: { session } } = await supabaseBrowser.auth.getSession()
-                        const token = session?.access_token
-                        if (!token) {
-                          throw new Error('Failed to get authentication token')
-                        }
-
-                        // Call regular checkout API for bank transfer
-                        const response = await fetch('/api/billing/checkout', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                          },
-                          body: JSON.stringify({
-                            package_id: selectedPackage!.id,
-                            billing_period,
-                            customer_info: {
-                              first_name: form.first_name,
-                              last_name: form.last_name,
-                              email: form.email,
-                              phone: form.phone,
-                              address: form.address,
-                              city: form.city,
-                              state: form.state,
-                              zip_code: form.zip_code,
-                              country: form.country,
-                              description: form.description
-                            },
-                            payment_gateway_id: form.payment_method
-                          }),
-                        })
-
-                        const result = await response.json()
-
-                        if (result.success) {
-                          // Log activity
-                          logBillingActivity('payment_processing', `Setup bank transfer payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
-
-                          addToast({
-                            title: "Payment order created!",
-                            description: result.data?.redirect_url ? "Redirecting to payment instructions..." : "Your payment order has been created successfully.",
-                            type: "success"
-                          })
-
-                          // Redirect to payment instructions or order page
-                          setTimeout(() => {
-                            if (result.data?.redirect_url) {
-                              window.location.href = result.data.redirect_url
-                            } else {
-                              router.push('/dashboard/settings/plans-billing')
-                            }
-                          }, 1500)
-                        } else {
-                          throw new Error(result.message || 'Payment processing failed. Please try again.')
-                        }
-
-                      } catch (error) {
-                        console.error('💥 FRONTEND: Bank transfer payment error:', error)
-                        addToast({
-                          title: "Payment failed",
-                          description: error instanceof Error ? error.message : "Please try again later.",
-                          type: "error"
-                        })
-                      } finally {
-                        // Always reset submitting state regardless of success or failure
-                        console.log('🔄 FRONTEND: Resetting submitting state (bank transfer)')
-                        setSubmitting(false)
-                      }
-                    }}
-                    disabled={submitting || !form.payment_method}
-                    className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-3 h-12 mt-6"
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Processing Order...
-                      </>
-                    ) : (
-                      <>
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Complete Order
-                      </>
-                    )}
-                  </Button>
-                )}
 
                 {/* Security Note */}
-                <div className="text-center">
-                  <p className="text-xs text-[#6C757D]">
-                    🔒 Secure checkout. Your information is protected.
-                  </p>
+                <div className="flex items-center justify-center text-xs text-[#6C757D] mt-4">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Secure checkout. Your information is protected.
                 </div>
               </CardContent>
             </Card>
