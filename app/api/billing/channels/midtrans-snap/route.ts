@@ -1,0 +1,155 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { BasePaymentHandler, PaymentData, PaymentResult } from '../shared/base-handler'
+import { supabaseAdmin } from '@/lib/supabase'
+
+const midtransClient = require('midtrans-client')
+
+class MidtransSnapHandler extends BasePaymentHandler {
+  private gateway: any
+  private snapClient: any
+
+  getPaymentMethodSlug(): string {
+    return 'midtrans_snap'
+  }
+
+  async processPayment(): Promise<PaymentResult> {
+    // Get gateway configuration
+    await this.loadGatewayConfig()
+    
+    // Calculate amount and convert to IDR if needed
+    const amount = this.calculateAmount()
+    let finalAmount = amount.finalAmount
+    
+    if (amount.originalCurrency === 'USD') {
+      const { convertUsdToIdr } = await import('@/lib/currency-converter')
+      finalAmount = await convertUsdToIdr(amount.finalAmount)
+    }
+
+    // Generate order ID
+    const orderId = `SNAP-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
+
+    // Create transaction record BEFORE Midtrans API call
+    await this.createPendingTransaction(orderId, this.gateway.id, {
+      payment_gateway_type: 'midtrans_snap',
+      converted_amount: finalAmount,
+      converted_currency: 'IDR'
+    })
+
+    // Create Snap transaction
+    const parameter = {
+      transaction_details: {
+        order_id: orderId,
+        gross_amount: finalAmount
+      },
+      credit_card: {
+        secure: true
+      },
+      item_details: [{
+        id: this.packageData.id,
+        price: finalAmount,
+        quantity: 1,
+        name: `${this.packageData.name} - ${this.paymentData.billing_period}`,
+        category: "subscription"
+      }],
+      customer_details: {
+        first_name: this.paymentData.customer_info.first_name,
+        last_name: this.paymentData.customer_info.last_name,
+        email: this.paymentData.customer_info.email,
+        phone: this.paymentData.customer_info.phone || ''
+      },
+      callbacks: {
+        finish: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing?payment=success`,
+        error: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing?payment=error`
+      }
+    }
+
+    const transaction = await this.snapClient.createTransaction(parameter)
+
+    // Update transaction with Midtrans response
+    await supabaseAdmin
+      .from('indb_payment_transactions')
+      .update({
+        gateway_transaction_id: transaction.token,
+        gateway_response: {
+          token: transaction.token,
+          redirect_url: transaction.redirect_url,
+          snap_parameter: parameter
+        }
+      })
+      .eq('payment_reference', orderId)
+
+    return {
+      success: true,
+      data: {
+        token: transaction.token,
+        redirect_url: transaction.redirect_url,
+        client_key: this.gateway.api_credentials.client_key,
+        environment: this.gateway.configuration.environment,
+        order_id: orderId
+      }
+    }
+  }
+
+  private async loadGatewayConfig(): Promise<void> {
+    const { data: gateway, error } = await supabaseAdmin
+      .from('indb_payment_gateways')
+      .select('*')
+      .eq('slug', 'midtrans_snap')
+      .eq('is_active', true)
+      .single()
+
+    if (error || !gateway) {
+      throw new Error('Midtrans Snap gateway not configured')
+    }
+
+    this.gateway = gateway
+    this.snapClient = new midtransClient.Snap({
+      isProduction: gateway.configuration.environment === 'production',
+      serverKey: gateway.api_credentials.server_key,
+      clientKey: gateway.api_credentials.client_key
+    })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  // Authentication
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {}
+        },
+      },
+    }
+  )
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  
+  if (authError || !user) {
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Authentication required' 
+    }, { status: 401 })
+  }
+
+  const body = await request.json()
+  const paymentData: PaymentData = {
+    package_id: body.package_id,
+    billing_period: body.billing_period,
+    customer_info: body.customer_info,
+    user
+  }
+
+  const handler = new MidtransSnapHandler(paymentData)
+  return await handler.execute()
+}

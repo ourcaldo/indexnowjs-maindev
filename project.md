@@ -2609,3 +2609,43 @@ indb_keyword_rankings (latest positions)
   - **Consistent Flow**: Create record → Call Midtrans → Update with response data
 - **File Modified**: `app/api/billing/payment/route.ts` - Reordered transaction creation flow
 - **Result**: Webhook can now find and process transactions immediately without timing issues
+
+### August 22, 2025 - Phase 1 (P0) Payment API Architecture Refactor - Clean Separation Implementation
+- ✅ **IMPLEMENTED CLEAN PAYMENT CHANNEL ARCHITECTURE**: Refactored from embedded payment logic to Frontend → Router → Channel APIs pattern
+  - **New Directory Structure**: Created `app/api/billing/channels/` with separate handlers for each payment method
+  - **Base Payment Handler**: Implemented abstract class `BasePaymentHandler` with common validation, transaction creation, and amount calculation
+  - **Channel-Specific Handlers**: Created dedicated handlers for Midtrans Snap, Midtrans Recurring, and Bank Transfer
+  - **Pure Router**: Refactored `/api/billing/payment/route.ts` to act as pure router without embedded payment logic
+- ✅ **CREATED SHARED PAYMENT UTILITIES**: Built reusable components for all payment channels
+  - **Base Handler**: `app/api/billing/channels/shared/base-handler.ts` - Abstract class with common payment processing logic
+  - **Type Definitions**: `app/api/billing/channels/shared/types.ts` - Standardized interfaces for payment requests/responses
+  - **Consistent Flow**: All channels follow same pattern: validate → create transaction → process payment → update transaction
+- ✅ **IMPLEMENTED MIDTRANS SNAP CHANNEL**: Clean separation of Snap payment processing
+  - **File**: `app/api/billing/channels/midtrans-snap/route.ts` - Dedicated Snap payment handler extending BasePaymentHandler
+  - **Features**: Currency conversion (USD→IDR), transaction creation before API calls, proper error handling
+  - **Security**: Individual authentication and validation per channel
+- ✅ **IMPLEMENTED MIDTRANS RECURRING CHANNEL**: Separated recurring payment logic
+  - **File**: `app/api/billing/channels/midtrans-recurring/route.ts` - Dedicated recurring payment handler
+  - **Features**: 3DS authentication support, subscription creation, saved token management
+  - **Enhanced Flow**: Charge creation → 3DS handling → Subscription setup → User profile updates
+- ✅ **IMPLEMENTED BANK TRANSFER CHANNEL**: Added manual payment method support
+  - **File**: `app/api/billing/channels/bank-transfer/route.ts` - Dedicated bank transfer handler
+  - **Features**: Order creation with bank details, redirect to order confirmation page
+  - **Integration**: Uses gateway configuration for bank account details
+- ✅ **CLEANED UP LEGACY ENDPOINTS**: Removed deprecated API endpoints to prevent conflicts
+  - **Backup Created**: Moved old endpoints to `.backup` files for safety
+  - **Removed**: Old embedded logic from payment router, deprecated Snap and recurring endpoints
+  - **Maintained**: 3DS callback and webhook endpoints (still needed for payment flow)
+- **Files Created**:
+  - `app/api/billing/channels/shared/base-handler.ts` - Abstract base payment handler
+  - `app/api/billing/channels/shared/types.ts` - Payment channel type definitions
+  - `app/api/billing/channels/midtrans-snap/route.ts` - Midtrans Snap channel handler
+  - `app/api/billing/channels/midtrans-recurring/route.ts` - Midtrans Recurring channel handler
+  - `app/api/billing/channels/bank-transfer/route.ts` - Bank Transfer channel handler
+- **Files Modified**:
+  - `app/api/billing/payment/route.ts` - Refactored to pure router (no embedded payment logic)
+- **Files Backed Up**:
+  - `app/api/billing/midtrans-snap/route.ts.backup` - Original Snap endpoint
+  - `app/api/billing/midtrans-recurring/route.ts.backup` - Original recurring endpoint
+  - `app/api/billing/checkout/route.ts.backup` - Original checkout endpoint
+- **Result**: Clean, maintainable payment architecture with proper separation of concerns, easier to extend with new payment methods
