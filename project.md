@@ -2575,3 +2575,24 @@ indb_keyword_rankings (latest positions)
   - **Verification**: Confirmed Midtrans Snap webhook URL `https://yourdomain.com/api/midtrans/snap-webhook` is already correct
 - **File Modified**: `app/backend/admin/settings/payments/page.tsx` - Updated webhook URL placeholder for Midtrans Recurring
 - **Result**: Admin panel now displays accurate webhook URLs for both Midtrans payment gateways
+
+### January 22, 2025 - Unified Midtrans Webhook Implementation
+- ✅ **CREATED UNIFIED WEBHOOK ENDPOINT**: Consolidated both Midtrans webhooks into single endpoint handling recurring and Snap payments
+  - **Single Endpoint**: `/api/midtrans/webhook` now handles all Midtrans payment notifications
+  - **Smart Detection**: Automatically detects payment type (recurring vs Snap) based on transaction gateway_type
+  - **Dual Verification**: Uses manual signature verification for recurring, midtrans-client verification for Snap
+  - **Unified Processing**: Common transaction status update and subscription activation logic
+- ✅ **UPDATED ADMIN PANEL**: Both Midtrans gateways now show same webhook URL
+  - **Recurring Gateway**: Updated to show `https://yourdomain.com/api/midtrans/webhook`
+  - **Snap Gateway**: Updated to show `https://yourdomain.com/api/midtrans/webhook`
+  - **Consistency**: Single webhook URL for all Midtrans payment configurations
+- ✅ **BACKWARD COMPATIBILITY**: Old webhook endpoints redirect to unified webhook
+  - **Legacy Support**: `/api/billing/midtrans/webhook` forwards requests to unified endpoint
+  - **Legacy Support**: `/api/midtrans/snap-webhook` forwards requests to unified endpoint
+  - **Seamless Transition**: No service interruption during webhook URL migration
+- **Files Created**: `app/api/midtrans/webhook/route.ts` - Unified webhook handler
+- **Files Modified**: 
+  - `app/backend/admin/settings/payments/page.tsx` - Updated webhook URL placeholders
+  - `app/api/billing/midtrans/webhook/route.ts` - Added redirect to unified webhook
+  - `app/api/midtrans/snap-webhook/route.ts` - Added redirect to unified webhook
+- **Result**: Single webhook endpoint handles all Midtrans payments with automatic type detection and processing
