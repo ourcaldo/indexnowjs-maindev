@@ -5,11 +5,11 @@ import { createMidtransService } from '@/lib/midtrans-service'
 export default class MidtransRecurringHandler extends BasePaymentHandler {
   private gateway: any
   private midtransService: any
-  private tokenId: string
+  private cardData: any
 
-  constructor(paymentData: PaymentData, tokenId: string) {
+  constructor(paymentData: PaymentData, cardData?: any) {
     super(paymentData)
-    this.tokenId = tokenId
+    this.cardData = cardData
   }
 
   getPaymentMethodSlug(): string {
@@ -29,7 +29,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     // Create transaction record BEFORE payment processing
     await this.createPendingTransaction(orderId, this.gateway.id, {
       payment_gateway_type: 'midtrans_recurring',
-      token_id: this.tokenId
+      card_data_provided: !!this.cardData
     })
 
     // Initialize Midtrans service
@@ -40,11 +40,11 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       merchant_id: this.gateway.api_credentials.merchant_id
     })
 
-    // Step 1: Create charge transaction
+    // Step 1: Create charge transaction with card data
     const chargeTransaction = await this.midtransService.createChargeTransaction({
       order_id: orderId,
       amount_usd: amount.finalAmount,
-      token_id: this.tokenId,
+      card_data: this.cardData,  // Use raw card data for initial charge
       customer_details: {
         first_name: this.paymentData.customer_info.first_name,
         last_name: this.paymentData.customer_info.last_name,

@@ -180,12 +180,19 @@ export class MidtransService {
   /**
    * Create credit card charge using direct HTTP call to /v2/charge
    * Makes direct POST request to Midtrans /v2/charge endpoint
+   * Supports both token_id (for existing tokens) and raw card data (for new cards)
    */
   async createChargeTransaction(
     orderData: {
       order_id: string;
       amount_usd: number;
-      token_id: string; // Card token from frontend MidtransNew3ds.getCardToken
+      token_id?: string; // Optional: Card token from saved token
+      card_data?: {        // Optional: Raw card data for new charges
+        card_number: string;
+        card_exp_month: string;
+        card_exp_year: string;
+        card_cvv: string;
+      };
       customer_details: MidtransCustomerDetails;
       item_details: {
         name: string;
@@ -203,18 +210,35 @@ export class MidtransService {
     const grossAmount = Math.round(idrAmount); // Ensure integer amount
     console.log('  Final gross amount (rounded):', grossAmount)
 
+    // Build credit card object based on what data is provided
+    let creditCardData: any = {
+      save_card: true, // CRITICAL: Save card token for subscription
+      authentication: true, // Enable 3DS
+    }
+
+    if (orderData.token_id) {
+      // Use existing saved token
+      creditCardData.token_id = orderData.token_id
+    } else if (orderData.card_data) {
+      // Use raw card data for initial charge
+      creditCardData = {
+        ...creditCardData,
+        card_number: orderData.card_data.card_number.replace(/\s/g, ''),
+        card_exp_month: orderData.card_data.card_exp_month.padStart(2, '0'),
+        card_exp_year: orderData.card_data.card_exp_year,
+        card_cvv: orderData.card_data.card_cvv,
+      }
+    } else {
+      throw new Error('Either token_id or card_data must be provided')
+    }
+
     const chargeRequest = {
       payment_type: 'credit_card',
       transaction_details: {
         order_id: orderData.order_id,
         gross_amount: grossAmount,
       },
-      credit_card: {
-        token_id: orderData.token_id, // Use token from frontend MidtransNew3ds.callback
-        save_token_id: true, // CRITICAL: Save card token for subscription
-        authentication: true, // Enable 3DS
-        callback_type: 'js_event' // Use JavaScript callback for 3DS
-      },
+      credit_card: creditCardData,
       item_details: [
         {
           id: 'subscription_setup',
@@ -238,7 +262,8 @@ export class MidtransService {
       }
     };
 
-    console.log('💳 Making direct charge request to /v2/charge with save_token_id: true');
+    console.log('💳 Making direct charge request to /v2/charge with save_card: true');
+    console.log('💳 Payment method:', orderData.token_id ? 'existing_token' : 'raw_card_data');
     return await this.makeRequest<MidtransCoreChargeResponse>('/v2/charge', 'POST', chargeRequest);
   }
 
