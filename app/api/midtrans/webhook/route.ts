@@ -47,6 +47,17 @@ export async function POST(request: NextRequest) {
       raw_body_keys: Object.keys(body)
     })
 
+    // 🔧 DEBUG: Print full body when order_id is undefined (subscription notifications)
+    if (!body.order_id) {
+      console.log('🚨 [DEBUG] SUBSCRIPTION NOTIFICATION DETECTED - Full Body:')
+      console.log('📋 [DEBUG] Complete webhook payload:', JSON.stringify(body, null, 2))
+      console.log('🔍 [DEBUG] Body keys and values:')
+      Object.entries(body).forEach(([key, value]) => {
+        console.log(`  ${key}:`, typeof value === 'object' ? JSON.stringify(value) : value)
+      })
+      console.log('🚨 [DEBUG] END OF SUBSCRIPTION NOTIFICATION')
+    }
+
     // Find transaction to determine payment method
     const orderId = body.order_id
     let transaction = null
