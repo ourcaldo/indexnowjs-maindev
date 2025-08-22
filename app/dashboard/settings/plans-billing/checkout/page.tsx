@@ -134,7 +134,25 @@ export default function CheckoutPage() {
   })
 
   // Initialize payment processor hook
-  const paymentProcessor = usePaymentProcessor()
+  const paymentProcessor = usePaymentProcessor({
+    packageData: selectedPackage,
+    onSuccess: (result) => {
+      // Handle successful payment
+      logBillingActivity('payment_success', `Payment successful for ${selectedPackage?.name} plan (${billing_period})`)
+      addToast({
+        title: "Payment successful!",
+        description: "Your subscription has been activated successfully.",
+        type: "success"
+      })
+      setTimeout(() => {
+        router.push('/dashboard/settings/plans-billing?payment=success')
+      }, 1500)
+    },
+    onError: (error) => {
+      // Handle payment error
+      logBillingActivity('payment_error', `Payment failed for ${selectedPackage?.name} plan: ${error.message}`)
+    }
+  })
 
   // Handle credit card form submission for Midtrans
   const handleCreditCardSubmit = async (cardData: any) => {
@@ -180,14 +198,55 @@ export default function CheckoutPage() {
       card_cvv: cardData.cvv
     }
 
-    await paymentProcessor.processCreditCardPayment(paymentRequest, mappedCardData, token)
-    
-    // Success handling is now managed within the payment processor hook
+    try {
+      await paymentProcessor.processCreditCardPayment(paymentRequest, mappedCardData, token)
+      
+      // Check if 3DS authentication is required from the payment processor state
+      // This would be handled by updating the payment processor to return 3DS requirements
+    } catch (error) {
+      // Handle any errors not caught by the payment processor
+      console.error('Credit card payment error:', error)
+      
+      // Check if this is a 3DS requirement
+      if (error && typeof error === 'object' && 'requires_3ds' in error) {
+        const threeDSError = error as any
+        if (threeDSError.requires_3ds && threeDSError.redirect_url) {
+          // Handle 3DS authentication
+          handle3DSAuthentication(
+            threeDSError.redirect_url, 
+            threeDSError.transaction_id, 
+            threeDSError.order_id
+          )
+          return // Don't show error toast for 3DS requirement
+        }
+      }
+
+      addToast({
+        title: "Payment failed",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        type: "error"
+      })
+    }
   }
 
-  // Card tokenization is now handled by MidtransClientService via usePaymentProcessor
-
-  // 3DS authentication is now handled by MidtransClientService via usePaymentProcessor
+  // Handle 3DS authentication with proper modal management
+  const handle3DSAuthentication = async (redirectUrl: string, transactionId: string, orderId: string) => {
+    await paymentProcessor.handle3DSAuthentication(
+      redirectUrl, 
+      transactionId, 
+      orderId,
+      (url: string) => {
+        // Open modal with 3DS URL
+        setThreeDSUrl(url)
+        setShow3DSModal(true)
+      },
+      () => {
+        // Close modal
+        setShow3DSModal(false)
+        setThreeDSUrl('')
+      }
+    )
+  }
 
   // Fetch package and payment gateway data
   useEffect(() => {

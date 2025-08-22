@@ -117,60 +117,66 @@ export class MidtransClientService {
   /**
    * Get credit card token using 3DS SDK
    * Uses JSONP callback mechanism - response comes through global callback override
+   * Implementation matches the original working version exactly
    */
   static async getCreditCardToken(cardData: CardTokenData): Promise<string> {
     return new Promise((resolve, reject) => {
-      if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.getCardToken !== 'function') {
-        reject(new Error('Midtrans 3DS SDK not loaded'))
-        return
-      }
-
       let isResolved = false
+
+      // Add timeout to prevent hanging (reduced from 30s to 15s for better UX)
       const timeout = setTimeout(() => {
         if (!isResolved) {
           isResolved = true
-          reject(new Error('Card tokenization timeout'))
+          reject(new Error('Card tokenization timeout. Please try again.'))
         }
-      }, 30000)
+      }, 15000)
 
-      try {
-        // Store original callback and override it temporarily for JSONP response
-        const originalCallback = (window as any).MidtransNew3ds.callback
+      if (!window.MidtransNew3ds) {
+        clearTimeout(timeout)
+        reject(new Error('Payment system not ready. Please refresh the page.'))
+        return
+      }
 
-        ;(window as any).MidtransNew3ds.callback = function(response: any) {
-          if (!isResolved) {
-            isResolved = true
-            clearTimeout(timeout)
-            
-            // Restore original callback
-            ;(window as any).MidtransNew3ds.callback = originalCallback
+      // Store original callback and override it temporarily
+      const originalCallback = (window as any).MidtransNew3ds.callback
 
-            if (response && response.token_id) {
-              resolve(response.token_id)
-            } else if (response && response.validation_messages) {
-              reject(new Error(response.validation_messages.join(', ')))
-            } else {
-              reject(new Error('Card tokenization failed'))
-            }
+      ;(window as any).MidtransNew3ds.callback = function(response: any) {
+        if (!isResolved) {
+          isResolved = true
+          clearTimeout(timeout)
+
+          // Restore original callback
+          ;(window as any).MidtransNew3ds.callback = originalCallback
+
+          if (response && response.status_code === '200' && response.token_id) {
+            resolve(response.token_id)
+          } else {
+            reject(new Error(response?.status_message || 'Card tokenization failed'))
           }
         }
+      }
 
-        // Make the API call - response comes through global callback
-        window.MidtransNew3ds.getCardToken({
-          card_number: cardData.card_number.replace(/\s/g, ''),
-          card_exp_month: cardData.card_exp_month.padStart(2, '0'),
-          card_exp_year: cardData.card_exp_year,
-          card_cvv: cardData.card_cvv,
-        }, function() {
-          // This callback is required by the API but actual response comes via global callback
-        })
+      try {
+        if (typeof window.MidtransNew3ds.getCardToken === 'function') {
+          window.MidtransNew3ds.getCardToken({
+            card_number: cardData.card_number.replace(/\s/g, ''),
+            card_exp_month: cardData.card_exp_month.padStart(2, '0'),
+            card_exp_year: cardData.card_exp_year,
+            card_cvv: cardData.card_cvv,
+          }, function() {
+            // This callback is required by the API but the actual response comes via global callback
+          })
+        } else {
+          throw new Error('getCardToken function not available')
+        }
 
       } catch (error) {
         clearTimeout(timeout)
         if (!isResolved) {
           isResolved = true
-          console.error('Card tokenization error:', error)
-          reject(new Error('Failed to tokenize card'))
+          // Restore original callback on error
+          ;(window as any).MidtransNew3ds.callback = originalCallback
+          reject(new Error('Payment processing failed. Please try again.'))
         }
       }
     })

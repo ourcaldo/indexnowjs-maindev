@@ -9,6 +9,8 @@ import { useRouter } from 'next/navigation'
 import { PaymentRouter, type PaymentRequest } from '@/lib/payment-services/payment-router'
 import { MidtransClientService } from '@/lib/payment-services/midtrans-client-service'
 import { useToast } from '@/hooks/use-toast'
+import { authService } from '@/lib/auth'
+import { supabaseBrowser } from '@/lib/supabase-browser'
 // ActivityLogger is imported dynamically to avoid server-side imports in browser
 
 export interface UsePaymentProcessorProps {
@@ -187,8 +189,13 @@ export function usePaymentProcessor({
       } else if (paymentMethod === 'midtrans_recurring') {
         // Handle 3DS authentication if required
         if (result.requires_redirect && result.redirect_url) {
-          await handle3DSAuthentication(result.redirect_url, result.data)
-          return
+          // Throw a special error that the component can catch and handle for 3DS
+          const threeDSError = new Error('3DS authentication required') as any
+          threeDSError.requires_3ds = true
+          threeDSError.redirect_url = result.redirect_url
+          threeDSError.transaction_id = result.data?.transaction_id
+          threeDSError.order_id = result.data?.order_id
+          throw threeDSError
         }
 
         // Direct success without 3DS
@@ -220,24 +227,135 @@ export function usePaymentProcessor({
   }
 
   /**
-   * Handle 3DS authentication
+   * Handle 3DS authentication with modal display
+   * This function should be called by the UI component that manages the modal state
    */
-  const handle3DSAuthentication = async (redirectUrl: string, transactionData: any) => {
+  const handle3DSAuthentication = async (
+    redirectUrl: string, 
+    transactionId: string, 
+    orderId: string,
+    onModalOpen?: (url: string) => void,
+    onModalClose?: () => void
+  ) => {
     try {
-      await MidtransClientService.handle3DSAuthentication(redirectUrl)
-      
-      // After 3DS completion, show success
-      addToast({
-        title: "Payment successful!",
-        description: "Your subscription has been activated.",
-        type: "success"
-      })
-      router.push('/dashboard/settings/plans-billing?payment=success')
+      console.log('🔐 Starting 3DS authentication process')
+
+      if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
+        throw new Error('3DS authentication not available. Please refresh the page and try again.')
+      }
+
+      const options = {
+        performAuthentication: (url: string) => {
+          // Open 3DS page in modal/iframe
+          console.log('🔐 Opening 3DS authentication page')
+          onModalOpen?.(url)
+        },
+        onSuccess: async (response: any) => {
+          console.log('✅ 3DS Authentication successful:', response)
+          onModalClose?.()
+
+          // Call our callback API to complete the payment process
+          try {
+            const user = await authService.getCurrentUser()
+            const { data: { session } } = await supabaseBrowser.auth.getSession()
+            const token = session?.access_token
+
+            if (!token) {
+              throw new Error('Authentication token expired')
+            }
+
+            const callbackResponse = await fetch('/api/billing/midtrans-3ds-callback', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                transaction_id: transactionId,
+                order_id: orderId
+              }),
+            })
+
+            const callbackResult = await callbackResponse.json()
+
+            if (callbackResult.success) {
+              addToast({
+                title: "Payment successful!",
+                description: "Your subscription has been activated successfully.",
+                type: "success"
+              })
+
+              // Log the successful activity
+              logPaymentActivity('subscription_created_3ds', {
+                package_id: packageData?.id || '',
+                billing_period: packageData?.billing_period || 'monthly',
+                payment_method: 'midtrans_recurring',
+                customer_info: {
+                  first_name: 'User',
+                  last_name: '',
+                  email: user?.email || '',
+                  phone: '',
+                  address: '',
+                  city: '',
+                  state: '',
+                  zip_code: '',
+                  country: 'Indonesia'
+                }
+              }, {
+                transaction_id: transactionId,
+                order_id: orderId,
+                authentication_method: '3ds'
+              })
+
+              router.push('/dashboard/settings/plans-billing?payment=success')
+            } else {
+              throw new Error(callbackResult.message || '3DS authentication callback failed')
+            }
+          } catch (error) {
+            console.error('3DS callback error:', error)
+            addToast({
+              title: "Payment processing failed",
+              description: error instanceof Error ? error.message : "Please contact support.",
+              type: "error"
+            })
+          } finally {
+            setSubmitting(false)
+          }
+        },
+        onFailure: (response: any) => {
+          console.log('❌ 3DS Authentication failed:', response)
+          onModalClose?.()
+          setSubmitting(false)
+
+          addToast({
+            title: "Payment authentication failed",
+            description: "Please verify your card details and try again.",
+            type: "error"
+          })
+        },
+        onPending: (response: any) => {
+          console.log('⏳ 3DS Authentication pending:', response)
+          onModalClose?.()
+          setSubmitting(false)
+
+          addToast({
+            title: "Payment pending",
+            description: "Your payment is being processed. You will receive a confirmation email shortly.",
+            type: "info"
+          })
+        }
+      }
+
+      // Trigger 3DS authentication
+      window.MidtransNew3ds.authenticate(redirectUrl, options)
+
     } catch (error) {
       console.error('3DS authentication failed:', error)
+      onModalClose?.()
+      setSubmitting(false)
       addToast({
         title: "Authentication failed",
-        description: "Payment authentication was not completed.",
+        description: error instanceof Error ? error.message : "Payment authentication was not completed.",
         type: "error"
       })
     }
