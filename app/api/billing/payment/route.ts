@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { BasePaymentHandler, PaymentData } from '../channels/shared/base-handler'
+
+// Import handlers directly
+import MidtransSnapHandler from '../channels/midtrans-snap/handler.js'
+import MidtransRecurringHandler from '../channels/midtrans-recurring/handler.js'  
+import BankTransferHandler from '../channels/bank-transfer/handler.js'
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,54 +48,46 @@ export async function POST(request: NextRequest) {
 
     console.log(`📊 [Payment Router] Routing to channel: ${payment_method}`)
 
-    // Route to specific payment channel API
-    const channelRoutes = {
-      'midtrans_snap': '/api/billing/channels/midtrans-snap',
-      'midtrans_recurring': '/api/billing/channels/midtrans-recurring', 
-      'bank_transfer': '/api/billing/channels/bank-transfer'
-    }
-
-    const channelUrl = channelRoutes[payment_method as keyof typeof channelRoutes]
-    
-    if (!channelUrl) {
-      return NextResponse.json({
-        success: false,
-        message: `Unsupported payment method: ${payment_method}`
-      }, { status: 400 })
-    }
-
-    // Prepare request body for channel
-    const channelRequestBody = {
+    // Prepare payment data
+    const paymentData: PaymentData = {
       package_id,
       billing_period,
       customer_info,
-      user_data: {
-        full_name: `${customer_info.first_name} ${customer_info.last_name}`.trim(),
-        email: customer_info.email,
-        phone_number: customer_info.phone,
-        country: customer_info.country
-      }
+      user
     }
 
-    // Add token_id for recurring payments
-    if (payment_method === 'midtrans_recurring' && token_id) {
-      (channelRequestBody as any).token_id = token_id
+    // Route to specific payment channel handler
+    let handler: BasePaymentHandler
+
+    switch (payment_method) {
+      case 'midtrans_snap':
+        handler = new MidtransSnapHandler(paymentData)
+        break
+      
+      case 'midtrans_recurring':
+        if (!token_id) {
+          return NextResponse.json({
+            success: false,
+            message: 'Valid card token is required for recurring payments'
+          }, { status: 400 })
+        }
+        handler = new MidtransRecurringHandler(paymentData, token_id)
+        break
+        
+      case 'bank_transfer':
+        handler = new BankTransferHandler(paymentData)
+        break
+        
+      default:
+        return NextResponse.json({
+          success: false,
+          message: `Unsupported payment method: ${payment_method}`
+        }, { status: 400 })
     }
 
-    // Forward to specific payment channel
-    const channelRequest = new Request(`${request.nextUrl.origin}${channelUrl}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || '',
-      },
-      body: JSON.stringify(channelRequestBody)
-    })
-
-    const channelResponse = await fetch(channelRequest)
-    const channelResult = await channelResponse.json()
-
-    return NextResponse.json(channelResult, { status: channelResponse.status })
+    // Execute payment processing
+    const result = await handler.execute()
+    return result
 
   } catch (error: any) {
     console.error('💥 [Payment Router] Error:', error)
