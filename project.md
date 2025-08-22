@@ -704,6 +704,31 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 22, 2025: Unified Payment API Midtrans Snap Integration & Amount Calculation Fix ✅
+
+**✅ CRITICAL: Midtrans Snap Server Key Authentication Issue Resolved**:
+- **Root Cause Identified**: Unified payment API was accessing server_key from `gateway.configuration` instead of `gateway.api_credentials`
+- **Database Structure Fix**: Updated code to properly retrieve Midtrans server_key and client_key from `indb_payment_gateways.api_credentials` column
+- **Authentication Success**: Fixed 401 "Access denied due to unauthorized transaction" error by using correct API credentials storage
+- **Implementation**: Updated both Snap token creation and response payload to use credentials from api_credentials column
+
+**✅ AMOUNT CALCULATION HARDCODED BUG RESOLVED**:
+- **Dynamic Pricing Implementation**: Replaced any hardcoded 25000 IDR amounts with proper dynamic pricing calculation
+- **Multi-Structure Support**: Enhanced amount calculation to support multiple pricing_tiers structures (new and legacy formats)
+- **Comprehensive Fallbacks**: Added intelligent fallback logic: pricing_tiers[period][currency] → pricing_tiers.regular[period] → base package price
+- **Currency Handling**: Proper USD to IDR conversion support for international pricing
+- **Debug Logging**: Added detailed logging to identify pricing structure issues and calculation steps
+
+**✅ UNIFIED PAYMENT API ENHANCED**:
+- **Server Key Validation**: Added credential validation to ensure server_key and client_key exist before API calls
+- **Error Handling Improvement**: Enhanced error messages with detailed diagnostic information for troubleshooting
+- **Consistent Logic**: Applied same improved amount calculation logic to both Snap and regular checkout handlers
+- **Production Ready**: Robust error handling prevents payment failures due to configuration issues
+
+**Files Modified**:
+- `app/api/billing/payment/route.ts`: Fixed server key retrieval, enhanced amount calculation, added credential validation
+- **Result**: Midtrans Snap payments now work with proper authentication and dynamic pricing
+
 ### August 21, 2025: Midtrans 3DS Payment Database Recording Fix ✅
 
 **✅ CRITICAL: Midtrans 3DS Payment Database Recording Issue Resolved**:

@@ -116,19 +116,47 @@ async function handleMidtransSnap(data: any, user: any) {
     let amount = 0
     const userCurrency = 'IDR' // Default currency
 
+    console.log('💰 [Snap Handler] Debug - Package pricing_tiers:', selectedPackage.pricing_tiers)
+    console.log('💰 [Snap Handler] Debug - Billing period:', billing_period)
+    console.log('💰 [Snap Handler] Debug - Package base price:', selectedPackage.price)
+
+    // Try new pricing_tiers structure first
     if (selectedPackage.pricing_tiers && selectedPackage.pricing_tiers[billing_period]) {
       const periodTier = selectedPackage.pricing_tiers[billing_period]
+      console.log('💰 [Snap Handler] Debug - Period tier found:', periodTier)
+      
       if (periodTier[userCurrency]) {
         const currencyTier = periodTier[userCurrency]
         amount = currencyTier.promo_price || currencyTier.regular_price
+        console.log('💰 [Snap Handler] Debug - Amount from new structure:', amount)
       }
+    }
+    
+    // Fallback to old pricing structure if available
+    if (amount === 0 && selectedPackage.pricing_tiers && selectedPackage.pricing_tiers.regular) {
+      const regularTier = selectedPackage.pricing_tiers.regular[billing_period]
+      const promoTier = selectedPackage.pricing_tiers.promo?.[billing_period]
+      amount = promoTier || regularTier || 0
+      console.log('💰 [Snap Handler] Debug - Amount from old structure:', amount)
+    }
+    
+    // Final fallback to base price
+    if (amount === 0) {
+      amount = selectedPackage.price || 0
+      console.log('💰 [Snap Handler] Debug - Amount from base price:', amount)
     }
 
     if (amount === 0) {
-      throw new Error('Unable to calculate package amount')
+      console.error('❌ [Snap Handler] Pricing structure:', {
+        pricing_tiers: selectedPackage.pricing_tiers,
+        billing_period,
+        base_price: selectedPackage.price,
+        currency: userCurrency
+      })
+      throw new Error('Unable to calculate package amount - no pricing found')
     }
 
-    console.log('💰 [Snap Handler] Calculated amount:', amount, userCurrency)
+    console.log('💰 [Snap Handler] Final calculated amount:', amount, userCurrency)
 
     // Get Midtrans gateway configuration
     const { data: gateway, error: gatewayError } = await supabaseAdmin
@@ -146,13 +174,27 @@ async function handleMidtransSnap(data: any, user: any) {
     console.log('✅ [Snap Handler] Gateway configuration loaded')
 
     const config = gateway.configuration as any
+    const credentials = gateway.api_credentials as any
     const isProduction = config.environment === 'production'
     
-    // Initialize Midtrans
+    // Validate credentials
+    if (!credentials.server_key || !credentials.client_key) {
+      console.error('❌ [Snap Handler] Missing API credentials:', {
+        has_server_key: !!credentials.server_key,
+        has_client_key: !!credentials.client_key,
+        configuration: config,
+        credentials: credentials
+      })
+      throw new Error('Midtrans API credentials not configured properly')
+    }
+    
+    console.log('🔑 [Snap Handler] API credentials validated')
+    
+    // Initialize Midtrans - get keys from api_credentials
     const snap = new midtransClient.Snap({
       isProduction,
-      serverKey: config.server_key,
-      clientKey: config.client_key
+      serverKey: credentials.server_key,
+      clientKey: credentials.client_key
     })
 
     console.log('🔧 [Snap Handler] Initialized', isProduction ? 'production' : 'sandbox', 'environment')
@@ -224,7 +266,7 @@ async function handleMidtransSnap(data: any, user: any) {
       data: {
         token: transaction.token,
         redirect_url: transaction.redirect_url,
-        client_key: config.client_key,
+        client_key: credentials.client_key,
         environment: config.environment || 'sandbox',
         order_id: orderId
       }
@@ -268,19 +310,51 @@ async function handleRegularCheckout(data: any, user: any) {
 
     console.log('✅ [Regular Checkout] Package and gateway loaded')
 
-    // Calculate amount
+    // Calculate amount with same logic as Snap handler
     let amount = 0
     const userCurrency = 'IDR'
 
+    console.log('💰 [Regular Checkout] Debug - Package pricing_tiers:', selectedPackage.pricing_tiers)
+    console.log('💰 [Regular Checkout] Debug - Billing period:', billing_period)
+    console.log('💰 [Regular Checkout] Debug - Package base price:', selectedPackage.price)
+
+    // Try new pricing_tiers structure first
     if (selectedPackage.pricing_tiers && selectedPackage.pricing_tiers[billing_period]) {
       const periodTier = selectedPackage.pricing_tiers[billing_period]
+      console.log('💰 [Regular Checkout] Debug - Period tier found:', periodTier)
+      
       if (periodTier[userCurrency]) {
         const currencyTier = periodTier[userCurrency]
         amount = currencyTier.promo_price || currencyTier.regular_price
+        console.log('💰 [Regular Checkout] Debug - Amount from new structure:', amount)
       }
-    } else {
-      amount = selectedPackage.price || 0
     }
+    
+    // Fallback to old pricing structure if available
+    if (amount === 0 && selectedPackage.pricing_tiers && selectedPackage.pricing_tiers.regular) {
+      const regularTier = selectedPackage.pricing_tiers.regular[billing_period]
+      const promoTier = selectedPackage.pricing_tiers.promo?.[billing_period]
+      amount = promoTier || regularTier || 0
+      console.log('💰 [Regular Checkout] Debug - Amount from old structure:', amount)
+    }
+    
+    // Final fallback to base price
+    if (amount === 0) {
+      amount = selectedPackage.price || 0
+      console.log('💰 [Regular Checkout] Debug - Amount from base price:', amount)
+    }
+
+    if (amount === 0) {
+      console.error('❌ [Regular Checkout] Pricing structure:', {
+        pricing_tiers: selectedPackage.pricing_tiers,
+        billing_period,
+        base_price: selectedPackage.price,
+        currency: userCurrency
+      })
+      throw new Error('Unable to calculate package amount - no pricing found')
+    }
+
+    console.log('💰 [Regular Checkout] Final calculated amount:', amount, userCurrency)
 
     // Generate unique order ID
     const orderId = `ORDER-${Date.now()}-${user.id.split('-')[0]}`
