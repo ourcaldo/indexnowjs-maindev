@@ -110,19 +110,37 @@ export function usePaymentProcessor({
     onPaymentStart?.()
 
     try {
+      console.log('🚀 [Credit Card Payment] Starting credit card payment process...')
+      console.log('📄 [Credit Card Payment] Payment data:', paymentData)
+      console.log('💳 [Credit Card Payment] Card data:', { 
+        has_card_number: !!cardData.card_number, 
+        exp_month: cardData.card_exp_month, 
+        exp_year: cardData.card_exp_year,
+        has_cvv: !!cardData.card_cvv 
+      })
+      
       // Step 1: Load 3DS SDK and get configuration
+      console.log('🔄 [Credit Card Payment] Getting Midtrans configuration...')
       const config = await MidtransClientService.getMidtransConfig(token)
+      console.log('✅ [Credit Card Payment] Config loaded:', { environment: config.environment })
+      
+      console.log('🔄 [Credit Card Payment] Ensuring 3DS SDK is loaded...')
       await MidtransClientService.load3DSSDK(config.client_key, config.environment)
+      console.log('✅ [Credit Card Payment] 3DS SDK loaded')
 
       // Step 2: Tokenize card using Midtrans JavaScript SDK
+      console.log('🚀 [Credit Card Payment] Starting card tokenization...')
       const cardToken = await MidtransClientService.getCreditCardToken(cardData)
+      console.log('✅ [Credit Card Payment] Card tokenization successful, token:', cardToken)
 
       if (!cardToken) {
         throw new Error('Failed to process card information')
       }
 
       // Step 3: Process payment with token_id (backend will charge → get saved_token → create subscription)
+      console.log('💳 [Credit Card Payment] Processing payment with card token...')
       await processPayment({ ...paymentData, token_id: cardToken }, token)
+      console.log('✅ [Credit Card Payment] Payment processing completed')
 
     } catch (error) {
       console.error('Credit card payment error:', error)

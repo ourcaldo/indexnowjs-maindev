@@ -86,7 +86,16 @@ export class MidtransClientService {
 
       script.onload = () => {
         console.log('✅ 3DS SDK loaded successfully')
-        resolve()
+        // Give the SDK a moment to initialize
+        setTimeout(() => {
+          console.log('🔍 Checking if window.MidtransNew3ds is available after load...')
+          console.log('🔍 window.MidtransNew3ds:', !!window.MidtransNew3ds)
+          if (window.MidtransNew3ds) {
+            console.log('🔍 Available methods:', Object.keys(window.MidtransNew3ds))
+            console.log('🔍 getCardToken available:', typeof window.MidtransNew3ds.getCardToken === 'function')
+          }
+          resolve()
+        }, 100)
       }
 
       script.onerror = () => {
@@ -121,26 +130,42 @@ export class MidtransClientService {
    */
   static async getCreditCardToken(cardData: CardTokenData): Promise<string> {
     return new Promise((resolve, reject) => {
+      console.log('🔄 Starting card tokenization...')
+      console.log('🔍 Card data received:', { 
+        has_card_number: !!cardData.card_number, 
+        exp_month: cardData.card_exp_month, 
+        exp_year: cardData.card_exp_year,
+        has_cvv: !!cardData.card_cvv 
+      })
+      
       let isResolved = false
 
       // Add timeout to prevent hanging (reduced from 30s to 15s for better UX)
       const timeout = setTimeout(() => {
         if (!isResolved) {
           isResolved = true
+          console.error('❌ Card tokenization timeout after 15 seconds')
           reject(new Error('Card tokenization timeout. Please try again.'))
         }
       }, 15000)
 
       if (!window.MidtransNew3ds) {
+        console.error('❌ window.MidtransNew3ds not available')
         clearTimeout(timeout)
         reject(new Error('Payment system not ready. Please refresh the page.'))
         return
       }
 
+      console.log('✅ window.MidtransNew3ds is available')
+      console.log('🔍 Available methods:', Object.keys(window.MidtransNew3ds))
+      console.log('🔍 getCardToken function available:', typeof window.MidtransNew3ds.getCardToken === 'function')
+
       // Store original callback and override it temporarily
       const originalCallback = (window as any).MidtransNew3ds.callback
+      console.log('🔄 Setting up JSONP callback override...')
 
       ;(window as any).MidtransNew3ds.callback = function(response: any) {
+        console.log('📥 Received JSONP callback response:', response)
         if (!isResolved) {
           isResolved = true
           clearTimeout(timeout)
@@ -149,8 +174,10 @@ export class MidtransClientService {
           ;(window as any).MidtransNew3ds.callback = originalCallback
 
           if (response && response.status_code === '200' && response.token_id) {
+            console.log('✅ Tokenization successful, token_id:', response.token_id)
             resolve(response.token_id)
           } else {
+            console.error('❌ Tokenization failed:', response)
             reject(new Error(response?.status_message || 'Card tokenization failed'))
           }
         }
@@ -158,19 +185,31 @@ export class MidtransClientService {
 
       try {
         if (typeof window.MidtransNew3ds.getCardToken === 'function') {
-          window.MidtransNew3ds.getCardToken({
+          const tokenizationData = {
             card_number: cardData.card_number.replace(/\s/g, ''),
             card_exp_month: cardData.card_exp_month.padStart(2, '0'),
             card_exp_year: cardData.card_exp_year,
             card_cvv: cardData.card_cvv,
-          }, function() {
+          }
+          
+          console.log('🚀 Calling Midtrans getCardToken with data:', {
+            card_number: '****' + tokenizationData.card_number.slice(-4),
+            card_exp_month: tokenizationData.card_exp_month,
+            card_exp_year: tokenizationData.card_exp_year,
+            has_cvv: !!tokenizationData.card_cvv
+          })
+          
+          window.MidtransNew3ds.getCardToken(tokenizationData, function(response?: any) {
+            console.log('📋 getCardToken direct callback (usually empty):', response)
             // This callback is required by the API but the actual response comes via global callback
           })
         } else {
+          console.error('❌ getCardToken function not available')
           throw new Error('getCardToken function not available')
         }
 
       } catch (error) {
+        console.error('💥 Error in tokenization try block:', error)
         clearTimeout(timeout)
         if (!isResolved) {
           isResolved = true
