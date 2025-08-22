@@ -262,7 +262,7 @@ export function usePaymentProcessor({
 
   /**
    * Handle 3DS authentication with modal display
-   * This function should be called by the UI component that manages the modal state
+   * Implements the proper Midtrans 3DS flow using MidtransNew3ds.authenticate()
    */
   const handle3DSAuthentication = async (
     redirectUrl: string, 
@@ -272,7 +272,7 @@ export function usePaymentProcessor({
     onModalClose?: () => void
   ) => {
     try {
-      console.log('🔐 Starting 3DS authentication process')
+      console.log('🔐 Starting 3DS authentication process with redirect URL:', redirectUrl)
 
       if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
         throw new Error('3DS authentication not available. Please refresh the page and try again.')
@@ -280,15 +280,13 @@ export function usePaymentProcessor({
 
       const options = {
         performAuthentication: (url: string) => {
-          // Open 3DS page in modal/iframe
-          console.log('🔐 Opening 3DS authentication page')
+          console.log('🔐 Opening 3DS authentication page in modal:', url)
           onModalOpen?.(url)
         },
         onSuccess: async (response: any) => {
           console.log('✅ 3DS Authentication successful:', response)
           onModalClose?.()
 
-          // Call our callback API to complete the payment process
           try {
             const user = await authService.getCurrentUser()
             const { data: { session } } = await supabaseBrowser.auth.getSession()
@@ -298,6 +296,7 @@ export function usePaymentProcessor({
               throw new Error('Authentication token expired')
             }
 
+            // Call 3DS callback API to finalize payment
             const callbackResponse = await fetch('/api/billing/midtrans-3ds-callback', {
               method: 'POST',
               headers: {
@@ -306,7 +305,9 @@ export function usePaymentProcessor({
               },
               body: JSON.stringify({
                 transaction_id: transactionId,
-                order_id: orderId
+                order_id: orderId,
+                status_code: response.status_code,
+                transaction_status: response.transaction_status
               }),
             })
 
@@ -317,28 +318,6 @@ export function usePaymentProcessor({
                 title: "Payment successful!",
                 description: "Your subscription has been activated successfully.",
                 type: "success"
-              })
-
-              // Log the successful activity
-              logPaymentActivity('subscription_created_3ds', {
-                package_id: packageData?.id || '',
-                billing_period: packageData?.billing_period || 'monthly',
-                payment_method: 'midtrans_recurring',
-                customer_info: {
-                  first_name: 'User',
-                  last_name: '',
-                  email: user?.email || '',
-                  phone: '',
-                  address: '',
-                  city: '',
-                  state: '',
-                  zip_code: '',
-                  country: 'Indonesia'
-                }
-              }, {
-                transaction_id: transactionId,
-                order_id: orderId,
-                authentication_method: '3ds'
               })
 
               router.push('/dashboard/settings/plans-billing?payment=success')
@@ -380,7 +359,8 @@ export function usePaymentProcessor({
         }
       }
 
-      // Trigger 3DS authentication
+      // Trigger 3DS authentication using Midtrans JavaScript library
+      console.log('🚀 Calling MidtransNew3ds.authenticate() with options')
       window.MidtransNew3ds.authenticate(redirectUrl, options)
 
     } catch (error) {
