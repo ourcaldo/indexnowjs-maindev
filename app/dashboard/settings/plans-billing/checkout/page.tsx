@@ -488,58 +488,81 @@ export default function CheckoutPage() {
     }
   }, [package_id, router, addToast])
 
-  // Load Midtrans SDKs with improved error handling and retry mechanism
+  // Load Midtrans SDK with improved error handling and retry mechanism
   useEffect(() => {
-    const loadMidtransSDKs = async () => {
+    const loadMidtransSDK = async () => {
+      // Check if script already exists
+      if (document.querySelector('script[src*="midtrans"]')) {
+        console.log('✅ Midtrans SDK already loaded')
+        return
+      }
+
       try {
         // Get authentication token
         const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
         if (!token) {
+          console.log('⚠️ No auth token, skipping Midtrans SDK load')
           return
         }
 
-        // Load Snap.js for Snap payments
-        if (!document.querySelector('script[src*="snap.js"]')) {
-          const snapScript = document.createElement('script')
-          snapScript.src = 'https://app.sandbox.midtrans.com/snap/snap.js'
-          snapScript.setAttribute('data-client-key', 'your_client_key_will_be_set_dynamically')
-          snapScript.setAttribute('id', 'snap-script')
-          document.head.appendChild(snapScript)
-        }
-
-        // Load 3DS SDK for recurring payments only if needed
-        if (!document.querySelector('script[src*="midtrans-new-3ds"]')) {
-          // Fetch Midtrans configuration from backend
-          const response = await fetch('/api/billing/midtrans-config', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          })
-
-          if (response.ok) {
-            const configData = await response.json()
-            if (configData.success) {
-              const { client_key, environment } = configData.data
-
-              // Create script element for 3DS (recurring payments)
-              const script = document.createElement('script')
-              script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
-              script.async = true
-              script.setAttribute('data-environment', environment || 'sandbox')
-              script.setAttribute('data-client-key', client_key)
-              script.setAttribute('id', 'midtrans-3ds-script')
-              
-              document.head.appendChild(script)
-            }
+        // Fetch Midtrans configuration from backend
+        const response = await fetch('/api/billing/midtrans-config', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
+        })
+
+        if (!response.ok) {
+          return
         }
+
+        const configData = await response.json()
+        if (!configData.success) {
+          return
+        }
+
+        const { client_key, environment } = configData.data
+
+        // Create script element with improved loading
+        const script = document.createElement('script')
+        script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
+        script.async = true
+        script.setAttribute('data-environment', environment || 'sandbox')
+        script.setAttribute('data-client-key', client_key)
+        script.setAttribute('id', 'midtrans-script')
+
+        script.onload = () => {
+          // Midtrans SDK loaded successfully
+        }
+
+        script.onerror = (error) => {
+          // Failed to load Midtrans SDK - handled silently
+        }
+
+        document.head.appendChild(script)
       } catch (error) {
-        // Error loading Midtrans SDKs - handled silently
+        // Error loading Midtrans SDK - handled silently
       }
     }
 
-    loadMidtransSDKs()
+    loadMidtransSDK()
+  }, [])
+
+  // Load Snap.js SDK for Snap payments
+  useEffect(() => {
+    const loadSnapSDK = async () => {
+      // Load Snap.js for Snap payments
+      if (!document.querySelector('script[src*="snap.js"]')) {
+        const snapScript = document.createElement('script')
+        snapScript.src = 'https://app.sandbox.midtrans.com/snap/snap.js'
+        snapScript.setAttribute('data-client-key', 'your_client_key_will_be_set_dynamically')
+        snapScript.setAttribute('id', 'snap-script')
+        document.head.appendChild(snapScript)
+      }
+    }
+
+    loadSnapSDK()
   }, [])
 
   // Calculate pricing based on selected billing period
@@ -632,6 +655,59 @@ export default function CheckoutPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleMidtransRecurringPayment = async (cardToken: string, token: string) => {
+    const response = await fetch('/api/billing/midtrans-recurring', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        package_id: selectedPackage!.id,
+        billing_period,
+        customer_info: {
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          zip_code: form.zip_code,
+          country: form.country,
+          description: form.description
+        },
+        token_id: cardToken
+      }),
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      // Log activity
+      logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
+
+      addToast({
+        title: "Payment successful!",
+        description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
+        type: "success"
+      })
+
+      // Redirect to payment page or success page
+      setTimeout(() => {
+        if (result.data?.redirect_url) {
+          window.location.href = result.data.redirect_url
+        } else {
+          router.push('/dashboard/settings/plans-billing')
+        }
+      }, 1500)
+    } else {
+      throw new Error(result.message || 'Payment processing failed. Please try again.')
+    }
+
+    setSubmitting(false)
   }
 
   const handleMidtransSnapPayment = async (token: string) => {
@@ -731,59 +807,6 @@ export default function CheckoutPage() {
     } catch (error) {
       throw error
     }
-  }
-
-  const handleMidtransRecurringPayment = async (cardToken: string, token: string) => {
-    const response = await fetch('/api/billing/midtrans-recurring', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        package_id: selectedPackage!.id,
-        billing_period,
-        customer_info: {
-          first_name: form.first_name,
-          last_name: form.last_name,
-          email: form.email,
-          phone: form.phone,
-          address: form.address,
-          city: form.city,
-          state: form.state,
-          zip_code: form.zip_code,
-          country: form.country,
-          description: form.description
-        },
-        token_id: cardToken
-      }),
-    })
-
-    const result = await response.json()
-
-    if (result.success) {
-      // Log activity
-      logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
-
-      addToast({
-        title: "Payment successful!",
-        description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
-        type: "success"
-      })
-
-      // Redirect to payment page or success page
-      setTimeout(() => {
-        if (result.data?.redirect_url) {
-          window.location.href = result.data.redirect_url
-        } else {
-          router.push('/dashboard/settings/plans-billing')
-        }
-      }, 1500)
-    } else {
-      throw new Error(result.message || 'Payment processing failed. Please try again.')
-    }
-
-    setSubmitting(false)
   }
 
   const handleRegularCheckout = async (token: string) => {
