@@ -203,11 +203,11 @@ export async function POST(request: NextRequest) {
         id: orderId,
         user_id: user.id,
         package_id: validatedData.package_id,
-        billing_period: validatedData.billing_period,
+        transaction_type: 'payment',
+        transaction_status: 'pending',
         amount: amount,
         currency: 'IDR',
         payment_method: 'midtrans_snap',
-        status: 'pending',
         gateway_transaction_id: transaction.token,
         gateway_response: {
           token: transaction.token,

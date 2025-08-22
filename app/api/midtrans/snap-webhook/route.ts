@@ -76,12 +76,12 @@ export async function POST(request: NextRequest) {
     const { data: transaction, error: updateError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .update({
-        status: finalStatus,
+        transaction_status: finalStatus,
         gateway_response: {
           ...statusResponse,
           updated_at: new Date().toISOString()
         },
-        completed_at: finalStatus === 'completed' ? new Date().toISOString() : null
+        processed_at: finalStatus === 'completed' ? new Date().toISOString() : null
       })
       .eq('id', orderId)
       .select('*')
