@@ -2586,10 +2586,10 @@ indb_keyword_rankings (latest positions)
   - **Recurring Gateway**: Updated to show `https://yourdomain.com/api/midtrans/webhook`
   - **Snap Gateway**: Updated to show `https://yourdomain.com/api/midtrans/webhook`
   - **Consistency**: Single webhook URL for all Midtrans payment configurations
-- ✅ **BACKWARD COMPATIBILITY**: Old webhook endpoints redirect to unified webhook
-  - **Legacy Support**: `/api/billing/midtrans/webhook` forwards requests to unified endpoint
-  - **Legacy Support**: `/api/midtrans/snap-webhook` forwards requests to unified endpoint
-  - **Seamless Transition**: No service interruption during webhook URL migration
+- ✅ **CLEAN MIGRATION**: Removed old webhook endpoints to prevent conflicts
+  - **Single Source**: Only `/api/midtrans/webhook` exists - clean, no redirects
+  - **No SSL Issues**: Eliminated internal fetch redirects that caused SSL routing errors
+  - **Simplified Architecture**: One webhook endpoint, no legacy compatibility needed
 - **Files Created**: `app/api/midtrans/webhook/route.ts` - Unified webhook handler
 - **Files Modified**: 
   - `app/backend/admin/settings/payments/page.tsx` - Updated webhook URL placeholders
