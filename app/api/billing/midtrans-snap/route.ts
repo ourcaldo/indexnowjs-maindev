@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch package details
     const { data: packageData, error: packageError } = await supabaseAdmin
-      .from('indb_packages')
+      .from('indb_payment_packages')
       .select('*')
       .eq('id', validatedData.package_id)
       .eq('is_active', true)
