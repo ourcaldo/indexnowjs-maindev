@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         },
         processed_at: finalStatus === 'completed' ? new Date().toISOString() : null
       })
-      .eq('id', orderId)
+      .eq('payment_reference', orderId)
       .select('*')
       .single()
 

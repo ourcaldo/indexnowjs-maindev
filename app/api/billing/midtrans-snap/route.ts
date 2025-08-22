@@ -200,7 +200,6 @@ export async function POST(request: NextRequest) {
     const { error: insertError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .insert({
-        id: orderId,
         user_id: user.id,
         package_id: validatedData.package_id,
         transaction_type: 'payment',
@@ -208,6 +207,7 @@ export async function POST(request: NextRequest) {
         amount: amount,
         currency: 'IDR',
         payment_method: 'midtrans_snap',
+        payment_reference: orderId,
         gateway_transaction_id: transaction.token,
         gateway_response: {
           token: transaction.token,
