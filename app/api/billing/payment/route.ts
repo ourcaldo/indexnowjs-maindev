@@ -249,41 +249,58 @@ async function handleMidtransSnap(data: any, user: any) {
       customer_email: user.email
     })
 
-    // Create transaction token
+    // CREATE TRANSACTION RECORD FIRST - BEFORE CALLING MIDTRANS API
+    console.log('💾 [Snap Handler] Creating transaction record BEFORE Midtrans API call...')
+    const { error: dbError } = await supabaseAdmin
+      .from('indb_payment_transactions')
+      .insert({
+        user_id: user.id,
+        package_id: selectedPackage.id,
+        transaction_type: 'payment',
+        transaction_status: 'pending',
+        amount: finalAmount,
+        currency: 'IDR',
+        payment_method: 'midtrans_snap',
+        payment_reference: orderId, // This is what webhook will search for
+        billing_period,
+        gateway_type: 'midtrans_snap', // For unified webhook detection
+        metadata: {
+          original_amount: amount,
+          original_currency: userCurrency,
+          converted_amount: finalAmount,
+          converted_currency: 'IDR',
+          customer_info: user_data
+        }
+      })
+
+    if (dbError) {
+      console.error('❌ [Snap Handler] Failed to create transaction record:', dbError)
+      throw new Error('Failed to create transaction record')
+    }
+    
+    console.log('✅ [Snap Handler] Transaction record created BEFORE API call')
+
+    // NOW create transaction token with Midtrans
     const transaction = await snap.createTransaction(parameter)
     
     console.log('✅ [Snap Handler] Transaction token created successfully')
     console.log('🔗 [Snap Handler] Token:', transaction.token)
     console.log('🌐 [Snap Handler] Redirect URL:', transaction.redirect_url)
 
-    // Try to store transaction (optional - don't fail if this errors)
-    try {
-      await supabaseAdmin
-        .from('indb_payment_transactions')
-        .insert({
-          id: orderId,
-          user_id: user.id,
-          package_id: selectedPackage.id,
-          gateway_id: gateway.id,
-          amount: finalAmount,
-          currency: 'IDR',
-          status: 'pending',
-          billing_period,
-          transaction_data: parameter,
-          metadata: {
-            snap_token: transaction.token,
-            redirect_url: transaction.redirect_url,
-            original_amount: amount,
-            original_currency: userCurrency,
-            converted_amount: finalAmount,
-            converted_currency: 'IDR'
-          }
-        })
-      console.log('✅ [Snap Handler] Transaction stored in database')
-    } catch (dbError) {
-      console.warn('⚠️ [Snap Handler] Failed to store transaction:', dbError)
-      // Don't fail the whole process if database storage fails
-    }
+    // Update transaction with Midtrans response data
+    await supabaseAdmin
+      .from('indb_payment_transactions')
+      .update({
+        gateway_transaction_id: transaction.token,
+        gateway_response: {
+          token: transaction.token,
+          redirect_url: transaction.redirect_url,
+          snap_parameter: parameter
+        }
+      })
+      .eq('payment_reference', orderId)
+    
+    console.log('✅ [Snap Handler] Transaction updated with Midtrans response')
 
     return NextResponse.json({
       success: true,

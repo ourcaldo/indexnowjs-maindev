@@ -2596,3 +2596,16 @@ indb_keyword_rankings (latest positions)
   - `app/api/billing/midtrans/webhook/route.ts` - Added redirect to unified webhook
   - `app/api/midtrans/snap-webhook/route.ts` - Added redirect to unified webhook
 - **Result**: Single webhook endpoint handles all Midtrans payments with automatic type detection and processing
+
+### January 22, 2025 - Fixed Transaction Record Creation Timing
+- ✅ **FIXED TRANSACTION NOT FOUND ERROR**: Transaction records now created BEFORE Midtrans API calls
+  - **Issue**: Webhook received notifications immediately but transaction record didn't exist yet
+  - **Root Cause**: Database INSERT happened AFTER Midtrans API call, creating timing gap
+  - **Solution**: Moved transaction record creation to BEFORE `snap.createTransaction()` call
+  - **Result**: Transaction record exists when webhook arrives, eliminating "transaction not found" errors
+- ✅ **ENHANCED TRANSACTION TRACKING**: Added proper fields for webhook detection
+  - **payment_reference**: Set to orderId for webhook lookup
+  - **gateway_type**: Set to 'midtrans_snap' for unified webhook payment type detection
+  - **Consistent Flow**: Create record → Call Midtrans → Update with response data
+- **File Modified**: `app/api/billing/payment/route.ts` - Reordered transaction creation flow
+- **Result**: Webhook can now find and process transactions immediately without timing issues
