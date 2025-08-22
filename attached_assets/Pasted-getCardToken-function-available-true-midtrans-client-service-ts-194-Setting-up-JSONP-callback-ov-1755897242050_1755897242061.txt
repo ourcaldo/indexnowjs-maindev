@@ -1,0 +1,42 @@
+getCardToken function available: true
+midtrans-client-service.ts:194 🔄 Setting up JSONP callback override...
+midtrans-client-service.ts:227 🚀 Calling Midtrans getCardToken with data: {card_number: '****1114', card_exp_month: '12', card_exp_year: '2029', has_cvv: true}card_exp_month: "12"card_exp_year: "2029"card_number: "****1114"has_cvv: true[[Prototype]]: Object
+midtrans-client-service.ts:260 💥 Error in tokenization try block: TypeError: Cannot read properties of null (reading 'getAttribute')
+    at d (midtrans-new-3ds.min.js:1:539)
+    at Object.getCardToken (midtrans-new-3ds.min.js:1:1703)
+    at eval (midtrans-client-service.ts:241:33)
+    at new Promise (<anonymous>)
+    at MidtransClientService.getCreditCardToken (midtrans-client-service.ts:161:12)
+    at Object.processCreditCardPayment (usePaymentProcessor.ts:133:53)
+    at async handleCreditCardSubmit (page.tsx:202:7)
+    at async handleExternalSubmit (MidtransCreditCardForm.tsx:156:7)
+    at async handleUnifiedPayment (page.tsx:495:9)
+    at async handleSubmit (page.tsx:446:7)
+error @ intercept-console-error.js:57
+eval @ midtrans-client-service.ts:260
+getCreditCardToken @ midtrans-client-service.ts:161
+processCreditCardPayment @ usePaymentProcessor.ts:133
+await in processCreditCardPayment
+handleCreditCardSubmit @ page.tsx:202
+await in handleCreditCardSubmit
+handleExternalSubmit @ MidtransCreditCardForm.tsx:156
+handleUnifiedPayment @ page.tsx:495
+handleSubmit @ page.tsx:446
+await in handleSubmit
+executeDispatch @ react-dom-client.development.js:16922
+runWithFiberInDEV @ react-dom-client.development.js:873
+processDispatchQueue @ react-dom-client.development.js:16972
+eval @ react-dom-client.development.js:17573
+batchedUpdates$1 @ react-dom-client.development.js:3313
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:17126
+dispatchEvent @ react-dom-client.development.js:21309
+dispatchDiscreteEvent @ react-dom-client.development.js:21277Understand this error
+usePaymentProcessor.ts:146 Credit card payment error: Error: Payment processing failed. Please try again.
+    at eval (midtrans-client-service.ts:266:18)
+    at new Promise (<anonymous>)
+    at MidtransClientService.getCreditCardToken (midtrans-client-service.ts:161:12)
+    at Object.processCreditCardPayment (usePaymentProcessor.ts:133:53)
+    at async handleCreditCardSubmit (page.tsx:202:7)
+    at async handleExternalSubmit (MidtransCreditCardForm.tsx:156:7)
+    at async handleUnifiedPayment (page.tsx:495:9)
+    at async handleSubmit (page.tsx:446:7)

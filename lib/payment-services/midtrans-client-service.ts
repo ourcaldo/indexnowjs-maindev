@@ -63,72 +63,45 @@ export class MidtransClientService {
   /**
    * Load Midtrans 3DS SDK for credit card tokenization
    * CRITICAL: Must be loaded with proper data-client-key and data-environment for tokenization to work
+   * Fixed to match original working implementation exactly
    */
   static async load3DSSDK(clientKey: string, environment: string): Promise<void> {
     return new Promise((resolve, reject) => {
       console.log('🔄 Loading Midtrans 3DS SDK with config:', { clientKey: clientKey.substring(0, 10) + '...', environment })
       
-      // Check if already loaded AND properly configured
-      const existingScript = document.querySelector('#midtrans-3ds-script')
-      if (existingScript && window.MidtransNew3ds) {
-        const existingClientKey = existingScript.getAttribute('data-client-key')
-        const existingEnv = existingScript.getAttribute('data-environment')
-        if (existingClientKey === clientKey && existingEnv === environment) {
-          console.log('✅ 3DS SDK already loaded with correct configuration')
-          resolve()
-          return
-        }
-      }
-
-      // Remove existing script if present (might have wrong config)
+      // Check if script already exists and remove it to ensure clean reload
+      const existingScript = document.querySelector('script[src*="midtrans-new-3ds"]') || document.querySelector('#midtrans-script')
       if (existingScript) {
-        console.log('🗑️ Removing existing SDK script with wrong configuration')
+        console.log('🗑️ Removing existing Midtrans script to ensure clean reload')
         existingScript.remove()
-        // Also clean up the global object
+        // Clean up the global object
         delete (window as any).MidtransNew3ds
       }
 
-      console.log('📥 Creating new SDK script element...')
+      console.log('📥 Creating new Midtrans SDK script element...')
       const script = document.createElement('script')
       script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
-      script.setAttribute('data-environment', environment)
+      script.async = true  // Use async like the original implementation
+      script.setAttribute('data-environment', environment || 'sandbox')  // Default to sandbox like original
       script.setAttribute('data-client-key', clientKey)
-      script.setAttribute('id', 'midtrans-3ds-script')
-      script.async = false  // Load synchronously to ensure proper initialization
+      script.setAttribute('id', 'midtrans-script')  // Use same ID as original
 
       script.onload = () => {
-        console.log('✅ 3DS SDK script loaded successfully')
-        // Give the SDK a moment to initialize properly
+        console.log('✅ Midtrans SDK loaded successfully')
+        // Wait a bit for the SDK to initialize, then verify it's working
         setTimeout(() => {
-          console.log('🔍 Post-load SDK verification...')
-          console.log('🔍 window.MidtransNew3ds available:', !!window.MidtransNew3ds)
-          
-          if (window.MidtransNew3ds) {
-            console.log('🔍 SDK methods:', Object.keys(window.MidtransNew3ds))
-            console.log('🔍 getCardToken function:', typeof window.MidtransNew3ds.getCardToken === 'function')
-            console.log('🔍 SDK clientKey:', (window.MidtransNew3ds as any).clientKey)
-            console.log('🔍 SDK version:', (window.MidtransNew3ds as any).version)
-            console.log('🔍 SDK url:', (window.MidtransNew3ds as any).url)
+          if (window.MidtransNew3ds && typeof window.MidtransNew3ds.getCardToken === 'function') {
+            console.log('✅ Midtrans SDK initialized and ready')
+            resolve()
           } else {
-            console.error('❌ window.MidtransNew3ds not available after script load!')
+            console.error('❌ Midtrans SDK loaded but getCardToken not available')
+            reject(new Error('Midtrans SDK not properly initialized'))
           }
-          
-          // Verify the script attributes are set correctly
-          const loadedScript = document.querySelector('#midtrans-3ds-script')
-          if (loadedScript) {
-            console.log('🔍 Script attributes:', {
-              'data-client-key': loadedScript.getAttribute('data-client-key'),
-              'data-environment': loadedScript.getAttribute('data-environment'),
-              'src': loadedScript.getAttribute('src')
-            })
-          }
-          
-          resolve()
-        }, 200)  // Increased timeout to ensure proper initialization
+        }, 100)
       }
 
-      script.onerror = () => {
-        console.error('❌ Failed to load 3DS SDK')
+      script.onerror = (error) => {
+        console.error('❌ Failed to load Midtrans SDK:', error)
         reject(new Error('Failed to load Midtrans 3DS SDK'))
       }
 
@@ -159,113 +132,101 @@ export class MidtransClientService {
    */
   static async getCreditCardToken(cardData: CardTokenData): Promise<string> {
     return new Promise((resolve, reject) => {
-      console.log('🔄 Starting card tokenization...')
-      console.log('🔍 Card data received:', { 
-        has_card_number: !!cardData.card_number, 
-        exp_month: cardData.card_exp_month, 
-        exp_year: cardData.card_exp_year,
-        has_cvv: !!cardData.card_cvv 
-      })
-      
       let isResolved = false
 
-      // Add timeout to prevent hanging (reduced from 30s to 15s for better UX)
+      // Add timeout to prevent hanging - same as original (15 seconds)
       const timeout = setTimeout(() => {
         if (!isResolved) {
           isResolved = true
-          console.error('❌ Card tokenization timeout after 15 seconds')
+          console.error('❌ Card tokenization timeout')
           reject(new Error('Card tokenization timeout. Please try again.'))
         }
       }, 15000)
 
       if (!window.MidtransNew3ds) {
-        console.error('❌ window.MidtransNew3ds not available')
         clearTimeout(timeout)
         reject(new Error('Payment system not ready. Please refresh the page.'))
         return
       }
 
-      console.log('✅ window.MidtransNew3ds is available')
-      console.log('🔍 Available methods:', Object.keys(window.MidtransNew3ds))
-      console.log('🔍 getCardToken function available:', typeof window.MidtransNew3ds.getCardToken === 'function')
+      console.log('getCardToken function available:', typeof window.MidtransNew3ds.getCardToken === 'function')
 
-      // Store original callback and override it temporarily
-      const originalCallback = (window as any).MidtransNew3ds.callback
-      console.log('🔄 Setting up JSONP callback override...')
+      // Wait for Midtrans SDK to be ready with timeout - exactly like original
+      let retryCount = 0
+      const maxRetries = 20
 
-      ;(window as any).MidtransNew3ds.callback = function(response: any) {
-        console.log('📥 JSONP callback triggered with response:', JSON.stringify(response, null, 2))
-        if (!isResolved) {
-          isResolved = true
-          clearTimeout(timeout)
-
-          // Restore original callback
-          ;(window as any).MidtransNew3ds.callback = originalCallback
-
-          if (response && response.status_code === '200' && response.token_id) {
-            console.log('✅ Tokenization successful, token_id:', response.token_id)
-            resolve(response.token_id)
-          } else {
-            console.error('❌ Tokenization failed with response:', response)
-            const errorMessage = response?.status_message || response?.validation_messages?.join(', ') || 'Card tokenization failed'
-            reject(new Error(errorMessage))
+      const waitForSDK = () => {
+        if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.getCardToken !== 'function') {
+          if (retryCount >= maxRetries) {
+            clearTimeout(timeout)
+            if (!isResolved) {
+              isResolved = true
+              reject(new Error('Midtrans payment system is not available. Please refresh the page and try again.'))
+            }
+            return
           }
-        } else {
-          console.log('⚠️ Callback called but already resolved')
+          retryCount++
+          setTimeout(waitForSDK, 300)
+          return
         }
-      }
 
-      try {
-        if (typeof window.MidtransNew3ds.getCardToken === 'function') {
-          const tokenizationData = {
+        // SDK is ready, proceed with tokenization
+        console.log('🔄 Setting up JSONP callback override...')
+        
+        // Store original callback and override it temporarily - exactly like original
+        const originalCallback = (window as any).MidtransNew3ds.callback
+
+        ;(window as any).MidtransNew3ds.callback = function(response: any) {
+          if (!isResolved) {
+            isResolved = true
+            clearTimeout(timeout)
+
+            // Restore original callback
+            ;(window as any).MidtransNew3ds.callback = originalCallback
+
+            if (response && response.status_code === '200' && response.token_id) {
+              resolve(response.token_id)
+            } else {
+              reject(new Error(response?.status_message || 'Card tokenization failed'))
+            }
+          }
+        }
+
+        try {
+          // Format card data exactly like the original implementation
+          const formattedCardData = {
             card_number: cardData.card_number.replace(/\s/g, ''),
             card_exp_month: cardData.card_exp_month.padStart(2, '0'),
             card_exp_year: cardData.card_exp_year,
             card_cvv: cardData.card_cvv,
           }
-          
-          console.log('🚀 Calling Midtrans getCardToken with data:', {
-            card_number: '****' + tokenizationData.card_number.slice(-4),
-            card_exp_month: tokenizationData.card_exp_month,
-            card_exp_year: tokenizationData.card_exp_year,
-            has_cvv: !!tokenizationData.card_cvv
-          })
-          
-          // Add a timeout to check if the request is actually made
-          setTimeout(() => {
-            if (!isResolved) {
-              console.warn('⚠️ No JSONP callback received after 2 seconds - checking network tab for tokenization request')
-            }
-          }, 2000)
-          
-          window.MidtransNew3ds.getCardToken(tokenizationData, function(response?: any) {
-            console.log('📋 getCardToken direct callback (should be empty):', response)
-            // This callback is required by the API but the actual response comes via global JSONP callback
-            // If this callback receives data, something is wrong with the JSONP setup
-            if (response && response.token_id && !isResolved) {
-              console.log('⚠️ Received token in direct callback instead of JSONP - using it')
-              isResolved = true
-              clearTimeout(timeout)
-              resolve(response.token_id)
-            }
-          })
-          
-          console.log('✅ getCardToken called successfully, waiting for JSONP response...')
-        } else {
-          console.error('❌ getCardToken function not available')
-          throw new Error('getCardToken function not available')
-        }
 
-      } catch (error) {
-        console.error('💥 Error in tokenization try block:', error)
-        clearTimeout(timeout)
-        if (!isResolved) {
-          isResolved = true
-          // Restore original callback on error
-          ;(window as any).MidtransNew3ds.callback = originalCallback
-          reject(new Error('Payment processing failed. Please try again.'))
+          console.log('🚀 Calling Midtrans getCardToken with data:', {
+            card_number: '****' + formattedCardData.card_number.slice(-4),
+            card_exp_month: formattedCardData.card_exp_month,
+            card_exp_year: formattedCardData.card_exp_year,
+            has_cvv: !!formattedCardData.card_cvv
+          })
+
+          // Call getCardToken exactly like the original - with empty callback function
+          window.MidtransNew3ds.getCardToken(formattedCardData, function() {
+            // This callback is required by the API but the actual response comes via global callback
+          })
+
+        } catch (error) {
+          console.error('💥 Error in tokenization try block:', error)
+          clearTimeout(timeout)
+          if (!isResolved) {
+            isResolved = true
+            // Restore original callback on error
+            ;(window as any).MidtransNew3ds.callback = originalCallback
+            reject(new Error('Payment processing failed. Please try again.'))
+          }
         }
       }
+
+      // Start waiting for SDK
+      waitForSDK()
     })
   }
 
