@@ -172,7 +172,15 @@ export default function CheckoutPage() {
       throw new Error('Authentication required')
     }
 
-    await paymentProcessor.processCreditCardPayment(paymentRequest, cardData, token)
+    // Map form fields to expected tokenization format
+    const mappedCardData = {
+      card_number: cardData.card_number,
+      card_exp_month: cardData.expiry_month,
+      card_exp_year: cardData.expiry_year,
+      card_cvv: cardData.cvv
+    }
+
+    await paymentProcessor.processCreditCardPayment(paymentRequest, mappedCardData, token)
     
     // Success handling is now managed within the payment processor hook
   }
@@ -415,7 +423,7 @@ export default function CheckoutPage() {
       }
 
       // For Midtrans recurring, delegate to credit card form
-      if (selectedGateway?.slug === 'midtrans') {
+      if (selectedGateway?.slug === 'midtrans' || selectedGateway?.slug === 'midtrans_recurring') {
         if (!window.midtransSubmitCard) {
           addToast({
             title: "Payment system not ready",
@@ -759,7 +767,7 @@ export default function CheckoutPage() {
                         </div>
 
                         {/* Credit Card Form - Inside the payment method selection */}
-                        {form.payment_method === gateway.id && gateway.slug === 'midtrans' && (
+                        {form.payment_method === gateway.id && (gateway.slug === 'midtrans' || gateway.slug === 'midtrans_recurring') && (
                           <div className="ml-8 mt-4">
                             <MidtransCreditCardForm
                               onSubmit={handleCreditCardSubmit}
