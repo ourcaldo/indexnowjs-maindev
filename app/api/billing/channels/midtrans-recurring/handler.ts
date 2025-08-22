@@ -58,7 +58,14 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     })
 
     // Check if 3DS authentication is required
-    if ((chargeTransaction as any).redirect_url) {
+    if (chargeTransaction.redirect_url || chargeTransaction.transaction_status === 'pending') {
+      console.log('🔐 3DS Authentication required for transaction:', {
+        order_id: orderId,
+        transaction_id: chargeTransaction.transaction_id,
+        redirect_url: chargeTransaction.redirect_url,
+        transaction_status: chargeTransaction.transaction_status
+      })
+
       // Update transaction status to pending_3ds
       await supabaseAdmin
         .from('indb_payment_transactions')
@@ -76,7 +83,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       return {
         success: true,
         requires_redirect: true,
-        redirect_url: (chargeTransaction as any).redirect_url,
+        redirect_url: chargeTransaction.redirect_url,
         data: {
           order_id: orderId,
           transaction_id: chargeTransaction.transaction_id,
@@ -94,6 +101,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       }
 
       // Create subscription
+      console.log('💳 Creating subscription with saved token:', savedTokenId)
       const subscription = await this.midtransService.createSubscription(amount.finalAmount, {
         name: `${this.packageData.name}_${this.paymentData.billing_period}`.toUpperCase(),
         token: savedTokenId,
@@ -116,6 +124,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
           order_id: orderId,
         },
       })
+      console.log('✅ Subscription created successfully:', subscription.id)
 
       // Update transaction to completed
       await supabaseAdmin

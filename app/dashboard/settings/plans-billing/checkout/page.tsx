@@ -164,8 +164,8 @@ export default function CheckoutPage() {
         throw new Error('Failed to process card information')
       }
 
-      // Immediately call our backend API with the token
-      const response = await fetch('/api/billing/midtrans-recurring', {
+      // Call unified payment API with card token
+      const response = await fetch('/api/billing/payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,6 +174,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           package_id: selectedPackage!.id,
           billing_period,
+          payment_method: 'midtrans_recurring',
           customer_info: {
             first_name: form.first_name,
             last_name: form.last_name,
@@ -194,13 +195,13 @@ export default function CheckoutPage() {
 
       if (result.success) {
         // Check if 3DS authentication is required
-        if (result.requires_3ds && result.redirect_url) {
-          handle3DSAuthentication(result.redirect_url, result.transaction_id, result.order_id)
+        if (result.requires_redirect && result.redirect_url) {
+          handle3DSAuthentication(result.redirect_url, result.data?.transaction_id, result.data?.order_id)
           return // Don't reset submitting state yet - 3DS is in progress
         }
 
         // Log activity for successful non-3DS payments
-        logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.order_id || 'unknown'})`)
+        logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
 
         addToast({
           title: "Payment successful!",
@@ -653,59 +654,6 @@ export default function CheckoutPage() {
     } finally {
       setSubmitting(false)
     }
-  }
-
-  const handleMidtransRecurringPayment = async (cardToken: string, token: string) => {
-    const response = await fetch('/api/billing/midtrans-recurring', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        package_id: selectedPackage!.id,
-        billing_period,
-        customer_info: {
-          first_name: form.first_name,
-          last_name: form.last_name,
-          email: form.email,
-          phone: form.phone,
-          address: form.address,
-          city: form.city,
-          state: form.state,
-          zip_code: form.zip_code,
-          country: form.country,
-          description: form.description
-        },
-        token_id: cardToken
-      }),
-    })
-
-    const result = await response.json()
-
-    if (result.success) {
-      // Log activity
-      logBillingActivity('payment_processing', `Setup recurring payment for ${selectedPackage!.name} plan (${billing_period}, Order: ${result.data?.order_id || 'unknown'})`)
-
-      addToast({
-        title: "Payment successful!",
-        description: result.data?.redirect_url ? "Redirecting to payment page..." : "Your payment has been processed successfully.",
-        type: "success"
-      })
-
-      // Redirect to payment page or success page
-      setTimeout(() => {
-        if (result.data?.redirect_url) {
-          window.location.href = result.data.redirect_url
-        } else {
-          router.push('/dashboard/settings/plans-billing')
-        }
-      }, 1500)
-    } else {
-      throw new Error(result.message || 'Payment processing failed. Please try again.')
-    }
-
-    setSubmitting(false)
   }
 
   const handleUnifiedPayment = async (token: string, selectedGateway: any) => {
