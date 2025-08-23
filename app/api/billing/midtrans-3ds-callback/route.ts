@@ -69,11 +69,18 @@ export async function POST(request: NextRequest) {
     if (transactionStatus.transaction_status === 'capture' || transactionStatus.transaction_status === 'settlement') {
       console.log('✅ 3DS Authentication successful, continuing with subscription creation')
       
-      // Use saved_token_id from successful 3DS transaction - Midtrans returns this after authentication
-      const savedTokenId = transactionStatus.saved_token_id
-      if (!savedTokenId) {
-        throw new Error('No saved_token_id returned from Midtrans after 3DS authentication')
+      // Get the original token_id from transaction metadata to create subscription
+      const { data: existingTransaction } = await supabase
+        .from('indb_payment_transactions')
+        .select('id, metadata')
+        .eq('gateway_transaction_id', transaction_id)
+        .maybeSingle()
+
+      if (!existingTransaction || !existingTransaction.metadata?.token_id) {
+        throw new Error('No original token_id found in transaction record for subscription creation')
       }
+
+      const originalTokenId = existingTransaction.metadata.token_id
 
       // Get authentication token from the request
       const authHeader = request.headers.get('authorization')
@@ -96,13 +103,7 @@ export async function POST(request: NextRequest) {
 
       console.log('💾 ============= STEP 1: CREATING SUBSCRIPTION AFTER 3DS =============')
       
-      // Get customer info from transaction record if needed
-      const { data: existingTransaction } = await supabase
-        .from('indb_payment_transactions')
-        .select('metadata')
-        .eq('gateway_transaction_id', transaction_id)
-        .maybeSingle()
-
+      // Get customer info from the same transaction record  
       let originalCustomerInfo = null
       if (existingTransaction && existingTransaction.metadata?.customer_info) {
         originalCustomerInfo = existingTransaction.metadata.customer_info
@@ -194,10 +195,10 @@ export async function POST(request: NextRequest) {
       
       console.log('💾 ============= STEP 2: CREATING SUBSCRIPTION =============') 
       
-      // Create subscription using saved_token_id from successful 3DS transaction
+      // Create subscription using original token_id - this returns saved_token_id
       const subscription = await midtransService.createSubscription(transactionAmountUSD, {
         name: `${matchedPackage.name}_${billing_period}`.toUpperCase(),
-        token: savedTokenId,
+        token: originalTokenId,
         schedule: {
           interval: 1,
           interval_unit: billing_period === 'monthly' ? 'month' : 'month',
