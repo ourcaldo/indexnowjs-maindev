@@ -229,30 +229,20 @@ export default function CheckoutPage() {
     }
   }
 
-  // Handle 3DS authentication with proper modal management
+  // Handle 3DS authentication with iframe popup
   const handle3DSAuthentication = async (redirectUrl: string, transactionId: string, orderId: string) => {
-    // Ensure 3DS SDK is loaded before authentication
     try {
-      const { data: { session } } = await supabaseBrowser.auth.getSession()
-      const token = session?.access_token
-      if (!token) {
-        throw new Error('Authentication token required')
-      }
-
-      const config = await MidtransClientService.getMidtransConfig(token)
-      await MidtransClientService.load3DSSDK(config.client_key, config.environment)
-
       await paymentProcessor.handle3DSAuthentication(
         redirectUrl, 
         transactionId, 
         orderId,
         (url: string) => {
-          // Open modal with 3DS URL - this will be handled by MidtransNew3ds.authenticate()
+          // Modal opened by payment processor
           setThreeDSUrl(url)
           setShow3DSModal(true)
         },
         () => {
-          // Close modal
+          // Modal closed by payment processor
           setShow3DSModal(false)
           setThreeDSUrl('')
         }

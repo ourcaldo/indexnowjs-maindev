@@ -241,8 +241,8 @@ export function usePaymentProcessor({
   }
 
   /**
-   * Handle 3DS authentication with modal display
-   * Implements the proper Midtrans 3DS flow using MidtransNew3ds.authenticate()
+   * Handle 3DS authentication with iframe popup
+   * Simple implementation using exact Midtrans example
    */
   const handle3DSAuthentication = async (
     redirectUrl: string, 
@@ -252,34 +252,52 @@ export function usePaymentProcessor({
     onModalClose?: () => void
   ) => {
     try {
-      // Ensure 3DS SDK is loaded before authentication
       if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
-        // Get token for SDK loading
-        const { data: { session } } = await supabaseBrowser.auth.getSession()
-        const token = session?.access_token
-        if (!token) {
-          throw new Error('Authentication token required')
-        }
+        throw new Error('3DS authentication not available. Please refresh the page and try again.')
+      }
 
-        // Load 3DS SDK first
-        const config = await MidtransClientService.getMidtransConfig(token)
-        await MidtransClientService.load3DSSDK(config.client_key, config.environment)
-        
-        // Verify SDK is now loaded
-        if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
-          throw new Error('Payment system not ready. Please refresh the page and try again.')
+      // Simple popup modal implementation
+      let modal: any = null
+      const popupModal = {
+        openPopup: (url: string) => {
+          // Create iframe modal
+          const modalDiv = document.createElement('div')
+          modalDiv.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); z-index: 9999; display: flex; 
+            justify-content: center; align-items: center;
+          `
+          
+          const iframe = document.createElement('iframe')
+          iframe.src = url
+          iframe.style.cssText = `
+            width: 75%; height: 90vh; border: none; background: white; 
+            border-radius: 8px;
+          `
+          
+          modalDiv.appendChild(iframe)
+          document.body.appendChild(modalDiv)
+          modal = modalDiv
+          
+          onModalOpen?.(url)
+        },
+        closePopup: () => {
+          if (modal) {
+            document.body.removeChild(modal)
+            modal = null
+          }
+          onModalClose?.()
         }
       }
 
       const options = {
         performAuthentication: (url: string) => {
-          onModalOpen?.(url)
+          popupModal.openPopup(url)
         },
         onSuccess: async (response: any) => {
-          onModalClose?.()
+          popupModal.closePopup()
 
           try {
-            const user = await authService.getCurrentUser()
             const { data: { session } } = await supabaseBrowser.auth.getSession()
             const token = session?.access_token
 
@@ -310,7 +328,6 @@ export function usePaymentProcessor({
                 description: "Your subscription has been activated successfully.",
                 type: "success"
               })
-
               router.push('/dashboard/settings/plans-billing?payment=success')
             } else {
               throw new Error(callbackResult.message || '3DS authentication callback failed')
@@ -326,9 +343,8 @@ export function usePaymentProcessor({
           }
         },
         onFailure: (response: any) => {
-          onModalClose?.()
+          popupModal.closePopup()
           setSubmitting(false)
-
           addToast({
             title: "Payment authentication failed",
             description: "Please verify your card details and try again.",
@@ -336,9 +352,8 @@ export function usePaymentProcessor({
           })
         },
         onPending: (response: any) => {
-          onModalClose?.()
+          popupModal.closePopup()
           setSubmitting(false)
-
           addToast({
             title: "Payment pending",
             description: "Your payment is being processed. You will receive a confirmation email shortly.",
@@ -347,7 +362,7 @@ export function usePaymentProcessor({
         }
       }
 
-      // Trigger 3DS authentication using Midtrans JavaScript library
+      // Trigger 3DS authentication - exactly like your example
       window.MidtransNew3ds.authenticate(redirectUrl, options)
 
     } catch (error) {
