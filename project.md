@@ -704,6 +704,19 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 23, 2025: Snap Payment Pending Redirect Fix ✅
+- **Fixed Snap payment pending state redirect issue**
+  - **Root Issue**: When users select payment method in Snap popup then close it, payment shows "pending" status but doesn't redirect to billing page
+  - **Expected Behavior**: If user selects payment method inside Snap, closing popup should redirect to billing page (payment is processing)
+  - **Solution**: Added redirect functionality to Snap onPending callback with proper toast notification flow
+  - **Implementation**: 
+    - Modified hooks/usePaymentProcessor.ts line 189-191 to add redirect with 1.5s delay to `/dashboard/settings/plans-billing?payment=pending`
+    - Restored pending toast functionality in app/dashboard/settings/plans-billing/page.tsx line 207-212 for payment=pending URL parameter
+  - **Result**: Users now properly redirected to billing page when Snap payment is pending with appropriate notification
+- **Files Modified**:
+  - `hooks/usePaymentProcessor.ts`: Added redirect to billing page in onPending callback for Snap payments
+  - `app/dashboard/settings/plans-billing/page.tsx`: Restored pending toast for payment=pending URL parameter
+
 ### August 23, 2025: Duplicate Toast Notification Fix ✅
 - **Fixed duplicate payment success toast notifications in 3DS authentication flow**
   - **Root Issue**: After successful 3DS authentication, payment flow was showing 3 duplicate "Payment successful!" toasts (1 from usePaymentProcessor + 2 from billing page redirect)

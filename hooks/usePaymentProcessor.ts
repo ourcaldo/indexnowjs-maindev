@@ -176,14 +176,16 @@ export function usePaymentProcessor({
             }, 1500)
           },
           onPending: (snapResult) => {
-            // Only show toast - NO REDIRECT
+            // Payment is pending - redirect to billing page for user to track status
             addToast({
               title: "Payment pending",
               description: "Your payment is being processed. Please wait...",
               type: "info"
             })
             logPaymentActivity('payment_pending', paymentData, snapResult)
-            // DO NOT REDIRECT - stay on current page
+            setTimeout(() => {
+              router.push('/dashboard/settings/plans-billing?payment=pending')
+            }, 1500)
           },
           onError: (snapResult) => {
             // Only show toast and reset state - NO REDIRECT

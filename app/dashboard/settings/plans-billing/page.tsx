@@ -201,6 +201,7 @@ export default function BillingPage() {
           })
           break
         case 'pending':
+          // Show pending toast - this is expected for Snap payments when user closes popup after selecting payment method
           addToast({
             title: "Payment pending",
             description: "Your payment is being processed. You will receive confirmation shortly.",
