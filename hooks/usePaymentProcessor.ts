@@ -392,11 +392,7 @@ export function usePaymentProcessor({
             const callbackResult = await callbackResponse.json()
 
             if (callbackResult.success) {
-              addToast({
-                title: "Payment successful!",
-                description: "Your subscription has been activated successfully.",
-                type: "success"
-              })
+              // Don't show toast here - billing page will handle it via URL parameter
               router.push('/dashboard/settings/plans-billing?payment=success')
             } else {
               throw new Error(callbackResult.message || '3DS authentication callback failed')
