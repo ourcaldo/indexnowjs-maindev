@@ -76,7 +76,10 @@ export function usePaymentProcessor({
 
       if (result.success) {
         await handlePaymentSuccess(result, paymentData.payment_method, paymentData)
-        onSuccess?.(result)
+        // Only call onSuccess for non-SNAP payments (SNAP handles success via popup callbacks)
+        if (paymentData.payment_method !== 'midtrans_snap') {
+          onSuccess?.(result)
+        }
       } else {
         throw new Error(result.message || 'Payment failed')
       }
@@ -161,14 +164,16 @@ export function usePaymentProcessor({
         
         await MidtransClientService.showSnapPayment(token, {
           onSuccess: (snapResult) => {
-            // Only show toast - NO REDIRECT. Let webhook handle the final confirmation
+            // Payment successful - let webhook handle the final confirmation
             addToast({
-              title: "Payment received",
-              description: "Please wait while we confirm your payment...",
-              type: "info"
+              title: "Payment successful!",
+              description: "Your subscription has been activated successfully.",
+              type: "success"
             })
-            logPaymentActivity('payment_received', paymentData, snapResult)
-            // DO NOT REDIRECT - stay on current page
+            logPaymentActivity('payment_success', paymentData, snapResult)
+            setTimeout(() => {
+              router.push('/dashboard/settings/plans-billing?payment=success')
+            }, 1500)
           },
           onPending: (snapResult) => {
             // Only show toast - NO REDIRECT
