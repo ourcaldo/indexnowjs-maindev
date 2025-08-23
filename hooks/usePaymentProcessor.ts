@@ -76,8 +76,8 @@ export function usePaymentProcessor({
 
       if (result.success) {
         await handlePaymentSuccess(result, paymentData.payment_method, paymentData)
-        // Only call onSuccess for non-SNAP payments (SNAP handles success via popup callbacks)
-        if (paymentData.payment_method !== 'midtrans_snap') {
+        // Only call onSuccess for non-Midtrans payments (Midtrans handles success via popup/3DS callbacks)
+        if (paymentData.payment_method !== 'midtrans_snap' && paymentData.payment_method !== 'midtrans_recurring') {
           onSuccess?.(result)
         }
       } else {
