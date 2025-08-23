@@ -76,11 +76,7 @@ export function usePaymentProcessor({
 
       if (result.success) {
         await handlePaymentSuccess(result, paymentData.payment_method, paymentData)
-        // CRITICAL FIX: Only call onSuccess for non-SNAP payments
-        // SNAP payments are handled entirely within handlePaymentSuccess
-        if (paymentData.payment_method !== 'midtrans_snap') {
-          onSuccess?.(result)
-        }
+        onSuccess?.(result)
       } else {
         throw new Error(result.message || 'Payment failed')
       }
@@ -158,36 +154,34 @@ export function usePaymentProcessor({
   const handlePaymentSuccess = async (result: any, paymentMethod: string, paymentData: PaymentRequest) => {
     try {
       if (paymentMethod === 'midtrans_snap') {
-        // Handle Snap popup - DO NOT call onSuccess callback until payment is actually completed
+        // Handle Snap popup
         const { token, client_key, environment } = result.data
         
         await MidtransClientService.loadSnapSDK(client_key, environment)
         
         await MidtransClientService.showSnapPayment(token, {
           onSuccess: (snapResult) => {
-            // CRITICAL FIX: Only show toast - DO NOT call checkout page onSuccess callback
-            // Let webhook handle the final confirmation and redirect
+            // Only show toast - NO REDIRECT. Let webhook handle the final confirmation
             addToast({
               title: "Payment received",
               description: "Please wait while we confirm your payment...",
               type: "info"
             })
             logPaymentActivity('payment_received', paymentData, snapResult)
-            setSubmitting(false)
-            // DO NOT CALL: onSuccess?.(result) - this was causing premature success
+            // DO NOT REDIRECT - stay on current page
           },
           onPending: (snapResult) => {
-            // Only show toast - DO NOT call checkout page onSuccess callback
+            // Only show toast - NO REDIRECT
             addToast({
               title: "Payment pending",
               description: "Your payment is being processed. Please wait...",
               type: "info"
             })
             logPaymentActivity('payment_pending', paymentData, snapResult)
-            setSubmitting(false)
+            // DO NOT REDIRECT - stay on current page
           },
           onError: (snapResult) => {
-            // Only show toast and reset state - DO NOT call checkout page onSuccess callback
+            // Only show toast and reset state - NO REDIRECT
             addToast({
               title: "Payment failed",
               description: "There was an error processing your payment. Please try again.",
@@ -197,7 +191,7 @@ export function usePaymentProcessor({
             setSubmitting(false)
           },
           onClose: () => {
-            // Only show toast and reset state - DO NOT call checkout page onSuccess callback
+            // Only show toast and reset state - NO REDIRECT
             addToast({
               title: "Payment cancelled",
               description: "You cancelled the payment process.",
@@ -207,10 +201,6 @@ export function usePaymentProcessor({
             setSubmitting(false)
           }
         })
-        
-        // CRITICAL FIX: Do NOT call onSuccess for SNAP payments here
-        // SNAP payments complete via webhook, not via frontend success
-        return // Exit early without calling onSuccess
       } else if (paymentMethod === 'midtrans_recurring') {
         // Handle 3DS authentication if required - check for requires_redirect from backend
         if (result.requires_redirect && result.redirect_url) {
