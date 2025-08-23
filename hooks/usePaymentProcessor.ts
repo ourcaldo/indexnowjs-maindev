@@ -161,18 +161,20 @@ export function usePaymentProcessor({
         
         await MidtransClientService.showSnapPayment(token, {
           onSuccess: (snapResult) => {
+            // Don't show final success yet - wait for webhook confirmation
             addToast({
-              title: "Payment successful!",
-              description: "Your subscription has been activated.",
-              type: "success"
+              title: "Payment received",
+              description: "Processing your payment confirmation. Please wait...",
+              type: "info"
             })
-            logPaymentActivity('payment_success', paymentData, snapResult)
-            router.push('/dashboard/settings/plans-billing?payment=success')
+            logPaymentActivity('payment_received', paymentData, snapResult)
+            // Stay on current page or redirect to pending status page
+            router.push('/dashboard/settings/plans-billing?payment=processing')
           },
           onPending: (snapResult) => {
             addToast({
               title: "Payment pending",
-              description: "Your payment is being processed.",
+              description: "Your payment is being processed. You will receive confirmation shortly.",
               type: "info"
             })
             logPaymentActivity('payment_pending', paymentData, snapResult)
@@ -181,10 +183,11 @@ export function usePaymentProcessor({
           onError: (snapResult) => {
             addToast({
               title: "Payment failed",
-              description: "There was an error processing your payment.",
+              description: "There was an error processing your payment. Please try again.",
               type: "error"
             })
             logPaymentActivity('payment_error', paymentData, snapResult)
+            setSubmitting(false)
           },
           onClose: () => {
             addToast({
@@ -193,6 +196,7 @@ export function usePaymentProcessor({
               type: "info"
             })
             logPaymentActivity('payment_cancelled', paymentData)
+            setSubmitting(false)
           }
         })
       } else if (paymentMethod === 'midtrans_recurring') {

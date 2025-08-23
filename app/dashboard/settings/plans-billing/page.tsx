@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   CreditCard, 
   Calendar, 
@@ -27,6 +28,7 @@ import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
+import { useToast } from '@/hooks/use-toast'
 
 interface CurrencyPricing {
   regular_price: number
@@ -152,6 +154,8 @@ export default function BillingPage() {
   // Log page view and billing activities
   usePageViewLogger('/dashboard/settings/plans-billing', 'Billing & Subscriptions', { section: 'billing_management' })
   const { logBillingActivity } = useActivityLogger()
+  const { addToast } = useToast()
+  const router = useRouter()
   const [historyData, setHistoryData] = useState<BillingHistoryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -173,6 +177,49 @@ export default function BillingPage() {
 
   useEffect(() => {
     loadAllData()
+    
+    // Check for payment status in URL parameters
+    const urlParams = new URLSearchParams(window.location.search)
+    const paymentStatus = urlParams.get('payment')
+    
+    if (paymentStatus) {
+      // Clear the URL parameter
+      const url = new URL(window.location.href)
+      url.searchParams.delete('payment')
+      router.replace(url.pathname, { scroll: false })
+      
+      // Show appropriate notification based on status
+      switch (paymentStatus) {
+        case 'success':
+          addToast({
+            title: "Payment successful!",
+            description: "Your subscription has been activated successfully.",
+            type: "success"
+          })
+          break
+        case 'processing':
+          addToast({
+            title: "Payment received",
+            description: "Your payment is being processed. You will receive confirmation shortly.",
+            type: "info"
+          })
+          break
+        case 'pending':
+          addToast({
+            title: "Payment pending",
+            description: "Your payment is being processed. You will receive confirmation shortly.",
+            type: "info"
+          })
+          break
+        case 'failed':
+          addToast({
+            title: "Payment failed",
+            description: "There was an issue processing your payment. Please try again.",
+            type: "error"
+          })
+          break
+      }
+    }
   }, [])
 
   useEffect(() => {
