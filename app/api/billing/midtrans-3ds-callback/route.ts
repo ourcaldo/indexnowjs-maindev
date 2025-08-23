@@ -69,27 +69,12 @@ export async function POST(request: NextRequest) {
     if (transactionStatus.transaction_status === 'capture' || transactionStatus.transaction_status === 'settlement') {
       console.log('✅ 3DS Authentication successful, continuing with subscription creation')
       
-      // Get the original token_id from the pending transaction record
-      let existingTransaction = null;
-      
-      // First try by gateway_transaction_id
-      const { data: txById } = await supabase
+      // Get transaction record for token_id
+      const { data: existingTransaction } = await supabase
         .from('indb_payment_transactions')
         .select('*')
         .eq('gateway_transaction_id', transaction_id)
         .maybeSingle()
-        
-      if (txById) {
-        existingTransaction = txById;
-      } else {
-        // Try by payment_reference (order_id)
-        const { data: txByOrder } = await supabase
-          .from('indb_payment_transactions')
-          .select('*')
-          .eq('payment_reference', order_id)
-          .maybeSingle()
-        existingTransaction = txByOrder;
-      }
 
       if (!existingTransaction || !existingTransaction.metadata?.token_id) {
         throw new Error('No original token_id found in transaction record for subscription creation')
@@ -121,15 +106,6 @@ export async function POST(request: NextRequest) {
       let originalCustomerInfo = null
       if (existingTransaction && existingTransaction.metadata?.customer_info) {
         originalCustomerInfo = existingTransaction.metadata.customer_info
-        console.log('✅ Found original customer info from database:', {
-          first_name: originalCustomerInfo.first_name,
-          last_name: originalCustomerInfo.last_name,
-          email: originalCustomerInfo.email,
-          phone: originalCustomerInfo.phone
-        })
-      } else {
-        console.log('⚠️ No customer info in existing transaction')
-        console.log('⚠️ Will use Midtrans details as fallback')
       }
       
       // Get transaction details from Midtrans

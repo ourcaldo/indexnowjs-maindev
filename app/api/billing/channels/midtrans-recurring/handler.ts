@@ -26,11 +26,30 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     // Generate order ID
     const orderId = `ORDER-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
 
-    // Create transaction record BEFORE payment processing
-    await this.createPendingTransaction(orderId, this.gateway.id, {
-      payment_gateway_type: 'midtrans_recurring',
-      token_id: this.tokenId
-    })
+    // Create transaction record BEFORE payment processing with token_id
+    const { error: dbError } = await supabaseAdmin
+      .from('indb_payment_transactions')
+      .insert({
+        user_id: this.paymentData.user.id,
+        package_id: this.paymentData.package_id,
+        gateway_id: this.gateway.id,
+        transaction_type: 'payment',
+        transaction_status: 'pending',
+        amount: this.calculateAmount().finalAmount,
+        currency: this.calculateAmount().currency,
+        payment_method: 'midtrans_recurring',
+        payment_reference: orderId,
+        billing_period: this.paymentData.billing_period,
+        metadata: {
+          token_id: this.tokenId,
+          customer_info: this.paymentData.customer_info,
+          payment_gateway_type: 'midtrans_recurring'
+        }
+      })
+
+    if (dbError) {
+      throw new Error('Failed to create transaction record')
+    }
 
     // Initialize Midtrans service
     this.midtransService = createMidtransService({

@@ -704,6 +704,13 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 23, 2025: 3DS Callback Token_ID Fix ✅
+- **Fixed 3DS callback subscription creation issue**
+  - Resolved token_id not found error in subscription creation after successful 3DS authentication
+  - Updated transaction record creation to properly preserve token_id in metadata during 3DS flow
+  - Fixed token_id lookup logic in 3DS callback to use original token_id for subscription creation
+  - Corrected subscription flow: original token_id → 3DS auth → subscription creation → saved_token_id return
+
 ### January 22, 2025: Critical Payment System Tokenization Fix ✅
 
 **✅ CRITICAL: Midtrans Tokenization Bug Fix for Refactored Payment Services**:
