@@ -188,14 +188,10 @@ export default function BillingPage() {
       url.searchParams.delete('payment')
       router.replace(url.pathname, { scroll: false })
       
-      // Show appropriate notification based on status
+      // Show appropriate notification based on status (success notifications removed to prevent duplicates)
       switch (paymentStatus) {
         case 'success':
-          addToast({
-            title: "Payment successful!",
-            description: "Your subscription has been activated successfully.",
-            type: "success"
-          })
+          // No toast for success - user already received confirmation during payment flow
           break
         case 'processing':
           addToast({
