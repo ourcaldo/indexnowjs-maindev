@@ -43,7 +43,13 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         metadata: {
           token_id: this.tokenId,
           customer_info: this.paymentData.customer_info,
-          payment_gateway_type: 'midtrans_recurring'
+          payment_gateway_type: 'midtrans_recurring',
+          package_details: {
+            id: this.paymentData.package_id,
+            name: this.packageData?.name || 'Package',
+            price: this.calculateAmount().finalAmount
+          },
+          billing_period: this.paymentData.billing_period
         }
       })
 
@@ -110,8 +116,15 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
           gateway_response: chargeTransaction,
           metadata: {
             ...currentTransaction?.metadata,
-            ...this.getTransactionMetadata(),
             token_id: this.tokenId,
+            customer_info: this.paymentData.customer_info,
+            package_details: {
+              id: this.packageData.id,
+              name: this.packageData.name,
+              price: this.calculateAmount().finalAmount
+            },
+            billing_period: this.paymentData.billing_period,
+            processing_method: 'recurring',
             requires_3ds: true
           }
         })
