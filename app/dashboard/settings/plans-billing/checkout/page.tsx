@@ -154,7 +154,7 @@ export default function CheckoutPage() {
     }
   })
 
-  // Handle credit card form submission for Midtrans
+  // Handle credit card form submission for Midtrans - simplified to use payment processor directly
   const handleCreditCardSubmit = async (cardData: any) => {
     if (!selectedPackage) {
       addToast({
@@ -187,7 +187,12 @@ export default function CheckoutPage() {
     const { data: { session } } = await supabaseBrowser.auth.getSession()
     const token = session?.access_token
     if (!token) {
-      throw new Error('Authentication required')
+      addToast({
+        title: "Authentication required",
+        description: "Please log in again to continue.",
+        type: "error"
+      })
+      return
     }
 
     // Map form fields to expected tokenization format
@@ -200,61 +205,41 @@ export default function CheckoutPage() {
 
     try {
       await paymentProcessor.processCreditCardPayment(paymentRequest, mappedCardData, token)
-      
-      // Check if 3DS authentication is required from the payment processor state
-      // This would be handled by updating the payment processor to return 3DS requirements
     } catch (error) {
-      // Handle any errors not caught by the payment processor
-      // Credit card payment error handled internally
-      
-      // Check if this is a 3DS requirement
+      // Handle 3DS authentication requirements
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
         const threeDSError = error as any
         if (threeDSError.requires_3ds && threeDSError.redirect_url) {
-          // Handle 3DS authentication
-          handle3DSAuthentication(
-            threeDSError.redirect_url, 
-            threeDSError.transaction_id, 
-            threeDSError.order_id
-          )
+          // Handle 3DS authentication with UI state management
+          try {
+            await paymentProcessor.handle3DSAuthentication(
+              threeDSError.redirect_url,
+              threeDSError.transaction_id,
+              threeDSError.order_id,
+              (url: string) => {
+                setThreeDSUrl(url)
+                setShow3DSModal(true)
+              },
+              () => {
+                setShow3DSModal(false)
+                setThreeDSUrl('')
+              }
+            )
+          } catch (authError) {
+            addToast({
+              title: "Authentication failed",
+              description: "Unable to initialize payment authentication. Please try again.",
+              type: "error"
+            })
+          }
           return // Don't show error toast for 3DS requirement
         }
       }
 
-      addToast({
-        title: "Payment failed",
-        description: error instanceof Error ? error.message : "Please try again later.",
-        type: "error"
-      })
+      // Other errors are handled by the payment processor hook
     }
   }
 
-  // Handle 3DS authentication with iframe popup
-  const handle3DSAuthentication = async (redirectUrl: string, transactionId: string, orderId: string) => {
-    try {
-      await paymentProcessor.handle3DSAuthentication(
-        redirectUrl, 
-        transactionId, 
-        orderId,
-        (url: string) => {
-          // Modal opened by payment processor
-          setThreeDSUrl(url)
-          setShow3DSModal(true)
-        },
-        () => {
-          // Modal closed by payment processor
-          setShow3DSModal(false)
-          setThreeDSUrl('')
-        }
-      )
-    } catch (error) {
-      addToast({
-        title: "Authentication failed",
-        description: "Unable to initialize payment authentication. Please try again.",
-        type: "error"
-      })
-    }
-  }
 
   // Fetch package and payment gateway data
   useEffect(() => {
@@ -446,26 +431,15 @@ export default function CheckoutPage() {
       // Check if selected payment method is Midtrans
       const selectedGateway = paymentGateways.find(gw => gw.id === form.payment_method)
 
-      // Call unified payment API that routes based on payment method
-      await handleUnifiedPayment(token, selectedGateway)
-
-    } catch (error) {
-      addToast({
-        title: "Checkout failed",
-        description: error instanceof Error ? error.message : "Please try again later.",
-        type: "error"
-      })
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const handleUnifiedPayment = async (token: string, selectedGateway: any) => {
-    try {
-      if (!selectedPackage) return
-
-      // Initialize PaymentRouter with auth token
-      const paymentRouter = new PaymentRouter(token)
+      // Process payment using unified payment processor
+      if (!selectedPackage) {
+        addToast({
+          title: "Package not found",
+          description: "Please select a package to continue.",
+          type: "error"
+        })
+        return
+      }
 
       const paymentRequest = {
         package_id: selectedPackage.id,
@@ -485,7 +459,7 @@ export default function CheckoutPage() {
         }
       }
 
-      // For Midtrans recurring, delegate to credit card form
+      // For Midtrans recurring (credit card), delegate to credit card form
       if (selectedGateway?.slug === 'midtrans' || selectedGateway?.slug === 'midtrans_recurring') {
         if (!window.midtransSubmitCard) {
           addToast({
@@ -493,87 +467,26 @@ export default function CheckoutPage() {
             description: "Please wait a moment and try again.",
             type: "error"
           })
-          setSubmitting(false)
           return
         }
         await window.midtransSubmitCard()
         return
       }
 
-      // For Snap payments, use MidtransClientService
-      if (selectedGateway?.slug === 'midtrans_snap') {
-        const result = await paymentRouter.processPayment(paymentRequest)
-        
-        if (result.success && result.data?.token) {
-          const snapCallbacks = {
-            onSuccess: (result: any) => {
-              addToast({
-                title: "Payment successful!",
-                description: "Your subscription has been activated successfully.",
-                type: "success"
-              })
-              setTimeout(() => {
-                router.push('/dashboard/settings/plans-billing?payment=success')
-              }, 1500)
-            },
-            onPending: (result: any) => {
-              addToast({
-                title: "Payment pending",
-                description: "Your payment is being processed. You will receive a confirmation email shortly.",
-                type: "info"
-              })
-              setTimeout(() => {
-                router.push('/dashboard/settings/plans-billing?payment=pending')
-              }, 1500)
-            },
-            onError: (result: any) => {
-              addToast({
-                title: "Payment failed",
-                description: "There was an error processing your payment. Please try again.",
-                type: "error"
-              })
-              setSubmitting(false)
-            },
-            onClose: () => {
-              addToast({
-                title: "Payment cancelled",
-                description: "You cancelled the payment process.",
-                type: "info"
-              })
-              setSubmitting(false)
-            }
-          }
-          
-          await MidtransClientService.showSnapPayment(result.data.token, snapCallbacks)
-        } else {
-          throw new Error(result.message || 'Failed to create Snap payment')
-        }
-      } else {
-        // Handle regular payments (bank transfer, etc.) using PaymentRouter
-        const result = await paymentRouter.processPayment(paymentRequest)
-        
-        if (result.success) {
-          addToast({
-            title: "Order submitted successfully!",
-            description: "Redirecting to order details...",
-            type: "success"
-          })
+      // For all other payment methods (Snap, Bank Transfer, etc.), use payment processor
+      await paymentProcessor.processPayment(paymentRequest, token)
 
-          setTimeout(() => {
-            if (result.data?.redirect_url) {
-              window.location.href = result.data.redirect_url
-            } else {
-              router.push('/dashboard/settings/plans-billing')
-            }
-          }, 1500)
-        } else {
-          throw new Error(result.message || 'Payment processing failed')
-        }
-      }
     } catch (error) {
-      throw error
+      addToast({
+        title: "Checkout failed",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        type: "error"
+      })
+    } finally {
+      setSubmitting(false)
     }
   }
+
 
 
   if (loading) {
