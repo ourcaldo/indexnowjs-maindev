@@ -47,12 +47,10 @@ export class MidtransClientService {
       script.async = true
       
       script.onload = () => {
-        console.log('✅ Snap SDK loaded successfully')
         resolve()
       }
       
       script.onerror = () => {
-        console.error('❌ Failed to load Snap SDK')
         reject(new Error('Failed to load Midtrans Snap SDK'))
       }
       
@@ -67,18 +65,13 @@ export class MidtransClientService {
    */
   static async load3DSSDK(clientKey: string, environment: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      console.log('🔄 Loading Midtrans 3DS SDK with config:', { clientKey: clientKey.substring(0, 10) + '...', environment })
-      
       // Check if script already exists and remove it to ensure clean reload
       const existingScript = document.querySelector('script[src*="midtrans-new-3ds"]') || document.querySelector('#midtrans-script')
       if (existingScript) {
-        console.log('🗑️ Removing existing Midtrans script to ensure clean reload')
         existingScript.remove()
         // Clean up the global object
         delete (window as any).MidtransNew3ds
       }
-
-      console.log('📥 Creating new Midtrans SDK script element...')
       const script = document.createElement('script')
       script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
       script.async = true  // Use async like the original implementation
@@ -87,21 +80,17 @@ export class MidtransClientService {
       script.setAttribute('id', 'midtrans-script')  // Use same ID as original
 
       script.onload = () => {
-        console.log('✅ Midtrans SDK loaded successfully')
         // Wait a bit for the SDK to initialize, then verify it's working
         setTimeout(() => {
           if (window.MidtransNew3ds && typeof window.MidtransNew3ds.getCardToken === 'function') {
-            console.log('✅ Midtrans SDK initialized and ready')
             resolve()
           } else {
-            console.error('❌ Midtrans SDK loaded but getCardToken not available')
             reject(new Error('Midtrans SDK not properly initialized'))
           }
         }, 100)
       }
 
       script.onerror = (error) => {
-        console.error('❌ Failed to load Midtrans SDK:', error)
         reject(new Error('Failed to load Midtrans 3DS SDK'))
       }
 
@@ -120,7 +109,6 @@ export class MidtransClientService {
     try {
       window.snap.pay(token, callbacks)
     } catch (error) {
-      console.error('Snap payment error:', error)
       throw new Error('Failed to display Snap payment popup')
     }
   }
@@ -138,7 +126,6 @@ export class MidtransClientService {
       const timeout = setTimeout(() => {
         if (!isResolved) {
           isResolved = true
-          console.error('❌ Card tokenization timeout')
           reject(new Error('Card tokenization timeout. Please try again.'))
         }
       }, 15000)
@@ -149,7 +136,7 @@ export class MidtransClientService {
         return
       }
 
-      console.log('getCardToken function available:', typeof window.MidtransNew3ds.getCardToken === 'function')
+      // Check if getCardToken function is available
 
       // Wait for Midtrans SDK to be ready with timeout - exactly like original
       let retryCount = 0
@@ -171,7 +158,6 @@ export class MidtransClientService {
         }
 
         // SDK is ready, proceed with tokenization
-        console.log('🔄 Setting up JSONP callback override...')
         
         // Store original callback and override it temporarily - exactly like original
         const originalCallback = (window as any).MidtransNew3ds.callback
@@ -201,12 +187,7 @@ export class MidtransClientService {
             card_cvv: cardData.card_cvv,
           }
 
-          console.log('🚀 Calling Midtrans getCardToken with data:', {
-            card_number: '****' + formattedCardData.card_number.slice(-4),
-            card_exp_month: formattedCardData.card_exp_month,
-            card_exp_year: formattedCardData.card_exp_year,
-            has_cvv: !!formattedCardData.card_cvv
-          })
+          // Calling Midtrans getCardToken
 
           // Call getCardToken exactly like the original - with empty callback function
           window.MidtransNew3ds.getCardToken(formattedCardData, function() {
@@ -214,7 +195,6 @@ export class MidtransClientService {
           })
 
         } catch (error) {
-          console.error('💥 Error in tokenization try block:', error)
           clearTimeout(timeout)
           if (!isResolved) {
             isResolved = true
@@ -254,20 +234,16 @@ export class MidtransClientService {
             }, 1000)
           },
           onSuccess: (response: any) => {
-            console.log('3DS authentication successful', response)
             resolve()
           },
           onPending: (response: any) => {
-            console.log('3DS authentication pending', response)
             // Handle pending state if needed
           },
           onFailure: (response: any) => {
-            console.error('3DS authentication failed:', response)
             reject(new Error('3DS authentication failed'))
           }
         })
       } catch (error) {
-        console.error('3DS authentication error:', error)
         reject(new Error('Failed to handle 3DS authentication'))
       }
     })
@@ -297,7 +273,6 @@ export class MidtransClientService {
 
       return data.data
     } catch (error) {
-      console.error('Error getting Midtrans config:', error)
       throw error
     }
   }

@@ -252,8 +252,23 @@ export function usePaymentProcessor({
     onModalClose?: () => void
   ) => {
     try {
+      // Ensure 3DS SDK is loaded before authentication
       if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
-        throw new Error('3DS authentication not available. Please refresh the page and try again.')
+        // Get token for SDK loading
+        const { data: { session } } = await supabaseBrowser.auth.getSession()
+        const token = session?.access_token
+        if (!token) {
+          throw new Error('Authentication token required')
+        }
+
+        // Load 3DS SDK first
+        const config = await MidtransClientService.getMidtransConfig(token)
+        await MidtransClientService.load3DSSDK(config.client_key, config.environment)
+        
+        // Verify SDK is now loaded
+        if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
+          throw new Error('Payment system not ready. Please refresh the page and try again.')
+        }
       }
 
       const options = {
