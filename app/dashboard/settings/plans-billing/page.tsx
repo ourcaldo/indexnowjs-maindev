@@ -188,32 +188,15 @@ export default function BillingPage() {
       url.searchParams.delete('payment')
       router.replace(url.pathname, { scroll: false })
       
-      // Show appropriate notification based on status (success notifications removed to prevent duplicates)
+      // No toast notifications on billing page - users already see notifications during payment flow
+      // Just clean up the URL parameter without showing any toasts to prevent duplicates
       switch (paymentStatus) {
         case 'success':
-          // No toast for success - user already received confirmation during payment flow
-          break
         case 'processing':
-          addToast({
-            title: "Payment received",
-            description: "Your payment is being processed. You will receive confirmation shortly.",
-            type: "info"
-          })
-          break
         case 'pending':
-          // Show pending toast - this is expected for Snap payments when user closes popup after selecting payment method
-          addToast({
-            title: "Payment pending",
-            description: "Your payment is being processed. You will receive confirmation shortly.",
-            type: "info"
-          })
-          break
         case 'failed':
-          addToast({
-            title: "Payment failed",
-            description: "There was an issue processing your payment. Please try again.",
-            type: "error"
-          })
+          // All payment status notifications are handled during the payment flow
+          // No additional toasts needed on billing page redirect
           break
       }
     }

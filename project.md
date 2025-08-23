@@ -704,18 +704,18 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
-### August 23, 2025: Snap Payment Pending Redirect Fix ✅
-- **Fixed Snap payment pending state redirect issue**
-  - **Root Issue**: When users select payment method in Snap popup then close it, payment shows "pending" status but doesn't redirect to billing page
-  - **Expected Behavior**: If user selects payment method inside Snap, closing popup should redirect to billing page (payment is processing)
-  - **Solution**: Added redirect functionality to Snap onPending callback with proper toast notification flow
+### August 23, 2025: Complete Payment Toast Notification Fix ✅
+- **Fixed all duplicate payment toast notifications for both Snap and recurring payments**
+  - **Root Issue**: All payment statuses (success, pending, failed) were showing duplicate toasts on billing page redirect
+  - **Problem Analysis**: Payment flow showed toasts during processing, then billing page showed additional toasts when detecting URL parameters
+  - **Solution**: Completely removed all toast notifications from billing page URL parameter handling while maintaining redirect functionality
   - **Implementation**: 
-    - Modified hooks/usePaymentProcessor.ts line 189-191 to add redirect with 1.5s delay to `/dashboard/settings/plans-billing?payment=pending`
-    - Restored pending toast functionality in app/dashboard/settings/plans-billing/page.tsx line 207-212 for payment=pending URL parameter
-  - **Result**: Users now properly redirected to billing page when Snap payment is pending with appropriate notification
+    - Modified hooks/usePaymentProcessor.ts line 189-191 to add redirect with 1.5s delay to `/dashboard/settings/plans-billing?payment=pending` for Snap pending payments
+    - Completely removed all toast notifications in app/dashboard/settings/plans-billing/page.tsx lines 194-204 for all payment statuses (success, pending, failed, processing)
+  - **Result**: Clean payment completion flow - users see notifications only during payment process, no duplicates on billing page
 - **Files Modified**:
   - `hooks/usePaymentProcessor.ts`: Added redirect to billing page in onPending callback for Snap payments
-  - `app/dashboard/settings/plans-billing/page.tsx`: Restored pending toast for payment=pending URL parameter
+  - `app/dashboard/settings/plans-billing/page.tsx`: Removed all payment status toast notifications from URL parameter handling
 
 ### August 23, 2025: Duplicate Toast Notification Fix ✅
 - **Fixed duplicate payment success toast notifications in 3DS authentication flow**
