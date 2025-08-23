@@ -69,11 +69,19 @@ export async function POST(request: NextRequest) {
     if (transactionStatus.transaction_status === 'capture' || transactionStatus.transaction_status === 'settlement') {
       console.log('✅ 3DS Authentication successful, continuing with subscription creation')
       
-      // Continue with subscription creation using saved_token_id
-      const savedTokenId = transactionStatus.saved_token_id
-      if (!savedTokenId) {
-        throw new Error('No saved token ID found after successful 3DS authentication')
+      // Get the original token_id from the pending transaction record
+      const { data: existingTransaction, error: existingTransactionError } = await supabase
+        .from('indb_payment_transactions')
+        .select('*')
+        .eq('gateway_transaction_id', transaction_id)
+        .single()
+
+      if (!existingTransaction || !existingTransaction.metadata?.token_id) {
+        throw new Error('No original token_id found in transaction record for subscription creation')
       }
+
+      const originalTokenId = existingTransaction.metadata.token_id
+      console.log('🔑 Using original token_id for subscription creation:', originalTokenId.substring(0, 20) + '...')
 
       // Get authentication token from the request
       const authHeader = request.headers.get('authorization')
@@ -96,14 +104,6 @@ export async function POST(request: NextRequest) {
 
       console.log('💾 ============= STEP 1: CREATING SUBSCRIPTION AFTER 3DS =============')
       
-      // Get the original transaction record from our database (contains real customer info from checkout form)
-      console.log('🔍 Getting original transaction record from database...')
-      const { data: existingTransaction, error: existingTransactionError } = await supabase
-        .from('indb_payment_transactions')
-        .select('*')
-        .eq('gateway_transaction_id', transaction_id)
-        .single()
-
       let originalCustomerInfo = null
       if (existingTransaction && existingTransaction.metadata?.customer_info) {
         originalCustomerInfo = existingTransaction.metadata.customer_info
@@ -114,14 +114,7 @@ export async function POST(request: NextRequest) {
           phone: originalCustomerInfo.phone
         })
       } else {
-        console.log('⚠️ No existing transaction record found')
-        console.log('🔍 Debug info:', {
-          existingTransaction: !!existingTransaction,
-          existingTransactionError: existingTransactionError?.message,
-          hasMetadata: !!existingTransaction?.metadata,
-          hasCustomerInfo: !!existingTransaction?.metadata?.customer_info,
-          transaction_id: transaction_id
-        })
+        console.log('⚠️ No customer info in existing transaction')
         console.log('⚠️ Will use Midtrans details as fallback')
       }
       
@@ -211,10 +204,10 @@ export async function POST(request: NextRequest) {
       
       console.log('💾 ============= STEP 2: CREATING SUBSCRIPTION =============') 
       
-      // Create subscription using Midtrans service
+      // Create subscription using original token_id (this will return saved_token_id)
       const subscription = await midtransService.createSubscription(transactionAmountUSD, {
         name: `${matchedPackage.name}_${billing_period}`.toUpperCase(),
-        token: savedTokenId,
+        token: originalTokenId,
         schedule: {
           interval: 1,
           interval_unit: billing_period === 'monthly' ? 'month' : 'month',
@@ -239,8 +232,15 @@ export async function POST(request: NextRequest) {
       console.log('✅ Subscription created successfully!', {
         subscription_id: subscription.id,
         name: subscription.name,
-        status: subscription.status
+        status: subscription.status,
+        saved_token_id: subscription.token?.substring(0, 20) + '...'
       })
+
+      // Extract saved_token_id from subscription response
+      const savedTokenId = subscription.token
+      if (!savedTokenId) {
+        throw new Error('No saved_token_id returned from subscription creation')
+      }
       
       console.log('💾 ============= STEP 3: SAVING TO DATABASE TABLES =============') 
       
