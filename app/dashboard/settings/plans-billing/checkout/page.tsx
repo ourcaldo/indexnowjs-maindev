@@ -205,7 +205,7 @@ export default function CheckoutPage() {
       // This would be handled by updating the payment processor to return 3DS requirements
     } catch (error) {
       // Handle any errors not caught by the payment processor
-      console.error('Credit card payment error:', error)
+      // Credit card payment error handled internally
       
       // Check if this is a 3DS requirement
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
@@ -304,11 +304,7 @@ export default function CheckoutPage() {
         const detectedCurrency = getUserCurrency((user as any).country)
         setUserCurrency(detectedCurrency)
         
-        console.log('🌏 Frontend currency detection:', {
-          user_profile_country: (user as any).country,
-          detected_currency: detectedCurrency,
-          form_country_before: form.country
-        })
+        // Frontend currency detection completed
 
         const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
         if (!token) {
@@ -351,7 +347,7 @@ export default function CheckoutPage() {
         }
 
       } catch (error) {
-        console.error('Error fetching checkout data:', error)
+        // Error fetching checkout data handled
         addToast({
           title: "Error",
           description: "Failed to load checkout information.",
@@ -389,7 +385,7 @@ export default function CheckoutPage() {
         }
       } catch (error) {
         // SDK loading failures are handled silently
-        console.warn('Failed to load Midtrans SDKs:', error)
+        // Failed to load Midtrans SDKs - handled silently
       }
     }
 

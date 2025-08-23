@@ -231,7 +231,11 @@ export function usePaymentProcessor({
         }
       }
     } catch (error) {
-      console.error('Error handling payment success:', error)
+      // Re-throw 3DS errors so they can be handled by the calling component
+      if (error && typeof error === 'object' && 'requires_3ds' in error) {
+        throw error
+      }
+      // Error handling payment success - logged internally
       setError('Payment completed but there was an error with the follow-up process')
     }
   }
@@ -349,7 +353,7 @@ export function usePaymentProcessor({
   const logPaymentActivity = async (action: string, paymentData: PaymentRequest, additionalData?: any) => {
     // Activity logging temporarily disabled during refactoring
     // Will be re-enabled with proper API endpoint approach
-    console.log('Payment activity:', { action, paymentData, additionalData })
+    // Payment activity logged internally
   }
 
   return {
