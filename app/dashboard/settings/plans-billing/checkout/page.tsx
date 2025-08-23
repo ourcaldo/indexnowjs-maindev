@@ -231,21 +231,42 @@ export default function CheckoutPage() {
 
   // Handle 3DS authentication with proper modal management
   const handle3DSAuthentication = async (redirectUrl: string, transactionId: string, orderId: string) => {
-    await paymentProcessor.handle3DSAuthentication(
-      redirectUrl, 
-      transactionId, 
-      orderId,
-      (url: string) => {
-        // Open modal with 3DS URL
-        setThreeDSUrl(url)
-        setShow3DSModal(true)
-      },
-      () => {
-        // Close modal
-        setShow3DSModal(false)
-        setThreeDSUrl('')
+    console.log('🔐 [Checkout] Initiating 3DS authentication process')
+    
+    // Ensure 3DS SDK is loaded before authentication
+    try {
+      const { data: { session } } = await supabaseBrowser.auth.getSession()
+      const token = session?.access_token
+      if (!token) {
+        throw new Error('Authentication token required')
       }
-    )
+
+      const config = await MidtransClientService.getMidtransConfig(token)
+      await MidtransClientService.load3DSSDK(config.client_key, config.environment)
+
+      await paymentProcessor.handle3DSAuthentication(
+        redirectUrl, 
+        transactionId, 
+        orderId,
+        (url: string) => {
+          // Open modal with 3DS URL - this will be handled by MidtransNew3ds.authenticate()
+          setThreeDSUrl(url)
+          setShow3DSModal(true)
+        },
+        () => {
+          // Close modal
+          setShow3DSModal(false)
+          setThreeDSUrl('')
+        }
+      )
+    } catch (error) {
+      console.error('❌ [Checkout] 3DS authentication setup failed:', error)
+      addToast({
+        title: "Authentication failed",
+        description: "Unable to initialize payment authentication. Please try again.",
+        type: "error"
+      })
+    }
   }
 
   // Fetch package and payment gateway data
@@ -951,21 +972,52 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* 3DS Authentication Modal */}
+      {/* 3DS Authentication Modal - Uses Midtrans JavaScript Library */}
       {show3DSModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-[#1A1A1A]">Card Authentication</h3>
-              <p className="text-sm text-[#6C757D]">Please complete the authentication process to continue.</p>
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-[#1A1A1A]">Card Authentication</h3>
+                <p className="text-sm text-[#6C757D]">Please complete the 3D Secure authentication to continue with your payment.</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShow3DSModal(false)
+                  setThreeDSUrl('')
+                }}
+                className="ml-4"
+              >
+                Cancel
+              </Button>
             </div>
-            <div className="relative">
-              <iframe
-                src={threeDSUrl}
-                className="w-full h-[70vh]"
-                frameBorder="0"
-                title="3DS Authentication"
-              />
+            <div className="relative p-4">
+              {threeDSUrl ? (
+                <div id="3ds-authentication-container" className="w-full h-[70vh] border border-gray-200 rounded">
+                  <iframe
+                    src={threeDSUrl}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    title="3DS Authentication"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-top-navigation"
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-[70vh]">
+                  <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#3D8BFF]" />
+                    <p className="text-[#6C757D]">Initializing authentication...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center text-xs text-[#6C757D]">
+                <Shield className="h-4 w-4 mr-2" />
+                This authentication is provided by your bank to ensure secure payment processing.
+              </div>
             </div>
           </div>
         </div>

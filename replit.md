@@ -83,3 +83,19 @@ The application is built with Next.js App Router and integrates with an Express 
 - **Validation:** Zod.
 - **Utilities:** xml2js (for sitemap parsing), date-fns, clsx, class-variance-authority, framer-motion.
 - **Development:** TypeScript, tsx, esbuild.
+
+## Recent Changes
+
+### August 23, 2025 - 3DS Authentication System Enhancement
+- **Fixed critical 3DS authentication issue in Midtrans recurring payment flow**
+  - Enhanced checkout page to properly initialize 3DS SDK before authentication
+  - Updated 3DS modal implementation with proper security sandbox and user controls
+  - Added comprehensive server-side logging for all Midtrans API responses
+  - Verified `callback_type: "js_event"` is properly set in Midtrans charge requests
+  - Enhanced error handling and user feedback during 3DS authentication process
+- **Technical Implementation:**
+  - `MidtransNew3ds.authenticate()` function properly implemented in usePaymentProcessor hook
+  - Complete callback handling for success, failure, and pending states
+  - Proper modal management with cancel functionality and loading states
+  - Enhanced server logging in Midtrans service and recurring payment handler
+  - All Midtrans responses now logged to server console for debugging

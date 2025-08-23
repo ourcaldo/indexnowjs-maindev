@@ -41,6 +41,14 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     })
 
     // Step 1: Create charge transaction with token_id from frontend tokenization
+    console.log('🚀 [Midtrans Recurring] Creating charge transaction with parameters:', {
+      order_id: orderId,
+      amount_usd: amount.finalAmount,
+      token_id: this.tokenId.substring(0, 20) + '...',
+      customer_name: `${this.paymentData.customer_info.first_name} ${this.paymentData.customer_info.last_name}`,
+      customer_email: this.paymentData.customer_info.email
+    })
+
     const chargeTransaction = await this.midtransService.createChargeTransaction({
       order_id: orderId,
       amount_usd: amount.finalAmount,
@@ -56,6 +64,8 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         description: this.packageData.description,
       },
     })
+
+    console.log('📋 [Midtrans Recurring] COMPLETE CHARGE RESPONSE FROM MIDTRANS:', JSON.stringify(chargeTransaction, null, 2))
 
     // Check if 3DS authentication is required
     if (chargeTransaction.redirect_url || chargeTransaction.transaction_status === 'pending') {

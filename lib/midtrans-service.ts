@@ -238,9 +238,15 @@ export class MidtransService {
       }
     };
 
-    console.log('💳 Making direct charge request to /v2/charge with save_card: true');
-    console.log('💳 Using token_id from frontend tokenization:', orderData.token_id);
-    return await this.makeRequest<MidtransCoreChargeResponse>('/v2/charge', 'POST', chargeRequest);
+    console.log('💳 [MIDTRANS SERVICE] Making direct charge request to /v2/charge with save_card: true');
+    console.log('💳 [MIDTRANS SERVICE] Using token_id from frontend tokenization:', orderData.token_id);
+    console.log('📤 [MIDTRANS SERVICE] COMPLETE CHARGE REQUEST PAYLOAD:', JSON.stringify(chargeRequest, null, 2));
+    
+    const response = await this.makeRequest<MidtransCoreChargeResponse>('/v2/charge', 'POST', chargeRequest);
+    
+    console.log('📥 [MIDTRANS SERVICE] COMPLETE CHARGE RESPONSE FROM MIDTRANS:', JSON.stringify(response, null, 2));
+    
+    return response;
   }
 
   /**
