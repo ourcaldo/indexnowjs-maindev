@@ -1,0 +1,90 @@
+ [Payment Router] Starting payment processing
+📊 [Payment Router] Routing to channel: midtrans_recurring
+🚀 [Midtrans Recurring] Creating charge transaction with parameters: {
+  order_id: 'ORDER-1755935134876-915f50e5',
+  amount_usd: 15,
+  token_id: '48111111-1114-80f728...',
+  customer_name: 'aldodkris ',
+  customer_email: 'aldodkris@gmail.com'
+}
+💱 CURRENCY CONVERSION DEBUG:
+  Input USD amount: 15
+  Converted IDR amount: 244490
+  Final gross amount (rounded): 244490
+💳 [MIDTRANS SERVICE] Making direct charge request to /v2/charge with save_card: true
+💳 [MIDTRANS SERVICE] Using token_id from frontend tokenization: 48111111-1114-80f7283f-72e4-4740-bb9b-436cb4185b67
+📤 [MIDTRANS SERVICE] COMPLETE CHARGE REQUEST PAYLOAD: {
+  "payment_type": "credit_card",
+  "transaction_details": {
+    "order_id": "ORDER-1755935134876-915f50e5",
+    "gross_amount": 244490
+  },
+  "credit_card": {
+    "token_id": "48111111-1114-80f7283f-72e4-4740-bb9b-436cb4185b67",
+    "save_card": true,
+    "authentication": true,
+    "callback_type": "js_event"
+  },
+  "item_details": [
+    {
+      "id": "subscription_setup",
+      "price": 244490,
+      "quantity": 1,
+      "name": "Premium"
+    }
+  ],
+  "customer_details": {
+    "first_name": "aldodkris",
+    "last_name": "",
+    "email": "aldodkris@gmail.com",
+    "phone": "081244001006",
+    "billing_address": {
+      "first_name": "aldodkris",
+      "last_name": "",
+      "email": "aldodkris@gmail.com",
+      "phone": "081244001006",
+      "address": "Jakarta",
+      "city": "Jakarta",
+      "postal_code": "12190",
+      "country_code": "IDN"
+    }
+  }
+}
+🔗 Making POST request to: https://api.sandbox.midtrans.com/v2/charge
+📤 Request body: {
+  "payment_type": "credit_card",
+  "transaction_details": {
+    "order_id": "ORDER-1755935134876-915f50e5",
+    "gross_amount": 244490
+  },
+  "credit_card": {
+    "token_id": "48111111-1114-80f7283f-72e4-4740-bb9b-436cb4185b67",
+    "save_card": true,
+    "authentication": true,
+    "callback_type": "js_event"
+  },
+  "item_details": [
+    {
+      "id": "subscription_setup",
+      "price": 244490,
+      "quantity": 1,
+      "name": "Premium"
+    }
+  ],
+  "customer_details": {
+    "first_name": "aldodkris",
+    "last_name": "",
+    "email": "aldodkris@gmail.com",
+    "phone": "081244001006",
+    "billing_address": {
+      "first_name": "aldodkris",
+      "last_name": "",
+      "email": "aldodkris@gmail.com",
+      "phone": "081244001006",
+      "address": "Jakarta",
+      "city": "Jakarta",
+      "postal_code": "12190",
+      "country_code": "IDN"
+    }
+  }
+}
