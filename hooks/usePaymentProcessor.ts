@@ -422,14 +422,9 @@ export function usePaymentProcessor({
           })
         },
         onPending: function(response: any) {
-          console.log('3DS Pending response:', response)
-          popupModal.closePopup()
-          setSubmitting(false)
-          addToast({
-            title: "Payment pending",
-            description: "Your payment is being processed. You will receive a confirmation email shortly.",
-            type: "info"
-          })
+          // For credit card recurring payments, there's no pending state - only success or failure
+          // Keep popup open and let user complete the authentication
+          console.log('3DS Pending response (keeping popup open):', response)
         }
       }
 
