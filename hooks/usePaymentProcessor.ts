@@ -71,21 +71,31 @@ export function usePaymentProcessor({
     onPaymentStart?.()
     
     try {
+      console.log('🚀 [processPayment] Starting payment processing for method:', paymentData.payment_method)
       const paymentRouter = new PaymentRouter(token)
       const result = await paymentRouter.processPayment(paymentData)
 
+      console.log('📋 [processPayment] Payment router result:', {
+        success: result.success,
+        has_message: !!result.message,
+        payment_method: paymentData.payment_method
+      })
+
       if (result.success) {
+        console.log('✅ [processPayment] Payment successful, calling handlePaymentSuccess')
         await handlePaymentSuccess(result, paymentData.payment_method, paymentData)
+        console.log('✅ [processPayment] handlePaymentSuccess completed, calling onSuccess')
         onSuccess?.(result)
       } else {
         throw new Error(result.message || 'Payment failed')
       }
     } catch (error) {
-      console.error('Payment processing error:', error)
+      console.error('❌ [processPayment] Payment processing error:', error)
       
       // Re-throw 3DS authentication errors so checkout page can handle them
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
-        console.log('🔐 Re-throwing 3DS authentication error for checkout page to handle')
+        console.log('🔐 [processPayment] Re-throwing 3DS authentication error for checkout page to handle')
+        setSubmitting(false) // Reset submitting state before re-throwing
         throw error
       }
       
@@ -98,7 +108,6 @@ export function usePaymentProcessor({
         description: errorMessage,
         type: "error"
       })
-    } finally {
       setSubmitting(false)
     }
   }
@@ -220,18 +229,35 @@ export function usePaymentProcessor({
           }
         })
       } else if (paymentMethod === 'midtrans_recurring') {
+        console.log('🔍 [handlePaymentSuccess] Processing midtrans_recurring result:', {
+          success: result.success,
+          requires_redirect: result.requires_redirect,
+          has_redirect_url: !!result.redirect_url,
+          redirect_url: result.redirect_url,
+          data: result.data
+        })
+
         // Handle 3DS authentication if required
         if (result.requires_redirect && result.redirect_url) {
-          console.log('🔐 3DS authentication required - throwing error for component to handle')
+          console.log('🔐 [handlePaymentSuccess] 3DS authentication required - throwing error for component to handle')
+          console.log('🔐 [handlePaymentSuccess] Creating 3DS error with data:', {
+            redirect_url: result.redirect_url,
+            transaction_id: result.data?.transaction_id,
+            order_id: result.data?.order_id
+          })
+          
           // Throw a special error that the component can catch and handle for 3DS
           const threeDSError = new Error('3DS authentication required') as any
           threeDSError.requires_3ds = true
           threeDSError.redirect_url = result.redirect_url
           threeDSError.transaction_id = result.data?.transaction_id
           threeDSError.order_id = result.data?.order_id
+          
+          console.log('🔐 [handlePaymentSuccess] About to throw 3DS error:', threeDSError)
           throw threeDSError
         }
 
+        console.log('✅ [handlePaymentSuccess] Direct success without 3DS (should be rare)')
         // Direct success without 3DS (should be rare - most recurring payments require 3DS)
         addToast({
           title: "Payment successful!",
