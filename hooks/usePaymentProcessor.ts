@@ -161,26 +161,27 @@ export function usePaymentProcessor({
         
         await MidtransClientService.showSnapPayment(token, {
           onSuccess: (snapResult) => {
-            // Don't show final success yet - wait for webhook confirmation
+            // Only show toast - NO REDIRECT. Let webhook handle the final confirmation
             addToast({
               title: "Payment received",
-              description: "Processing your payment confirmation. Please wait...",
+              description: "Please wait while we confirm your payment...",
               type: "info"
             })
             logPaymentActivity('payment_received', paymentData, snapResult)
-            // Stay on current page or redirect to pending status page
-            router.push('/dashboard/settings/plans-billing?payment=processing')
+            // DO NOT REDIRECT - stay on current page
           },
           onPending: (snapResult) => {
+            // Only show toast - NO REDIRECT
             addToast({
               title: "Payment pending",
-              description: "Your payment is being processed. You will receive confirmation shortly.",
+              description: "Your payment is being processed. Please wait...",
               type: "info"
             })
             logPaymentActivity('payment_pending', paymentData, snapResult)
-            router.push('/dashboard/settings/plans-billing?payment=pending')
+            // DO NOT REDIRECT - stay on current page
           },
           onError: (snapResult) => {
+            // Only show toast and reset state - NO REDIRECT
             addToast({
               title: "Payment failed",
               description: "There was an error processing your payment. Please try again.",
@@ -190,6 +191,7 @@ export function usePaymentProcessor({
             setSubmitting(false)
           },
           onClose: () => {
+            // Only show toast and reset state - NO REDIRECT
             addToast({
               title: "Payment cancelled",
               description: "You cancelled the payment process.",
