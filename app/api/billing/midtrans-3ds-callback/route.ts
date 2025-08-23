@@ -70,18 +70,32 @@ export async function POST(request: NextRequest) {
       console.log('✅ 3DS Authentication successful, continuing with subscription creation')
       
       // Get the original token_id from the pending transaction record
-      const { data: existingTransaction, error: existingTransactionError } = await supabase
+      let existingTransaction = null;
+      
+      // First try by gateway_transaction_id
+      const { data: txById } = await supabase
         .from('indb_payment_transactions')
         .select('*')
         .eq('gateway_transaction_id', transaction_id)
-        .single()
+        .maybeSingle()
+        
+      if (txById) {
+        existingTransaction = txById;
+      } else {
+        // Try by payment_reference (order_id)
+        const { data: txByOrder } = await supabase
+          .from('indb_payment_transactions')
+          .select('*')
+          .eq('payment_reference', order_id)
+          .maybeSingle()
+        existingTransaction = txByOrder;
+      }
 
       if (!existingTransaction || !existingTransaction.metadata?.token_id) {
         throw new Error('No original token_id found in transaction record for subscription creation')
       }
 
       const originalTokenId = existingTransaction.metadata.token_id
-      console.log('🔑 Using original token_id for subscription creation:', originalTokenId.substring(0, 20) + '...')
 
       // Get authentication token from the request
       const authHeader = request.headers.get('authorization')

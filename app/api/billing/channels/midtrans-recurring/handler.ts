@@ -76,7 +76,13 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         transaction_status: chargeTransaction.transaction_status
       })
 
-      // Update transaction status to pending_3ds
+      // Update transaction status to pending_3ds - preserve original metadata including token_id
+      const { data: currentTransaction } = await supabaseAdmin
+        .from('indb_payment_transactions')
+        .select('metadata')
+        .eq('payment_reference', orderId)
+        .single()
+
       await supabaseAdmin
         .from('indb_payment_transactions')
         .update({
@@ -84,7 +90,9 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
           gateway_transaction_id: chargeTransaction.transaction_id,
           gateway_response: chargeTransaction,
           metadata: {
+            ...currentTransaction?.metadata,
             ...this.getTransactionMetadata(),
+            token_id: this.tokenId,
             requires_3ds: true
           }
         })
