@@ -136,18 +136,7 @@ export default function CheckoutPage() {
   // Initialize payment processor hook
   const paymentProcessor = usePaymentProcessor({
     packageData: selectedPackage,
-    onSuccess: (result) => {
-      // Handle successful payment
-      logBillingActivity('payment_success', `Payment successful for ${selectedPackage?.name} plan (${billing_period})`)
-      addToast({
-        title: "Payment successful!",
-        description: "Your subscription has been activated successfully.",
-        type: "success"
-      })
-      setTimeout(() => {
-        router.push('/dashboard/settings/plans-billing?payment=success')
-      }, 1500)
-    },
+    // No onSuccess needed - 3DS authentication and other payment methods handle their own success
     onError: (error) => {
       // Handle payment error
       logBillingActivity('payment_error', `Payment failed for ${selectedPackage?.name} plan: ${error.message}`)
