@@ -71,30 +71,18 @@ export function usePaymentProcessor({
     onPaymentStart?.()
     
     try {
-      console.log('🚀 [processPayment] Starting payment processing for method:', paymentData.payment_method)
       const paymentRouter = new PaymentRouter(token)
       const result = await paymentRouter.processPayment(paymentData)
 
-      console.log('📋 [processPayment] Payment router result:', {
-        success: result.success,
-        has_message: !!result.message,
-        payment_method: paymentData.payment_method
-      })
-
       if (result.success) {
-        console.log('✅ [processPayment] Payment successful, calling handlePaymentSuccess')
         await handlePaymentSuccess(result, paymentData.payment_method, paymentData)
-        console.log('✅ [processPayment] handlePaymentSuccess completed, calling onSuccess')
         onSuccess?.(result)
       } else {
         throw new Error(result.message || 'Payment failed')
       }
     } catch (error) {
-      console.error('❌ [processPayment] Payment processing error:', error)
-      
       // Re-throw 3DS authentication errors so checkout page can handle them
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
-        console.log('🔐 [processPayment] Re-throwing 3DS authentication error for checkout page to handle')
         setSubmitting(false) // Reset submitting state before re-throwing
         throw error
       }
@@ -126,44 +114,23 @@ export function usePaymentProcessor({
     onPaymentStart?.()
 
     try {
-      console.log('🚀 [Credit Card Payment] Starting credit card payment process...')
-      console.log('📄 [Credit Card Payment] Payment data:', paymentData)
-      console.log('💳 [Credit Card Payment] Card data:', { 
-        has_card_number: !!cardData.card_number, 
-        exp_month: cardData.card_exp_month, 
-        exp_year: cardData.card_exp_year,
-        has_cvv: !!cardData.card_cvv 
-      })
-      
       // Step 1: Load 3DS SDK and get configuration
-      console.log('🔄 [Credit Card Payment] Getting Midtrans configuration...')
       const config = await MidtransClientService.getMidtransConfig(token)
-      console.log('✅ [Credit Card Payment] Config loaded:', { environment: config.environment })
-      
-      console.log('🔄 [Credit Card Payment] Ensuring 3DS SDK is loaded...')
       await MidtransClientService.load3DSSDK(config.client_key, config.environment)
-      console.log('✅ [Credit Card Payment] 3DS SDK loaded')
 
       // Step 2: Tokenize card using Midtrans JavaScript SDK
-      console.log('🚀 [Credit Card Payment] Starting card tokenization...')
       const cardToken = await MidtransClientService.getCreditCardToken(cardData)
-      console.log('✅ [Credit Card Payment] Card tokenization successful, token:', cardToken)
 
       if (!cardToken) {
         throw new Error('Failed to process card information')
       }
 
       // Step 3: Process payment with token_id (backend will charge → get saved_token → create subscription)
-      console.log('💳 [Credit Card Payment] Processing payment with card token...')
       await processPayment({ ...paymentData, token_id: cardToken }, token)
-      console.log('✅ [Credit Card Payment] Payment processing completed')
 
     } catch (error) {
-      console.error('Credit card payment error:', error)
-      
       // Re-throw 3DS authentication errors so checkout page can handle them
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
-        console.log('🔐 Re-throwing 3DS authentication error from credit card payment for checkout page to handle')
         setSubmitting(false)
         throw error
       }
@@ -229,23 +196,8 @@ export function usePaymentProcessor({
           }
         })
       } else if (paymentMethod === 'midtrans_recurring') {
-        console.log('🔍 [handlePaymentSuccess] Processing midtrans_recurring result:', {
-          success: result.success,
-          requires_redirect: result.requires_redirect,
-          has_redirect_url: !!result.redirect_url,
-          redirect_url: result.redirect_url,
-          data: result.data
-        })
-
-        // Handle 3DS authentication if required
+        // Handle 3DS authentication if required - check for requires_redirect from backend
         if (result.requires_redirect && result.redirect_url) {
-          console.log('🔐 [handlePaymentSuccess] 3DS authentication required - throwing error for component to handle')
-          console.log('🔐 [handlePaymentSuccess] Creating 3DS error with data:', {
-            redirect_url: result.redirect_url,
-            transaction_id: result.data?.transaction_id,
-            order_id: result.data?.order_id
-          })
-          
           // Throw a special error that the component can catch and handle for 3DS
           const threeDSError = new Error('3DS authentication required') as any
           threeDSError.requires_3ds = true
@@ -253,11 +205,9 @@ export function usePaymentProcessor({
           threeDSError.transaction_id = result.data?.transaction_id
           threeDSError.order_id = result.data?.order_id
           
-          console.log('🔐 [handlePaymentSuccess] About to throw 3DS error:', threeDSError)
           throw threeDSError
         }
 
-        console.log('✅ [handlePaymentSuccess] Direct success without 3DS (should be rare)')
         // Direct success without 3DS (should be rare - most recurring payments require 3DS)
         addToast({
           title: "Payment successful!",
@@ -298,19 +248,15 @@ export function usePaymentProcessor({
     onModalClose?: () => void
   ) => {
     try {
-      console.log('🔐 Starting 3DS authentication process with redirect URL:', redirectUrl)
-
       if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
         throw new Error('3DS authentication not available. Please refresh the page and try again.')
       }
 
       const options = {
         performAuthentication: (url: string) => {
-          console.log('🔐 Opening 3DS authentication page in modal:', url)
           onModalOpen?.(url)
         },
         onSuccess: async (response: any) => {
-          console.log('✅ 3DS Authentication successful:', response)
           onModalClose?.()
 
           try {
@@ -351,7 +297,6 @@ export function usePaymentProcessor({
               throw new Error(callbackResult.message || '3DS authentication callback failed')
             }
           } catch (error) {
-            console.error('3DS callback error:', error)
             addToast({
               title: "Payment processing failed",
               description: error instanceof Error ? error.message : "Please contact support.",
@@ -362,7 +307,6 @@ export function usePaymentProcessor({
           }
         },
         onFailure: (response: any) => {
-          console.log('❌ 3DS Authentication failed:', response)
           onModalClose?.()
           setSubmitting(false)
 
@@ -373,7 +317,6 @@ export function usePaymentProcessor({
           })
         },
         onPending: (response: any) => {
-          console.log('⏳ 3DS Authentication pending:', response)
           onModalClose?.()
           setSubmitting(false)
 
@@ -386,11 +329,9 @@ export function usePaymentProcessor({
       }
 
       // Trigger 3DS authentication using Midtrans JavaScript library
-      console.log('🚀 Calling MidtransNew3ds.authenticate() with options')
       window.MidtransNew3ds.authenticate(redirectUrl, options)
 
     } catch (error) {
-      console.error('3DS authentication failed:', error)
       onModalClose?.()
       setSubmitting(false)
       addToast({

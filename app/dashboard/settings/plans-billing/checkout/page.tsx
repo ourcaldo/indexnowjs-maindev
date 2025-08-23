@@ -231,8 +231,6 @@ export default function CheckoutPage() {
 
   // Handle 3DS authentication with proper modal management
   const handle3DSAuthentication = async (redirectUrl: string, transactionId: string, orderId: string) => {
-    console.log('🔐 [Checkout] Initiating 3DS authentication process')
-    
     // Ensure 3DS SDK is loaded before authentication
     try {
       const { data: { session } } = await supabaseBrowser.auth.getSession()
@@ -260,7 +258,6 @@ export default function CheckoutPage() {
         }
       )
     } catch (error) {
-      console.error('❌ [Checkout] 3DS authentication setup failed:', error)
       addToast({
         title: "Authentication failed",
         description: "Unable to initialize payment authentication. Please try again.",

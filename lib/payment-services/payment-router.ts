@@ -60,9 +60,20 @@ export class PaymentRouter {
         throw new Error(errorData.message || `Payment API error: ${response.status}`)
       }
 
-      return await response.json()
+      const result = await response.json()
+      
+      // Send result to backend for logging (no browser logs)
+      fetch('/api/debug/payment-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          payment_method: request.payment_method,
+          result: result
+        })
+      }).catch(() => {}) // Silent fail
+      
+      return result
     } catch (error) {
-      console.error('Payment router error:', error)
       throw error
     }
   }
