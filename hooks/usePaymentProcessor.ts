@@ -256,45 +256,101 @@ export function usePaymentProcessor({
         throw new Error('3DS authentication not available. Please refresh the page and try again.')
       }
 
-      // Simple popup modal implementation
+      // 3DS Modal implementation following Midtrans documentation exactly
       let modal: any = null
       const popupModal = {
         openPopup: (url: string) => {
-          // Create iframe modal
+          // Create modal container exactly like Midtrans docs
           const modalDiv = document.createElement('div')
           modalDiv.style.cssText = `
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); z-index: 9999; display: flex; 
-            justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.7); z-index: 10000; display: flex; 
+            justify-content: center; align-items: center; padding: 20px;
           `
           
+          // Create modal content container
+          const modalContent = document.createElement('div')
+          modalContent.style.cssText = `
+            position: relative; width: 75%; height: 90vh; background: white; 
+            border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
+          `
+          
+          // Create header with cancel button
+          const header = document.createElement('div')
+          header.style.cssText = `
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px; border-bottom: 1px solid #e0e6ed; background: #f7f9fc;
+            border-radius: 8px 8px 0 0;
+          `
+          
+          const title = document.createElement('h3')
+          title.textContent = 'Complete Payment Authentication'
+          title.style.cssText = 'margin: 0; color: #1a1a1a; font-size: 16px; font-weight: 600;'
+          
+          const cancelButton = document.createElement('button')
+          cancelButton.textContent = '✕'
+          cancelButton.style.cssText = `
+            background: none; border: none; font-size: 20px; color: #6c757d;
+            cursor: pointer; padding: 4px 8px; border-radius: 4px;
+            transition: background-color 0.2s;
+          `
+          cancelButton.onmouseover = () => cancelButton.style.backgroundColor = '#e0e6ed'
+          cancelButton.onmouseout = () => cancelButton.style.backgroundColor = 'transparent'
+          cancelButton.onclick = () => {
+            popupModal.closePopup()
+            setSubmitting(false)
+            addToast({
+              title: "Payment cancelled",
+              description: "You cancelled the payment authentication.",
+              type: "info"
+            })
+          }
+          
+          header.appendChild(title)
+          header.appendChild(cancelButton)
+          
+          // Create iframe with exact Midtrans specifications
           const iframe = document.createElement('iframe')
           iframe.src = url
+          iframe.frameBorder = '0'
           iframe.style.cssText = `
-            width: 75%; height: 90vh; border: none; background: white; 
-            border-radius: 8px;
+            width: 100%; flex: 1; border: none; border-radius: 0 0 8px 8px;
           `
           
-          modalDiv.appendChild(iframe)
+          // Add sandbox attributes for security
+          iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-top-navigation')
+          iframe.setAttribute('allow', 'payment')
+          
+          modalContent.appendChild(header)
+          modalContent.appendChild(iframe)
+          modalDiv.appendChild(modalContent)
           document.body.appendChild(modalDiv)
           modal = modalDiv
           
           onModalOpen?.(url)
         },
         closePopup: () => {
-          if (modal) {
-            document.body.removeChild(modal)
+          if (modal && modal.parentNode) {
+            try {
+              modal.parentNode.removeChild(modal)
+            } catch (e) {
+              // Ignore if already removed
+            }
             modal = null
           }
           onModalClose?.()
         }
       }
 
+      // Options exactly matching Midtrans documentation structure
       const options = {
-        performAuthentication: (url: string) => {
-          popupModal.openPopup(url)
+        performAuthentication: function(redirect_url: string) {
+          // Implement exactly as Midtrans docs show
+          popupModal.openPopup(redirect_url)
         },
-        onSuccess: async (response: any) => {
+        onSuccess: async function(response: any) {
+          console.log('3DS Success response:', response)
           popupModal.closePopup()
 
           try {
@@ -316,7 +372,9 @@ export function usePaymentProcessor({
                 transaction_id: transactionId,
                 order_id: orderId,
                 status_code: response.status_code,
-                transaction_status: response.transaction_status
+                transaction_status: response.transaction_status,
+                gross_amount: response.gross_amount,
+                payment_type: response.payment_type
               }),
             })
 
@@ -342,7 +400,8 @@ export function usePaymentProcessor({
             setSubmitting(false)
           }
         },
-        onFailure: (response: any) => {
+        onFailure: function(response: any) {
+          console.log('3DS Failure response:', response)
           popupModal.closePopup()
           setSubmitting(false)
           addToast({
@@ -351,7 +410,8 @@ export function usePaymentProcessor({
             type: "error"
           })
         },
-        onPending: (response: any) => {
+        onPending: function(response: any) {
+          console.log('3DS Pending response:', response)
           popupModal.closePopup()
           setSubmitting(false)
           addToast({

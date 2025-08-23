@@ -69,8 +69,12 @@ export class MidtransClientService {
       const existingScript = document.querySelector('script[src*="midtrans-new-3ds"]') || document.querySelector('#midtrans-script')
       if (existingScript) {
         existingScript.remove()
-        // Clean up the global object
-        delete (window as any).MidtransNew3ds
+        // Clean up the global object safely
+        try {
+          (window as any).MidtransNew3ds = undefined
+        } catch (e) {
+          // Ignore if property cannot be deleted
+        }
       }
       const script = document.createElement('script')
       script.src = 'https://api.midtrans.com/v2/assets/js/midtrans-new-3ds.min.js'
