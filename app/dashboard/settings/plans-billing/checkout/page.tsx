@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,12 +15,12 @@ import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { authService } from '@/lib/auth'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { formatCurrency } from '@/lib/currency-utils'
-import MidtransCreditCardForm from '@/components/MidtransCreditCardForm'
 import { PaymentRouter } from '@/lib/payment-services/payment-router'
 import { MidtransClientService } from '@/lib/payment-services/midtrans-client-service'
 import { usePaymentProcessor } from '@/hooks/usePaymentProcessor'
 import BillingPeriodSelector from '@/components/checkout/BillingPeriodSelector'
 import OrderSummary from '@/components/checkout/OrderSummary'
+import PaymentMethodSelector from '@/components/checkout/payment-methods/PaymentMethodSelector'
 
 // Midtrans type declarations
 declare global {
@@ -690,59 +689,13 @@ export default function CheckoutPage() {
               </Card>
 
               {/* Payment Methods */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <RadioGroup value={form.payment_method} onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}>
-                    {paymentGateways.map((gateway) => (
-                      <div key={gateway.id} className="space-y-4">
-                        <div className="flex items-start space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#1A1A1A] transition-colors">
-                          <RadioGroupItem value={gateway.id} id={gateway.id} />
-                          <div className="flex-1">
-                            <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
-                              {gateway.slug === 'bank_transfer' && (
-                                <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
-                              )}
-                              <div>
-                                <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
-                                <div className="text-sm text-[#6C757D]">{gateway.description}</div>
-                                {gateway.configuration?.bank_name && form.payment_method === gateway.id && (
-                                  <div className="text-sm text-[#1A1A1A] mt-2 p-2 bg-[#F7F9FC] rounded border">
-                                    <div className="font-semibold">Bank Details:</div>
-                                    <div className="text-xs space-y-1 mt-1">
-                                      <div><span className="font-medium">Bank:</span> {gateway.configuration.bank_name}</div>
-                                      <div><span className="font-medium">Account Name:</span> {gateway.configuration.account_name}</div>
-                                      <div><span className="font-medium">Account Number:</span> {gateway.configuration.account_number}</div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </Label>
-                          </div>
-                          {gateway.is_default && (
-                            <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full mt-1">
-                              Recommended
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Credit Card Form - Inside the payment method selection */}
-                        {form.payment_method === gateway.id && (gateway.slug === 'midtrans' || gateway.slug === 'midtrans_recurring') && (
-                          <div className="ml-8 mt-4">
-                            <MidtransCreditCardForm
-                              onSubmit={handleCreditCardSubmit}
-                              loading={submitting}
-                              disabled={submitting}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </CardContent>
-              </Card>
+              <PaymentMethodSelector
+                paymentGateways={paymentGateways}
+                selectedMethod={form.payment_method}
+                onMethodChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}
+                onCreditCardSubmit={handleCreditCardSubmit}
+                loading={submitting}
+              />
 
               {/* Unified Submit Button - Works for all payment methods */}
               {form.payment_method && (
@@ -767,8 +720,6 @@ export default function CheckoutPage() {
                 </div>
               )}
             </form>
-
-            {/* Credit Card Form now moved inside payment method selection above */}
           </div>
 
           {/* Order Summary */}
