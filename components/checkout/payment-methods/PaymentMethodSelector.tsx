@@ -25,7 +25,7 @@ export default function PaymentMethodSelector({
   
   return (
     <PaymentErrorBoundary>
-      <Card className="border-[#E0E6ED] bg-white">
+      <Card className="border-[#E0E6ED] bg-[#FFFFFF]">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Payment Method</CardTitle>
         </CardHeader>

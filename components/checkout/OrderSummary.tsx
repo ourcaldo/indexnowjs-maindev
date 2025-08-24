@@ -63,7 +63,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
   const { price, discount, originalPrice, periodLabel } = calculatePrice()
 
   return (
-    <Card className="sticky top-8">
+    <Card className="sticky top-8 border-[#E0E6ED] bg-[#FFFFFF]">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Order Summary</CardTitle>
       </CardHeader>
