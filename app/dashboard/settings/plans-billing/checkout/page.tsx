@@ -540,7 +540,7 @@ export default function CheckoutPage() {
               {/* Personal Information & Billing Address */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Personal & Billing Information</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Personal & Billing Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Personal Information */}

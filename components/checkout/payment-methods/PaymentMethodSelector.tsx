@@ -29,30 +29,37 @@ export default function PaymentMethodSelector({
     <PaymentErrorBoundary>
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
+          <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Payment Method</CardTitle>
         </CardHeader>
         <CardContent>
         <RadioGroup value={selectedMethod} onValueChange={onMethodChange}>
           {paymentGateways.map((gateway) => (
             <div key={gateway.id} className="space-y-4">
-              <div className="flex items-start space-x-3 p-4 border border-[#E0E6ED] rounded-lg hover:border-[#1A1A1A] transition-colors">
-                <RadioGroupItem value={gateway.id} id={gateway.id} />
+              <div className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                selectedMethod === gateway.id 
+                  ? 'border-[#3D8BFF] bg-[#3D8BFF]/5 shadow-sm' 
+                  : 'border-[#E0E6ED] hover:border-[#1A1A1A]'
+              }`}>
+                <RadioGroupItem 
+                  value={gateway.id} 
+                  id={gateway.id}
+                  className={selectedMethod === gateway.id ? 'border-[#3D8BFF] text-[#3D8BFF]' : ''}
+                />
                 <div className="flex-1">
-                  <Label htmlFor={gateway.id} className="flex items-center cursor-pointer">
-                    {gateway.slug === 'bank_transfer' && (
-                      <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
-                    )}
-                    <div>
+                  <Label htmlFor={gateway.id} className="flex items-center justify-between cursor-pointer">
+                    <div className="flex items-center">
+                      {gateway.slug === 'bank_transfer' && (
+                        <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
+                      )}
                       <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
-                      <div className="text-sm text-[#6C757D]">{gateway.description}</div>
                     </div>
+                    {gateway.is_default && (
+                      <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full">
+                        Recommended
+                      </span>
+                    )}
                   </Label>
                 </div>
-                {gateway.is_default && (
-                  <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full mt-1">
-                    Recommended
-                  </span>
-                )}
               </div>
 
               {/* Payment Method Specific Components */}

@@ -82,7 +82,7 @@ export default function BillingPeriodSelector({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-[#1A1A1A]">1. Billing Period</CardTitle>
+        <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Billing Period</CardTitle>
         <p className="text-sm text-[#6C757D]">Choose your preferred billing cycle</p>
       </CardHeader>
       <CardContent>
