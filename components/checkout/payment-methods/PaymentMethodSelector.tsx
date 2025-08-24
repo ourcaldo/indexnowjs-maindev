@@ -62,24 +62,6 @@ export default function PaymentMethodSelector({
                 </div>
               </div>
 
-              {/* Payment Method Specific Components */}
-              {selectedMethod === gateway.id && (
-                <>
-                  {gateway.slug === 'midtrans_snap' && (
-                    <MidtransSnapPayment gateway={gateway} />
-                  )}
-                  {gateway.slug === 'midtrans' && (
-                    <MidtransRecurringPayment 
-                      gateway={gateway} 
-                      onCreditCardSubmit={onCreditCardSubmit}
-                      loading={loading}
-                    />
-                  )}
-                  {gateway.slug === 'bank_transfer' && (
-                    <BankTransferPayment gateway={gateway} />
-                  )}
-                </>
-              )}
             </div>
           ))}
         </RadioGroup>
