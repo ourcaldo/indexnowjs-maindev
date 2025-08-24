@@ -78,7 +78,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
               </p>
             </div>
             {discount > 0 && (
-              <span className="bg-[#4BB543] text-[#FFFFFF] text-xs px-2 py-1 rounded-full font-medium">
+              <span className="bg-[#F0A202] text-[#FFFFFF] text-xs px-2 py-1 rounded-full font-medium">
                 Save {discount}%
               </span>
             )}
@@ -110,7 +110,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
           {discount > 0 && (
             <div className="flex justify-between items-center">
               <span className="text-[#6C757D]">Discount ({discount}%):</span>
-              <span className="font-medium text-[#4BB543]">
+              <span className="font-medium text-[#F0A202]">
                 -{formatCurrency(originalPrice - price, userCurrency)}
               </span>
             </div>

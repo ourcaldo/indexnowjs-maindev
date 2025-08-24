@@ -52,7 +52,7 @@ export default function PaymentMethodSelector({
                       <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
                     </div>
                     {gateway.is_default && (
-                      <span className="text-xs bg-[#4BB543] text-[#FFFFFF] px-2 py-1 rounded-full font-medium">
+                      <span className="text-xs bg-[#F0A202] text-[#FFFFFF] px-2 py-1 rounded-full font-medium">
                         Recommended
                       </span>
                     )}

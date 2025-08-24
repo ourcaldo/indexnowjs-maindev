@@ -94,7 +94,7 @@ export default function BillingPeriodSelector({
                           {option.period_label}
                         </span>
                         {discount > 0 && (
-                          <span className="bg-[#4BB543] text-[#FFFFFF] text-xs px-2 py-0.5 rounded-full font-medium">
+                          <span className="bg-[#F0A202] text-[#FFFFFF] text-xs px-2 py-0.5 rounded-full font-medium">
                             {discount}% OFF
                           </span>
                         )}
