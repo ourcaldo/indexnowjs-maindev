@@ -25,7 +25,7 @@ export default function PaymentMethodSelector({
   
   return (
     <PaymentErrorBoundary>
-      <Card>
+      <Card className="border-[#E0E6ED] bg-white">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Payment Method</CardTitle>
         </CardHeader>
@@ -36,12 +36,12 @@ export default function PaymentMethodSelector({
               <div className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                 selectedMethod === gateway.id 
                   ? 'border-[#3D8BFF] bg-[#3D8BFF]/5 shadow-sm' 
-                  : 'border-[#E0E6ED] hover:border-[#1A1A1A]'
+                  : 'border-[#E0E6ED] hover:border-[#1A1A1A]/20'
               }`}>
                 <RadioGroupItem 
                   value={gateway.id} 
                   id={gateway.id}
-                  className={selectedMethod === gateway.id ? 'border-[#3D8BFF] text-[#3D8BFF]' : ''}
+                  className={selectedMethod === gateway.id ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED]'}
                 />
                 <div className="flex-1">
                   <Label htmlFor={gateway.id} className="flex items-center justify-between cursor-pointer">
@@ -52,7 +52,7 @@ export default function PaymentMethodSelector({
                       <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
                     </div>
                     {gateway.is_default && (
-                      <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full">
+                      <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full font-medium">
                         Recommended
                       </span>
                     )}
@@ -60,9 +60,9 @@ export default function PaymentMethodSelector({
                 </div>
               </div>
 
-              {/* Only show credit card form for recurring payment, no descriptions */}
+              {/* Credit card form with proper spacing and styling */}
               {selectedMethod === gateway.id && gateway.slug === 'midtrans' && onCreditCardSubmit && (
-                <div className="ml-8 mt-4 mb-6">
+                <div className="ml-8 mt-4 mb-8 p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
                   <MidtransCreditCardForm
                     onSubmit={onCreditCardSubmit}
                     loading={loading}
