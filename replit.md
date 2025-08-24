@@ -86,6 +86,20 @@ The application is built with Next.js App Router and integrates with an Express 
 
 ## Recent Changes
 
+### August 24, 2025 - Phase 3 Checkout Enhancement: Dynamic Billing Period Selection
+- **Implemented dynamic billing period selector with enhanced order summary**
+  - Created BillingPeriodSelector component supporting monthly, quarterly, biannual, and annual periods
+  - Built enhanced OrderSummary component with currency conversion display for USD users
+  - Integrated dynamic billing period selection into checkout flow, replacing hardcoded period parameters
+  - Enhanced order summary shows conversion rates and IDR amounts for US-based users
+  - Added monthly savings calculations and discount badges for longer billing periods
+- **Technical Implementation:**
+  - `BillingPeriodSelector.tsx`: Dynamic period selection with pricing tier integration
+  - `OrderSummary.tsx`: Currency conversion with exchange rate API integration
+  - Updated checkout page to use dynamic billing periods with proper section numbering
+  - Integrated with existing `pricing_tiers` structure from database
+  - Maintains compatibility with all existing payment processors (Snap, Recurring, Bank Transfer)
+
 ### August 23, 2025 - 3DS Authentication System Enhancement
 - **Fixed critical 3DS authentication issue in Midtrans recurring payment flow**
   - Enhanced checkout page to properly initialize 3DS SDK before authentication

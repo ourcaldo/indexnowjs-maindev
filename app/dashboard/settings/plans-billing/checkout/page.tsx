@@ -20,6 +20,8 @@ import MidtransCreditCardForm from '@/components/MidtransCreditCardForm'
 import { PaymentRouter } from '@/lib/payment-services/payment-router'
 import { MidtransClientService } from '@/lib/payment-services/midtrans-client-service'
 import { usePaymentProcessor } from '@/hooks/usePaymentProcessor'
+import BillingPeriodSelector from '@/components/checkout/BillingPeriodSelector'
+import OrderSummary from '@/components/checkout/OrderSummary'
 
 // Midtrans type declarations
 declare global {
@@ -105,7 +107,7 @@ export default function CheckoutPage() {
   const { addToast } = useToast()
 
   const [package_id] = useState(searchParams?.get('package'))
-  const [billing_period] = useState(searchParams?.get('period') || 'monthly')
+  const [billing_period, setBillingPeriod] = useState(searchParams?.get('period') || 'monthly')
   const [selectedPackage, setSelectedPackage] = useState<PaymentPackage | null>(null)
   const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([])
   const [loading, setLoading] = useState(true)
@@ -529,7 +531,7 @@ export default function CheckoutPage() {
               {/* Personal Information */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">1. Personal Information</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -598,7 +600,7 @@ export default function CheckoutPage() {
               {/* Billing Address */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Billing Address</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">4. Billing Address</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -692,10 +694,18 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
+              {/* Billing Period Selection */}
+              <BillingPeriodSelector
+                selectedPackage={selectedPackage}
+                userCurrency={userCurrency}
+                selectedPeriod={billing_period}
+                onPeriodChange={setBillingPeriod}
+              />
+
               {/* Payment Methods */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">5. Payment Method</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <RadioGroup value={form.payment_method} onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}>
@@ -776,83 +786,11 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-8">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Package Details */}
-                <div className="p-4 bg-[#F7F9FC] rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-semibold text-[#1A1A1A]">{selectedPackage.name} Plan</h3>
-                      <p className="text-sm text-[#6C757D] capitalize">{billing_period} billing</p>
-                    </div>
-                    {discount > 0 && (
-                      <span className="bg-[#4BB543] text-white text-xs px-2 py-1 rounded-full">
-                        Save {discount}%
-                      </span>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    {selectedPackage.features.slice(0, 3).map((feature, index) => (
-                      <div key={index} className="flex items-center text-sm">
-                        <Check className="h-4 w-4 text-[#4BB543] mr-2 flex-shrink-0" />
-                        <span className="text-[#6C757D]">{feature}</span>
-                      </div>
-                    ))}
-                    {selectedPackage.features.length > 3 && (
-                      <div className="text-xs text-[#6C757D]">
-                        +{selectedPackage.features.length - 3} more features
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Pricing Breakdown */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[#6C757D]">Subtotal:</span>
-                    <span className="font-medium text-[#1A1A1A]">
-                      {formatCurrency(originalPrice, userCurrency)}
-                    </span>
-                  </div>
-
-                  {discount > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-[#6C757D]">Discount ({discount}%):</span>
-                      <span className="font-medium text-[#4BB543]">
-                        -{formatCurrency(originalPrice - price, userCurrency)}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-[#6C757D]">Tax:</span>
-                    <span className="font-medium text-[#1A1A1A]">{formatCurrency(0, userCurrency)}</span>
-                  </div>
-
-                  <hr className="border-[#E0E6ED]" />
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
-                    <span className="text-lg font-bold text-[#1A1A1A]">
-                      {formatCurrency(price, userCurrency)}
-                    </span>
-                  </div>
-                </div>
-
-
-
-
-
-                {/* Security Note */}
-                <div className="flex items-center justify-center text-xs text-[#6C757D] mt-4">
-                  <Shield className="h-4 w-4 mr-2" />
-                  Secure checkout. Your information is protected.
-                </div>
-              </CardContent>
-            </Card>
+            <OrderSummary
+              selectedPackage={selectedPackage}
+              billingPeriod={billing_period}
+              userCurrency={userCurrency}
+            />
           </div>
         </div>
       </div>
