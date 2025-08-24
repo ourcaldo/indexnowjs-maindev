@@ -78,6 +78,7 @@ export default function BillingPeriodSelector({
                       ? 'border-[#3D8BFF] bg-[#3D8BFF]/5' 
                       : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
                   }`}
+                  onClick={() => onPeriodChange(option.period)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
