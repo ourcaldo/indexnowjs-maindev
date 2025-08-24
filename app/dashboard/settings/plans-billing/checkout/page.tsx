@@ -497,7 +497,7 @@ export default function CheckoutPage() {
         <div className="text-center">
           <h2 className="text-xl font-semibold text-[#1A1A1A] mb-2">Package not found</h2>
           <p className="text-[#6C757D] mb-4">The selected package could not be found.</p>
-          <Button onClick={() => router.push('/dashboard/settings/plans-billing')} className="bg-[#3D8BFF] hover:bg-[#2C6FCC]">
+          <Button onClick={() => router.push('/dashboard/settings/plans-billing')} className="bg-[#1C2331] hover:bg-[#0d1b2a] text-white">
             Back to Billing
           </Button>
         </div>
@@ -516,7 +516,7 @@ export default function CheckoutPage() {
           <Button
             variant="ghost"
             onClick={() => router.push('/dashboard/settings/plans-billing')}
-            className="mb-4 text-[#6C757D] hover:text-[#1A1A1A]"
+            className="mb-4 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] border-0"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Plans

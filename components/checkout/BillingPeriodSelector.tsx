@@ -76,7 +76,7 @@ export default function BillingPeriodSelector({
                   className={`relative border rounded-lg p-3 cursor-pointer transition-all ${
                     isSelected 
                       ? 'border-[#3D8BFF] bg-[#3D8BFF]/5' 
-                      : 'border-[#E0E6ED] hover:border-[#1A1A1A]/20'
+                      : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -84,7 +84,7 @@ export default function BillingPeriodSelector({
                       <RadioGroupItem 
                         value={option.period} 
                         id={option.period}
-                        className={isSelected ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED]'}
+                        className={isSelected ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED] text-[#6C757D]'}
                       />
                       <Label 
                         htmlFor={option.period} 
@@ -94,7 +94,7 @@ export default function BillingPeriodSelector({
                           {option.period_label}
                         </span>
                         {discount > 0 && (
-                          <span className="bg-[#4BB543] text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                          <span className="bg-[#4BB543] text-[#FFFFFF] text-xs px-2 py-0.5 rounded-full font-medium">
                             {discount}% OFF
                           </span>
                         )}

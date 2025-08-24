@@ -36,12 +36,12 @@ export default function PaymentMethodSelector({
               <div className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                 selectedMethod === gateway.id 
                   ? 'border-[#3D8BFF] bg-[#3D8BFF]/5 shadow-sm' 
-                  : 'border-[#E0E6ED] hover:border-[#1A1A1A]/20'
+                  : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
               }`}>
                 <RadioGroupItem 
                   value={gateway.id} 
                   id={gateway.id}
-                  className={selectedMethod === gateway.id ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED]'}
+                  className={selectedMethod === gateway.id ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED] text-[#6C757D]'}
                 />
                 <div className="flex-1">
                   <Label htmlFor={gateway.id} className="flex items-center justify-between cursor-pointer">
@@ -52,7 +52,7 @@ export default function PaymentMethodSelector({
                       <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
                     </div>
                     {gateway.is_default && (
-                      <span className="text-xs bg-[#4BB543]/10 text-[#4BB543] px-2 py-1 rounded-full font-medium">
+                      <span className="text-xs bg-[#4BB543] text-[#FFFFFF] px-2 py-1 rounded-full font-medium">
                         Recommended
                       </span>
                     )}

@@ -78,7 +78,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
               </p>
             </div>
             {discount > 0 && (
-              <span className="bg-[#4BB543] text-white text-xs px-2 py-1 rounded-full">
+              <span className="bg-[#4BB543] text-[#FFFFFF] text-xs px-2 py-1 rounded-full font-medium">
                 Save {discount}%
               </span>
             )}
@@ -132,7 +132,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
 
           {/* Currency Conversion Display for USD users */}
           {userCurrency === 'USD' && idrAmount && conversionRate && (
-            <div className="mt-4 p-3 bg-[#3D8BFF]/5 border border-[#3D8BFF]/20 rounded-lg">
+            <div className="mt-4 p-3 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
               <div className="flex items-start space-x-2">
                 <Info className="h-4 w-4 text-[#3D8BFF] mt-0.5 flex-shrink-0" />
                 <div className="text-sm">
@@ -151,7 +151,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
 
         {/* Security Note */}
         <div className="flex items-center justify-center text-xs text-[#6C757D] mt-4">
-          <Shield className="h-4 w-4 mr-2" />
+          <Shield className="h-4 w-4 mr-2 text-[#6C757D]" />
           Secure checkout. Your information is protected.
         </div>
       </CardContent>
