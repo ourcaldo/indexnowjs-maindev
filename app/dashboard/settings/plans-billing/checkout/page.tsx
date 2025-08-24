@@ -528,81 +528,88 @@ export default function CheckoutPage() {
           {/* Main Form */}
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Personal Information */}
+              {/* Billing Period Selection */}
+              <BillingPeriodSelector
+                selectedPackage={selectedPackage}
+                userCurrency={userCurrency}
+                selectedPeriod={billing_period}
+                onPeriodChange={setBillingPeriod}
+              />
+
+              {/* Personal Information & Billing Address */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Personal Information</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">2. Personal & Billing Information</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="first_name" className="text-sm font-medium text-[#1A1A1A]">
-                        First Name *
-                      </Label>
-                      <Input
-                        id="first_name"
-                        type="text"
-                        required
-                        value={form.first_name}
-                        onChange={(e) => setForm(prev => ({ ...prev, first_name: e.target.value }))}
-                        className="mt-1"
-                        placeholder="Enter your first name"
-                      />
+                <CardContent className="space-y-6">
+                  {/* Personal Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-base font-medium text-[#1A1A1A] border-b border-[#E0E6ED] pb-2">Personal Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="first_name" className="text-sm font-medium text-[#1A1A1A]">
+                          First Name *
+                        </Label>
+                        <Input
+                          id="first_name"
+                          type="text"
+                          required
+                          value={form.first_name}
+                          onChange={(e) => setForm(prev => ({ ...prev, first_name: e.target.value }))}
+                          className="mt-1"
+                          placeholder="Enter your first name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="last_name" className="text-sm font-medium text-[#1A1A1A]">
+                          Last Name
+                        </Label>
+                        <Input
+                          id="last_name"
+                          type="text"
+                          value={form.last_name}
+                          onChange={(e) => setForm(prev => ({ ...prev, last_name: e.target.value }))}
+                          className="mt-1"
+                          placeholder="Enter your last name"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="last_name" className="text-sm font-medium text-[#1A1A1A]">
-                        Last Name
-                      </Label>
-                      <Input
-                        id="last_name"
-                        type="text"
-                        value={form.last_name}
-                        onChange={(e) => setForm(prev => ({ ...prev, last_name: e.target.value }))}
-                        className="mt-1"
-                        placeholder="Enter your last name"
-                      />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="email" className="text-sm font-medium text-[#1A1A1A]">
+                          Email Address *
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          required
+                          value={form.email}
+                          onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
+                          className="mt-1"
+                          placeholder="Enter your email"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="phone" className="text-sm font-medium text-[#1A1A1A]">
+                          Phone Number *
+                        </Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          required
+                          value={form.phone}
+                          onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
+                          className="mt-1"
+                          placeholder="Enter your phone number"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="email" className="text-sm font-medium text-[#1A1A1A]">
-                        Email Address *
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        required
-                        value={form.email}
-                        onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
-                        className="mt-1"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone" className="text-sm font-medium text-[#1A1A1A]">
-                        Phone Number *
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        required
-                        value={form.phone}
-                        onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
-                        className="mt-1"
-                        placeholder="Enter your phone number"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Billing Address */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">4. Billing Address</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  {/* Billing Address */}
+                  <div className="space-y-4">
+                    <h3 className="text-base font-medium text-[#1A1A1A] border-b border-[#E0E6ED] pb-2">Billing Address</h3>
                   <div>
                     <Label htmlFor="address" className="text-sm font-medium text-[#1A1A1A]">
                       Street Address
@@ -678,34 +685,14 @@ export default function CheckoutPage() {
                     </Select>
                   </div>
 
-                  <div>
-                    <Label htmlFor="description" className="text-sm font-medium text-[#1A1A1A]">
-                      Additional Notes
-                    </Label>
-                    <Textarea
-                      id="description"
-                      value={form.description}
-                      onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
-                      className="mt-1"
-                      placeholder="Any additional information or special requests..."
-                      rows={3}
-                    />
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Billing Period Selection */}
-              <BillingPeriodSelector
-                selectedPackage={selectedPackage}
-                userCurrency={userCurrency}
-                selectedPeriod={billing_period}
-                onPeriodChange={setBillingPeriod}
-              />
-
               {/* Payment Methods */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">5. Payment Method</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <RadioGroup value={form.payment_method} onValueChange={(value) => setForm(prev => ({ ...prev, payment_method: value }))}>
