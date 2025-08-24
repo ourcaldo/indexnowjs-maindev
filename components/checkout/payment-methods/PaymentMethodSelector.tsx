@@ -62,7 +62,7 @@ export default function PaymentMethodSelector({
 
               {/* Only show credit card form for recurring payment, no descriptions */}
               {selectedMethod === gateway.id && gateway.slug === 'midtrans' && onCreditCardSubmit && (
-                <div className="ml-8 mt-4">
+                <div className="ml-8 mt-4 mb-6">
                   <MidtransCreditCardForm
                     onSubmit={onCreditCardSubmit}
                     loading={loading}
