@@ -51,8 +51,6 @@ export default class PaymentErrorBoundary extends Component<Props, State> {
       url: typeof window !== 'undefined' ? window.location.href : 'server'
     }
 
-    console.error('🚨 Payment Error Boundary - Critical Error:', errorDetails)
-    
     // Call optional error callback
     this.props.onError?.(error, errorInfo)
     
@@ -70,9 +68,8 @@ export default class PaymentErrorBoundary extends Component<Props, State> {
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify(errorDetails)
       // })
-      console.warn('Error logging service not implemented')
     } catch (loggingError) {
-      console.error('Failed to log error to service:', loggingError)
+      // Silent fail for logging errors
     }
   }
 
@@ -183,7 +180,6 @@ export function usePaymentErrorHandler() {
       url: typeof window !== 'undefined' ? window.location.href : 'server'
     }
 
-    console.error('🚨 Payment Error Handler:', errorDetails)
     return errorDetails
   }, [])
 

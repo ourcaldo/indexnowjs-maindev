@@ -508,12 +508,7 @@ export default function CheckoutPage() {
   const { price, discount, originalPrice } = calculatePrice()
 
   return (
-    <PaymentErrorBoundary
-      onError={(error, errorInfo) => {
-        console.error('🚨 Checkout Error:', { error, errorInfo })
-        // In production, send to error tracking service
-      }}
-    >
+    <PaymentErrorBoundary>
       <div className="min-h-screen bg-[#F7F9FC]">
         <div className="container mx-auto px-4 py-8">
         {/* Header */}
