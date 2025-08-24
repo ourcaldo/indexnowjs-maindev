@@ -21,6 +21,7 @@ import { usePaymentProcessor } from '@/hooks/usePaymentProcessor'
 import BillingPeriodSelector from '@/components/checkout/BillingPeriodSelector'
 import OrderSummary from '@/components/checkout/OrderSummary'
 import PaymentMethodSelector from '@/components/checkout/payment-methods/PaymentMethodSelector'
+import PaymentErrorBoundary from '@/components/checkout/PaymentErrorBoundary'
 
 // Midtrans type declarations
 declare global {
@@ -507,8 +508,14 @@ export default function CheckoutPage() {
   const { price, discount, originalPrice } = calculatePrice()
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC]">
-      <div className="container mx-auto px-4 py-8">
+    <PaymentErrorBoundary
+      onError={(error, errorInfo) => {
+        console.error('🚨 Checkout Error:', { error, errorInfo })
+        // In production, send to error tracking service
+      }}
+    >
+      <div className="min-h-screen bg-[#F7F9FC]">
+        <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Button
@@ -783,6 +790,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PaymentErrorBoundary>
   )
 }

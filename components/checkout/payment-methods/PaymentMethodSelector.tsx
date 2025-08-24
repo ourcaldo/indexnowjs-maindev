@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Building2 } from 'lucide-react'
+import PaymentErrorBoundary from '@/components/checkout/PaymentErrorBoundary'
 import MidtransSnapPayment from '@/components/checkout/payment-methods/MidtransSnapPayment'
 import MidtransRecurringPayment from '@/components/checkout/payment-methods/MidtransRecurringPayment'
 import BankTransferPayment from '@/components/checkout/payment-methods/BankTransferPayment'
@@ -25,11 +26,12 @@ export default function PaymentMethodSelector({
 }: PaymentMethodSelectorProps) {
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <PaymentErrorBoundary>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-[#1A1A1A]">3. Payment Method</CardTitle>
+        </CardHeader>
+        <CardContent>
         <RadioGroup value={selectedMethod} onValueChange={onMethodChange}>
           {paymentGateways.map((gateway) => (
             <div key={gateway.id} className="space-y-4">
@@ -74,7 +76,8 @@ export default function PaymentMethodSelector({
             </div>
           ))}
         </RadioGroup>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </PaymentErrorBoundary>
   )
 }

@@ -66,16 +66,33 @@ export function usePaymentProcessor({
    * Process payment using unified payment API
    */
   const processPayment = async (paymentData: PaymentRequest, token: string): Promise<void> => {
+    const paymentId = `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const startTime = Date.now()
+    
     setSubmitting(true)
     setError(null)
     onPaymentStart?.()
     
     try {
+      console.log(`🚀 [Payment Processor ${paymentId}] Starting payment:`, {
+        method: paymentData.payment_method,
+        package_id: paymentData.package_id,
+        billing_period: paymentData.billing_period,
+        customer_email: paymentData.customer_info.email
+      })
+      
       const paymentRouter = new PaymentRouter(token)
       const result = await paymentRouter.processPayment(paymentData)
 
       if (result.success) {
+        const duration = Date.now() - startTime
+        console.log(`✅ [Payment Processor ${paymentId}] Payment succeeded in ${duration}ms:`, {
+          request_id: (result as any).request_id,
+          processing_time: (result as any).processing_time_ms
+        })
+        
         await handlePaymentSuccess(result, paymentData.payment_method, paymentData)
+        
         // Only call onSuccess for non-Midtrans payments (Midtrans handles success via popup/3DS callbacks)
         if (paymentData.payment_method !== 'midtrans_snap' && paymentData.payment_method !== 'midtrans_recurring') {
           onSuccess?.(result)
@@ -84,6 +101,13 @@ export function usePaymentProcessor({
         throw new Error(result.message || 'Payment failed')
       }
     } catch (error) {
+      const duration = Date.now() - startTime
+      console.error(`❌ [Payment Processor ${paymentId}] Payment failed after ${duration}ms:`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        method: paymentData.payment_method,
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      
       // Re-throw 3DS authentication errors so checkout page can handle them
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
         setSubmitting(false) // Reset submitting state before re-throwing
