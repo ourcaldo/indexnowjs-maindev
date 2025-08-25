@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireSuperAdminAuth } from '@/lib/admin-auth'
-import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
+import { requireSuperAdminAuth } from '@/lib/auth'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 import * as nodemailer from 'nodemailer'
 
 export async function POST(request: NextRequest) {

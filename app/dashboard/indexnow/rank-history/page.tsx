@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 import { usePageViewLogger } from '@/hooks/useActivityLogger'
 import { 
   Calendar, 

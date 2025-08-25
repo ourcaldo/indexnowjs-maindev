@@ -21,7 +21,7 @@ import {
   X
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 
 // Simple UI Components using project color scheme

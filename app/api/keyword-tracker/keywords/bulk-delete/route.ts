@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getServerAuthUser } from '@/lib/server-auth'
-import { supabaseAdmin } from '@/lib/supabase'
-import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
+import { getServerAuthUser } from '@/lib/auth'
+import { supabaseAdmin } from '@/lib/database'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 const bulkDeleteSchema = z.object({
   keywordIds: z.array(z.string().uuid()).min(1, 'At least one keyword ID is required')

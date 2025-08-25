@@ -11,7 +11,7 @@ import {
   Loader2
 } from 'lucide-react'
 import { authService } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 interface PackageFeature {

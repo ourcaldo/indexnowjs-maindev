@@ -6,7 +6,7 @@ import GlobalWebSocketProvider from '@/components/GlobalWebSocketProvider'
 // Initialize background services on server-side only once
 if (typeof window === 'undefined' && !(global as any).backgroundServicesInitialized) {
   (global as any).backgroundServicesInitialized = true;
-  import('../lib/worker-startup').then(({ workerStartup }) => {
+  import('../lib/job-management/worker-startup').then(({ workerStartup }) => {
     workerStartup.initialize().then(() => {
       console.log('IndexNow Studio background services initialized successfully');
     }).catch((error) => {

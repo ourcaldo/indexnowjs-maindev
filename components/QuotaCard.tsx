@@ -5,7 +5,7 @@ import { TrendingUp, AlertTriangle, Package, Search } from 'lucide-react'
 import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
 import { useQuotaUpdates } from '@/hooks/useGlobalWebSocket'
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 
 interface QuotaInfo {
   daily_quota_used: number

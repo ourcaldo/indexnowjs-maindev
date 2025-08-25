@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { authService, AuthUser } from '@/lib/auth';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database';
 import io, { Socket } from 'socket.io-client';
 
 interface SocketMessage {

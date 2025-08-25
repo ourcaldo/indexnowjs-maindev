@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 import { loginSchema } from '@/shared/schema'
 import { 
   publicApiRouteWrapper,
@@ -13,7 +13,7 @@ import {
   ErrorSeverity, 
   logger 
 } from '@/lib/error-handling'
-import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint: string) => {
   // Validate request body

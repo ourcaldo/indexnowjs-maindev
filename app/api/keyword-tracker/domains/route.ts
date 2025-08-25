@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerAuthUser } from '@/lib/server-auth'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getServerAuthUser } from '@/lib/auth'
+import { supabaseAdmin } from '@/lib/database'
 import { z } from 'zod'
 
 // Validation schema

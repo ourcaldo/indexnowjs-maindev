@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { authService } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 import { useToast } from '@/hooks/use-toast'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { 

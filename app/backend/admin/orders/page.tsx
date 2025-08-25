@@ -25,7 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/hooks/use-toast'
-import { supabaseBrowser } from '@/lib/supabase-browser'
+import { supabaseBrowser } from '@/lib/database'
 import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils'
 
 interface OrderTransaction {

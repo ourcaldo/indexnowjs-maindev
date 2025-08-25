@@ -1,5 +1,5 @@
 import { BasePaymentHandler, PaymentData, PaymentResult } from '../shared/base-handler'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/database'
 
 export default class BankTransferHandler extends BasePaymentHandler {
   private gateway: any

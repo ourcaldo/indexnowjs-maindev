@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/database'
 import { z } from 'zod'
 import crypto from 'crypto'
 import { 
@@ -41,7 +41,7 @@ const createServiceAccountSchema = z.object({
 
 // Use the same EncryptionService as the main system
 import { EncryptionService } from '@/lib/encryption'
-import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 export const GET = apiRouteWrapper(async (request: NextRequest, auth: AuthenticatedRequest, endpoint: string) => {
   // Fetch user's service accounts with proper error handling

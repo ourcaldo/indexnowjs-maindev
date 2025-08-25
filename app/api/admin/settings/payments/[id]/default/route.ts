@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireSuperAdminAuth } from '@/lib/admin-auth'
-import { supabaseAdmin } from '@/lib/supabase'
+import { requireSuperAdminAuth } from '@/lib/auth'
+import { supabaseAdmin } from '@/lib/database'
 
 export async function PATCH(
   request: NextRequest,

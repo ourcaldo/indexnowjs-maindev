@@ -3,7 +3,7 @@
  * Sends security notifications when users log into their accounts
  */
 
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/database'
 import * as nodemailer from 'nodemailer'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -279,6 +279,7 @@ export class LoginNotificationService {
       
       // Determine security risk level
       const securityRisk = this.getSecurityRiskLevel(data.ipAddress, deviceInfo, locationData)
+      const securityRisk = this.getSecurityRiskLevel(data.ipAddress, deviceInfo, locationData)
 
       // Format dates
       const loginTime = new Date(data.loginTime).toLocaleString('en-US', {
@@ -349,6 +350,7 @@ export class LoginNotificationService {
   /**
    * Determine security risk level
    */
+  private getSecurityRiskLevel(ipAddress: string, deviceInfo: Record<string, any>, locationData: Record<string, any>): string {
   private getSecurityRiskLevel(ipAddress: string, deviceInfo: Record<string, any>, locationData: Record<string, any>): string {
     // Simple risk assessment logic
     let riskScore = 0

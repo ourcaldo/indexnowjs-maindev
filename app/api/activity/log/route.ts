@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { ActivityLogger } from '@/lib/activity-logger'
+import { ActivityLogger } from '@/lib/monitoring'
 
 interface ActivityLogRequest {
   eventType: string

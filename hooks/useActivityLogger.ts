@@ -5,7 +5,7 @@
 
 import { useEffect, useRef } from 'react'
 import { authService } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 
 interface ActivityLogRequest {
   eventType: string

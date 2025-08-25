@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database';
 import { authService } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useSocketIO } from '@/hooks/useSocketIO';

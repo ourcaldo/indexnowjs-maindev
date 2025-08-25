@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
-import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
+import { supabase, supabaseAdmin } from '@/lib/database'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {

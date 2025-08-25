@@ -10,7 +10,7 @@ import { PaymentRouter, type PaymentRequest } from '@/lib/payment-services/payme
 import { MidtransClientService } from '@/lib/payment-services/midtrans-client-service'
 import { useToast } from '@/hooks/use-toast'
 import { authService } from '@/lib/auth'
-import { supabaseBrowser } from '@/lib/supabase-browser'
+import { supabaseBrowser } from '@/lib/database'
 // ActivityLogger is imported dynamically to avoid server-side imports in browser
 
 export interface UsePaymentProcessorProps {

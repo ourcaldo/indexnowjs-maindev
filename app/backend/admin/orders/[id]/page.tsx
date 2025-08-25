@@ -28,7 +28,7 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { supabaseBrowser } from '@/lib/supabase-browser'
+import { supabaseBrowser } from '@/lib/database'
 import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils'
 
 interface OrderTransaction {

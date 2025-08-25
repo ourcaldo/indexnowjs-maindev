@@ -16,7 +16,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { authService } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 import QuotaCard from '@/components/QuotaCard'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 

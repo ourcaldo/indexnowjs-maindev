@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerAuthUser } from '@/lib/server-auth'
+import { getServerAuthUser } from '@/lib/auth'
 import { workerStartup } from '@/lib/worker-startup'
 import { dailyRankCheckJob } from '@/lib/daily-rank-check-job'
 

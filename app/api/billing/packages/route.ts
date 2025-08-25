@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
-import { getUserCurrency, formatCurrency } from '@/lib/currency-utils'
+import { supabaseAdmin } from '@/lib/database'
+import { getUserCurrency, formatCurrency } from '@/lib/utils'
 
 export async function GET(request: NextRequest) {
   try {

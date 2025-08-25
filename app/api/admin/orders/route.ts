@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireServerAdminAuth } from '@/lib/server-auth'
+import { requireServerAdminAuth } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
-import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

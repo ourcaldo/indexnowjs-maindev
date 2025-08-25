@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
-import { requireSuperAdminAuth } from '@/lib/admin-auth'
-import { ActivityLogger, ActivityEventTypes } from '@/lib/activity-logger'
+import { supabaseAdmin } from '@/lib/database'
+import { requireSuperAdminAuth } from '@/lib/auth'
+import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 export async function GET(request: NextRequest) {
   try {

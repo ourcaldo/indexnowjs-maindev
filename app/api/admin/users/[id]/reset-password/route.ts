@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireSuperAdminAuth } from '@/lib/admin-auth'
-import { supabaseAdmin } from '@/lib/supabase'
-import { ActivityLogger } from '@/lib/activity-logger'
+import { requireSuperAdminAuth } from '@/lib/auth'
+import { supabaseAdmin } from '@/lib/database'
+import { ActivityLogger } from '@/lib/monitoring'
 
 // POST /api/admin/users/[id]/reset-password - Generate new password for user
 export async function POST(

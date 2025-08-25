@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check, Shield, Info } from 'lucide-react'
-import { formatCurrency } from '@/lib/currency-utils'
+import { formatCurrency } from '@/lib/utils'
 
 interface OrderSummaryProps {
   selectedPackage: any

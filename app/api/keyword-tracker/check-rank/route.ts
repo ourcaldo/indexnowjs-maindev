@@ -4,9 +4,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerAuthUser } from '@/lib/server-auth'
+import { getServerAuthUser } from '@/lib/auth'
 import { RankTracker } from '@/lib/rank-tracker'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/database'
 import { z } from 'zod'
 
 // Validation schema

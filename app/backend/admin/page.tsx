@@ -11,7 +11,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 import { useAdminDashboardLogger } from '@/hooks/use-admin-activity-logger'
 
 interface DashboardStats {

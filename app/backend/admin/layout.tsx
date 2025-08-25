@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { adminAuthService, AdminUser } from '@/lib/admin-auth'
+import { adminAuthService, AdminUser } from '@/lib/auth'
 import { AdminSidebar } from '@/components/AdminSidebar'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { ToastContainer } from '@/components/ui/toast'

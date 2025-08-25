@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Upload, CheckCircle, Clock, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react'
-import { supabaseBrowser } from '@/lib/supabase-browser'
+import { supabaseBrowser } from '@/lib/database'
 import { useToast } from '@/hooks/use-toast'
 
 interface Transaction {

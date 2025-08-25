@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { getRequestInfo } from '@/lib/ip-device-utils'
-import { findCountryByName } from '@/lib/countries'
+import { findCountryByName } from '@/lib/utils'
 import { 
   publicApiRouteWrapper,
   createApiResponse

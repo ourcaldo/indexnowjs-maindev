@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/database'
 import { createMidtransService } from '@/lib/midtrans-service'
 
 export async function POST(request: NextRequest) {

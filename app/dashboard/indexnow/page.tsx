@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 import { authService } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { useQuotaValidation } from '@/hooks/useQuotaValidation'

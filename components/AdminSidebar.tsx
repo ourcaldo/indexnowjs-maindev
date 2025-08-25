@@ -21,7 +21,7 @@ import {
   Receipt,
   Mail
 } from 'lucide-react'
-import { AdminUser } from '@/lib/admin-auth'
+import type { AdminUser } from '@/lib/auth'
 import { authService } from '@/lib/auth'
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 

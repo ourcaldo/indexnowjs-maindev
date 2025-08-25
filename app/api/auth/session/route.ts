@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { ActivityLogger } from '@/lib/activity-logger'
+import { ActivityLogger } from '@/lib/monitoring'
 import { logger } from '@/lib/error-handling'
 
 export async function GET(request: NextRequest) {

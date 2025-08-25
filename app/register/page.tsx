@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { authService } from "@/lib/auth"
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
-import { countries, findCountryByCode } from '@/lib/countries'
+import { countries, findCountryByCode } from '@/lib/utils'
 import { Eye, EyeOff } from 'lucide-react'
 // We'll use a simple fetch to our detect-location API instead
 

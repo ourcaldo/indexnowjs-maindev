@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AlertTriangle, Package } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/database'
 
 interface QuotaInfo {
   daily_quota_used: number

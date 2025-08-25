@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerAuthUser } from '@/lib/server-auth'
+import { getServerAuthUser } from '@/lib/auth'
 import { quotaMonitor } from '@/lib/quota-monitor'
 import { z } from 'zod'
 

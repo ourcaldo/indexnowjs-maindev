@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/database'
 import { updateUserSettingsSchema } from '@/shared/schema'
 
 export async function GET(request: NextRequest) {

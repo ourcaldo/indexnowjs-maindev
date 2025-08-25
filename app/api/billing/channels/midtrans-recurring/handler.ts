@@ -1,5 +1,5 @@
 import { BasePaymentHandler, PaymentData, PaymentResult } from '../shared/base-handler'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/database'
 import { createMidtransService } from '@/lib/midtrans-service'
 
 export default class MidtransRecurringHandler extends BasePaymentHandler {
