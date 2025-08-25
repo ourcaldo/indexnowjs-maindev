@@ -704,6 +704,24 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 25, 2025: Email System Enhancement - Payment Flow & Currency Display Fixes ✅
+- **Midtrans SNAP Email Flow Optimization**
+  - **Fixed Payment Detail Integration**: Removed immediate email sending from SNAP handler for bank_transfer and cstore payments
+  - **Webhook-Based Payment Details**: Now waits for Midtrans webhook notification to send emails with complete payment information (VA numbers, store codes, expiry times)
+  - **Enhanced Payment Instructions**: Users receive emails with proper virtual account numbers and convenience store payment codes from webhook data
+- **Currency Display Issues Resolution**
+  - **Fixed USD/IDR Currency Confusion**: Resolved payment received emails showing incorrect currency (was showing "IDR 45" instead of "$45")
+  - **Original Currency Preservation**: Enhanced webhook notifications to respect transaction's original currency (USD/IDR) for proper email display
+  - **Proper Amount Formatting**: Added intelligent currency display logic based on transaction metadata and original currency
+- **Comprehensive Email Trigger Enhancement**
+  - **Order Expiration Emails**: Added automatic email notifications for failed/expired payments with proper status handling
+  - **Payment Flow Completion**: Enhanced webhook handler to send appropriate emails at correct transaction stages (pending → completed → expired)
+  - **All Payment Methods Coverage**: Ensured Bank Transfer, Midtrans SNAP, and Midtrans Recurring properly trigger webhook-based email notifications
+- **Technical Implementation Details**
+  - Modified `app/api/billing/channels/midtrans-snap/handler.ts`: Removed immediate email sending to wait for webhook
+  - Enhanced `app/api/midtrans/webhook/route.ts`: Added currency-aware email sending and order expiration handling
+  - Updated payment received and order confirmation email logic to use proper currency display from transaction metadata
+
 ### August 25, 2025: Comprehensive Email Notification System Implementation ✅
 - **Complete Payment Email Notification System Enhancement**
   - **Enhanced Email Service**: Extended emailService.ts with four new email types (payment received, package activated, order expired) and enhanced billing confirmation with Midtrans payment details

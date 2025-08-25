@@ -286,11 +286,16 @@ async function processTransaction(body: any, transaction: any, supabaseAdmin: an
       case 'cancel':
       case 'failure':
         newStatus = 'failed'
+        // Send order expired email for failed payments
+        await sendOrderExpiredEmail(body, transaction, supabaseAdmin, paymentType, body.transaction_status)
         break
       case 'expire':
         // Handle expire status with auto-cancel service
         console.log(`⏰ [${paymentType.toUpperCase()}] Transaction expired, processing with auto-cancel service`)
+        newStatus = 'expired'
         await AutoCancelJob.handleMidtransExpireNotification(transaction, body)
+        // Send order expired email
+        await sendOrderExpiredEmail(body, transaction, supabaseAdmin, paymentType, 'expired')
         return NextResponse.json({ status: 'OK', message: 'Transaction expired and processed' })
       case 'pending':
         newStatus = 'pending'
@@ -322,8 +327,10 @@ async function processTransaction(body: any, transaction: any, supabaseAdmin: an
     
     console.log(`✅ [${paymentType.toUpperCase()}] Transaction updated successfully`)
 
-    // Send order confirmation email with payment details if this is a new pending transaction
-    if (newStatus === 'pending' && transaction.transaction_status !== 'pending') {
+    // Send order confirmation email with payment details for pending transactions
+    // This handles bank_transfer and cstore payments that need payment instructions
+    if (newStatus === 'pending' && (body.payment_type === 'bank_transfer' || body.payment_type === 'cstore')) {
+      console.log(`📧 [${paymentType.toUpperCase()}] Sending order confirmation with payment details for ${body.payment_type}`)
       await sendOrderConfirmationWithDetails(body, transaction, supabaseAdmin, paymentType)
     }
 
@@ -344,12 +351,18 @@ async function processTransaction(body: any, transaction: any, supabaseAdmin: an
           .single()
 
         if (userData && packageData) {
+          // Get original currency from transaction metadata or use transaction currency
+          const originalCurrency = transaction.currency || (transaction.metadata as any)?.original_currency || 'USD'
+          const displayAmount = originalCurrency === 'USD' 
+            ? `$${Number(transaction.amount).toFixed(2)}`
+            : `${originalCurrency} ${Number(transaction.amount).toLocaleString('id-ID')}`
+
           await emailService.sendPaymentReceived(userData.email, {
             customerName: userData.full_name || 'Customer',
-            orderId: transaction.order_id || transaction.id,
+            orderId: transaction.payment_reference || transaction.id,
             packageName: packageData.name,
             billingPeriod: transaction.billing_period || 'monthly',
-            amount: `IDR ${Number(transaction.amount).toLocaleString('id-ID')}`,
+            amount: displayAmount,
             paymentDate: new Date().toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
@@ -387,12 +400,24 @@ async function sendOrderConfirmationWithDetails(body: any, transaction: any, sup
       .single()
 
     if (userData && packageData) {
+      // Get original currency and converted amount for proper display
+      const originalCurrency = transaction.currency || (transaction.metadata as any)?.original_currency || 'USD'
+      const convertedAmount = (transaction.metadata as any)?.converted_amount
+      const convertedCurrency = (transaction.metadata as any)?.converted_currency || 'IDR'
+      
+      // Use converted amount if available (for Midtrans which uses IDR), otherwise use original
+      const displayAmount = convertedAmount 
+        ? `${convertedCurrency} ${Number(convertedAmount).toLocaleString('id-ID')}`
+        : originalCurrency === 'USD' 
+          ? `$${Number(transaction.amount).toFixed(2)}`
+          : `${originalCurrency} ${Number(transaction.amount).toLocaleString('id-ID')}`
+
       const emailData: any = {
         customerName: userData.full_name || 'Customer',
-        orderId: transaction.order_id || transaction.id,
+        orderId: transaction.payment_reference || transaction.id,
         packageName: packageData.name,
         billingPeriod: transaction.billing_period || 'monthly',
-        amount: `IDR ${Number(transaction.amount).toLocaleString('id-ID')}`,
+        amount: displayAmount,
         paymentMethod: 'Midtrans',
         orderDate: new Date().toLocaleDateString('en-US', {
           year: 'numeric',
@@ -706,5 +731,49 @@ async function handleSubscriptionEvent(body: any, transaction: any, supabaseAdmi
       message: 'Subscription event processing failed',
       error: error.message
     }, { status: 500 })
+  }
+}
+
+async function sendOrderExpiredEmail(body: any, transaction: any, supabaseAdmin: any, paymentType: string, status: string) {
+  try {
+    console.log(`📧 [${paymentType.toUpperCase()}] Sending order expired email for status: ${status}`)
+    
+    const { data: userData } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select('full_name, email')
+      .eq('user_id', transaction.user_id)
+      .single()
+
+    const { data: packageData } = await supabaseAdmin
+      .from('indb_payment_packages')
+      .select('name')
+      .eq('id', transaction.package_id)
+      .single()
+
+    if (userData && packageData) {
+      // Get original currency and amount for proper display
+      const originalCurrency = transaction.currency || (transaction.metadata as any)?.original_currency || 'USD'
+      const displayAmount = originalCurrency === 'USD' 
+        ? `$${Number(transaction.amount).toFixed(2)}`
+        : `${originalCurrency} ${Number(transaction.amount).toLocaleString('id-ID')}`
+
+      await emailService.sendOrderExpired(userData.email, {
+        customerName: userData.full_name || 'Customer',
+        orderId: transaction.payment_reference || transaction.id,
+        packageName: packageData.name,
+        billingPeriod: transaction.billing_period || 'monthly',
+        amount: displayAmount,
+        status: status === 'expired' ? 'Expired' : 'Failed',
+        expiredDate: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        subscribeUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://indexnow.studio'
+      })
+      console.log(`✅ [${paymentType.toUpperCase()}] Order expired email sent successfully`)
+    }
+  } catch (emailError) {
+    console.error(`⚠️ [${paymentType.toUpperCase()}] Failed to send order expired email:`, emailError)
   }
 }
