@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       process.nextTick(async () => {
         try {
           const { LoginNotificationService } = await import('@/lib/email/login-notification-service')
-          const { getRequestInfo } = await import('@/lib/utils')
+          const { getRequestInfo } = await import('@/lib/utils/ip-device-utils')
           
           // Extract request information for notification
           const requestInfo = await getRequestInfo(request)

@@ -6,7 +6,6 @@
 import { supabaseAdmin } from '@/lib/database'
 import { logger } from './error-handling'
 import { getRequestInfo, formatDeviceInfo, formatLocationData, getSecurityRiskLevel } from '../utils/ip-device-utils'
-import { getRequestInfo, formatDeviceInfo, formatLocationData, getSecurityRiskLevel } from '../utils/ip-device-utils'
 import { NextRequest } from 'next/server'
 
 export interface ActivityLogData {
