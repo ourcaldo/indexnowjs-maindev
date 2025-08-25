@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Log password change activity
     try {
-      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/activity-logger')
+      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/monitoring/activity-logger')
       await ActivityLogger.logActivity({
         userId: user.id,
         eventType: ActivityEventTypes.PASSWORD_CHANGE,

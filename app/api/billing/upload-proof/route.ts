@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     // Log payment proof upload activity
     try {
-      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/activity-logger')
+      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/monitoring/activity-logger')
       await ActivityLogger.logBillingActivity(
         user.id,
         ActivityEventTypes.PAYMENT_PROOF_UPLOADED,

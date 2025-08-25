@@ -1,6 +1,6 @@
 import { Server } from 'socket.io'
-import { supabaseAdmin } from '../../lib/supabase'
-import { SocketIOBroadcaster } from '../../lib/socketio-broadcaster'
+import { supabaseAdmin } from '../../lib/database/supabase'
+import { SocketIOBroadcaster } from '../../lib/core/socketio-broadcaster'
 
 const SocketHandler = (req, res) => {
   if (res.socket.server.io) {

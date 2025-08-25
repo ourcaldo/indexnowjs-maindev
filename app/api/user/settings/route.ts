@@ -122,7 +122,7 @@ export async function PUT(request: NextRequest) {
 
     // Log settings update activity
     try {
-      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/activity-logger')
+      const { ActivityLogger, ActivityEventTypes } = await import('@/lib/monitoring/activity-logger')
       const changedFields = Object.keys(result.data).join(', ')
       await ActivityLogger.logProfileActivity(
         user.id,
