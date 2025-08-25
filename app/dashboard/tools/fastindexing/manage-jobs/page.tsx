@@ -98,7 +98,6 @@ export default function ManageJobsPage() {
 
   // Memoized callback functions to prevent infinite re-renders
   const handleJobUpdate = useCallback((message: any) => {
-    console.log('📨 Job update received:', message);
     // Update the specific job in the list
     setJobs(prevJobs => 
       prevJobs.map(job => {
@@ -120,7 +119,6 @@ export default function ManageJobsPage() {
   }, []);
 
   const handleJobCompleted = useCallback((message: any) => {
-    console.log('✅ Job completed:', message);
     addToast({
       title: 'Job Completed',
       description: `Job completed successfully!`,

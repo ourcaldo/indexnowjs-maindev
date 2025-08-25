@@ -369,7 +369,6 @@ export function usePaymentProcessor({
           popupModal.openPopup(redirect_url)
         },
         onSuccess: async function(response: any) {
-          console.log('3DS Success response:', response)
           popupModal.closePopup()
 
           try {
@@ -416,7 +415,6 @@ export function usePaymentProcessor({
           }
         },
         onFailure: function(response: any) {
-          console.log('3DS Failure response:', response)
           popupModal.closePopup()
           setSubmitting(false)
           addToast({
@@ -428,7 +426,6 @@ export function usePaymentProcessor({
         onPending: function(response: any) {
           // For credit card recurring payments, there's no pending state - only success or failure
           // Keep popup open and let user complete the authentication
-          console.log('3DS Pending response (keeping popup open):', response)
         }
       }
 

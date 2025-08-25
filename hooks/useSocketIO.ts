@@ -47,13 +47,11 @@ class SocketManager {
   async getConnection(userId: string, token: string): Promise<Socket> {
     // If we already have a valid connection for the same user, return it immediately
     if (this.socket && this.socket.connected && this.lastUserId === userId) {
-      console.log('🔄 Reusing existing Socket.io connection for user:', userId);
       return this.socket;
     }
 
     // If user changed, disconnect old connection
     if (this.socket && this.lastUserId && this.lastUserId !== userId) {
-      console.log('👤 User changed, disconnecting old connection');
       this.socket.disconnect();
       this.socket = null;
       this.connectionPromise = null;
@@ -61,7 +59,6 @@ class SocketManager {
 
     // If we're already connecting for this user, wait for the existing connection attempt
     if (this.connectionPromise && this.lastUserId === userId) {
-      console.log('⏳ Waiting for existing connection attempt');
       return this.connectionPromise;
     }
 
@@ -78,7 +75,6 @@ class SocketManager {
       this.socket = null;
     }
 
-    console.log('🔌 Creating Socket.io connection with WebSocket-only transport');
     
     // Create Socket.io connection with WebSocket-only transport - NO POLLING
     const socket = io({
@@ -111,18 +107,15 @@ class SocketManager {
 
     // Setup connection handlers
     socket.on('connect', () => {
-      console.log('✅ Socket.io connected via WebSocket-only (transport:', (socket as any).io?.engine?.transport?.name || 'websocket', ')');
       this.isConnecting = false;
     });
 
     socket.on('disconnect', (reason: string) => {
-      console.log(`❌ Socket.io disconnected: ${reason}`);
       this.isConnecting = false;
       this.connectionPromise = null;
       
       // Don't immediately reconnect if it was a deliberate disconnect
       if (reason === 'io client disconnect' || reason === 'io server disconnect') {
-        console.log('🔌 Connection was deliberately closed, not reconnecting');
         this.socket = null;
       }
     });
@@ -181,14 +174,11 @@ class SocketManager {
 
   removeSubscriber(id: string) {
     this.subscribers.delete(id);
-    console.log(`📤 Hook ${id} unsubscribed. Active subscribers: ${this.subscribers.size}`);
     
     // Keep connection alive if there are any subscribers, disconnect after delay if none
     if (this.subscribers.size === 0) {
-      console.log('🔌 No more subscribers, scheduling disconnect in 5 seconds');
       setTimeout(() => {
         if (this.subscribers.size === 0 && this.socket) {
-          console.log('🔌 Disconnecting Socket.io after timeout');
           this.disconnect();
         }
       }, 5000);
@@ -286,7 +276,6 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
               
               socket.emit('subscribe_job', { jobId });
               currentSubscribedJobId = jobId;
-              console.log(`📡 Subscribed to job updates for job: ${jobId}`);
             }
           }
         };
@@ -299,21 +288,18 @@ export function useSocketIO(options: UseSocketIOOptions = {}) {
 
         const handleJobUpdate = (message: SocketMessage) => {
           if (isMounted) {
-            console.log('📨 Job update received:', message);
             setLastMessage({ ...message, type: 'job_update' });
           }
         };
 
         const handleJobProgress = (message: SocketMessage) => {
           if (isMounted) {
-            console.log('📊 Job progress received:', message);
             setLastMessage({ ...message, type: 'job_progress' });
           }
         };
 
         const handleJobCompleted = (message: SocketMessage) => {
           if (isMounted) {
-            console.log('✅ Job completed:', message);
             setLastMessage({ ...message, type: 'job_completed' });
           }
         };

@@ -50,7 +50,6 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
   // Subscribe to real-time quota updates via WebSocket
   useQuotaUpdates((quotaUpdate) => {
     // Quota will be automatically updated through the global manager
-    console.log('📊 Received quota update via WebSocket:', quotaUpdate)
   })
 
   // Fetch keyword usage data

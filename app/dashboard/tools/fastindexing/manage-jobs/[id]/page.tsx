@@ -125,13 +125,11 @@ export default function JobDetailsPage() {
 
   // Memoized callback functions to prevent infinite re-renders
   const handleJobUpdate = useCallback((message: any) => {
-    console.log('📨 Job update received on detail page:', message);
     // Update job data with real-time progress
     if (message.jobId === jobId) {
       setJob(prevJob => {
         if (!prevJob) return prevJob;
         
-        console.log('🔄 Updating job state with:', message);
         return {
           ...prevJob,
           status: (message.status as Job['status']) || prevJob.status,
@@ -147,7 +145,6 @@ export default function JobDetailsPage() {
   }, [jobId]);
 
   const handleJobProgress = useCallback((message: any) => {
-    console.log('📊 Job progress received on detail page:', message);
     if (message.jobId === jobId && message.progress) {
       setJob(prevJob => {
         if (!prevJob) return prevJob;
@@ -166,7 +163,6 @@ export default function JobDetailsPage() {
   }, [jobId]);
 
   const handleJobCompleted = useCallback((message: any) => {
-    console.log('✅ Job completed on detail page:', message);
     if (message.jobId === jobId) {
       addToast({
         title: 'Job Completed',
@@ -201,7 +197,6 @@ export default function JobDetailsPage() {
     const handleUrlSubmissionUpdate = (event: any) => {
       const { detail: submission } = event;
       if (submission.job_id === jobId) {
-        console.log('📨 Real-time URL submission update:', submission);
         
         setSubmissions(prevSubmissions => {
           // Check if this submission already exists
@@ -224,7 +219,6 @@ export default function JobDetailsPage() {
     const handleJobProgressUpdate = (event: any) => {
       const { detail: data } = event;
       if (data.jobId === jobId && data.reloadSubmissions) {
-        console.log('🔄 Reloading submissions due to job progress update');
         // Using the memoized loadSubmissions function
         if (loadSubmissions) {
           loadSubmissions();
@@ -236,7 +230,6 @@ export default function JobDetailsPage() {
     const handleUrlStatusChange = (event: any) => {
       const { detail: data } = event;
       if (data.jobId === jobId && data.submission) {
-        console.log('📨 Real-time URL status change:', data.submission);
         setSubmissions(prevSubmissions => {
           const existingIndex = prevSubmissions.findIndex(sub => sub.id === data.submission.id);
           
@@ -257,7 +250,6 @@ export default function JobDetailsPage() {
     const handleDetailedProgress = (event: any) => {
       const { detail: progressData } = event;
       if (progressData.jobId === jobId) {
-        console.log('📊 Detailed progress update:', progressData);
         // Additional progress handling can be added here
       }
     };

@@ -20,7 +20,6 @@ export default function QuotaNotification() {
 
   // Subscribe to real-time quota updates via WebSocket
   useQuotaUpdates((quotaUpdate) => {
-    console.log('📊 Quota notification received WebSocket update:', quotaUpdate)
   })
 
   // Check quota status and show appropriate notification

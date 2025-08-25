@@ -31,7 +31,6 @@ export default function ServiceAccountQuotaNotification() {
 
   // Subscribe to real-time notification updates via WebSocket
   useNotificationUpdates((newNotification) => {
-    console.log('📣 Received new notification via WebSocket:', newNotification)
     setLocalNotifications(prev => [newNotification, ...prev])
   })
 

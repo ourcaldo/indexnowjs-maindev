@@ -15,7 +15,6 @@ export default function GlobalWebSocketProvider({ children }: { children: React.
 
   useEffect(() => {
     if (mounted && typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard')) {
-      console.log(`🌐 Global WebSocket status: ${isConnected ? 'Connected' : 'Disconnected'}`)
     }
   }, [isConnected, mounted])
 

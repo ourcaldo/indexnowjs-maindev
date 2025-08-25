@@ -61,7 +61,6 @@ async function initializeGlobalWebSocket(): Promise<Socket> {
       
       if (!user) {
         // Instead of rejecting immediately, log the error and try to reconnect later
-        console.log('🌐 User not authenticated for WebSocket, will retry later')
         setTimeout(() => {
           connectionPromise = null
           if (typeof window !== 'undefined') {
@@ -86,12 +85,10 @@ async function initializeGlobalWebSocket(): Promise<Socket> {
       })
 
       globalSocket.on('connect', () => {
-        console.log('🔗 Global WebSocket connected:', globalSocket?.id)
         resolve(globalSocket!)
       })
 
       globalSocket.on('disconnect', (reason) => {
-        console.log('🔗 Global WebSocket disconnected:', reason)
         if (reason === 'io server disconnect') {
           // Server disconnected, try to reconnect
           setTimeout(() => initializeGlobalWebSocket(), 5000)

@@ -296,7 +296,6 @@ export default function CheckoutPage() {
 
   // Handle 3DS authentication
   const handle3DSAuthentication = (redirectUrl: string, transactionId: string, orderId: string) => {
-    console.log('🔐 Starting 3DS authentication process')
 
     if (!window.MidtransNew3ds || typeof window.MidtransNew3ds.authenticate !== 'function') {
       throw new Error('3DS authentication not available. Please refresh the page and try again.')
@@ -305,12 +304,10 @@ export default function CheckoutPage() {
     const options = {
       performAuthentication: (url: string) => {
         // Open 3DS page in modal/iframe
-        console.log('🔐 Opening 3DS authentication page')
         setThreeDSUrl(url)
         setShow3DSModal(true)
       },
       onSuccess: async (response: any) => {
-        console.log('✅ 3DS Authentication successful:', response)
         setShow3DSModal(false)
 
         // Call our callback API to complete the payment process
@@ -357,7 +354,6 @@ export default function CheckoutPage() {
         }
       },
       onFailure: (response: any) => {
-        console.log('❌ 3DS Authentication failed:', response)
         setShow3DSModal(false)
         setSubmitting(false)
 
@@ -368,7 +364,6 @@ export default function CheckoutPage() {
         })
       },
       onPending: (response: any) => {
-        console.log('⏳ 3DS Authentication pending:', response)
         setShow3DSModal(false)
         setSubmitting(false)
 
@@ -493,7 +488,6 @@ export default function CheckoutPage() {
     const loadMidtransSDK = async () => {
       // Check if script already exists
       if (document.querySelector('script[src*="midtrans"]')) {
-        console.log('✅ Midtrans SDK already loaded')
         return
       }
 
@@ -501,7 +495,6 @@ export default function CheckoutPage() {
         // Get authentication token
         const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
         if (!token) {
-          console.log('⚠️ No auth token, skipping Midtrans SDK load')
           return
         }
 
@@ -1159,7 +1152,6 @@ export default function CheckoutPage() {
                     onClick={async () => {
                       setSubmitting(true)
                       try {
-                        console.log('🏦 FRONTEND: Starting bank transfer payment process...')
 
                         const user = await authService.getCurrentUser()
                         if (!user) {
@@ -1231,7 +1223,6 @@ export default function CheckoutPage() {
                         })
                       } finally {
                         // Always reset submitting state regardless of success or failure
-                        console.log('🔄 FRONTEND: Resetting submitting state (bank transfer)')
                         setSubmitting(false)
                       }
                     }}
