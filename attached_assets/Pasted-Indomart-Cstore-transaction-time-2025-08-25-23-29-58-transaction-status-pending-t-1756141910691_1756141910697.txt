@@ -1,0 +1,34 @@
+Indomart Cstore
+{
+"transaction_time": "2025-08-25 23:29:58",
+"transaction_status": "pending",
+"transaction_id": "ce0538ef-785d-4553-9d16-384007e7f4d2",
+"store": "indomaret",
+"status_message": "midtrans payment notification",
+"status_code": "201",
+"signature_key": "9ac74de3de4706966d7740cc8389c99ba36127d3442d863c7468a75d6cbbb4c874fd8f6ccc6ead0b9d96c056d241fcea8e0ad5a9659f02d0d90427792e67be7d",
+"payment_type": "cstore",
+"payment_code": "801244001006",
+"order_id": "SNAP-1756139391043-915f50e5",
+"merchant_id": "G643888341",
+"gross_amount": "733344.00",
+"expiry_time": "2025-08-26 23:29:58",
+"currency": "IDR"
+}
+
+For the other SNAP Midtrans that isn't using "payment_type" cstore and bank_transfer, please don't add the payment details.
+
+I want you to also state in email that user need to made a payment before the "expiry_time".
+
+After the order confirmation, I also want you to made another email when payment is received. It's happen when admin is accept the order from the backend or when midtrans send webhook notification with transaction_stauts is capture or settlement.
+
+Also made the email when user package is active.
+
+Also made email when user order is expire/failed.
+
+For the email, please made as simple as the current template lib/email/templates/billing-confirmation.html
+'''
+
+But, the problem is:
+1. When user pay using SNAP Midtrans with payment type bank_transfer and cstore, you didn't add the payment details like the VA number or payment code, because the email is directly sended after user is click complete order. You should pay attention, when user choose payment method bamk transfer manual it's okay to directly sending, bcs the payment details is get directly from the backend database. But, for the midtrans snap, we should waiting webhook notification from Midtrans to send payment details like notification that I give on this instruction.
+2. In order confirmation and payment received email, there's different in amount that paid. In the order confirmation is use IDR after we convert the USD to idr. But, the payment received is use USD but have mistake (price is 45 USD, but on the email it's say IDR 45).
