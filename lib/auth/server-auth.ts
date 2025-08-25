@@ -169,10 +169,28 @@ export async function getServerAuthUser(request?: NextRequest): Promise<AdminUse
       }
     )
 
-    // Get user from session (this will automatically handle Supabase cookies)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Try to get user from session first
+    let { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    // If cookies failed, try Authorization header as fallback
+    if (!user && authError) {
+      const authHeader = request.headers.get('authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7)
+        console.log('🔐 Trying Authorization header token...')
+        const result = await supabase.auth.getUser(token)
+        user = result.data.user
+        authError = result.error
+      }
+    }
+    
+    console.log('🔐 Supabase auth getUser result:', { 
+      user: user ? { id: user.id, email: user.email } : null, 
+      error: authError?.message 
+    })
     
     if (authError || !user) {
+      console.log('🔐 Authentication failed:', authError?.message || 'No user found')
       return null
     }
 
