@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBackgroundServicesStatus } from '@/lib/worker-startup';
+import { getBackgroundServicesStatus } from '@/lib/job-management/worker-startup';
 
 export async function GET(request: NextRequest) {
   try {

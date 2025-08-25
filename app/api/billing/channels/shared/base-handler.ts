@@ -85,7 +85,7 @@ export abstract class BasePaymentHandler {
 
   // Common amount calculation
   calculateAmount(): { originalAmount: number; finalAmount: number; currency: string; originalCurrency: string } {
-    const { getUserCurrency } = require('@/lib/currency-utils')
+    const { getUserCurrency } = require('@/lib/utils/currency-utils')
     const userCurrency = getUserCurrency(this.paymentData.customer_info.country)
 
     let amount = 0

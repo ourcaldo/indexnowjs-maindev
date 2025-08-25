@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '../database/supabase';
 import { GoogleAuthService } from '../google-services/google-auth-service';
-import { SocketIOBroadcaster } from '../google-services/socketio-broadcaster';
-import { JobLoggingService } from '../google-services/job-logging-service';
+import { SocketIOBroadcaster } from '../core/socketio-broadcaster';
+import { JobLoggingService } from '../job-management/job-logging-service';
 
 interface IndexingJob {
   id: string;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createMidtransService } from '@/lib/midtrans-service'
+import { createMidtransService } from '@/lib/payment-services/midtrans-service'
 
 export async function POST(request: NextRequest) {
   try {

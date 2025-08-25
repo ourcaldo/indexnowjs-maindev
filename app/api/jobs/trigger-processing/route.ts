@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { supabaseAdmin } from '../../../../lib/supabase';
-import { GoogleIndexingProcessor } from '../../../../lib/google-indexing-processor';
+import { supabaseAdmin } from '@/lib/database/supabase';
+import { GoogleIndexingProcessor } from '@/lib/google-services/google-indexing-processor';
 import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {

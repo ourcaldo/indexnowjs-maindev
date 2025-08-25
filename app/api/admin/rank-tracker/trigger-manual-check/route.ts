@@ -5,8 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerAuthUser } from '@/lib/auth'
-import { workerStartup } from '@/lib/worker-startup'
-import { dailyRankCheckJob } from '@/lib/daily-rank-check-job'
+import { workerStartup } from '@/lib/job-management/worker-startup'
+import { dailyRankCheckJob } from '@/lib/rank-tracking/daily-rank-check-job'
 
 export async function POST(request: NextRequest) {
   try {

@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerAuthUser } from '@/lib/auth'
-import { errorTracker } from '@/lib/error-tracker'
+import { errorTracker } from '@/lib/monitoring/error-tracker'
 import { z } from 'zod'
 
 const criticalQuerySchema = z.object({

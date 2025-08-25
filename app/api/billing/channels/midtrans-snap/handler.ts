@@ -20,7 +20,7 @@ export default class MidtransSnapHandler extends BasePaymentHandler {
     let finalAmount = amount.finalAmount
     
     if (amount.originalCurrency === 'USD') {
-      const { convertUsdToIdr } = await import('@/lib/currency-converter')
+      const { convertUsdToIdr } = await import('@/lib/utils/currency-converter')
       finalAmount = await convertUsdToIdr(amount.finalAmount)
     }
 

@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerAuthUser } from '@/lib/auth'
-import { quotaMonitor } from '@/lib/quota-monitor'
+import { quotaMonitor } from '@/lib/monitoring/quota-monitor'
 import { z } from 'zod'
 
 const reportQuerySchema = z.object({

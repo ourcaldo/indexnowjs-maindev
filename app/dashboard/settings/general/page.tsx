@@ -19,7 +19,7 @@ export default function GeneralSettingsPage() {
 
   // Log page view and settings activities
   usePageViewLogger('/dashboard/settings/general', 'General Settings', { section: 'general_settings' })
-  const { logSettingsActivity } = useActivityLogger()
+  const { logDashboardActivity } = useActivityLogger()
 
   // Form states
   const [notifications, setNotifications] = useState({
@@ -107,7 +107,7 @@ export default function GeneralSettingsPage() {
           description: 'Settings updated successfully',
           type: 'success'
         })
-        await logSettingsActivity('settings_update', 'Settings updated', {
+        await logDashboardActivity('settings_update', 'Settings updated', {
           section: 'general',
           changes: { generalSettings, notifications }
         })

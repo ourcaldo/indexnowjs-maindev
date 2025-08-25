@@ -1,6 +1,6 @@
 import { BasePaymentHandler, PaymentData, PaymentResult } from '../shared/base-handler'
 import { supabaseAdmin } from '@/lib/database'
-import { createMidtransService } from '@/lib/midtrans-service'
+import { createMidtransService } from '@/lib/payment-services/midtrans-service'
 
 export default class MidtransRecurringHandler extends BasePaymentHandler {
   private gateway: any

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { supabaseAdmin } from '../../../../lib/supabase';
-import { getBackgroundServicesStatus } from '../../../../lib/worker-startup';
+import { supabaseAdmin } from '@/lib/database/supabase';
+import { getBackgroundServicesStatus } from '@/lib/job-management/worker-startup';
 
 export async function GET(request: NextRequest) {
   try {
