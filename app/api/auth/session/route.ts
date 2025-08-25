@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { ActivityLogger } from '@/lib/monitoring'
-import { logger } from '@/lib/error-handling'
+import { logger } from '@/lib/monitoring/error-handling'
 
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
