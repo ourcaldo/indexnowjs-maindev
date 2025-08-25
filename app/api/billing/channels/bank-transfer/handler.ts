@@ -1,5 +1,6 @@
 import { BasePaymentHandler, PaymentData, PaymentResult } from '../shared/base-handler'
 import { supabaseAdmin } from '@/lib/database'
+import { emailService } from '@/lib/email/emailService'
 
 export default class BankTransferHandler extends BasePaymentHandler {
   private gateway: any
@@ -39,6 +40,29 @@ export default class BankTransferHandler extends BasePaymentHandler {
         }
       })
       .eq('payment_reference', orderId)
+
+    // Send order confirmation email
+    try {
+      await emailService.sendBillingConfirmation(this.paymentData.customer_info.email, {
+        customerName: `${this.paymentData.customer_info.first_name} ${this.paymentData.customer_info.last_name}`.trim(),
+        orderId: orderId,
+        packageName: this.packageData.name,
+        billingPeriod: this.paymentData.billing_period,
+        amount: `${amount.currency} ${amount.finalAmount}`,
+        paymentMethod: 'Bank Transfer',
+        bankName: this.gateway.configuration.bank_name,
+        accountName: this.gateway.configuration.account_name,
+        accountNumber: this.gateway.configuration.account_number,
+        orderDate: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      })
+      console.log('✅ [Bank Transfer] Order confirmation email sent successfully')
+    } catch (emailError) {
+      console.error('⚠️ [Bank Transfer] Failed to send order confirmation email:', emailError)
+    }
 
     return {
       success: true,

@@ -18,6 +18,40 @@ interface BillingConfirmationData {
   accountName?: string
   accountNumber?: string
   orderDate: string
+  expiryTime?: string
+  vaNumber?: string
+  vaBank?: string
+  storeCode?: string
+  storeName?: string
+}
+
+interface PaymentReceivedData {
+  customerName: string
+  orderId: string
+  packageName: string
+  billingPeriod: string
+  amount: string
+  paymentDate: string
+}
+
+interface PackageActivatedData {
+  customerName: string
+  packageName: string
+  billingPeriod: string
+  expiresAt: string
+  activationDate: string
+  dashboardUrl: string
+}
+
+interface OrderExpiredData {
+  customerName: string
+  orderId: string
+  packageName: string
+  billingPeriod: string
+  amount: string
+  status: string
+  expiredDate: string
+  subscribeUrl: string
 }
 
 export class EmailService {
@@ -160,6 +194,96 @@ export class EmailService {
         console.error('Error stack:', error.stack)
       }
       
+      throw error
+    }
+  }
+
+  async sendPaymentReceived(email: string, data: PaymentReceivedData): Promise<void> {
+    try {
+      console.log(`📤 Preparing to send payment received email to: ${email}`)
+
+      if (!this.transporter) {
+        await this.initializeTransporter()
+        if (!this.transporter) {
+          throw new Error('SMTP transporter not available')
+        }
+      }
+
+      const templateHtml = this.loadTemplate('payment-received')
+      const renderedHtml = this.renderTemplate(templateHtml, data)
+
+      const mailOptions = {
+        from: `${process.env.SMTP_FROM_NAME || 'IndexNow Studio'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+        to: email,
+        subject: `Payment Received - ${data.packageName} Subscription`,
+        html: renderedHtml
+      }
+
+      const result = await this.transporter.sendMail(mailOptions)
+      console.log('✅ Payment received email sent successfully!')
+
+    } catch (error) {
+      console.error('❌ Failed to send payment received email:', error)
+      throw error
+    }
+  }
+
+  async sendPackageActivated(email: string, data: PackageActivatedData): Promise<void> {
+    try {
+      console.log(`📤 Preparing to send package activated email to: ${email}`)
+
+      if (!this.transporter) {
+        await this.initializeTransporter()
+        if (!this.transporter) {
+          throw new Error('SMTP transporter not available')
+        }
+      }
+
+      const templateHtml = this.loadTemplate('package-activated')
+      const renderedHtml = this.renderTemplate(templateHtml, data)
+
+      const mailOptions = {
+        from: `${process.env.SMTP_FROM_NAME || 'IndexNow Studio'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+        to: email,
+        subject: `Package Activated - Welcome to ${data.packageName}!`,
+        html: renderedHtml
+      }
+
+      const result = await this.transporter.sendMail(mailOptions)
+      console.log('✅ Package activated email sent successfully!')
+
+    } catch (error) {
+      console.error('❌ Failed to send package activated email:', error)
+      throw error
+    }
+  }
+
+  async sendOrderExpired(email: string, data: OrderExpiredData): Promise<void> {
+    try {
+      console.log(`📤 Preparing to send order expired email to: ${email}`)
+
+      if (!this.transporter) {
+        await this.initializeTransporter()
+        if (!this.transporter) {
+          throw new Error('SMTP transporter not available')
+        }
+      }
+
+      const templateHtml = this.loadTemplate('order-expired')
+      const renderedHtml = this.renderTemplate(templateHtml, data)
+
+      const mailOptions = {
+        from: `${process.env.SMTP_FROM_NAME || 'IndexNow Studio'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+        to: email,
+        subject: `Order Expired - ${data.packageName} Subscription`,
+        html: renderedHtml
+      }
+
+      const result = await this.transporter.sendMail(mailOptions)
+      console.log('✅ Order expired email sent successfully!')
+
+    } catch (error) {
+      console.error('❌ Failed to send order expired email:', error)
       throw error
     }
   }

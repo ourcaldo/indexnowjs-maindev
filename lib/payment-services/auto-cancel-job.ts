@@ -1,5 +1,6 @@
 import cron from 'node-cron'
 import { supabaseAdmin } from '@/lib/database'
+import { emailService } from '@/lib/email/emailService'
 
 /**
  * Auto-cancel service for expired payment transactions
@@ -177,6 +178,41 @@ export class AutoCancelJob {
         } catch (activityError) {
           console.warn(`[WARN] ⚠️ Activity logging error for transaction ${transaction.id}:`, activityError)
         }
+      }
+
+      // Send order expired email
+      try {
+        const { data: userData } = await supabaseAdmin
+          .from('indb_auth_user_profiles')
+          .select('full_name, email')
+          .eq('user_id', transaction.user_id)
+          .single()
+
+        const { data: packageData } = await supabaseAdmin
+          .from('indb_payment_packages')
+          .select('name')
+          .eq('id', transaction.package_id)
+          .single()
+
+        if (userData && packageData) {
+          await emailService.sendOrderExpired(userData.email, {
+            customerName: userData.full_name || 'Customer',
+            orderId: transaction.order_id || transaction.id,
+            packageName: packageData.name,
+            billingPeriod: transaction.billing_period || 'monthly',
+            amount: `IDR ${Number(transaction.amount).toLocaleString('id-ID')}`,
+            status: 'Expired',
+            expiredDate: new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            subscribeUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://indexnow.studio'}/dashboard/settings/plans-billing`
+          })
+          console.log(`[INFO] ✅ Order expired email sent for transaction ${transaction.id}`)
+        }
+      } catch (emailError) {
+        console.warn(`[WARN] ⚠️ Failed to send order expired email for transaction ${transaction.id}:`, emailError)
       }
 
       console.log(`[INFO] ✅ Transaction ${transaction.id} cancelled successfully`)

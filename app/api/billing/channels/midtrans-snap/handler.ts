@@ -1,5 +1,6 @@
 import { BasePaymentHandler, PaymentData, PaymentResult } from '../shared/base-handler'
 import { supabaseAdmin } from '@/lib/database'
+import { emailService } from '@/lib/email/emailService'
 
 const midtransClient = require('midtrans-client')
 
@@ -76,6 +77,26 @@ export default class MidtransSnapHandler extends BasePaymentHandler {
         }
       })
       .eq('payment_reference', orderId)
+
+    // Send order confirmation email
+    try {
+      await emailService.sendBillingConfirmation(this.paymentData.customer_info.email, {
+        customerName: `${this.paymentData.customer_info.first_name} ${this.paymentData.customer_info.last_name}`.trim(),
+        orderId: orderId,
+        packageName: this.packageData.name,
+        billingPeriod: this.paymentData.billing_period,
+        amount: `IDR ${finalAmount.toLocaleString('id-ID')}`,
+        paymentMethod: 'Midtrans SNAP',
+        orderDate: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      })
+      console.log('✅ [Midtrans SNAP] Order confirmation email sent successfully')
+    } catch (emailError) {
+      console.error('⚠️ [Midtrans SNAP] Failed to send order confirmation email:', emailError)
+    }
 
     return {
       success: true,

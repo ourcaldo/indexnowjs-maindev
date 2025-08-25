@@ -1,6 +1,7 @@
 import { BasePaymentHandler, PaymentData, PaymentResult } from '../shared/base-handler'
 import { supabaseAdmin } from '@/lib/database'
 import { createMidtransService } from '@/lib/payment-services/midtrans-service'
+import { emailService } from '@/lib/email/emailService'
 
 export default class MidtransRecurringHandler extends BasePaymentHandler {
   private gateway: any
@@ -197,6 +198,26 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
 
       // Update user subscription
       await this.updateUserSubscription(subscription, amount.finalAmount)
+
+      // Send order confirmation email
+      try {
+        await emailService.sendBillingConfirmation(this.paymentData.customer_info.email, {
+          customerName: `${this.paymentData.customer_info.first_name} ${this.paymentData.customer_info.last_name}`.trim(),
+          orderId: orderId,
+          packageName: this.packageData.name,
+          billingPeriod: this.paymentData.billing_period,
+          amount: `IDR ${amount.finalAmount.toLocaleString('id-ID')}`,
+          paymentMethod: 'Midtrans Recurring (Credit Card)',
+          orderDate: new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        })
+        console.log('✅ [Midtrans Recurring] Order confirmation email sent successfully')
+      } catch (emailError) {
+        console.error('⚠️ [Midtrans Recurring] Failed to send order confirmation email:', emailError)
+      }
 
       return {
         success: true,

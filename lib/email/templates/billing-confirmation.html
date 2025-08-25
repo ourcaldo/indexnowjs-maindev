@@ -256,6 +256,32 @@
                         <span class="detail-value">{{accountNumber}}</span>
                     </div>
                     {{/if}}
+                    {{#if vaNumber}}
+                    <div class="detail-row">
+                        <span class="detail-label">Virtual Account</span>
+                        <span class="detail-value">{{vaNumber}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Bank</span>
+                        <span class="detail-value">{{vaBank}}</span>
+                    </div>
+                    {{/if}}
+                    {{#if storeCode}}
+                    <div class="detail-row">
+                        <span class="detail-label">Store</span>
+                        <span class="detail-value">{{storeName}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Code</span>
+                        <span class="detail-value">{{storeCode}}</span>
+                    </div>
+                    {{/if}}
+                    {{#if expiryTime}}
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Expires</span>
+                        <span class="detail-value" style="color: #F0A202;">{{expiryTime}}</span>
+                    </div>
+                    {{/if}}
                     <div class="detail-row">
                         <span class="detail-label">Status</span>
                         <span class="detail-value">Pending Payment</span>
@@ -264,7 +290,14 @@
             </div>
             
             <div class="footer-message">
-                Please include your Order ID ({{orderId}}) in the payment reference. Once we receive your payment, we'll activate your subscription and send you a confirmation email.
+                {{#if expiryTime}}
+                <strong>Important:</strong> Please complete your payment before {{expiryTime}} to avoid order expiration.<br><br>
+                {{/if}}
+                {{#if vaNumber}}
+                Please transfer the exact amount to the virtual account number above. {{/if}}{{#if storeCode}}
+                Please visit {{storeName}} and provide the payment code above to complete your payment. {{/if}}{{#if bankName}}
+                Please transfer to the bank account above and include your Order ID ({{orderId}}) in the payment reference. {{/if}}
+                Once we receive your payment, we'll activate your subscription and send you a confirmation email.
             </div>
             
             <div class="signature">Thank you for choosing IndexNow Pro!</div>

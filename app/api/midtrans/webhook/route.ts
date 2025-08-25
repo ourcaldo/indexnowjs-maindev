@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import { AutoCancelJob } from '@/lib/payment-services/auto-cancel-job'
+import { emailService } from '@/lib/email/emailService'
 import crypto from 'crypto'
 
 const midtransClient = require('midtrans-client')
@@ -321,8 +322,45 @@ async function processTransaction(body: any, transaction: any, supabaseAdmin: an
     
     console.log(`✅ [${paymentType.toUpperCase()}] Transaction updated successfully`)
 
-    // If payment is completed, activate subscription
+    // Send order confirmation email with payment details if this is a new pending transaction
+    if (newStatus === 'pending' && transaction.transaction_status !== 'pending') {
+      await sendOrderConfirmationWithDetails(body, transaction, supabaseAdmin, paymentType)
+    }
+
+    // If payment is completed, send payment received email and activate subscription
     if (newStatus === 'completed') {
+      // Send payment received email
+      try {
+        const { data: userData } = await supabaseAdmin
+          .from('indb_auth_user_profiles')
+          .select('full_name, email')
+          .eq('user_id', transaction.user_id)
+          .single()
+
+        const { data: packageData } = await supabaseAdmin
+          .from('indb_payment_packages')
+          .select('name')
+          .eq('id', transaction.package_id)
+          .single()
+
+        if (userData && packageData) {
+          await emailService.sendPaymentReceived(userData.email, {
+            customerName: userData.full_name || 'Customer',
+            orderId: transaction.order_id || transaction.id,
+            packageName: packageData.name,
+            billingPeriod: transaction.billing_period || 'monthly',
+            amount: `IDR ${Number(transaction.amount).toLocaleString('id-ID')}`,
+            paymentDate: new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })
+          })
+        }
+      } catch (emailError) {
+        console.error(`⚠️ [${paymentType.toUpperCase()}] Failed to send payment received email:`, emailError)
+      }
+
       await activateSubscription(body, transaction, supabaseAdmin, paymentType)
     }
 
@@ -331,6 +369,66 @@ async function processTransaction(body: any, transaction: any, supabaseAdmin: an
   } catch (error: any) {
     console.error(`💥 [${paymentType.toUpperCase()}] Processing error:`, error)
     return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
+  }
+}
+
+async function sendOrderConfirmationWithDetails(body: any, transaction: any, supabaseAdmin: any, paymentType: string) {
+  try {
+    const { data: userData } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select('full_name, email')
+      .eq('user_id', transaction.user_id)
+      .single()
+
+    const { data: packageData } = await supabaseAdmin
+      .from('indb_payment_packages')
+      .select('name')
+      .eq('id', transaction.package_id)
+      .single()
+
+    if (userData && packageData) {
+      const emailData: any = {
+        customerName: userData.full_name || 'Customer',
+        orderId: transaction.order_id || transaction.id,
+        packageName: packageData.name,
+        billingPeriod: transaction.billing_period || 'monthly',
+        amount: `IDR ${Number(transaction.amount).toLocaleString('id-ID')}`,
+        paymentMethod: 'Midtrans',
+        orderDate: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      }
+
+      // Add payment details based on payment type
+      if (body.payment_type === 'bank_transfer' && body.va_numbers && body.va_numbers.length > 0) {
+        const vaInfo = body.va_numbers[0]
+        emailData.vaNumber = vaInfo.va_number
+        emailData.vaBank = vaInfo.bank.toUpperCase()
+        emailData.paymentMethod = `Midtrans Virtual Account (${vaInfo.bank.toUpperCase()})`
+      } else if (body.payment_type === 'cstore' && body.payment_code) {
+        emailData.storeCode = body.payment_code
+        emailData.storeName = body.store ? body.store.charAt(0).toUpperCase() + body.store.slice(1) : 'Convenience Store'
+        emailData.paymentMethod = `Midtrans ${emailData.storeName}`
+      }
+
+      // Add expiry time if available
+      if (body.expiry_time) {
+        emailData.expiryTime = new Date(body.expiry_time).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      }
+
+      await emailService.sendBillingConfirmation(userData.email, emailData)
+      console.log(`✅ [${paymentType.toUpperCase()}] Order confirmation email sent with payment details`)
+    }
+  } catch (emailError) {
+    console.error(`⚠️ [${paymentType.toUpperCase()}] Failed to send order confirmation email:`, emailError)
   }
 }
 
@@ -396,6 +494,36 @@ async function activateSubscription(body: any, transaction: any, supabaseAdmin: 
       console.log(`✅ [${paymentType.toUpperCase()}] Subscription activated successfully`)
       console.log(`📦 Package: ${packageData.name} (${billingPeriod})`)
       console.log(`⏰ Valid until: ${expiresAt.toISOString()}`)
+      
+      // Send package activated email
+      try {
+        const { data: userData } = await supabaseAdmin
+          .from('indb_auth_user_profiles')
+          .select('full_name, email')
+          .eq('user_id', transaction.user_id)
+          .single()
+
+        if (userData) {
+          await emailService.sendPackageActivated(userData.email, {
+            customerName: userData.full_name || 'Customer',
+            packageName: packageData.name,
+            billingPeriod: billingPeriod,
+            expiresAt: expiresAt.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            activationDate: new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            dashboardUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://indexnow.studio'
+          })
+        }
+      } catch (emailError) {
+        console.error(`⚠️ [${paymentType.toUpperCase()}] Failed to send package activated email:`, emailError)
+      }
     }
 
     // Create subscription record based on payment type
