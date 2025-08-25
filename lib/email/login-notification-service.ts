@@ -279,7 +279,6 @@ export class LoginNotificationService {
       
       // Determine security risk level
       const securityRisk = this.getSecurityRiskLevel(data.ipAddress, deviceInfo, locationData)
-      const securityRisk = this.getSecurityRiskLevel(data.ipAddress, deviceInfo, locationData)
 
       // Format dates
       const loginTime = new Date(data.loginTime).toLocaleString('en-US', {
@@ -350,7 +349,6 @@ export class LoginNotificationService {
   /**
    * Determine security risk level
    */
-  private getSecurityRiskLevel(ipAddress: string, deviceInfo: Record<string, any>, locationData: Record<string, any>): string {
   private getSecurityRiskLevel(ipAddress: string, deviceInfo: Record<string, any>, locationData: Record<string, any>): string {
     // Simple risk assessment logic
     let riskScore = 0
