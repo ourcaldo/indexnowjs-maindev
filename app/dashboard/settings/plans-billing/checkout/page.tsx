@@ -266,7 +266,7 @@ export default function CheckoutPage() {
         }))
 
         // Update frontend currency based on user's profile country
-        const { getUserCurrency } = await import('@/lib/currency-utils')
+        const { getUserCurrency } = await import('@/lib/utils/currency-utils')
         const detectedCurrency = getUserCurrency((user as any).country)
         setUserCurrency(detectedCurrency)
         
