@@ -234,7 +234,6 @@ export async function getRequestInfo(request?: NextRequest): Promise<{
  * Format device info for display
  */
 export function formatDeviceInfo(deviceInfo?: DeviceInfo | null): string {
-export function formatDeviceInfo(deviceInfo?: DeviceInfo | null): string {
   if (!deviceInfo) return 'Unknown Device'
   
   const { type, browser, os } = deviceInfo
@@ -244,7 +243,6 @@ export function formatDeviceInfo(deviceInfo?: DeviceInfo | null): string {
 /**
  * Format location data for display
  */
-export function formatLocationData(locationData?: LocationData | null): string {
 export function formatLocationData(locationData?: LocationData | null): string {
   if (!locationData) return 'Unknown Location'
   
@@ -259,7 +257,6 @@ export function formatLocationData(locationData?: LocationData | null): string {
 /**
  * Get security risk level based on device/location patterns
  */
-export function getSecurityRiskLevel(
 export function getSecurityRiskLevel(
   ipAddress: string | null,
   deviceInfo: DeviceInfo | null,

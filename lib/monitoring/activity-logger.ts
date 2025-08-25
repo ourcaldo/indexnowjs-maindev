@@ -175,7 +175,6 @@ export class ActivityLogger {
       
       if (data.request && (!ipAddress || !userAgent || !deviceInfo)) {
         const requestInfo = await getRequestInfo(data.request)
-        const requestInfo = await getRequestInfo(data.request)
         ipAddress = ipAddress || requestInfo.ipAddress || undefined
         userAgent = userAgent || requestInfo.userAgent || undefined
         deviceInfo = deviceInfo || requestInfo.deviceInfo || undefined
@@ -186,8 +185,6 @@ export class ActivityLogger {
       const enhancedMetadata = {
         ...(data.metadata || {}),
         deviceFormatted: deviceInfo ? formatDeviceInfo(deviceInfo as any) : null,
-        deviceFormatted: deviceInfo ? formatDeviceInfo(deviceInfo as any) : null,
-        locationFormatted: locationData ? formatLocationData(locationData as any) : null,
         locationFormatted: locationData ? formatLocationData(locationData as any) : null,
         timestamp: new Date().toISOString()
       }
