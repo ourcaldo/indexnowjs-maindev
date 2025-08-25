@@ -360,8 +360,8 @@ export async function POST(request: NextRequest) {
     // Trigger immediate rank checks for newly added keywords if user has API key configured
     let hasAPIKey = false
     try {
-      const { APIKeyManager } = await import('@/lib/api-key-manager')
-      const { RankTracker } = await import('@/lib/rank-tracker')
+      const { APIKeyManager } = await import('@/lib/rank-tracking/api-key-manager')
+      const { RankTracker } = await import('@/lib/rank-tracking/rank-tracker')
       
       const apiKeyManager = new APIKeyManager()
       const siteAPIKey = await apiKeyManager.getActiveAPIKey()

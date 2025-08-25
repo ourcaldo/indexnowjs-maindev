@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerAuthUser } from '@/lib/auth'
-import { RankTracker } from '@/lib/rank-tracker'
+import { RankTracker } from '@/lib/rank-tracking'
 import { supabaseAdmin } from '@/lib/database'
 import { z } from 'zod'
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Check site quota before proceeding
-    const { APIKeyManager } = await import('@/lib/api-key-manager')
+    const { APIKeyManager } = await import('@/lib/rank-tracking')
     const apiKeyManager = new APIKeyManager()
     const availableQuota = await apiKeyManager.getAvailableQuota()
     
