@@ -33,10 +33,10 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:5000', '0.0.0.0:5000', '*.replit.dev', '*.replit.app', '*.replit.co']
+      allowedOrigins: ['localhost:5000', '0.0.0.0:5000', '*.replit.dev', '*.replit.app', '*.replit.co', '*']
     }
   },
-  allowedDevOrigins: ['*.replit.dev', '*.replit.app', '*.replit.co', '*.*.replit.co'],
+  allowedDevOrigins: ['*.replit.dev', '*.replit.app', '*.replit.co', '*.*.replit.co','*'],
 
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
