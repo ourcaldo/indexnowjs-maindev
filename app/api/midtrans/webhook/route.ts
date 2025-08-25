@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
+import { AutoCancelJob } from '@/lib/payment-services/auto-cancel-job'
 import crypto from 'crypto'
 
 const midtransClient = require('midtrans-client')
@@ -282,10 +283,14 @@ async function processTransaction(body: any, transaction: any, supabaseAdmin: an
         break
       case 'deny':
       case 'cancel':
-      case 'expire':
       case 'failure':
         newStatus = 'failed'
         break
+      case 'expire':
+        // Handle expire status with auto-cancel service
+        console.log(`⏰ [${paymentType.toUpperCase()}] Transaction expired, processing with auto-cancel service`)
+        await AutoCancelJob.handleMidtransExpireNotification(transaction, body)
+        return NextResponse.json({ status: 'OK', message: 'Transaction expired and processed' })
       case 'pending':
         newStatus = 'pending'
         break

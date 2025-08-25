@@ -6,6 +6,7 @@
 import { dailyRankCheckJob } from '../rank-tracking/daily-rank-check-job'
 import { quotaMonitor } from '../monitoring/quota-monitor'
 import { recurringBillingJob } from '../payment-services/recurring-billing-job'
+import { autoCancelJob } from '../payment-services/auto-cancel-job'
 
 // Simple console logger for development
 const logger = {
@@ -48,10 +49,13 @@ export class WorkerStartup {
       // 2. Start recurring billing job scheduler
       await this.initializeRecurringBilling()
 
-      // 3. Initialize quota monitoring
+      // 3. Start auto-cancel job scheduler
+      await this.initializeAutoCancelService()
+
+      // 4. Initialize quota monitoring
       await this.initializeQuotaMonitoring()
 
-      // 4. Add any other background workers here
+      // 5. Add any other background workers here
       // await this.initializeNotificationWorker()
 
       this.isInitialized = true
@@ -87,6 +91,27 @@ export class WorkerStartup {
 
     } catch (error) {
       logger.error('Failed to initialize rank check scheduler:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Initialize auto-cancel service for expired transactions
+   */
+  private async initializeAutoCancelService(): Promise<void> {
+    try {
+      logger.info('Starting auto-cancel job scheduler...')
+      
+      // Start the auto-cancel job scheduler
+      autoCancelJob.start()
+      
+      // Get job status for confirmation
+      const status = autoCancelJob.getStatus()
+      logger.info(`Auto-cancel scheduler: ${status.isScheduled ? 'ACTIVE' : 'INACTIVE'}`)
+      logger.info(`Auto-cancel schedule: ${status.schedule} (${status.description})`)
+
+    } catch (error) {
+      logger.error('Failed to initialize auto-cancel service:', error)
       throw error
     }
   }

@@ -704,6 +704,27 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 25, 2025: Auto-Cancel Payment Transactions Implementation ✅
+- **✅ AUTOMATED ORDER CANCELLATION SYSTEM**: Successfully implemented comprehensive auto-cancel functionality for expired payment transactions
+  - **24-Hour Auto-Cancel Rule**: Background service automatically cancels transactions that remain pending for more than 24 hours
+  - **Midtrans Webhook Integration**: Enhanced existing webhook handler to process 'expire' notifications from Midtrans payment gateway
+  - **Dual Cancellation Triggers**: System handles both time-based expiry (24 hours) and gateway-notified expiry (Midtrans webhook)
+  - **Background Service Scheduling**: Auto-cancel job runs every hour to check for expired transactions using node-cron
+- **✅ ENHANCED WEBHOOK PROCESSING**: Improved Midtrans webhook handler with specialized expire notification handling
+  - **Expire Status Processing**: Enhanced webhook to call specialized auto-cancel service when receiving 'expire' transaction status
+  - **Transaction Status Management**: Proper differentiation between 'cancelled' (24-hour auto-cancel) and 'expired' (Midtrans notification)
+  - **Comprehensive Logging**: Detailed logging for all auto-cancel operations with transaction tracking and user activity logs
+- **✅ DATABASE INTEGRATION**: Complete integration with existing payment transaction system
+  - **Status Updates**: Proper transaction status updates with detailed metadata and processing timestamps
+  - **Transaction History**: Full audit trail in `indb_payment_transactions_history` with auto-cancel specific entries
+  - **Activity Logging**: User activity logs for payment cancellations and expirations with proper metadata
+- **Files Created**:
+  - `lib/payment-services/auto-cancel-job.ts` - Complete auto-cancel service with background job scheduling
+- **Files Modified**:
+  - `app/api/midtrans/webhook/route.ts` - Enhanced webhook handler with expire notification processing
+  - `lib/job-management/worker-startup.ts` - Integrated auto-cancel service into background worker system
+- **Result**: Comprehensive payment expiry management system that automatically handles expired transactions through both time-based rules and payment gateway notifications
+
 ### August 24, 2025: Phase 4 - Payment Method Component Separation Complete ✅
 - **✅ PHASE 4 (P3) FULLY COMPLETED**: Successfully implemented payment method component separation with modular architecture
   - **Component Structure**: Created dedicated directory `components/checkout/payment-methods/` with individual payment method components
