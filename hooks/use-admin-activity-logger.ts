@@ -41,7 +41,7 @@ export function useAdminActivityLogger() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await supabase.auth.getSession().then(s => s.data.session?.access_token)}`
+          'Authorization': `Bearer ${await supabase.auth.getSession().then((s: any) => s.data.session?.access_token)}`
         },
         body: JSON.stringify({
           eventType,

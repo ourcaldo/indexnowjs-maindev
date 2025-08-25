@@ -14,8 +14,8 @@ import { ArrowLeft, Building2, Check, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { authService } from '@/lib/auth'
-import { supabaseBrowser } from '@/lib/supabase-browser'
-import { formatCurrency } from '@/lib/currency-utils'
+import { supabaseBrowser } from '@/lib/database'
+import { formatCurrency } from '@/lib/utils'
 import MidtransCreditCardForm from '@/components/MidtransCreditCardForm'
 
 // Midtrans type declarations

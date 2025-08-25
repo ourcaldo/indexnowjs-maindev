@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { siteSettingsService, SiteSettings } from '@/lib/site-settings'
+import { siteSettingsService, SiteSettings } from '@/lib/utils'
 
 export function useSiteSettings() {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
