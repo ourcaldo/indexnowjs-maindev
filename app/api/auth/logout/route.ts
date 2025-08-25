@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
-import { logger } from '@/lib/error-handling'
+import { logger } from '@/lib/monitoring/error-handling'
 
 export async function POST(request: NextRequest) {
   try {

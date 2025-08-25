@@ -7,13 +7,13 @@ import {
   validateRequest,
   createApiResponse,
   createErrorResponse
-} from '@/lib/api-middleware'
+} from '@/lib/core/api-middleware'
 import { 
   ErrorHandlingService, 
   ErrorType, 
   ErrorSeverity, 
   logger 
-} from '@/lib/error-handling'
+} from '@/lib/monitoring/error-handling'
 import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint: string) => {

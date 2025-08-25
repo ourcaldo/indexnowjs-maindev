@@ -9,13 +9,13 @@ import {
   createApiResponse,
   createErrorResponse,
   AuthenticatedRequest
-} from '@/lib/api-middleware'
+} from '@/lib/core/api-middleware'
 import { 
   ErrorHandlingService, 
   ErrorType, 
   ErrorSeverity, 
   logger 
-} from '@/lib/error-handling'
+} from '@/lib/monitoring/error-handling'
 
 // Schema for Google service account JSON
 const googleServiceAccountSchema = z.object({
@@ -40,7 +40,7 @@ const createServiceAccountSchema = z.object({
 })
 
 // Use the same EncryptionService as the main system
-import { EncryptionService } from '@/lib/encryption'
+import { EncryptionService } from '@/lib/auth/encryption'
 import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 export const GET = apiRouteWrapper(async (request: NextRequest, auth: AuthenticatedRequest, endpoint: string) => {
@@ -292,10 +292,9 @@ export const POST = apiRouteWrapper(async (request: NextRequest, auth: Authentic
       auth.userId,
       ActivityEventTypes.SERVICE_ACCOUNT_ADD,
       createResult.data.id,
-      `Added Google service account: ${name} (${email})`,
-      request,
+      name,
       {
-        serviceAccountName: name,
+        actionDescription: `Added Google service account: ${name} (${email})`,
         serviceAccountEmail: email,
         packageData: packageData?.name,
         quotaLimits: {

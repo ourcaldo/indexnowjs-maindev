@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server'
-import { getRequestInfo } from '@/lib/ip-device-utils'
-import { findCountryByName } from '@/lib/utils'
+import { getRequestInfo } from '@/lib/utils/ip-device-utils'
+import { findCountryByCode } from '@/lib/utils'
 import { 
   publicApiRouteWrapper,
   createApiResponse
-} from '@/lib/api-middleware'
+} from '@/lib/core/api-middleware'
 
 export const GET = publicApiRouteWrapper(async (request: NextRequest, endpoint: string) => {
   try {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/database';
 import { createClient } from '@supabase/supabase-js';
-import { JobLoggingService } from '@/lib/job-logging-service';
+import { JobLoggingService } from '@/lib/job-management/job-logging-service';
 
 export async function GET(
   request: NextRequest,

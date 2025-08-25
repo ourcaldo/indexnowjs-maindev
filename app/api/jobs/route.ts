@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import { createClient } from '@supabase/supabase-js'
-import { JobLoggingService } from '@/lib/job-logging-service'
+import { JobLoggingService } from '@/lib/job-management/job-logging-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     const { name, type, urls, sitemapUrl, scheduleType, startTime } = body
 
     // Import QuotaService for quota enforcement at the top
-    const { QuotaService } = await import('@/lib/quota-service')
+    const { QuotaService } = await import('@/lib/monitoring/quota-service')
 
     // Security: Sanitize inputs
     const sanitizeInput = (input: string): string => {

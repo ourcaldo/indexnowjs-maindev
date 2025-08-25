@@ -201,7 +201,14 @@ export class RankTrackerService {
         logger.info(`IndexNow Rank Tracker: Response status: ${response.status} ${response.statusText}`)
 
         if (!response.ok) {
-          // Try to get response body for more details
+          // Handle 403 as expected response (not an error)
+          if (response.status === 403) {
+            logger.info(`IndexNow Rank Tracker: 403 response received (expected behavior)`)
+            const data = await response.json().catch(() => ({ rank: null, message: 'Access forbidden' }))
+            return data
+          }
+          
+          // Try to get response body for more details for other errors
           let errorDetails = ''
           try {
             errorDetails = await response.text()

@@ -6,13 +6,13 @@ import {
   validateRequest,
   createApiResponse,
   createErrorResponse
-} from '@/lib/api-middleware'
+} from '@/lib/core/api-middleware'
 import { 
   ErrorHandlingService, 
   ErrorType, 
   ErrorSeverity, 
   logger 
-} from '@/lib/error-handling'
+} from '@/lib/monitoring/error-handling'
 import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
 
 export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint: string) => {
@@ -96,7 +96,7 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
       process.nextTick(async () => {
         try {
           const { loginNotificationService } = await import('@/lib/email/login-notification-service')
-          const { getRequestInfo } = await import('@/lib/ip-device-utils')
+          const { getRequestInfo } = await import('@/lib/utils/ip-device-utils')
           
           // Extract request information for notification
           const requestInfo = await getRequestInfo(request)
