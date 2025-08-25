@@ -112,7 +112,6 @@ export function parseUserAgent(userAgent: string): DeviceInfo {
  * Get comprehensive device and location info from request
  */
 export async function getRequestInfo(request?: NextRequest): Promise<{
-export async function getRequestInfo(request?: NextRequest): Promise<{
   ipAddress: string | null
   userAgent: string | null
   deviceInfo: DeviceInfo | null

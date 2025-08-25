@@ -11,14 +11,22 @@ const createDomainSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 Keyword Tracker Domains: Attempting authentication...')
+    console.log('🔍 Headers:', Object.fromEntries(request.headers.entries()))
+    
     // Get authenticated user from server context
     const user = await getServerAuthUser(request)
+    console.log('🔍 Authentication result:', user ? 'SUCCESS' : 'FAILED')
+    
     if (!user) {
+      console.log('❌ No authenticated user found')
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       )
     }
+    
+    console.log('✅ Authenticated user:', user.id, user.email)
 
     // Get user's domains
     const { data: domains, error } = await supabaseAdmin

@@ -132,9 +132,13 @@ export async function requireServerAdminAuth(request?: NextRequest): Promise<Adm
 export async function getServerAuthUser(request?: NextRequest): Promise<AdminUser | null> {
   try {
     if (!request) {
-      console.log('Server auth: No request provided')
+      console.log('🔐 Server auth: No request provided')
       return null
     }
+    
+    console.log('🔐 Server auth: Processing authentication request...')
+    const cookieHeader = request.headers.get('cookie')
+    console.log('🔐 Cookie header:', cookieHeader ? 'Present' : 'Missing')
 
     // Create proper Supabase server client that handles cookies automatically
     const supabase = createServerClient(
