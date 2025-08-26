@@ -1,13 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Alert } from '@/components/ui/alert'
-import { Loader2, Shield, Clock, Mail, RotateCcw } from 'lucide-react'
+import { Shield } from 'lucide-react'
 
 interface MFAVerificationFormProps {
   email: string
@@ -128,11 +122,11 @@ export default function MFAVerificationForm({
 
       const result = await response.json()
 
-      if (response.ok && result.data) {
-        // Verification successful
-        onVerificationSuccess(result.data)
+      if (response.ok) {
+        // Verification successful - API returns data directly, not wrapped in result.data
+        onVerificationSuccess(result)
       } else {
-        setError(result.error?.message || 'Verification failed. Please try again.')
+        setError(result.message || result.error?.message || 'Verification failed. Please try again.')
         setOtpCode('') // Clear the code for retry
         inputRefs.current[0]?.focus()
       }
@@ -169,47 +163,62 @@ export default function MFAVerificationForm({
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto p-8">
+    <div 
+      className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-8"
+      style={{
+        backgroundColor: '#FFFFFF',
+        borderColor: '#E0E6ED'
+      }}
+    >
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center">
-          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{
+              background: 'linear-gradient(135deg, #3D8BFF 0%, #2C73E6 100%)',
+              boxShadow: '0 4px 12px rgba(61, 139, 255, 0.25)'
+            }}
+          >
+            <Shield className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Security Verification</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Enter the 6-digit code sent to your email
+          <h2 
+            className="text-2xl font-bold mb-2"
+            style={{ color: '#1A1A1A' }}
+          >
+            Check your email
+          </h2>
+          <p 
+            className="leading-relaxed"
+            style={{ color: '#6C757D' }}
+          >
+            Enter the code sent to<br />
+            <span className="font-medium" style={{ color: '#2C2C2E' }}>{email}</span>
           </p>
         </div>
 
-        {/* Email Badge */}
-        <div className="flex items-center justify-center">
-          <Badge variant="outline" className="px-3 py-1">
-            <Mail className="w-4 h-4 mr-2" />
-            {email}
-          </Badge>
+        {/* Timer Display */}
+        <div 
+          className="text-center text-sm py-2 px-4 rounded-lg"
+          style={{ 
+            backgroundColor: '#F7F9FC', 
+            color: timeLeft > 0 ? '#6C757D' : '#E63946',
+            border: '1px solid #E0E6ED' 
+          }}
+        >
+          {timeLeft > 0 ? (
+            <>This code expires in {formatTime(timeLeft)}</>
+          ) : (
+            <span style={{ color: '#E63946' }}>Code has expired</span>
+          )}
         </div>
 
-        {/* Timer Display */}
-        <div className="flex items-center justify-center space-x-2">
-          <Clock className="w-4 h-4 text-gray-500" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            {timeLeft > 0 ? (
-              <>Code expires in: <span className="font-mono font-semibold text-amber-600">{formatTime(timeLeft)}</span></>
-            ) : (
-              <span className="text-red-600 font-semibold">Code has expired</span>
-            )}
-          </span>
-        </div>
 
         {/* OTP Input */}
         <div className="space-y-4">
-          <Label className="text-center block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Verification Code
-          </Label>
-          <div className="flex justify-center space-x-2" onPaste={handlePaste}>
+          <div className="flex justify-center space-x-3" onPaste={handlePaste}>
             {[...Array(6)].map((_, index) => (
-              <Input
+              <input
                 key={index}
                 ref={el => { inputRefs.current[index] = el }}
                 type="text"
@@ -218,9 +227,26 @@ export default function MFAVerificationForm({
                 value={otpCode[index] || ''}
                 onChange={e => handleOtpChange(index, e.target.value)}
                 onKeyDown={e => handleKeyPress(index, e)}
-                className="w-12 h-12 text-center text-lg font-bold border-2 focus:border-blue-500 dark:focus:border-blue-400"
+                className="w-14 h-14 text-center text-xl font-bold rounded-lg transition-all duration-200"
+                style={{
+                  backgroundColor: otpCode[index] ? '#FFFFFF' : '#F7F9FC',
+                  border: `2px solid ${otpCode[index] ? '#3D8BFF' : '#E0E6ED'}`,
+                  color: '#1A1A1A',
+                  outline: 'none',
+                  boxShadow: otpCode[index] ? '0 0 0 3px rgba(61, 139, 255, 0.1)' : 'none'
+                }}
                 disabled={isVerifying || timeLeft === 0}
                 data-testid={`otp-input-${index}`}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#3D8BFF'
+                  e.target.style.boxShadow = '0 0 0 3px rgba(61, 139, 255, 0.1)'
+                }}
+                onBlur={(e) => {
+                  if (!otpCode[index]) {
+                    e.target.style.borderColor = '#E0E6ED'
+                    e.target.style.boxShadow = 'none'
+                  }
+                }}
               />
             ))}
           </div>
@@ -228,67 +254,114 @@ export default function MFAVerificationForm({
 
         {/* Error Message */}
         {error && (
-          <Alert variant="destructive" data-testid="mfa-error-message">
-            <p>{error}</p>
-          </Alert>
+          <div 
+            className="p-4 rounded-lg flex items-start space-x-3" 
+            style={{ 
+              backgroundColor: 'rgba(230, 57, 70, 0.1)', 
+              border: '1px solid rgba(230, 57, 70, 0.3)' 
+            }}
+            data-testid="mfa-error-message"
+          >
+            <div 
+              className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+              style={{ backgroundColor: '#E63946' }}
+            >
+              <span className="text-white text-xs font-bold">!</span>
+            </div>
+            <p style={{ color: '#E63946', fontSize: '14px', fontWeight: '500' }}>{error}</p>
+          </div>
         )}
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          <Button
+          <button
             type="button"
             onClick={() => handleVerifyOTP()}
             disabled={otpCode.length !== 6 || isVerifying || timeLeft === 0}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full h-12 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2"
+            style={{
+              backgroundColor: (otpCode.length === 6 && !isVerifying && timeLeft > 0) ? '#1A1A1A' : '#E0E6ED',
+              color: (otpCode.length === 6 && !isVerifying && timeLeft > 0) ? '#FFFFFF' : '#6C757D',
+              cursor: (otpCode.length === 6 && !isVerifying && timeLeft > 0) ? 'pointer' : 'not-allowed'
+            }}
             data-testid="verify-otp-button"
+            onMouseEnter={(e) => {
+              if (otpCode.length === 6 && !isVerifying && timeLeft > 0) {
+                e.target.style.backgroundColor = '#2C2C2E'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (otpCode.length === 6 && !isVerifying && timeLeft > 0) {
+                e.target.style.backgroundColor = '#1A1A1A'
+              }
+            }}
           >
             {isVerifying ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Verifying...
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Verifying...</span>
               </>
             ) : (
-              'Verify Code'
+              <span>Verify Code</span>
             )}
-          </Button>
+          </button>
 
           {/* Resend Button */}
-          <Button
+          <button
             type="button"
-            variant="outline"
             onClick={handleResend}
             disabled={!canResend || resendCooldown > 0 || isVerifying}
-            className="w-full"
+            className="w-full h-10 rounded-lg font-medium transition-all duration-200"
+            style={{
+              border: '2px solid #E0E6ED',
+              backgroundColor: 'transparent',
+              color: (canResend && resendCooldown === 0 && !isVerifying) ? '#6C757D' : '#E0E6ED'
+            }}
             data-testid="resend-otp-button"
+            onMouseEnter={(e) => {
+              if (canResend && resendCooldown === 0 && !isVerifying) {
+                e.target.style.borderColor = '#3D8BFF'
+                e.target.style.color = '#3D8BFF'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (canResend && resendCooldown === 0 && !isVerifying) {
+                e.target.style.borderColor = '#E0E6ED'
+                e.target.style.color = '#6C757D'
+              }
+            }}
           >
             {resendCooldown > 0 ? (
               `Resend in ${resendCooldown}s`
             ) : (
-              <>
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Resend Code
-              </>
+              'Resend Code'
             )}
-          </Button>
+          </button>
 
           {/* Back to Login */}
-          <Button
+          <button
             type="button"
-            variant="ghost"
             onClick={onBack}
             disabled={isVerifying}
-            className="w-full text-gray-600 dark:text-gray-400"
+            className="w-full h-10 font-medium transition-colors duration-200 text-center"
+            style={{ color: '#6C757D' }}
             data-testid="back-to-login-button"
+            onMouseEnter={(e) => {
+              e.target.style.color = '#1A1A1A'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.color = '#6C757D'
+            }}
           >
             ← Back to Login
-          </Button>
+          </button>
         </div>
 
         {/* Help Text */}
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-center text-sm" style={{ color: '#6C757D' }}>
           <p>Didn't receive the code? Check your spam folder or try resending.</p>
         </div>
       </div>
-    </Card>
+    </div>
   )
 }
