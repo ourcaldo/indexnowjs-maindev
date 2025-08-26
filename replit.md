@@ -1,8 +1,7 @@
 # IndexNow Studio - Professional Web Application
 
 ## Overview
-
-IndexNow Studio is a professional-grade, full-stack web application designed to automate Google URL indexing through the Google Search Console API. It provides instant indexing, manages multiple service accounts, schedules jobs, and offers advanced monitoring and reporting for SEO professionals, digital marketers, and website owners. Its vision is to be a comprehensive solution for efficient, large-scale indexing.
+IndexNow Studio is a professional, full-stack web application designed to automate Google URL indexing through the Google Search Console API. It offers instant indexing, multi-service account management, advanced scheduling, comprehensive monitoring, and professional email notifications. The vision is to provide a comprehensive solution for efficient, large-scale indexing for SEO professionals, digital marketers, and website owners, aiming for a leading position in the SEO automation market.
 
 **Key Capabilities:**
 - Automated Google Indexing for thousands of URLs.
@@ -51,14 +50,14 @@ The application is built with Next.js App Router and integrates with an Express 
 - **Security:** Multi-layered security, input validation, rate limiting, audit logging.
 
 **Key Features:**
-- **User Management & Authentication:** Secure JWT-based authentication, user profiles, three-tier role system (user, admin, super_admin).
+- **User Management & Authentication:** Secure JWT-based authentication, user profiles, three-tier role system (user, admin, super_admin), and Multi-Factor Authentication (MFA) via email OTP.
 - **Service Account Management:** Secure JSON upload, AES-256-CBC credential encryption, daily and minute quota tracking, load balancing, and JWT token caching.
 - **Indexing Job System:** Job creation via sitemap parsing or manual URL lists, various scheduling options, status tracking, real-time progress monitoring via WebSockets, and bulk operations.
 - **Google API Integration:** Direct integration with Google Indexing API, service account authentication, comprehensive error handling with retry logic, and rate limiting.
 - **Email Notification System:** Professional, branded email templates for job completion/failure, daily quota reports, and quota alerts.
 - **Security Features:** Comprehensive Zod schema validation, SQL injection prevention, per-user rate limiting, CORS configuration, security headers, audit logging, and role-based authorization.
-- **Rank Tracking Backend:** Implemented ScrapingDog API integration with API key management, quota tracking, daily rank checks, and batch processing. Enhanced admin package settings to support keyword limits configuration.
-- **Payment System:** Unified payment channel architecture with modular handlers for various payment methods (Midtrans Snap, Midtrans Recurring, Bank Transfer). Implemented official Midtrans Node.js client for Core API and Subscription API.
+- **Rank Tracking Backend:** ScrapingDog API integration with API key management, quota tracking, daily rank checks, and batch processing.
+- **Payment System:** Unified payment channel architecture with modular handlers for various payment methods (Midtrans Snap, Midtrans Recurring, Bank Transfer). Includes enhanced security via Zod schema validation, rate limiting, and robust error boundaries.
 
 **User Interface Design:**
 - **Main Color:** Clean white backgrounds.
@@ -83,79 +82,3 @@ The application is built with Next.js App Router and integrates with an Express 
 - **Validation:** Zod.
 - **Utilities:** xml2js (for sitemap parsing), date-fns, clsx, class-variance-authority, framer-motion.
 - **Development:** TypeScript, tsx, esbuild.
-
-## Recent Changes
-
-### August 24, 2025 - Phase 3 Checkout Enhancement: Dynamic Billing Period Selection
-- **Implemented dynamic billing period selector with enhanced order summary**
-  - Created BillingPeriodSelector component supporting monthly, quarterly, biannual, and annual periods
-  - Built enhanced OrderSummary component with currency conversion display for USD users
-  - Integrated dynamic billing period selection into checkout flow, replacing hardcoded period parameters
-  - Enhanced order summary shows conversion rates and IDR amounts for US-based users
-  - Added monthly savings calculations and discount badges for longer billing periods
-- **Technical Implementation:**
-  - `BillingPeriodSelector.tsx`: Dynamic period selection with pricing tier integration
-  - `OrderSummary.tsx`: Currency conversion with exchange rate API integration
-  - Updated checkout page to use dynamic billing periods with proper section numbering
-  - Integrated with existing `pricing_tiers` structure from database
-  - Maintains compatibility with all existing payment processors (Snap, Recurring, Bank Transfer)
-
-### August 24, 2025 - Phase 5 (P4) Implementation: Enhanced Security, Validation & Error Handling
-- **Comprehensive Payment Validation System with Enhanced Security**
-  - Created `app/api/billing/channels/shared/validation.ts` with Zod schema validation for all payment requests
-  - Implemented rate limiting per user (10 requests per 15 minutes with 1-hour blocks after exceeding limit)
-  - Added input sanitization and comprehensive business rules validation
-  - Enhanced customer information validation with regex patterns and character limits
-  - Added email domain validation to prevent temporary/spam email addresses
-- **Payment Error Boundaries for Robust Error Handling**
-  - Created `components/checkout/PaymentErrorBoundary.tsx` React error boundary component
-  - Implemented fallback UI with user-friendly error messages and recovery options
-  - Added comprehensive error logging with unique error IDs for traceability
-  - Wrapped checkout page and PaymentMethodSelector with error boundaries
-  - Enhanced error recovery mechanisms with retry, reload, and navigation options
-- **Enhanced Logging and Monitoring Across Payment Channels**
-  - Upgraded all payment channel handlers (Midtrans Snap, Recurring, Bank Transfer) with structured logging
-  - Added request ID generation and performance metrics tracking (processing time in ms)
-  - Implemented comprehensive error logging with stack traces and request context
-  - Enhanced usePaymentProcessor hook with detailed payment flow logging
-  - All payment interactions now logged with unique identifiers for debugging and monitoring
-- **Security Enhancements and Validation Integration**
-  - Applied validation middleware to all payment channels with detailed error reporting
-  - Enhanced rate limiting to prevent payment abuse and fraud attempts
-  - Added request sanitization to prevent XSS and injection attacks
-  - Implemented business rules validation for country-specific requirements
-  - All payment responses now include request IDs and processing metrics
-
-### August 24, 2025 - Comprehensive System Analysis & Strategic Enhancement Planning
-- **Deep Dive Codebase Analysis and Architecture Assessment**
-  - Conducted comprehensive analysis of complete system architecture including frontend (Next.js 15, React 18, TypeScript), backend (Node.js 20+, Express), and database (Supabase with indb_ schema)
-  - Evaluated current security implementation including JWT authentication, rate limiting (10 req/15min), Zod validation, CORS configuration, and admin middleware protection
-  - Analyzed performance optimizations including TanStack Query caching (5min staleTime, 10min gcTime), singleton patterns for services, and background job processing with node-cron
-  - Assessed payment system architecture with multi-channel support (Midtrans Snap/Recurring, Bank Transfer) and 3DS authentication
-  - Reviewed admin dashboard capabilities, activity logging system, and real-time WebSocket integration
-- **Strategic Enhancement Roadmap Creation (P0-P4 Priorities)**
-  - Created `INDEXNOW_STUDIO_ENHANCEMENT_PLAN.md` with comprehensive 14-week roadmap covering critical improvements to experimental features
-  - P0 Critical (Weeks 1-2): Enhanced monitoring & alerting system, advanced security hardening, performance optimization & scalability
-  - P1 High Priority (Weeks 3-4): Advanced analytics & reporting dashboard, enhanced job management & automation, improved user experience & interface
-  - P2 Medium Priority (Weeks 5-7): Multi-tenant & agency features, advanced integration ecosystem, enhanced billing & subscription management
-  - P3 Nice-to-Have (Weeks 8-10): AI-powered features & optimization, advanced SEO tools, enhanced rank tracking & analytics
-  - P4 Future Enhancements (Weeks 11-14): Advanced enterprise features, experimental capabilities, emerging technology integration
-- **System Status Assessment**
-  - Confirmed production-ready status with enterprise-grade architecture scoring 9/10 for frontend and backend, 8.5/10 for security, 9/10 for database design
-  - Identified current system strengths: robust Next.js architecture, comprehensive payment processing, professional admin panel, real-time capabilities, performance optimization
-  - Documented immediate action items for Week 1 including monitoring system setup, security enhancements, database optimization, and testing protocol establishment
-  - Established success metrics and KPIs for technical performance (99.9% uptime, sub-200ms API response), business growth (70+ NPS, 95% retention), and user experience improvements
-
-### August 23, 2025 - 3DS Authentication System Enhancement
-- **Fixed critical 3DS authentication issue in Midtrans recurring payment flow**
-  - Enhanced checkout page to properly initialize 3DS SDK before authentication
-  - Updated 3DS modal implementation with proper security sandbox and user controls
-  - Added comprehensive server-side logging for all Midtrans API responses
-  - Verified `callback_type: "js_event"` is properly set in Midtrans charge requests
-  - Enhanced error handling and user feedback during 3DS authentication process
-- **Technical Implementation:**
-  - `MidtransNew3ds.authenticate()` function properly implemented in usePaymentProcessor hook
-  - Complete callback handling for success, failure, and pending states
-  - Proper modal management with cancel functionality and loading states
-  - Enhanced server logging in Midtrans service and recurring payment handler
-  - All Midtrans responses now logged to server console for debugging

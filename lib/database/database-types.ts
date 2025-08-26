@@ -39,6 +39,47 @@ export interface Database {
           updated_at?: string
         }
       }
+      indb_security_otp_codes: {
+        Row: {
+          id: string
+          user_id: string
+          email: string
+          otp_code: string
+          otp_type: 'login_mfa' | 'password_reset' | 'email_verification'
+          is_used: boolean
+          attempts_count: number
+          max_attempts: number
+          expires_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          email: string
+          otp_code: string
+          otp_type?: 'login_mfa' | 'password_reset' | 'email_verification'
+          is_used?: boolean
+          attempts_count?: number
+          max_attempts?: number
+          expires_at: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          email?: string
+          otp_code?: string
+          otp_type?: 'login_mfa' | 'password_reset' | 'email_verification'
+          is_used?: boolean
+          attempts_count?: number
+          max_attempts?: number
+          expires_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
       indb_auth_user_settings: {
         Row: {
           id: string
