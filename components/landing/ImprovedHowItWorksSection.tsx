@@ -46,11 +46,11 @@ export default function ImprovedHowItWorksSection() {
           {/* Background gradient line */}
           <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-y-1/2 hidden lg:block"></div>
           
-          <div className="grid lg:grid-cols-3 gap-12 lg:gap-8">
+          <div className="grid lg:grid-cols-3 gap-12 lg:gap-8" style={{gridAutoRows: '1fr'}}>
             {steps.map((step, index) => (
               <div key={index} className="relative group">
                 {/* Step Card */}
-                <div className="bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 text-center hover:bg-white/10 transition-all duration-500 group-hover:scale-105">
+                <div className="bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 text-center hover:bg-white/10 transition-all duration-500 group-hover:scale-105 h-full flex flex-col">
                   {/* Icon with gradient background */}
                   <div className="relative mb-6">
                     <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br ${step.color} p-4 mb-4 group-hover:rotate-12 transition-transform duration-500`}>
@@ -70,7 +70,7 @@ export default function ImprovedHowItWorksSection() {
                     {step.details}
                   </div>
                   
-                  <p className="text-gray-300 leading-relaxed">
+                  <p className="text-gray-300 leading-relaxed flex-grow">
                     {step.description}
                   </p>
 

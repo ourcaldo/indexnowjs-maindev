@@ -39,9 +39,9 @@ export default function HowItWorksSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-8 mb-12" style={{gridAutoRows: '1fr'}}>
           {steps.map((step, index) => (
-            <div key={index} className="text-center relative">
+            <div key={index} className="text-center relative h-full flex flex-col">
               {/* Connection line */}
               {index < steps.length - 1 && (
                 <div className="hidden md:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-blue-400/50 to-cyan-400/50 -translate-y-1/2 z-0"></div>
@@ -65,7 +65,7 @@ export default function HowItWorksSection() {
                   <p className="text-sm text-gray-400 mb-2">{step.details}</p>
                 )}
                 
-                <p className="text-gray-300">
+                <p className="text-gray-300 flex-grow">
                   {step.description}
                 </p>
               </div>

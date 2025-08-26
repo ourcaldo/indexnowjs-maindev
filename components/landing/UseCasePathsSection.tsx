@@ -40,9 +40,9 @@ export default function UseCasePathsSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8" style={{gridAutoRows: '1fr'}}>
           {useCases.map((useCase, index) => (
-            <NeonBorderCard key={index} intensity={index === 1 ? "high" : "medium"} className="p-8">
+            <NeonBorderCard key={index} intensity={index === 1 ? "high" : "medium"} className="p-8 h-full flex flex-col">
               <div className={`w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 ${useCase.color}`}>
                 <useCase.icon className="w-8 h-8" />
               </div>
@@ -51,7 +51,7 @@ export default function UseCasePathsSection() {
                 {useCase.title}
               </h3>
               
-              <p className="text-gray-300 mb-6 leading-relaxed">
+              <p className="text-gray-300 mb-6 leading-relaxed flex-grow">
                 {useCase.description}
               </p>
               

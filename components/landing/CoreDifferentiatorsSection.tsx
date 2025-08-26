@@ -37,16 +37,16 @@ export default function CoreDifferentiatorsSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8" style={{gridAutoRows: '1fr'}}>
           {differentiators.map((item, index) => (
-            <NeonBorderCard key={index} intensity={index === 1 ? "high" : "medium"} className="p-8 text-center">
+            <NeonBorderCard key={index} intensity={index === 1 ? "high" : "medium"} className="p-8 text-center h-full flex flex-col">
               <div className={`w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-6 ${item.color}`}>
                 <item.icon className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-semibold mb-4 text-white">
                 {item.title}
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-gray-300 leading-relaxed flex-grow">
                 {item.description}
               </p>
             </NeonBorderCard>
