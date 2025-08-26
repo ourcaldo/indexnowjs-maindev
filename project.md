@@ -704,6 +704,31 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### January 29, 2025 16:30: Advanced Neon Light Effect Implementation - Fixed Landing Page Pricing Cards ✅
+- **✅ NEON LIGHT EFFECT COMPLETE REWRITE**: Completely reimplemented the neon light effect system to match Qoder reference behavior
+  - **Problem Solved**: Fixed neon light that was only appearing when hovering directly on cards and showing underneath text/middle of cards
+  - **Global Mouse Tracking**: Created new NeonContainer component that tracks mouse position at container level across entire pricing section
+  - **Distance-Based Activation**: Neon light now appears on border edges when mouse is within 200px of any card, even when hovering outside cards
+  - **Proper Edge Positioning**: Neon light only appears on border edges (top, right, bottom, left) closest to mouse pointer, never under text or in middle
+  - **Project Color Compliance**: Used project's Soft Blue (#3D8BFF) instead of previous green colors, maintaining design consistency
+- **✅ ADVANCED NEON CARD SYSTEM**: Built sophisticated neon effect with multiple border elements and precise positioning
+  - **Four Border Elements**: Each card has separate neon elements for top, right, bottom, and left borders
+  - **Opacity-Based Distance**: Neon intensity decreases based on distance from mouse to card borders (fade effect)
+  - **Smooth Transitions**: Added 0.15s ease-out transitions for opacity changes with 0.1s position updates
+  - **Performance Optimized**: Efficient boundary calculations and conditional rendering for better performance
+- **✅ BACKWARD COMPATIBILITY**: Created wrapper components to maintain existing component imports
+  - **NeonCard.tsx**: Wrapper around new system for components using original NeonCard
+  - **NeonBorderCard.tsx**: Wrapper around new system for components using original NeonBorderCard
+  - **Zero Breaking Changes**: All existing landing page components continue working without modification
+- **Files Created**:
+  - `components/landing/AdvancedNeonCard.tsx` - Core neon effect implementation with distance-based border lighting
+  - `components/landing/NeonContainer.tsx` - Global mouse tracking container component
+- **Files Modified**:
+  - `components/landing/PricingTeaserSection.tsx` - Updated to use new NeonContainer with AdvancedNeonCard
+  - `components/landing/NeonCard.tsx` - Recreated as wrapper for backward compatibility
+  - `components/landing/NeonBorderCard.tsx` - Recreated as wrapper for backward compatibility
+- **Result**: Perfect Qoder-style neon light effect that activates on closest border edges when hovering anywhere near cards, working exactly as shown in reference images with project color scheme compliance
+
 ### August 25, 2025: Email System Enhancement - Payment Flow & Currency Display Fixes ✅
 - **Midtrans SNAP Email Flow Optimization**
   - **Fixed Payment Detail Integration**: Removed immediate email sending from SNAP handler for bank_transfer and cstore payments
