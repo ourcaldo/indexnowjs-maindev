@@ -120,7 +120,8 @@ export default function MFAVerificationForm({
       const result = await response.json()
 
       if (response.ok) {
-        // Verification successful - API returns data directly, not wrapped in result.data
+        // Verification successful - API returns data directly
+        console.log('MFA verification successful:', result)
         onVerificationSuccess(result)
       } else {
         setError(result.message || result.error?.message || 'Verification failed. Please try again.')
@@ -161,113 +162,85 @@ export default function MFAVerificationForm({
 
   return (
     <div 
-      className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-8"
+      className="w-full max-w-sm mx-auto bg-white rounded-xl border p-6"
       style={{
         backgroundColor: '#FFFFFF',
-        borderColor: '#E0E6ED'
+        borderColor: '#E5E7EB',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
       }}
     >
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Header */}
         <div className="text-center">
           <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
             style={{
-              background: 'linear-gradient(135deg, #3D8BFF 0%, #2C73E6 100%)',
-              boxShadow: '0 4px 12px rgba(61, 139, 255, 0.25)'
+              backgroundColor: '#3D8BFF'
             }}
           >
-            <Shield className="w-8 h-8 text-white" />
+            <img 
+              src="https://bwkasvyrzbzhcdtvsbyg.supabase.co/storage/v1/object/public/indexnow-bucket/logo/IndexNow-icon.png" 
+              alt="Logo"
+              className="w-6 h-6"
+              style={{ filter: 'invert(1)' }}
+            />
           </div>
           <h2 
-            className="text-2xl font-bold mb-2"
-            style={{ color: '#1A1A1A' }}
+            className="text-xl font-semibold mb-1"
+            style={{ color: '#1F2937' }}
           >
             Check your email
           </h2>
           <p 
-            className="leading-relaxed"
-            style={{ color: '#6C757D' }}
+            className="text-sm"
+            style={{ color: '#6B7280' }}
           >
             Enter the code sent to<br />
-            <span className="font-medium" style={{ color: '#2C2C2E' }}>{email}</span>
+            <span className="font-medium" style={{ color: '#374151' }}>{email}</span>
           </p>
-        </div>
-
-        {/* Timer Display */}
-        <div 
-          className="text-center text-sm py-2 px-4 rounded-lg"
-          style={{ 
-            backgroundColor: '#F7F9FC', 
-            color: timeLeft > 0 ? '#6C757D' : '#E63946',
-            border: '1px solid #E0E6ED' 
-          }}
-        >
-          {timeLeft > 0 ? (
-            <>This code expires in {formatTime(timeLeft)}</>
-          ) : (
-            <span style={{ color: '#E63946' }}>Code has expired</span>
-          )}
+          <p 
+            className="text-xs mt-2"
+            style={{ color: timeLeft > 0 ? '#6B7280' : '#EF4444' }}
+          >
+            {timeLeft > 0 ? `This code expires in ${formatTime(timeLeft)}` : 'Code has expired'}
+          </p>
         </div>
 
 
         {/* OTP Input */}
-        <div className="space-y-4">
-          <div className="relative">
-            <input
-              ref={el => { inputRefs.current[0] = el }}
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              value={otpCode}
-              onChange={handleSingleInputChange}
-              onKeyDown={handleSingleInputKeyPress}
-              onPaste={handlePaste}
-              placeholder="Enter verification code"
-              className="w-full h-14 text-center text-2xl font-bold rounded-lg transition-all duration-200 tracking-[0.5em]"
-              style={{
-                backgroundColor: '#F7F9FC',
-                border: `2px solid ${otpCode.length > 0 ? '#3D8BFF' : '#E0E6ED'}`,
-                color: '#1A1A1A',
-                outline: 'none',
-                letterSpacing: '0.5em',
-                paddingLeft: '0.25em'
-              }}
-              disabled={isVerifying || timeLeft === 0}
-              data-testid="otp-input"
-              onFocus={(e) => {
-                e.target.style.borderColor = '#3D8BFF'
-                e.target.style.boxShadow = '0 0 0 3px rgba(61, 139, 255, 0.1)'
-              }}
-              onBlur={(e) => {
-                if (otpCode.length === 0) {
-                  e.target.style.borderColor = '#E0E6ED'
-                  e.target.style.boxShadow = 'none'
-                }
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div 
-            className="p-4 rounded-lg flex items-start space-x-3" 
-            style={{ 
-              backgroundColor: 'rgba(230, 57, 70, 0.1)', 
-              border: '1px solid rgba(230, 57, 70, 0.3)' 
+        <div>
+          <input
+            ref={el => { inputRefs.current[0] = el }}
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={otpCode}
+            onChange={handleSingleInputChange}
+            onKeyDown={handleSingleInputKeyPress}
+            onPaste={handlePaste}
+            placeholder="Enter verification code"
+            className="w-full h-11 text-center text-lg font-medium rounded-md transition-all duration-200"
+            style={{
+              backgroundColor: '#F9FAFB',
+              border: `1px solid ${otpCode.length > 0 ? '#3B82F6' : '#D1D5DB'}`,
+              color: '#111827',
+              outline: 'none',
+              letterSpacing: '0.25em'
             }}
-            data-testid="mfa-error-message"
-          >
-            <div 
-              className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-              style={{ backgroundColor: '#E63946' }}
-            >
-              <span className="text-white text-xs font-bold">!</span>
-            </div>
-            <p style={{ color: '#E63946', fontSize: '14px', fontWeight: '500' }}>{error}</p>
-          </div>
-        )}
+            disabled={isVerifying || timeLeft === 0}
+            data-testid="otp-input"
+            onFocus={(e) => {
+              e.target.style.borderColor = '#3B82F6'
+              e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.1)'
+            }}
+            onBlur={(e) => {
+              if (otpCode.length === 0) {
+                e.target.style.borderColor = '#D1D5DB'
+                e.target.style.boxShadow = 'none'
+              }
+            }}
+          />
+        </div>
 
         {/* Action Buttons */}
         <div className="space-y-3">
@@ -275,23 +248,13 @@ export default function MFAVerificationForm({
             type="button"
             onClick={() => handleVerifyOTP()}
             disabled={otpCode.length !== 6 || isVerifying || timeLeft === 0}
-            className="w-full h-12 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2"
+            className="w-full h-10 rounded-md font-medium transition-all duration-200 flex items-center justify-center space-x-2"
             style={{
-              backgroundColor: (otpCode.length === 6 && !isVerifying && timeLeft > 0) ? '#1A1A1A' : '#E0E6ED',
-              color: (otpCode.length === 6 && !isVerifying && timeLeft > 0) ? '#FFFFFF' : '#6C757D',
+              backgroundColor: (otpCode.length === 6 && !isVerifying && timeLeft > 0) ? '#111827' : '#F3F4F6',
+              color: (otpCode.length === 6 && !isVerifying && timeLeft > 0) ? '#FFFFFF' : '#9CA3AF',
               cursor: (otpCode.length === 6 && !isVerifying && timeLeft > 0) ? 'pointer' : 'not-allowed'
             }}
             data-testid="verify-otp-button"
-            onMouseEnter={(e) => {
-              if (otpCode.length === 6 && !isVerifying && timeLeft > 0) {
-                (e.target as HTMLButtonElement).style.backgroundColor = '#2C2C2E'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (otpCode.length === 6 && !isVerifying && timeLeft > 0) {
-                (e.target as HTMLButtonElement).style.backgroundColor = '#1A1A1A'
-              }
-            }}
           >
             {isVerifying ? (
               <>
@@ -308,28 +271,16 @@ export default function MFAVerificationForm({
             type="button"
             onClick={handleResend}
             disabled={!canResend || resendCooldown > 0 || isVerifying}
-            className="w-full h-10 rounded-lg font-medium transition-all duration-200"
+            className="w-full h-9 font-medium transition-all duration-200 text-sm"
             style={{
-              border: '2px solid #E0E6ED',
               backgroundColor: 'transparent',
-              color: (canResend && resendCooldown === 0 && !isVerifying) ? '#6C757D' : '#E0E6ED'
+              color: (canResend && resendCooldown === 0 && !isVerifying) ? '#6B7280' : '#D1D5DB',
+              border: 'none'
             }}
             data-testid="resend-otp-button"
-            onMouseEnter={(e) => {
-              if (canResend && resendCooldown === 0 && !isVerifying) {
-                (e.target as HTMLButtonElement).style.borderColor = '#3D8BFF';
-                (e.target as HTMLButtonElement).style.color = '#3D8BFF'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (canResend && resendCooldown === 0 && !isVerifying) {
-                (e.target as HTMLButtonElement).style.borderColor = '#E0E6ED';
-                (e.target as HTMLButtonElement).style.color = '#6C757D'
-              }
-            }}
           >
             {resendCooldown > 0 ? (
-              `Resend in ${resendCooldown}s`
+              `Resend Code`
             ) : (
               'Resend Code'
             )}
@@ -340,23 +291,28 @@ export default function MFAVerificationForm({
             type="button"
             onClick={onBack}
             disabled={isVerifying}
-            className="w-full h-10 font-medium transition-colors duration-200 text-center"
-            style={{ color: '#6C757D' }}
+            className="w-full h-9 font-medium transition-colors duration-200 text-center text-sm"
+            style={{ color: '#6B7280', backgroundColor: 'transparent', border: 'none' }}
             data-testid="back-to-login-button"
-            onMouseEnter={(e) => {
-              (e.target as HTMLButtonElement).style.color = '#1A1A1A'
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLButtonElement).style.color = '#6C757D'
-            }}
           >
             ← Back to Login
           </button>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div 
+            className="text-center text-sm mt-2"
+            style={{ color: '#EF4444' }}
+            data-testid="mfa-error-message"
+          >
+            {error}
+          </div>
+        )}
+
         {/* Help Text */}
-        <div className="text-center text-sm" style={{ color: '#6C757D' }}>
-          <p>Didn't receive the code? Check your spam folder or try resending.</p>
+        <div className="text-center text-xs" style={{ color: '#9CA3AF' }}>
+          <p>Can't find the email? Check your spam folder or try resending.</p>
         </div>
       </div>
     </div>
