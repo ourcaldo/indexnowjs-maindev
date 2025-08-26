@@ -14,8 +14,11 @@ export default function FinalCTASection({ onGetStarted }: FinalCTASectionProps) 
   return (
     <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        <div className="bg-gradient-to-r from-blue-500/10 via-cyan-400/10 to-blue-500/10 rounded-3xl border border-white/10 overflow-hidden">
-          <div className="p-12 lg:p-16 text-center">
+        <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/5 backdrop-blur-md shadow-2xl hover:bg-white/10 transition-all duration-500 hover:border-white/30 hover:shadow-3xl">
+          {/* Glass effect overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-blue-500/10 pointer-events-none"></div>
+          
+          <div className="relative p-12 lg:p-16 text-center">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white">
               Start tracking what actually matters
             </h2>
@@ -34,14 +37,14 @@ export default function FinalCTASection({ onGetStarted }: FinalCTASectionProps) 
               
               <button
                 onClick={handleBookDemo}
-                className="border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/5 transition-all duration-300 flex items-center space-x-2"
+                className="border border-white/30 text-white px-8 py-4 rounded-full font-semibold text-lg bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/40 transition-all duration-300 flex items-center space-x-2"
               >
                 <Calendar className="w-5 h-5" />
                 <span>Book a 15-min demo</span>
               </button>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-white/10">
+            <div className="mt-8 pt-8 border-t border-white/20">
               <p className="text-sm text-gray-400">
                 7-day free trial • No credit card required • Cancel anytime
               </p>
