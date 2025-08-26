@@ -18,8 +18,8 @@ if (typeof window === 'undefined' && !(global as any).backgroundServicesInitiali
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'IndexNow Studio',
-  description: 'Professional URL indexing automation platform for Google Search Console',
+  title: 'IndexNow: Rank Tracker',
+  description: 'Professional rank tracking made simple. Precise keyword rankings with clean reports and fair pricing.',
 }
 
 export default function RootLayout({
