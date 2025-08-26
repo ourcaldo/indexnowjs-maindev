@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, Minus, MapPin, Smartphone, Monitor, Globe } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, MapPin, Phone, Monitor, Globe } from 'lucide-react'
 
 const keywordData = [
   { keyword: 'seo tools', position: 3, change: 2, volume: '12K', difficulty: 'High', device: 'desktop', location: 'US' },
@@ -42,7 +42,7 @@ export default function RankTrackerPreview() {
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-1">
                     {item.device === 'mobile' ? 
-                      <Smartphone className="w-3 h-3 text-gray-400" /> : 
+                      <Phone className="w-3 h-3 text-gray-400" /> : 
                       <Monitor className="w-3 h-3 text-gray-400" />
                     }
                     <MapPin className="w-3 h-3 text-gray-400" />

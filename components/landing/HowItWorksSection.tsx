@@ -21,7 +21,7 @@ export default function HowItWorksSection() {
     {
       number: "3",
       icon: Play,
-      title: "Set schedule & alerts—done",
+      title: "Set schedule & alerts done",
       description: "Automated daily tracking with instant notifications when rankings change.",
       details: ""
     }

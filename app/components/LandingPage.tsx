@@ -11,7 +11,7 @@ import PainPromiseSection from '@/components/landing/PainPromiseSection'
 import CoreDifferentiatorsSection from '@/components/landing/CoreDifferentiatorsSection'
 import ProductTourSection from '@/components/landing/ProductTourSection'
 import UseCasePathsSection from '@/components/landing/UseCasePathsSection'
-import HowItWorksSection from '@/components/landing/HowItWorksSection'
+import ImprovedHowItWorksSection from '@/components/landing/ImprovedHowItWorksSection'
 import PricingTeaserSection from '@/components/landing/PricingTeaserSection'
 import ComparisonSection from '@/components/landing/ComparisonSection'
 import EnhancedFAQSection from '@/components/landing/EnhancedFAQSection'
@@ -334,7 +334,7 @@ export default function LandingPage() {
 
       {/* How It Works Section */}
       <section ref={howItWorksRef}>
-        <HowItWorksSection />
+        <ImprovedHowItWorksSection />
       </section>
 
       {/* Pricing Teaser Section */}

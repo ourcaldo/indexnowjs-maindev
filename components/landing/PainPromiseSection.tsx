@@ -10,14 +10,14 @@ interface PainPromiseSectionProps {
 export default function PainPromiseSection({ onGetStarted }: PainPromiseSectionProps) {
   const painPoints = [
     "Data changes by location/device but tools don't show the real picture.",
-    "Tool suites are bloated—and overpriced—for simple tracking needs.",
+    "Tool suites are bloated and overpriced for simple tracking needs.",
     "Surprise overage fees and confusing 'credits' kill budgets.",
     "Clients can't read messy reports; I need clean, shareable proof."
   ]
 
   const solutions = [
     "True-to-location & device checks (down to city/ZIP when needed).",
-    "Just rank tracking—fast, focused, no bloat.",
+    "Just rank tracking: fast, focused, no bloat.",
     "Fair, predictable pricing that scales with you.",
     "Client-ready reports and live share links that make sense."
   ]

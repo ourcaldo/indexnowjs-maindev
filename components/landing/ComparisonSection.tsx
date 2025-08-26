@@ -96,7 +96,7 @@ export default function ComparisonSection({ onGetStarted }: ComparisonSectionPro
             onClick={onGetStarted}
             className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
           >
-            <span>Keep it simple—start free</span>
+            <span>Keep it simple, start free</span>
             <ArrowRight className="w-5 h-5" />
           </button>
         </div>

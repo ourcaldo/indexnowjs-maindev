@@ -20,7 +20,7 @@ export default function FinalCTASection({ onGetStarted }: FinalCTASectionProps) 
               Start tracking what actually matters
             </h2>
             <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-              See real positions by location and device—without the bloat.
+              See real positions by location and device without the bloat.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

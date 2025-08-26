@@ -25,7 +25,7 @@ export default function ProductTourSection() {
             <span className="text-sm">rank tracker</span>
             <div className="flex items-center space-x-2">
               <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">#1</span>
-              <span className="text-gray-400 text-xs">—</span>
+              <span className="text-gray-400 text-xs">-</span>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function ProductTourSection() {
     {
       icon: FileText,
       title: "Client Reports",
-      description: "Schedule branded PDFs or live links—weekly/monthly—ready for clients.",
+      description: "Schedule branded PDFs or live links weekly/monthly ready for clients.",
       preview: (
         <div className="space-y-3">
           <div className="bg-white/5 p-4 rounded-lg border border-white/10">

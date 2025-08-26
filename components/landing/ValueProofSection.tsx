@@ -25,7 +25,7 @@ export default function ValueProofSection() {
         {/* 1-line reassurance */}
         <div className="text-center">
           <p className="text-lg text-gray-300">
-            Built for speed and clarity—get set up in minutes.
+            Built for speed and clarity. Get set up in minutes.
           </p>
         </div>
       </div>

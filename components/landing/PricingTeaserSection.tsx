@@ -153,7 +153,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 <AdvancedNeonCard 
                   key={pkg.id} 
                   intensity={isPopular ? "high" : "medium"} 
-                  className="p-8 flex flex-col h-full"
+                  className="p-8 flex flex-col min-h-[500px]"
                   mousePosition={mousePosition}
                   isTracking={isTracking}
                 >
@@ -199,11 +199,13 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                       <span>
                         {index === displayPackages.length - 1 && pkg.name.toLowerCase().includes('agency') 
                           ? 'Talk to us' 
-                          : index === 0 
+                          : pkg.name.toLowerCase().includes('free') || pkg.name.toLowerCase().includes('starter') || pkg.name.toLowerCase().includes('basic')
                             ? 'Start free trial'
-                            : index === 1 
-                              ? 'Go Pro' 
-                              : 'Get started'
+                            : pkg.name.toLowerCase().includes('premium') 
+                              ? 'Go Premium' 
+                              : pkg.name.toLowerCase().includes('pro')
+                                ? 'Get Pro'
+                                : 'Get started'
                         }
                       </span>
                       {!(index === displayPackages.length - 1 && pkg.name.toLowerCase().includes('agency')) && <ArrowRight className="w-5 h-5" />}
