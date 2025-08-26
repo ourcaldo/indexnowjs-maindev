@@ -22,7 +22,7 @@ export default function EnhancedFAQSection() {
     },
     {
       question: "How many keywords can I track?",
-      answer: "Add as many keywords as you need across **multiple domains**. Organize them with tags and filter by country, device, or performance to focus on what matters most."
+      answer: "Keyword limits depend on your **subscription plan**. Organize your keywords with **custom tags** and filter by country, device, or performance to make the most of your allocation."
     },
     {
       question: "What about Google indexing?",
