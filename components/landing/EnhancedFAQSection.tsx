@@ -68,9 +68,9 @@ export default function EnhancedFAQSection() {
                 
                 {expandedFAQ === index && (
                   <div className="px-6 pb-6">
-                    <p className="text-gray-300 leading-relaxed">
-                      {faq.answer}
-                    </p>
+                    <div className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{
+                      __html: faq.answer.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+                    }} />
                   </div>
                 )}
               </div>
