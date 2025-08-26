@@ -3,24 +3,24 @@ import LandingPage from './components/LandingPage'
 import ClientOnlyWrapper from '@/components/ClientOnlyWrapper'
 
 export const metadata: Metadata = {
-  title: 'IndexNow Studio - Professional Google URL Indexing Automation',
-  description: 'Stop waiting for Google to find your content. IndexNow Studio automates URL indexing with Google Search Console API. Get your pages indexed instantly with enterprise-grade reliability.',
-  keywords: 'Google indexing, URL indexing, SEO automation, Google Search Console, instant indexing, RankMath alternative',
+  title: 'IndexNow Studio - Professional Rank Tracking Made Simple',
+  description: 'Track your keyword rankings with precision. IndexNow Studio provides powerful rank tracking tools that are simple yet comprehensive for SEO professionals and digital marketers.',
+  keywords: 'rank tracking, keyword ranking, SEO tracking, SERP monitoring, rank tracker, keyword position, SEO analytics',
   openGraph: {
-    title: 'IndexNow Studio - Professional Google URL Indexing Automation',
-    description: 'Stop waiting for Google to find your content. IndexNow Studio automates URL indexing with Google Search Console API. Get your pages indexed instantly with enterprise-grade reliability.',
+    title: 'IndexNow Studio - Professional Rank Tracking Made Simple',
+    description: 'Track your keyword rankings with precision. IndexNow Studio provides powerful rank tracking tools that are simple yet comprehensive for SEO professionals.',
     type: 'website',
     images: [{
       url: 'https://bwkasvyrzbzhcdtvsbyg.supabase.co/storage/v1/object/public/indexnow-bucket/logo/indexnow-black.png',
       width: 1200,
       height: 630,
-      alt: 'IndexNow Studio - Professional URL Indexing'
+      alt: 'IndexNow Studio - Professional Rank Tracking'
     }]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'IndexNow Studio - Professional Google URL Indexing Automation',
-    description: 'Stop waiting for Google to find your content. IndexNow Studio automates URL indexing with Google Search Console API.',
+    title: 'IndexNow Studio - Professional Rank Tracking Made Simple',
+    description: 'Track your keyword rankings with precision. IndexNow Studio provides powerful rank tracking tools that are simple yet comprehensive.',
   }
 }
 
@@ -30,7 +30,7 @@ export default function HomePage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading IndexNow Studio...</p>
+          <p className="text-gray-600">Loading IndexNow Rank Tracker...</p>
         </div>
       </div>
     }>

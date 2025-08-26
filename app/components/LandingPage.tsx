@@ -344,16 +344,17 @@ export default function LandingPage() {
             <div className="space-y-8">
               <div className="space-y-6">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                  SEO Professionals Are{' '}
+                  Not just another rank tracker.{' '}
+                  <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400">
-                    Losing Rankings
+                    IndexNow thinks deeper
                   </span>{' '}
-                  Every Single Day
+                  to solve real SEO challenges.
                 </h1>
                 
                 <p className="text-xl text-gray-300 leading-relaxed">
-                  While you're waiting 2-4 weeks for Google to discover your content, 
-                  your competitors are getting indexed in minutes and capturing your traffic.
+                  Simple yet powerful rank tracking that gives you the insights you need 
+                  to dominate search results without the complexity.
                 </p>
               </div>
 
@@ -364,19 +365,19 @@ export default function LandingPage() {
                   onClick={handleGetStarted}
                   className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
-                  Start Your Free Trial
+                  Start Tracking
                 </button>
                 <button
                   onClick={() => scrollToSection(statsRef)}
                   className="border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/5 transition-all duration-300"
                 >
-                  See Success Stories
+                  See What's Possible
                 </button>
               </div>
 
               <div className="pt-4 border-t border-white/10">
                 <p className="text-sm text-gray-500">
-                  Trusted by industry leaders • 98.7% success rate • 95% faster indexing
+                  Trusted by SEO professionals • Real-time tracking • Enterprise-grade precision
                 </p>
               </div>
             </div>
@@ -404,33 +405,33 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              The Results Speak for Themselves
+              Rank Tracking Platform for Real SEO Professionals
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Over 50,000 professionals trust IndexNow Pro to get their content indexed instantly.
+              Track what matters. Monitor keywords that drive business results with enterprise-grade precision.
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
             <div className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-4xl font-bold text-white mb-2">98.7%</div>
-              <div className="text-gray-400">Success Rate</div>
-              <div className="text-xs text-gray-500 mt-1">Industry Leading</div>
+              <div className="text-4xl font-bold text-white mb-2">99.9%</div>
+              <div className="text-gray-400">Uptime</div>
+              <div className="text-xs text-gray-500 mt-1">Never Miss Rankings</div>
             </div>
             <div className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-4xl font-bold text-white mb-2">&lt;24min</div>
-              <div className="text-gray-400">Average Index Time</div>
-              <div className="text-xs text-gray-500 mt-1">95% Faster</div>
+              <div className="text-4xl font-bold text-white mb-2">Real-Time</div>
+              <div className="text-gray-400">Data Updates</div>
+              <div className="text-xs text-gray-500 mt-1">Always Current</div>
             </div>
             <div className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-4xl font-bold text-white mb-2">2.1M+</div>
-              <div className="text-gray-400">URLs Indexed</div>
-              <div className="text-xs text-gray-500 mt-1">This Month</div>
+              <div className="text-4xl font-bold text-white mb-2">500K+</div>
+              <div className="text-gray-400">Keywords Tracked</div>
+              <div className="text-xs text-gray-500 mt-1">Daily Monitoring</div>
             </div>
             <div className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-4xl font-bold text-white mb-2">340%</div>
-              <div className="text-gray-400">Traffic Increase</div>
-              <div className="text-xs text-gray-500 mt-1">Average Client</div>
+              <div className="text-4xl font-bold text-white mb-2">15min</div>
+              <div className="text-gray-400">Setup Time</div>
+              <div className="text-xs text-gray-500 mt-1">Start Tracking Fast</div>
             </div>
           </div>
 
@@ -442,16 +443,16 @@ export default function LandingPage() {
               </div>
             </div>
             <blockquote className="text-xl text-gray-300 mb-6 italic">
-              "IndexNow Pro transformed our SEO workflow. We went from manually submitting 50 URLs per day 
-              to automatically indexing 10,000+ pages in hours. Our organic traffic increased by 340% in just one month."
+              "Finally, a rank tracker that doesn't over-complicate things. Clean interface, accurate data, 
+              and the insights I actually need to make decisions. It just works."
             </blockquote>
             <div className="flex items-center justify-center space-x-4">
               <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
               </div>
               <div className="text-left">
-                <p className="text-white font-semibold">Sarah Johnson</p>
-                <p className="text-gray-400 text-sm">SEO Manager at TechCorp</p>
+                <p className="text-white font-semibold">Marcus Chen</p>
+                <p className="text-gray-400 text-sm">Head of SEO at GrowthLabs</p>
               </div>
             </div>
           </div>
@@ -463,32 +464,35 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              The Complete Indexing Solution
+              Rank Tracking Mode:
+              <br />Delegate Rankings to Intelligence
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              While you're waiting 2-4 weeks for Google to discover your content, competitors are getting indexed in minutes and capturing your traffic. Manual indexing is broken. Google Search Console limits you to 200 URLs per day. Our proven 3-step system solves this:
+              Add your keywords with specifications. Our intelligence will 
+              complete the tracking, monitoring, and deliver precision 
+              results automatically.
             </p>
             <div className="grid md:grid-cols-3 gap-6 mt-8 max-w-4xl mx-auto">
               <div className="text-center">
                 <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-lg font-bold">1</span>
                 </div>
-                <h3 className="font-semibold mb-2">Connect Google</h3>
-                <p className="text-sm text-gray-400">Secure API integration</p>
+                <h3 className="font-semibold mb-2">Add Keywords</h3>
+                <p className="text-sm text-gray-400">Simple keyword input</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-lg font-bold">2</span>
                 </div>
-                <h3 className="font-semibold mb-2">Submit URLs</h3>
-                <p className="text-sm text-gray-400">Bulk or scheduled indexing</p>
+                <h3 className="font-semibold mb-2">Auto-Track</h3>
+                <p className="text-sm text-gray-400">Daily rank monitoring</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-lg font-bold">3</span>
                 </div>
-                <h3 className="font-semibold mb-2">Get Results</h3>
-                <p className="text-sm text-gray-400">Real-time progress tracking</p>
+                <h3 className="font-semibold mb-2">Get Insights</h3>
+                <p className="text-sm text-gray-400">Actionable analytics</p>
               </div>
             </div>
           </div>
@@ -498,10 +502,10 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Instant Batch Indexing</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white">Smart Keyword Intelligence</h3>
               <p className="text-gray-300 leading-relaxed">
-                Submit thousands of URLs to Google's official Indexing API simultaneously. 
-                No more manual submissions or waiting weeks for discovery.
+                Track thousands of keywords across multiple search engines simultaneously. 
+                Our intelligence pinpoints the rankings that matter most.
               </p>
             </div>
 
@@ -509,10 +513,10 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Real-Time Analytics Dashboard</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white">Advanced Repository Insight</h3>
               <p className="text-gray-300 leading-relaxed">
-                Monitor indexing progress, success rates, and quota usage with professional dashboards. 
-                Get detailed insights into your indexing performance.
+                Monitor ranking changes, competitor movements, and search visibility with precision dashboards. 
+                Resolve SEO issues based on deep understanding of your keyword landscape.
               </p>
             </div>
 
@@ -520,10 +524,10 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
                 <Clock className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Smart Scheduling System</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white">Intelligent Monitoring System</h3>
               <p className="text-gray-300 leading-relaxed">
-                Set up automated indexing jobs with flexible schedules. 
-                Hourly, daily, weekly, or monthly - your content gets indexed automatically.
+                Set up automated rank checks with flexible frequencies. 
+                Daily, weekly, or custom schedules - your rankings are monitored intelligently.
               </p>
             </div>
 
@@ -534,7 +538,7 @@ export default function LandingPage() {
               <h3 className="text-xl font-semibold mb-4 text-white">Enterprise Security</h3>
               <p className="text-gray-300 leading-relaxed">
                 Bank-level encryption, comprehensive audit logs, and role-based access control. 
-                Your data and credentials are completely secure.
+                Your ranking data and API credentials are completely secure.
               </p>
             </div>
 
@@ -542,10 +546,10 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
                 <Users className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Multi-Account Load Balancing</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white">Multi-Location Tracking</h3>
               <p className="text-gray-300 leading-relaxed">
-                Automatically distribute indexing requests across multiple Google service accounts 
-                for maximum throughput and quota optimization.
+                Automatically track rankings across multiple locations and search engines 
+                for comprehensive visibility and performance optimization.
               </p>
             </div>
 
@@ -553,10 +557,10 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
                 <Globe className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Sitemap Integration</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white">Competitor Intelligence</h3>
               <p className="text-gray-300 leading-relaxed">
-                Automatically parse XML sitemaps and index all discovered URLs with one click. 
-                Perfect for large websites with thousands of pages.
+                Monitor your competitors' ranking movements and discover new keyword opportunities. 
+                Perfect for staying ahead in competitive markets.
               </p>
             </div>
           </div>
@@ -571,7 +575,7 @@ export default function LandingPage() {
               Simple Pricing That Scales With Your Success
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Start getting your content indexed instantly. No setup fees, no hidden costs, cancel anytime.
+              Start tracking your rankings with precision. No setup fees, no hidden costs, cancel anytime.
             </p>
             
             {/* Global Billing Period Selector */}
@@ -706,23 +710,23 @@ export default function LandingPage() {
               Frequently Asked Questions
             </h2>
             <p className="text-xl text-gray-300">
-              Everything you need to know about IndexNow Pro
+              Everything you need to know about IndexNow Rank Tracker
             </p>
           </div>
 
           <div className="space-y-6">
             {[
               {
-                question: "How is this different from Google Search Console?",
-                answer: "Google Search Console limits you to 200 URLs per day and requires manual submission. IndexNow Pro uses Google's official Indexing API to submit thousands of URLs automatically with enterprise-grade service accounts, achieving 95% faster indexing times."
+                question: "How is this different from other rank trackers?",
+                answer: "IndexNow Rank Tracker focuses on simplicity without sacrificing power. While other tools overwhelm you with unnecessary features, we provide precise ranking data, intelligent insights, and clean interfaces that help you make decisions faster."
               },
               {
-                question: "Is this similar to RankMath's Instant Indexing?",
-                answer: "Yes! IndexNow Pro provides the same instant indexing capabilities as RankMath's plugin, but as a standalone web platform. We offer advanced features like multi-account management, scheduled jobs, team collaboration, and enterprise security that WordPress plugins can't provide."
+                question: "How accurate is the ranking data?",
+                answer: "Our platform achieves enterprise-grade accuracy with real-time data updates. We use multiple data sources and advanced algorithms to ensure you get the most reliable ranking information available."
               },
               {
-                question: "What's the success rate for indexing?",
-                answer: "Our platform achieves a 98.7% success rate with an average indexing time of under 24 minutes. We use multiple Google service accounts for load balancing and have built-in retry mechanisms for maximum reliability."
+                question: "Can I track competitors?",
+                answer: "Yes! Monitor your competitors' keyword rankings and discover new opportunities. Our intelligent analysis helps you understand market movements and find gaps in your SEO strategy."
               },
               {
                 question: "Can I cancel anytime?",
@@ -765,11 +769,11 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-12 border border-white/10">
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Don't Let Your Content Get Lost in the Search Void
+              Don't Let Your Rankings Slip Away Unnoticed
             </h2>
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              Every day you wait is another day your competitors are stealing your traffic. 
-              Join thousands of successful SEO professionals who've improved their indexing speed by 95%.
+              Every day you wait is another day your competitors gain ranking advantages. 
+              Join thousands of successful SEO professionals who've improved their ranking visibility by 95%.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
@@ -777,7 +781,7 @@ export default function LandingPage() {
                 onClick={handleGetStarted}
                 className="bg-white text-black px-10 py-5 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
-                Start Your Free Trial <ArrowRight className="inline ml-2 w-5 h-5" />
+                Start Tracking Now <ArrowRight className="inline ml-2 w-5 h-5" />
               </button>
               <button
                 onClick={() => scrollToSection(contactRef)}
@@ -788,8 +792,8 @@ export default function LandingPage() {
             </div>
 
             <p className="text-gray-400 text-sm">
-              🚀 Success: Get your content indexed in minutes, not weeks<br />
-              ⚠️ Failure: Watch competitors steal your rankings while you wait
+              🚀 Success: Track your rankings with precision and stay ahead<br />
+              ⚠️ Failure: Miss ranking opportunities while competitors advance
             </p>
           </div>
         </div>
@@ -803,7 +807,7 @@ export default function LandingPage() {
               Have Questions? We're Here to Help
             </h2>
             <p className="text-xl text-gray-300">
-              Get in touch with our indexing experts for personalized assistance
+              Get in touch with our rank tracking experts for personalized assistance
             </p>
           </div>
 
@@ -841,7 +845,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <p className="text-gray-300">
-                  Chat with our technical support team for immediate assistance with setup and configuration.
+                  Chat with our support team for immediate assistance with rank tracking setup and configuration.
                 </p>
               </div>
 
@@ -849,9 +853,9 @@ export default function LandingPage() {
                 <h3 className="text-xl font-semibold text-white mb-4">Common Questions:</h3>
                 <ul className="space-y-2 text-gray-300">
                   <li>• Enterprise pricing and custom solutions</li>
-                  <li>• API integration and technical setup</li>
-                  <li>• Multi-account configuration</li>
-                  <li>• White-label solutions</li>
+                  <li>• Keyword tracking setup and configuration</li>
+                  <li>• Multi-location tracking setup</li>
+                  <li>• White-label rank tracking solutions</li>
                 </ul>
               </div>
             </div>
@@ -881,7 +885,7 @@ export default function LandingPage() {
                   <textarea 
                     rows={4}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-white/40 transition-colors resize-none"
-                    placeholder="Tell us about your indexing needs..."
+                    placeholder="Tell us about your rank tracking needs..."
                   />
                 </div>
                 <button className="w-full bg-white text-black py-3 px-6 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
@@ -909,17 +913,17 @@ export default function LandingPage() {
                 />
               ) : (
                 <span className="text-2xl font-bold text-white">
-                  {siteSettings?.site_name || 'IndexNow Pro'}
+                  {siteSettings?.site_name || 'IndexNow Rank Tracker'}
                 </span>
               )}
             </div>
             <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-              {siteSettings?.site_description || 'Professional URL indexing automation platform that helps SEO professionals get their content indexed by Google instantly using the official Indexing API.'}
+              {siteSettings?.site_description || 'Professional rank tracking platform that helps SEO professionals monitor keyword rankings with precision and intelligence.'}
             </p>
             <div className="border-t border-white/10 pt-6">
               <p className="text-sm text-gray-500">
-                © 2025 {siteSettings?.site_name || 'IndexNow Pro'}. All rights reserved. 
-                Built for SEO professionals who demand results.
+                © 2025 {siteSettings?.site_name || 'IndexNow Rank Tracker'}. All rights reserved. 
+                Built for SEO professionals who demand precision.
               </p>
             </div>
           </div>
