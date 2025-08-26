@@ -7,20 +7,20 @@ export default function CoreDifferentiatorsSection() {
   const differentiators = [
     {
       icon: Target,
-      title: "Accuracy that matches reality",
-      description: "Neutralized personalization, reliable location/device simulation, and consistent schedules for stable trendlines.",
+      title: "Dual-purpose automation",
+      description: "Combines Google URL indexing with keyword rank tracking in one platform for complete SEO workflow automation.",
       color: "text-blue-400"
     },
     {
       icon: Eye,
-      title: "Clarity over complexity",
-      description: "A dashboard you'll actually open. Find wins, losses, and actions in seconds.",
+      title: "Enterprise-grade security",
+      description: "AES-256 encryption for credentials, comprehensive audit logging, and secure service account management.",
       color: "text-cyan-400"
     },
     {
       icon: DollarSign,
-      title: "Fair pricing that grows with you",
-      description: "Transparent plans, flexible credits, unlimited projects on higher tiers. No lock-in.",
+      title: "Transparent operations",
+      description: "Clear quota monitoring, job scheduling with email notifications, and organized domain management.",
       color: "text-green-400"
     }
   ]

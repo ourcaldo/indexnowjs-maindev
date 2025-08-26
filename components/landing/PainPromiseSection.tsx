@@ -9,17 +9,17 @@ interface PainPromiseSectionProps {
 
 export default function PainPromiseSection({ onGetStarted }: PainPromiseSectionProps) {
   const painPoints = [
-    "Data changes by location/device but tools don't show the real picture.",
-    "Tool suites are bloated and overpriced for simple tracking needs.",
-    "Surprise overage fees and confusing 'credits' kill budgets.",
-    "Clients can't read messy reports; I need clean, shareable proof."
+    "Manual URL submission to Google is time-consuming and unreliable.",
+    "Managing multiple Google service accounts for indexing is complex.", 
+    "Keyword tracking tools are expensive with confusing pricing models.",
+    "No way to automate both indexing and rank tracking in one platform."
   ]
 
   const solutions = [
-    "True-to-location & device checks (down to city/ZIP when needed).",
-    "Just rank tracking: fast, focused, no bloat.",
-    "Fair, predictable pricing that scales with you.",
-    "Client-ready reports and live share links that make sense."
+    "Automated Google Indexing API submission with service account management.",
+    "Comprehensive rank tracking with daily checks across devices and countries.",
+    "Fair, transparent pricing with clear quota management and monitoring.",
+    "Combined indexing and tracking platform with scheduling and analytics."
   ]
 
   return (

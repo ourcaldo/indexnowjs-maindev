@@ -132,50 +132,50 @@ export default function RankTrackerPreview() {
       )
     },
     {
-      title: "Smart Alerts & Reports",
-      description: "Get notified of ranking changes and generate branded reports",
+      title: "Position History & Analytics",
+      description: "View keyword ranking trends and manage domains with organized tracking",
       content: (
         <div className="space-y-4">
           <div className="bg-gradient-to-r from-blue-500/10 to-cyan-400/10 rounded-lg p-4 border border-blue-500/20">
             <div className="flex items-center space-x-2 mb-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-green-400">LIVE ALERT</span>
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span className="text-sm font-medium text-blue-400">DOMAIN STATS</span>
             </div>
             <div className="text-white font-medium">
-              "SEO tools" jumped from #5 to #3 in New York
+              example.com: 47 keywords tracked
             </div>
-            <div className="text-xs text-gray-400 mt-1">2 minutes ago</div>
+            <div className="text-xs text-gray-400 mt-1">Last updated today</div>
           </div>
           
           <div className="space-y-2">
-            <div className="text-sm font-medium text-gray-300 mb-3">Recent Alerts</div>
+            <div className="text-sm font-medium text-gray-300 mb-3">Recent Position Changes</div>
             {[
-              { type: 'up', keyword: 'rank tracker', from: 2, to: 1, time: '1h ago' },
-              { type: 'down', keyword: 'keyword research', from: 6, to: 7, time: '3h ago' },
-              { type: 'up', keyword: 'local seo', from: 5, to: 4, time: '5h ago' }
-            ].map((alert, idx) => (
+              { keyword: 'seo tools', position: 3, change: '+2', device: 'Desktop' },
+              { keyword: 'rank tracker', position: 1, change: '-', device: 'Mobile' },
+              { keyword: 'keyword research', position: 7, change: '-1', device: 'Desktop' }
+            ].map((item, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center space-x-3">
-                  {alert.type === 'up' ? 
-                    <TrendingUp className="w-4 h-4 text-green-400" /> : 
-                    <TrendingDown className="w-4 h-4 text-red-400" />
-                  }
-                  <span className="text-sm text-white">{alert.keyword}</span>
+                  <span className="text-sm text-white">{item.keyword}</span>
+                  <span className="text-xs text-gray-400">{item.device}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-400">
-                    #{alert.from} → #{alert.to}
+                  <span className="text-sm font-medium">#{item.position}</span>
+                  <span className={`text-xs ${
+                    item.change.includes('+') ? 'text-green-400' : 
+                    item.change === '-' ? 'text-gray-400' : 'text-red-400'
+                  }`}>
+                    {item.change}
                   </span>
-                  <span className="text-xs text-gray-500">{alert.time}</span>
                 </div>
               </div>
             ))}
           </div>
           
           <div className="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
-            <div className="text-sm text-gray-400 mb-1">Weekly Report Ready</div>
+            <div className="text-sm text-gray-400 mb-1">Position History Available</div>
             <button className="text-blue-400 text-sm font-medium hover:underline">
-              Download PDF Report
+              View Historical Data
             </button>
           </div>
         </div>

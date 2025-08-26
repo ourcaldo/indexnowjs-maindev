@@ -8,22 +8,22 @@ export default function UseCasePathsSection() {
     {
       icon: User,
       title: "Solo/Small Team",
-      description: "Everything you need to prove impact without paying for features you'll never touch.",
-      features: ["Up to 500 keywords", "Daily rank checks", "Basic reports", "Email alerts"],
+      description: "Everything you need for Google indexing and keyword tracking without complexity.",
+      features: ["Keyword rank tracking", "Daily position checks", "Google URL indexing", "Service account management"],
       color: "text-blue-400"
     },
     {
       icon: Building2,
       title: "Agencies",
-      description: "Clean, white-label reports and team roles. Track many clients, stay within budget.",
-      features: ["Unlimited projects", "White-label reports", "Team collaboration", "Priority support"],
+      description: "Manage multiple client domains with organized keyword tracking and indexing jobs.",
+      features: ["Multiple domains", "Job scheduling", "Position history", "Quota monitoring"],
       color: "text-cyan-400"
     },
     {
       icon: Users,
       title: "In-house Marketer",
-      description: "Daily visibility without distracting extras. Show real progress to stakeholders.",
-      features: ["Executive dashboards", "Automated reporting", "Competitor tracking", "Custom alerts"],
+      description: "Track your website's keyword positions and automate Google URL submission.",
+      features: ["Domain management", "Automated indexing", "Historical tracking", "Tag organization"],
       color: "text-green-400"
     }
   ]

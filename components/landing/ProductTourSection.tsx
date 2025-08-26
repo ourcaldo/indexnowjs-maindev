@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Monitor, MapPin, Bell, FileText, Map, Phone } from 'lucide-react'
+import { Monitor, MapPin, Globe, BarChart3, Clock, Phone } from 'lucide-react'
 import NeonCard from './NeonCard'
 
 export default function ProductTourSection() {
@@ -55,69 +55,70 @@ export default function ProductTourSection() {
       )
     },
     {
-      icon: Bell,
-      title: "Smart Alerts",
-      description: "Instant alerts when positions jump or drop beyond your threshold.",
+      icon: Globe,
+      title: "Google Indexing System",
+      description: "Submit thousands of URLs to Google's Indexing API automatically with service account management.",
       preview: (
         <div className="space-y-3">
+          <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span className="text-blue-400 text-xs font-medium">INDEXING</span>
+            </div>
+            <div className="text-sm text-white mt-1">1,247 URLs submitted</div>
+          </div>
           <div className="bg-green-500/10 border border-green-500/20 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-green-400 text-xs font-medium">RANK UP</span>
+              <span className="text-green-400 text-xs font-medium">INDEXED</span>
             </div>
-            <div className="text-sm text-white mt-1">"seo tools" #5 → #3</div>
+            <div className="text-sm text-white mt-1">892 URLs successfully indexed</div>
           </div>
-          <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
+        </div>
+      )
+    },
+    {
+      icon: BarChart3,
+      title: "Analytics & History",
+      description: "Track ranking progress over time with detailed position history and daily statistics.",
+      preview: (
+        <div className="space-y-3">
+          <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium">Position History</span>
+              <span className="text-xs text-green-400">Updated</span>
+            </div>
+            <div className="text-xs text-gray-400">147 keywords • Daily tracking • Historical data</div>
+          </div>
+          <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium">Domain Statistics</span>
+              <span className="text-xs text-blue-400">Real-time</span>
+            </div>
+            <div className="text-xs text-gray-400">Filtered views • Tag management • Progress tracking</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      icon: Clock,
+      title: "Automated Scheduling",
+      description: "Schedule indexing jobs with flexible options: one-time, hourly, daily, weekly, or monthly.",
+      preview: (
+        <div className="space-y-3">
+          <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-              <span className="text-red-400 text-xs font-medium">RANK DOWN</span>
+              <Clock className="w-4 h-4 text-gray-400" />
+              <span className="text-sm">Daily Sitemap Job</span>
             </div>
-            <div className="text-sm text-white mt-1">"keyword tool" #8 → #12</div>
+            <span className="text-green-400 font-medium">Active</span>
           </div>
-        </div>
-      )
-    },
-    {
-      icon: FileText,
-      title: "Client Reports",
-      description: "Schedule branded PDFs or live links weekly/monthly ready for clients.",
-      preview: (
-        <div className="space-y-3">
-          <div className="bg-white/5 p-4 rounded-lg border border-white/10">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium">Weekly Report</span>
-              <span className="text-xs text-green-400">Ready</span>
+          <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <Clock className="w-4 h-4 text-gray-400" />
+              <span className="text-sm">Weekly Batch Job</span>
             </div>
-            <div className="text-xs text-gray-400">47 keywords • 12 improved • 3 declined</div>
-          </div>
-          <div className="bg-white/5 p-4 rounded-lg border border-white/10">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium">Client Dashboard</span>
-              <span className="text-xs text-blue-400">Live Link</span>
-            </div>
-            <div className="text-xs text-gray-400">Auto-updates • White-labeled</div>
-          </div>
-        </div>
-      )
-    },
-    {
-      icon: Map,
-      title: "Local Grid View",
-      description: "Visualize coverage across neighborhoods for true local SEO.",
-      preview: (
-        <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-2">
-            {['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten I.', 'Nassau'].map((area, idx) => (
-              <div key={idx} className="bg-white/5 p-2 rounded text-center border border-white/10">
-                <div className="text-xs text-gray-400">{area}</div>
-                <div className={`text-sm font-medium ${
-                  idx % 3 === 0 ? 'text-green-400' : 
-                  idx % 3 === 1 ? 'text-yellow-400' : 'text-gray-400'
-                }`}>
-                  #{3 + idx}
-                </div>
-              </div>
-            ))}
+            <span className="text-blue-400 font-medium">Scheduled</span>
           </div>
         </div>
       )

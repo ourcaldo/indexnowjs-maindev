@@ -9,32 +9,32 @@ export default function EnhancedFAQSection() {
 
   const faqs = [
     {
-      question: "How accurate is IndexNow's data?",
-      answer: "We use neutralized personalization and reliable location/device simulation with consistent daily schedules to ensure stable, accurate trendlines. Our data reflects real search results your customers see."
+      question: "How does IndexNow Studio work?",
+      answer: "IndexNow Studio combines Google URL indexing automation with rank tracking. Upload Google service account credentials, submit URLs via sitemaps or manual lists, and track keyword positions across countries and devices."
     },
     {
-      question: "Do you track mobile and local rankings?",
-      answer: "Yes, we support desktop and mobile tracking across 190+ countries. For local SEO, we can track down to city and ZIP code level, giving you granular insights into local performance."
+      question: "What indexing features are included?",
+      answer: "We provide automated Google Indexing API submission, service account management with load balancing, scheduled jobs (one-time to monthly), quota monitoring, and email notifications for job completion."
     },
     {
       question: "How often do you check rankings?",
-      answer: "Plans include daily checks by default, with weekly options available. Pro and Agency plans can set custom schedules including on-demand checks when you need immediate updates."
+      answer: "Our rank tracking system checks keyword positions daily using ScrapingDog API. You can view position history, filter by device (desktop/mobile), country, and manage keywords with custom tags."
     },
     {
-      question: "Can I add competitors to track?",
-      answer: "Absolutely. Pro plans include up to 5 competitors per project, while Agency plans offer unlimited competitor tracking to keep you ahead of the competition."
+      question: "Can I track multiple domains?",
+      answer: "Yes, you can add multiple domains to your account. Each domain can have its own set of keywords with individual tracking configurations for different countries and devices."
     },
     {
-      question: "Do you offer white-label reports?",
-      answer: "Yes, our Pro and Agency plans include fully branded PDF reports and live dashboard links. Add your logo, colors, and domain for seamless client presentation."
+      question: "What payment methods do you support?",
+      answer: "We support multiple payment methods through Midtrans integration including Snap payments, recurring subscriptions, and bank transfers with automatic invoice generation."
     },
     {
-      question: "What happens if I exceed my keyword limit?",
-      answer: "No surprise fees. We'll notify you when approaching limits and offer easy upgrade options. Overage is handled transparently with clear pricing per additional keyword block."
+      question: "How do service accounts work for indexing?",
+      answer: "Upload your Google service account JSON files securely. We encrypt credentials and automatically load balance requests across accounts while respecting Google's API quotas (200 daily, 60 per minute)."
     },
     {
-      question: "Is there an API available?",
-      answer: "Yes, we provide a comprehensive REST API for Pro and Agency plans, allowing you to integrate ranking data into your existing workflows and custom dashboards."
+      question: "Is my data secure?",
+      answer: "Yes, we use AES-256-CBC encryption for sensitive data, comprehensive audit logging, rate limiting, and follow security best practices with Supabase authentication and database security."
     }
   ]
 

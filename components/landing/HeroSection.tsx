@@ -51,7 +51,7 @@ export default function HeroSection({ user, onGetStarted, onScrollToDemo }: Hero
 
             <div className="pt-4 border-t border-white/10">
               <p className="text-sm text-gray-400">
-                Local & mobile tracking • Scheduled reports • Real-time alerts
+                Google URL indexing • Keyword rank tracking • Service account management
               </p>
             </div>
           </div>
