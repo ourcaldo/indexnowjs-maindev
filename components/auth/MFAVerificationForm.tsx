@@ -57,41 +57,38 @@ export default function MFAVerificationForm({
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  // Handle OTP input change
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return // Only allow digits
-
-    const newOtpCode = otpCode.split('')
-    newOtpCode[index] = value
-    const newCode = newOtpCode.join('')
-    
-    setOtpCode(newCode)
-    setError('')
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus()
-    }
-
-    // Auto-submit when all 6 digits are entered
-    if (newCode.length === 6 && /^\d{6}$/.test(newCode)) {
-      handleVerifyOTP(newCode)
+  // Handle single input changes
+  const handleSingleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '') // Only allow numbers
+    if (value.length <= 6) {
+      setOtpCode(value)
+      setError('') // Clear error when user starts typing
+      
+      // Auto-submit when all 6 digits are entered
+      if (value.length === 6) {
+        handleVerifyOTP(value)
+      }
     }
   }
 
-  // Handle key press for backspace navigation
-  const handleKeyPress = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus()
+  // Handle key presses for single input
+  const handleSingleInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && otpCode.length === 6) {
+      handleVerifyOTP()
+    }
+    // Allow only numbers, backspace, delete, arrow keys, tab
+    if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
+      e.preventDefault()
     }
   }
 
-  // Handle paste
-  const handlePaste = (e: React.ClipboardEvent) => {
+  // Handle paste functionality for single input
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault()
     const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
     if (pastedData) {
       setOtpCode(pastedData)
+      setError('')
       if (pastedData.length === 6) {
         handleVerifyOTP(pastedData)
       }
@@ -216,39 +213,39 @@ export default function MFAVerificationForm({
 
         {/* OTP Input */}
         <div className="space-y-4">
-          <div className="flex justify-center space-x-3" onPaste={handlePaste}>
-            {[...Array(6)].map((_, index) => (
-              <input
-                key={index}
-                ref={el => { inputRefs.current[index] = el }}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={otpCode[index] || ''}
-                onChange={e => handleOtpChange(index, e.target.value)}
-                onKeyDown={e => handleKeyPress(index, e)}
-                className="w-14 h-14 text-center text-xl font-bold rounded-lg transition-all duration-200"
-                style={{
-                  backgroundColor: otpCode[index] ? '#FFFFFF' : '#F7F9FC',
-                  border: `2px solid ${otpCode[index] ? '#3D8BFF' : '#E0E6ED'}`,
-                  color: '#1A1A1A',
-                  outline: 'none',
-                  boxShadow: otpCode[index] ? '0 0 0 3px rgba(61, 139, 255, 0.1)' : 'none'
-                }}
-                disabled={isVerifying || timeLeft === 0}
-                data-testid={`otp-input-${index}`}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#3D8BFF'
-                  e.target.style.boxShadow = '0 0 0 3px rgba(61, 139, 255, 0.1)'
-                }}
-                onBlur={(e) => {
-                  if (!otpCode[index]) {
-                    e.target.style.borderColor = '#E0E6ED'
-                    e.target.style.boxShadow = 'none'
-                  }
-                }}
-              />
-            ))}
+          <div className="relative">
+            <input
+              ref={el => { inputRefs.current[0] = el }}
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={otpCode}
+              onChange={handleSingleInputChange}
+              onKeyDown={handleSingleInputKeyPress}
+              onPaste={handlePaste}
+              placeholder="Enter verification code"
+              className="w-full h-14 text-center text-2xl font-bold rounded-lg transition-all duration-200 tracking-[0.5em]"
+              style={{
+                backgroundColor: '#F7F9FC',
+                border: `2px solid ${otpCode.length > 0 ? '#3D8BFF' : '#E0E6ED'}`,
+                color: '#1A1A1A',
+                outline: 'none',
+                letterSpacing: '0.5em',
+                paddingLeft: '0.25em'
+              }}
+              disabled={isVerifying || timeLeft === 0}
+              data-testid="otp-input"
+              onFocus={(e) => {
+                e.target.style.borderColor = '#3D8BFF'
+                e.target.style.boxShadow = '0 0 0 3px rgba(61, 139, 255, 0.1)'
+              }}
+              onBlur={(e) => {
+                if (otpCode.length === 0) {
+                  e.target.style.borderColor = '#E0E6ED'
+                  e.target.style.boxShadow = 'none'
+                }
+              }}
+            />
           </div>
         </div>
 
@@ -287,12 +284,12 @@ export default function MFAVerificationForm({
             data-testid="verify-otp-button"
             onMouseEnter={(e) => {
               if (otpCode.length === 6 && !isVerifying && timeLeft > 0) {
-                e.target.style.backgroundColor = '#2C2C2E'
+                (e.target as HTMLButtonElement).style.backgroundColor = '#2C2C2E'
               }
             }}
             onMouseLeave={(e) => {
               if (otpCode.length === 6 && !isVerifying && timeLeft > 0) {
-                e.target.style.backgroundColor = '#1A1A1A'
+                (e.target as HTMLButtonElement).style.backgroundColor = '#1A1A1A'
               }
             }}
           >
@@ -320,14 +317,14 @@ export default function MFAVerificationForm({
             data-testid="resend-otp-button"
             onMouseEnter={(e) => {
               if (canResend && resendCooldown === 0 && !isVerifying) {
-                e.target.style.borderColor = '#3D8BFF'
-                e.target.style.color = '#3D8BFF'
+                (e.target as HTMLButtonElement).style.borderColor = '#3D8BFF';
+                (e.target as HTMLButtonElement).style.color = '#3D8BFF'
               }
             }}
             onMouseLeave={(e) => {
               if (canResend && resendCooldown === 0 && !isVerifying) {
-                e.target.style.borderColor = '#E0E6ED'
-                e.target.style.color = '#6C757D'
+                (e.target as HTMLButtonElement).style.borderColor = '#E0E6ED';
+                (e.target as HTMLButtonElement).style.color = '#6C757D'
               }
             }}
           >
@@ -347,10 +344,10 @@ export default function MFAVerificationForm({
             style={{ color: '#6C757D' }}
             data-testid="back-to-login-button"
             onMouseEnter={(e) => {
-              e.target.style.color = '#1A1A1A'
+              (e.target as HTMLButtonElement).style.color = '#1A1A1A'
             }}
             onMouseLeave={(e) => {
-              e.target.style.color = '#6C757D'
+              (e.target as HTMLButtonElement).style.color = '#6C757D'
             }}
           >
             ← Back to Login

@@ -77,12 +77,42 @@ export default function Login() {
 
   const handleMFAVerificationSuccess = async (data: any) => {
     try {
-      // Set up the user session manually since MFA was successful
-      if (data.user && data.mfaVerified) {
-        // Simulate successful login for frontend
+      // Set up the user session with the returned session data
+      if (data.user && data.session && data.mfaVerified) {
+        // Create Supabase client for session management
+        const { createClient } = await import('@supabase/supabase-js')
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
+
+        // Set the session in Supabase client
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        })
+
+        if (sessionError) {
+          console.error('Session setup failed:', sessionError)
+          setError("Authentication setup failed. Please try logging in again.")
+          return
+        }
+
+        // Store user data in local storage for immediate access
+        localStorage.setItem('supabase.auth.token', JSON.stringify({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          expires_at: data.session.expires_at,
+          user: data.user
+        }))
+
+        // Navigate to dashboard
         router.push("/dashboard")
+      } else {
+        setError("Authentication verification incomplete. Please try again.")
       }
     } catch (error: any) {
+      console.error('MFA success handler error:', error)
       setError("Login completion failed. Please try again.")
     }
   }
