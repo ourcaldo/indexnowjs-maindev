@@ -53,17 +53,20 @@ export default function Login() {
 
       const result = await response.json()
 
-      if (response.ok && result.data) {
+      if (response.ok) {
         // MFA OTP generated successfully, show MFA form
+        // The success response is returned directly, not wrapped in a 'data' property
         setMfaData({
-          email: result.data.email,
-          userName: result.data.email.split('@')[0], // Fallback if no name
-          expiresAt: new Date(result.data.expiresAt),
-          userId: result.data.userId
+          email: result.email,
+          userName: result.email.split('@')[0], // Fallback if no name
+          expiresAt: new Date(result.expiresAt),
+          userId: result.userId
         })
         setShowMFA(true)
+        setError("") // Clear any previous errors
       } else {
-        setError(result.error?.message || "Login failed")
+        // Error response format: { error: true, message: "...", ... }
+        setError(result.message || "Login failed")
       }
     } catch (error: any) {
       setError(error.message || "Login failed")
@@ -108,14 +111,14 @@ export default function Login() {
 
       const result = await response.json()
 
-      if (response.ok && result.data) {
-        // Update expiry time
+      if (response.ok) {
+        // Update expiry time - success response is direct, not wrapped
         setMfaData(prev => prev ? {
           ...prev,
-          expiresAt: new Date(result.data.expiresAt)
+          expiresAt: new Date(result.expiresAt)
         } : null)
       } else {
-        throw new Error(result.error?.message || "Failed to resend code")
+        throw new Error(result.message || "Failed to resend code")
       }
     } catch (error: any) {
       setError(error.message || "Failed to resend code")
