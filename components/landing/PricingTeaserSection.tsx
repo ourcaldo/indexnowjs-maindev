@@ -143,7 +143,8 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
           </p>
         </div>
 
-        <NeonContainer className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-8 mb-12" style={{ display: 'grid', gridAutoRows: '1fr' }}>
+        <NeonContainer className="contents">
           {(mousePosition, isTracking) => 
             displayPackages.map((pkg, index) => {
               const pricing = getCurrentPrice(pkg)
@@ -153,7 +154,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 <AdvancedNeonCard 
                   key={pkg.id} 
                   intensity={isPopular ? "high" : "medium"} 
-                  className="p-8 flex flex-col min-h-[480px] h-full"
+                  className="p-8 flex flex-col h-full"
                   mousePosition={mousePosition}
                   isTracking={isTracking}
                 >
@@ -219,6 +220,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
             })
           }
         </NeonContainer>
+        </div>
 
         {/* Link to full pricing */}
         <div className="text-center">
