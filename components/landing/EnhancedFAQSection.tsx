@@ -14,7 +14,7 @@ export default function EnhancedFAQSection() {
     },
     {
       question: "How accurate is the rank tracking data?",
-      answer: "Our **rank tracking system** uses ScrapingDog API for reliable daily position checks. You get **real-time position updates**, **historical trend analysis**, and **device-specific rankings** (desktop vs mobile) across different countries for accurate SEO insights."
+      answer: "Our **rank tracking system** provides reliable daily position checks with **real-time position updates**, **historical trend analysis**, and **device-specific rankings** (desktop vs mobile) across different countries for accurate SEO insights."
     },
     {
       question: "Can I track multiple websites and keywords?",
@@ -22,7 +22,7 @@ export default function EnhancedFAQSection() {
     },
     {
       question: "What indexing automation is included?",
-      answer: "Beyond rank tracking, IndexNow Studio provides **automated Google URL indexing** via Google Indexing API. Upload service account credentials for **automated submission**, **scheduled indexing jobs**, **quota monitoring**, and **email notifications** for job completion."
+      answer: "Beyond rank tracking, IndexNow Studio provides **automated Google URL indexing**. Upload service account credentials for **automated submission**, **scheduled indexing jobs**, **quota monitoring**, and **email notifications** for job completion."
     },
     {
       question: "How does the scheduling system work?",
