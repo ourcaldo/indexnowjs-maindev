@@ -440,13 +440,13 @@ export default function LandingPage() {
                 </ul>
               </div>
             </div>
+          </div>
 
-            {/* Copyright section */}
-            <div className="border-t border-gray-700/50 mt-8 pt-6">
-              <p className="text-gray-500 text-xs">
-                © 2025 {siteSettings?.site_name || 'IndexNow'}. All rights reserved.
-              </p>
-            </div>
+          {/* Copyright section - OUTSIDE the rounded container like Qoder */}
+          <div className="mt-8">
+            <p className="text-gray-500 text-xs">
+              © 2025 {siteSettings?.site_name || 'IndexNow'}. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
