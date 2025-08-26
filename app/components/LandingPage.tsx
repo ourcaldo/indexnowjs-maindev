@@ -324,7 +324,7 @@ export default function LandingPage() {
 
       {/* Product Tour Section */}
       <section ref={productTourRef}>
-        <ProductTourSection onTryDemo={() => scrollToSection(productTourRef)} />
+        <ProductTourSection />
       </section>
 
       {/* Use Case Paths Section */}

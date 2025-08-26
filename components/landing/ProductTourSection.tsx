@@ -1,14 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Monitor, MapPin, Bell, FileText, Map, Play } from 'lucide-react'
+import { Monitor, MapPin, Bell, FileText, Map } from 'lucide-react'
 import NeonCard from './NeonCard'
 
-interface ProductTourSectionProps {
-  onTryDemo: () => void
-}
-
-export default function ProductTourSection({ onTryDemo }: ProductTourSectionProps) {
+export default function ProductTourSection() {
   const [activeTab, setActiveTab] = useState(0)
 
   const features = [
@@ -193,16 +189,6 @@ export default function ProductTourSection({ onTryDemo }: ProductTourSectionProp
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-16">
-          <button
-            onClick={onTryDemo}
-            className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
-          >
-            <Play className="w-5 h-5" />
-            <span>Try the live demo</span>
-          </button>
-        </div>
       </div>
     </section>
   )
