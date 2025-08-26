@@ -20,37 +20,42 @@ export default function NeonBorderCard({ children, className = '', intensity = '
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
       
-      // Get neon color
+      // Calculate distances to each border edge
+      const distanceToTop = y
+      const distanceToRight = rect.width - x
+      const distanceToBottom = rect.height - y
+      const distanceToLeft = x
+      
+      // Find which border edge is closest
+      const minDistance = Math.min(distanceToTop, distanceToRight, distanceToBottom, distanceToLeft)
+      
+      // Get neon color based on intensity
       const neonColor = intensity === 'high' ? '#00ff88' : intensity === 'medium' ? '#10b981' : '#059669'
       
-      // Calculate mouse position as percentages around the perimeter
-      const centerX = rect.width / 2
-      const centerY = rect.height / 2
-      const angle = Math.atan2(y - centerY, x - centerX)
+      let boxShadow = ''
       
-      // Convert to degrees and normalize to 0-360
-      let degrees = (angle * 180 / Math.PI + 360) % 360
+      if (minDistance === distanceToTop) {
+        // Top border - create localized glow at cursor X position
+        const xPercent = (x / rect.width) * 100
+        boxShadow = `inset 0 2px 0 0 transparent, inset ${x - 50}px 2px 100px -90px ${neonColor}`
+      } else if (minDistance === distanceToRight) {
+        // Right border - create localized glow at cursor Y position
+        const yPercent = (y / rect.height) * 100
+        boxShadow = `inset -2px ${y - 50}px 100px -90px ${neonColor}`
+      } else if (minDistance === distanceToBottom) {
+        // Bottom border - create localized glow at cursor X position
+        const xPercent = (x / rect.width) * 100
+        boxShadow = `inset ${x - 50}px -2px 100px -90px ${neonColor}`
+      } else {
+        // Left border - create localized glow at cursor Y position
+        const yPercent = (y / rect.height) * 100
+        boxShadow = `inset 2px ${y - 50}px 100px -90px ${neonColor}`
+      }
       
-      // Create conic gradient that follows the mouse around the border
-      const gradient = `conic-gradient(from ${degrees}deg, transparent, ${neonColor} 2%, transparent 4%)`
-      
-      // Apply as border using mask technique
-      card.style.background = `${gradient} border-box`
-      card.style.border = '2px solid transparent'
-      card.style.backgroundClip = 'padding-box'
-      card.style.WebkitMask = 'linear-gradient(white 0 0) padding-box, linear-gradient(white 0 0)'
-      card.style.WebkitMaskComposite = 'subtract'
-      card.style.maskComposite = 'subtract'
-      card.style.boxShadow = `0 0 20px ${neonColor}60`
+      card.style.boxShadow = `${boxShadow}, 0 0 20px ${neonColor}40`
     }
 
     const handleMouseLeave = () => {
-      card.style.background = ''
-      card.style.border = '2px solid rgba(255,255,255,0.1)'
-      card.style.backgroundClip = ''
-      card.style.WebkitMask = ''
-      card.style.WebkitMaskComposite = ''
-      card.style.maskComposite = ''
       card.style.boxShadow = ''
     }
 
