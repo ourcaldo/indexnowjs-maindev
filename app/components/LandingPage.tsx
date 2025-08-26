@@ -364,8 +364,9 @@ export default function LandingPage() {
       <footer ref={contactRef} className="relative z-10 border-t border-white/10 bg-black/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid md:grid-cols-5 gap-8">
-            {/* Company Info */}
+            {/* Company Info with Logo and Social Icons */}
             <div className="space-y-4">
+              {/* Company Logo/Name */}
               <div className="flex items-center">
                 {siteSettings?.site_logo_url ? (
                   <img 
@@ -374,7 +375,7 @@ export default function LandingPage() {
                     className="h-8 w-auto"
                   />
                 ) : (
-                  <span className="text-lg font-bold text-white">
+                  <span className="text-2xl font-bold text-white">
                     {siteSettings?.site_name || 'IndexNow'}
                   </span>
                 )}
