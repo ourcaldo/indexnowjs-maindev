@@ -9,32 +9,32 @@ export default function EnhancedFAQSection() {
 
   const faqs = [
     {
-      question: "How does IndexNow Studio work?",
-      answer: "IndexNow Studio combines Google URL indexing automation with rank tracking. Upload Google service account credentials, submit URLs via sitemaps or manual lists, and track keyword positions across countries and devices."
+      question: "What rank tracking features does IndexNow Studio provide?",
+      answer: "IndexNow Studio offers **daily keyword position tracking**, **multi-device monitoring** (desktop/mobile), **country-specific tracking**, **position history analytics**, **tag-based keyword organization**, and **domain management**. Track unlimited keywords across multiple domains with detailed historical data."
     },
     {
-      question: "What indexing features are included?",
-      answer: "We provide automated Google Indexing API submission, service account management with load balancing, scheduled jobs (one-time to monthly), quota monitoring, and email notifications for job completion."
+      question: "How accurate is the rank tracking data?",
+      answer: "Our **rank tracking system** uses ScrapingDog API for reliable daily position checks. You get **real-time position updates**, **historical trend analysis**, and **device-specific rankings** (desktop vs mobile) across different countries for accurate SEO insights."
     },
     {
-      question: "How often do you check rankings?",
-      answer: "Our rank tracking system checks keyword positions daily using ScrapingDog API. You can view position history, filter by device (desktop/mobile), country, and manage keywords with custom tags."
+      question: "Can I track multiple websites and keywords?",
+      answer: "Yes! IndexNow Studio supports **unlimited domain tracking**. Each domain can have its own keyword set with **individual country/device configurations**. Organize keywords with **custom tags** and view **comprehensive analytics** for each domain separately."
     },
     {
-      question: "Can I track multiple domains?",
-      answer: "Yes, you can add multiple domains to your account. Each domain can have its own set of keywords with individual tracking configurations for different countries and devices."
+      question: "What indexing automation is included?",
+      answer: "Beyond rank tracking, IndexNow Studio provides **automated Google URL indexing** via Google Indexing API. Upload service account credentials for **automated submission**, **scheduled indexing jobs**, **quota monitoring**, and **email notifications** for job completion."
     },
     {
-      question: "What payment methods do you support?",
-      answer: "We support multiple payment methods through Midtrans integration including Snap payments, recurring subscriptions, and bank transfers with automatic invoice generation."
+      question: "How does the scheduling system work?",
+      answer: "Set up **automated indexing jobs** with flexible scheduling: one-time, hourly, daily, weekly, or monthly. The system includes **service account load balancing**, **quota management**, and **email notifications** to keep your URLs consistently indexed."
     },
     {
-      question: "How do service accounts work for indexing?",
-      answer: "Upload your Google service account JSON files securely. We encrypt credentials and automatically load balance requests across accounts while respecting Google's API quotas (200 daily, 60 per minute)."
+      question: "What analytics and reporting features are available?",
+      answer: "View **detailed position history**, **ranking trend analysis**, **keyword performance metrics**, and **domain-specific statistics**. Filter data by device type, country, and time periods. Export historical data and track keyword progress over time."
     },
     {
-      question: "Is my data secure?",
-      answer: "Yes, we use AES-256-CBC encryption for sensitive data, comprehensive audit logging, rate limiting, and follow security best practices with Supabase authentication and database security."
+      question: "Is my data and credentials secure?",
+      answer: "Yes, IndexNow Studio uses **enterprise-grade security**: encrypted storage for service account credentials, comprehensive audit logging, rate limiting, and secure authentication with role-based access control."
     }
   ]
 
