@@ -9,32 +9,28 @@ export default function EnhancedFAQSection() {
 
   const faqs = [
     {
-      question: "What rank tracking features does IndexNow Studio provide?",
-      answer: "IndexNow Studio offers **daily keyword position tracking**, **multi-device monitoring** (desktop/mobile), **country-specific tracking**, **position history analytics**, **tag-based keyword organization**, and **domain management**. Track unlimited keywords across multiple domains with detailed historical data."
+      question: "What can I track with IndexNow Studio?",
+      answer: "Track **keyword rankings** for your websites across different countries and devices. Monitor **position changes over time**, organize keywords with **custom tags**, and manage multiple domains from one dashboard."
     },
     {
-      question: "How accurate is the rank tracking data?",
-      answer: "Our **rank tracking system** provides reliable daily position checks with **real-time position updates**, **historical trend analysis**, and **device-specific rankings** (desktop vs mobile) across different countries for accurate SEO insights."
+      question: "How often are rankings updated?",
+      answer: "Rankings are checked **daily** to give you fresh data on your keyword positions. View **historical trends** and track progress over weeks and months."
     },
     {
-      question: "Can I track multiple websites and keywords?",
-      answer: "Yes! IndexNow Studio supports **unlimited domain tracking**. Each domain can have its own keyword set with **individual country/device configurations**. Organize keywords with **custom tags** and view **comprehensive analytics** for each domain separately."
+      question: "Can I track mobile and desktop separately?",
+      answer: "Yes! Track rankings on both **desktop and mobile devices** to see how your keywords perform across different platforms in various countries."
     },
     {
-      question: "What indexing automation is included?",
-      answer: "Beyond rank tracking, IndexNow Studio provides **automated Google URL indexing**. Upload service account credentials for **automated submission**, **scheduled indexing jobs**, **quota monitoring**, and **email notifications** for job completion."
+      question: "How many keywords can I track?",
+      answer: "Add as many keywords as you need across **multiple domains**. Organize them with tags and filter by country, device, or performance to focus on what matters most."
     },
     {
-      question: "How does the scheduling system work?",
-      answer: "Set up **automated indexing jobs** with flexible scheduling: one-time, hourly, daily, weekly, or monthly. The system includes **service account load balancing**, **quota management**, and **email notifications** to keep your URLs consistently indexed."
+      question: "What about Google indexing?",
+      answer: "Beyond rank tracking, IndexNow Studio helps you **submit URLs to Google** for faster indexing. Schedule automatic submissions and monitor indexing progress."
     },
     {
-      question: "What analytics and reporting features are available?",
-      answer: "View **detailed position history**, **ranking trend analysis**, **keyword performance metrics**, and **domain-specific statistics**. Filter data by device type, country, and time periods. Export historical data and track keyword progress over time."
-    },
-    {
-      question: "Is my data and credentials secure?",
-      answer: "Yes, IndexNow Studio uses **enterprise-grade security**: encrypted storage for service account credentials, comprehensive audit logging, rate limiting, and secure authentication with role-based access control."
+      question: "Is it easy to get started?",
+      answer: "Very easy! Add your domain, upload your keywords, and start tracking immediately. The dashboard shows everything clearly with **charts and historical data**."
     }
   ]
 
