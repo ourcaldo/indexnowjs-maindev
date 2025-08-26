@@ -363,8 +363,11 @@ export default function LandingPage() {
       {/* Footer */}
       <footer ref={contactRef} className="relative z-10 bg-black py-16">
         <div className="max-w-6xl mx-auto px-8">
-          {/* Open container - NO bottom border like Qoder */}
-          <div className="border-t border-l border-r border-gray-600/40 rounded-t-3xl bg-gray-900/20 backdrop-blur-sm p-12">
+          {/* Open container with elegant fade effect like Qoder */}
+          <div className="relative border-t border-l border-r border-gray-600/40 rounded-t-3xl bg-gray-900/20 backdrop-blur-sm p-12">
+            {/* Elegant bottom fade effect */}
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-black pointer-events-none"></div>
+            
             <div className="grid md:grid-cols-5 gap-8">
               {/* Company Info with Logo and Social Icons */}
               <div className="space-y-4">
@@ -442,7 +445,7 @@ export default function LandingPage() {
             </div>
 
             {/* Copyright section - INSIDE the open container like Qoder */}
-            <div className="mt-8">
+            <div className="mt-8 relative z-10">
               <p className="text-gray-500 text-xs">
                 © 2025 {siteSettings?.site_name || 'IndexNow'}. All rights reserved.
               </p>
