@@ -46,6 +46,7 @@ export default function LandingPage() {
   const [activeSection, setActiveSection] = useState('hero')
   const [globalBillingPeriod, setGlobalBillingPeriod] = useState('monthly')
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
+  const [isHeaderSticky, setIsHeaderSticky] = useState(false)
 
   // Refs for sections
   const heroRef = useRef<HTMLElement>(null)
@@ -64,7 +65,9 @@ export default function LandingPage() {
     
     // Scroll event listener
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400)
+      const scrollY = window.scrollY
+      setShowScrollTop(scrollY > 400)
+      setIsHeaderSticky(scrollY > 100)
       
       // Update active section based on scroll position
       const sections = [
@@ -152,6 +155,67 @@ export default function LandingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Neon hover effect component
+  const NeonCard = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => {
+    const cardRef = useRef<HTMLDivElement>(null)
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+    const [isHovered, setIsHovered] = useState(false)
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!cardRef.current) return
+      const rect = cardRef.current.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      setMousePosition({ x, y })
+    }
+
+    const handleMouseEnter = () => {
+      setIsHovered(true)
+    }
+
+    const handleMouseLeave = () => {
+      setIsHovered(false)
+    }
+
+    return (
+      <div
+        ref={cardRef}
+        className={`relative overflow-hidden group ${className}`}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Neon glow effect */}
+        <div
+          className={`absolute pointer-events-none transition-opacity duration-300 ${
+            isHovered ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            left: mousePosition.x - 100,
+            top: mousePosition.y - 100,
+            width: '200px',
+            height: '200px',
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 100%)',
+            borderRadius: '50%',
+            filter: 'blur(20px)',
+          }}
+        />
+        {/* Card border glow */}
+        <div
+          className={`absolute inset-0 rounded-2xl transition-all duration-300 ${
+            isHovered 
+              ? 'bg-gradient-to-r from-blue-500/20 via-cyan-400/20 to-blue-500/20 p-[1px]' 
+              : 'bg-white/10 p-[1px]'
+          }`}
+        >
+          <div className="w-full h-full bg-black/80 backdrop-blur-sm rounded-2xl">
+            {children}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const formatPrice = (price: number, currency: string = 'IDR') => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -220,9 +284,19 @@ export default function LandingPage() {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isHeaderSticky 
+          ? 'bg-black/95 backdrop-blur-md' 
+          : 'bg-transparent'
+      }`}>
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+          isHeaderSticky ? 'py-2' : 'py-0'
+        }`}>
+          <div className={`flex justify-between items-center transition-all duration-300 ${
+            isHeaderSticky 
+              ? 'h-14 bg-white/5 backdrop-blur-sm rounded-2xl px-6 border border-white/10' 
+              : 'h-16'
+          }`}>
             {/* Logo */}
             <div className="flex items-center">
               {siteSettings?.site_logo_url ? (
@@ -278,9 +352,13 @@ export default function LandingPage() {
             <div className="hidden md:flex">
               <button
                 onClick={handleAuthAction}
-                className="bg-white text-black px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
+                className={`font-medium transition-colors rounded-full ${
+                  isHeaderSticky 
+                    ? 'bg-white text-black px-4 py-2 hover:bg-gray-100 text-sm' 
+                    : 'bg-white text-black px-6 py-2 hover:bg-gray-100'
+                }`}
               >
-                {user ? 'Go to Dashboard' : 'Sign In'}
+                {user ? (isHeaderSticky ? 'Dashboard' : 'Go to Dashboard') : 'Sign In'}
               </button>
             </div>
 
@@ -413,26 +491,34 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-            <div className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-4xl font-bold text-white mb-2">99.9%</div>
-              <div className="text-gray-400">Uptime</div>
-              <div className="text-xs text-gray-500 mt-1">Never Miss Rankings</div>
-            </div>
-            <div className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-4xl font-bold text-white mb-2">Real-Time</div>
-              <div className="text-gray-400">Data Updates</div>
-              <div className="text-xs text-gray-500 mt-1">Always Current</div>
-            </div>
-            <div className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-4xl font-bold text-white mb-2">500K+</div>
-              <div className="text-gray-400">Keywords Tracked</div>
-              <div className="text-xs text-gray-500 mt-1">Daily Monitoring</div>
-            </div>
-            <div className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="text-4xl font-bold text-white mb-2">15min</div>
-              <div className="text-gray-400">Setup Time</div>
-              <div className="text-xs text-gray-500 mt-1">Start Tracking Fast</div>
-            </div>
+            <NeonCard>
+              <div className="text-center p-6">
+                <div className="text-4xl font-bold text-white mb-2">99.9%</div>
+                <div className="text-gray-400">Uptime</div>
+                <div className="text-xs text-gray-500 mt-1">Never Miss Rankings</div>
+              </div>
+            </NeonCard>
+            <NeonCard>
+              <div className="text-center p-6">
+                <div className="text-4xl font-bold text-white mb-2">Real-Time</div>
+                <div className="text-gray-400">Data Updates</div>
+                <div className="text-xs text-gray-500 mt-1">Always Current</div>
+              </div>
+            </NeonCard>
+            <NeonCard>
+              <div className="text-center p-6">
+                <div className="text-4xl font-bold text-white mb-2">500K+</div>
+                <div className="text-gray-400">Keywords Tracked</div>
+                <div className="text-xs text-gray-500 mt-1">Daily Monitoring</div>
+              </div>
+            </NeonCard>
+            <NeonCard>
+              <div className="text-center p-6">
+                <div className="text-4xl font-bold text-white mb-2">15min</div>
+                <div className="text-gray-400">Setup Time</div>
+                <div className="text-xs text-gray-500 mt-1">Start Tracking Fast</div>
+              </div>
+            </NeonCard>
           </div>
 
           {/* Success Story */}
@@ -498,71 +584,83 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="w-6 h-6 text-white" />
+            <NeonCard>
+              <div className="p-8">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-white">Smart Keyword Intelligence</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Track thousands of keywords across multiple search engines simultaneously. 
+                  Our intelligence pinpoints the rankings that matter most.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Smart Keyword Intelligence</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Track thousands of keywords across multiple search engines simultaneously. 
-                Our intelligence pinpoints the rankings that matter most.
-              </p>
-            </div>
+            </NeonCard>
 
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
-                <BarChart3 className="w-6 h-6 text-white" />
+            <NeonCard>
+              <div className="p-8">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
+                  <BarChart3 className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-white">Advanced Repository Insight</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Monitor ranking changes, competitor movements, and search visibility with precision dashboards. 
+                  Resolve SEO issues based on deep understanding of your keyword landscape.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Advanced Repository Insight</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Monitor ranking changes, competitor movements, and search visibility with precision dashboards. 
-                Resolve SEO issues based on deep understanding of your keyword landscape.
-              </p>
-            </div>
+            </NeonCard>
 
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
-                <Clock className="w-6 h-6 text-white" />
+            <NeonCard>
+              <div className="p-8">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-white">Intelligent Monitoring System</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Set up automated rank checks with flexible frequencies. 
+                  Daily, weekly, or custom schedules - your rankings are monitored intelligently.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Intelligent Monitoring System</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Set up automated rank checks with flexible frequencies. 
-                Daily, weekly, or custom schedules - your rankings are monitored intelligently.
-              </p>
-            </div>
+            </NeonCard>
 
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
-                <Shield className="w-6 h-6 text-white" />
+            <NeonCard>
+              <div className="p-8">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-white">Enterprise Security</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Bank-level encryption, comprehensive audit logs, and role-based access control. 
+                  Your ranking data and API credentials are completely secure.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Enterprise Security</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Bank-level encryption, comprehensive audit logs, and role-based access control. 
-                Your ranking data and API credentials are completely secure.
-              </p>
-            </div>
+            </NeonCard>
 
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
-                <Users className="w-6 h-6 text-white" />
+            <NeonCard>
+              <div className="p-8">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-white">Multi-Location Tracking</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Automatically track rankings across multiple locations and search engines 
+                  for comprehensive visibility and performance optimization.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Multi-Location Tracking</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Automatically track rankings across multiple locations and search engines 
-                for comprehensive visibility and performance optimization.
-              </p>
-            </div>
+            </NeonCard>
 
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
-                <Globe className="w-6 h-6 text-white" />
+            <NeonCard>
+              <div className="p-8">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6">
+                  <Globe className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-white">Competitor Intelligence</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Monitor your competitors' ranking movements and discover new keyword opportunities. 
+                  Perfect for staying ahead in competitive markets.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-white">Competitor Intelligence</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Monitor your competitors' ranking movements and discover new keyword opportunities. 
-                Perfect for staying ahead in competitive markets.
-              </p>
-            </div>
+            </NeonCard>
           </div>
         </div>
       </section>
