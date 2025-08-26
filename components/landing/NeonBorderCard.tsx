@@ -19,55 +19,53 @@ export default function NeonBorderCard({ children, className = '', intensity = '
       const rect = card.getBoundingClientRect()
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
+      
+      // Calculate the angle around the border where cursor is closest
       const centerX = rect.width / 2
       const centerY = rect.height / 2
+      const angle = Math.atan2(y - centerY, x - centerX)
       
-      // Calculate which side the cursor is closest to
-      const distanceToTop = y
-      const distanceToRight = rect.width - x
-      const distanceToBottom = rect.height - y
-      const distanceToLeft = x
+      // Convert angle to percentage around border (0-100%)
+      const borderPosition = ((angle + Math.PI) / (2 * Math.PI)) * 100
       
-      const minDistance = Math.min(distanceToTop, distanceToRight, distanceToBottom, distanceToLeft)
-      
-      let gradientDirection = ''
-      let neonColor = intensity === 'high' ? 'cyan' : intensity === 'medium' ? 'blue' : 'slate'
-      
-      if (minDistance === distanceToTop) {
-        gradientDirection = 'to right'
-      } else if (minDistance === distanceToRight) {
-        gradientDirection = 'to bottom'
-      } else if (minDistance === distanceToBottom) {
-        gradientDirection = 'to left'
-      } else {
-        gradientDirection = 'to top'
-      }
-      
-      // Create glowing border effect
-      let borderColor = ''
-      let shadowColor = ''
+      // Create green/cyan neon colors based on intensity like qoder
+      let neonColor1, neonColor2, shadowIntensity
       
       if (intensity === 'high') {
-        borderColor = '#22d3ee, #06b6d4, #0891b2'
-        shadowColor = '0 0 20px #22d3ee, 0 0 40px #06b6d4'
+        neonColor1 = '#00ff88' // Bright green-cyan
+        neonColor2 = '#00d4aa' // Cyan
+        shadowIntensity = '0 0 25px #00ff88, 0 0 50px #00d4aa'
       } else if (intensity === 'medium') {
-        borderColor = '#3b82f6, #1d4ed8, #1e3a8a'
-        shadowColor = '0 0 15px #3b82f6, 0 0 30px #1d4ed8'
+        neonColor1 = '#10b981' // Emerald
+        neonColor2 = '#06b6d4' // Cyan
+        shadowIntensity = '0 0 20px #10b981, 0 0 40px #06b6d4'
       } else {
-        borderColor = '#64748b, #475569, #334155'
-        shadowColor = '0 0 10px #64748b, 0 0 20px #475569'
+        neonColor1 = '#059669' // Darker green
+        neonColor2 = '#0891b2' // Darker cyan
+        shadowIntensity = '0 0 15px #059669, 0 0 30px #0891b2'
       }
       
-      // Apply the neon effect based on cursor position
-      card.style.background = `linear-gradient(${gradientDirection}, transparent, rgba(${intensity === 'high' ? '34, 211, 238' : intensity === 'medium' ? '59, 130, 246' : '100, 116, 139'}, 0.1), transparent)`
-      card.style.borderImage = `linear-gradient(${gradientDirection}, ${borderColor}) 1`
-      card.style.boxShadow = shadowColor
-      card.style.transition = 'all 0.3s ease'
+      // Create conic gradient that follows cursor around the border
+      const gradient = `conic-gradient(from ${borderPosition}deg, transparent 0deg, ${neonColor1} ${borderPosition}deg, ${neonColor2} ${borderPosition + 5}deg, transparent ${borderPosition + 20}deg, transparent 360deg)`
+      
+      // Apply the neon border effect
+      card.style.background = `${gradient}, linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.02))`
+      card.style.backgroundSize = '2px 2px, 100% 100%'
+      card.style.backgroundRepeat = 'no-repeat'
+      card.style.backgroundPosition = 'border-box'
+      card.style.border = '2px solid transparent'
+      card.style.backgroundClip = 'padding-box, border-box'
+      card.style.boxShadow = shadowIntensity
+      card.style.transition = 'all 0.1s ease-out'
     }
 
     const handleMouseLeave = () => {
       card.style.background = ''
-      card.style.borderImage = ''
+      card.style.backgroundSize = ''
+      card.style.backgroundRepeat = ''
+      card.style.backgroundPosition = ''
+      card.style.backgroundClip = ''
+      card.style.border = '2px solid rgba(255,255,255,0.1)'
       card.style.boxShadow = ''
       card.style.transition = 'all 0.3s ease'
     }
@@ -84,10 +82,9 @@ export default function NeonBorderCard({ children, className = '', intensity = '
   return (
     <div
       ref={cardRef}
-      className={`relative bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-300 ${className}`}
+      className={`relative bg-white/5 backdrop-blur-sm rounded-3xl transition-all duration-300 ${className}`}
       style={{
-        borderWidth: '2px',
-        borderStyle: 'solid'
+        border: '2px solid rgba(255,255,255,0.1)'
       }}
     >
       {children}
