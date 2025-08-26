@@ -144,7 +144,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+    <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
       {/* Enhanced Black glossy background with subtle patterns */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-black"></div>
