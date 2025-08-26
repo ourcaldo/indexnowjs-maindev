@@ -52,7 +52,7 @@ export default function EnhancedFAQSection() {
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <NeonCard key={index} intensity="low">
+            <div key={index} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
               <div className="p-1">
                 <button
                   onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
@@ -78,7 +78,7 @@ export default function EnhancedFAQSection() {
                   </div>
                 )}
               </div>
-            </NeonCard>
+            </div>
           ))}
         </div>
       </div>

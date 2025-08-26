@@ -42,30 +42,28 @@ export default function UseCasePathsSection() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {useCases.map((useCase, index) => (
-            <NeonCard key={index} intensity="medium">
-              <div className="p-8">
-                <div className={`w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 ${useCase.color}`}>
-                  <useCase.icon className="w-8 h-8" />
-                </div>
-                
-                <h3 className="text-xl font-semibold mb-4 text-white">
-                  {useCase.title}
-                </h3>
-                
-                <p className="text-gray-300 mb-6 leading-relaxed">
-                  {useCase.description}
-                </p>
-                
-                <ul className="space-y-2">
-                  {useCase.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center space-x-2">
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                      <span className="text-sm text-gray-400">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+            <div key={index} className="bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 hover:bg-white/10 transition-all duration-300">
+              <div className={`w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 ${useCase.color}`}>
+                <useCase.icon className="w-8 h-8" />
               </div>
-            </NeonCard>
+              
+              <h3 className="text-xl font-semibold mb-4 text-white">
+                {useCase.title}
+              </h3>
+              
+              <p className="text-gray-300 mb-6 leading-relaxed">
+                {useCase.description}
+              </p>
+              
+              <ul className="space-y-2">
+                {useCase.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-center space-x-2">
+                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                    <span className="text-sm text-gray-400">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
         </div>
       </div>

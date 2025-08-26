@@ -170,7 +170,7 @@ export default function ProductTourSection() {
 
           {/* Feature Preview */}
           <div className="lg:sticky lg:top-8">
-            <NeonCard intensity="medium">
+            <div className="bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300">
               <div className="p-8">
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold text-white mb-2">
@@ -185,7 +185,7 @@ export default function ProductTourSection() {
                   {features[activeTab].preview}
                 </div>
               </div>
-            </NeonCard>
+            </div>
           </div>
         </div>
 

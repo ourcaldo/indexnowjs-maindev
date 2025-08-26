@@ -49,9 +49,9 @@ export default function HowItWorksSection() {
               
               <div className="relative z-10">
                 {/* Step number and icon */}
-                <div className="w-32 h-32 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 flex flex-col items-center justify-center mx-auto mb-6 relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-3xl"></div>
-                  <div className="relative">
+                <div className="w-32 h-32 bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20 flex flex-col items-center justify-center mx-auto mb-6 relative hover:bg-white/20 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-cyan-400/30 rounded-3xl"></div>
+                  <div className="relative z-10">
                     <div className="text-2xl font-bold text-white mb-2">{step.number}</div>
                     <step.icon className="w-8 h-8 text-blue-400" />
                   </div>
