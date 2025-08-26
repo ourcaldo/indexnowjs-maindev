@@ -37,12 +37,12 @@
   --button-dark: #1E1E1E;
   
   /* CSS Variables using new palette */
-  --background: var(--pure-white);
-  --foreground: var(--graphite);
-  --card: var(--pure-white);
-  --card-foreground: var(--graphite);
-  --popover: var(--pure-white);
-  --popover-foreground: var(--graphite);
+  --background: #111113;
+  --foreground: var(--pure-white);
+  --card: #111113;
+  --card-foreground: var(--pure-white);
+  --popover: #111113;
+  --popover-foreground: var(--pure-white);
   
   /* Primary elements using button colors */
   --primary: var(--button-primary);
