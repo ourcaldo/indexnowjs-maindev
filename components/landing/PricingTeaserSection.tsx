@@ -143,7 +143,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
           </p>
         </div>
 
-        <NeonContainer className="grid md:grid-cols-3 gap-8 mb-12 items-stretch">
+        <NeonContainer className="grid md:grid-cols-3 gap-8 mb-12">
           {(mousePosition, isTracking) => 
             displayPackages.map((pkg, index) => {
               const pricing = getCurrentPrice(pkg)
@@ -153,7 +153,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 <AdvancedNeonCard 
                   key={pkg.id} 
                   intensity={isPopular ? "high" : "medium"} 
-                  className="p-8 flex flex-col h-full"
+                  className="p-8 flex flex-col min-h-[480px] h-full"
                   mousePosition={mousePosition}
                   isTracking={isTracking}
                 >
@@ -181,11 +181,14 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                       </div>
                     </div>
                     
-                    <p className="text-gray-300 mb-8 leading-relaxed flex-grow">
-                      {getFeatureDescription(pkg)}
-                    </p>
+                    <div className="text-gray-300 mb-8 leading-relaxed flex-grow flex items-start">
+                      <p>
+                        {getFeatureDescription(pkg)}
+                      </p>
+                    </div>
                     
-                    <button
+                    <div className="mt-auto">
+                      <button
                       onClick={index === displayPackages.length - 1 && pkg.name.toLowerCase().includes('agency') 
                         ? () => window.open('mailto:hello@indexnow.studio', '_blank')
                         : onGetStarted}
@@ -209,7 +212,8 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                         }
                       </span>
                       {!(index === displayPackages.length - 1 && pkg.name.toLowerCase().includes('agency')) && <ArrowRight className="w-5 h-5" />}
-                    </button>
+                      </button>
+                    </div>
                   </AdvancedNeonCard>
               )
             })
