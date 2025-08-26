@@ -163,99 +163,103 @@ export default function LandingPage() {
       </div>
 
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isHeaderSticky 
-          ? 'bg-black/95 backdrop-blur-md' 
-          : 'bg-transparent'
-      }`}>
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
-          isHeaderSticky ? 'py-2' : 'py-0'
+      <header className="fixed top-0 left-0 right-0 z-50">
+        <div className={`transition-all duration-500 ease-in-out ${
+          isHeaderSticky 
+            ? 'px-6 py-3' 
+            : 'px-0 py-0'
         }`}>
-          <div className={`flex justify-between items-center transition-all duration-300 ${
+          <div className={`transition-all duration-500 ease-in-out ${
             isHeaderSticky 
-              ? 'h-14 bg-white/5 backdrop-blur-sm rounded-2xl px-6 border border-white/10' 
-              : 'h-16'
+              ? 'max-w-5xl mx-auto bg-black/95 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl' 
+              : 'max-w-7xl mx-auto bg-transparent px-4 sm:px-6 lg:px-8'
           }`}>
-            {/* Logo */}
-            <div className="flex items-center">
-              {siteSettings?.site_logo_url ? (
-                <img 
-                  src={siteSettings.site_logo_url} 
-                  alt={siteSettings.site_name}
-                  className="h-8 w-auto"
-                />
-              ) : (
-                <span className="text-xl font-bold text-white">
-                  {siteSettings?.site_name || 'IndexNow Rank Tracker'}
-                </span>
-              )}
-            </div>
+            <div className={`flex justify-between items-center transition-all duration-500 ease-in-out ${
+              isHeaderSticky 
+                ? 'h-14 px-6' 
+                : 'h-16'
+            }`}>
+              {/* Logo */}
+              <div className="flex items-center">
+                {siteSettings?.site_logo_url ? (
+                  <img 
+                    src={siteSettings.site_logo_url} 
+                    alt={siteSettings.site_name}
+                    className="h-8 w-auto"
+                  />
+                ) : (
+                  <span className="text-xl font-bold text-white">
+                    {siteSettings?.site_name || 'IndexNow Rank Tracker'}
+                  </span>
+                )}
+              </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <button 
-                onClick={() => scrollToSection(productTourRef)}
-                className={`text-sm font-medium transition-colors ${
-                  activeSection === 'product-tour' ? 'text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                Features
-              </button>
-              <button 
-                onClick={() => scrollToSection(pricingRef)}
-                className={`text-sm font-medium transition-colors ${
-                  activeSection === 'pricing' ? 'text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                Pricing
-              </button>
-              <button 
-                onClick={() => scrollToSection(faqRef)}
-                className={`text-sm font-medium transition-colors ${
-                  activeSection === 'faq' ? 'text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                FAQ
-              </button>
-              <button 
-                onClick={() => scrollToSection(contactRef)}
-                className={`text-sm font-medium transition-colors ${
-                  activeSection === 'contact' ? 'text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                Contact
-              </button>
-            </nav>
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex space-x-8">
+                <button 
+                  onClick={() => scrollToSection(productTourRef)}
+                  className={`text-sm font-medium transition-colors ${
+                    activeSection === 'product-tour' ? 'text-white' : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  Features
+                </button>
+                <button 
+                  onClick={() => scrollToSection(pricingRef)}
+                  className={`text-sm font-medium transition-colors ${
+                    activeSection === 'pricing' ? 'text-white' : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  Pricing
+                </button>
+                <button 
+                  onClick={() => scrollToSection(faqRef)}
+                  className={`text-sm font-medium transition-colors ${
+                    activeSection === 'faq' ? 'text-white' : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  FAQ
+                </button>
+                <button 
+                  onClick={() => scrollToSection(contactRef)}
+                  className={`text-sm font-medium transition-colors ${
+                    activeSection === 'contact' ? 'text-white' : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  Contact
+                </button>
+              </nav>
 
-            {/* Desktop Auth Button */}
-            <div className="hidden md:flex">
-              <button
-                onClick={handleAuthAction}
-                className={`font-medium transition-colors rounded-full ${
-                  isHeaderSticky 
-                    ? 'bg-white text-black px-4 py-2 hover:bg-gray-100 text-sm' 
-                    : 'bg-white text-black px-6 py-2 hover:bg-gray-100'
-                }`}
-              >
-                {user ? (isHeaderSticky ? 'Dashboard' : 'Go to Dashboard') : 'Sign In'}
-              </button>
-            </div>
+              {/* Desktop Auth Button */}
+              <div className="hidden md:flex">
+                <button
+                  onClick={handleAuthAction}
+                  className={`font-medium transition-all duration-300 rounded-full ${
+                    isHeaderSticky 
+                      ? 'bg-white text-black px-4 py-2 hover:bg-gray-100 text-sm' 
+                      : 'bg-white text-black px-6 py-2 hover:bg-gray-100'
+                  }`}
+                >
+                  {user ? (isHeaderSticky ? 'Dashboard' : 'Go to Dashboard') : 'Sign In'}
+                </button>
+              </div>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden flex items-center space-x-4">
-              <button
-                onClick={handleAuthAction}
-                className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                {user ? 'Dashboard' : 'Sign In'}
-              </button>
-              
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-white hover:text-gray-300 transition-colors"
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+              {/* Mobile menu button */}
+              <div className="md:hidden flex items-center space-x-4">
+                <button
+                  onClick={handleAuthAction}
+                  className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+                >
+                  {user ? 'Dashboard' : 'Sign In'}
+                </button>
+                
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="text-white hover:text-gray-300 transition-colors"
+                >
+                  {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+              </div>
             </div>
           </div>
         </div>
