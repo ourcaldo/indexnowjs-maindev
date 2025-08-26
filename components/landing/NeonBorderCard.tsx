@@ -15,6 +15,18 @@ export default function NeonBorderCard({ children, className = '', intensity = '
     const card = cardRef.current
     if (!card) return
 
+    // Create the neon line element
+    const neonLine = document.createElement('div')
+    neonLine.style.position = 'absolute'
+    neonLine.style.pointerEvents = 'none'
+    neonLine.style.borderRadius = '24px'
+    neonLine.style.opacity = '0'
+    neonLine.style.transition = 'all 0.1s ease-out'
+    neonLine.style.zIndex = '10'
+    
+    card.style.position = 'relative'
+    card.appendChild(neonLine)
+
     const handleMouseMove = (e: MouseEvent) => {
       const rect = card.getBoundingClientRect()
       const x = e.clientX - rect.left
@@ -32,31 +44,52 @@ export default function NeonBorderCard({ children, className = '', intensity = '
       // Get neon color based on intensity
       const neonColor = intensity === 'high' ? '#00ff88' : intensity === 'medium' ? '#10b981' : '#059669'
       
-      let boxShadow = ''
-      
+      // Position the neon line on the closest border edge
       if (minDistance === distanceToTop) {
-        // Top border - create localized glow at cursor X position
-        const xPercent = (x / rect.width) * 100
-        boxShadow = `inset 0 2px 0 0 transparent, inset ${x - 50}px 2px 100px -90px ${neonColor}`
+        // Top border
+        neonLine.style.top = '0px'
+        neonLine.style.left = `${Math.max(0, x - 60)}px`
+        neonLine.style.width = '120px'
+        neonLine.style.height = '2px'
+        neonLine.style.background = `linear-gradient(to right, transparent, ${neonColor}, transparent)`
+        neonLine.style.boxShadow = `0 0 20px ${neonColor}`
       } else if (minDistance === distanceToRight) {
-        // Right border - create localized glow at cursor Y position
-        const yPercent = (y / rect.height) * 100
-        boxShadow = `inset -2px ${y - 50}px 100px -90px ${neonColor}`
+        // Right border
+        neonLine.style.top = `${Math.max(0, y - 60)}px`
+        neonLine.style.right = '0px'
+        neonLine.style.width = '2px'
+        neonLine.style.height = '120px'
+        neonLine.style.background = `linear-gradient(to bottom, transparent, ${neonColor}, transparent)`
+        neonLine.style.boxShadow = `0 0 20px ${neonColor}`
       } else if (minDistance === distanceToBottom) {
-        // Bottom border - create localized glow at cursor X position
-        const xPercent = (x / rect.width) * 100
-        boxShadow = `inset ${x - 50}px -2px 100px -90px ${neonColor}`
+        // Bottom border
+        neonLine.style.bottom = '0px'
+        neonLine.style.left = `${Math.max(0, x - 60)}px`
+        neonLine.style.width = '120px'
+        neonLine.style.height = '2px'
+        neonLine.style.background = `linear-gradient(to right, transparent, ${neonColor}, transparent)`
+        neonLine.style.boxShadow = `0 0 20px ${neonColor}`
       } else {
-        // Left border - create localized glow at cursor Y position
-        const yPercent = (y / rect.height) * 100
-        boxShadow = `inset 2px ${y - 50}px 100px -90px ${neonColor}`
+        // Left border
+        neonLine.style.top = `${Math.max(0, y - 60)}px`
+        neonLine.style.left = '0px'
+        neonLine.style.width = '2px'
+        neonLine.style.height = '120px'
+        neonLine.style.background = `linear-gradient(to bottom, transparent, ${neonColor}, transparent)`
+        neonLine.style.boxShadow = `0 0 20px ${neonColor}`
       }
       
-      card.style.boxShadow = `${boxShadow}, 0 0 20px ${neonColor}40`
+      // Clear any previous positioning
+      neonLine.style.top = neonLine.style.top || 'auto'
+      neonLine.style.right = neonLine.style.right || 'auto'
+      neonLine.style.bottom = neonLine.style.bottom || 'auto'
+      neonLine.style.left = neonLine.style.left || 'auto'
+      
+      neonLine.style.opacity = '1'
     }
 
     const handleMouseLeave = () => {
-      card.style.boxShadow = ''
+      neonLine.style.opacity = '0'
     }
 
     card.addEventListener('mousemove', handleMouseMove)
@@ -65,6 +98,9 @@ export default function NeonBorderCard({ children, className = '', intensity = '
     return () => {
       card.removeEventListener('mousemove', handleMouseMove)
       card.removeEventListener('mouseleave', handleMouseLeave)
+      if (neonLine.parentNode) {
+        neonLine.parentNode.removeChild(neonLine)
+      }
     }
   }, [intensity])
 
