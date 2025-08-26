@@ -6,7 +6,6 @@ import { authService } from "@/lib/auth"
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
 import DashboardPreview from '../../../components/DashboardPreview'
-import MFAVerificationForm from '../../../components/auth/MFAVerificationForm'
 
 export default function Login() {
   const router = useRouter()
@@ -19,15 +18,6 @@ export default function Login() {
   const [isMagicLinkMode, setIsMagicLinkMode] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   
-  // MFA State
-  const [showMFA, setShowMFA] = useState(false)
-  const [mfaData, setMfaData] = useState<{
-    email: string;
-    userName: string;
-    expiresAt: Date;
-    userId: string;
-  } | null>(null)
-  
   // Site settings hooks
   const siteName = useSiteName()
   const logoUrl = useSiteLogo(true) // Always use full logo for login page
@@ -39,97 +29,10 @@ export default function Login() {
     setError("")
     
     try {
-      // Try to generate MFA OTP instead of direct login
-      const response = await fetch('/api/auth/mfa/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password
-        }),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        // MFA OTP generated successfully, show MFA form
-        // The success response is returned directly, not wrapped in a 'data' property
-        setMfaData({
-          email: result.email,
-          userName: result.email.split('@')[0], // Fallback if no name
-          expiresAt: new Date(result.expiresAt),
-          userId: result.userId
-        })
-        setShowMFA(true)
-        setError("") // Clear any previous errors
-      } else {
-        // Error response format: { error: true, message: "...", ... }
-        setError(result.message || "Login failed")
-      }
+      await authService.signIn(email, password)
+      router.push("/dashboard")
     } catch (error: any) {
       setError(error.message || "Login failed")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleMFAVerificationSuccess = async (data: any) => {
-    console.log('MFA verification success handler called with:', data)
-    
-    try {
-      // Check if we have the required data
-      if (data?.mfaVerified && data?.user) {
-        console.log('MFA verification complete, redirecting to dashboard...')
-        
-        // Force immediate redirect to dashboard - cookies are already set by the API
-        window.location.href = '/dashboard'
-      } else {
-        console.error('Invalid MFA response data:', data)
-        setError("Authentication verification incomplete. Please try again.")
-      }
-    } catch (error: any) {
-      console.error('MFA success handler error:', error)
-      setError("Login completion failed. Please try again.")
-    }
-  }
-
-  const handleMFABack = () => {
-    setShowMFA(false)
-    setMfaData(null)
-    setError("")
-  }
-
-  const handleMFAResend = async () => {
-    if (!mfaData) return
-    
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/auth/mfa/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: mfaData.email,
-          password // We still have the password in state
-        }),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        // Update expiry time - success response is direct, not wrapped
-        setMfaData(prev => prev ? {
-          ...prev,
-          expiresAt: new Date(result.expiresAt)
-        } : null)
-      } else {
-        throw new Error(result.message || "Failed to resend code")
-      }
-    } catch (error: any) {
-      setError(error.message || "Failed to resend code")
     } finally {
       setIsLoading(false)
     }
@@ -164,29 +67,6 @@ export default function Login() {
     
     return () => window.removeEventListener('resize', checkIfMobile)
   }, [])
-
-  // Show MFA form if needed
-  if (showMFA && mfaData) {
-    return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#F7F9FC',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-      }}>
-        <MFAVerificationForm
-          email={mfaData.email}
-          userName={mfaData.userName}
-          expiresAt={mfaData.expiresAt}
-          onVerificationSuccess={handleMFAVerificationSuccess}
-          onBack={handleMFABack}
-          onResendOTP={handleMFAResend}
-        />
-      </div>
-    )
-  }
 
   return (
     <div style={{ 

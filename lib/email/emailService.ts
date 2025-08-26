@@ -54,16 +54,6 @@ interface OrderExpiredData {
   subscribeUrl: string
 }
 
-interface OTPVerificationData {
-  userName: string
-  userEmail: string
-  otpCode: string
-  loginTime: string
-  ipAddress: string
-  deviceInfo: string
-  locationData?: string
-}
-
 export class EmailService {
   private transporter: nodemailer.Transporter | null = null
 
@@ -294,65 +284,6 @@ export class EmailService {
 
     } catch (error) {
       console.error('❌ Failed to send order expired email:', error)
-      throw error
-    }
-  }
-
-  async sendOTPVerification(email: string, data: OTPVerificationData): Promise<void> {
-    try {
-      console.log(`📤 Preparing to send OTP verification email to: ${email}`)
-      console.log('📊 OTP email data:', {
-        userName: data.userName,
-        otpCode: '***',
-        loginTime: data.loginTime,
-        ipAddress: data.ipAddress
-      })
-
-      if (!this.transporter) {
-        console.log('🔄 Transporter not initialized, attempting to reinitialize...')
-        await this.initializeTransporter()
-        
-        if (!this.transporter) {
-          throw new Error('SMTP transporter not available')
-        }
-      }
-
-      // Load and render template
-      const templateHtml = this.loadTemplate('otp-verification')
-      const renderedHtml = this.renderTemplate(templateHtml, data)
-
-      const mailOptions = {
-        from: `${process.env.SMTP_FROM_NAME || 'IndexNow Studio'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
-        to: email,
-        subject: `Security Verification Code - IndexNow Studio`,
-        html: renderedHtml
-      }
-
-      console.log('📬 Sending OTP email with options:', {
-        from: mailOptions.from,
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        htmlLength: renderedHtml.length
-      })
-
-      const result = await this.transporter.sendMail(mailOptions)
-      
-      console.log('✅ OTP verification email sent successfully!')
-      console.log('📨 Email result:', {
-        messageId: result.messageId,
-        response: result.response
-      })
-
-    } catch (error) {
-      console.error('❌ Failed to send OTP verification email:', error)
-      
-      // Log detailed error information
-      if (error instanceof Error) {
-        console.error('Error name:', error.name)
-        console.error('Error message:', error.message)
-        console.error('Error stack:', error.stack)
-      }
-      
       throw error
     }
   }
