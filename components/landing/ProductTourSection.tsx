@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Monitor, MapPin, Bell, FileText, Map } from 'lucide-react'
+import { Monitor, MapPin, Bell, FileText, Map, Phone } from 'lucide-react'
 import NeonCard from './NeonCard'
 
 export default function ProductTourSection() {
@@ -46,7 +46,7 @@ export default function ProductTourSection() {
           </div>
           <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <span className="w-4 h-4 text-gray-400">📱</span>
+              <Phone className="w-4 h-4 text-gray-400" />
               <span className="text-sm">Mobile • London</span>
             </div>
             <span className="text-yellow-400 font-medium">#7</span>
