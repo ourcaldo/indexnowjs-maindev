@@ -1,7 +1,7 @@
 'use client'
 
 import { User, Users, Building2 } from 'lucide-react'
-import NeonCard from './NeonCard'
+import NeonBorderCard from './NeonBorderCard'
 
 export default function UseCasePathsSection() {
   const useCases = [
@@ -42,7 +42,7 @@ export default function UseCasePathsSection() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {useCases.map((useCase, index) => (
-            <div key={index} className="bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 hover:bg-white/10 transition-all duration-300">
+            <NeonBorderCard key={index} intensity={index === 1 ? "high" : "medium"} className="p-8">
               <div className={`w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 ${useCase.color}`}>
                 <useCase.icon className="w-8 h-8" />
               </div>
@@ -63,7 +63,7 @@ export default function UseCasePathsSection() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </NeonBorderCard>
           ))}
         </div>
       </div>

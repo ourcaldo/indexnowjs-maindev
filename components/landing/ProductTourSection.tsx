@@ -168,7 +168,7 @@ export default function ProductTourSection() {
             ))}
           </div>
 
-          {/* Feature Preview */}
+          {/* Feature Preview - Complex Interactive Demo */}
           <div className="lg:sticky lg:top-8">
             <div className="bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300">
               <div className="p-8">
@@ -176,13 +176,83 @@ export default function ProductTourSection() {
                   <h3 className="text-xl font-semibold text-white mb-2">
                     {features[activeTab].title}
                   </h3>
-                  <p className="text-gray-400">
+                  <p className="text-gray-400 mb-4">
                     {features[activeTab].description}
                   </p>
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span className="flex items-center space-x-1">
+                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                      <span>Live Data</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      <span>Real-time Updates</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
+                      <span>Interactive</span>
+                    </span>
+                  </div>
                 </div>
                 
-                <div className="min-h-[200px]">
-                  {features[activeTab].preview}
+                {/* Enhanced Preview Content */}
+                <div className="h-[400px] bg-black/50 rounded-2xl border border-white/10 overflow-hidden">
+                  <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                    </div>
+                    <div className="text-xs text-gray-400">IndexNow Studio - {features[activeTab].title}</div>
+                    <div className="text-xs text-gray-500">Live Demo</div>
+                  </div>
+                  
+                  <div className="p-4 h-full">
+                    <div className="h-full">
+                      {features[activeTab].preview}
+                      
+                      {/* Additional Interactive Elements */}
+                      <div className="mt-4 pt-4 border-t border-white/10">
+                        <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+                          <span>Last updated: 2 mins ago</span>
+                          <span className="flex items-center space-x-1">
+                            <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                            <span>Monitoring active</span>
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="bg-white/5 rounded p-2 text-center">
+                            <div className="text-xs text-gray-400">Today</div>
+                            <div className="text-sm font-medium text-green-400">+12</div>
+                          </div>
+                          <div className="bg-white/5 rounded p-2 text-center">
+                            <div className="text-xs text-gray-400">Week</div>
+                            <div className="text-sm font-medium text-blue-400">+47</div>
+                          </div>
+                          <div className="bg-white/5 rounded p-2 text-center">
+                            <div className="text-xs text-gray-400">Month</div>
+                            <div className="text-sm font-medium text-yellow-400">+156</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Interactive Controls */}
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex space-x-2">
+                    <button className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded hover:bg-blue-500/30 transition-colors">
+                      Export Data
+                    </button>
+                    <button className="text-xs bg-white/10 text-white px-2 py-1 rounded hover:bg-white/20 transition-colors">
+                      Set Alert
+                    </button>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    Try clicking elements above ↑
+                  </div>
                 </div>
               </div>
             </div>

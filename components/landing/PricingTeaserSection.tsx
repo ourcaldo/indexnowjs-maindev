@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ArrowRight, MessageCircle } from 'lucide-react'
-import NeonCard from './NeonCard'
+import NeonBorderCard from './NeonBorderCard'
 
 interface PricingTier {
   period: string
@@ -148,9 +148,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
             const isPopular = pkg.is_popular
             
             return (
-              <div key={pkg.id} className={`bg-white/5 backdrop-blur-sm rounded-3xl border p-8 flex flex-col h-full hover:bg-white/10 transition-all duration-300 ${
-                isPopular ? 'border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-cyan-400/10' : 'border-white/10'
-              }`}>
+              <NeonBorderCard key={pkg.id} intensity={isPopular ? "high" : "medium"} className="p-8 flex flex-col h-full">
                   {isPopular && (
                     <div className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-xs font-bold px-3 py-1 rounded-full text-center mb-4">
                       MOST POPULAR
@@ -191,11 +189,18 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                   >
                     {index === displayPackages.length - 1 && pkg.name.toLowerCase().includes('agency') && <MessageCircle className="w-5 h-5" />}
                     <span>
-                      {index === displayPackages.length - 1 && pkg.name.toLowerCase().includes('agency') ? 'Talk to us' : 'Start free'}
+                      {index === displayPackages.length - 1 && pkg.name.toLowerCase().includes('agency') 
+                        ? 'Talk to us' 
+                        : index === 0 
+                          ? 'Start free trial'
+                          : index === 1 
+                            ? 'Go Pro' 
+                            : 'Get started'
+                      }
                     </span>
                     {!(index === displayPackages.length - 1 && pkg.name.toLowerCase().includes('agency')) && <ArrowRight className="w-5 h-5" />}
                   </button>
-                </div>
+                </NeonBorderCard>
             )
           })}
         </div>

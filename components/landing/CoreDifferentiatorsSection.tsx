@@ -1,7 +1,7 @@
 'use client'
 
 import { Target, Eye, DollarSign } from 'lucide-react'
-import NeonCard from './NeonCard'
+import NeonBorderCard from './NeonBorderCard'
 
 export default function CoreDifferentiatorsSection() {
   const differentiators = [
@@ -39,7 +39,7 @@ export default function CoreDifferentiatorsSection() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {differentiators.map((item, index) => (
-            <div key={index} className="bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 text-center hover:bg-white/10 transition-all duration-300">
+            <NeonBorderCard key={index} intensity={index === 1 ? "high" : "medium"} className="p-8 text-center">
               <div className={`w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-6 ${item.color}`}>
                 <item.icon className="w-8 h-8" />
               </div>
@@ -49,7 +49,7 @@ export default function CoreDifferentiatorsSection() {
               <p className="text-gray-300 leading-relaxed">
                 {item.description}
               </p>
-            </div>
+            </NeonBorderCard>
           ))}
         </div>
       </div>

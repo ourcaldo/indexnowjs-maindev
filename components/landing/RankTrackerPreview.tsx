@@ -208,7 +208,7 @@ export default function RankTrackerPreview() {
             </p>
           </div>
           
-          <div className="min-h-[300px]">
+          <div className="h-[400px] overflow-hidden">
             {slides[activeSlide].content}
           </div>
         </div>
