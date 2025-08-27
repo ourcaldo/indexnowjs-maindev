@@ -47,7 +47,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         gateway_id: this.gateway.id,
         transaction_type: 'payment',
         transaction_status: 'pending',
-        amount: this.calculateAmount().finalAmount, // Will be $0 for trial, calculated in base handler
+        amount: this.paymentData.is_trial ? 1 : this.calculateAmount().finalAmount, // Store charge amount: $1 for trials, real price for subscriptions
         currency: this.calculateAmount().currency,
         payment_method: 'midtrans_recurring',
         payment_reference: orderId,
@@ -88,9 +88,12 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       customer_email: this.paymentData.customer_info.email
     })
 
+    // Midtrans requires minimum charge of $0.01, so use $1 for trials to meet requirement
+    const chargeAmount = this.paymentData.is_trial ? 1 : amount.finalAmount;
+    
     const chargeTransaction = await this.midtransService.createChargeTransaction({
       order_id: orderId,
-      amount_usd: amount.finalAmount, // Will be $0 for trial, calculated in base handler
+      amount_usd: chargeAmount, // Use $1 for trials to meet Midtrans minimum, real price for subscriptions
       token_id: this.tokenId,  // Use token from frontend Midtrans.min.js tokenization
       customer_details: {
         first_name: this.paymentData.customer_info.first_name,
@@ -167,7 +170,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       // Create subscription with trial-specific logic
       console.log('💳 Creating subscription with saved token:', savedTokenId)
       
-      const subscriptionAmount = this.paymentData.is_trial ? amount.finalAmount : amount.finalAmount; // Full amount for subscription
+      const subscriptionAmount = amount.finalAmount; // Always use real package price for subscription
       const subscriptionName = this.paymentData.is_trial ? 
         `${this.packageData.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
         `${this.packageData.name}_${this.paymentData.billing_period}`.toUpperCase();
