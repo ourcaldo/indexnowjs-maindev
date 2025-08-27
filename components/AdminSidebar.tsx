@@ -172,7 +172,15 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
         </a>
         {/* Tooltip for collapsed state */}
         {isCollapsed && (
-          <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[9999] shadow-xl">
+          <div 
+            className="fixed bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl"
+            style={{
+              left: '68px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 99999
+            }}
+          >
             {item.label}
             <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-[#1A1A1A]"></div>
           </div>
@@ -204,8 +212,8 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
     <>
       {/* Desktop Sidebar */}
       <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-[#E5E7EB] transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'w-16' : 'w-64'
-      } hidden md:block ${isCollapsed ? 'overflow-hidden' : ''}`}>
+        isCollapsed ? 'w-16 overflow-hidden' : 'w-64'
+      } hidden md:block`}>
         <div className="flex flex-col h-full">
           {/* Header with Logo/Brand */}
           <div className={`px-4 py-5 ${
