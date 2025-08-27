@@ -68,19 +68,6 @@ export async function GET(request: NextRequest) {
       } as TrialEligibilityResponse)
     }
 
-    // Check if user is currently subscribed to a paid plan
-    const isCurrentlySubscribed = userProfile.package_id && 
-                                  userProfile.subscribed_at && 
-                                  userProfile.expires_at && 
-                                  new Date(userProfile.expires_at) > new Date()
-
-    if (isCurrentlySubscribed) {
-      return NextResponse.json({
-        eligible: false,
-        reason: 'existing_subscriber',
-        message: 'You already have an active subscription'
-      } as TrialEligibilityResponse)
-    }
 
     // Get available trial packages (Premium and Pro only)
     const { data: packages, error: packagesError } = await supabase
