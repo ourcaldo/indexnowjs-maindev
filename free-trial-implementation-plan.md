@@ -73,7 +73,7 @@ CREATE INDEX idx_user_profiles_trial_usage ON indb_auth_user_profiles(has_used_t
 ALTER TABLE indb_user_subscriptions 
 ADD COLUMN IF NOT EXISTS trial_metadata JSONB,
 ADD COLUMN IF NOT EXISTS midtrans_subscription_id TEXT,
-ADD COLUMN IF NOT EXISTS saved_token_id TEXT;
+ADD COLUMN IF NOT EXISTS saved_token_id TEXT; -- This comes from subscription.create response, NOT tokenization
 
 -- Create index for trial lookups
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_trial 
@@ -119,13 +119,14 @@ interface CheckoutRequest {
 3. Backend: Check is_trial parameter in existing checkout endpoint
 4. Backend: If trial=true:
    - Create $0 tokenization transaction (instead of full charge)
-   - Extract saved_token_id from response
+   - Extract token_id from tokenization response
    - Create Midtrans subscription with:
      * amount: Full plan price in IDR
      * start_time: trial_end_date + 1 day
      * interval: 1 month
-     * token: saved_token_id
-5. Backend: Save to existing subscription table with trial_metadata
+     * token: token_id (from step above)
+   - Extract saved_token_id from subscription.create response
+5. Backend: Save to existing subscription table with trial_metadata and saved_token_id
 6. Backend: Update user profile with trial status
 ```
 
@@ -136,7 +137,7 @@ interface CheckoutRequest {
   "amount": "736649", // 45 USD converted to IDR
   "currency": "IDR",
   "payment_type": "credit_card",
-  "token": "48111111sHfSakAvHvFQFEjTivUV1114", // saved_token_id from tokenization
+  "token": "48111111sHfSakAvHvFQFEjTivUV1114", // token_id from initial tokenization transaction
   "schedule": {
     "interval": 1,
     "interval_unit": "month",
@@ -150,7 +151,7 @@ interface CheckoutRequest {
   },
   "metadata": {
     "user_id": "915f50e5-0902-466a-b1af-bdf19d789722",
-    "package_slug": "pro-trial",
+    "package_slug": "pro",
     "trial_type": "free_trial_auto_billing",
     "original_trial_start": "2025-08-27T17:45:00Z"
   },
@@ -161,6 +162,9 @@ interface CheckoutRequest {
     "phone": "+62812345678"
   }
 }
+
+// Note: saved_token_id will be returned from this subscription.create response
+// and stored for future subscription management
 ```
 
 ---
@@ -181,8 +185,8 @@ interface CheckoutRequest {
 6. Card tokenization required before trial activation
 ```
 
-#### 3.2 Enhanced Pricing Page
-Modify existing pricing page to show dual options:
+#### 3.2 Enhanced Settings Page (Billing & Subscriptions Tab)
+Modify existing settings page `/dashboard/settings` (Plans and Billing tab) to show dual options:
 - **For each Premium/Pro plan**: Two buttons side by side
   - "Subscribe Now" (existing flow)
   - "Start 3-Day Free Trial" (new trial flow with ?trial=true)
@@ -219,11 +223,12 @@ const availablePaymentMethods = paymentGateways.filter(gateway => {
 // Payment processing for trials (same endpoint, different logic)
 if (isTrialFlow) {
   1. Tokenize card with Midtrans SDK
-  2. Create $0 authorization transaction
-  3. Extract saved_token_id
-  4. Create Midtrans subscription with start_time = trial_end + 1 day
-  5. Save to existing subscription table with trial_metadata
-  6. Activate trial immediately
+  2. Create $0 authorization transaction  
+  3. Extract token_id from tokenization response
+  4. Create Midtrans subscription using token_id with start_time = trial_end + 1 day
+  5. Extract saved_token_id from subscription.create response
+  6. Save to existing subscription table with trial_metadata and saved_token_id
+  7. Activate trial immediately
 }
 ```
 
