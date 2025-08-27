@@ -259,8 +259,8 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
         </div>
 
         {/* Period Tabs */}
-        <div className="flex justify-center items-center gap-4 mb-12">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 inline-flex">
+        <div className="flex justify-center mb-12">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 inline-flex items-center">
             {periodOptions.map((option) => (
               <button
                 key={option.key}
@@ -274,12 +274,12 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 {option.label}
               </button>
             ))}
+            {globalBillingPeriod !== 'monthly' && (
+              <span className="ml-3 px-3 py-1 text-xs bg-green-500/20 text-green-400 rounded-lg font-medium">
+                Save {globalBillingPeriod === 'annual' ? '16%' : globalBillingPeriod === 'biannual' ? '12%' : '8%'}
+              </span>
+            )}
           </div>
-          {globalBillingPeriod !== 'monthly' && (
-            <span className="px-3 py-2 text-sm bg-green-500/20 text-green-400 rounded-lg font-medium">
-              Save {globalBillingPeriod === 'annual' ? '16%' : globalBillingPeriod === 'biannual' ? '12%' : '8%'}
-            </span>
-          )}
         </div>
 
         {/* Pricing Cards */}
