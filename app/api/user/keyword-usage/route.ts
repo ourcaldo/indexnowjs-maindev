@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         .eq('user_id', userId)
         .single()
 
-      const keywordsLimit = profile?.package?.quota_limits?.keywords_limit || 0
+      const keywordsLimit = (profile?.package as any)?.quota_limits?.keywords_limit || 0
 
       return NextResponse.json({
         keywords_used: 0,

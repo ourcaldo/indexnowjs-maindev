@@ -22,6 +22,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 import { useUserProfile } from '@/hooks/useUserProfile'
+import { useKeywordUsage } from '@/hooks/useKeywordUsage'
 
 interface SidebarProps {
   isOpen: boolean
@@ -48,6 +49,9 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   
   // Get user profile with role information
   const { user: userProfile } = useUserProfile()
+  
+  // Get keyword usage data
+  const { keywordUsage, loading: keywordLoading } = useKeywordUsage()
 
   const handleLogout = async () => {
     try {
@@ -265,13 +269,30 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                   <span className="text-sm font-semibold">Usage Limit</span>
                 </div>
                 <div className="mb-3">
-                  <div className="text-xs text-blue-100 mb-1">1,234/5,000 Monthly Limit</div>
-                  <div className="w-full bg-white/20 rounded-full h-2">
-                    <div 
-                      className="bg-white rounded-full h-2 transition-all duration-300" 
-                      style={{ width: '24.68%' }}
-                    ></div>
-                  </div>
+                  {keywordLoading ? (
+                    <div className="text-xs text-blue-100 mb-1">Loading...</div>
+                  ) : keywordUsage ? (
+                    <>
+                      <div className="text-xs text-blue-100 mb-1">
+                        {keywordUsage.is_unlimited 
+                          ? `${keywordUsage.keywords_used.toLocaleString()} Keywords Used`
+                          : `${keywordUsage.keywords_used.toLocaleString()}/${keywordUsage.keywords_limit.toLocaleString()} Keywords`
+                        }
+                      </div>
+                      <div className="w-full bg-white/20 rounded-full h-2">
+                        <div 
+                          className="bg-white rounded-full h-2 transition-all duration-300" 
+                          style={{ 
+                            width: keywordUsage.is_unlimited 
+                              ? '100%' 
+                              : `${Math.min(100, (keywordUsage.keywords_used / keywordUsage.keywords_limit) * 100)}%`
+                          }}
+                        ></div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-xs text-blue-100 mb-1">0/0 Keywords</div>
+                  )}
                 </div>
                 <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                   Upgrade plan →
@@ -406,13 +427,30 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                 <span className="text-sm font-semibold">Usage Limit</span>
               </div>
               <div className="mb-3">
-                <div className="text-xs text-blue-100 mb-1">1,234/5,000 Monthly Limit</div>
-                <div className="w-full bg-white/20 rounded-full h-2">
-                  <div 
-                    className="bg-white rounded-full h-2 transition-all duration-300" 
-                    style={{ width: '24.68%' }}
-                  ></div>
-                </div>
+                {keywordLoading ? (
+                  <div className="text-xs text-blue-100 mb-1">Loading...</div>
+                ) : keywordUsage ? (
+                  <>
+                    <div className="text-xs text-blue-100 mb-1">
+                      {keywordUsage.is_unlimited 
+                        ? `${keywordUsage.keywords_used.toLocaleString()} Keywords Used`
+                        : `${keywordUsage.keywords_used.toLocaleString()}/${keywordUsage.keywords_limit.toLocaleString()} Keywords`
+                      }
+                    </div>
+                    <div className="w-full bg-white/20 rounded-full h-2">
+                      <div 
+                        className="bg-white rounded-full h-2 transition-all duration-300" 
+                        style={{ 
+                          width: keywordUsage.is_unlimited 
+                            ? '100%' 
+                            : `${Math.min(100, (keywordUsage.keywords_used / keywordUsage.keywords_limit) * 100)}%`
+                        }}
+                      ></div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-xs text-blue-100 mb-1">0/0 Keywords</div>
+                )}
               </div>
               <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                 Upgrade plan →
