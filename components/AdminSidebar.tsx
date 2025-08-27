@@ -172,7 +172,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
         </a>
         {/* Tooltip for collapsed state */}
         {isCollapsed && (
-          <div className="fixed left-20 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[9999] shadow-xl border border-gray-600">
+          <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[9999] shadow-xl">
             {item.label}
             <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-[#1A1A1A]"></div>
           </div>
