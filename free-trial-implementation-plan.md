@@ -1,8 +1,8 @@
-# Free Trial Implementation Plan
-**IndexNow Studio - Free Trial with Recurring Payment System**
+# Free Trial Implementation Plan (Revised Approach)
+**IndexNow Studio - Free Trial with Parameter-Based System**
 
 ## Overview
-Transform the current Free Package system into a Free Trial model where users must provide credit card information to access trial periods. After the trial ends, automatic billing occurs through Midtrans recurring payments.
+Transform the current Free Package system into a Free Trial model using URL parameters and metadata. Users can choose "Subscribe" or "Start Free Trial" for Premium and Pro plans. The trial flow uses the same packages but with different payment processing and metadata tracking.
 
 ---
 
@@ -20,64 +20,32 @@ Transform the current Free Package system into a Free Trial model where users mu
 
 ---
 
-## New Free Trial System Requirements
+## New Free Trial System Requirements (Simplified Approach)
 
 ### Core Concept
-- Replace "Free Package" with "Free Trial" for Pro and Premium plans
-- Require credit card tokenization before trial activation
-- Use Midtrans scheduler to automatically charge after trial period
-- No manual intervention needed - Midtrans handles the billing
+- **No new packages needed** - Use existing Premium and Pro packages
+- Add "Start Free Trial" buttons alongside "Subscribe" buttons
+- Use URL parameter `trial=true` to indicate trial flow
+- Same database tables, enhanced with metadata fields
+- Midtrans handles auto-billing through subscription scheduling
 
 ### Trial Configuration
 - **Trial Duration**: 3 days (configurable)
-- **Available Plans**: Premium Trial and Pro Trial
-- **Payment Method**: **Card Recurring ONLY** (required for tokenization and future auto-billing)
-- **Restriction**: Bank Transfer and other payment methods are disabled for trials
+- **Available Plans**: Existing Premium and Pro packages
+- **Payment Method**: **Card Recurring ONLY** when `trial=true`
+- **Restriction**: Hide Bank Transfer and other methods for trial flow
 - **Initial Charge**: $0 (tokenization transaction)
 - **Post-Trial Charge**: Full plan amount in IDR
+- **Database**: Same order/subscription tables with enhanced metadata
 
 ---
 
 ## Detailed Implementation Plan
 
-### Phase 1: Database Schema Updates
+### Phase 1: Database Schema Updates (Simplified)
 
-#### 1.1 Update `indb_payment_packages` Table
-```sql
--- Add trial-related columns to packages
-ALTER TABLE indb_payment_packages 
-ADD COLUMN is_trial BOOLEAN DEFAULT false,
-ADD COLUMN trial_duration_days INTEGER DEFAULT 0,
-ADD COLUMN trial_description TEXT;
-
--- Update existing packages to support trial
-UPDATE indb_payment_packages 
-SET is_trial = false, trial_duration_days = 0 
-WHERE slug IN ('free', 'premium', 'pro');
-
--- Create new trial packages
-INSERT INTO indb_payment_packages (
-  name, slug, description, price, currency, billing_period,
-  is_trial, trial_duration_days, trial_description,
-  features, quota_limits, is_active, sort_order
-) VALUES 
-(
-  'Premium Trial', 'premium-trial', 'Try Premium features for 3 days, then auto-billed',
-  50000.00, 'IDR', 'monthly',
-  true, 3, '3-day free trial, then automatically billed monthly',
-  '["All Premium features", "3-day trial period", "Auto-billing after trial"]',
-  '{"daily_urls": 500, "keywords_limit": 250, "concurrent_jobs": 3, "service_accounts": 3}',
-  true, 2
-),
-(
-  'Pro Trial', 'pro-trial', 'Try Pro features for 3 days, then auto-billed',
-  140000.00, 'IDR', 'monthly',
-  true, 3, '3-day free trial, then automatically billed monthly',
-  '["All Pro features", "3-day trial period", "Auto-billing after trial"]',
-  '{"daily_urls": -1, "keywords_limit": 1500, "concurrent_jobs": 10, "service_accounts": -1}',
-  true, 3
-);
-```
+#### 1.1 No Changes to `indb_payment_packages` Table
+**No new packages needed** - We use existing Premium and Pro packages for both regular subscriptions and trials. The trial logic is handled through metadata and URL parameters.
 
 #### 1.2 Update `indb_auth_user_profiles` Table
 ```sql
@@ -94,45 +62,48 @@ ADD COLUMN trial_used_at TIMESTAMPTZ; -- When trial was first used
 CREATE INDEX idx_user_profiles_trial_usage ON indb_auth_user_profiles(has_used_trial, trial_used_at);
 ```
 
-#### 1.3 Create Free Trial Subscriptions Table
-```sql
-CREATE TABLE indb_free_trial_subscriptions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  package_id UUID NOT NULL REFERENCES indb_payment_packages(id),
-  midtrans_subscription_id TEXT UNIQUE,
-  saved_token_id TEXT NOT NULL,
-  saved_token_expiry TIMESTAMPTZ,
-  trial_start_date TIMESTAMPTZ NOT NULL,
-  trial_end_date TIMESTAMPTZ NOT NULL,
-  billing_start_date TIMESTAMPTZ NOT NULL, -- When actual billing begins
-  amount_usd DECIMAL(10,2) NOT NULL,
-  amount_idr BIGINT NOT NULL, -- Converted amount for Midtrans
-  status VARCHAR(20) DEFAULT 'trial_active', -- 'trial_active', 'billing_active', 'cancelled', 'failed'
-  customer_details JSONB,
-  metadata JSONB,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
+#### 1.2 Enhance Existing Subscription/Order Tables
+**Use existing subscription/order tables** with enhanced metadata fields to track trial information:
 
--- Add indexes
-CREATE INDEX idx_trial_subscriptions_user ON indb_free_trial_subscriptions(user_id);
-CREATE INDEX idx_trial_subscriptions_status ON indb_free_trial_subscriptions(status);
-CREATE INDEX idx_trial_subscriptions_billing_start ON indb_free_trial_subscriptions(billing_start_date);
+```sql
+-- Add trial tracking columns to existing subscription table (if not already present)
+-- Note: Check current table structure first - you may already have metadata JSONB fields
+
+-- If using existing indb_user_subscriptions table:
+ALTER TABLE indb_user_subscriptions 
+ADD COLUMN IF NOT EXISTS trial_metadata JSONB,
+ADD COLUMN IF NOT EXISTS midtrans_subscription_id TEXT,
+ADD COLUMN IF NOT EXISTS saved_token_id TEXT;
+
+-- Create index for trial lookups
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_trial 
+ON indb_user_subscriptions USING GIN (trial_metadata);
+
+-- Example trial_metadata structure:
+-- {
+--   "is_trial": true,
+--   "trial_start_date": "2025-08-27T10:00:00Z",
+--   "trial_end_date": "2025-08-30T10:00:00Z",
+--   "trial_duration_days": 3,
+--   "auto_billing_start": "2025-08-30T10:00:01Z",
+--   "trial_package_slug": "premium",
+--   "original_amount_usd": 45.00,
+--   "converted_amount_idr": 736649
+-- }
 ```
 
 ---
 
 ### Phase 2: Midtrans Integration Updates
 
-#### 2.1 Free Trial Tokenization Flow
-**Process**: User provides credit card via Midtrans Card Recurring → Tokenize with $0 charge → Store token → Create scheduled subscription
-**Restriction**: Only Midtrans Card Recurring gateway allowed for trials
+#### 2.1 Enhanced Checkout Flow for Trials
+**Process**: Same checkout endpoint with `trial=true` parameter → Filter payment methods → Use $0 tokenization → Create scheduled subscription
 
 ```typescript
-// New endpoint: /api/billing/free-trial
-interface FreeTrialRequest {
-  package_id: string; // premium-trial or pro-trial
+// Enhanced existing endpoint: /api/billing/checkout
+interface CheckoutRequest {
+  package_id: string; // existing premium or pro package ID
+  is_trial?: boolean; // NEW: indicates trial flow
   card_token: string; // From Midtrans frontend tokenization
   customer_info: {
     first_name: string;
@@ -142,17 +113,20 @@ interface FreeTrialRequest {
   };
 }
 
-// Flow:
-1. Frontend tokenizes card using Midtrans SDK
-2. Backend creates $0 tokenization transaction
-3. Extract saved_token_id from response
-4. Create Midtrans subscription with:
-   - amount: Full plan price in IDR
-   - start_time: trial_end_date + 1 day
-   - interval: 1 month
-   - token: saved_token_id
-5. Save trial subscription record
-6. Update user profile with trial status
+// Enhanced Flow:
+1. Frontend: If URL has ?trial=true, show only Card Recurring payment method
+2. Frontend: User completes card tokenization with Midtrans SDK
+3. Backend: Check is_trial parameter in existing checkout endpoint
+4. Backend: If trial=true:
+   - Create $0 tokenization transaction (instead of full charge)
+   - Extract saved_token_id from response
+   - Create Midtrans subscription with:
+     * amount: Full plan price in IDR
+     * start_time: trial_end_date + 1 day
+     * interval: 1 month
+     * token: saved_token_id
+5. Backend: Save to existing subscription table with trial_metadata
+6. Backend: Update user profile with trial status
 ```
 
 #### 2.2 Midtrans Subscription Payload for Free Trial
@@ -198,28 +172,32 @@ interface FreeTrialRequest {
 **New**: User registers → No package assigned → Must choose Premium or Pro trial to continue
 
 ```typescript
-// Updated user registration
+// Updated user registration (no change to registration itself)
 1. User completes sign-up form
 2. Email verification (existing)
-3. Redirect to trial selection page (/dashboard/select-trial)
-4. User must choose Premium Trial or Pro Trial
-5. Redirect to checkout with trial parameter
+3. Redirect to pricing/dashboard page
+4. User sees "Subscribe" and "Start Free Trial" buttons for Premium/Pro
+5. "Start Free Trial" redirects to checkout with ?trial=true&package=premium
 6. Card tokenization required before trial activation
 ```
 
-#### 3.2 Trial Selection Page
-New page: `/dashboard/select-trial`
-- Display Premium Trial and Pro Trial options
-- Show trial duration (3 days)
+#### 3.2 Enhanced Pricing Page
+Modify existing pricing page to show dual options:
+- **For each Premium/Pro plan**: Two buttons side by side
+  - "Subscribe Now" (existing flow)
+  - "Start 3-Day Free Trial" (new trial flow with ?trial=true)
+- Show trial duration (3 days) clearly
 - Explain auto-billing after trial
-- "Start Trial" buttons redirect to checkout
+- "Start Free Trial" buttons redirect to: `/checkout?package=premium&trial=true`
 
-#### 3.3 Updated Checkout Flow
-Modify existing checkout page to handle trial subscriptions:
+#### 3.3 Enhanced Checkout Flow (Same Page, Different Logic)
+Modify existing checkout page to handle trial parameter:
 
 ```typescript
-// Checkout modifications for trials
-if (package.is_trial) {
+// Checkout modifications based on URL parameter ?trial=true
+const isTrialFlow = searchParams.get('trial') === 'true';
+
+if (isTrialFlow) {
   // Show trial-specific UI
   - "Start 3-Day Trial" instead of "Subscribe Now"
   - Explain $0 charge now, auto-billing later
@@ -231,20 +209,22 @@ if (package.is_trial) {
 
 // Payment method filtering for trials
 const availablePaymentMethods = paymentGateways.filter(gateway => {
-  if (selectedPackage.is_trial) {
-    // Only allow Midtrans for trials (need card tokenization)
+  if (isTrialFlow) {
+    // Only allow Midtrans Card Recurring for trials (need tokenization)
     return gateway.slug === 'midtrans' && gateway.supports_recurring === true;
   }
   return gateway.is_active; // Normal flow for non-trial packages
 });
 
-// Payment processing for trials
-1. Tokenize card with Midtrans SDK
-2. Create $0 authorization transaction
-3. Extract saved_token_id
-4. Create Midtrans subscription with start_time = trial_end + 1 day
-5. Save trial subscription record
-6. Activate trial immediately
+// Payment processing for trials (same endpoint, different logic)
+if (isTrialFlow) {
+  1. Tokenize card with Midtrans SDK
+  2. Create $0 authorization transaction
+  3. Extract saved_token_id
+  4. Create Midtrans subscription with start_time = trial_end + 1 day
+  5. Save to existing subscription table with trial_metadata
+  6. Activate trial immediately
+}
 ```
 
 ---
@@ -253,32 +233,33 @@ const availablePaymentMethods = paymentGateways.filter(gateway => {
 
 #### 4.1 New API Endpoints
 
-**4.1.1 Free Trial Initiation**
+**4.1.1 Enhanced Existing Checkout Endpoint**
 ```typescript
-// POST /api/billing/free-trial
-- **FIRST: Check trial eligibility** (has_used_trial = false)
-- Validate trial package selection
-- Validate credit card information
-- Create $0 tokenization transaction
-- Setup Midtrans subscription with delayed start
-- Save trial subscription record
-- **Mark user as trial used** (has_used_trial = true, trial_used_at = now())
+// POST /api/billing/checkout (existing endpoint, enhanced for trials)
+- **NEW: Check if is_trial parameter is true**
+- **FIRST: Check trial eligibility** (has_used_trial = false) if trial
+- Validate package selection (existing Premium/Pro packages)
+- If trial: Validate credit card information (Card Recurring only)
+- If trial: Create $0 tokenization transaction instead of full charge
+- If trial: Setup Midtrans subscription with delayed start
+- Save to existing subscription table with trial_metadata
+- **If trial: Mark user as trial used** (has_used_trial = true, trial_used_at = now())
 - Update user profile with trial status
 ```
 
 **4.1.2 Trial Eligibility Check**
 ```typescript
-// GET /api/user/trial-eligibility
+// GET /api/user/trial-eligibility (new endpoint)
 - Check if user has already used trial (has_used_trial field)
 - Return eligibility status and reasoning
-- Include available trial packages if eligible
+- Include existing Premium/Pro packages if eligible
 - Include restriction message if not eligible
 
 interface TrialEligibilityResponse {
   eligible: boolean;
   reason?: 'already_used' | 'existing_subscriber' | 'invalid_account';
   trial_used_at?: string;
-  available_packages?: TrialPackage[];
+  available_packages?: Package[]; // Existing Premium/Pro packages
   message: string;
 }
 ```
@@ -552,34 +533,34 @@ Checkpoint 5: Frontend protection
 
 ---
 
-## Summary: Why Dedicated Trial Packages vs Frontend Logic
+## Summary: Why Parameter-Based Approach vs Separate Trial Packages
 
-### Technical Justification for Trial Packages:
+### Technical Justification for Parameter-Based Approach:
 
-1. **Midtrans Subscription Requirements**: 
-   - Requires specific package IDs and exact billing amounts
-   - Cannot dynamically modify subscription pricing after creation
-   - Needs predefined recurring payment schedules
+1. **Simplified Package Management**: 
+   - Use existing Premium and Pro packages for both regular and trial flows
+   - No need to create duplicate trial packages in database
+   - Midtrans still gets exact billing amounts from existing package pricing
 
-2. **Database Integrity & Reporting**:
-   - Clean separation between trial and paid subscriptions
-   - Accurate analytics and conversion tracking
-   - Simplified billing reconciliation
+2. **Database Simplicity**:
+   - Same subscription/order tables with enhanced metadata
+   - Trial information stored in JSONB metadata fields
+   - Easier reporting and analytics with unified data structure
 
-3. **Business Logic Simplification**:
-   - Each package has distinct quotas and features
-   - Eliminates complex conditional logic throughout application
-   - Clear upgrade/downgrade paths
+3. **User Experience Benefits**:
+   - Clear dual-button approach on pricing page ("Subscribe" vs "Start Free Trial")
+   - Users see actual package they'll be paying for after trial
+   - No confusion about different trial vs regular packages
 
-4. **Payment Gateway Integration**:
-   - Different payment flows for trials vs regular subscriptions
-   - Midtrans tokenization requirements for recurring payments
-   - Specific webhook handling for trial-to-paid conversions
+4. **Frontend Logic Simplification**:
+   - Single checkout page with conditional logic based on ?trial=true parameter
+   - Payment method filtering based on URL parameter
+   - Same success flows with different messaging
 
-5. **User Experience**:
-   - Clear pricing and feature communication
-   - Transparent billing expectations
-   - Simplified checkout flows
+5. **Maintenance Efficiency**:
+   - No duplicate package configurations to maintain
+   - Single source of truth for package features and pricing
+   - Easier A/B testing of trial flows
 
 ### One Trial Per User Lifetime Implementation:
 
