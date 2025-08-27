@@ -47,7 +47,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         gateway_id: this.gateway.id,
         transaction_type: 'payment',
         transaction_status: 'pending',
-        amount: this.paymentData.is_trial ? '0.00' : this.calculateAmount().finalAmount, // $0 charge for trial
+        amount: this.calculateAmount().finalAmount, // Will be $0 for trial, calculated in base handler
         currency: this.calculateAmount().currency,
         payment_method: 'midtrans_recurring',
         payment_reference: orderId,
@@ -90,7 +90,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
 
     const chargeTransaction = await this.midtransService.createChargeTransaction({
       order_id: orderId,
-      amount_usd: this.paymentData.is_trial ? 0 : amount.finalAmount, // $0 charge for trial
+      amount_usd: amount.finalAmount, // Will be $0 for trial, calculated in base handler
       token_id: this.tokenId,  // Use token from frontend Midtrans.min.js tokenization
       customer_details: {
         first_name: this.paymentData.customer_info.first_name,

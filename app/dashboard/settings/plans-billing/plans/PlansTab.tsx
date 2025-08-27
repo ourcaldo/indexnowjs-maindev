@@ -11,7 +11,8 @@ import {
   AlertCircle,
   Loader2,
   CheckCircle,
-  X
+  X,
+  Clock
 } from 'lucide-react'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/database'
@@ -70,9 +71,11 @@ export default function PlansTab() {
   const [error, setError] = useState<string | null>(null)
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<string>('monthly')
   const [subscribing, setSubscribing] = useState<string | null>(null)
+  const [startingTrial, setStartingTrial] = useState<string | null>(null)
   const [showSuccessNotification, setShowSuccessNotification] = useState(false)
   const [expandedPlans, setExpandedPlans] = useState<Record<string, boolean>>({})
   const [showComparePlans, setShowComparePlans] = useState(false)
+  const [trialEligible, setTrialEligible] = useState<boolean | null>(null)
 
   // Check for checkout success
   useEffect(() => {
@@ -85,6 +88,7 @@ export default function PlansTab() {
 
   useEffect(() => {
     loadPackages()
+    checkTrialEligibility()
   }, [])
 
   const loadPackages = async () => {
@@ -156,6 +160,28 @@ export default function PlansTab() {
 
 
 
+  const checkTrialEligibility = async () => {
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) return
+
+      const response = await fetch('/api/user/trial-eligibility', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setTrialEligible(result.eligible)
+      }
+    } catch (error) {
+      console.error('Failed to check trial eligibility:', error)
+      setTrialEligible(false)
+    }
+  }
+
   const handleSubscribe = async (packageId: string) => {
     try {
       setSubscribing(packageId)
@@ -170,6 +196,28 @@ export default function PlansTab() {
     } finally {
       setSubscribing(null)
     }
+  }
+
+  const handleStartTrial = async (packageId: string) => {
+    try {
+      setStartingTrial(packageId)
+      
+      // Redirect to checkout page with trial parameter
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=monthly&trial=true`
+      window.location.href = checkoutUrl
+      
+    } catch (error) {
+      console.error('Error starting trial:', error)
+      alert(error instanceof Error ? error.message : 'Failed to start trial')
+    } finally {
+      setStartingTrial(null)
+    }
+  }
+
+  // Check if package is eligible for trial (Premium or Pro plans only)
+  const isTrialEligiblePackage = (pkg: PaymentPackage) => {
+    const packageName = pkg.name.toLowerCase()
+    return packageName.includes('premium') || packageName.includes('pro')
   }
 
   if (loading) {
@@ -407,26 +455,54 @@ export default function PlansTab() {
                 </div>
               )}
 
-              {/* Action Button - Always same style and alignment */}
+              {/* Action Buttons */}
               {!pkg.is_current && (
-                <button
-                  onClick={() => handleSubscribe(pkg.id)}
-                  disabled={subscribing === pkg.id}
-                  className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 ${
-                    pkg.is_popular
-                      ? 'bg-[#1A1A1A] text-white hover:bg-[#2C2C2E] hover:shadow-md'
-                      : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
-                  } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {subscribing === pkg.id ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    'Upgrade'
+                <div className="space-y-3">
+                  {/* Regular Subscription Button */}
+                  <button
+                    onClick={() => handleSubscribe(pkg.id)}
+                    disabled={subscribing === pkg.id}
+                    className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 ${
+                      pkg.is_popular
+                        ? 'bg-[#1A1A1A] text-white hover:bg-[#2C2C2E] hover:shadow-md'
+                        : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
+                    } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {subscribing === pkg.id ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Upgrade'
+                    )}
+                  </button>
+
+                  {/* Free Trial Button - Only show for eligible users and eligible packages */}
+                  {trialEligible && isTrialEligiblePackage(pkg) && (
+                    <button
+                      onClick={() => handleStartTrial(pkg.id)}
+                      disabled={startingTrial === pkg.id}
+                      className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 border-2 ${
+                        pkg.is_popular
+                          ? 'border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white'
+                          : 'border-[#1C2331] text-[#1C2331] hover:bg-[#1C2331] hover:text-white'
+                      } ${startingTrial === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {startingTrial === pkg.id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Starting...
+                        </>
+                      ) : (
+                        <>
+                          <Clock className="h-4 w-4 mr-2" />
+                          Start 3-Day Free Trial
+                        </>
+                      )}
+                    </button>
                   )}
-                </button>
+                </div>
               )}
             </div>
           )

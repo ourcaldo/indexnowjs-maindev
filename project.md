@@ -1041,6 +1041,38 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### January 30, 2025 02:00: Free Trial System Fixes & Replit Migration ✅
+- **✅ DATABASE POLICY INFINITE RECURSION RESOLVED**: Fixed critical policy conflicts preventing trial functionality
+  - **Root Cause**: Multiple overlapping policies on `indb_auth_user_profiles` table caused infinite recursion errors
+  - **Policy Cleanup**: Dropped all conflicting policies and recreated clean, non-recursive security policies
+  - **Service Role Access**: Maintained full service role access while fixing user-level permission issues
+  - **Trial API Restoration**: Fixed `/api/user/trial-eligibility` and `/api/user/trial-status` endpoints that were failing
+- **✅ FREE TRIAL BUTTON INTEGRATION**: Added dual-button system to plans page for better user experience
+  - **Smart Button Logic**: Plans now show both "Upgrade" and "Start 3-Day Free Trial" buttons when appropriate
+  - **Eligibility Checking**: Trial buttons only appear for users who haven't used their lifetime trial
+  - **Package Filtering**: Trial buttons only show for eligible packages (Premium and Pro plans)
+  - **Visual Enhancement**: Added clock icon and proper styling for trial buttons with hover effects
+- **✅ TRIAL PRICING CALCULATION FIX**: Resolved $0 charging issue for trial payments
+  - **Base Handler Update**: Modified `calculateAmount()` method to properly handle trial pricing logic
+  - **Centralized Logic**: Moved trial amount calculation to base handler for consistency across all payment methods
+  - **Debug Resolution**: Fixed console log showing full price instead of $0 for trial transactions
+  - **Midtrans Integration**: Ensured all Midtrans payment flows correctly process $0 initial charges for trials
+- **✅ REPLIT ENVIRONMENT MIGRATION**: Successfully migrated project from Replit Agent to standard Replit
+  - **Node.js Setup**: Installed Node.js 20 and all required dependencies for Next.js application
+  - **Workflow Configuration**: Configured application to run on port 5000 with proper binding
+  - **Security Compliance**: Ensured proper client/server separation and security practices
+- **User Experience Improvements**:
+  - ✅ Trial functionality fully restored with database policy fixes
+  - ✅ Clear visual distinction between subscription and trial options
+  - ✅ Accurate pricing display for trial flows ($0 initial charge)
+  - ✅ Seamless migration to Replit environment without functionality loss
+- **Files Modified**:
+  - `app/dashboard/settings/plans-billing/plans/PlansTab.tsx`: Added trial button logic and eligibility checking
+  - `app/api/billing/channels/shared/base-handler.ts`: Fixed trial pricing calculation in base amount method
+  - `app/api/billing/channels/midtrans-recurring/handler.ts`: Simplified trial amount handling using base calculation
+  - Database policy SQL scripts provided for infinite recursion fix
+- **Result**: Complete free trial system restoration with dual-button UI, accurate $0 charging, and successful Replit migration
+
 ### August 27, 2025 23:45: Admin Sidebar UX Improvements ✅
 - **✅ FIXED COLLAPSED SIDEBAR LOGO POSITIONING**: Resolved logo display and button placement issues in collapsed state
   - **Logo Display Fix**: Logo now properly appears in collapsed sidebar state (previously disappeared)

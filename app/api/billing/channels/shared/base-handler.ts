@@ -100,14 +100,17 @@ export abstract class BasePaymentHandler {
       amount = this.packageData.price || 0
     }
 
-    if (amount === 0) {
+    if (amount === 0 && !this.paymentData.is_trial) {
       throw new Error('Unable to calculate package amount - no pricing found')
     }
+
+    // For trial payments, set final amount to 0 but keep original amount for reference
+    const finalAmount = this.paymentData.is_trial ? 0 : amount
 
     return {
       originalAmount: amount,
       originalCurrency: userCurrency,
-      finalAmount: amount,
+      finalAmount: finalAmount,
       currency: userCurrency
     }
   }
