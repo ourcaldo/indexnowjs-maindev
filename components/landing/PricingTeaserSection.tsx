@@ -259,7 +259,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
         </div>
 
         {/* Period Tabs */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center items-center gap-4 mb-12">
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 inline-flex">
             {periodOptions.map((option) => (
               <button
@@ -274,12 +274,12 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 {option.label}
               </button>
             ))}
-            {globalBillingPeriod !== 'monthly' && (
-              <span className="ml-2 px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-md font-medium">
-                Save {globalBillingPeriod === 'annual' ? '16%' : globalBillingPeriod === 'biannual' ? '12%' : '8%'}
-              </span>
-            )}
           </div>
+          {globalBillingPeriod !== 'monthly' && (
+            <span className="px-3 py-2 text-sm bg-green-500/20 text-green-400 rounded-lg font-medium">
+              Save {globalBillingPeriod === 'annual' ? '16%' : globalBillingPeriod === 'biannual' ? '12%' : '8%'}
+            </span>
+          )}
         </div>
 
         {/* Pricing Cards */}
@@ -317,17 +317,22 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 
                 {/* Price */}
                 <div className="mb-8">
-                  <div className="flex items-baseline space-x-2">
-                    {pricing.originalPrice && (
+                  {/* Original Price - Above */}
+                  {pricing.originalPrice && (
+                    <div className="mb-2">
                       <span className="text-lg text-gray-500 line-through">
                         {formatPrice(pricing.originalPrice, currency)}
                       </span>
-                    )}
+                    </div>
+                  )}
+                  {/* Current Price */}
+                  <div className="mb-2">
                     <span className="text-4xl font-bold text-white">
                       {formatPrice(pricing.price, currency)}
                     </span>
                   </div>
-                  <div className="mt-1">
+                  {/* Period Label */}
+                  <div>
                     <span className="text-gray-400 text-sm">
                       per {globalBillingPeriod === 'monthly' ? 'month' : 
                            globalBillingPeriod === 'quarterly' ? '3 Months' :
