@@ -6,6 +6,7 @@ export interface PaymentData {
   billing_period: string
   customer_info: CustomerInfo
   user: any
+  is_trial?: boolean
 }
 
 export interface CustomerInfo {

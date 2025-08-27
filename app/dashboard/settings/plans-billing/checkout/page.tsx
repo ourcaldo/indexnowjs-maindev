@@ -108,6 +108,8 @@ export default function CheckoutPage() {
 
   const [package_id] = useState(searchParams?.get('package'))
   const [billing_period, setBillingPeriod] = useState(searchParams?.get('period') || 'monthly')
+  const [isTrialFlow, setIsTrialFlow] = useState(searchParams?.get('trial') === 'true')
+  const [trialEligible, setTrialEligible] = useState<boolean | null>(null)
   const [selectedPackage, setSelectedPackage] = useState<PaymentPackage | null>(null)
   const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([])
   const [loading, setLoading] = useState(true)
@@ -160,6 +162,7 @@ export default function CheckoutPage() {
       package_id: selectedPackage.id,
       billing_period,
       payment_method: 'midtrans_recurring',
+      is_trial: isTrialFlow,
       customer_info: {
         first_name: form.first_name,
         last_name: form.last_name,
@@ -300,13 +303,54 @@ export default function CheckoutPage() {
 
         setSelectedPackage(selected)
 
+        // Check trial eligibility if this is a trial flow
+        if (isTrialFlow) {
+          try {
+            const eligibilityResponse = await fetch('/api/user/trial-eligibility', {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            })
+            const eligibilityData = await eligibilityResponse.json()
+            
+            if (!eligibilityData.eligible) {
+              addToast({
+                title: "Trial not available",
+                description: eligibilityData.message,
+                type: "error"
+              })
+              router.push('/dashboard/settings/plans-billing')
+              return
+            }
+            setTrialEligible(true)
+          } catch (error) {
+            addToast({
+              title: "Error",
+              description: "Unable to verify trial eligibility.",
+              type: "error"
+            })
+            router.push('/dashboard/settings/plans-billing')
+            return
+          }
+        }
+
         // Fetch payment gateways using PaymentRouter
         const activeGateways = await paymentRouter.getPaymentGateways()
-        if (activeGateways && activeGateways.length > 0) {
-          setPaymentGateways(activeGateways)
+        let filteredGateways = activeGateways || []
+
+        // Filter payment methods for trial flow - only allow Midtrans Card Recurring
+        if (isTrialFlow) {
+          filteredGateways = activeGateways.filter((gw: PaymentGateway) => 
+            gw.slug === 'midtrans' && gw.configuration?.supports_recurring === true
+          )
+        }
+
+        if (filteredGateways && filteredGateways.length > 0) {
+          setPaymentGateways(filteredGateways)
 
           // Set default payment method
-          const defaultGateway = activeGateways.find((gw: PaymentGateway) => gw.is_default)
+          const defaultGateway = filteredGateways.find((gw: PaymentGateway) => gw.is_default) || filteredGateways[0]
           if (defaultGateway) {
             setForm(prev => ({ ...prev, payment_method: defaultGateway.id }))
           }
@@ -329,7 +373,7 @@ export default function CheckoutPage() {
     } else {
       router.push('/dashboard/settings/plans-billing')
     }
-  }, [package_id, router, addToast])
+  }, [package_id, router, addToast, isTrialFlow])
 
   // Load Midtrans SDKs using MidtransClientService
   useEffect(() => {

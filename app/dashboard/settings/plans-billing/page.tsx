@@ -29,6 +29,8 @@ import { supabase } from '@/lib/database'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { useToast } from '@/hooks/use-toast'
+import TrialStatusCard from '@/components/trial/TrialStatusCard'
+import TrialOptions from '@/components/trial/TrialOptions'
 
 interface CurrencyPricing {
   regular_price: number
@@ -547,6 +549,12 @@ export default function BillingPage() {
           Refresh
         </button>
       </div>
+
+      {/* Trial Status Card */}
+      <TrialStatusCard />
+
+      {/* Trial Options */}
+      <TrialOptions userCurrency={userCurrency} />
 
       {/* Billing Settings Section */}
       <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">

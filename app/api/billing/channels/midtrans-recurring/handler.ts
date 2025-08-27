@@ -28,6 +28,17 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     const orderId = `ORDER-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
 
     // Create transaction record BEFORE payment processing with token_id
+    const trialMetadata = this.paymentData.is_trial ? {
+      is_trial: true,
+      trial_start_date: new Date().toISOString(),
+      trial_end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+      trial_duration_days: 3,
+      auto_billing_start: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 1000).toISOString(), // 1 second after trial ends
+      trial_package_slug: this.packageData?.slug,
+      original_amount_usd: amount.originalAmount,
+      converted_amount_idr: amount.finalAmount
+    } : null;
+
     const { error: dbError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .insert({
@@ -36,11 +47,12 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         gateway_id: this.gateway.id,
         transaction_type: 'payment',
         transaction_status: 'pending',
-        amount: this.calculateAmount().finalAmount,
+        amount: this.paymentData.is_trial ? '0.00' : this.calculateAmount().finalAmount, // $0 charge for trial
         currency: this.calculateAmount().currency,
         payment_method: 'midtrans_recurring',
         payment_reference: orderId,
         billing_period: this.paymentData.billing_period,
+        trial_metadata: trialMetadata,
         metadata: {
           token_id: this.tokenId,
           customer_info: this.paymentData.customer_info,
@@ -50,7 +62,8 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
             name: this.packageData?.name || 'Package',
             price: this.calculateAmount().finalAmount
           },
-          billing_period: this.paymentData.billing_period
+          billing_period: this.paymentData.billing_period,
+          is_trial: this.paymentData.is_trial || false
         }
       })
 
@@ -77,7 +90,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
 
     const chargeTransaction = await this.midtransService.createChargeTransaction({
       order_id: orderId,
-      amount_usd: amount.finalAmount,
+      amount_usd: this.paymentData.is_trial ? 0 : amount.finalAmount, // $0 charge for trial
       token_id: this.tokenId,  // Use token from frontend Midtrans.min.js tokenization
       customer_details: {
         first_name: this.paymentData.customer_info.first_name,
@@ -86,8 +99,8 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         phone: this.paymentData.customer_info.phone,
       },
       item_details: {
-        name: this.packageData.name,
-        description: this.packageData.description,
+        name: this.paymentData.is_trial ? `${this.packageData.name} - 3 Day Free Trial` : this.packageData.name,
+        description: this.paymentData.is_trial ? `Free trial for ${this.packageData.name} plan` : this.packageData.description,
       },
     })
 
@@ -151,16 +164,27 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         throw new Error('Card token was not saved from transaction')
       }
 
-      // Create subscription
+      // Create subscription with trial-specific logic
       console.log('💳 Creating subscription with saved token:', savedTokenId)
-      const subscription = await this.midtransService.createSubscription(amount.finalAmount, {
-        name: `${this.packageData.name}_${this.paymentData.billing_period}`.toUpperCase(),
+      
+      const subscriptionAmount = this.paymentData.is_trial ? amount.finalAmount : amount.finalAmount; // Full amount for subscription
+      const subscriptionName = this.paymentData.is_trial ? 
+        `${this.packageData.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
+        `${this.packageData.name}_${this.paymentData.billing_period}`.toUpperCase();
+      
+      // For trials, start billing 3 days later. For regular subscriptions, use normal interval
+      const startTime = this.paymentData.is_trial ? 
+        new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) : // 3 days for trial
+        new Date(Date.now() + (this.paymentData.billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000);
+      
+      const subscription = await this.midtransService.createSubscription(subscriptionAmount, {
+        name: subscriptionName,
         token: savedTokenId,
         schedule: {
           interval: 1,
           interval_unit: this.paymentData.billing_period === 'monthly' ? 'month' : 'month',
           max_interval: this.paymentData.billing_period === 'monthly' ? 12 : 1,
-          start_time: new Date(Date.now() + (this.paymentData.billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
+          start_time: startTime,
         },
         customer_details: {
           first_name: this.paymentData.customer_info.first_name,
@@ -173,6 +197,8 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
           package_id: this.paymentData.package_id,
           billing_period: this.paymentData.billing_period,
           order_id: orderId,
+          trial_type: this.paymentData.is_trial ? 'free_trial_auto_billing' : null,
+          original_trial_start: this.paymentData.is_trial ? new Date().toISOString() : null
         },
       })
       console.log('✅ Subscription created successfully:', subscription.id)
@@ -196,8 +222,12 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         })
         .eq('payment_reference', orderId)
 
-      // Update user subscription
-      await this.updateUserSubscription(subscription, amount.finalAmount)
+      // Update user subscription with trial-specific logic
+      if (this.paymentData.is_trial) {
+        await this.updateUserTrialSubscription(subscription, amount.finalAmount)
+      } else {
+        await this.updateUserSubscription(subscription, amount.finalAmount)
+      }
 
       // Send order confirmation email
       try {
@@ -271,5 +301,27 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         expires_at: new Date(Date.now() + (this.paymentData.billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000).toISOString(),
       })
       .eq('user_id', this.paymentData.user.id)
+  }
+
+  private async updateUserTrialSubscription(subscription: any, amount: number): Promise<void> {
+    const now = new Date()
+    const trialEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // 3 days from now
+
+    await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .update({
+        package_id: this.paymentData.package_id,
+        subscribed_at: now.toISOString(),
+        expires_at: trialEndDate.toISOString(), // Trial expires in 3 days
+        trial_started_at: now.toISOString(),
+        trial_ends_at: trialEndDate.toISOString(),
+        trial_status: 'active',
+        auto_billing_enabled: true,
+        has_used_trial: true, // Mark trial as used
+        trial_used_at: now.toISOString()
+      })
+      .eq('user_id', this.paymentData.user.id)
+    
+    console.log('✅ [Trial] User profile updated with trial information')
   }
 }

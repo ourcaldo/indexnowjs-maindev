@@ -44,16 +44,54 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { payment_method, package_id, billing_period, customer_info, token_id } = body
+    const { payment_method, package_id, billing_period, customer_info, token_id, is_trial } = body
 
     console.log(`📊 [Payment Router] Routing to channel: ${payment_method}`)
+
+    // Check trial eligibility if this is a trial flow
+    if (is_trial) {
+      const cookieStore2 = await cookies()
+      const supabase2 = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore2.getAll()
+            },
+            setAll(cookiesToSet) {
+              try {
+                cookiesToSet.forEach(({ name, value, options }) =>
+                  cookieStore2.set(name, value, options)
+                )
+              } catch {}
+            },
+          },
+        }
+      )
+
+      // Check if user has already used trial
+      const { data: userProfile } = await supabase2
+        .from('indb_auth_user_profiles')
+        .select('has_used_trial, trial_used_at')
+        .eq('user_id', user.id)
+        .single()
+
+      if (userProfile?.has_used_trial) {
+        return NextResponse.json({
+          success: false,
+          message: `Free trial already used on ${new Date(userProfile.trial_used_at).toLocaleDateString()}`
+        }, { status: 400 })
+      }
+    }
 
     // Prepare payment data
     const paymentData: PaymentData = {
       package_id,
       billing_period,
       customer_info,
-      user
+      user,
+      is_trial
     }
 
     // Route to specific payment channel handler
