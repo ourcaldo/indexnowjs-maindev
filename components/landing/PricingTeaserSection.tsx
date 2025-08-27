@@ -248,11 +248,11 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
   const displayPackages = packages.slice(0, 3)
 
   return (
-    <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8 bg-white">
+    <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-gray-900">
+          <h2 className="text-4xl font-bold mb-4 text-white">
             We've got a <span className="italic">plan</span><br />
             that's <span className="italic">perfect</span> for you
           </h2>
@@ -260,22 +260,22 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
 
         {/* Period Tabs */}
         <div className="flex justify-center mb-12">
-          <div className="bg-gray-100 rounded-lg p-1 inline-flex">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 inline-flex">
             {periodOptions.map((option) => (
               <button
                 key={option.key}
                 onClick={() => setGlobalBillingPeriod(option.key)}
-                className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                   globalBillingPeriod === option.key
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-black shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10'
                 }`}
               >
                 {option.label}
               </button>
             ))}
             {globalBillingPeriod !== 'monthly' && (
-              <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-md font-medium">
+              <span className="ml-2 px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-md font-medium">
                 Save {globalBillingPeriod === 'annual' ? '16%' : globalBillingPeriod === 'biannual' ? '12%' : '8%'}
               </span>
             )}
@@ -292,56 +292,56 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
             return (
               <div
                 key={pkg.id}
-                className={`relative bg-white border rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 ${
-                  isPopular ? 'border-blue-500 border-2' : 'border-gray-200'
+                className={`relative bg-gray-900/50 backdrop-blur-sm border rounded-2xl p-8 hover:bg-gray-900/70 transition-all duration-300 ${
+                  isPopular ? 'border-blue-500/50 border-2' : 'border-white/10'
                 }`}
               >
                 {/* Popular Badge */}
                 {isPopular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                      Popular
+                    <div className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                      MOST POPULAR
                     </div>
                   </div>
                 )}
                 
                 {/* Plan Name */}
                 <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-2xl font-bold text-white mb-2">
                     {pkg.name} plan
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-300 text-sm">
                     {pkg.description}
                   </p>
                 </div>
                 
                 {/* Price */}
                 <div className="mb-8">
-                  <div className="flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">
-                      {formatPrice(pricing.price, currency)}
-                    </span>
-                    <span className="text-gray-600 ml-1">
-                      per {pricing.period.replace('ly', '')}
-                      <br />
-                      per month
-                    </span>
-                  </div>
-                  {pricing.originalPrice && (
-                    <div className="mt-2">
-                      <span className="text-gray-500 line-through text-lg">
+                  <div className="flex items-baseline space-x-2">
+                    {pricing.originalPrice && (
+                      <span className="text-lg text-gray-500 line-through">
                         {formatPrice(pricing.originalPrice, currency)}
                       </span>
-                    </div>
-                  )}
+                    )}
+                    <span className="text-4xl font-bold text-white">
+                      {formatPrice(pricing.price, currency)}
+                    </span>
+                  </div>
+                  <div className="mt-1">
+                    <span className="text-gray-400 text-sm">
+                      per {globalBillingPeriod === 'monthly' ? 'month' : 
+                           globalBillingPeriod === 'quarterly' ? '3 Months' :
+                           globalBillingPeriod === 'biannual' ? '6 Months' : 'year'}
+                    </span>
+                  </div>
                 </div>
                 
                 {/* Description */}
                 <div className="mb-8">
-                  <p className="text-gray-600 text-sm">
-                    {pkg.name === 'Free' ? 'Basic features for up to 10 users.' : 
-                     pkg.name === 'Premium' ? 'Basic features for up to 20 users.' :
-                     'Advanced features + unlimited users.'}
+                  <p className="text-gray-300 text-sm">
+                    {pkg.name === 'Free' ? 'Basic indexing features for personal use' : 
+                     pkg.name === 'Premium' ? 'Enhanced features for professionals' :
+                     'Full features for agencies and enterprises'}
                   </p>
                 </div>
                 
@@ -349,7 +349,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 <div className="mb-8">
                   <button
                     onClick={onGetStarted}
-                    className="w-full bg-gray-900 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition-colors duration-200"
+                    className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
                   >
                     Get started
                   </button>
@@ -358,10 +358,10 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 {/* Features */}
                 <div>
                   <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                    <h4 className="text-sm font-semibold text-white uppercase tracking-wide">
                       FEATURES
                     </h4>
-                    <p className="text-gray-600 text-sm mt-1">
+                    <p className="text-gray-400 text-sm mt-1">
                       Everything in {pkg.name} plan plus...
                     </p>
                   </div>
@@ -369,11 +369,11 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                     {features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
                         <div className="flex-shrink-0 w-5 h-5 mt-0.5">
-                          <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <span className="ml-3 text-gray-700 text-sm">
+                        <span className="ml-3 text-gray-300 text-sm">
                           {feature}
                         </span>
                       </li>
@@ -389,7 +389,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
         <div className="text-center mt-12">
           <button
             onClick={onScrollToPricing}
-            className="text-blue-600 hover:text-blue-800 transition-colors font-medium"
+            className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
           >
             See detailed comparison →
           </button>
