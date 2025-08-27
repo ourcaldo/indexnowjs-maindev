@@ -224,14 +224,13 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 </div>
               )}
             </div>
-            {!isCollapsed && (
-              <button 
-                onClick={onCollapse}
-                className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-            )}
+            <button 
+              onClick={onCollapse}
+              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Search Bar */}
