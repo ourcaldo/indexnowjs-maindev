@@ -150,20 +150,34 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
 
   const renderMenuItem = (item: any) => {
     return (
-      <a
-        key={item.label}
-        href={item.href}
-        className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
-          item.active
-            ? 'bg-[#3D8BFF] text-white shadow-sm'
-            : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F8FAFC]'
-        }`}
-      >
-        <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0 ${
-          item.active ? 'text-white' : 'text-[#6C757D] group-hover:text-[#3D8BFF]'
-        }`} />
-        {!isCollapsed && <span className="truncate">{item.label}</span>}
-      </a>
+      <div key={item.label} className="relative group">
+        <a
+          href={item.href}
+          className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
+            item.active
+              ? isCollapsed 
+                ? 'bg-[#3D8BFF]/10 text-[#3D8BFF]' 
+                : 'bg-[#3D8BFF] text-white shadow-sm'
+              : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F8FAFC]'
+          }`}
+        >
+          <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0 ${
+            item.active 
+              ? isCollapsed 
+                ? 'text-[#3D8BFF]' 
+                : 'text-white' 
+              : 'text-[#6C757D] group-hover:text-[#3D8BFF]'
+          }`} />
+          {!isCollapsed && <span className="truncate">{item.label}</span>}
+        </a>
+        {/* Tooltip for collapsed state */}
+        {isCollapsed && (
+          <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+            {item.label}
+            <div className="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-[#1A1A1A]"></div>
+          </div>
+        )}
+      </div>
     )
   }
 
@@ -194,21 +208,14 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
       } hidden md:block`}>
         <div className="flex flex-col h-full">
           {/* Header with Logo/Brand */}
-          <div className={`flex items-center px-4 py-5 ${
-            isCollapsed ? 'justify-center' : 'justify-between'
-          }`}>
-            <div className="flex items-center">
-              {logoUrl && !isCollapsed ? (
+          <div className="px-4 py-5">
+            <div className="flex items-center justify-center mb-4">
+              {logoUrl ? (
                 <img 
                   src={logoUrl} 
                   alt={`${siteName} Admin Logo`}
-                  style={{ width: '106.664px', height: '60px' }}
-                />
-              ) : logoUrl && isCollapsed ? (
-                <img 
-                  src={logoUrl} 
-                  alt={`${siteName} Admin Icon`}
-                  className="h-8 w-8 object-contain"
+                  className={isCollapsed ? "h-8 w-8 object-contain" : ""}
+                  style={!isCollapsed ? { width: '106.664px', height: '60px' } : {}}
                 />
               ) : (
                 <div className="flex items-center">
@@ -224,13 +231,15 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 </div>
               )}
             </div>
-            <button 
-              onClick={onCollapse}
-              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
-              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+            <div className="flex justify-center">
+              <button 
+                onClick={onCollapse}
+                className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+                title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           {/* Search Bar */}

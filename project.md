@@ -704,6 +704,29 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 27, 2025 23:45: Admin Sidebar UX Improvements ✅
+- **✅ FIXED COLLAPSED SIDEBAR LOGO POSITIONING**: Resolved logo display and button placement issues in collapsed state
+  - **Logo Display Fix**: Logo now properly appears in collapsed sidebar state (previously disappeared)
+  - **Button Repositioning**: Collapse/expand button moved from top-right to centered position under the logo (matches reference design)
+  - **Layout Restructure**: Reorganized header section with logo centered and button positioned below for better visual hierarchy
+- **✅ ENHANCED ACTIVE MENU TRANSPARENCY**: Improved visual feedback for active menu items in collapsed state
+  - **Transparent Active State**: Changed active menu background from bright blue (#3D8BFF) to transparent blue (#3D8BFF/10) in collapsed mode
+  - **Visual Distinction**: Active menu items now use subtle transparency while maintaining clear visual indication
+  - **Color Consistency**: Preserved full blue background for expanded state while using transparent version for collapsed state
+- **✅ ADDED HOVER TOOLTIPS**: Implemented contextual menu labels for collapsed sidebar navigation
+  - **Tooltip System**: Added dark tooltips that appear on hover for each menu item when sidebar is collapsed
+  - **Professional Styling**: Tooltips use dark background (#1A1A1A) with white text and proper positioning
+  - **Arrow Indicators**: Added left-pointing arrow on tooltips for clear visual connection to menu items
+  - **Z-index Management**: Proper layering (z-50) ensures tooltips appear above all other elements
+- **User Experience Enhancements**:
+  - ✅ Logo visibility maintained in both expanded and collapsed states
+  - ✅ Intuitive button positioning following common design patterns
+  - ✅ Clear visual feedback for active states without overwhelming bright colors
+  - ✅ Contextual help through hover tooltips improving navigation usability
+- **Files Modified**:
+  - `components/AdminSidebar.tsx` - Enhanced logo layout, active state styling, and tooltip implementation
+- **Result**: Improved admin sidebar UX with proper logo visibility, intuitive controls, and enhanced navigation feedback
+
 ### January 29, 2025 18:30: Admin Sidebar Revamp ✅
 - **✅ REDESIGNED ADMIN SIDEBAR**: Complete overhaul to match modern reference design with enhanced UX
   - **Reference Implementation**: Based on clean, minimalist design pattern with proper visual hierarchy
