@@ -284,18 +284,21 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-8">
-          {displayPackages.map((pkg, index) => {
-            const pricing = getCurrentPrice(pkg)
-            const isPopular = pkg.is_popular
-            const features = getFeaturesList(pkg)
-            
-            return (
-              <div
-                key={pkg.id}
-                className={`relative bg-gray-900/50 backdrop-blur-sm border rounded-2xl p-8 hover:bg-gray-900/70 transition-all duration-300 ${
-                  isPopular ? 'border-blue-500/50 border-2' : 'border-white/10'
-                }`}
-              >
+        <NeonContainer className="contents">
+          {(mousePosition, isTracking) => 
+            displayPackages.map((pkg, index) => {
+              const pricing = getCurrentPrice(pkg)
+              const isPopular = pkg.is_popular
+              const features = getFeaturesList(pkg)
+              
+              return (
+                <AdvancedNeonCard 
+                  key={pkg.id} 
+                  intensity={isPopular ? "high" : "medium"} 
+                  className="p-8 flex flex-col h-full"
+                  mousePosition={mousePosition}
+                  isTracking={isTracking}
+                >
                 {/* Popular Badge */}
                 {isPopular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -385,9 +388,11 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                     ))}
                   </ul>
                 </div>
-              </div>
-            )
-          })}
+                </AdvancedNeonCard>
+              )
+            })
+          }
+        </NeonContainer>
         </div>
 
         {/* Bottom CTA */}
