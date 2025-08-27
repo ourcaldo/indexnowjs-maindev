@@ -271,14 +271,14 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                     : 'text-gray-300 hover:text-white hover:bg-white/10'
                 }`}
               >
-                {option.label}
+                <span>{option.label}</span>
+                {globalBillingPeriod === option.key && option.key !== 'monthly' && (
+                  <span className="ml-2 text-xs text-green-600 font-semibold">
+                    Save {option.key === 'annual' ? '16%' : option.key === 'biannual' ? '12%' : '8%'}
+                  </span>
+                )}
               </button>
             ))}
-            {globalBillingPeriod !== 'monthly' && (
-              <span className="ml-3 px-3 py-1 text-xs bg-green-500/20 text-green-400 rounded-lg font-medium">
-                Save {globalBillingPeriod === 'annual' ? '16%' : globalBillingPeriod === 'biannual' ? '12%' : '8%'}
-              </span>
-            )}
           </div>
         </div>
 
