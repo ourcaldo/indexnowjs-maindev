@@ -163,12 +163,8 @@ export default function PlansTab() {
   const checkTrialEligibility = async () => {
     try {
       const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) {
-        console.log('No token found for trial eligibility check')
-        return
-      }
+      if (!token) return
 
-      console.log('Checking trial eligibility...')
       const response = await fetch('/api/user/trial-eligibility', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -178,14 +174,11 @@ export default function PlansTab() {
 
       if (response.ok) {
         const result = await response.json()
-        console.log('Trial eligibility result:', result)
         setTrialEligible(result.eligible)
       } else {
-        console.error('Trial eligibility API failed with status:', response.status)
         setTrialEligible(false)
       }
     } catch (error) {
-      console.error('Failed to check trial eligibility:', error)
       setTrialEligible(false)
     }
   }

@@ -150,6 +150,8 @@ export default function BillingPage() {
   const [billingData, setBillingData] = useState<BillingData | null>(null)
   const [packagesData, setPackagesData] = useState<PackagesData | null>(null)
   const [userCurrency, setUserCurrency] = useState<'USD' | 'IDR'>('USD')
+  const [trialEligible, setTrialEligible] = useState<boolean | null>(null)
+  const [startingTrial, setStartingTrial] = useState<string | null>(null)
   
   // Log page view and billing activities
   usePageViewLogger('/dashboard/settings/plans-billing', 'Billing & Subscriptions', { section: 'billing_management' })
@@ -214,13 +216,52 @@ export default function BillingPage() {
       await Promise.all([
         loadBillingData(),
         loadPackages(),
-        loadBillingHistory()
+        loadBillingHistory(),
+        checkTrialEligibility()
       ])
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const checkTrialEligibility = async () => {
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) return
+
+      const response = await fetch('/api/user/trial-eligibility', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setTrialEligible(result.eligible)
+      }
+    } catch (error) {
+      setTrialEligible(false)
+    }
+  }
+
+  const handleStartTrial = async (packageId: string) => {
+    try {
+      setStartingTrial(packageId)
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=monthly&trial=true`
+      window.location.href = checkoutUrl
+    } catch (error) {
+      console.error('Error starting trial:', error)
+    } finally {
+      setStartingTrial(null)
+    }
+  }
+
+  const isTrialEligiblePackage = (pkg: PaymentPackage) => {
+    const packageName = pkg.name.toLowerCase()
+    return packageName.includes('premium') || packageName.includes('pro')
   }
 
   const loadBillingData = async () => {
@@ -630,24 +671,51 @@ export default function BillingPage() {
                 </div>
 
                 <div className="mt-auto space-y-2">
-                  <button 
-                    onClick={() => isCurrentPlan ? null : handleSubscribe(pkg.id)}
-                    disabled={isCurrentPlan || subscribing === pkg.id}
-                    className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 ${
-                      isCurrentPlan 
-                        ? 'bg-white text-[#1A1A1A] cursor-default'
-                        : 'bg-[#1A1A1A] text-white hover:bg-[#0d1b2a]'
-                    } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {subscribing === pkg.id ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </div>
-                    ) : isCurrentPlan ? 'Current plan' : 'Switch plan'}
-                  </button>
+                  {!isCurrentPlan && (
+                    <>
+                      <button 
+                        onClick={() => handleSubscribe(pkg.id)}
+                        disabled={subscribing === pkg.id}
+                        className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 bg-[#1A1A1A] text-white hover:bg-[#0d1b2a] ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {subscribing === pkg.id ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Processing...
+                          </div>
+                        ) : 'Switch plan'}
+                      </button>
 
-
+                      {/* Trial Button - Only show for eligible users and eligible packages */}
+                      {trialEligible && isTrialEligiblePackage(pkg) && (
+                        <button
+                          onClick={() => handleStartTrial(pkg.id)}
+                          disabled={startingTrial === pkg.id}
+                          className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white ${startingTrial === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          {startingTrial === pkg.id ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-4 h-4 border-2 border-[#1A1A1A] border-t-transparent rounded-full animate-spin"></div>
+                              Starting...
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              Start 3-Day Free Trial
+                            </div>
+                          )}
+                        </button>
+                      )}
+                    </>
+                  )}
+                  {isCurrentPlan && (
+                    <button 
+                      disabled
+                      className="w-full py-3 px-4 rounded-lg text-sm font-medium h-12 bg-white text-[#1A1A1A] cursor-default"
+                    >
+                      Current plan
+                    </button>
+                  )}
                 </div>
               </div>
             )
