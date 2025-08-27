@@ -195,7 +195,7 @@ export default function LandingPage() {
               </div>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center space-x-8 px-6 py-2 border border-gray-600/30 rounded-full bg-gray-900/20 backdrop-blur-sm">
+              <nav className="hidden md:flex space-x-8">
                 <button 
                   onClick={() => scrollToSection(productTourRef)}
                   className={`text-sm font-medium transition-colors ${
