@@ -150,10 +150,10 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
 
   const renderMenuItem = (item: any) => {
     return (
-      <div key={item.label} className="relative">
+      <div key={item.label} className="relative group">
         <a
           href={item.href}
-          className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
+          className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
             item.active
               ? isCollapsed 
                 ? 'bg-[#3D8BFF]/10 text-[#3D8BFF]' 
@@ -262,7 +262,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 overflow-y-auto" style={isCollapsed ? { overflow: 'visible' } : {}}>
+          <nav className={`flex-1 px-4 ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto'}`}>
             {filteredSections.map(section => renderSection(section))}
           </nav>
 
@@ -352,7 +352,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 overflow-y-auto" style={isCollapsed ? { overflow: 'visible' } : {}}>
+          <nav className={`flex-1 px-4 ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto'}`}>
             {filteredSections.map(section => renderSection(section))}
           </nav>
 
