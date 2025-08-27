@@ -10,11 +10,12 @@ Transform the current Free Package system into a Free Trial model where users mu
 
 ### Current Package Structure
 - **Free Package**: Automatically assigned on user registration, no payment required
-- **Pro Package**: Highest tier with full feature access
+- **Premium Package**: Mid-tier with enhanced features (500 daily URLs, 250 keywords)
+- **Pro Package**: Highest tier with unlimited service accounts and daily URLs (1500 keywords)
 
 ### Current Flow
 1. User registers → Automatically assigned to Free Package
-2. User can upgrade to Pro through checkout page
+2. User can upgrade to Premium or Pro through checkout page
 3. Payment via Midtrans Snap or Bank Transfer
 
 ---
@@ -22,14 +23,14 @@ Transform the current Free Package system into a Free Trial model where users mu
 ## New Free Trial System Requirements
 
 ### Core Concept
-- Replace "Free Package" with "Free Trial" for Pro plan
+- Replace "Free Package" with "Free Trial" for Pro and Premium plans
 - Require credit card tokenization before trial activation
 - Use Midtrans scheduler to automatically charge after trial period
 - No manual intervention needed - Midtrans handles the billing
 
 ### Trial Configuration
 - **Trial Duration**: 3 days (configurable)
-- **Available Plans**: Pro Trial only
+- **Available Plans**: Premium Trial and Pro Trial
 - **Payment Method**: **Card Recurring ONLY** (required for tokenization and future auto-billing)
 - **Restriction**: Bank Transfer and other payment methods are disabled for trials
 - **Initial Charge**: $0 (tokenization transaction)
@@ -52,21 +53,29 @@ ADD COLUMN trial_description TEXT;
 -- Update existing packages to support trial
 UPDATE indb_payment_packages 
 SET is_trial = false, trial_duration_days = 0 
-WHERE slug IN ('free', 'pro');
+WHERE slug IN ('free', 'premium', 'pro');
 
--- Create new trial package
+-- Create new trial packages
 INSERT INTO indb_payment_packages (
   name, slug, description, price, currency, billing_period,
   is_trial, trial_duration_days, trial_description,
   features, quota_limits, is_active, sort_order
 ) VALUES 
 (
-  'Pro Trial', 'pro-trial', 'Try Pro features for 3 days, then $45/month',
-  45.00, 'USD', 'monthly',
+  'Premium Trial', 'premium-trial', 'Try Premium features for 3 days, then auto-billed',
+  50000.00, 'IDR', 'monthly',
+  true, 3, '3-day free trial, then automatically billed monthly',
+  '["All Premium features", "3-day trial period", "Auto-billing after trial"]',
+  '{"daily_urls": 500, "keywords_limit": 250, "concurrent_jobs": 3, "service_accounts": 3}',
+  true, 2
+),
+(
+  'Pro Trial', 'pro-trial', 'Try Pro features for 3 days, then auto-billed',
+  140000.00, 'IDR', 'monthly',
   true, 3, '3-day free trial, then automatically billed monthly',
   '["All Pro features", "3-day trial period", "Auto-billing after trial"]',
-  '{"daily_urls": -1, "service_accounts": -1, "concurrent_jobs": -1, "keywords_limit": -1}',
-  true, 2
+  '{"daily_urls": -1, "keywords_limit": 1500, "concurrent_jobs": 10, "service_accounts": -1}',
+  true, 3
 );
 ```
 
@@ -118,7 +127,7 @@ CREATE INDEX idx_trial_subscriptions_billing_start ON indb_free_trial_subscripti
 ```typescript
 // New endpoint: /api/billing/free-trial
 interface FreeTrialRequest {
-  package_id: string; // pro-trial
+  package_id: string; // premium-trial or pro-trial
   card_token: string; // From Midtrans frontend tokenization
   customer_info: {
     first_name: string;
@@ -181,24 +190,24 @@ interface FreeTrialRequest {
 
 #### 3.1 Registration Flow Update
 **Current**: User registers → Free package assigned automatically
-**New**: User registers → No package assigned → Must choose Pro trial to continue
+**New**: User registers → No package assigned → Must choose Premium or Pro trial to continue
 
 ```typescript
 // Updated user registration
 1. User completes sign-up form
 2. Email verification (existing)
 3. Redirect to trial selection page (/dashboard/select-trial)
-4. User must choose Pro Trial
+4. User must choose Premium Trial or Pro Trial
 5. Redirect to checkout with trial parameter
 6. Card tokenization required before trial activation
 ```
 
 #### 3.2 Trial Selection Page
 New page: `/dashboard/select-trial`
-- Display Pro Trial option
+- Display Premium Trial and Pro Trial options
 - Show trial duration (3 days)
 - Explain auto-billing after trial
-- "Start Trial" button redirects to checkout
+- "Start Trial" buttons redirect to checkout
 
 #### 3.3 Updated Checkout Flow
 Modify existing checkout page to handle trial subscriptions:
@@ -326,8 +335,8 @@ Update Midtrans webhook handler to process trial subscription events:
 - Auto-billing management in settings
 
 #### 6.2 Pricing Page Updates
-Replace "Free" with "Pro Trial":
-- Show "Start 3-Day Trial" button
+Replace "Free" with "Premium Trial" and "Pro Trial":
+- Show "Start 3-Day Trial" buttons
 - Explain auto-billing clearly
 - **Clearly state**: "Credit card required - no other payment methods accepted for trials"
 - Add prominent notice: "Only card payments accepted for trial subscriptions"
@@ -350,7 +359,7 @@ Add trial management section:
 ```
 1. User registers → Email verification
 2. Redirect to /dashboard/select-trial
-3. Choose Pro Trial
+3. Choose Premium Trial or Pro Trial
 4. Redirect to checkout with trial=true
 5. Enter credit card details
 6. Midtrans tokenizes card ($0 charge)
