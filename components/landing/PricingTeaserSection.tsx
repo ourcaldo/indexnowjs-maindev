@@ -173,21 +173,55 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
     return keywordLimit.toString()
   }
 
-  const getFeatureDescription = (pkg: Package) => {
-    const keywordLimit = getKeywordLimit(pkg)
+  const getFeaturesList = (pkg: Package): string[] => {
+    const features: string[] = []
+    
+    // Extract quota limits
+    const keywordLimit = pkg.quota_limits?.keywords_limit || 0
     const serviceAccounts = pkg.quota_limits?.service_accounts || 1
     const concurrentJobs = pkg.quota_limits?.concurrent_jobs || 1
     const dailyUrls = pkg.quota_limits?.daily_urls || 0
     
-    if (pkg.name.toLowerCase().includes('starter') || pkg.name.toLowerCase().includes('basic')) {
-      return `${keywordLimit} keywords • ${serviceAccounts} service account • daily checks`
-    } else if (pkg.name.toLowerCase().includes('pro') || pkg.name.toLowerCase().includes('professional') || pkg.name.toLowerCase().includes('premium')) {
-      return `${keywordLimit} keywords • ${serviceAccounts} service accounts • ${concurrentJobs} concurrent jobs • ${dailyUrls} daily indexing`
-    } else if (pkg.name.toLowerCase().includes('agency') || pkg.name.toLowerCase().includes('enterprise')) {
-      return `${keywordLimit} keywords • team roles • white-label • priority checks`
+    // Add keyword limit
+    if (keywordLimit === -1) {
+      features.push('Unlimited Keywords')
+    } else if (keywordLimit >= 1000) {
+      features.push(`${Math.floor(keywordLimit / 1000)}K+ Keywords`)
     } else {
-      return `${keywordLimit} keywords • ${serviceAccounts} service accounts • ${concurrentJobs} concurrent jobs`
+      features.push(`${keywordLimit} Keywords`)
     }
+    
+    // Add service accounts
+    if (serviceAccounts === -1) {
+      features.push('Unlimited Service Accounts')
+    } else if (serviceAccounts === 1) {
+      features.push('1 Service Account')
+    } else {
+      features.push(`${serviceAccounts} Service Accounts`)
+    }
+    
+    // Add daily URLs for indexing
+    if (dailyUrls === -1) {
+      features.push('Unlimited Daily Indexing')
+    } else if (dailyUrls > 0) {
+      features.push(`${dailyUrls} Daily URL Quota`)
+    }
+    
+    // Add concurrent jobs
+    if (concurrentJobs > 1) {
+      features.push(`${concurrentJobs} Concurrent Jobs`)
+    }
+    
+    // Add package-specific features from database features array
+    if (pkg.features && Array.isArray(pkg.features)) {
+      pkg.features.forEach(feature => {
+        if (feature && !features.some(f => f.toLowerCase().includes(feature.toLowerCase().substring(0, 10)))) {
+          features.push(feature)
+        }
+      })
+    }
+    
+    return features
   }
 
   const periodOptions = [
@@ -283,10 +317,15 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                       </div>
                     </div>
                     
-                    <div className="text-gray-300 mb-8 leading-relaxed flex-grow flex items-start">
-                      <p>
-                        {getFeatureDescription(pkg)}
-                      </p>
+                    <div className="text-gray-300 mb-8 leading-relaxed flex-grow">
+                      <ul className="space-y-3">
+                        {getFeaturesList(pkg).map((feature, index) => (
+                          <li key={index} className="flex items-center space-x-3">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0"></div>
+                            <span className="text-sm">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     
                     <div className="mt-auto">

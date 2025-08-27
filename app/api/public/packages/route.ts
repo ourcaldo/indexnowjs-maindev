@@ -19,19 +19,34 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform packages data for public display
-    const transformedPackages = packages?.map(pkg => ({
-      id: pkg.id,
-      name: pkg.name,
-      slug: pkg.slug,
-      description: pkg.description,
-      price: parseFloat(pkg.price || '0'),
-      currency: pkg.currency,
-      billing_period: pkg.billing_period,
-      features: pkg.features || [],
-      quota_limits: pkg.quota_limits || {},
-      is_popular: pkg.is_popular || false,
-      pricing_tiers: Array.isArray(pkg.pricing_tiers) ? pkg.pricing_tiers : []
-    })) || []
+    const transformedPackages = packages?.map(pkg => {
+      // Parse pricing_tiers if it's a JSON string
+      let pricingTiers = {}
+      try {
+        if (typeof pkg.pricing_tiers === 'string') {
+          pricingTiers = JSON.parse(pkg.pricing_tiers)
+        } else if (typeof pkg.pricing_tiers === 'object' && pkg.pricing_tiers !== null) {
+          pricingTiers = pkg.pricing_tiers
+        }
+      } catch (error) {
+        console.error('Failed to parse pricing_tiers for package:', pkg.id, error)
+        pricingTiers = {}
+      }
+
+      return {
+        id: pkg.id,
+        name: pkg.name,
+        slug: pkg.slug,
+        description: pkg.description,
+        price: parseFloat(pkg.price || '0'),
+        currency: pkg.currency,
+        billing_period: pkg.billing_period,
+        features: pkg.features || [],
+        quota_limits: pkg.quota_limits || {},
+        is_popular: pkg.is_popular || false,
+        pricing_tiers: pricingTiers
+      }
+    }) || []
 
     return NextResponse.json({
       success: true,
