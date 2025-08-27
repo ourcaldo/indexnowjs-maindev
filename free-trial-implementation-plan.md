@@ -86,7 +86,12 @@ ALTER TABLE indb_auth_user_profiles
 ADD COLUMN trial_started_at TIMESTAMPTZ,
 ADD COLUMN trial_ends_at TIMESTAMPTZ,
 ADD COLUMN trial_status VARCHAR(20) DEFAULT 'none', -- 'none', 'active', 'ended', 'converted'
-ADD COLUMN auto_billing_enabled BOOLEAN DEFAULT false;
+ADD COLUMN auto_billing_enabled BOOLEAN DEFAULT false,
+ADD COLUMN has_used_trial BOOLEAN DEFAULT false, -- Track if user has ever used trial
+ADD COLUMN trial_used_at TIMESTAMPTZ; -- When trial was first used
+
+-- Create index for trial eligibility checks
+CREATE INDEX idx_user_profiles_trial_usage ON indb_auth_user_profiles(has_used_trial, trial_used_at);
 ```
 
 #### 1.3 Create Free Trial Subscriptions Table
@@ -251,11 +256,31 @@ const availablePaymentMethods = paymentGateways.filter(gateway => {
 **4.1.1 Free Trial Initiation**
 ```typescript
 // POST /api/billing/free-trial
+- **FIRST: Check trial eligibility** (has_used_trial = false)
 - Validate trial package selection
+- Validate credit card information
 - Create $0 tokenization transaction
 - Setup Midtrans subscription with delayed start
 - Save trial subscription record
+- **Mark user as trial used** (has_used_trial = true, trial_used_at = now())
 - Update user profile with trial status
+```
+
+**4.1.2 Trial Eligibility Check**
+```typescript
+// GET /api/user/trial-eligibility
+- Check if user has already used trial (has_used_trial field)
+- Return eligibility status and reasoning
+- Include available trial packages if eligible
+- Include restriction message if not eligible
+
+interface TrialEligibilityResponse {
+  eligible: boolean;
+  reason?: 'already_used' | 'existing_subscriber' | 'invalid_account';
+  trial_used_at?: string;
+  available_packages?: TrialPackage[];
+  message: string;
+}
 ```
 
 **4.1.2 Trial Status Check**
@@ -359,17 +384,49 @@ Add trial management section:
 ```
 1. User registers → Email verification
 2. Redirect to /dashboard/select-trial
-3. Choose Premium Trial or Pro Trial
-4. Redirect to checkout with trial=true
-5. Enter credit card details
-6. Midtrans tokenizes card ($0 charge)
-7. System creates subscription with delayed start
-8. Trial activated immediately
-9. User has 3 days full access
-10. Day 3: Email reminder about upcoming billing
-11. Day 4: Auto-billing via Midtrans subscription
-12. If successful: User continues with full plan
-13. If failed: Retry mechanism + notifications
+3. **STEP: Check trial eligibility** (call /api/user/trial-eligibility)
+   - If eligible: Show Premium Trial and Pro Trial options
+   - If NOT eligible: Show message "You have already used your free trial" and redirect to normal pricing
+4. Choose Premium Trial or Pro Trial (only if eligible)
+5. Redirect to checkout with trial=true
+6. **STEP: Double-check eligibility** before showing payment form
+7. Enter credit card details (only Midtrans Card Recurring shown)
+8. Midtrans tokenizes card ($0 charge)
+9. **STEP: Final eligibility check** before creating subscription
+10. System creates subscription with delayed start
+11. **STEP: Mark user as trial used** (has_used_trial = true)
+12. Trial activated immediately
+13. User has 3 days full access
+14. Day 3: Email reminder about upcoming billing
+15. Day 4: Auto-billing via Midtrans subscription
+16. If successful: User continues with full plan
+17. If failed: Retry mechanism + notifications
+```
+
+#### 7.2 Trial Eligibility Validation Flow (Multiple Checkpoints)
+```
+Checkpoint 1: Registration redirect
+- Check has_used_trial before showing trial selection page
+- If true: Redirect to normal pricing page instead
+
+Checkpoint 2: Trial selection page load  
+- Call /api/user/trial-eligibility
+- Hide trial options if not eligible
+- Show clear message: "Free trial already used on [date]"
+
+Checkpoint 3: Checkout page load
+- Verify trial package selection is valid
+- Double-check user eligibility
+- Block payment form if not eligible
+
+Checkpoint 4: Payment processing
+- Final eligibility check before Midtrans tokenization
+- Fail payment if has_used_trial = true
+- Atomic transaction: mark trial used + create subscription
+
+Checkpoint 5: Frontend protection
+- Disable trial buttons via JavaScript if not eligible
+- Show "Already used" status instead of "Start Trial"
 ```
 
 #### 7.2 Trial Experience
@@ -384,13 +441,14 @@ Add trial management section:
 ### Phase 8: Business Logic & Validation
 
 #### 8.1 Trial Eligibility Rules
-- One trial per user per email address
+- **One trial per user lifetime** - Each user can only get free trial once, ever
 - Must provide valid credit card (mandatory)
 - **Card Recurring payment method only** - no exceptions
 - Credit card must pass tokenization successfully
 - No trial for existing paying customers
 - Block known fraud patterns
 - Validate card supports recurring payments
+- Track trial usage by user ID and email address to prevent multiple trials
 
 #### 8.2 Trial Limitations
 - Cannot downgrade during trial
@@ -491,6 +549,47 @@ Add trial management section:
 - Database query performance
 - Email delivery rates
 - Error rates across all flows
+
+---
+
+## Summary: Why Dedicated Trial Packages vs Frontend Logic
+
+### Technical Justification for Trial Packages:
+
+1. **Midtrans Subscription Requirements**: 
+   - Requires specific package IDs and exact billing amounts
+   - Cannot dynamically modify subscription pricing after creation
+   - Needs predefined recurring payment schedules
+
+2. **Database Integrity & Reporting**:
+   - Clean separation between trial and paid subscriptions
+   - Accurate analytics and conversion tracking
+   - Simplified billing reconciliation
+
+3. **Business Logic Simplification**:
+   - Each package has distinct quotas and features
+   - Eliminates complex conditional logic throughout application
+   - Clear upgrade/downgrade paths
+
+4. **Payment Gateway Integration**:
+   - Different payment flows for trials vs regular subscriptions
+   - Midtrans tokenization requirements for recurring payments
+   - Specific webhook handling for trial-to-paid conversions
+
+5. **User Experience**:
+   - Clear pricing and feature communication
+   - Transparent billing expectations
+   - Simplified checkout flows
+
+### One Trial Per User Lifetime Implementation:
+
+- **Database tracking**: `has_used_trial` and `trial_used_at` fields
+- **Multiple validation checkpoints** throughout user journey
+- **Atomic transaction** to prevent race conditions
+- **Frontend and backend validation** for comprehensive protection
+- **Clear messaging** when trial already used
+
+This approach ensures robust, scalable, and maintainable free trial functionality while meeting Midtrans requirements and providing excellent user experience.
 
 ---
 
