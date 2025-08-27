@@ -150,10 +150,10 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
 
   const renderMenuItem = (item: any) => {
     return (
-      <div key={item.label} className="relative group" style={isCollapsed ? { overflow: 'visible' } : {}}>
+      <div key={item.label} className="relative">
         <a
           href={item.href}
-          className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative ${
+          className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
             item.active
               ? isCollapsed 
                 ? 'bg-[#3D8BFF]/10 text-[#3D8BFF]' 
@@ -169,14 +169,14 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
               : 'text-[#6C757D] group-hover:text-[#3D8BFF]'
           }`} />
           {!isCollapsed && <span className="truncate">{item.label}</span>}
-          {/* Tooltip for collapsed state - positioned relative to each menu item */}
-          {isCollapsed && (
-            <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl" style={{ zIndex: 99999 }}>
-              {item.label}
-              <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-[#1A1A1A]"></div>
-            </div>
-          )}
         </a>
+        {/* Tooltip for collapsed state */}
+        {isCollapsed && (
+          <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl" style={{ zIndex: 99999 }}>
+            {item.label}
+            <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-[#1A1A1A]"></div>
+          </div>
+        )}
       </div>
     )
   }
@@ -205,7 +205,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
       {/* Desktop Sidebar */}
       <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-[#E5E7EB] transition-all duration-300 ease-in-out ${
         isCollapsed ? 'w-16' : 'w-64'
-      } hidden md:block`} style={isCollapsed ? { overflow: 'hidden', minWidth: '64px', maxWidth: '64px' } : {}}>
+      } hidden md:block`} style={isCollapsed ? { overflow: 'hidden', touchAction: 'none', userSelect: 'none' } : {}}>
         <div className="flex flex-col h-full">
           {/* Header with Logo/Brand */}
           <div className={`px-4 py-5 ${
@@ -262,7 +262,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 overflow-y-auto">
+          <nav className="flex-1 px-4 overflow-y-auto" style={isCollapsed ? { overflow: 'visible' } : {}}>
             {filteredSections.map(section => renderSection(section))}
           </nav>
 
@@ -352,7 +352,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 overflow-y-auto">
+          <nav className="flex-1 px-4 overflow-y-auto" style={isCollapsed ? { overflow: 'visible' } : {}}>
             {filteredSections.map(section => renderSection(section))}
           </nav>
 
