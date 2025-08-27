@@ -1,0 +1,13 @@
+Before I ask you to do enhancement/changes, I need you to do:
+1. Deep dive into this project, read all code, file and information, specificly in project.md (not replit.md, but still read the replit.md) where you can get the all related this project, database structure and detailed changes log. Don't just fucking use grep to get few lines to read it, fucking open the file and read the full context.
+2. Always and keep remember that you're SHOULDN'T delete any information in project.md, for every update and changes, you should write in Recent Changes inside the project.md with proper timeline format like the other without delete anything.
+3. If you need to make debug/test file to fix the problem, then make it. But keep in mind to delete that file again after it's solved and before you end the action chain.
+4. For after every changes you made, don't forget to add it in timeline changlongs in project.md in Recent Changes section.
+5. As this project using Supabase database, which you didn't have access directly to it, if you need to know the database format beside that I put in project.md, you can give me SQL queries for me to run to see, changes or update database related. Keep in your mind to not push anything related to DB in your local.
+6. If you need to add debug, never use console.log that can appear on user's browser, we don't want that.
+
+Then, before I ask you to revamp the homepage landing page, I need you to revise the "How It Work" section. At the moment, the section is too simple and I didn't quite like it (please see image 1), I want you to follow the reference that I give in images 2 and so-on.
+
+Before you do it, please keep in mind that I change the positioning of this project to IndexNow Rank Tracker, not FastIndexing which is related to sending request to Indexing API.
+
+Before you made the copywriting and the content, please make sure you understand this project completely, so you didn't mention a feature or any content that didn't relevant to this project.
