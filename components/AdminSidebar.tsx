@@ -205,7 +205,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
       {/* Desktop Sidebar */}
       <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-[#E5E7EB] transition-all duration-300 ease-in-out ${
         isCollapsed ? 'w-16' : 'w-64'
-      } hidden md:block`} style={isCollapsed ? { overflow: 'hidden', touchAction: 'none', userSelect: 'none' } : {}}>
+      } hidden md:block`} style={isCollapsed ? { touchAction: 'none', userSelect: 'none' } : {}}>
         <div className="flex flex-col h-full">
           {/* Header with Logo/Brand */}
           <div className={`px-4 py-5 ${
