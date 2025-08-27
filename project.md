@@ -704,6 +704,17 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### January 29, 2025 18:15: Admin Backend Import Error Fix ✅
+- **✅ FIXED ADMIN AUTH SERVICE IMPORT ERROR**: Resolved missing export error preventing admin backend from loading
+  - **Problem Identified**: Admin layout was importing `adminAuthService` but lib/auth/index.ts only exported the class `AdminAuthService`, not the instance
+  - **Root Cause**: During lib folder reorganization, the instance export was missing from the auth index.ts barrel export
+  - **Solution Applied**: Added `adminAuthService` instance export to lib/auth/index.ts alongside existing `AdminAuthService` class export
+  - **Import Fix**: Updated auth barrel export from `export { AdminAuthService }` to `export { AdminAuthService, adminAuthService }`
+- **Verification**: LSP diagnostics cleared, compilation successful, admin backend now accessible without import errors
+- **Files Modified**:
+  - `lib/auth/index.ts` - Added missing adminAuthService instance export
+- **Result**: Admin backend fully functional with proper authentication service imports
+
 ### January 29, 2025 18:00: Pricing Section Button Alignment Fix ✅
 - **✅ FIXED PRICING CARD BUTTON ALIGNMENT**: Resolved button alignment issue where buttons were not inline between the 3 pricing cards
   - **Problem Identified**: Pricing cards had varying content heights causing buttons to appear at different vertical positions
