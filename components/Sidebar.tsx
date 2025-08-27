@@ -10,51 +10,18 @@ import {
   FileText,
   Settings,
   X,
-  ChevronDown,
-  ChevronRight,
   LogOut,
   User,
   Menu,
   Activity,
-  CreditCard,
   TrendingUp,
-  Wrench
+  Search,
+  Shield
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 import { useUserProfile } from '@/hooks/useUserProfile'
-
-// Simple Button component using new color palette
-const Button = ({ children, className = '', variant = 'ghost', size = 'sm', onClick, ...props }: any) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none'
-  const variants: { [key: string]: string } = {
-    ghost: 'hover:opacity-80',
-    default: 'text-white hover:opacity-80'
-  }
-  const sizes: { [key: string]: string } = {
-    sm: 'h-9 px-3',
-    default: 'h-10 py-2 px-4'
-  }
-  
-  const variantStyles = variant === 'ghost' 
-    ? { backgroundColor: 'transparent', color: '#6C757D' }
-    : { backgroundColor: '#1C2331', color: '#FFFFFF' }
-  
-  return (
-    <button 
-      className={`${baseStyles} ${variants[variant] || variants.ghost} ${sizes[size] || sizes.sm} ${className}`}
-      style={variantStyles}
-      onClick={onClick}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-
-// Simple cn function
-const cn = (...classes: string[]) => classes.filter(Boolean).join(' ')
 
 interface SidebarProps {
   isOpen: boolean
@@ -68,8 +35,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   const pathname = usePathname()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
-  const [indexNowExpanded, setIndexNowExpanded] = useState(true)
-  const [fastIndexingExpanded, setFastIndexingExpanded] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
   
   useEffect(() => {
     setMounted(true)
@@ -78,6 +44,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   // Site settings hooks
   const siteName = useSiteName()
   const logoUrl = useSiteLogo(!isCollapsed) // Full logo when expanded, icon when collapsed
+  const iconUrl = useSiteLogo(false) // Always get icon for mobile header
   
   // Get user profile with role information
   const { user: userProfile } = useUserProfile()
@@ -91,53 +58,39 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
     }
   }
 
-  // Define menu items with conditional Test Backend item
-  const baseMenuItems = [
+  // Navigation sections structured like admin sidebar
+  const navigationSections = [
     {
-      label: 'Dashboard',
-      href: '/dashboard',
-      icon: LayoutDashboard,
-      active: pathname === '/dashboard'
+      title: 'DASHBOARD',
+      items: [
+        {
+          label: 'Dashboard',
+          href: '/dashboard',
+          icon: LayoutDashboard,
+          active: pathname === '/dashboard'
+        }
+      ]
     },
     {
-      label: 'Keyword Tracker',
-      icon: null,
-      isLabel: true
-    },
-    {
-      label: 'IndexNow',
-      icon: TrendingUp,
-      expandable: true,
-      expanded: indexNowExpanded,
-      onToggle: () => setIndexNowExpanded(!indexNowExpanded),
-      children: [
+      title: 'KEYWORD TRACKER',
+      items: [
         {
           label: 'Overview',
           href: '/dashboard/indexnow/overview',
           icon: Activity,
           active: pathname === '/dashboard/indexnow/overview'
         },
-
         {
           label: 'Rank History',
           href: '/dashboard/indexnow/rank-history',
-          icon: Activity,
+          icon: TrendingUp,
           active: pathname === '/dashboard/indexnow/rank-history'
         }
       ]
     },
     {
-      label: 'Tools',
-      icon: null,
-      isLabel: true
-    },
-    {
-      label: 'FastIndexing',
-      icon: Wrench,
-      expandable: true,
-      expanded: fastIndexingExpanded,
-      onToggle: () => setFastIndexingExpanded(!fastIndexingExpanded),
-      children: [
+      title: 'TOOLS',
+      items: [
         {
           label: 'New Index',
           href: '/dashboard/tools/fastindexing',
@@ -154,18 +107,83 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
     }
   ]
 
-  // Add Test Backend menu item only for super_admin users
-  const menuItems = userProfile?.isSuperAdmin 
+  // Add Test Backend section only for super_admin users
+  const allSections = userProfile?.isSuperAdmin 
     ? [
-        ...baseMenuItems,
+        ...navigationSections,
         {
-          label: 'Test Backend',
-          href: '/dashboard/test-backend',
-          icon: Activity,
-          active: pathname === '/dashboard/test-backend'
+          title: 'ADMIN',
+          items: [
+            {
+              label: 'Test Backend',
+              href: '/dashboard/test-backend',
+              icon: Activity,
+              active: pathname === '/dashboard/test-backend'
+            }
+          ]
         }
       ]
-    : baseMenuItems
+    : navigationSections
+
+  // Filter navigation items based on search query
+  const filteredSections = allSections.map(section => ({
+    ...section,
+    items: section.items.filter(item => 
+      searchQuery === '' || item.label.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  })).filter(section => section.items.length > 0)
+
+  const renderMenuItem = (item: any) => {
+    return (
+      <div key={item.label} className="relative group">
+        <a
+          href={item.href}
+          className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+            item.active
+              ? isCollapsed 
+                ? 'bg-[#3D8BFF]/10 text-[#3D8BFF]' 
+                : 'bg-[#3D8BFF] text-white shadow-sm'
+              : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F8FAFC]'
+          }`}
+        >
+          <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0 ${
+            item.active 
+              ? isCollapsed 
+                ? 'text-[#3D8BFF]' 
+                : 'text-white' 
+              : 'text-[#6C757D] group-hover:text-[#3D8BFF]'
+          }`} />
+          {!isCollapsed && <span className="truncate">{item.label}</span>}
+        </a>
+        {/* Tooltip for collapsed state */}
+        {isCollapsed && (
+          <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl" style={{ zIndex: 99999 }}>
+            {item.label}
+            <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-[#1A1A1A]"></div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const renderSection = (section: any) => {
+    if (isCollapsed) {
+      return section.items.map((item: any) => renderMenuItem(item))
+    }
+
+    return (
+      <div key={section.title} className="mb-6">
+        <div className="px-3 mb-3">
+          <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">
+            {section.title}
+          </p>
+        </div>
+        <div className="space-y-1">
+          {section.items.map((item: any) => renderMenuItem(item))}
+        </div>
+      </div>
+    )
+  }
 
   // Don't render sidebar until mounted to prevent hydration mismatch
   if (!mounted) {
@@ -174,260 +192,146 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
 
   return (
     <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={onToggle}
-        />
-      )}
-
-      {/* Mobile off-canvas sidebar */}
-      <div 
-        className={cn(
-          "fixed left-0 top-0 h-full z-50 transform transition-all duration-300 ease-in-out flex flex-col lg:hidden",
-          "w-64", // Always full width on mobile
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-        style={{backgroundColor: '#FFFFFF', borderRight: '1px solid #E0E6ED'}}
-      >
-        {/* Mobile Header with Close Button */}
-        <div className="p-4 flex items-center justify-between" style={{borderBottom: '1px solid #E0E6ED'}}>
-          <div className="flex items-center">
-            {logoUrl ? (
-              <img 
-                src={logoUrl} 
-                alt={`${siteName} Logo`}
-                style={{ width: '106.664px', height: '60px' }}
-              />
-            ) : (
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-                  <Zap className="h-4 w-4 text-white" />
+      {/* Desktop Sidebar */}
+      <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-[#E5E7EB] transition-all duration-300 ease-in-out ${
+        isCollapsed ? 'w-20' : 'w-64'
+      } hidden md:block`} style={isCollapsed ? { touchAction: 'none', userSelect: 'none' } : {}}>
+        <div className="flex flex-col h-full">
+          {/* Header with Logo/Brand */}
+          <div className={`px-4 py-5 ${
+            isCollapsed ? 'flex flex-col items-center space-y-4' : 'flex items-center justify-between'
+          }`}>
+            <div className="flex items-center">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt={`${siteName} Logo`}
+                  className={isCollapsed ? "h-8 w-8 object-contain" : ""}
+                  style={!isCollapsed ? { width: '106.664px', height: '60px' } : {}}
+                />
+              ) : (
+                <div className="flex items-center">
+                  <div className="h-8 w-8 bg-[#3D8BFF] rounded-lg flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  {!isCollapsed && (
+                    <div className="ml-3">
+                      <h1 className="text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
+                      <p className="text-xs text-[#6C757D]">User Dashboard</p>
+                    </div>
+                  )}
                 </div>
-                <span className="font-bold text-lg ml-2" style={{color: '#1A1A1A'}}>{siteName}</span>
-              </div>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="p-1"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className="flex-1 overflow-y-auto py-4">
-          <nav className="space-y-1 px-3">
-            {menuItems.map((item) => (
-              <div key={item.label}>
-                {item.isLabel ? (
-                  <div className="px-4 py-3 mt-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    {item.label}
-                  </div>
-                ) : item.expandable ? (
-                  <div>
-                    <Button
-                      variant="ghost"
-                      className="w-full h-10 justify-start px-4 font-medium transition-all duration-200"
-                      onClick={item.onToggle}
-                      style={{color: '#6C757D'}}
-                      onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                        ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
-                      }}
-                      onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
-                        ;(e.target as HTMLButtonElement).style.color = '#6C757D'
-                      }}
-                    >
-                      <div className="flex items-center w-full">
-                        <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
-                        <span className="text-left flex-1">{item.label}</span>
-                        {item.expanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </div>
-                    </Button>
-                    
-                    {item.expanded && item.children && (
-                      <div className="ml-8 mt-1 space-y-1">
-                        {item.children.map((child) => (
-                          <Link key={child.label} href={child.href} onClick={onToggle}>
-                            <Button
-                              variant="ghost"
-                              className={cn(
-                                "w-full h-9 justify-start text-left text-sm px-4",
-                                child.active ? "font-medium" : ""
-                              )}
-                              style={{
-                                color: child.active ? '#1A1A1A' : '#6C757D',
-                                backgroundColor: child.active ? '#F7F9FC' : 'transparent'
-                              }}
-                              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                if (!child.active) {
-                                  (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                                  ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
-                                }
-                              }}
-                              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                if (!child.active) {
-                                  (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
-                                  ;(e.target as HTMLButtonElement).style.color = '#6C757D'
-                                }
-                              }}
-                            >
-                              <div className="flex items-center w-full">
-                                <child.icon className="h-3 w-3 mr-3 flex-shrink-0" />
-                                <span className="text-left">{child.label}</span>
-                              </div>
-                            </Button>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : item.href ? (
-                  <Link href={item.href} onClick={onToggle}>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full h-10 justify-start px-4 transition-all duration-200",
-                        item.active ? "font-medium" : ""
-                      )}
-                      style={{
-                        color: item.active ? '#1A1A1A' : '#6C757D',
-                        backgroundColor: item.active ? '#F7F9FC' : 'transparent'
-                      }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        if (!item.active) {
-                          (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                          ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
-                        }
-                      }}
-                      onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        if (!item.active) {
-                          (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
-                          ;(e.target as HTMLButtonElement).style.color = '#6C757D'
-                        }
-                      }}
-                    >
-                      <div className="flex items-center w-full">
-                        {item.icon && <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />}
-                        <span className="text-left">{item.label}</span>
-                      </div>
-                    </Button>
-                  </Link>
-                ) : null}
-              </div>
-            ))}
-          </nav>
-        </div>
-
-        {/* Settings Menu Item at Bottom */}
-        <div className="px-3 pb-4">
-          <Link href="/dashboard/settings" onClick={onToggle}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full h-10 justify-start px-4 transition-all duration-200",
-                pathname === '/dashboard/settings' ? "font-medium" : ""
               )}
-              style={{
-                color: pathname === '/dashboard/settings' ? '#1A1A1A' : '#6C757D',
-                backgroundColor: pathname === '/dashboard/settings' ? '#F7F9FC' : 'transparent'
-              }}
-              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                if (pathname !== '/dashboard/settings') {
-                  (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                  ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
-                }
-              }}
-              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                if (pathname !== '/dashboard/settings') {
-                  (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
-                  ;(e.target as HTMLButtonElement).style.color = '#6C757D'
-                }
-              }}
-            >
-              <div className="flex items-center w-full">
-                <Settings className="h-4 w-4 mr-3 flex-shrink-0" />
-                <span className="text-left">Settings</span>
-              </div>
-            </Button>
-          </Link>
-        </div>
-
-        {/* Mobile User Profile at Bottom */}
-        <div className="border-t border-gray-200 p-4 mt-auto flex-shrink-0">
-          <div className="px-4 py-2">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-gray-700" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-900 truncate">
-                  {user?.email || 'User'}
-                </div>
-                <div className="text-xs text-gray-500 truncate">
-                  {user?.email || 'user@example.com'}
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
             </div>
+            <button 
+              onClick={onCollapse}
+              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Search Bar */}
+          {!isCollapsed && (
+            <div className="px-4 mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent transition-colors"
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <kbd className="px-2 py-0.5 text-xs bg-[#E5E7EB] text-[#6B7280] rounded border">⌘K</kbd>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className={`flex-1 px-4 ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto'}`}>
+            {filteredSections.map(section => renderSection(section))}
+          </nav>
+
+          {/* Upgrade Section */}
+          {!isCollapsed && (
+            <div className="px-4 py-4">
+              <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
+                <div className="flex items-center mb-2">
+                  <Zap className="h-5 w-5 mr-2" />
+                  <span className="text-sm font-semibold">Usage Limit</span>
+                </div>
+                <div className="mb-3">
+                  <div className="text-xs text-blue-100 mb-1">1,234/5,000 Monthly Limit</div>
+                  <div className="w-full bg-white/20 rounded-full h-2">
+                    <div 
+                      className="bg-white rounded-full h-2 transition-all duration-300" 
+                      style={{ width: '24.68%' }}
+                    ></div>
+                  </div>
+                </div>
+                <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  Upgrade plan →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Settings */}
+          <div className="px-4 pb-2">
+            <div className="relative group">
+              <a
+                href="/dashboard/settings"
+                className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  pathname === '/dashboard/settings'
+                    ? isCollapsed 
+                      ? 'bg-[#3D8BFF]/10 text-[#3D8BFF]' 
+                      : 'bg-[#3D8BFF] text-white shadow-sm'
+                    : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F8FAFC]'
+                }`}
+              >
+                <Settings className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0 ${
+                  pathname === '/dashboard/settings'
+                    ? isCollapsed 
+                      ? 'text-[#3D8BFF]' 
+                      : 'text-white' 
+                    : 'text-[#6C757D] group-hover:text-[#3D8BFF]'
+                }`} />
+                {!isCollapsed && <span className="truncate">Settings</span>}
+              </a>
+              {/* Tooltip for collapsed state */}
+              {isCollapsed && (
+                <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl" style={{ zIndex: 99999 }}>
+                  Settings
+                  <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-[#1A1A1A]"></div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="border-t border-[#E5E7EB] p-4">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-[#DC2626] rounded-lg hover:bg-[#FEF2F2] transition-colors"
+            >
+              <LogOut className={`${isCollapsed ? 'mr-0' : 'mr-2'} h-4 w-4 flex-shrink-0`} />
+              {!isCollapsed && <span>Sign out</span>}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Desktop sidebar - only visible on desktop */}
-      <div 
-        className={cn(
-          "fixed left-0 top-0 h-full z-50 transform transition-all duration-200 ease-in-out flex-col",
-          // Mobile: COMPLETELY HIDDEN
-          "hidden",
-          // Desktop: always visible, can collapse
-          "lg:flex lg:translate-x-0", 
-          // Width: Desktop can collapse to 16
-          isCollapsed ? "lg:w-16" : "lg:w-64"
-        )}
-        style={{backgroundColor: '#FFFFFF', borderRight: '1px solid #E0E6ED'}}
-      >
-        {/* Desktop Header */}
-        <div className="p-4" style={{borderBottom: '1px solid #E0E6ED'}}>
-          {isCollapsed ? (
-            <div className="flex flex-col items-center space-y-3">
-              {logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt={`${siteName} Icon`}
-                  className="w-8 h-8 object-contain"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-                  <Zap className="h-4 w-4 text-white" />
-                </div>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onCollapse}
-                className="hidden lg:flex p-1"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
+      {/* Mobile Sidebar */}
+      <div className={`fixed left-0 top-0 z-50 h-full w-64 bg-white border-r border-[#E5E7EB] transform transition-transform duration-300 ease-in-out md:hidden ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-5">
             <div className="flex items-center">
               {logoUrl ? (
                 <img 
@@ -437,237 +341,137 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                 />
               ) : (
                 <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-                    <Zap className="h-4 w-4 text-white" />
+                  <div className="h-8 w-8 bg-[#3D8BFF] rounded-lg flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-white" />
                   </div>
-                  <span className="font-bold text-lg ml-2" style={{color: '#1A1A1A'}}>{siteName}</span>
+                  <div className="ml-3">
+                    <h1 className="text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
+                    <p className="text-xs text-[#6C757D]">User Dashboard</p>
+                  </div>
                 </div>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onCollapse}
-                className="ml-auto hidden lg:flex p-1"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
             </div>
-          )}
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="flex-1 overflow-y-auto py-4">
-          <nav className={cn("space-y-1", isCollapsed ? "px-2" : "px-3")}>
-            {menuItems.map((item) => (
-              <div key={item.label}>
-                {item.isLabel ? (
-                  !isCollapsed && (
-                    <div className="px-4 py-3 mt-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                      {item.label}
-                    </div>
-                  )
-                ) : item.expandable ? (
-                  <div>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full h-10 font-medium transition-all duration-200",
-                        isCollapsed 
-                          ? "justify-center px-3" 
-                          : "justify-start px-4"
-                      )}
-                      onClick={item.onToggle}
-                      style={{color: '#6C757D'}}
-                      onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                        ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
-                      }}
-                      onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
-                        ;(e.target as HTMLButtonElement).style.color = '#6C757D'
-                      }}
-                    >
-                      {isCollapsed ? (
-                        <item.icon className="h-4 w-4" />
-                      ) : (
-                        <div className="flex items-center w-full">
-                          <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
-                          <span className="text-left flex-1">{item.label}</span>
-                          {item.expanded ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </div>
-                      )}
-                    </Button>
-                    
-                    {item.expanded && item.children && !isCollapsed && (
-                      <div className="ml-8 mt-1 space-y-1">
-                        {item.children.map((child) => (
-                          <Link key={child.label} href={child.href}>
-                            <Button
-                              variant="ghost"
-                              className={cn(
-                                "w-full h-9 justify-start text-left text-sm px-4",
-                                child.active
-                                  ? "font-medium"
-                                  : ""
-                              )}
-                              style={{
-                                color: child.active ? '#1A1A1A' : '#6C757D',
-                                backgroundColor: child.active ? '#F7F9FC' : 'transparent'
-                              }}
-                              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                if (!child.active) {
-                                  (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                                  ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
-                                }
-                              }}
-                              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                if (!child.active) {
-                                  (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
-                                  ;(e.target as HTMLButtonElement).style.color = '#6C757D'
-                                }
-                              }}
-                            >
-                              <div className="flex items-center w-full">
-                                <child.icon className="h-3 w-3 mr-3 flex-shrink-0" />
-                                <span className="text-left">{child.label}</span>
-                              </div>
-                            </Button>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : item.href ? (
-                  <Link href={item.href}>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full h-10 transition-all duration-200",
-                        isCollapsed 
-                          ? "justify-center px-3" 
-                          : "justify-start px-4",
-                        item.active
-                          ? "font-medium"
-                          : ""
-                      )}
-                      style={{
-                        color: item.active ? '#1A1A1A' : '#6C757D',
-                        backgroundColor: item.active ? '#F7F9FC' : 'transparent'
-                      }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        if (!item.active) {
-                          (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                          ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
-                        }
-                      }}
-                      onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        if (!item.active) {
-                          (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
-                          ;(e.target as HTMLButtonElement).style.color = '#6C757D'
-                        }
-                      }}
-                    >
-                      {isCollapsed ? (
-                        item.icon && <item.icon className="h-4 w-4" />
-                      ) : (
-                        <div className="flex items-center w-full">
-                          {item.icon && <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />}
-                          <span className="text-left">{item.label}</span>
-                        </div>
-                      )}
-                    </Button>
-                  </Link>
-                ) : null}
-              </div>
-            ))}
-          </nav>
-        </div>
-
-        {/* Settings Menu Item at Bottom */}
-        <div className="px-3 pb-4">
-          <Link href="/dashboard/settings">
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full h-10 transition-all duration-200",
-                isCollapsed 
-                  ? "justify-center px-3" 
-                  : "justify-start px-4",
-                pathname === '/dashboard/settings'
-                  ? "font-medium"
-                  : ""
-              )}
-              style={{
-                color: pathname === '/dashboard/settings' ? '#1A1A1A' : '#6C757D',
-                backgroundColor: pathname === '/dashboard/settings' ? '#F7F9FC' : 'transparent'
-              }}
-              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                if (pathname !== '/dashboard/settings') {
-                  (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'
-                  ;(e.target as HTMLButtonElement).style.color = '#1A1A1A'
-                }
-              }}
-              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                if (pathname !== '/dashboard/settings') {
-                  (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'
-                  ;(e.target as HTMLButtonElement).style.color = '#6C757D'
-                }
-              }}
+            <button 
+              onClick={onToggle}
+              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
             >
-              {isCollapsed ? (
-                <Settings className="h-4 w-4" />
-              ) : (
-                <div className="flex items-center w-full">
-                  <Settings className="h-4 w-4 mr-3 flex-shrink-0" />
-                  <span className="text-left">Settings</span>
-                </div>
-              )}
-            </Button>
-          </Link>
-        </div>
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-        {/* Desktop User Profile at Bottom */}
-        <div className="border-t border-gray-200 p-4 mt-auto flex-shrink-0">
-          {isCollapsed ? (
-            <div className="flex flex-col items-center space-y-3">
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-gray-700" />
+          {/* Search Bar */}
+          <div className="px-4 mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-4 overflow-y-auto">
+            {filteredSections.map(section => renderSection(section))}
+          </nav>
+
+          {/* Settings */}
+          <div className="px-4 pb-2">
+            <a
+              href="/dashboard/settings"
+              onClick={onToggle}
+              className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                pathname === '/dashboard/settings'
+                  ? 'bg-[#3D8BFF] text-white shadow-sm'
+                  : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F8FAFC]'
+              }`}
+            >
+              <Settings className={`mr-3 h-5 w-5 flex-shrink-0 ${
+                pathname === '/dashboard/settings'
+                  ? 'text-white' 
+                  : 'text-[#6C757D]'
+              }`} />
+              <span className="truncate">Settings</span>
+            </a>
+          </div>
+
+          {/* Upgrade Section */}
+          <div className="px-4 py-4">
+            <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
+              <div className="flex items-center mb-2">
+                <Zap className="h-5 w-5 mr-2" />
+                <span className="text-sm font-semibold">Usage Limit</span>
               </div>
-              <button
-                onClick={handleLogout}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded"
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4" />
+              <div className="mb-3">
+                <div className="text-xs text-blue-100 mb-1">1,234/5,000 Monthly Limit</div>
+                <div className="w-full bg-white/20 rounded-full h-2">
+                  <div 
+                    className="bg-white rounded-full h-2 transition-all duration-300" 
+                    style={{ width: '24.68%' }}
+                  ></div>
+                </div>
+              </div>
+              <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                Upgrade plan →
               </button>
             </div>
-          ) : (
-            <div className="px-4 py-2">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-gray-700" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate">
-                    {user?.email || 'User'}
-                  </div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {user?.email || 'user@example.com'}
-                  </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                  title="Logout"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="border-t border-[#E5E7EB] p-4">
+            {user && (
+              <div className="mb-3">
+                <p className="text-sm font-medium text-[#1A1A1A] truncate">{user.email}</p>
+                <p className="text-xs text-[#6C757D] truncate">User Dashboard</p>
               </div>
-            </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-[#DC2626] rounded-lg hover:bg-[#FEF2F2] transition-colors"
+            >
+              <LogOut className="mr-2 h-4 w-4 flex-shrink-0" />
+              <span>Sign out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={onToggle}
+        />
+      )}
+
+      {/* Mobile Header - Show when sidebar is closed */}
+      <div className="md:hidden bg-white border-b border-[#E5E7EB] p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={onToggle}
+              className="p-2 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] mr-3 transition-colors"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            {iconUrl ? (
+              <img 
+                src={iconUrl} 
+                alt={`${siteName} Icon`}
+                className="h-6 w-6"
+              />
+            ) : (
+              <div className="h-6 w-6 bg-[#3D8BFF] rounded flex items-center justify-center">
+                <Shield className="h-4 w-4 text-white" />
+              </div>
+            )}
+            <h1 className="ml-2 text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
+          </div>
+          {user && (
+            <p className="text-sm text-[#6C757D] truncate max-w-32">{user.email}</p>
           )}
         </div>
       </div>
@@ -676,4 +480,3 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
 }
 
 export default Sidebar
-
