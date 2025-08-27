@@ -195,7 +195,7 @@ export default function LandingPage() {
               </div>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center space-x-6">
+              <nav className="hidden md:flex items-center space-x-8 px-6 py-2 border border-gray-600/30 rounded-full bg-gray-900/20 backdrop-blur-sm">
                 <button 
                   onClick={() => scrollToSection(productTourRef)}
                   className={`text-sm font-medium transition-colors ${
@@ -204,7 +204,6 @@ export default function LandingPage() {
                 >
                   Features
                 </button>
-                <div className="w-px h-4 bg-gray-500/60"></div>
                 <button 
                   onClick={() => scrollToSection(pricingRef)}
                   className={`text-sm font-medium transition-colors ${
@@ -213,7 +212,6 @@ export default function LandingPage() {
                 >
                   Pricing
                 </button>
-                <div className="w-px h-4 bg-gray-500/60"></div>
                 <button 
                   onClick={() => scrollToSection(faqRef)}
                   className={`text-sm font-medium transition-colors ${
@@ -222,7 +220,6 @@ export default function LandingPage() {
                 >
                   FAQ
                 </button>
-                <div className="w-px h-4 bg-gray-500/60"></div>
                 <button 
                   onClick={() => scrollToSection(contactRef)}
                   className={`text-sm font-medium transition-colors ${
