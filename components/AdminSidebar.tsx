@@ -208,8 +208,10 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
       } hidden md:block`}>
         <div className="flex flex-col h-full">
           {/* Header with Logo/Brand */}
-          <div className="px-4 py-5">
-            <div className="flex items-center justify-center mb-4">
+          <div className={`px-4 py-5 ${
+            isCollapsed ? 'flex flex-col items-center space-y-4' : 'flex items-center justify-between'
+          }`}>
+            <div className="flex items-center">
               {logoUrl ? (
                 <img 
                   src={logoUrl} 
@@ -231,17 +233,13 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 </div>
               )}
             </div>
-            {isCollapsed && (
-              <div className="flex justify-center">
-                <button 
-                  onClick={onCollapse}
-                  className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
-                  title="Expand sidebar"
-                >
-                  <Menu className="h-5 w-5" />
-                </button>
-              </div>
-            )}
+            <button 
+              onClick={onCollapse}
+              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Search Bar */}
@@ -294,33 +292,6 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
 
           {/* Bottom Section */}
           <div className="border-t border-[#E5E7EB] p-4">
-            {/* Theme Toggle & Settings */}
-            <div className="flex items-center justify-between mb-4">
-              {!isCollapsed && (
-                <button
-                  onClick={() => setIsDarkMode(!isDarkMode)}
-                  className="flex items-center space-x-2 text-sm text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
-                >
-                  {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                  <span>{isDarkMode ? 'Light mode' : 'Dark mode'}</span>
-                </button>
-              )}
-              <button 
-                className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
-                title="Settings"
-              >
-                <Settings className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* User Info & Logout */}
-            {!isCollapsed && user && (
-              <div className="mb-3">
-                <p className="text-sm font-medium text-[#1A1A1A] truncate">{user.name}</p>
-                <p className="text-xs text-[#6C757D] truncate">{user.email}</p>
-                <p className="text-xs text-[#3D8BFF] font-medium">{user.role}</p>
-              </div>
-            )}
             <button
               onClick={handleLogout}
               className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-[#DC2626] rounded-lg hover:bg-[#FEF2F2] transition-colors"
