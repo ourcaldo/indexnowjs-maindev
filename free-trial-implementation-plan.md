@@ -62,33 +62,96 @@ ADD COLUMN trial_used_at TIMESTAMPTZ; -- When trial was first used
 CREATE INDEX idx_user_profiles_trial_usage ON indb_auth_user_profiles(has_used_trial, trial_used_at);
 ```
 
-#### 1.2 Enhance Existing Subscription/Order Tables
-**Use existing subscription/order tables** with enhanced metadata fields to track trial information:
+#### 1.2 Enhance Existing Payment Transaction Table
+**Use existing `indb_payment_transactions` table** with enhanced metadata fields to track trial information:
+
+**Current Table Structure** (from sample data):
+- Existing columns: `id`, `user_id`, `subscription_id`, `package_id`, `gateway_id`
+- Transaction fields: `transaction_type`, `transaction_status`, `amount`, `currency`
+- Payment data: `payment_method`, `gateway_transaction_id`, `gateway_response`
+- Metadata: `metadata` (JSONB), `billing_period`
+- Timestamps: `processed_at`, `verified_at`, `created_at`, `updated_at`
 
 ```sql
--- Add trial tracking columns to existing subscription table (if not already present)
--- Note: Check current table structure first - you may already have metadata JSONB fields
+-- Add trial tracking columns to existing payment transactions table
+ALTER TABLE indb_payment_transactions 
+ADD COLUMN IF NOT EXISTS trial_metadata JSONB;
 
--- If using existing indb_user_subscriptions table:
-ALTER TABLE indb_user_subscriptions 
-ADD COLUMN IF NOT EXISTS trial_metadata JSONB,
-ADD COLUMN IF NOT EXISTS midtrans_subscription_id TEXT,
-ADD COLUMN IF NOT EXISTS saved_token_id TEXT; -- This comes from subscription.create response, NOT tokenization
+-- Add trial tracking columns to existing Midtrans table
+ALTER TABLE indb_payment_midtrans 
+ADD COLUMN IF NOT EXISTS trial_metadata JSONB;
 
 -- Create index for trial lookups
-CREATE INDEX IF NOT EXISTS idx_user_subscriptions_trial 
-ON indb_user_subscriptions USING GIN (trial_metadata);
+CREATE INDEX IF NOT EXISTS idx_payment_transactions_trial 
+ON indb_payment_transactions USING GIN (trial_metadata);
+CREATE INDEX IF NOT EXISTS idx_payment_midtrans_trial 
+ON indb_payment_midtrans USING GIN (trial_metadata);
 
--- Example trial_metadata structure:
+#### 1.3 Midtrans Recurring Payment Table Structure
+**Table**: `indb_payment_midtrans`
+
+**Current Table Structure** (from sample data):
+- Core: `id`, `transaction_id`, `user_id`, `midtrans_subscription_id`, `saved_token_id`
+- Card info: `masked_card`, `card_type`, `bank`, `token_expired_at`
+- Subscription: `subscription_status`, `next_billing_date`
+- Data: `metadata` (JSONB), `created_at`, `updated_at`
+
+-- Example trial records across three tables:
+
+-- 1. TRIAL CHARGE TRANSACTION in indb_payment_transactions (IDR 0)
 -- {
---   "is_trial": true,
---   "trial_start_date": "2025-08-27T10:00:00Z",
---   "trial_end_date": "2025-08-30T10:00:00Z",
---   "trial_duration_days": 3,
---   "auto_billing_start": "2025-08-30T10:00:01Z",
---   "trial_package_slug": "premium",
---   "original_amount_usd": 45.00,
---   "converted_amount_idr": 736649
+--   "transaction_type": "payment",
+--   "transaction_status": "completed", 
+--   "amount": "0.00",
+--   "currency": "IDR",
+--   "payment_method": "midtrans_recurring",
+--   "trial_metadata": {
+--     "is_trial": true,
+--     "trial_start_date": "2025-08-27T10:00:00Z",
+--     "trial_end_date": "2025-08-30T10:00:00Z",
+--     "trial_duration_days": 3,
+--     "auto_billing_start": "2025-08-30T10:00:01Z",
+--     "trial_package_slug": "premium",
+--     "original_amount_usd": 15.00,
+--     "converted_amount_idr": 237000
+--   }
+-- }
+
+-- 2. MIDTRANS SUBSCRIPTION in indb_payment_midtrans (AUTO-CREATED by database trigger)
+-- NOTE: This record is created automatically by database trigger, 
+-- NOT by backend logic during trial signup
+-- {
+--   "id": "06aaea92-331d-4fca-aa1e-bfbe7f586c55",
+--   "transaction_id": "<transaction_id_from_above>", 
+--   "user_id": "915f50e5-0902-466a-b1af-bdf19d789722",
+--   "midtrans_subscription_id": "7f2ed18f-8f60-4c5e-93ac-411d08ef5d21",
+--   "saved_token_id": "48111111-1114-207bb424-1494-4aa9-9437-f377a2719fad",
+--   "masked_card": "48111111-1114",
+--   "card_type": "credit",
+--   "bank": "bni",
+--   "subscription_status": "active",
+--   "next_billing_date": "2025-08-30 16:02:33+00",
+--   "metadata": {
+--     "order_id": "ORDER-1755964941264-915f50e5",
+--     "subscription_name": "PREMIUM_TRIAL_AUTO_BILLING",
+--     "schedule": {
+--       "interval": 1,
+--       "start_time": "2025-08-30 16:02:33",
+--       "interval_unit": "month",
+--       "current_interval": 0
+--     },
+--     "processing_method": "3ds_callback",
+--     "midtrans_transaction_id": "207bb424-1494-4aa9-9437-f377a2719fad"
+--   }
+-- }
+
+-- 3. FUTURE AUTO-BILLING TRANSACTION (Created by Midtrans webhook)
+-- {
+--   "transaction_type": "recurring_payment",
+--   "transaction_status": "completed",
+--   "amount": "237000.00", 
+--   "currency": "IDR",
+--   "payment_method": "midtrans_recurring"
 -- }
 ```
 
@@ -128,8 +191,9 @@ interface CheckoutRequest {
      * interval: 1 month
      * token: token_id (from charge response)
    - Extract saved_token_id from subscription.create response
-5. Backend: Save to existing subscription table with trial_metadata and saved_token_id
+5. Backend: Save to indb_payment_transactions table with trial_metadata
 6. Backend: Update user profile with trial status
+7. Database: Auto-creates indb_payment_midtrans record via database trigger when subscription is processed
 ```
 
 #### 2.1 Currency Conversion & Multi-Currency Trial Logic
@@ -293,7 +357,7 @@ if (isTrialFlow) {
   5. Backend: Charge response includes token_id (NOT saved_token_id)
   6. Backend: Create Midtrans subscription with FULL PRICE (IDR) using token_id with start_time = trial_end + 1 day
   7. Backend: Extract saved_token_id from subscription.create response
-  8. Backend: Save to existing subscription table with trial_metadata and saved_token_id
+  8. Backend: Save to indb_payment_transactions table with trial_metadata
   9. Backend: Activate trial immediately (user gets full access)
 }
 ```
