@@ -1041,6 +1041,24 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 27, 2025 20:45: Trial Charge Amount Fix - Midtrans Validation ✅
+- **✅ FIXED MIDTRANS $0 CHARGE VALIDATION ERROR**: Resolved API error preventing trial payments from processing
+  - **Root Cause**: Midtrans API requires minimum charge of $0.01, but trial amount was set to $0.00
+  - **Error Message**: "transaction_details.gross_amount must be between 0.01 - 999999999.00"
+  - **Solution Applied**: Updated trial amount from $0 to $1 USD to meet Midtrans minimum charge requirement
+  - **Payment Gateway Compliance**: Ensures all trial payments process successfully through Midtrans API
+- **✅ BASE HANDLER AMOUNT CALCULATION UPDATE**: Modified trial pricing logic in shared payment handler
+  - **Updated Logic**: Changed `finalAmount = this.paymentData.is_trial ? 0 : amount` to `finalAmount = this.paymentData.is_trial ? 1 : amount`
+  - **Original Amount Preservation**: Maintained original pricing structure for reference and future billing cycles
+  - **Centralized Fix**: Applied change to base handler ensuring consistency across all payment methods
+- **Technical Details**:
+  - ✅ Updated trial charge from $0.00 to $1.00 USD in base payment handler
+  - ✅ Maintained original amount tracking for subscription billing after trial period
+  - ✅ Added descriptive comment explaining Midtrans minimum requirement
+- **Files Modified**:
+  - `app/api/billing/channels/shared/base-handler.ts` - Updated calculateAmount method trial logic
+- **Result**: Trial payments now process successfully with $1 initial charge, meeting Midtrans API validation requirements
+
 ### August 27, 2025 20:30: Free Trial Payment Method Filtering Fix ✅
 - **✅ FIXED TRIAL CHECKOUT NO PAYMENT METHODS**: Resolved issue where no payment methods were showing for free trial checkout
   - **Root Cause**: Payment method filtering logic was checking for non-existent `supports_recurring` field instead of actual database structure

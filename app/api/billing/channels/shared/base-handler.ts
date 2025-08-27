@@ -104,8 +104,8 @@ export abstract class BasePaymentHandler {
       throw new Error('Unable to calculate package amount - no pricing found')
     }
 
-    // For trial payments, set final amount to 0 but keep original amount for reference
-    const finalAmount = this.paymentData.is_trial ? 0 : amount
+    // For trial payments, set final amount to 1 USD to meet Midtrans minimum requirement but keep original amount for reference
+    const finalAmount = this.paymentData.is_trial ? 1 : amount
 
     return {
       originalAmount: amount,
