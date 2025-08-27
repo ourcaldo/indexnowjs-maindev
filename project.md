@@ -1041,6 +1041,24 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 27, 2025 20:30: Free Trial Payment Method Filtering Fix ✅
+- **✅ FIXED TRIAL CHECKOUT NO PAYMENT METHODS**: Resolved issue where no payment methods were showing for free trial checkout
+  - **Root Cause**: Payment method filtering logic was checking for non-existent `supports_recurring` field instead of actual database structure
+  - **Database Structure**: Real `indb_payment_gateways` table uses `configuration.payment_methods` array containing `'credit_card_recurring'`
+  - **Solution Applied**: Updated filtering logic to check `gw.configuration?.payment_methods?.includes('credit_card_recurring')`
+  - **Method Verification**: Now correctly identifies Midtrans gateway with slug='midtrans' and credit card recurring support
+- **✅ TRIAL FLOW RESTORATION**: Free trial checkout now properly shows Midtrans card payment option
+  - **Payment Method Display**: Trial users now see credit card payment form when accessing checkout with `trial=true` parameter
+  - **User Experience**: Fixed complete payment flow from trial selection to card input for 3-day free trials
+  - **Database Compliance**: Filtering logic now matches actual production database schema structure
+- **Technical Details**:
+  - ✅ Corrected filter from `gw.configuration?.supports_recurring === true` to `gw.configuration?.payment_methods?.includes('credit_card_recurring')`
+  - ✅ Maintained slug check for 'midtrans' gateway identification
+  - ✅ Removed debug logging to prevent browser console pollution
+- **Files Modified**:
+  - `app/dashboard/settings/plans-billing/checkout/page.tsx` - Fixed payment gateway filtering logic for trial flow
+- **Result**: Free trial checkout now correctly displays credit card payment method, allowing users to complete trial signup process
+
 ### January 30, 2025 02:00: Free Trial System Fixes & Replit Migration ✅
 - **✅ DATABASE POLICY INFINITE RECURSION RESOLVED**: Fixed critical policy conflicts preventing trial functionality
   - **Root Cause**: Multiple overlapping policies on `indb_auth_user_profiles` table caused infinite recursion errors

@@ -341,9 +341,12 @@ export default function CheckoutPage() {
 
         // Filter payment methods for trial flow - only allow Midtrans Card Recurring
         if (isTrialFlow) {
-          filteredGateways = activeGateways.filter((gw: PaymentGateway) => 
-            gw.slug === 'midtrans' && gw.configuration?.supports_recurring === true
-          )
+          filteredGateways = activeGateways.filter((gw: PaymentGateway) => {
+            // Check if this is the Midtrans gateway that supports credit card recurring
+            // Based on actual database structure: slug='midtrans' with 'credit_card_recurring' in payment_methods
+            const hasRecurringSupport = gw.configuration?.payment_methods?.includes('credit_card_recurring')
+            return gw.slug === 'midtrans' && hasRecurringSupport
+          })
         }
 
         if (filteredGateways && filteredGateways.length > 0) {
