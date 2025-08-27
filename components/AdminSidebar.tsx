@@ -172,9 +172,9 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
         </a>
         {/* Tooltip for collapsed state */}
         {isCollapsed && (
-          <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+          <div className="absolute left-full ml-3 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[60] shadow-lg">
             {item.label}
-            <div className="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-[#1A1A1A]"></div>
+            <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-[#1A1A1A]"></div>
           </div>
         )}
       </div>
@@ -231,12 +231,12 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 </div>
               )}
             </div>
-            {!isCollapsed && (
+            {isCollapsed && (
               <div className="flex justify-center">
                 <button 
                   onClick={onCollapse}
                   className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
-                  title="Collapse sidebar"
+                  title="Expand sidebar"
                 >
                   <Menu className="h-5 w-5" />
                 </button>
