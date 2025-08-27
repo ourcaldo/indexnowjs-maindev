@@ -115,17 +115,16 @@ interface CheckoutRequest {
 
 // Enhanced Flow:
 1. Frontend: If URL has ?trial=true, show only Card Recurring payment method
-2. Frontend: User completes card tokenization with Midtrans SDK
+2. Frontend: User completes card tokenization with Midtrans SDK → gets token_id
 3. Backend: Check is_trial parameter in existing checkout endpoint
 4. Backend: If trial=true:
-   - Create $0 tokenization transaction (instead of full charge)
-   - Extract token_id from tokenization response
+   - Create $0 charge transaction using token_id with save_card: true
+   - Extract saved_token_id from charge response (or getTransactionStatus if not in response)
    - Create Midtrans subscription with:
      * amount: Full plan price in IDR
      * start_time: trial_end_date + 1 day
      * interval: 1 month
-     * token: token_id (from step above)
-   - Extract saved_token_id from subscription.create response
+     * token: saved_token_id (from charge response above)
 5. Backend: Save to existing subscription table with trial_metadata and saved_token_id
 6. Backend: Update user profile with trial status
 ```
@@ -222,13 +221,12 @@ const availablePaymentMethods = paymentGateways.filter(gateway => {
 
 // Payment processing for trials (same endpoint, different logic)
 if (isTrialFlow) {
-  1. Tokenize card with Midtrans SDK
-  2. Create $0 authorization transaction  
-  3. Extract token_id from tokenization response
-  4. Create Midtrans subscription using token_id with start_time = trial_end + 1 day
-  5. Extract saved_token_id from subscription.create response
-  6. Save to existing subscription table with trial_metadata and saved_token_id
-  7. Activate trial immediately
+  1. Frontend: Tokenize card with Midtrans SDK → gets token_id
+  2. Backend: Create $0 charge transaction using token_id with save_card: true  
+  3. Backend: Extract saved_token_id from charge response (or getTransactionStatus)
+  4. Backend: Create Midtrans subscription using saved_token_id with start_time = trial_end + 1 day
+  5. Backend: Save to existing subscription table with trial_metadata and saved_token_id
+  6. Backend: Activate trial immediately
 }
 ```
 
