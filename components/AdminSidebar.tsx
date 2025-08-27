@@ -19,7 +19,12 @@ import {
   LogOut,
   Shield,
   Receipt,
-  Mail
+  Search,
+  BarChart3,
+  TrendingUp,
+  Moon,
+  Sun,
+  Zap
 } from 'lucide-react'
 import type { AdminUser } from '@/lib/auth'
 import { authService } from '@/lib/auth'
@@ -38,6 +43,8 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
   const router = useRouter()
   const [settingsExpanded, setSettingsExpanded] = useState(true)
   const [cmsExpanded, setCmsExpanded] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isDarkMode, setIsDarkMode] = useState(false)
   
   // Site settings hooks
   const siteName = useSiteName()
@@ -54,38 +61,40 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
     }
   }
 
-  const menuItems = [
+  // Navigation sections as shown in reference design
+  const navigationSections = [
     {
-      label: 'Dashboard',
-      href: '/backend/admin',
-      icon: LayoutDashboard,
-      active: pathname === '/backend/admin'
+      title: 'NAVIGATION',
+      items: [
+        {
+          label: 'Dashboard',
+          href: '/backend/admin',
+          icon: LayoutDashboard,
+          active: pathname === '/backend/admin'
+        },
+        {
+          label: 'Users',
+          href: '/backend/admin/users',
+          icon: Users,
+          active: pathname?.startsWith('/backend/admin/users') || false
+        },
+        {
+          label: 'Orders',
+          href: '/backend/admin/orders',
+          icon: Receipt,
+          active: pathname?.startsWith('/backend/admin/orders') || false
+        },
+        {
+          label: 'Activity',
+          href: '/backend/admin/activity',
+          icon: Activity,
+          active: pathname?.startsWith('/backend/admin/activity') || false
+        }
+      ]
     },
     {
-      label: 'User Management',
-      href: '/backend/admin/users',
-      icon: Users,
-      active: pathname?.startsWith('/backend/admin/users') || false
-    },
-    {
-      label: 'Orders',
-      href: '/backend/admin/orders',
-      icon: Receipt,
-      active: pathname?.startsWith('/backend/admin/orders') || false
-    },
-    {
-      label: 'Activity Logs',
-      href: '/backend/admin/activity',
-      icon: Activity,
-      active: pathname?.startsWith('/backend/admin/activity') || false
-    },
-    {
-      label: 'Settings',
-      icon: Settings,
-      expandable: true,
-      expanded: settingsExpanded,
-      onToggle: () => setSettingsExpanded(!settingsExpanded),
-      children: [
+      title: 'MANAGEMENT',
+      items: [
         {
           label: 'Site Settings',
           href: '/backend/admin/settings/site',
@@ -93,7 +102,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           active: pathname === '/backend/admin/settings/site'
         },
         {
-          label: 'Payment Gateway',
+          label: 'Payments',
           href: '/backend/admin/settings/payments',
           icon: CreditCard,
           active: pathname === '/backend/admin/settings/payments'
@@ -103,16 +112,18 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           href: '/backend/admin/settings/packages',
           icon: Package,
           active: pathname === '/backend/admin/settings/packages'
+        },
+        {
+          label: 'Analytics',
+          href: '/backend/admin/analytics',
+          icon: BarChart3,
+          active: pathname?.startsWith('/backend/admin/analytics') || false
         }
       ]
     },
     {
-      label: 'CMS',
-      icon: BookOpen,
-      expandable: true,
-      expanded: cmsExpanded,
-      onToggle: () => setCmsExpanded(!cmsExpanded),
-      children: [
+      title: 'CONTENT',
+      items: [
         {
           label: 'Posts',
           href: '/backend/admin/cms/posts',
@@ -129,61 +140,62 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
     }
   ]
 
-  const renderMenuItem = (item: any, isChild = false) => {
-    if (item.expandable) {
-      return (
-        <div key={item.label}>
-          <button
-            onClick={item.onToggle}
-            className={`w-full flex items-center justify-between p-3 text-sm font-medium rounded-lg transition-colors ${
-              isChild ? 'pl-6' : ''
-            } text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]`}
-          >
-            <div className="flex items-center">
-              <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-6 w-6 flex-shrink-0`} />
-              {!isCollapsed && <span>{item.label}</span>}
-            </div>
-            {!isCollapsed && (
-              item.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
-            )}
-          </button>
-          {!isCollapsed && item.expanded && item.children && (
-            <div className="ml-4 mt-1 space-y-1">
-              {item.children.map((child: any) => renderMenuItem(child, true))}
-            </div>
-          )}
-        </div>
-      )
-    }
+  // Filter navigation items based on search query
+  const filteredSections = navigationSections.map(section => ({
+    ...section,
+    items: section.items.filter(item => 
+      searchQuery === '' || item.label.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  })).filter(section => section.items.length > 0)
 
+  const renderMenuItem = (item: any) => {
     return (
       <a
         key={item.label}
         href={item.href}
-        className={`flex items-center p-3 text-sm font-medium rounded-lg transition-colors ${
-          isChild ? 'pl-6' : ''
-        } ${
+        className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
           item.active
-            ? 'bg-[#1C2331] text-white'
-            : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]'
+            ? 'bg-[#3D8BFF] text-white shadow-sm'
+            : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F8FAFC]'
         }`}
       >
-        <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-6 w-6 flex-shrink-0`} />
-        {!isCollapsed && <span>{item.label}</span>}
+        <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0 ${
+          item.active ? 'text-white' : 'text-[#6C757D] group-hover:text-[#3D8BFF]'
+        }`} />
+        {!isCollapsed && <span className="truncate">{item.label}</span>}
       </a>
+    )
+  }
+
+  const renderSection = (section: any) => {
+    if (isCollapsed) {
+      return section.items.map((item: any) => renderMenuItem(item))
+    }
+
+    return (
+      <div key={section.title} className="mb-6">
+        <div className="px-3 mb-3">
+          <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">
+            {section.title}
+          </p>
+        </div>
+        <div className="space-y-1">
+          {section.items.map((item: any) => renderMenuItem(item))}
+        </div>
+      </div>
     )
   }
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-[#E0E6ED] transition-all duration-200 ${
+      <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-[#E5E7EB] transition-all duration-300 ease-in-out ${
         isCollapsed ? 'w-16' : 'w-64'
       } hidden md:block`}>
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className={`flex items-center p-4 border-b border-[#E0E6ED] ${
-            isCollapsed ? 'justify-center flex-col space-y-2' : 'justify-between'
+          {/* Header with Logo/Brand */}
+          <div className={`flex items-center px-4 py-5 ${
+            isCollapsed ? 'justify-center' : 'justify-between'
           }`}>
             <div className="flex items-center">
               {logoUrl && !isCollapsed ? (
@@ -200,34 +212,100 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 />
               ) : (
                 <div className="flex items-center">
-                  <Shield className="h-8 w-8 text-[#1C2331]" />
+                  <div className="h-8 w-8 bg-[#3D8BFF] rounded-lg flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
                   {!isCollapsed && (
                     <div className="ml-3">
-                      <h1 className="text-lg font-bold text-[#1A1A1A]">Admin Panel</h1>
-                      <p className="text-xs text-[#6C757D]">{siteName}</p>
+                      <h1 className="text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
+                      <p className="text-xs text-[#6C757D]">Admin Panel</p>
                     </div>
                   )}
                 </div>
               )}
             </div>
-            {/* Always show hamburger button */}
-            <button 
-              onClick={onCollapse}
-              className="p-1.5 rounded-md hover:bg-[#F7F9FC] text-[#6C757D] transition-colors"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+            {!isCollapsed && (
+              <button 
+                onClick={onCollapse}
+                className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            )}
           </div>
 
+          {/* Search Bar */}
+          {!isCollapsed && (
+            <div className="px-4 mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent transition-colors"
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <kbd className="px-2 py-0.5 text-xs bg-[#E5E7EB] text-[#6B7280] rounded border">⌘K</kbd>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            {menuItems.map(item => renderMenuItem(item))}
+          <nav className="flex-1 px-4 overflow-y-auto">
+            {filteredSections.map(section => renderSection(section))}
           </nav>
 
-          {/* User Info & Logout */}
-          <div className="border-t border-[#E0E6ED] p-4">
+          {/* Upgrade Section */}
+          {!isCollapsed && (
+            <div className="px-4 py-4">
+              <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
+                <div className="flex items-center mb-2">
+                  <Zap className="h-5 w-5 mr-2" />
+                  <span className="text-sm font-semibold">Usage Limit</span>
+                </div>
+                <div className="mb-3">
+                  <div className="text-xs text-blue-100 mb-1">1,234/5,000 Monthly Limit</div>
+                  <div className="w-full bg-white/20 rounded-full h-2">
+                    <div 
+                      className="bg-white rounded-full h-2 transition-all duration-300" 
+                      style={{ width: '24.68%' }}
+                    ></div>
+                  </div>
+                </div>
+                <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  Upgrade plan →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Section */}
+          <div className="border-t border-[#E5E7EB] p-4">
+            {/* Theme Toggle & Settings */}
+            <div className="flex items-center justify-between mb-4">
+              {!isCollapsed && (
+                <button
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  className="flex items-center space-x-2 text-sm text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+                >
+                  {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  <span>{isDarkMode ? 'Light mode' : 'Dark mode'}</span>
+                </button>
+              )}
+              <button 
+                className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+                title="Settings"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* User Info & Logout */}
             {!isCollapsed && user && (
-              <div className="mb-4">
+              <div className="mb-3">
                 <p className="text-sm font-medium text-[#1A1A1A] truncate">{user.name}</p>
                 <p className="text-xs text-[#6C757D] truncate">{user.email}</p>
                 <p className="text-xs text-[#3D8BFF] font-medium">{user.role}</p>
@@ -235,22 +313,22 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             )}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center p-2 text-sm font-medium text-[#E63946] rounded-lg hover:bg-[#F7F9FC] transition-colors"
+              className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-[#DC2626] rounded-lg hover:bg-[#FEF2F2] transition-colors"
             >
-              <LogOut className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-6 w-6 flex-shrink-0`} />
-              {!isCollapsed && <span>Logout</span>}
+              <LogOut className={`${isCollapsed ? 'mr-0' : 'mr-2'} h-4 w-4 flex-shrink-0`} />
+              {!isCollapsed && <span>Sign out</span>}
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile Sidebar */}
-      <div className={`fixed left-0 top-0 z-50 h-full w-64 bg-white border-r border-[#E0E6ED] transform transition-transform md:hidden ${
+      <div className={`fixed left-0 top-0 z-50 h-full w-64 bg-white border-r border-[#E5E7EB] transform transition-transform duration-300 ease-in-out md:hidden ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#E0E6ED]">
+          <div className="flex items-center justify-between px-4 py-5">
             <div className="flex items-center">
               {logoUrl ? (
                 <img 
@@ -260,31 +338,87 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 />
               ) : (
                 <div className="flex items-center">
-                  <Shield className="h-8 w-8 text-[#1C2331]" />
+                  <div className="h-8 w-8 bg-[#3D8BFF] rounded-lg flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
                   <div className="ml-3">
-                    <h1 className="text-lg font-bold text-[#1A1A1A]">Admin Panel</h1>
-                    <p className="text-xs text-[#6C757D]">{siteName}</p>
+                    <h1 className="text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
+                    <p className="text-xs text-[#6C757D]">Admin Panel</p>
                   </div>
                 </div>
               )}
             </div>
             <button 
               onClick={onToggle}
-              className="p-1.5 rounded-md hover:bg-[#F7F9FC] text-[#6C757D]"
+              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
+          {/* Search Bar */}
+          <div className="px-4 mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent transition-colors"
+              />
+            </div>
+          </div>
+
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            {menuItems.map(item => renderMenuItem(item))}
+          <nav className="flex-1 px-4 overflow-y-auto">
+            {filteredSections.map(section => renderSection(section))}
           </nav>
 
-          {/* User Info & Logout */}
-          <div className="border-t border-[#E0E6ED] p-4">
+          {/* Upgrade Section */}
+          <div className="px-4 py-4">
+            <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
+              <div className="flex items-center mb-2">
+                <Zap className="h-5 w-5 mr-2" />
+                <span className="text-sm font-semibold">Usage Limit</span>
+              </div>
+              <div className="mb-3">
+                <div className="text-xs text-blue-100 mb-1">1,234/5,000 Monthly Limit</div>
+                <div className="w-full bg-white/20 rounded-full h-2">
+                  <div 
+                    className="bg-white rounded-full h-2 transition-all duration-300" 
+                    style={{ width: '24.68%' }}
+                  ></div>
+                </div>
+              </div>
+              <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                Upgrade plan →
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="border-t border-[#E5E7EB] p-4">
+            {/* Theme Toggle & Settings */}
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="flex items-center space-x-2 text-sm text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+              >
+                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                <span>{isDarkMode ? 'Light mode' : 'Dark mode'}</span>
+              </button>
+              <button 
+                className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+                title="Settings"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* User Info & Logout */}
             {user && (
-              <div className="mb-4">
+              <div className="mb-3">
                 <p className="text-sm font-medium text-[#1A1A1A] truncate">{user.name}</p>
                 <p className="text-xs text-[#6C757D] truncate">{user.email}</p>
                 <p className="text-xs text-[#3D8BFF] font-medium">{user.role}</p>
@@ -292,22 +426,22 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             )}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center p-2 text-sm font-medium text-[#E63946] rounded-lg hover:bg-[#F7F9FC] transition-colors"
+              className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-[#DC2626] rounded-lg hover:bg-[#FEF2F2] transition-colors"
             >
-              <LogOut className="mr-3 h-4 w-4" />
-              <span>Logout</span>
+              <LogOut className="mr-2 h-4 w-4 flex-shrink-0" />
+              <span>Sign out</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile Header - Show when sidebar is closed */}
-      <div className="md:hidden bg-white border-b border-[#E0E6ED] p-4">
+      <div className="md:hidden bg-white border-b border-[#E5E7EB] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <button
               onClick={onToggle}
-              className="p-2 rounded-md hover:bg-[#F7F9FC] text-[#6C757D] mr-3"
+              className="p-2 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] mr-3 transition-colors"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -318,9 +452,11 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 className="h-6 w-6"
               />
             ) : (
-              <Shield className="h-6 w-6 text-[#1C2331]" />
+              <div className="h-6 w-6 bg-[#3D8BFF] rounded flex items-center justify-center">
+                <Shield className="h-4 w-4 text-white" />
+              </div>
             )}
-            <h1 className="ml-2 text-lg font-bold text-[#1A1A1A]">Admin Panel</h1>
+            <h1 className="ml-2 text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
           </div>
           {user && (
             <p className="text-sm text-[#6C757D] truncate max-w-32">{user.email}</p>
