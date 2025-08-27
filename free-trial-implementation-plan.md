@@ -118,10 +118,12 @@ interface CheckoutRequest {
 2. Frontend: User completes card tokenization with Midtrans SDK → gets token_id
 3. Backend: Check is_trial parameter in existing checkout endpoint
 4. Backend: If trial=true:
-   - Create $0 charge transaction using token_id with save_card: true
+   - Get user's original package pricing based on their currency (USD/IDR)
+   - If user currency is USD: Convert to IDR using convertUsdToIdr() for Midtrans
+   - Create FULL PRICE charge transaction using token_id with save_card: true
    - Charge response includes token_id (NOT saved_token_id)
    - Create Midtrans subscription with:
-     * amount: Full plan price in IDR
+     * amount: 0 (no additional charges during trial period)
      * start_time: trial_end_date + 1 day
      * interval: 1 month
      * token: token_id (from charge response)
@@ -130,14 +132,76 @@ interface CheckoutRequest {
 6. Backend: Update user profile with trial status
 ```
 
+#### 2.1 Currency Conversion & Multi-Currency Trial Logic
+
+**Package Pricing Structure (Current Database):**
+```javascript
+// Premium Plan pricing_tiers JSON structure:
+{
+  "monthly": {
+    "IDR": { "promo_price": 25000, "regular_price": 50000, "period_label": "Monthly" },
+    "USD": { "promo_price": 15, "regular_price": 19, "period_label": "Monthly" }
+  },
+  "annual": {
+    "IDR": { "promo_price": 120000, "regular_price": 600000, "period_label": "12 Months" },
+    "USD": { "promo_price": 159, "regular_price": 199, "period_label": "12 Months" }
+  }
+}
+
+// Pro Plan pricing_tiers JSON structure:
+{
+  "monthly": {
+    "IDR": { "promo_price": 80000, "regular_price": 140000, "period_label": "Monthly" },
+    "USD": { "promo_price": 45, "regular_price": 59, "period_label": "Monthly" }
+  },
+  "annual": {
+    "IDR": { "promo_price": 790000, "regular_price": 1680000, "period_label": "12 Months" },
+    "USD": { "promo_price": 499, "regular_price": 599, "period_label": "12 Months" }
+  }
+}
+```
+
+**Currency Detection Logic:**
+```javascript
+// lib/utils/currency-utils.ts
+function getUserCurrency(country: string): 'IDR' | 'USD' {
+  const indonesiaVariants = ['indonesia', 'id', 'idn', 'republic of indonesia']
+  return indonesiaVariants.includes(country.toLowerCase()) ? 'IDR' : 'USD'
+}
+```
+
+**Currency Conversion for Midtrans (USD → IDR Only):**
+```javascript
+// lib/utils/currency-converter.ts
+async function convertUsdToIdr(usdAmount: number): Promise<number> {
+  try {
+    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD')
+    const data = await response.json()
+    const idrRate = data.rates?.IDR || 15800 // Fallback rate
+    return Math.round(usdAmount * idrRate)
+  } catch (error) {
+    return Math.round(usdAmount * 15800) // Fallback rate if API fails
+  }
+}
+```
+
+**Trial Pricing Examples:**
+
+| User Country | Package | Billing Period | User's Currency | Display Price | Midtrans Charge (IDR) |
+|-------------|---------|----------------|-----------------|---------------|---------------------|
+| Indonesia | Premium | Monthly | IDR | IDR 25,000 | IDR 25,000 |
+| United States | Premium | Monthly | USD | $15 | IDR ~237,000 (15 × 15,800) |
+| Indonesia | Pro | Annual | IDR | IDR 790,000 | IDR 790,000 |
+| United States | Pro | Annual | USD | $499 | IDR ~7,884,200 (499 × 15,800) |
+
 #### 2.2 Midtrans Subscription Payload for Free Trial
 ```javascript
 {
   "name": "PRO_TRIAL_AUTO_BILLING",
-  "amount": "736649", // 45 USD converted to IDR
+  "amount": "0", // ZERO amount for auto-billing subscription
   "currency": "IDR",
   "payment_type": "credit_card",
-  "token": "48111111sHfSakAvHvFQFEjTivUV1114", // token_id from charge response
+  "token": "48111111sHfSakAvHvFQFEjTivUV1114", // token_id from FULL PRICE charge response
   "schedule": {
     "interval": 1,
     "interval_unit": "month",
@@ -223,12 +287,14 @@ const availablePaymentMethods = paymentGateways.filter(gateway => {
 // Payment processing for trials (same endpoint, different logic)
 if (isTrialFlow) {
   1. Frontend: Tokenize card with Midtrans SDK → gets token_id
-  2. Backend: Create $0 charge transaction using token_id with save_card: true  
-  3. Backend: Charge response includes token_id (NOT saved_token_id)
-  4. Backend: Create Midtrans subscription using token_id with start_time = trial_end + 1 day
-  5. Backend: Extract saved_token_id from subscription.create response
-  6. Backend: Save to existing subscription table with trial_metadata and saved_token_id
-  7. Backend: Activate trial immediately
+  2. Backend: Get package pricing from user's original currency (USD/IDR from pricing_tiers)
+  3. Backend: If user currency is USD: Convert to IDR using convertUsdToIdr() for Midtrans
+  4. Backend: Create FULL PRICE charge transaction using token_id with save_card: true  
+  5. Backend: Charge response includes token_id (NOT saved_token_id)
+  6. Backend: Create Midtrans subscription with ZERO amount using token_id with start_time = trial_end + 1 day
+  7. Backend: Extract saved_token_id from subscription.create response
+  8. Backend: Save to existing subscription table with trial_metadata and saved_token_id
+  9. Backend: Activate trial immediately (user gets full access)
 }
 ```
 
