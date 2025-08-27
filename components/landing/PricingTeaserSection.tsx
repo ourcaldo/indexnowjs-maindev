@@ -295,7 +295,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 <AdvancedNeonCard 
                   key={pkg.id} 
                   intensity={isPopular ? "high" : "medium"} 
-                  className="p-8 flex flex-col h-full"
+                  className="p-8 flex flex-col h-full min-h-[500px]"
                   mousePosition={mousePosition}
                   isTracking={isTracking}
                 >
@@ -353,18 +353,8 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                   </p>
                 </div>
                 
-                {/* CTA Button */}
-                <div className="mb-8">
-                  <button
-                    onClick={onGetStarted}
-                    className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    Get started
-                  </button>
-                </div>
-                
                 {/* Features */}
-                <div>
+                <div className="flex-grow">
                   <div className="mb-4">
                     <h4 className="text-sm font-semibold text-white uppercase tracking-wide">
                       FEATURES
@@ -373,7 +363,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                       Everything in {pkg.name} plan plus...
                     </p>
                   </div>
-                  <ul className="space-y-3">
+                  <ul className="space-y-3 mb-8">
                     {features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
                         <div className="flex-shrink-0 w-5 h-5 mt-0.5">
@@ -387,6 +377,16 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                       </li>
                     ))}
                   </ul>
+                </div>
+                
+                {/* CTA Button */}
+                <div className="mt-auto">
+                  <button
+                    onClick={onGetStarted}
+                    className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    Get started
+                  </button>
                 </div>
                 </AdvancedNeonCard>
               )
