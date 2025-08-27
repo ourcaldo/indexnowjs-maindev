@@ -88,37 +88,6 @@ export default function ImprovedHowItWorksSection() {
 
         </div>
 
-        {/* Simple Process */}
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-white mb-8">Simple 3-Step Process</h3>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">1</span>
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-2">Add Keywords & Domains</h4>
-              <p className="text-gray-300 text-sm">Import keywords via CSV or add manually, set up domains and configure tracking preferences</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">2</span>
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-2">Configure Tracking</h4>
-              <p className="text-gray-300 text-sm">Set device types, target countries, and enable automated daily rank monitoring</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-400 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">3</span>
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-2">Monitor Rankings</h4>
-              <p className="text-gray-300 text-sm">View rank history, position changes, and analytics with comprehensive reporting</p>
-            </div>
-          </div>
-        </div>
-
       </div>
     </section>
   )
