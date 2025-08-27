@@ -12,6 +12,36 @@ export async function POST(request: NextRequest) {
       transaction_id,
       order_id
     })
+    
+    // CRITICAL FIX: Check if this transaction has already been processed to prevent double requests
+    const supabaseCheck = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    
+    const { data: existingProcessed } = await supabaseCheck
+      .from('indb_payment_transactions')
+      .select('id, transaction_status, metadata')
+      .eq('gateway_transaction_id', transaction_id)
+      .eq('transaction_status', 'completed')
+      .maybeSingle()
+    
+    if (existingProcessed) {
+      console.log('⚠️ Transaction already processed, skipping to prevent duplicate:', {
+        transaction_id,
+        existing_id: existingProcessed.id,
+        status: existingProcessed.transaction_status
+      })
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Transaction already processed successfully',
+        data: {
+          transaction_id: existingProcessed.id,
+          already_processed: true
+        }
+      })
+    }
 
     if (!transaction_id || !order_id) {
       return NextResponse.json(
@@ -19,6 +49,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+    
+    console.log('✅ New transaction processing - no duplicates found')
 
     // Initialize Supabase client (using same pattern as working endpoint)
     const supabase = createClient(
@@ -197,22 +229,45 @@ export async function POST(request: NextRequest) {
       
       // CRITICAL FIX: Check if transaction is trial and get real package price for subscription
       const isTrialTransaction = existingTransaction.metadata?.is_trial || false;
-      const realPackageAmount = isTrialTransaction ? 
-        (existingTransaction.metadata?.package_details?.price || transactionAmountUSD) : 
-        transactionAmountUSD;
+      
+      // For trials, we need to use the REAL package price, not the $1 charge amount
+      let realPackageAmount = transactionAmountUSD;
+      let realPackageForMatching = matchedPackage; // Default to matched package
+      
+      if (isTrialTransaction) {
+        // Get the real package details from metadata
+        const packageDetails = existingTransaction.metadata?.package_details;
+        if (packageDetails) {
+          realPackageAmount = packageDetails.price;
+          console.log('🔍 [TRIAL] Using real package price from metadata:', packageDetails);
+          
+          // Re-match package using the real package ID if available
+          if (packageDetails.id) {
+            const realPackageMatch = allPackages.find(pkg => pkg.id === packageDetails.id);
+            if (realPackageMatch) {
+              realPackageForMatching = realPackageMatch;
+              console.log('🔍 [TRIAL] Re-matched package using real package ID:', realPackageMatch.name);
+            }
+          }
+        } else {
+          console.warn('⚠️ [TRIAL] No package details in metadata, using transaction amount');
+        }
+      }
       
       console.log('🔍 [3DS SUBSCRIPTION AMOUNT DEBUG]:', {
         is_trial: isTrialTransaction,
         transaction_amount_usd: transactionAmountUSD,
         real_package_amount: realPackageAmount,
+        matched_package_name: realPackageForMatching.name,
+        matched_package_id: realPackageForMatching.id,
         charge_was: isTrialTransaction ? '$1 for tokenization' : '$' + transactionAmountUSD + ' real charge'
       });
       
       // Create subscription using original token_id - this returns saved_token_id
       const subscription = await midtransService.createSubscription(realPackageAmount, {
         name: isTrialTransaction ? 
-          `${matchedPackage.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
-          `${matchedPackage.name}_${billing_period}`.toUpperCase(),
+          `${realPackageForMatching.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
+          `${realPackageForMatching.name}_${billing_period}`.toUpperCase(),
         token: originalTokenId,
         schedule: {
           interval: 1,
@@ -230,7 +285,7 @@ export async function POST(request: NextRequest) {
         },
         metadata: {
           user_id: user.id,
-          package_id: matchedPackage.id,
+          package_id: realPackageForMatching.id,
           billing_period: billing_period,
           order_id: order_id,
           original_transaction_id: transaction_id,
@@ -265,6 +320,7 @@ export async function POST(request: NextRequest) {
         const { data: updatedTransaction, error: updateError } = await supabase
           .from('indb_payment_transactions')
           .update({
+            package_id: realPackageForMatching.id, // Use the correct package ID
             transaction_status: 'completed',
             gateway_response: transactionDetails,
             processed_at: new Date().toISOString(),
@@ -275,7 +331,9 @@ export async function POST(request: NextRequest) {
               subscription_status: subscription.status,
               next_execution_at: subscription.schedule?.next_execution_at,
               processing_method: '3ds_callback',
-              order_id: order_id
+              order_id: order_id,
+              final_package_id: realPackageForMatching.id,
+              final_package_name: realPackageForMatching.name
             },
           })
           .eq('id', existingTransaction.id)
@@ -291,7 +349,7 @@ export async function POST(request: NextRequest) {
           .from('indb_payment_transactions')
           .insert({
             user_id: user.id,
-            package_id: matchedPackage.id,
+            package_id: realPackageForMatching.id,
           gateway_id: midtransGateway.id,
           transaction_type: 'subscription',
           transaction_status: 'completed',
@@ -374,7 +432,7 @@ export async function POST(request: NextRequest) {
         const trialEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
         
         userUpdateData = {
-          package_id: matchedPackage.id,
+          package_id: realPackageForMatching.id,
           subscribed_at: now.toISOString(),
           expires_at: trialEndDate.toISOString(), // Trial expires in 3 days
           trial_started_at: now.toISOString(),
@@ -388,22 +446,44 @@ export async function POST(request: NextRequest) {
         console.log('✅ [Trial] User profile will be updated with trial information');
       } else {
         userUpdateData = {
-          package_id: matchedPackage.id,
+          package_id: realPackageForMatching.id,
           subscribed_at: new Date().toISOString(),
           expires_at: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000).toISOString(),
         };
       }
       
-      const { error: userUpdateError } = await supabase
+      console.log('🔍 [DEBUG] About to update user profile with data:', JSON.stringify(userUpdateData, null, 2));
+      console.log('🔍 [DEBUG] User ID:', user.id);
+      
+      const { data: updatedProfile, error: userUpdateError } = await supabase
         .from('indb_auth_user_profiles')
         .update(userUpdateData)
         .eq('user_id', user.id)
+        .select('user_id, package_id, trial_status, expires_at')
+        .single()
 
       if (userUpdateError) {
-        console.error('⚠️ Failed to update user profile:', userUpdateError)
-        // Don't fail the transaction, just log the warning
+        console.error('❌ CRITICAL: Failed to update user profile:', userUpdateError)
+        throw new Error(`User profile update failed: ${userUpdateError.message}`)
       } else {
-        console.log('✅ User profile updated successfully')
+        console.log('✅ User profile updated successfully:', {
+          user_id: updatedProfile.user_id,
+          new_package_id: updatedProfile.package_id,
+          trial_status: updatedProfile.trial_status,
+          expires_at: updatedProfile.expires_at
+        })
+        
+        // Verify the update worked by checking the database
+        console.log('🔍 [VERIFICATION] Double-checking user profile update...');
+        const { data: verificationProfile } = await supabase
+          .from('indb_auth_user_profiles')
+          .select('user_id, package_id, trial_status, expires_at')
+          .eq('user_id', user.id)
+          .single()
+        
+        if (verificationProfile) {
+          console.log('✅ [VERIFICATION] Current user profile in database:', verificationProfile);
+        }
       }
       
       console.log('🎉 ============= SUCCESS: 3DS PAYMENT & SUBSCRIPTION COMPLETED =============')      
