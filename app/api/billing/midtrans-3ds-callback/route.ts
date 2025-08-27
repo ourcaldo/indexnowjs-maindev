@@ -195,15 +195,32 @@ export async function POST(request: NextRequest) {
       
       console.log('💾 ============= STEP 2: CREATING SUBSCRIPTION =============') 
       
+      // CRITICAL FIX: Check if transaction is trial and get real package price for subscription
+      const isTrialTransaction = existingTransaction.metadata?.is_trial || false;
+      const realPackageAmount = isTrialTransaction ? 
+        (existingTransaction.metadata?.package_details?.price || transactionAmountUSD) : 
+        transactionAmountUSD;
+      
+      console.log('🔍 [3DS SUBSCRIPTION AMOUNT DEBUG]:', {
+        is_trial: isTrialTransaction,
+        transaction_amount_usd: transactionAmountUSD,
+        real_package_amount: realPackageAmount,
+        charge_was: isTrialTransaction ? '$1 for tokenization' : '$' + transactionAmountUSD + ' real charge'
+      });
+      
       // Create subscription using original token_id - this returns saved_token_id
-      const subscription = await midtransService.createSubscription(transactionAmountUSD, {
-        name: `${matchedPackage.name}_${billing_period}`.toUpperCase(),
+      const subscription = await midtransService.createSubscription(realPackageAmount, {
+        name: isTrialTransaction ? 
+          `${matchedPackage.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
+          `${matchedPackage.name}_${billing_period}`.toUpperCase(),
         token: originalTokenId,
         schedule: {
           interval: 1,
           interval_unit: billing_period === 'monthly' ? 'month' : 'month',
           max_interval: billing_period === 'monthly' ? 12 : 1,
-          start_time: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
+          start_time: isTrialTransaction ? 
+            new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) : // 3 days for trial
+            new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
         },
         customer_details: {
           first_name: originalCustomerInfo?.first_name || midtransFirstName || transactionDetails.customer_details?.first_name || 'Customer',
@@ -217,6 +234,8 @@ export async function POST(request: NextRequest) {
           billing_period: billing_period,
           order_id: order_id,
           original_transaction_id: transaction_id,
+          trial_type: isTrialTransaction ? 'free_trial_auto_billing' : null,
+          original_trial_start: isTrialTransaction ? new Date().toISOString() : null
         },
       })
       
@@ -346,15 +365,38 @@ export async function POST(request: NextRequest) {
         console.log('✅ Midtrans data record created:', midtransData.id)
       }
 
-      // Update user package
+      // Update user package with trial-specific logic
       console.log('👤 Updating user profile with package subscription...')
-      const { error: userUpdateError } = await supabase
-        .from('indb_auth_user_profiles')
-        .update({
+      
+      let userUpdateData;
+      if (isTrialTransaction) {
+        const now = new Date();
+        const trialEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
+        
+        userUpdateData = {
+          package_id: matchedPackage.id,
+          subscribed_at: now.toISOString(),
+          expires_at: trialEndDate.toISOString(), // Trial expires in 3 days
+          trial_started_at: now.toISOString(),
+          trial_ends_at: trialEndDate.toISOString(),
+          trial_status: 'active',
+          auto_billing_enabled: true,
+          has_used_trial: true, // Mark trial as used
+          trial_used_at: now.toISOString()
+        };
+        
+        console.log('✅ [Trial] User profile will be updated with trial information');
+      } else {
+        userUpdateData = {
           package_id: matchedPackage.id,
           subscribed_at: new Date().toISOString(),
           expires_at: new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000).toISOString(),
-        })
+        };
+      }
+      
+      const { error: userUpdateError } = await supabase
+        .from('indb_auth_user_profiles')
+        .update(userUpdateData)
         .eq('user_id', user.id)
 
       if (userUpdateError) {

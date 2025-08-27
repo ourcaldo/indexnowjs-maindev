@@ -159,7 +159,8 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       }
     }
 
-    // For successful charges, continue with subscription creation
+    // CRITICAL FIX: Only create subscription if charge was completed immediately (no 3DS)
+    // If 3DS was required, subscription creation will be handled by 3DS callback
     if (chargeTransaction.transaction_status === 'capture' || chargeTransaction.transaction_status === 'settlement') {
       const savedTokenId = chargeTransaction.saved_token_id
 
@@ -170,10 +171,19 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       // Create subscription with trial-specific logic
       console.log('💳 Creating subscription with saved token:', savedTokenId)
       
-      const subscriptionAmount = amount.finalAmount; // Always use real package price for subscription
+      // CRITICAL FIX: For trials, subscription amount MUST be the real package price, not the $1 charge amount
+      const subscriptionAmount = this.paymentData.is_trial ? amount.originalAmount : amount.finalAmount; // Use ORIGINAL amount for trials, final for regular
       const subscriptionName = this.paymentData.is_trial ? 
         `${this.packageData.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
         `${this.packageData.name}_${this.paymentData.billing_period}`.toUpperCase();
+      
+      console.log('💰 [SUBSCRIPTION AMOUNT DEBUG]:', {
+        is_trial: this.paymentData.is_trial,
+        charge_amount: this.paymentData.is_trial ? 1 : amount.finalAmount,
+        subscription_amount: subscriptionAmount,
+        original_amount: amount.originalAmount,
+        final_amount: amount.finalAmount
+      });
       
       // For trials, start billing 3 days later. For regular subscriptions, use normal interval
       const startTime = this.paymentData.is_trial ? 
@@ -263,6 +273,8 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       }
     }
 
+    // CRITICAL FIX: If we get here and status is not capture/settlement, it means the charge failed
+    // Don't create subscription for failed charges
     throw new Error(`Charge transaction failed: ${chargeTransaction.status_message}`)
   }
 

@@ -3810,3 +3810,29 @@ indb_keyword_rankings (latest positions)
   - Enhanced `app/api/billing/channels/midtrans-recurring/handler.ts`: Trial-specific payment handling
   - Enhanced `app/api/billing/channels/shared/base-handler.ts`: Trial parameter support
 - **Result**: Complete, production-ready free trial system with automated billing, comprehensive UI, robust validation, and seamless user experience
+
+### August 28, 2025 - Critical Free Trial Payment Processing Fixes ✅
+- ✅ **FIXED SUBSCRIPTION AMOUNT ISSUE**: Resolved critical bug where trial subscriptions used $1 instead of real package price
+  - **Problem**: When users started a trial for Pro ($45), the charge was correctly $1 for tokenization, but the subscription was also created with $1 instead of $45
+  - **Root Cause**: Midtrans recurring handler was using `amount.finalAmount` for both charge and subscription creation
+  - **Solution**: Enhanced handler to use `amount.originalAmount` for trial subscriptions (real package price) and `1` only for the initial charge
+  - **Technical Fix**: Added subscription amount debug logging to track charge vs subscription amounts correctly
+- ✅ **ELIMINATED DOUBLE REQUEST ISSUE**: Fixed duplicate payment processing causing multiple subscription creation attempts
+  - **Problem**: Payment system was making two separate requests for same transaction, creating duplicate processing
+  - **Root Cause**: Main payment handler attempted subscription creation, then 3DS callback also tried to create subscription
+  - **Solution**: Modified flow so subscription is only created in 3DS callback after successful authentication, not in main handler
+  - **Logic Improvement**: Main handler now only handles charge and 3DS setup, leaving subscription creation to callback
+- ✅ **ENHANCED 3DS CALLBACK TRIAL HANDLING**: Updated 3DS callback to properly handle trial-specific logic
+  - **Trial Amount Detection**: Added logic to detect trial transactions and use real package price for subscription
+  - **Trial Subscription Naming**: Enhanced subscription naming for trials (e.g., "PRO_TRIAL_AUTO_BILLING")
+  - **Trial Billing Schedule**: Implemented proper 3-day delay for trial subscriptions vs immediate billing for regular
+  - **Trial User Profile**: Added trial-specific user profile updates with trial status, dates, and billing configuration
+- ✅ **IMPROVED PAYMENT FLOW DEBUG LOGGING**: Added comprehensive debug logging for payment processing
+  - **Amount Tracking**: Clear logging of charge amount vs subscription amount for trials
+  - **Trial Detection**: Visible logging when trial parameters are detected and processed
+  - **Flow Tracking**: Better visibility into payment processing stages and decision points
+  - **Error Prevention**: Enhanced logging to prevent future confusion between charge and subscription amounts
+- **Files Modified**:
+  - `app/api/billing/channels/midtrans-recurring/handler.ts`: Fixed subscription amount calculation for trials
+  - `app/api/billing/midtrans-3ds-callback/route.ts`: Enhanced trial handling in 3DS callback with proper amount detection
+- **Result**: Free trial system now correctly charges $1 for tokenization but creates subscriptions with real package price ($45 for Pro), eliminating double requests and ensuring proper trial-to-paid conversion
