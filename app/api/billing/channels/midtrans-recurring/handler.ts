@@ -162,10 +162,18 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     // CRITICAL FIX: Only create subscription if charge was completed immediately (no 3DS)
     // If 3DS was required, subscription creation will be handled by 3DS callback
     if (chargeTransaction.transaction_status === 'capture' || chargeTransaction.transaction_status === 'settlement') {
-      const savedTokenId = chargeTransaction.saved_token_id
+      let savedTokenId = chargeTransaction.saved_token_id
+
+      // If saved_token_id is not in charge response, get it from transaction status
+      if (!savedTokenId) {
+        console.log('🔍 saved_token_id not in charge response, checking transaction status...')
+        const transactionStatus = await this.midtransService.getTransactionStatus(chargeTransaction.transaction_id)
+        savedTokenId = transactionStatus.saved_token_id
+        console.log('🔍 saved_token_id from transaction status:', savedTokenId)
+      }
 
       if (!savedTokenId) {
-        throw new Error('Card token was not saved from transaction')
+        throw new Error('Card token was not saved from transaction - save_card may have failed')
       }
 
       // Create subscription with trial-specific logic

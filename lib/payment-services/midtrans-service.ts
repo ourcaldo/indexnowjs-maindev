@@ -211,7 +211,7 @@ export class MidtransService {
       },
       credit_card: {
         token_id: orderData.token_id, // Use token from frontend Midtrans.min.js tokenization
-        save_card: true, // CRITICAL: Save card token for subscription
+        save_token_id: true, // CRITICAL: Save token ID for subscription (NOT save_card)
         authentication: true, // Enable 3DS
         callback_type: "js_event" // CRITICAL: Enable JavaScript-based 3DS authentication
       },
@@ -238,7 +238,7 @@ export class MidtransService {
       }
     };
 
-    console.log('💳 [MIDTRANS SERVICE] Making direct charge request to /v2/charge with save_card: true');
+    console.log('💳 [MIDTRANS SERVICE] Making direct charge request to /v2/charge with save_token_id: true');
     console.log('💳 [MIDTRANS SERVICE] Using token_id from frontend tokenization:', orderData.token_id);
     console.log('📤 [MIDTRANS SERVICE] COMPLETE CHARGE REQUEST PAYLOAD:', JSON.stringify(chargeRequest, null, 2));
     
