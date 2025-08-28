@@ -1068,6 +1068,53 @@ JWT_SECRET=[jwt-secret-key]
 
 - **Result**: Users without active packages now see "Start 3-Day Free Trial" buttons in dashboard pricing cards when eligible, providing consistent trial access across both dashboard and settings pages.
 
+### August 28, 2025 17:00: Critical Trial System & Webhook Fixes ✅
+
+- **✅ FIXED TRIAL EMAIL TEMPLATE ISSUE**: Resolved trial ending notifications using wrong template
+  - **Created Trial-Specific Template**: Added `lib/email/templates/trial-ending.html` with proper trial messaging and styling
+  - **Added Email Service Method**: Implemented `sendTrialEndingNotification()` in emailService with TrialEndingData interface
+  - **Proper Subject Line**: Changed from "Order Confirmation" to "⏰ Your [Package] Trial Ends Soon - Action Required"
+  - **Contextual Content**: Trial emails now show appropriate messaging about trial status, auto-billing, and next steps
+
+- **✅ IMPLEMENTED UNIFIED ORDER ID FORMAT**: Fixed inconsistent order ID generation across trial and regular orders
+  - **Standardized Format**: All orders now use `ORDER-${timestamp}-${randomString}` format instead of `TRIAL-ENDING-${userId}`
+  - **Trial Monitor Fix**: Updated `checkTrialsEndingSoon()` and `sendTrialWelcomeEmail()` to use unified format
+  - **Consistent Pattern**: Same ORDER-xxxxx-xxxxx pattern used for trials, renewals, and regular payments
+
+- **✅ FIXED WEBHOOK JSON PARSING ERROR**: Resolved "Unexpected end of JSON input" syntax error
+  - **Graceful Empty Body Handling**: Added text parsing before JSON.parse() to handle empty request bodies
+  - **Error Prevention**: Webhook now checks if body is empty before attempting JSON parsing
+  - **Proper Error Response**: Returns structured error response for invalid JSON instead of crashing
+
+- **✅ ENHANCED TRANSACTION METADATA**: Added comprehensive metadata for webhook processing
+  - **Complete User Context**: Added user_id, user_email, package_id, billing_period to all transaction metadata
+  - **Payment Type Tracking**: Distinguished between trial_payment and regular_payment types
+  - **Webhook Order ID**: Included midtrans_order_id in metadata for proper webhook matching
+  - **Creation Timestamp**: Added created_at timestamp for audit trail
+
+- **✅ IMPROVED WEBHOOK RENEWAL LOGIC**: Enhanced package expiration handling using metadata instead of order IDs
+  - **Metadata-Based Processing**: Webhook now uses transaction metadata (user_id, package_id, billing_period) for renewals
+  - **Multiple User Identification**: Enhanced user lookup by metadata, subscription_id, and email fallback
+  - **Unified Order Generation**: Subscription renewals now generate proper ORDER-xxxxx-xxxxx format IDs
+  - **Comprehensive Error Handling**: Detailed logging and error responses for renewal processing failures
+
+- **Technical Details**:
+  - ✅ Created `lib/email/templates/trial-ending.html` - Professional trial ending template with conditional content
+  - ✅ Added `TrialEndingData` interface and `sendTrialEndingNotification()` method to emailService
+  - ✅ Updated trial monitor to use `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}` format
+  - ✅ Enhanced webhook JSON parsing with empty body check and proper error handling
+  - ✅ Added comprehensive metadata fields in `base-handler.ts` createPendingTransaction method
+  - ✅ Improved subscription renewal logic in webhook with metadata-based user identification
+
+- **Files Modified**:
+  - `lib/email/templates/trial-ending.html` - New trial-specific email template
+  - `lib/email/emailService.ts` - Added TrialEndingData interface and sendTrialEndingNotification method
+  - `lib/job-management/trial-monitor.ts` - Fixed ORDER ID format and email method calls
+  - `app/api/midtrans/webhook/route.ts` - Fixed JSON parsing error and enhanced renewal logic
+  - `app/api/billing/channels/shared/base-handler.ts` - Enhanced transaction metadata with comprehensive user context
+
+- **Result**: Trial system now uses proper email templates, unified order IDs, robust webhook processing, and comprehensive metadata for reliable payment processing and subscription renewals.
+
 ### August 28, 2025 16:36: No-Package Dashboard Enhancements ✅
 
 - **✅ HIDDEN USER WELCOME CARD FOR NO-PACKAGE USERS**: Improved user interface when users don't have active packages

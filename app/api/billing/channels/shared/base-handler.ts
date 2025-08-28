@@ -73,6 +73,13 @@ export abstract class BasePaymentHandler {
           original_amount: amount.originalAmount,
           original_currency: amount.originalCurrency,
           customer_info: this.paymentData.customer_info,
+          user_id: this.paymentData.user.id,
+          user_email: this.paymentData.user.email,
+          package_id: this.paymentData.package_id,
+          billing_period: this.paymentData.billing_period,
+          created_at: new Date().toISOString(),
+          midtrans_order_id: orderId,
+          payment_type: this.paymentData.is_trial ? 'trial_payment' : 'regular_payment',
           ...additionalData
         }
       })

@@ -56,14 +56,21 @@ export class TrialMonitorService {
           const packageData = Array.isArray(trial.indb_payment_packages) ? 
             trial.indb_payment_packages[0] : trial.indb_payment_packages
           
-          await emailService.sendBillingConfirmation(trial.email!, {
+          // Generate unified ORDER ID format
+          const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+          
+          await emailService.sendTrialEndingNotification(trial.email!, {
             customerName: trial.full_name || trial.email!.split('@')[0],
-            orderId: `TRIAL-ENDING-${trial.user_id}`,
             packageName: packageData?.name || 'Premium',
-            billingPeriod: 'trial',
-            amount: `${hoursRemaining} hours remaining`,
-            paymentMethod: 'Trial - Auto-billing enabled',
-            orderDate: new Date().toLocaleDateString()
+            timeRemaining: `${hoursRemaining} hours`,
+            autoBillingStatus: trial.auto_billing_enabled ? 'Enabled' : 'Disabled',
+            autoBillingEnabled: trial.auto_billing_enabled,
+            dashboardUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://indexnow.studio',
+            notificationDate: new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })
           })
 
           console.log(`✅ [Trial Monitor] Sent ending notification to ${trial.email}`)
@@ -150,9 +157,12 @@ export class TrialMonitorService {
    */
   static async sendTrialWelcomeEmail(userEmail: string, customerName: string, planName: string, trialEndDate: string): Promise<void> {
     try {
+      // Generate unified ORDER ID format
+      const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+      
       await emailService.sendBillingConfirmation(userEmail, {
         customerName,
-        orderId: `TRIAL-WELCOME-${Date.now()}`,
+        orderId: orderId,
         packageName: planName,
         billingPeriod: 'trial',
         amount: 'Free for 3 days',

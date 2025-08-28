@@ -17,9 +17,20 @@ export async function POST(request: NextRequest) {
     let body: any = {}
     
     if (contentType.includes('application/json')) {
-      // Parse JSON data
-      body = await request.json()
-      console.log('📦 [Unified Webhook] Parsed as JSON')
+      // Parse JSON data - handle empty body gracefully
+      try {
+        const text = await request.text()
+        if (text.trim() === '') {
+          console.log('⚠️ [Unified Webhook] Empty JSON body received')
+          body = {}
+        } else {
+          body = JSON.parse(text)
+          console.log('📦 [Unified Webhook] Parsed as JSON')
+        }
+      } catch (parseError) {
+        console.error('💥 [Unified Webhook] JSON parsing failed:', parseError)
+        return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+      }
     } else if (contentType.includes('application/x-www-form-urlencoded')) {
       // Parse form-encoded data
       const formData = await request.formData()
