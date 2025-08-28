@@ -287,9 +287,21 @@ export class MidtransService {
     // Convert USD to IDR
     const idrAmount = await convertUsdToIdr(usdAmount);
     
-    // Format start time
-    const startTime = subscriptionData.schedule.start_time || new Date();
-    const formattedStartTime = this.formatMidtransDateTime(startTime);
+    // Format start time - ensure it's in the future
+    const startTime = subscriptionData.schedule.start_time || new Date(Date.now() + 2 * 60 * 1000); // Default: 2 minutes from now
+    
+    // Ensure start time is at least 1 minute in the future
+    const minStartTime = new Date(Date.now() + 60 * 1000);
+    const actualStartTime = startTime < minStartTime ? minStartTime : startTime;
+    
+    const formattedStartTime = this.formatMidtransDateTime(actualStartTime);
+    
+    console.log('🕐 [Midtrans Schedule] Creating subscription schedule:', {
+      original_start_time: subscriptionData.schedule.start_time?.toISOString(),
+      calculated_start_time: actualStartTime.toISOString(),
+      formatted_for_midtrans: formattedStartTime,
+      current_time: new Date().toISOString()
+    });
 
     const subscriptionRequest: CreateSubscriptionRequest = {
       name: subscriptionData.name,
@@ -432,18 +444,26 @@ export class MidtransService {
   /**
    * Format date for Midtrans API
    * Format: "2020-07-22 07:25:01 +0700"
+   * CRITICAL: Must convert to Indonesia timezone (UTC+7) for Midtrans API
    */
   private formatMidtransDateTime(date: Date): string {
-    // Indonesia timezone is UTC+7
-    const offset = '+0700';
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+    // Convert to Indonesia timezone (UTC+7)
+    const jakartaTime = new Date(date.getTime() + (7 * 60 * 60 * 1000)); // Add 7 hours for Indonesia
     
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${offset}`;
+    const year = jakartaTime.getUTCFullYear();
+    const month = String(jakartaTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(jakartaTime.getUTCDate()).padStart(2, '0');
+    const hours = String(jakartaTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(jakartaTime.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(jakartaTime.getUTCSeconds()).padStart(2, '0');
+    
+    // Indonesia timezone offset
+    const offset = '+0700';
+    
+    const formatted = `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${offset}`;
+    console.log(`🕐 [Midtrans DateTime] Input: ${date.toISOString()} → Output: ${formatted}`);
+    
+    return formatted;
   }
 
 }
