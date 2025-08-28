@@ -1041,6 +1041,33 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 28, 2025 16:48: Dashboard Free Trial Buttons Implementation ✅
+
+- **✅ ADDED FREE TRIAL BUTTONS TO DASHBOARD**: Implemented identical trial functionality from Settings page in dashboard pricing cards
+  - **Trial Eligibility Check**: Added `/api/user/trial-eligibility` API call to determine if user is eligible for free trial
+  - **Package Eligibility Logic**: Implemented `isTrialEligiblePackage()` function to identify Premium and Pro plans eligible for trials
+  - **Trial Button Display**: Free trial buttons now appear in dashboard pricing cards when user is eligible and package supports trials
+  - **Consistent Behavior**: Trial buttons have same styling, loading states, and functionality as Settings page implementation
+
+- **✅ TRIAL WORKFLOW INTEGRATION**: Enhanced dashboard to support complete trial signup process
+  - **Trial State Management**: Added `startingTrial` and `trialEligible` state variables for proper UI management
+  - **Checkout Integration**: Trial buttons redirect to checkout page with proper trial parameters (`?trial=true`)
+  - **Loading States**: Added spinner animations and disabled states during trial initiation process
+  - **Error Handling**: Included proper error handling for trial eligibility checks and trial initiation
+
+- **Technical Details**:
+  - ✅ Added `checkTrialEligibility()` function calling `/api/user/trial-eligibility` endpoint
+  - ✅ Added `isTrialEligiblePackage()` function checking for 'premium' or 'pro' in package names
+  - ✅ Added `handleStartTrial()` function for trial initiation with proper redirect
+  - ✅ Added trial eligibility check to useEffect alongside other data loading
+  - ✅ Added conditional trial button rendering with same logic as Settings page: `{trialEligible && isTrialEligiblePackage(pkg) && (`
+  - ✅ Added Clock icon import for trial button visual consistency
+
+- **Files Modified**:
+  - `app/dashboard/page.tsx` - Added trial functionality matching Settings page behavior (lines 18, 107-108, 247-291, 298, 533-551)
+
+- **Result**: Users without active packages now see "Start 3-Day Free Trial" buttons in dashboard pricing cards when eligible, providing consistent trial access across both dashboard and settings pages.
+
 ### August 28, 2025 16:36: No-Package Dashboard Enhancements ✅
 
 - **✅ HIDDEN USER WELCOME CARD FOR NO-PACKAGE USERS**: Improved user interface when users don't have active packages

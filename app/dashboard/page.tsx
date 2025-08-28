@@ -13,7 +13,8 @@ import {
   ExternalLink,
   Check,
   Star,
-  Crown
+  Crown,
+  Clock
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -101,6 +102,8 @@ export default function Dashboard() {
   const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
   const [packagesData, setPackagesData] = useState<{ packages: PaymentPackage[], current_package_id: string | null } | null>(null);
   const [subscribing, setSubscribing] = useState<string | null>(null);
+  const [startingTrial, setStartingTrial] = useState<string | null>(null);
+  const [trialEligible, setTrialEligible] = useState<boolean | null>(null);
 
   // Log page view and dashboard activities
   usePageViewLogger('/dashboard', 'Dashboard', { section: 'main_dashboard' })
@@ -239,11 +242,58 @@ export default function Dashboard() {
     }
   }
 
+  // Check trial eligibility
+  const checkTrialEligibility = async () => {
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) return
+
+      const response = await fetch('/api/user/trial-eligibility', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setTrialEligible(result.eligible)
+      } else {
+        setTrialEligible(false)
+      }
+    } catch (error) {
+      setTrialEligible(false)
+    }
+  }
+
+  // Check if package is eligible for trial (Premium or Pro plans only)
+  const isTrialEligiblePackage = (pkg: PaymentPackage) => {
+    const packageName = pkg.name.toLowerCase()
+    return packageName.includes('premium') || packageName.includes('pro')
+  }
+
+  // Handle trial subscription
+  const handleStartTrial = async (packageId: string) => {
+    try {
+      setStartingTrial(packageId)
+      
+      // Redirect to checkout page with trial parameter
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=monthly&trial=true`
+      window.location.href = checkoutUrl
+      
+    } catch (error) {
+      console.error('Error starting trial:', error)
+    } finally {
+      setStartingTrial(null)
+    }
+  }
+
   // Load user data
   useEffect(() => {
     Promise.all([
       loadUserProfile(),
-      loadPackages()
+      loadPackages(),
+      checkTrialEligibility()
     ]).finally(() => setLoading(false))
   }, [])
 
@@ -476,6 +526,27 @@ export default function Dashboard() {
                             </div>
                           ) : 'Switch plan'}
                         </button>
+
+                        {/* Free Trial Button - Only show for eligible users and eligible packages */}
+                        {trialEligible && isTrialEligiblePackage(pkg) && (
+                          <button
+                            onClick={() => handleStartTrial(pkg.id)}
+                            disabled={startingTrial === pkg.id}
+                            className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white ${startingTrial === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {startingTrial === pkg.id ? (
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-4 h-4 border-2 border-[#1A1A1A] border-t-transparent rounded-full animate-spin"></div>
+                                Starting...
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                Start 3-Day Free Trial
+                              </div>
+                            )}
+                          </button>
+                        )}
                       </>
                     )}
                     {isCurrentPlan && (
