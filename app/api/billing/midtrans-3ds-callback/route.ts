@@ -101,18 +101,21 @@ export async function POST(request: NextRequest) {
     if (transactionStatus.transaction_status === 'capture' || transactionStatus.transaction_status === 'settlement') {
       console.log('✅ 3DS Authentication successful, continuing with subscription creation')
       
-      // Get the original token_id from transaction metadata to create subscription
+      // CRITICAL FIX: Use saved_token_id from the transaction status (after 3DS), NOT the original temporary token_id
+      const savedTokenId = transactionStatus.saved_token_id
+      
+      if (!savedTokenId) {
+        throw new Error('No saved_token_id found in transaction status - card tokenization may have failed')
+      }
+      
+      console.log('💳 Using saved_token_id from transaction status:', savedTokenId.substring(0, 20) + '...')
+      
+      // Get the original transaction record for metadata
       const { data: existingTransaction } = await supabase
         .from('indb_payment_transactions')
         .select('id, metadata')
         .eq('gateway_transaction_id', transaction_id)
         .maybeSingle()
-
-      if (!existingTransaction || !existingTransaction.metadata?.token_id) {
-        throw new Error('No original token_id found in transaction record for subscription creation')
-      }
-
-      const originalTokenId = existingTransaction.metadata.token_id
 
       // Get authentication token from the request
       const authHeader = request.headers.get('authorization')
@@ -228,7 +231,7 @@ export async function POST(request: NextRequest) {
       console.log('💾 ============= STEP 2: CREATING SUBSCRIPTION =============') 
       
       // CRITICAL FIX: Check if transaction is trial and get real package price for subscription
-      const isTrialTransaction = existingTransaction.metadata?.is_trial || false;
+      const isTrialTransaction = existingTransaction?.metadata?.is_trial || false;
       
       // For trials, we need to use the REAL package price, not the $1 charge amount
       let realPackageAmount = transactionAmountUSD;
@@ -236,7 +239,7 @@ export async function POST(request: NextRequest) {
       
       if (isTrialTransaction) {
         // Get the real package details from metadata
-        const packageDetails = existingTransaction.metadata?.package_details;
+        const packageDetails = existingTransaction?.metadata?.package_details;
         if (packageDetails) {
           realPackageAmount = packageDetails.price;
           console.log('🔍 [TRIAL] Using real package price from metadata:', packageDetails);
@@ -263,12 +266,12 @@ export async function POST(request: NextRequest) {
         charge_was: isTrialTransaction ? '$1 for tokenization' : '$' + transactionAmountUSD + ' real charge'
       });
       
-      // Create subscription using original token_id - this returns saved_token_id
+      // Create subscription using saved_token_id from transaction status (NOT the original temporary token)
       const subscription = await midtransService.createSubscription(realPackageAmount, {
         name: isTrialTransaction ? 
           `${realPackageForMatching.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
           `${realPackageForMatching.name}_${billing_period}`.toUpperCase(),
-        token: originalTokenId,
+        token: savedTokenId, // Use the permanent saved_token_id, not the temporary token
         schedule: {
           interval: 1,
           interval_unit: billing_period === 'monthly' ? 'month' : 'month',
@@ -301,11 +304,9 @@ export async function POST(request: NextRequest) {
         saved_token_id: subscription.token?.substring(0, 20) + '...'
       })
 
-      // Extract saved_token_id from subscription response
-      const savedTokenId = subscription.token
-      if (!savedTokenId) {
-        throw new Error('No saved_token_id returned from subscription creation')
-      }
+      // Note: We already have the saved_token_id from transaction status, don't overwrite it
+      // The subscription.token should be the same as our savedTokenId
+      console.log('✅ Subscription created with saved_token_id:', savedTokenId.substring(0, 20) + '...')
       
       console.log('💾 ============= STEP 3: SAVING TO DATABASE TABLES =============') 
       
