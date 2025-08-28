@@ -318,20 +318,6 @@ export default function Dashboard() {
     
     return { price: pkg.price }
   }
-  
-  // Handle subscription - EXACT copy from Plans & Billing page
-  const handleSubscribe = async (packageId: string) => {
-    try {
-      setSubscribing(packageId)
-      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=monthly`
-      window.location.href = checkoutUrl
-    } catch (error) {
-      console.error('Error subscribing:', error)
-      alert(error instanceof Error ? error.message : 'Failed to redirect to checkout')
-    } finally {
-      setSubscribing(null)
-    }
-  }
 
   // Position change indicator
   const PositionChange = ({ change }: { change: number | null }) => {
