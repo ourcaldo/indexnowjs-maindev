@@ -869,6 +869,19 @@ async function handleSubscriptionRenewal(body: any, orderId: string, supabaseAdm
       return NextResponse.json({ error: 'Package not found' }, { status: 400 })
     }
     
+    // Get Midtrans gateway ID
+    const { data: gatewayData } = await supabaseAdmin
+      .from('indb_payment_gateways')
+      .select('id')
+      .eq('slug', 'midtrans')
+      .eq('is_active', true)
+      .single()
+      
+    if (!gatewayData) {
+      console.error('❌ [Subscription Renewal] Midtrans gateway not found or inactive')
+      return NextResponse.json({ error: 'Payment gateway not available' }, { status: 400 })
+    }
+    
     // Use unified order ID template (same as regular orders)
     const renewalOrderId = `ORDER-${Date.now()}-${userId.substring(0, 8)}`
     
@@ -878,14 +891,16 @@ async function handleSubscriptionRenewal(body: any, orderId: string, supabaseAdm
     const renewalTransaction = {
       user_id: userId,
       package_id: packageId,
+      gateway_id: gatewayData.id, // Required field from indb_payment_gateways
+      transaction_type: 'purchase', // Required field
+      transaction_status: 'completed',
       amount: parseFloat(body.gross_amount || '0'),
       currency: body.currency || 'IDR',
-      billing_period: billingPeriod,
       payment_method: 'midtrans_recurring',
-      transaction_status: 'completed',
       payment_reference: renewalOrderId, // Use new renewal order ID
       gateway_transaction_id: body.transaction_id,
-      created_at: new Date().toISOString(),
+      billing_period: billingPeriod,
+      processed_at: new Date().toISOString(),
       metadata: {
         renewal_type: 'automatic_recurring',
         original_order_id: originalOrderId,
@@ -895,11 +910,25 @@ async function handleSubscriptionRenewal(body: any, orderId: string, supabaseAdm
       }
     }
     
-    const { data: newTransaction } = await supabaseAdmin
+    console.log('💾 [Subscription Renewal] Transaction data to insert:', {
+      user_id: renewalTransaction.user_id,
+      package_id: renewalTransaction.package_id,
+      amount: renewalTransaction.amount,
+      currency: renewalTransaction.currency,
+      payment_method: renewalTransaction.payment_method,
+      payment_reference: renewalTransaction.payment_reference
+    })
+    
+    const { data: newTransaction, error: transactionError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .insert(renewalTransaction)
       .select()
       .single()
+      
+    if (transactionError) {
+      console.error('💥 [Subscription Renewal] Transaction creation failed:', transactionError)
+      return NextResponse.json({ error: 'Failed to create transaction record' }, { status: 500 })
+    }
       
     console.log('✅ [Subscription Renewal] Created transaction record:', newTransaction.id)
     
@@ -960,7 +989,7 @@ async function handleSubscriptionRenewal(body: any, orderId: string, supabaseAdm
           billingPeriod: billingPeriod,
           amount: body.currency === 'USD' ? `$${parseFloat(body.gross_amount).toFixed(2)}` : `IDR ${Number(body.gross_amount).toLocaleString('id-ID')}`,
           paymentMethod: 'Midtrans (Auto-renewal)',
-          paymentDate: new Date().toLocaleDateString('en-US', {
+          orderDate: new Date().toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
