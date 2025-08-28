@@ -275,7 +275,12 @@ export default function Dashboard() {
   const hasActivePackage = userProfile?.package || packagesData?.current_package_id
 
   // Format currency helper
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
+  const formatCurrency = (amount: number | null | undefined, currency: string = 'USD') => {
+    // Handle null, undefined, or NaN values
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return currency === 'USD' ? '$0' : `${currency} 0`
+    }
+    
     const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
     return new Intl.NumberFormat(locale, {
       style: 'currency',

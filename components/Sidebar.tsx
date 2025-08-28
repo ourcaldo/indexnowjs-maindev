@@ -23,6 +23,7 @@ import { usePathname } from 'next/navigation'
 import { useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { useKeywordUsage } from '@/hooks/useKeywordUsage'
+import { useQuery } from '@tanstack/react-query'
 
 interface SidebarProps {
   isOpen: boolean
@@ -52,6 +53,26 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   
   // Get keyword usage data
   const { keywordUsage, loading: keywordLoading } = useKeywordUsage()
+  
+  // Get packages data to check for active package
+  const { data: packagesData } = useQuery({
+    queryKey: ['packages'],
+    queryFn: async () => {
+      const response = await fetch('/api/billing/packages')
+      if (!response.ok) throw new Error('Failed to fetch packages')
+      return response.json()
+    }
+  })
+  
+  // Get detailed user profile data for package information
+  const { data: detailedUserProfile } = useQuery({
+    queryKey: ['user-profile-detailed'],
+    queryFn: async () => {
+      const response = await fetch('/api/user/profile')
+      if (!response.ok) throw new Error('Failed to fetch user profile')
+      return response.json()
+    }
+  })
 
   const handleLogout = async () => {
     try {
@@ -264,44 +285,53 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {!isCollapsed && (
             <div className="px-4 py-4">
               <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
-                <div className="flex items-center mb-2">
-                  <Zap className="h-5 w-5 mr-2" />
-                  <span className="text-sm font-semibold">
-                    {keywordLoading ? 'Loading...' : (!keywordUsage || keywordUsage.keywords_limit === 0) ? 'No Active Package' : 'Usage Limit'}
-                  </span>
-                </div>
-                <div className="mb-3">
-                  {keywordLoading ? (
-                    <div className="text-xs text-blue-100 mb-1">Loading...</div>
-                  ) : (!keywordUsage || keywordUsage.keywords_limit === 0) ? (
-                    <div className="text-xs text-blue-100 mb-1">No Active Package found</div>
-                  ) : (
+                {(() => {
+                  const hasActivePackage = detailedUserProfile?.profile?.package || packagesData?.current_package_id
+                  const isLoading = keywordLoading || !detailedUserProfile || !packagesData
+                  
+                  return (
                     <>
-                      <div className="text-xs text-blue-100 mb-1">
-                        {keywordUsage.is_unlimited 
-                          ? `${keywordUsage.keywords_used.toLocaleString()} Keywords Used`
-                          : `${keywordUsage.keywords_used.toLocaleString()}/${keywordUsage.keywords_limit.toLocaleString()} Keywords`
-                        }
+                      <div className="flex items-center mb-2">
+                        <Zap className="h-5 w-5 mr-2" />
+                        <span className="text-sm font-semibold">
+                          {isLoading ? 'Loading...' : hasActivePackage ? 'Usage Limit' : 'No Active Package'}
+                        </span>
                       </div>
-                      <div className="w-full bg-white/20 rounded-full h-2">
-                        <div 
-                          className="bg-white rounded-full h-2 transition-all duration-300" 
-                          style={{ 
-                            width: keywordUsage.is_unlimited 
-                              ? '100%' 
-                              : `${Math.min(100, (keywordUsage.keywords_used / keywordUsage.keywords_limit) * 100)}%`
-                          }}
-                        ></div>
+                      <div className="mb-3">
+                        {isLoading ? (
+                          <div className="text-xs text-blue-100 mb-1">Loading...</div>
+                        ) : !hasActivePackage ? (
+                          <div className="text-xs text-blue-100 mb-1">No Active Package found</div>
+                        ) : (
+                          <>
+                            <div className="text-xs text-blue-100 mb-1">
+                              {keywordUsage?.is_unlimited 
+                                ? `${keywordUsage.keywords_used?.toLocaleString() || 0} Keywords Used`
+                                : `${keywordUsage?.keywords_used?.toLocaleString() || 0}/${keywordUsage?.keywords_limit?.toLocaleString() || 0} Keywords`
+                              }
+                            </div>
+                            <div className="w-full bg-white/20 rounded-full h-2">
+                              <div 
+                                className="bg-white rounded-full h-2 transition-all duration-300" 
+                                style={{ 
+                                  width: keywordUsage?.is_unlimited 
+                                    ? '100%' 
+                                    : `${Math.min(100, ((keywordUsage?.keywords_used || 0) / (keywordUsage?.keywords_limit || 1)) * 100)}%`
+                                }}
+                              ></div>
+                            </div>
+                          </>
+                        )}
                       </div>
+                      <a 
+                        href="/dashboard/settings/plans-billing"
+                        className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors block text-center"
+                      >
+                        {!hasActivePackage ? 'Subscribe now →' : 'Upgrade plan →'}
+                      </a>
                     </>
-                  )}
-                </div>
-                <a 
-                  href="/dashboard/settings/plans-billing"
-                  className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors block text-center"
-                >
-                  {(!keywordUsage || keywordUsage.keywords_limit === 0) ? 'Subscribe now →' : 'Upgrade plan →'}
-                </a>
+                  )
+                })()}
               </div>
             </div>
           )}
@@ -427,44 +457,53 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {/* Upgrade Section */}
           <div className="px-4 py-4">
             <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
-              <div className="flex items-center mb-2">
-                <Zap className="h-5 w-5 mr-2" />
-                <span className="text-sm font-semibold">
-                  {keywordLoading ? 'Loading...' : (!keywordUsage || keywordUsage.keywords_limit === 0) ? 'No Active Package' : 'Usage Limit'}
-                </span>
-              </div>
-              <div className="mb-3">
-                {keywordLoading ? (
-                  <div className="text-xs text-blue-100 mb-1">Loading...</div>
-                ) : (!keywordUsage || keywordUsage.keywords_limit === 0) ? (
-                  <div className="text-xs text-blue-100 mb-1">No Active Package found</div>
-                ) : (
+              {(() => {
+                const hasActivePackage = detailedUserProfile?.profile?.package || packagesData?.current_package_id
+                const isLoading = keywordLoading || !detailedUserProfile || !packagesData
+                
+                return (
                   <>
-                    <div className="text-xs text-blue-100 mb-1">
-                      {keywordUsage.is_unlimited 
-                        ? `${keywordUsage.keywords_used.toLocaleString()} Keywords Used`
-                        : `${keywordUsage.keywords_used.toLocaleString()}/${keywordUsage.keywords_limit.toLocaleString()} Keywords`
-                      }
+                    <div className="flex items-center mb-2">
+                      <Zap className="h-5 w-5 mr-2" />
+                      <span className="text-sm font-semibold">
+                        {isLoading ? 'Loading...' : hasActivePackage ? 'Usage Limit' : 'No Active Package'}
+                      </span>
                     </div>
-                    <div className="w-full bg-white/20 rounded-full h-2">
-                      <div 
-                        className="bg-white rounded-full h-2 transition-all duration-300" 
-                        style={{ 
-                          width: keywordUsage.is_unlimited 
-                            ? '100%' 
-                            : `${Math.min(100, (keywordUsage.keywords_used / keywordUsage.keywords_limit) * 100)}%`
-                        }}
-                      ></div>
+                    <div className="mb-3">
+                      {isLoading ? (
+                        <div className="text-xs text-blue-100 mb-1">Loading...</div>
+                      ) : !hasActivePackage ? (
+                        <div className="text-xs text-blue-100 mb-1">No Active Package found</div>
+                      ) : (
+                        <>
+                          <div className="text-xs text-blue-100 mb-1">
+                            {keywordUsage?.is_unlimited 
+                              ? `${keywordUsage.keywords_used?.toLocaleString() || 0} Keywords Used`
+                              : `${keywordUsage?.keywords_used?.toLocaleString() || 0}/${keywordUsage?.keywords_limit?.toLocaleString() || 0} Keywords`
+                            }
+                          </div>
+                          <div className="w-full bg-white/20 rounded-full h-2">
+                            <div 
+                              className="bg-white rounded-full h-2 transition-all duration-300" 
+                              style={{ 
+                                width: keywordUsage?.is_unlimited 
+                                  ? '100%' 
+                                  : `${Math.min(100, ((keywordUsage?.keywords_used || 0) / (keywordUsage?.keywords_limit || 1)) * 100)}%`
+                              }}
+                            ></div>
+                          </div>
+                        </>
+                      )}
                     </div>
+                    <a 
+                      href="/dashboard/settings/plans-billing"
+                      className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors block text-center"
+                    >
+                      {!hasActivePackage ? 'Subscribe now →' : 'Upgrade plan →'}
+                    </a>
                   </>
-                )}
-              </div>
-              <a 
-                href="/dashboard/settings/plans-billing"
-                className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors block text-center"
-              >
-                {(!keywordUsage || keywordUsage.keywords_limit === 0) ? 'Subscribe now →' : 'Upgrade plan →'}
-              </a>
+                )
+              })()}
             </div>
           </div>
 
