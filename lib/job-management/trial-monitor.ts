@@ -116,30 +116,23 @@ export class TrialMonitorService {
       // Process each expired trial
       for (const trial of expiredTrials) {
         try {
+          // CRITICAL FIX: For ALL expired trials, user should NOT have any package until Midtrans payment is processed
+          // Whether auto_billing_enabled is true or false, user loses access when trial ends
+          // Only when Midtrans webhook confirms successful payment, user regains access
+          await supabaseAdmin
+            .from('indb_auth_user_profiles')
+            .update({
+              trial_status: 'ended',
+              package_id: null,     // Remove package access immediately when trial ends
+              subscribed_at: null,  // Clear subscription info
+              expires_at: null      // Clear expiration
+            })
+            .eq('user_id', trial.user_id)
+
           if (trial.auto_billing_enabled) {
-            // For auto-billing trials, mark as ended (billing will be handled by Midtrans webhook)
-            await supabaseAdmin
-              .from('indb_auth_user_profiles')
-              .update({
-                trial_status: 'ended'
-                // Keep package_id and subscription info for continued access
-              })
-              .eq('user_id', trial.user_id)
-
-            console.log(`✅ [Trial Monitor] Marked trial as ended for user ${trial.user_id} (auto-billing enabled)`)
+            console.log(`✅ [Trial Monitor] Trial ended for user ${trial.user_id} - access removed, waiting for Midtrans billing`)
           } else {
-            // For cancelled trials, remove access
-            await supabaseAdmin
-              .from('indb_auth_user_profiles')
-              .update({
-                trial_status: 'ended',
-                package_id: null,
-                subscribed_at: null,
-                expires_at: null
-              })
-              .eq('user_id', trial.user_id)
-
-            console.log(`✅ [Trial Monitor] Removed access for expired trial user ${trial.user_id}`)
+            console.log(`✅ [Trial Monitor] Trial ended for user ${trial.user_id} - access removed permanently (auto-billing disabled)`)
           }
 
         } catch (updateError) {

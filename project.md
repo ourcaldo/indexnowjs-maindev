@@ -1788,6 +1788,33 @@ The infinite loading was caused by waiting for a callback parameter that never e
 
 ## Recent Changes
 
+### August 28, 2025: Trial Testing Enhancement & Trial End Logic Fix ✅
+
+**✅ TESTING DURATION ADJUSTMENT - Trial Start Time Optimization**:
+- **Duration Change**: Updated trial subscription start_time from 3 days to 8 minutes for testing purposes
+- **Multiple File Updates**: Updated all trial-related files to use 8-minute duration consistently
+- **Midtrans Schedule Compliance**: Ensured schedule object format follows Midtrans specifications with proper timezone (+0700)
+- **Testing Ready**: Subscription will now auto-charge 8 minutes after trial starts for faster testing cycles
+
+**✅ CRITICAL BUG FIX - Trial End Logic Correction**:
+- **Problem Identified**: Users were keeping their Pro/Premium package access after trial ended, even when trial expired
+- **Root Cause**: Trial monitor was only updating trial_status to 'ended' but NOT removing package_id for auto-billing enabled trials
+- **Expected Behavior**: When trial ends, user should have NO package assignment until Midtrans webhook confirms successful payment
+- **Fixed Logic**: All expired trials now remove package_id, subscribed_at, and expires_at immediately when trial ends
+- **Payment Restoration**: Only when Midtrans webhook processes successful payment will user regain package access
+
+**✅ ENHANCED TRIAL EXPIRATION HANDLING**:
+- **Unified Logic**: Both auto_billing_enabled true/false trials now remove access when expired
+- **Clean State**: Users return to no-package state after trial ends, regardless of auto-billing setting
+- **Proper Flow**: Trial End → No Access → Midtrans Payment Success → Access Restored
+- **User Experience**: Clear distinction between trial period and paid subscription
+
+**Files Modified**:
+- `app/api/billing/channels/midtrans-recurring/handler.ts`: Updated trial duration from 3 days to 8 minutes
+- `app/api/billing/midtrans-3ds-callback/route.ts`: Updated trial duration from 3 days to 8 minutes  
+- `lib/job-management/trial-monitor.ts`: Fixed trial end logic to remove package access for ALL expired trials
+- **Result**: Trial testing now happens in 8 minutes, and users properly lose access when trial ends
+
 **MIDTRANS RECURRING BILLING DATABASE SCHEMA FIX COMPLETED (January 29, 2025)**
 - ✅ **CRITICAL DATABASE RELATIONSHIP ERROR RESOLVED**: Fixed recurring billing job failure caused by incorrect table name references
   - **Root Cause Identified**: API was querying non-existent `indb_payment_midtrans_subscriptions` table instead of actual `indb_payment_midtrans` table
