@@ -7,6 +7,7 @@ import { dailyRankCheckJob } from '../rank-tracking/daily-rank-check-job'
 import { quotaMonitor } from '../monitoring/quota-monitor'
 import { recurringBillingJob } from '../payment-services/recurring-billing-job'
 import { autoCancelJob } from '../payment-services/auto-cancel-job'
+import { trialMonitorJob } from './trial-monitor-job'
 
 // Simple console logger for development
 const logger = {
@@ -52,10 +53,13 @@ export class WorkerStartup {
       // 3. Start auto-cancel job scheduler
       await this.initializeAutoCancelService()
 
-      // 4. Initialize quota monitoring
+      // 4. Start trial monitoring job scheduler
+      await this.initializeTrialMonitoring()
+
+      // 5. Initialize quota monitoring
       await this.initializeQuotaMonitoring()
 
-      // 5. Add any other background workers here
+      // 6. Add any other background workers here
       // await this.initializeNotificationWorker()
 
       this.isInitialized = true
@@ -133,6 +137,27 @@ export class WorkerStartup {
 
     } catch (error) {
       logger.error('Failed to initialize quota monitoring:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Initialize trial monitoring job scheduler
+   */
+  private async initializeTrialMonitoring(): Promise<void> {
+    try {
+      logger.info('Starting trial monitoring job scheduler...')
+      
+      // Start the trial monitoring job scheduler
+      trialMonitorJob.start()
+      
+      // Get job status for confirmation
+      const status = trialMonitorJob.getStatus()
+      logger.info(`Trial monitoring scheduler: ${status.isScheduled ? 'ACTIVE' : 'INACTIVE'}`)
+      logger.info(`Trial monitoring schedule: ${status.schedule} (${status.description})`)
+      
+    } catch (error) {
+      logger.error('Failed to initialize trial monitoring:', error)
       throw error
     }
   }
