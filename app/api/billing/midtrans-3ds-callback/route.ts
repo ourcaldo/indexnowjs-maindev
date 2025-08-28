@@ -288,12 +288,15 @@ export async function POST(request: NextRequest) {
         },
         metadata: {
           user_id: user.id,
+          user_email: user.email,
           package_id: realPackageForMatching.id,
+          package_name: realPackageForMatching.name,
           billing_period: billing_period,
           order_id: order_id,
           original_transaction_id: transaction_id,
           trial_type: isTrialTransaction ? 'free_trial_auto_billing' : null,
-          original_trial_start: isTrialTransaction ? new Date().toISOString() : null
+          original_trial_start: isTrialTransaction ? new Date().toISOString() : null,
+          subscription_type: 'recurring_payment'
         },
       })
       

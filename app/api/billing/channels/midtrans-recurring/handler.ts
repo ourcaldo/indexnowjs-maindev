@@ -213,11 +213,14 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         },
         metadata: {
           user_id: this.paymentData.user.id,
+          user_email: this.paymentData.customer_info.email,
           package_id: this.paymentData.package_id,
+          package_name: this.packageData.name,
           billing_period: this.paymentData.billing_period,
           order_id: orderId,
           trial_type: this.paymentData.is_trial ? 'free_trial_auto_billing' : null,
-          original_trial_start: this.paymentData.is_trial ? new Date().toISOString() : null
+          original_trial_start: this.paymentData.is_trial ? new Date().toISOString() : null,
+          subscription_type: 'recurring_payment'
         },
       })
       console.log('✅ Subscription created successfully:', subscription.id)

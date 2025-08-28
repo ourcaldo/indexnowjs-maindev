@@ -114,6 +114,12 @@ export async function POST(request: NextRequest) {
         if (gatewayTransaction) {
           transaction = gatewayTransaction
         } else {
+          // For subscription renewals, check if this is a recurring payment without existing transaction
+          if (isSubscriptionEvent || body.subscription_id) {
+            console.log('🔄 [Unified Webhook] No transaction found, checking if this is a subscription renewal')
+            return await handleSubscriptionRenewal(body, orderId, supabaseAdmin)
+          }
+          
           console.error('❌ [Unified Webhook] Transaction not found for order_id:', orderId)
           return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
         }
@@ -775,5 +781,209 @@ async function sendOrderExpiredEmail(body: any, transaction: any, supabaseAdmin:
     }
   } catch (emailError) {
     console.error(`⚠️ [${paymentType.toUpperCase()}] Failed to send order expired email:`, emailError)
+  }
+}
+
+/**
+ * Handle subscription renewals that don't have matching transaction records
+ * This occurs when Midtrans processes automatic recurring payments
+ */
+async function handleSubscriptionRenewal(body: any, orderId: string, supabaseAdmin: any) {
+  try {
+    console.log('🔄 [Subscription Renewal] Processing automatic renewal for order_id:', orderId)
+    console.log('🔍 [Subscription Renewal] Webhook body keys:', Object.keys(body))
+    
+    // Look for user based on subscription metadata or webhook body
+    let userId = body.metadata?.user_id
+    let userEmail = body.metadata?.user_email || body.metadata?.email
+    let packageId = body.metadata?.package_id
+    let billingPeriod = body.metadata?.billing_period || 'monthly'
+    let originalOrderId = body.metadata?.order_id
+    
+    // Also check customer_details from webhook body
+    if (!userEmail && body.customer_details?.email) {
+      userEmail = body.customer_details.email
+    }
+    
+    console.log('🔍 [Subscription Renewal] Extracted metadata:', {
+      userId, userEmail, packageId, billingPeriod, originalOrderId
+    })
+    console.log('🔍 [Subscription Renewal] Available metadata keys:', Object.keys(body.metadata || {}))
+    console.log('🔍 [Subscription Renewal] Customer details:', body.customer_details)
+    
+    // If no user metadata found, try to find by subscription ID
+    if (!userId && body.subscription_id) {
+      console.log('🔍 [Subscription Renewal] Searching by subscription_id:', body.subscription_id)
+      
+      const { data: existingSubscription } = await supabaseAdmin
+        .from('indb_payment_midtrans')
+        .select('user_id, package_id, billing_period, customer_details')
+        .eq('subscription_id', body.subscription_id)
+        .single()
+        
+      if (existingSubscription) {
+        userId = existingSubscription.user_id
+        packageId = existingSubscription.package_id
+        billingPeriod = existingSubscription.billing_period
+        userEmail = existingSubscription.customer_details?.email
+        console.log('✅ [Subscription Renewal] Found existing subscription data:', { userId, packageId })
+      }
+    }
+    
+    // If still no userId, try to find user by email
+    if (!userId && userEmail) {
+      console.log('🔍 [Subscription Renewal] Searching user by email:', userEmail)
+      
+      const { data: userByEmail } = await supabaseAdmin
+        .from('indb_auth_user_profiles')
+        .select('user_id, package_id')
+        .eq('email', userEmail)
+        .single()
+        
+      if (userByEmail) {
+        userId = userByEmail.user_id
+        if (!packageId) packageId = userByEmail.package_id
+        console.log('✅ [Subscription Renewal] Found user by email:', userId)
+      }
+    }
+    
+    if (!userId) {
+      console.error('❌ [Subscription Renewal] Cannot process: no user identification found')
+      console.error('❌ [Subscription Renewal] Available data:', { 
+        metadata: body.metadata, 
+        customer_details: body.customer_details,
+        subscription_id: body.subscription_id 
+      })
+      return NextResponse.json({ error: 'User identification required for renewal' }, { status: 400 })
+    }
+    
+    // Get package data
+    const { data: packageData } = await supabaseAdmin
+      .from('indb_payment_packages')
+      .select('*')
+      .eq('id', packageId)
+      .single()
+      
+    if (!packageData) {
+      console.error('❌ [Subscription Renewal] Package not found:', packageId)
+      return NextResponse.json({ error: 'Package not found' }, { status: 400 })
+    }
+    
+    // Use unified order ID template (same as regular orders)
+    const renewalOrderId = `ORDER-${Date.now()}-${userId.substring(0, 8)}`
+    
+    console.log('🆔 [Subscription Renewal] Generated unified order_id:', renewalOrderId)
+    
+    // Create transaction record for the renewal
+    const renewalTransaction = {
+      user_id: userId,
+      package_id: packageId,
+      amount: parseFloat(body.gross_amount || '0'),
+      currency: body.currency || 'IDR',
+      billing_period: billingPeriod,
+      payment_method: 'midtrans_recurring',
+      transaction_status: 'completed',
+      payment_reference: renewalOrderId, // Use new renewal order ID
+      gateway_transaction_id: body.transaction_id,
+      created_at: new Date().toISOString(),
+      metadata: {
+        renewal_type: 'automatic_recurring',
+        original_order_id: originalOrderId,
+        midtrans_webhook_order_id: orderId, // The order_id from Midtrans webhook
+        midtrans_webhook_data: body,
+        subscription_id: body.subscription_id
+      }
+    }
+    
+    const { data: newTransaction } = await supabaseAdmin
+      .from('indb_payment_transactions')
+      .insert(renewalTransaction)
+      .select()
+      .single()
+      
+    console.log('✅ [Subscription Renewal] Created transaction record:', newTransaction.id)
+    
+    // Update user subscription expiration
+    const currentDate = new Date()
+    const nextBillingDate = billingPeriod === 'yearly' ? 
+      new Date(currentDate.getTime() + 365 * 24 * 60 * 60 * 1000) :
+      new Date(currentDate.getTime() + 30 * 24 * 60 * 60 * 1000)
+    
+    await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .update({
+        package_id: packageId,
+        subscribed_at: currentDate.toISOString(),
+        expires_at: nextBillingDate.toISOString(),
+        updated_at: currentDate.toISOString()
+      })
+      .eq('user_id', userId)
+      
+    console.log('✅ [Subscription Renewal] Updated user package expiration to:', nextBillingDate.toISOString())
+    
+    // Create Midtrans payment record
+    await supabaseAdmin
+      .from('indb_payment_midtrans')
+      .insert({
+        transaction_id: newTransaction.id,
+        user_id: userId,
+        package_id: packageId,
+        gateway_transaction_id: body.transaction_id,
+        subscription_id: body.subscription_id,
+        amount: parseFloat(body.gross_amount || '0'),
+        currency: body.currency || 'IDR',
+        payment_status: 'completed',
+        subscription_status: 'active',
+        billing_period: billingPeriod,
+        card_type: body.card_type,
+        masked_card: body.masked_card,
+        bank: body.bank,
+        metadata: {
+          renewal_payment: true,
+          webhook_data: body
+        }
+      })
+    
+    // Send renewal confirmation email if user email available
+    if (userEmail) {
+      try {
+        const { data: userProfile } = await supabaseAdmin
+          .from('indb_auth_user_profiles')
+          .select('full_name')
+          .eq('user_id', userId)
+          .single()
+          
+        await emailService.sendBillingConfirmation(userEmail, {
+          customerName: userProfile?.full_name || 'Customer',
+          orderId: renewalOrderId,
+          packageName: packageData.name,
+          billingPeriod: billingPeriod,
+          amount: body.currency === 'USD' ? `$${parseFloat(body.gross_amount).toFixed(2)}` : `IDR ${Number(body.gross_amount).toLocaleString('id-ID')}`,
+          paymentMethod: 'Midtrans (Auto-renewal)',
+          paymentDate: new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        })
+        
+        console.log('✅ [Subscription Renewal] Sent renewal confirmation email to:', userEmail)
+      } catch (emailError) {
+        console.error('⚠️ [Subscription Renewal] Failed to send email:', emailError)
+      }
+    }
+    
+    console.log('🎉 [Subscription Renewal] Successfully processed automatic renewal')
+    return NextResponse.json({ 
+      status: 'Renewal processed successfully',
+      renewal_order_id: renewalOrderId,
+      original_webhook_order_id: orderId,
+      user_id: userId,
+      package_name: packageData.name
+    })
+    
+  } catch (error: any) {
+    console.error('💥 [Subscription Renewal] Processing error:', error)
+    return NextResponse.json({ error: 'Renewal processing failed' }, { status: 500 })
   }
 }
