@@ -274,20 +274,63 @@ export default function Dashboard() {
   const selectedDomain = domains.find((d: any) => d.id === selectedDomainId)
   const hasActivePackage = userProfile?.package || packagesData?.current_package_id
 
-  // Format currency helper
-  const formatCurrency = (amount: number | null | undefined, currency: string = 'USD') => {
-    // Handle null, undefined, or NaN values
-    if (amount === null || amount === undefined || isNaN(amount)) {
-      return currency === 'USD' ? '$0' : `${currency} 0`
-    }
-    
+  // Format currency helper - EXACT copy from Plans & Billing page
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    // Determine locale based on currency
     const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
+    
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)
+  }
+  
+  // Billing period pricing - EXACT copy from Plans & Billing page
+  const getBillingPeriodPrice = (pkg: any, period: string): { price: number, originalPrice?: number, discount?: number } => {
+    // Check if package has new multicurrency structure
+    if (pkg.pricing_tiers && typeof pkg.pricing_tiers === 'object' && pkg.pricing_tiers[period]) {
+      const periodTier = pkg.pricing_tiers[period]
+      
+      // New multicurrency format
+      if (periodTier['USD']) {
+        const currencyTier = periodTier['USD']
+        return {
+          price: currencyTier.promo_price || currencyTier.regular_price,
+          originalPrice: currencyTier.promo_price ? currencyTier.regular_price : undefined,
+          discount: currencyTier.promo_price ? Math.round(((currencyTier.regular_price - currencyTier.promo_price) / currencyTier.regular_price) * 100) : undefined
+        }
+      }
+      
+      // Legacy array format - check if it's an array
+      if (Array.isArray(pkg.pricing_tiers)) {
+        const tier = pkg.pricing_tiers.find((t: any) => t.period === period)
+        if (tier) {
+          return {
+            price: tier.promo_price || tier.regular_price,
+            originalPrice: tier.promo_price ? tier.regular_price : undefined,
+            discount: tier.discount_percentage
+          }
+        }
+      }
+    }
+    
+    return { price: pkg.price }
+  }
+  
+  // Handle subscription - EXACT copy from Plans & Billing page
+  const handleSubscribe = async (packageId: string) => {
+    try {
+      setSubscribing(packageId)
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=monthly`
+      window.location.href = checkoutUrl
+    } catch (error) {
+      console.error('Error subscribing:', error)
+      alert(error instanceof Error ? error.message : 'Failed to redirect to checkout')
+    } finally {
+      setSubscribing(null)
+    }
   }
 
   // Position change indicator
@@ -370,11 +413,11 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* Plans Cards - Same as Plans and Billing page */}
+          {/* EXACT copy from Plans & Billing page */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {packagesData?.packages.map((pkg) => {
               const isCurrentPlan = pkg.is_current
-              const pricing = pkg.pricing_tiers?.monthly || { USD: pkg.price, IDR: pkg.price * 16300 }
+              const pricing = getBillingPeriodPrice(pkg, 'monthly')
 
               return (
                 <div key={pkg.id} className={`rounded-lg border p-4 relative flex flex-col h-full ${
@@ -407,7 +450,7 @@ export default function Dashboard() {
                   <div className="mb-4">
                     <div className="flex items-baseline gap-1">
                       <span className={`text-2xl font-bold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                        {formatCurrency(pricing.USD || pkg.price, 'USD')}
+                        {formatCurrency(pricing.price, 'USD')}
                       </span>
                       <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
                         per month
@@ -415,10 +458,11 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Features */}
+                  {/* Expandable Features */}
                   <div className="flex-grow">
                     <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
                       <div className="space-y-3">
+                        {/* Database Features ONLY - no hardcoded quota features */}
                         {pkg.features.map((feature, index) => (
                           <div key={index} className="flex items-center gap-2">
                             <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
