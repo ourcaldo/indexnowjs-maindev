@@ -343,7 +343,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* User Profile Card */}
-      {userProfile && (
+      {userProfile && hasActivePackage && (
         <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center space-x-4">
@@ -492,17 +492,6 @@ export default function Dashboard() {
             })}
           </div>
 
-          <div className="text-center">
-            <p className="text-sm text-[#6C757D] mb-2">
-              Already have an account?
-            </p>
-            <a 
-              href="/dashboard/settings/plans-billing" 
-              className="text-[#3D8BFF] hover:text-[#3D8BFF]/80 text-sm font-medium"
-            >
-              View billing settings →
-            </a>
-          </div>
         </div>
       )}
 

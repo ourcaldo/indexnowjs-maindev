@@ -1041,6 +1041,29 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 28, 2025 16:36: No-Package Dashboard Enhancements ✅
+
+- **✅ HIDDEN USER WELCOME CARD FOR NO-PACKAGE USERS**: Improved user interface when users don't have active packages
+  - **Welcome Card Logic**: Modified dashboard to only show "Welcome back, [user name]!" card when user has an active package
+  - **Conditional Display**: Added `hasActivePackage` condition to User Profile Card component preventing display for trial-ended or non-subscribed users
+  - **Clean Interface**: Users without packages now see clean pricing table without redundant welcome messaging
+  - **User Experience**: Reduces interface clutter and focuses attention on subscription options when no active package exists
+
+- **✅ REMOVED REDUNDANT BILLING TEXT**: Cleaned up pricing table messaging for users without active packages
+  - **Text Removal**: Eliminated "Already have an account? View billing settings →" text from dashboard pricing table
+  - **Streamlined Interface**: Users now see focused pricing options without confusing account reference messaging
+  - **Consistent Experience**: Pricing table presentation is now cleaner and more direct when displayed in no-package state
+
+- **Technical Details**:
+  - ✅ Updated User Profile Card condition from `{userProfile && (` to `{userProfile && hasActivePackage && (`
+  - ✅ Removed billing settings text section entirely from no-package pricing table
+  - ✅ Maintained existing `hasActivePackage` logic: `userProfile?.package || packagesData?.current_package_id`
+
+- **Files Modified**:
+  - `app/dashboard/page.tsx` - Updated User Profile Card display condition and removed billing text (lines 349, 495-505)
+
+- **Result**: Users without active packages now experience a cleaner, more focused dashboard interface with appropriate messaging and call-to-action elements.
+
 ### August 28, 2025 14:15: No-Package User Experience Enhancement ✅
 
 - **✅ IMPROVED NO-PACKAGE USER INTERFACE**: Enhanced dashboard and sidebar experience for users without active packages
