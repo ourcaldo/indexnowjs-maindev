@@ -1041,6 +1041,37 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 28, 2025 14:15: No-Package User Experience Enhancement ✅
+
+- **✅ IMPROVED NO-PACKAGE USER INTERFACE**: Enhanced dashboard and sidebar experience for users without active packages
+  - **Sidebar Update**: Changed "Subscribe to track keywords" message to "No Active Package found" for clearer user messaging
+  - **Dashboard Enhancement**: Updated no-package state to use consistent pricing cards matching Plans and Billing page design
+  - **User Experience**: Provides clear, professional interface for users whose trials have ended or who haven't subscribed yet
+  - **Consistency**: Ensures uniform pricing card presentation across dashboard and billing pages
+
+- **✅ SIDEBAR COMPONENT MESSAGING IMPROVEMENT**: Modified sidebar upgrade section to display accurate package status
+  - **Desktop Sidebar**: Updated text from "Subscribe to track keywords" to "No Active Package found" when user has no active package
+  - **Mobile Sidebar**: Applied same messaging improvement for mobile users ensuring consistent experience
+  - **Visual Clarity**: Maintains gradient background and styling while providing accurate package status information
+
+- **✅ DASHBOARD PRICING CARDS STANDARDIZATION**: Aligned dashboard no-package cards with Plans and Billing page format
+  - **Card Structure**: Implemented identical card layout, styling, and feature display as Plans and Billing page
+  - **Feature Display**: Shows database-driven features with proper check icons and formatting
+  - **Pricing Format**: Uses same currency formatting and pricing display logic
+  - **Button Styling**: Consistent "Switch plan" button styling and loading states
+
+- **Technical Details**:
+  - ✅ Updated sidebar component messaging for both desktop and mobile versions
+  - ✅ Standardized pricing card presentation across dashboard and billing pages
+  - ✅ Maintained existing functionality while improving visual consistency
+  - ✅ Applied project color scheme and styling standards
+
+- **Files Modified**:
+  - `components/Sidebar.tsx` - Updated no-package messaging in upgrade section (lines 280, 443)
+  - `app/dashboard/page.tsx` - Updated no-package state pricing cards to match billing page format (lines 371-475)
+
+- **Result**: Users without active packages now see consistent, professional messaging and pricing card presentation across all pages, improving clarity about their subscription status and available options.
+
 ### August 27, 2025 20:45: Trial Charge Amount Fix - Midtrans Validation ✅
 - **✅ FIXED MIDTRANS $0 CHARGE VALIDATION ERROR**: Resolved API error preventing trial payments from processing
   - **Root Cause**: Midtrans API requires minimum charge of $0.01, but trial amount was set to $0.00

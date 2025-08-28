@@ -365,7 +365,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* Current Plan Cards - Same as billing page */}
+          {/* Plans Cards - Same as Plans and Billing page */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {packagesData?.packages.map((pkg) => {
               const isCurrentPlan = pkg.is_current

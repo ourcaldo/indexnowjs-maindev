@@ -274,7 +274,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                   {keywordLoading ? (
                     <div className="text-xs text-blue-100 mb-1">Loading...</div>
                   ) : (!keywordUsage || keywordUsage.keywords_limit === 0) ? (
-                    <div className="text-xs text-blue-100 mb-1">Subscribe to track keywords</div>
+                    <div className="text-xs text-blue-100 mb-1">No Active Package found</div>
                   ) : (
                     <>
                       <div className="text-xs text-blue-100 mb-1">
@@ -437,7 +437,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                 {keywordLoading ? (
                   <div className="text-xs text-blue-100 mb-1">Loading...</div>
                 ) : (!keywordUsage || keywordUsage.keywords_limit === 0) ? (
-                  <div className="text-xs text-blue-100 mb-1">Subscribe to track keywords</div>
+                  <div className="text-xs text-blue-100 mb-1">No Active Package found</div>
                 ) : (
                   <>
                     <div className="text-xs text-blue-100 mb-1">
