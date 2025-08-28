@@ -20,7 +20,7 @@ export class TrialMonitorService {
           user_id,
           email,
           full_name,
-          trial_ends_at,
+          expires_at,
           trial_status,
           auto_billing_enabled,
           indb_payment_packages (
@@ -31,8 +31,8 @@ export class TrialMonitorService {
           )
         `)
         .eq('trial_status', 'active')
-        .gte('trial_ends_at', now.toISOString())
-        .lte('trial_ends_at', tomorrow.toISOString())
+        .gte('expires_at', now.toISOString())
+        .lte('expires_at', tomorrow.toISOString())
 
       if (error) {
         console.error('❌ [Trial Monitor] Error fetching expiring trials:', error)
@@ -49,7 +49,7 @@ export class TrialMonitorService {
       // Send notification emails
       for (const trial of expiringTrials) {
         try {
-          const trialEndTime = new Date(trial.trial_ends_at!)
+          const trialEndTime = new Date(trial.expires_at!)
           const hoursRemaining = Math.ceil((trialEndTime.getTime() - now.getTime()) / (1000 * 60 * 60))
 
           // Use existing email service method for now
@@ -93,13 +93,13 @@ export class TrialMonitorService {
           user_id,
           email,
           full_name,
-          trial_ends_at,
+          expires_at,
           trial_status,
           auto_billing_enabled,
           package_id
         `)
         .eq('trial_status', 'active')
-        .lt('trial_ends_at', now.toISOString())
+        .lt('expires_at', now.toISOString())
 
       if (error) {
         console.error('❌ [Trial Monitor] Error fetching expired trials:', error)

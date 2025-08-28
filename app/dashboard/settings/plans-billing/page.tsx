@@ -606,6 +606,21 @@ export default function BillingPage() {
           </button>
         </div>
 
+        {/* No Active Package Alert */}
+        {!packagesData?.current_package_id && (
+          <div className="mb-6 p-4 border border-[#F0A202] bg-[#F0A202]/5 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-[#F0A202] flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-medium text-[#1A1A1A] mb-1">No Active Package</h3>
+                <p className="text-sm text-[#6C757D]">
+                  You don't have an active package. Subscribe to a plan below to start tracking your keywords and accessing all features.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Current Plan Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {packagesData?.packages.map((pkg) => {

@@ -338,7 +338,6 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         subscribed_at: now.toISOString(),
         expires_at: trialEndDate.toISOString(), // Trial expires in 8 minutes (testing purposes)
         trial_started_at: now.toISOString(),
-        trial_ends_at: trialEndDate.toISOString(),
         trial_status: 'active',
         auto_billing_enabled: true,
         has_used_trial: true, // Mark trial as used

@@ -10,7 +10,10 @@ import {
   Target,
   Zap,
   ChevronRightIcon,
-  ExternalLink
+  ExternalLink,
+  Check,
+  Star,
+  Crown
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -72,11 +75,32 @@ interface RankStats {
   newKeywords: number;
 }
 
+interface PaymentPackage {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  currency: string;
+  billing_period: string;
+  features: string[];
+  quota_limits: {
+    daily_quota_limit: number;
+    service_accounts_limit: number;
+    concurrent_jobs_limit: number;
+  };
+  is_popular: boolean;
+  is_current: boolean;
+  pricing_tiers: Record<string, any>;
+}
+
 export default function Dashboard() {
   const router = useRouter()
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
+  const [packagesData, setPackagesData] = useState<{ packages: PaymentPackage[], current_package_id: string | null } | null>(null);
+  const [subscribing, setSubscribing] = useState<string | null>(null);
 
   // Log page view and dashboard activities
   usePageViewLogger('/dashboard', 'Dashboard', { section: 'main_dashboard' })
@@ -177,9 +201,50 @@ export default function Dashboard() {
     }
   }, [domains, selectedDomainId])
 
+  // Load packages data
+  const loadPackages = async () => {
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) return
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) return
+
+      const response = await fetch('/api/billing/packages', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setPackagesData(data)
+      }
+    } catch (error) {
+      console.error('Error loading packages:', error)
+    }
+  }
+
+  // Handle subscription
+  const handleSubscribe = async (packageId: string) => {
+    try {
+      setSubscribing(packageId)
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=monthly`
+      window.location.href = checkoutUrl
+    } catch (error) {
+      console.error('Error starting subscription:', error)
+    } finally {
+      setSubscribing(null)
+    }
+  }
+
   // Load user data
   useEffect(() => {
-    loadUserProfile().finally(() => setLoading(false))
+    Promise.all([
+      loadUserProfile(),
+      loadPackages()
+    ]).finally(() => setLoading(false))
   }, [])
 
   // Calculate rank statistics
@@ -207,6 +272,18 @@ export default function Dashboard() {
 
   const rankStats = calculateRankStats()
   const selectedDomain = domains.find((d: any) => d.id === selectedDomainId)
+  const hasActivePackage = userProfile?.package || packagesData?.current_package_id
+
+  // Format currency helper
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
 
   // Position change indicator
   const PositionChange = ({ change }: { change: number | null }) => {
@@ -269,12 +346,133 @@ export default function Dashboard() {
             )}
           </div>
 
-          <QuotaCard userProfile={userProfile} />
+          {hasActivePackage && <QuotaCard userProfile={userProfile} />}
+        </div>
+      )}
+
+      {/* No Active Package State */}
+      {!hasActivePackage && packagesData && (
+        <div className="bg-white rounded-xl border border-[#E0E6ED] p-8">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#3D8BFF] to-[#1C2331] rounded-full flex items-center justify-center mx-auto mb-4">
+              <Crown className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
+              Unlock the Power of Professional Rank Tracking
+            </h2>
+            <p className="text-[#6C757D] text-lg mb-6">
+              Subscribe to start tracking your keyword rankings, monitor your SEO performance, and grow your online presence with professional insights.
+            </p>
+          </div>
+
+          {/* Current Plan Cards - Same as billing page */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {packagesData?.packages.map((pkg) => {
+              const isCurrentPlan = pkg.is_current
+              const pricing = pkg.pricing_tiers?.monthly || { USD: pkg.price, IDR: pkg.price * 16300 }
+
+              return (
+                <div key={pkg.id} className={`rounded-lg border p-4 relative flex flex-col h-full ${
+                  isCurrentPlan 
+                    ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white' 
+                    : 'border-[#E0E6ED] bg-white hover:border-[#1A1A1A] transition-colors'
+                }`}>
+                  {pkg.is_popular && !isCurrentPlan && (
+                    <div className="absolute -top-3 left-4 bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-medium">
+                      Most Popular
+                    </div>
+                  )}
+
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className={`font-semibold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                        {pkg.name}
+                      </h3>
+                      {isCurrentPlan && (
+                        <span className="bg-white text-[#1A1A1A] px-2 py-0.5 rounded text-xs font-medium">
+                          Current plan
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                      {pkg.description}
+                    </p>
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-2xl font-bold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                        {formatCurrency(pricing.USD || pkg.price, 'USD')}
+                      </span>
+                      <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                        per month
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <div className="flex-grow">
+                    <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
+                      <div className="space-y-3">
+                        {pkg.features.map((feature, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
+                            <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                              {feature}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-auto space-y-2">
+                    {!isCurrentPlan && (
+                      <>
+                        <button 
+                          onClick={() => handleSubscribe(pkg.id)}
+                          disabled={subscribing === pkg.id}
+                          className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 bg-[#1A1A1A] text-white hover:bg-[#0d1b2a] ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          {subscribing === pkg.id ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Processing...
+                            </div>
+                          ) : 'Switch plan'}
+                        </button>
+                      </>
+                    )}
+                    {isCurrentPlan && (
+                      <button 
+                        disabled
+                        className="w-full py-3 px-4 rounded-lg text-sm font-medium h-12 bg-white text-[#1A1A1A] cursor-default"
+                      >
+                        Current plan
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-[#6C757D] mb-2">
+              Already have an account?
+            </p>
+            <a 
+              href="/dashboard/settings/plans-billing" 
+              className="text-[#3D8BFF] hover:text-[#3D8BFF]/80 text-sm font-medium"
+            >
+              View billing settings →
+            </a>
+          </div>
         </div>
       )}
 
       {/* Domain Selection & Rank Stats */}
-      {domains.length === 0 ? (
+      {hasActivePackage && domains.length === 0 ? (
         <div className="bg-white rounded-xl border border-[#E0E6ED] p-12 text-center">
           <Globe className="w-16 h-16 mx-auto mb-4 text-[#6C757D]" />
           <h3 className="text-xl font-semibold mb-2 text-[#1A1A1A]">
@@ -291,7 +489,7 @@ export default function Dashboard() {
             Add Your First Domain
           </button>
         </div>
-      ) : (
+      ) : hasActivePackage ? (
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Rank Tracking Section */}
           <div className="lg:col-span-2 space-y-6">
@@ -486,7 +684,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

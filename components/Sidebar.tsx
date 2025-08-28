@@ -266,12 +266,16 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
               <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
                 <div className="flex items-center mb-2">
                   <Zap className="h-5 w-5 mr-2" />
-                  <span className="text-sm font-semibold">Usage Limit</span>
+                  <span className="text-sm font-semibold">
+                    {keywordLoading ? 'Loading...' : (!keywordUsage || keywordUsage.keywords_limit === 0) ? 'No Active Package' : 'Usage Limit'}
+                  </span>
                 </div>
                 <div className="mb-3">
                   {keywordLoading ? (
                     <div className="text-xs text-blue-100 mb-1">Loading...</div>
-                  ) : keywordUsage ? (
+                  ) : (!keywordUsage || keywordUsage.keywords_limit === 0) ? (
+                    <div className="text-xs text-blue-100 mb-1">Subscribe to track keywords</div>
+                  ) : (
                     <>
                       <div className="text-xs text-blue-100 mb-1">
                         {keywordUsage.is_unlimited 
@@ -290,13 +294,14 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                         ></div>
                       </div>
                     </>
-                  ) : (
-                    <div className="text-xs text-blue-100 mb-1">0/0 Keywords</div>
                   )}
                 </div>
-                <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  Upgrade plan →
-                </button>
+                <a 
+                  href="/dashboard/settings/plans-billing"
+                  className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors block text-center"
+                >
+                  {(!keywordUsage || keywordUsage.keywords_limit === 0) ? 'Subscribe now →' : 'Upgrade plan →'}
+                </a>
               </div>
             </div>
           )}
@@ -424,12 +429,16 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
             <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
               <div className="flex items-center mb-2">
                 <Zap className="h-5 w-5 mr-2" />
-                <span className="text-sm font-semibold">Usage Limit</span>
+                <span className="text-sm font-semibold">
+                  {keywordLoading ? 'Loading...' : (!keywordUsage || keywordUsage.keywords_limit === 0) ? 'No Active Package' : 'Usage Limit'}
+                </span>
               </div>
               <div className="mb-3">
                 {keywordLoading ? (
                   <div className="text-xs text-blue-100 mb-1">Loading...</div>
-                ) : keywordUsage ? (
+                ) : (!keywordUsage || keywordUsage.keywords_limit === 0) ? (
+                  <div className="text-xs text-blue-100 mb-1">Subscribe to track keywords</div>
+                ) : (
                   <>
                     <div className="text-xs text-blue-100 mb-1">
                       {keywordUsage.is_unlimited 
@@ -448,13 +457,14 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       ></div>
                     </div>
                   </>
-                ) : (
-                  <div className="text-xs text-blue-100 mb-1">0/0 Keywords</div>
                 )}
               </div>
-              <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
-                Upgrade plan →
-              </button>
+              <a 
+                href="/dashboard/settings/plans-billing"
+                className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors block text-center"
+              >
+                {(!keywordUsage || keywordUsage.keywords_limit === 0) ? 'Subscribe now →' : 'Upgrade plan →'}
+              </a>
             </div>
           </div>
 
