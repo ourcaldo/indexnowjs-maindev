@@ -86,8 +86,9 @@ export async function GET(request: NextRequest) {
     console.log('Raw pricing_tiers:', profile.package?.pricing_tiers)
     console.log('pricing_tiers type:', typeof profile.package?.pricing_tiers)
     
-    if (profile.package && profile.country) {
-      const userCurrency = getUserCurrency(profile.country)
+    if (profile.package) {
+      // Default to USD if no country data available
+      const userCurrency = profile.country ? getUserCurrency(profile.country) : 'USD'
       const packageData = profile.package
       
       // Parse pricing_tiers if it's a string
@@ -140,7 +141,7 @@ export async function GET(request: NextRequest) {
         console.log('No valid pricing_tiers found')
       }
     } else {
-      console.log('Missing package or country data')
+      console.log('Missing package data')
     }
     console.log('=== PROFILE DEBUG END ===')
     console.log('Final transformed package:', transformedPackage)
