@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import jwt from 'jsonwebtoken'
+import { getUserCurrency, formatCurrency } from '@/lib/utils/currency-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     const userId = payload.sub
 
-    // Get user profile with package information
+    // Get user profile with package information including pricing_tiers
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('indb_auth_user_profiles')
       .select(`
@@ -41,7 +42,8 @@ export async function GET(request: NextRequest) {
           billing_period,
           features,
           quota_limits,
-          is_active
+          is_active,
+          pricing_tiers
         )
       `)
       .eq('user_id', userId)
@@ -76,9 +78,35 @@ export async function GET(request: NextRequest) {
         .in('status', ['running', 'pending'])
     ])
 
+    // Apply currency detection and pricing transformation
+    let transformedPackage = profile.package
+    if (profile.package && profile.country) {
+      const userCurrency = getUserCurrency(profile.country)
+      const packageData = profile.package
+      
+      // Apply pricing from pricing_tiers based on user currency
+      if (packageData.pricing_tiers && typeof packageData.pricing_tiers === 'object') {
+        const billingPeriod = packageData.billing_period || 'monthly'
+        const tierData = packageData.pricing_tiers[billingPeriod]
+        
+        if (tierData && tierData[userCurrency]) {
+          const currencyTierData = tierData[userCurrency]
+          transformedPackage = {
+            ...packageData,
+            currency: userCurrency,
+            price: currencyTierData.promo_price || currencyTierData.regular_price,
+            billing_period: billingPeriod,
+            // Keep original pricing_tiers for frontend use
+            pricing_tiers: packageData.pricing_tiers
+          }
+        }
+      }
+    }
+
     // Combine profile and auth data with additional stats
     const userProfile = {
       ...profile,
+      package: transformedPackage,
       email: authUser.user?.email || null,
       email_confirmed_at: authUser.user?.email_confirmed_at || null,
       last_sign_in_at: authUser.user?.last_sign_in_at || null,

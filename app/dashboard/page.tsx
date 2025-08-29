@@ -23,6 +23,7 @@ import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/database'
 import QuotaCard from '@/components/QuotaCard'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
+import { formatCurrency } from '@/lib/utils/currency-utils'
 
 interface UserProfile {
   full_name: string | null;
@@ -424,7 +425,7 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-[#6C757D] mt-1">
                   {userProfile.package.price === 0 ? 'Free Plan' : 
-                   `${userProfile.package.currency} ${userProfile.package.price.toLocaleString()}/${userProfile.package.billing_period}`}
+                   `${formatCurrency(userProfile.package.price, userProfile.package.currency)}/${userProfile.package.billing_period}`}
                 </p>
               </div>
             )}
