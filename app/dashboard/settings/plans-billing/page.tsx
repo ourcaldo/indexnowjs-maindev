@@ -13,8 +13,7 @@ import {
   BillingStats, 
   PricingCards, 
   BillingHistory, 
-  PackageComparison,
-  InlineUsageStats 
+  PackageComparison
 } from './components'
 
 // Type definitions
@@ -519,8 +518,6 @@ export default function BillingPage() {
         userCurrency={userCurrency}
       />
 
-      {/* Usage Statistics - Inline 3 Column Layout */}
-      <InlineUsageStats />
 
       {/* Billing Settings Section */}
       <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">

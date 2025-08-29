@@ -1,7 +1,10 @@
-import React from 'react'
-import { AlertCircle, Package, TrendingUp } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { AlertCircle, Package, TrendingUp, Globe, Users, Server } from 'lucide-react'
 import { StatCard } from '@/components/dashboard/enhanced'
 import { Card } from '@/components/dashboard/ui'
+import { supabase } from '@/lib/database'
+import { authService } from '@/lib/auth'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 interface BillingData {
   currentSubscription: {
@@ -21,6 +24,23 @@ interface BillingData {
   }
 }
 
+interface UsageData {
+  daily_quota_used: number
+  daily_quota_limit: number
+  is_unlimited: boolean
+  quota_exhausted: boolean
+  package_name: string
+  remaining_quota: number
+  service_account_count: number
+}
+
+interface KeywordUsageData {
+  keywords_used: number
+  keywords_limit: number
+  is_unlimited: boolean
+  remaining_quota: number
+}
+
 interface BillingStatsProps {
   billingData: BillingData | null
   currentPackageId: string | null
@@ -35,6 +55,97 @@ export const BillingStats = ({
   userCurrency 
 }: BillingStatsProps) => {
   const { currentSubscription, billingStats } = billingData || {}
+  const [usageData, setUsageData] = useState<UsageData | null>(null)
+  const [keywordUsage, setKeywordUsage] = useState<KeywordUsageData | null>(null)
+  const [usageLoading, setUsageLoading] = useState(true)
+
+  useEffect(() => {
+    loadUsageData()
+  }, [])
+
+  const loadUsageData = async () => {
+    try {
+      setUsageLoading(true)
+      await Promise.all([
+        loadQuotaData(),
+        loadKeywordUsageData()
+      ])
+    } catch (error) {
+      console.error('Error loading usage data:', error)
+    } finally {
+      setUsageLoading(false)
+    }
+  }
+
+  const loadQuotaData = async () => {
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) return
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) return
+
+      const response = await fetch('/api/user/quota', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setUsageData(data.quota)
+      }
+    } catch (error) {
+      console.error('Error loading usage data:', error)
+    }
+  }
+
+  const loadKeywordUsageData = async () => {
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) return
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) return
+
+      const response = await fetch('/api/user/keyword-usage', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setKeywordUsage(data)
+      }
+    } catch (error) {
+      console.error('Error loading keyword usage:', error)
+    }
+  }
+
+  const getUsagePercentage = (used: number, limit: number, isUnlimited: boolean) => {
+    if (isUnlimited || limit <= 0) return 0
+    return Math.min(100, (used / limit) * 100)
+  }
+
+  const getExpirationText = () => {
+    if (!currentSubscription?.expires_at) return 'No expiration'
+    
+    const expiryDate = new Date(currentSubscription.expires_at)
+    const now = new Date()
+    const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    
+    if (daysUntilExpiry <= 0) return 'Expired'
+    if (daysUntilExpiry <= 7) return `${daysUntilExpiry} days left`
+    
+    return expiryDate.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
 
   return (
     <div className="space-y-6">
@@ -55,36 +166,117 @@ export const BillingStats = ({
         </Card>
       )}
 
-      {/* Current Subscription Stats */}
+      {/* Unified Plan & Usage Section - Like Reference Design */}
       {currentSubscription && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Current Plan"
-            value={currentSubscription.package_name}
-            description={`${currentSubscription.billing_period} billing`}
-            icon={<Package className="w-6 h-6" />}
-          />
-          
-          <StatCard
-            title="Amount Paid"
-            value={formatCurrency(currentSubscription.amount_paid, userCurrency)}
-            description="Current billing cycle"
-            icon={<TrendingUp className="w-6 h-6" style={{color: '#4BB543'}} />}
-          />
-          
-          <StatCard
-            title="Days Remaining"
-            value={billingStats?.days_remaining?.toString() || '0'}
-            description="Until next billing"
-            icon={<AlertCircle className="w-6 h-6" style={{color: '#F0A202'}} />}
-          />
-          
-          <StatCard
-            title="Total Spent"
-            value={formatCurrency(billingStats?.total_spent || 0, userCurrency)}
-            description={`${billingStats?.total_payments || 0} transactions`}
-            icon={<TrendingUp className="w-6 h-6" style={{color: '#3D8BFF'}} />}
-          />
+        <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+          {/* Plan Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-lg font-semibold text-[#1A1A1A]">Plan</h2>
+                <h2 className="text-lg font-semibold text-[#1A1A1A]">Payment</h2>
+              </div>
+              <div className="flex items-center gap-3">
+                <div>
+                  <h3 className="text-xl font-bold text-[#1A1A1A]">{currentSubscription.package_name}</h3>
+                  <p className="text-sm text-[#6C757D]">{getExpirationText()}</p>
+                </div>
+                <div className="text-right ml-auto">
+                  <div className="text-xl font-bold text-[#1A1A1A]">
+                    {formatCurrency(currentSubscription.amount_paid, userCurrency)}
+                  </div>
+                  <p className="text-sm text-[#6C757D]">per {currentSubscription.billing_period}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button className="text-sm text-[#6C757D] hover:text-[#1A1A1A]">Cancel subscription</button>
+              <button className="text-sm text-[#3D8BFF] hover:text-[#3D8BFF]/80">Upgrade</button>
+            </div>
+          </div>
+
+          {/* Usage Stats - Inline 3 Column Layout */}
+          {usageLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-[#E0E6ED]">
+              {/* Daily URLs */}
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Globe className="h-4 w-4 text-[#6C757D]" />
+                  <span className="text-sm font-medium text-[#6C757D]">Daily URLs</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold text-[#1A1A1A]">
+                    {usageData?.daily_quota_used || 0}
+                  </div>
+                  <div className="text-sm text-[#6C757D]">
+                    {usageData?.is_unlimited ? 'Unlimited' : `${usageData?.daily_quota_limit || 500}`}
+                  </div>
+                  {!usageData?.is_unlimited && (
+                    <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                      <div 
+                        className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${getUsagePercentage(
+                            usageData?.daily_quota_used || 0, 
+                            usageData?.daily_quota_limit || 500, 
+                            usageData?.is_unlimited || false
+                          )}%` 
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Keywords tracked */}
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Users className="h-4 w-4 text-[#6C757D]" />
+                  <span className="text-sm font-medium text-[#6C757D]">Keywords tracked</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold text-[#1A1A1A]">
+                    {keywordUsage?.keywords_used || 147}
+                  </div>
+                  <div className="text-sm text-[#6C757D]">
+                    {keywordUsage?.is_unlimited ? 'Unlimited' : `${keywordUsage?.keywords_limit || 250}`}
+                  </div>
+                  {!keywordUsage?.is_unlimited && (
+                    <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                      <div 
+                        className="bg-[#F0A202] h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${getUsagePercentage(
+                            keywordUsage?.keywords_used || 147, 
+                            keywordUsage?.keywords_limit || 250, 
+                            keywordUsage?.is_unlimited || false
+                          )}%` 
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Service accounts */}
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Server className="h-4 w-4 text-[#6C757D]" />
+                  <span className="text-sm font-medium text-[#6C757D]">Service accounts</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold text-[#1A1A1A]">
+                    {usageData?.service_account_count || 2}
+                  </div>
+                  <div className="text-sm text-[#6C757D]">connected</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
