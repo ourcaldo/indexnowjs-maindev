@@ -180,39 +180,46 @@ export const UsageOverviewCard = () => {
         </div>
       </div>
 
-      {/* Plan Info */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-[#1A1A1A] mb-1">{packageName}</h3>
+      {/* Plan Info - Vertical Layout */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold text-[#1A1A1A]">{packageName}</h3>
+          {hasActiveSubscription && (
+            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-[#4BB543]/10 text-[#4BB543] border border-[#4BB543]/20">
+              Active
+            </span>
+          )}
+        </div>
+        <div className="space-y-1">
           <p className="text-sm text-[#6C757D]">
             {hasActiveSubscription ? 'Active subscription' : 'No active subscription'}
           </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-[#1A1A1A]">{getExpirationText()}</p>
+          <p className="text-sm font-medium text-[#1A1A1A]">
+            {getExpirationText()}
+          </p>
         </div>
       </div>
 
-      {/* Usage & Limits */}
+      {/* Usage & Limits - Vertical Layout */}
       <div>
         <h4 className="text-sm font-medium text-[#6C757D] mb-4">Usage & Limits</h4>
         
-        <div className="space-y-4">
+        <div className="grid gap-6">
           {/* Daily URLs */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
               <Globe className="h-4 w-4 text-[#6C757D]" />
-              <span className="text-sm text-[#6C757D]">Daily URLs</span>
+              <span className="text-sm font-medium text-[#6C757D]">Daily URLs</span>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right min-w-16">
-                <div className="text-lg font-bold text-[#1A1A1A]">{usageData?.daily_quota_used || 0}</div>
-                <div className="text-xs text-[#6C757D]">
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-[#1A1A1A]">{usageData?.daily_quota_used || 0}</span>
+                <span className="text-sm text-[#6C757D]">
                   of {usageData?.is_unlimited ? '∞' : (usageData?.daily_quota_limit || 500)}
-                </div>
+                </span>
               </div>
               {!usageData?.is_unlimited && (
-                <div className="w-20 bg-[#E0E6ED] rounded-full h-2">
+                <div className="w-full bg-[#E0E6ED] rounded-full h-2">
                   <div 
                     className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
                     style={{ 
@@ -229,20 +236,20 @@ export const UsageOverviewCard = () => {
           </div>
 
           {/* Keywords tracked */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
               <Users className="h-4 w-4 text-[#6C757D]" />
-              <span className="text-sm text-[#6C757D]">Keywords tracked</span>
+              <span className="text-sm font-medium text-[#6C757D]">Keywords tracked</span>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right min-w-16">
-                <div className="text-lg font-bold text-[#1A1A1A]">{keywordUsage?.keywords_used || 147}</div>
-                <div className="text-xs text-[#6C757D]">
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-[#1A1A1A]">{keywordUsage?.keywords_used || 147}</span>
+                <span className="text-sm text-[#6C757D]">
                   of {keywordUsage?.is_unlimited ? '∞' : (keywordUsage?.keywords_limit || 250)}
-                </div>
+                </span>
               </div>
               {!keywordUsage?.is_unlimited && (
-                <div className="w-20 bg-[#E0E6ED] rounded-full h-2">
+                <div className="w-full bg-[#E0E6ED] rounded-full h-2">
                   <div 
                     className="bg-[#F0A202] h-2 rounded-full transition-all duration-300"
                     style={{ 
@@ -259,14 +266,16 @@ export const UsageOverviewCard = () => {
           </div>
 
           {/* Service accounts */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
               <Server className="h-4 w-4 text-[#6C757D]" />
-              <span className="text-sm text-[#6C757D]">Service accounts</span>
+              <span className="text-sm font-medium text-[#6C757D]">Service accounts</span>
             </div>
-            <div className="text-right min-w-16">
-              <div className="text-lg font-bold text-[#1A1A1A]">{usageData?.service_account_count || 2}</div>
-              <div className="text-xs text-[#6C757D]">connected</div>
+            <div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-[#1A1A1A]">{usageData?.service_account_count || 2}</span>
+                <span className="text-sm text-[#6C757D]">connected</span>
+              </div>
             </div>
           </div>
         </div>

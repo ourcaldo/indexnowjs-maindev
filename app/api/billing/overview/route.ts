@@ -82,9 +82,13 @@ export async function GET(request: NextRequest) {
       daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     }
 
-    // Prepare response data
-    const responseData = {
-      currentSubscription: currentSubscription ? {
+    // Prepare current subscription data
+    // First check if there's a subscription record, otherwise use profile data
+    let subscriptionData = null
+    
+    if (currentSubscription) {
+      // Use subscription table data
+      subscriptionData = {
         package_name: currentSubscription.package?.name || 'Unknown',
         package_slug: currentSubscription.package?.slug || '',
         subscription_status: currentSubscription.subscription_status,
@@ -92,7 +96,23 @@ export async function GET(request: NextRequest) {
         subscribed_at: currentSubscription.started_at,
         amount_paid: parseFloat(currentSubscription.amount_paid || '0'),
         billing_period: currentSubscription.billing_period
-      } : null,
+      }
+    } else if (userProfile.package_id && userProfile.package) {
+      // Use profile data when user has direct package assignment
+      subscriptionData = {
+        package_name: userProfile.package.name || 'Unknown',
+        package_slug: userProfile.package.slug || '',
+        subscription_status: userProfile.expires_at && new Date(userProfile.expires_at) > new Date() ? 'active' : 'expired',
+        expires_at: userProfile.expires_at,
+        subscribed_at: userProfile.subscribed_at,
+        amount_paid: 0, // No amount data in profile
+        billing_period: userProfile.package.billing_period || 'monthly'
+      }
+    }
+
+    // Prepare response data
+    const responseData = {
+      currentSubscription: subscriptionData,
       billingStats: {
         total_payments: billingStats?.total_payments || 0,
         total_spent: parseFloat(billingStats?.total_spent || '0'),

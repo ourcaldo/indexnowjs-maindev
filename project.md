@@ -1205,6 +1205,33 @@ JWT_SECRET=[jwt-secret-key]
   - `app/dashboard/settings/plans-billing/checkout/page.tsx` - Fixed payment gateway filtering logic for trial flow
 - **Result**: Free trial checkout now correctly displays credit card payment method, allowing users to complete trial signup process
 
+### January 30, 2025 10:30: Settings UsageOverviewCard Layout & Package Detection Fixes ✅
+
+-- **✅ FIXED USAGEOVERVIEWCARD LAYOUT**: Updated Settings > Plans & Billing component to match reference design
+  - **Layout Issue Resolved**: Changed from inline layout (label left, usage right) to vertical layout (usage below label)
+  - **Design Consistency**: Updated layout to match reference design with vertical stacking of usage metrics
+  - **Progress Bar Enhancement**: Progress bars now span full width instead of fixed small width
+  - **Typography Improvements**: Increased usage numbers to text-2xl for better visibility and prominence
+  - **Status Indicator**: Added green "Active" badge for users with active subscriptions
+
+-- **✅ FIXED PACKAGE DETECTION & EXPIRATION DATE DISPLAY**: Resolved API issues preventing proper package information display
+  - **Root Cause Identified**: Billing overview API was only checking `indb_payment_subscriptions` table for subscription data
+  - **Profile-Based Subscription Support**: Enhanced API to handle subscription data stored directly in `indb_auth_user_profiles` table
+  - **Fallback Logic**: Added fallback to use `package_id`, `expires_at`, and `subscribed_at` from user profile when no subscription record exists
+  - **Data Consistency**: Ensures Premium package users (like user ID: 915f50e5-0902-466a-b1af-bdf19d789722) now show correct package details and expiration dates
+
+-- **Technical Details**:
+  - ✅ Modified `app/dashboard/settings/plans-billing/components/UsageOverviewCard.tsx` - Updated layout from horizontal flex to vertical grid
+  - ✅ Enhanced `app/api/billing/overview/route.ts` - Added profile data fallback for subscription information
+  - ✅ Updated plan info section to show active status badge and vertical expiration date display
+  - ✅ Changed usage metrics to vertical layout with larger numbers (text-2xl) and full-width progress bars
+
+-- **Files Modified**:
+  - `app/dashboard/settings/plans-billing/components/UsageOverviewCard.tsx` - Layout redesign and component structure
+  - `app/api/billing/overview/route.ts` - API enhancement for profile-based subscription data
+
+-- **Result**: Settings page now properly displays user's active Premium package, correct expiration date (Sept 27, 2025), and usage metrics in a clean vertical layout matching the reference design.
+
 ### January 30, 2025 02:00: Free Trial System Fixes & Replit Migration ✅
 - **✅ DATABASE POLICY INFINITE RECURSION RESOLVED**: Fixed critical policy conflicts preventing trial functionality
   - **Root Cause**: Multiple overlapping policies on `indb_auth_user_profiles` table caused infinite recursion errors
