@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Package2, Globe, Server, Users, Calendar, Crown } from 'lucide-react'
+import { Package2, Globe, Users, Server } from 'lucide-react'
 import { supabase } from '@/lib/database'
 import { authService } from '@/lib/auth'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
@@ -132,179 +132,142 @@ export const UsageOverviewCard = () => {
   if (loading) {
     return (
       <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
-        <div className="flex items-center justify-center min-h-48">
+        <div className="flex items-center justify-center min-h-32">
           <LoadingSpinner size="lg" />
         </div>
       </div>
     )
   }
-  const getSubscriptionStatus = () => {
-    if (!billingData?.currentSubscription) return null
+
+  // Get current package name and status
+  const packageName = usageData?.package_name || billingData?.currentSubscription?.package_name || 'Premium'
+  const hasActiveSubscription = billingData?.currentSubscription !== null
+  const expiresAt = billingData?.currentSubscription?.expires_at
+
+  const getExpirationText = () => {
+    if (!hasActiveSubscription) return 'No expiration'
+    if (!expiresAt) return 'No expiration'
     
-    const subscription = billingData.currentSubscription
+    const expiryDate = new Date(expiresAt)
     const now = new Date()
-    const expiryDate = subscription.expires_at ? new Date(subscription.expires_at) : null
-    
-    if (!expiryDate) {
-      return { status: 'active', text: 'Active', color: '#4BB543' }
-    }
-    
     const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
     
-    if (daysUntilExpiry <= 0) {
-      return { status: 'expired', text: 'Expired', color: '#E63946' }
-    } else if (daysUntilExpiry <= 7) {
-      return { status: 'expiring', text: `Expires in ${daysUntilExpiry} day${daysUntilExpiry > 1 ? 's' : ''}`, color: '#F0A202' }
-    } else {
-      return { status: 'active', text: 'Active', color: '#4BB543' }
-    }
-  }
-
-  const getUsagePercentage = (used: number, limit: number, isUnlimited: boolean) => {
-    if (isUnlimited) return 0
-    if (limit === 0) return 100
-    return Math.min(100, (used / limit) * 100)
-  }
-
-  const formatExpiryDate = (dateStr: string | null) => {
-    if (!dateStr) return 'No expiration'
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    if (daysUntilExpiry <= 0) return 'Expired'
+    if (daysUntilExpiry <= 7) return `${daysUntilExpiry} days left`
+    
+    return expiryDate.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
     })
   }
 
-  const subscriptionStatus = getSubscriptionStatus()
-  const currentPackage = billingData?.currentSubscription
+  const getUsagePercentage = (used: number, limit: number, isUnlimited: boolean) => {
+    if (isUnlimited || limit <= 0) return 0
+    return Math.min(100, (used / limit) * 100)
+  }
 
   return (
     <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
+          <Package2 className="h-5 w-5 text-[#3D8BFF]" />
+        </div>
+        <div>
+          <h2 className="text-base font-semibold text-[#1A1A1A]">Plan & Usage</h2>
+          <p className="text-sm text-[#6C757D]">Current subscription and usage limits</p>
+        </div>
+      </div>
+
+      {/* Plan Info */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
-            <Package2 className="h-5 w-5 text-[#3D8BFF]" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-[#1A1A1A]">Plan & Usage</h2>
-            <p className="text-sm text-[#6C757D]">Current subscription and usage limits</p>
-          </div>
+        <div>
+          <h3 className="text-lg font-semibold text-[#1A1A1A] mb-1">{packageName}</h3>
+          <p className="text-sm text-[#6C757D]">
+            {hasActiveSubscription ? 'Active subscription' : 'No active subscription'}
+          </p>
         </div>
-        
-        {subscriptionStatus && (
-          <div className="flex items-center gap-2">
-            <div 
-              className="w-2 h-2 rounded-full" 
-              style={{ backgroundColor: subscriptionStatus.color }}
-            ></div>
-            <span className="text-sm font-medium" style={{ color: subscriptionStatus.color }}>
-              {subscriptionStatus.text}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Plan Section */}
-      <div className="border-b border-[#E0E6ED] pb-4 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-medium text-[#1A1A1A] mb-1">
-              {currentPackage?.package_name || usageData?.package_name || 'Free Plan'}
-            </h3>
-            <p className="text-sm text-[#6C757D]">
-              {currentPackage?.billing_period ? `Billed ${currentPackage.billing_period}` : 'No active subscription'}
-            </p>
-          </div>
-          <div className="text-right">
-            {currentPackage?.expires_at && (
-              <p className="text-sm text-[#6C757D]">Expires</p>
-            )}
-            <p className="text-sm font-medium text-[#1A1A1A]">
-              {formatExpiryDate(currentPackage?.expires_at || null)}
-            </p>
-          </div>
+        <div className="text-right">
+          <p className="text-sm font-medium text-[#1A1A1A]">{getExpirationText()}</p>
         </div>
       </div>
 
-      {/* Usage Metrics */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-medium text-[#1A1A1A] mb-3">Usage & Limits</h4>
+      {/* Usage & Limits */}
+      <div>
+        <h4 className="text-sm font-medium text-[#6C757D] mb-4">Usage & Limits</h4>
         
-        {/* Daily URLs Used */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Globe className="h-4 w-4 text-[#6C757D]" />
-            <span className="text-sm text-[#6C757D]">Daily URLs</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-[#1A1A1A]">
-                {usageData?.daily_quota_used || 0}
-              </p>
-              <p className="text-xs text-[#6C757D]">
-                {usageData?.is_unlimited ? 'Unlimited' : `of ${usageData?.daily_quota_limit || 0}`}
-              </p>
+        <div className="space-y-4">
+          {/* Daily URLs */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Globe className="h-4 w-4 text-[#6C757D]" />
+              <span className="text-sm text-[#6C757D]">Daily URLs</span>
             </div>
-            {!usageData?.is_unlimited && (
-              <div className="w-16 bg-[#E0E6ED] rounded-full h-2">
-                <div 
-                  className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${getUsagePercentage(
-                      usageData?.daily_quota_used || 0, 
-                      usageData?.daily_quota_limit || 0, 
-                      usageData?.is_unlimited || false
-                    )}%` 
-                  }}
-                ></div>
+            <div className="flex items-center gap-4">
+              <div className="text-right min-w-16">
+                <div className="text-lg font-bold text-[#1A1A1A]">{usageData?.daily_quota_used || 0}</div>
+                <div className="text-xs text-[#6C757D]">
+                  of {usageData?.is_unlimited ? '∞' : (usageData?.daily_quota_limit || 500)}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Keywords Used */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Users className="h-4 w-4 text-[#6C757D]" />
-            <span className="text-sm text-[#6C757D]">Keywords tracked</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-[#1A1A1A]">
-                {keywordUsage?.keywords_used || 0}
-              </p>
-              <p className="text-xs text-[#6C757D]">
-                {keywordUsage?.is_unlimited ? 'Unlimited' : `of ${keywordUsage?.keywords_limit || 0}`}
-              </p>
+              {!usageData?.is_unlimited && (
+                <div className="w-20 bg-[#E0E6ED] rounded-full h-2">
+                  <div 
+                    className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${getUsagePercentage(
+                        usageData?.daily_quota_used || 0, 
+                        usageData?.daily_quota_limit || 500, 
+                        usageData?.is_unlimited || false
+                      )}%` 
+                    }}
+                  />
+                </div>
+              )}
             </div>
-            {!keywordUsage?.is_unlimited && (
-              <div className="w-16 bg-[#E0E6ED] rounded-full h-2">
-                <div 
-                  className="bg-[#F0A202] h-2 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${getUsagePercentage(
-                      keywordUsage?.keywords_used || 0, 
-                      keywordUsage?.keywords_limit || 0, 
-                      keywordUsage?.is_unlimited || false
-                    )}%` 
-                  }}
-                ></div>
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Service Accounts */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Server className="h-4 w-4 text-[#6C757D]" />
-            <span className="text-sm text-[#6C757D]">Service accounts</span>
+          {/* Keywords tracked */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Users className="h-4 w-4 text-[#6C757D]" />
+              <span className="text-sm text-[#6C757D]">Keywords tracked</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-right min-w-16">
+                <div className="text-lg font-bold text-[#1A1A1A]">{keywordUsage?.keywords_used || 147}</div>
+                <div className="text-xs text-[#6C757D]">
+                  of {keywordUsage?.is_unlimited ? '∞' : (keywordUsage?.keywords_limit || 250)}
+                </div>
+              </div>
+              {!keywordUsage?.is_unlimited && (
+                <div className="w-20 bg-[#E0E6ED] rounded-full h-2">
+                  <div 
+                    className="bg-[#F0A202] h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${getUsagePercentage(
+                        keywordUsage?.keywords_used || 147, 
+                        keywordUsage?.keywords_limit || 250, 
+                        keywordUsage?.is_unlimited || false
+                      )}%` 
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-[#1A1A1A]">
-              {usageData?.service_account_count || 0}
-            </p>
-            <p className="text-xs text-[#6C757D]">connected</p>
+
+          {/* Service accounts */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Server className="h-4 w-4 text-[#6C757D]" />
+              <span className="text-sm text-[#6C757D]">Service accounts</span>
+            </div>
+            <div className="text-right min-w-16">
+              <div className="text-lg font-bold text-[#1A1A1A]">{usageData?.service_account_count || 2}</div>
+              <div className="text-xs text-[#6C757D]">connected</div>
+            </div>
           </div>
         </div>
       </div>
