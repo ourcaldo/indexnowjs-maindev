@@ -19,8 +19,6 @@ This document outlines a comprehensive refactoring strategy for IndexNow Studio,
 - `lib/google-services/google-indexing-processor.ts` (1,060 lines) → Extract into service layers
 - `app/dashboard/indexnow/overview/page.tsx` (923 lines) → Extract UI components and data logic
 
-**Excluded:** `app/api/midtrans/webhook/route.ts` (1,028 lines) - Cannot be modified per project requirements
-
 **Approach:**
 1. **Extract UI Components**: Move reusable UI elements to `components/ui/`
 2. **Business Logic Separation**: Create dedicated service classes in `lib/services/`
@@ -63,13 +61,12 @@ lib/
 │       └── JobValidator.ts         # Job validation
 ```
 
-**Note**: Midtrans webhook route will be kept as-is per project requirements.
 
 ## Priority 1: API Routes Organization & Payment System
 **Timeline: Days 4-6**
 
 ### P1.1: API Routes Restructuring (92 routes)
-**Current Issue**: Flat structure with complex webhook handling
+**Current Issue**: Flat structure with complex routing
 
 **New Structure:**
 ```
@@ -97,8 +94,7 @@ app/api/
 │   ├── payments/
 │   │   ├── midtrans/
 │   │   │   ├── snap/route.ts       # Snap payments
-│   │   │   ├── recurring/route.ts  # Subscription payments
-│   │   │   └── webhook/route.ts    # Unified webhook
+│   │   │   └── recurring/route.ts  # Subscription payments
 │   │   └── channels/
 │   └── rank-tracking/
 │       ├── keywords/route.ts
@@ -127,7 +123,6 @@ lib/services/payments/
     └── PackageManager.ts           # Package management
 ```
 
-**Note**: Webhook route (`app/api/midtrans/webhook/route.ts`) will remain unchanged per project requirements.
 
 ## Priority 2: Dashboard & Page Optimization
 **Timeline: Days 7-9**
