@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
         name: pkg.name,
         slug: pkg.slug,
         description: pkg.description,
-        price: parseFloat(pkg.price || '0'),
+        // Note: price now comes from pricing_tiers, this field is kept for backward compatibility
+        price: 0, // Deprecated - use pricing_tiers instead
         currency: pkg.currency,
         billing_period: pkg.billing_period,
         features: pkg.features || [],

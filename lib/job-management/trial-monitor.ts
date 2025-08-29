@@ -26,7 +26,7 @@ export class TrialMonitorService {
           indb_payment_packages (
             name,
             slug,
-            price,
+            pricing_tiers,
             billing_period
           )
         `)
