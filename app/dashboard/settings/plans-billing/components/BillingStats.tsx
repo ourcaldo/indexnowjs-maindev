@@ -171,23 +171,24 @@ export const BillingStats = ({
         <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
           {/* Plan Header */}
           <div className="flex items-center justify-between mb-6">
-            <div className="flex justify-between w-full items-start">
-              <div className="flex-1">
-                <h2 className="text-sm font-medium text-[#6C757D] mb-2">Plan</h2>
-                <h3 className="text-xl font-bold text-[#1A1A1A] mb-1">{currentSubscription.package_name}</h3>
-                <p className="text-sm text-[#6C757D]">{getExpirationText()}</p>
-              </div>
-              <div className="flex-1 text-right">
-                <h2 className="text-sm font-medium text-[#6C757D] mb-2">Payment</h2>
-                <div className="text-xl font-bold text-[#1A1A1A] mb-1">
-                  {formatCurrency(currentSubscription.amount_paid, userCurrency)}
+            <div className="flex-1">
+              <h2 className="text-sm font-medium text-[#6C757D] mb-3">Plan Payment</h2>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-[#1A1A1A] mb-1">{currentSubscription.package_name}</h3>
+                  <p className="text-sm text-[#6C757D]">{getExpirationText()}</p>
                 </div>
-                <p className="text-sm text-[#6C757D]">per {currentSubscription.billing_period}</p>
+                <div className="text-right">
+                  <div className="text-xl font-bold text-[#1A1A1A] mb-1">
+                    {formatCurrency(currentSubscription.amount_paid, userCurrency)}
+                  </div>
+                  <p className="text-sm text-[#6C757D]">per {currentSubscription.billing_period}</p>
+                </div>
               </div>
-              <div className="flex gap-2 ml-6">
-                <button className="text-sm text-[#6C757D] hover:text-[#1A1A1A]">Cancel subscription</button>
-                <button className="text-sm text-[#3D8BFF] hover:text-[#3D8BFF]/80">Upgrade</button>
-              </div>
+            </div>
+            <div className="flex gap-2 ml-6">
+              <button className="text-sm text-[#6C757D] hover:text-[#1A1A1A]">Cancel subscription</button>
+              <button className="text-sm text-[#3D8BFF] hover:text-[#3D8BFF]/80">Upgrade</button>
             </div>
           </div>
 
