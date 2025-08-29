@@ -17,8 +17,9 @@ This document outlines a comprehensive refactoring strategy for IndexNow Studio,
 **Target Files:**
 - `app/backend/admin/users/[id]/page.tsx` (1,375 lines) → Split into 8-10 components
 - `lib/google-services/google-indexing-processor.ts` (1,060 lines) → Extract into service layers
-- `app/api/midtrans/webhook/route.ts` (1,028 lines) → Split webhook handlers by payment type
 - `app/dashboard/indexnow/overview/page.tsx` (923 lines) → Extract UI components and data logic
+
+**Excluded:** `app/api/midtrans/webhook/route.ts` (1,028 lines) - Cannot be modified per project requirements
 
 **Approach:**
 1. **Extract UI Components**: Move reusable UI elements to `components/ui/`
@@ -61,6 +62,8 @@ lib/
 │       ├── UrlValidator.ts         # URL validation
 │       └── JobValidator.ts         # Job validation
 ```
+
+**Note**: Midtrans webhook route will be kept as-is per project requirements.
 
 ## Priority 1: API Routes Organization & Payment System
 **Timeline: Days 4-6**
@@ -105,7 +108,6 @@ app/api/
 
 ### P1.2: Payment System Refactoring
 **Target Files:**
-- `app/api/midtrans/webhook/route.ts` (1,028 lines)
 - `lib/payment-services/midtrans-service.ts` (484 lines)
 
 **New Architecture:**
@@ -118,17 +120,14 @@ lib/services/payments/
 ├── midtrans/
 │   ├── MidtransSnapService.ts      # Snap payments
 │   ├── MidtransRecurringService.ts # Subscription payments
-│   ├── MidtransWebhookHandler.ts   # Webhook processing
 │   └── MidtransTokenManager.ts     # Token management
-├── webhooks/
-│   ├── WebhookRouter.ts            # Route webhooks by type
-│   ├── SubscriptionWebhook.ts      # Handle subscription events
-│   └── TransactionWebhook.ts       # Handle transaction events
 └── billing/
     ├── BillingService.ts           # Billing logic
     ├── TrialManager.ts             # Trial management
     └── PackageManager.ts           # Package management
 ```
+
+**Note**: Webhook route (`app/api/midtrans/webhook/route.ts`) will remain unchanged per project requirements.
 
 ## Priority 2: Dashboard & Page Optimization
 **Timeline: Days 7-9**
