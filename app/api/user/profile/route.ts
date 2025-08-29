@@ -79,14 +79,33 @@ export async function GET(request: NextRequest) {
 
     // Apply currency detection and pricing transformation
     let transformedPackage = profile.package
+    
+    console.log('=== PROFILE DEBUG START ===')
+    console.log('profile.package:', profile.package)
+    console.log('profile.country:', profile.country)
+    console.log('Raw pricing_tiers:', profile.package?.pricing_tiers)
+    console.log('pricing_tiers type:', typeof profile.package?.pricing_tiers)
+    
     if (profile.package && profile.country) {
       const userCurrency = getUserCurrency(profile.country)
       const packageData = profile.package
       
+      // Parse pricing_tiers if it's a string
+      let pricingTiers = packageData.pricing_tiers
+      if (typeof pricingTiers === 'string') {
+        try {
+          pricingTiers = JSON.parse(pricingTiers)
+          console.log('Parsed pricing_tiers from string:', pricingTiers)
+        } catch (e) {
+          console.error('Failed to parse pricing_tiers string:', e)
+          pricingTiers = null
+        }
+      }
+      
       // Apply pricing from pricing_tiers based on user currency
-      if (packageData.pricing_tiers && typeof packageData.pricing_tiers === 'object') {
+      if (pricingTiers && typeof pricingTiers === 'object') {
         const billingPeriod = packageData.billing_period || 'monthly'
-        const tierData = packageData.pricing_tiers[billingPeriod]
+        const tierData = pricingTiers[billingPeriod]
         
         console.log('Profile API Debug:')
         console.log('- User Country:', profile.country)
@@ -107,7 +126,7 @@ export async function GET(request: NextRequest) {
             price: finalPrice,
             billing_period: billingPeriod,
             // Keep original pricing_tiers for frontend use
-            pricing_tiers: packageData.pricing_tiers
+            pricing_tiers: pricingTiers
           }
         } else {
           console.log('- No pricing found for currency:', userCurrency)
@@ -117,8 +136,14 @@ export async function GET(request: NextRequest) {
             price: 0 // Default to 0 if no pricing found
           }
         }
+      } else {
+        console.log('No valid pricing_tiers found')
       }
+    } else {
+      console.log('Missing package or country data')
     }
+    console.log('=== PROFILE DEBUG END ===')
+    console.log('Final transformed package:', transformedPackage)
 
     // Combine profile and auth data with additional stats
     const userProfile = {
