@@ -2,49 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-  CreditCard, 
-  Calendar, 
-  DollarSign, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle,
-  Package,
-  Receipt,
-  TrendingUp,
-  Crown,
-  Star,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Filter,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  Download
-} from 'lucide-react'
-import { authService } from '@/lib/auth'
+import { TrendingUp, AlertCircle, Package, CheckCircle, Clock } from 'lucide-react'
 import { supabase } from '@/lib/database'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { authService } from '@/lib/auth'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { useToast } from '@/hooks/use-toast'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { Button } from '@/components/dashboard/ui'
+import { 
+  BillingStats, 
+  PricingCards, 
+  BillingHistory, 
+  PackageComparison 
+} from './components'
 
-interface CurrencyPricing {
-  regular_price: number
-  promo_price: number
-  period_label: string
-}
-
-interface PricingTier {
-  period: string
-  regular_price?: number
-  promo_price?: number
-  discount_percentage?: number
-  IDR?: CurrencyPricing
-  USD?: CurrencyPricing
-}
-
+// Type definitions
 interface PaymentPackage {
   id: string
   name: string
@@ -61,7 +33,7 @@ interface PaymentPackage {
   }
   is_popular: boolean
   is_current: boolean
-  pricing_tiers: Record<string, PricingTier> | any
+  pricing_tiers: any
 }
 
 interface Transaction {
@@ -147,25 +119,22 @@ interface BillingHistoryData {
 }
 
 export default function BillingPage() {
+  // State management
   const [billingData, setBillingData] = useState<BillingData | null>(null)
   const [packagesData, setPackagesData] = useState<PackagesData | null>(null)
+  const [historyData, setHistoryData] = useState<BillingHistoryData | null>(null)
   const [userCurrency, setUserCurrency] = useState<'USD' | 'IDR'>('USD')
   const [trialEligible, setTrialEligible] = useState<boolean | null>(null)
-  const [startingTrial, setStartingTrial] = useState<string | null>(null)
-  
-  // Log page view and billing activities
-  usePageViewLogger('/dashboard/settings/plans-billing', 'Billing & Subscriptions', { section: 'billing_management' })
-  const { logBillingActivity } = useActivityLogger()
-  const { addToast } = useToast()
-  const router = useRouter()
-  const [historyData, setHistoryData] = useState<BillingHistoryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Plans section state
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<string>('monthly')
   const [subscribing, setSubscribing] = useState<string | null>(null)
+  const [startingTrial, setStartingTrial] = useState<string | null>(null)
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null)
+  const [showDetails, setShowDetails] = useState<Record<string, boolean>>({})
+  const [showComparePlans, setShowComparePlans] = useState(false)
 
   // History section state
   const [currentPage, setCurrentPage] = useState(1)
@@ -174,33 +143,25 @@ export default function BillingPage() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
   const [selectAll, setSelectAll] = useState(false)
-  const [showDetails, setShowDetails] = useState<Record<string, boolean>>({})
-  const [showComparePlans, setShowComparePlans] = useState(false)
 
+  // Hooks
+  const router = useRouter()
+  const { addToast } = useToast()
+  const { logBillingActivity } = useActivityLogger()
+  usePageViewLogger('/dashboard/settings/plans-billing', 'Billing & Subscriptions', { section: 'billing_management' })
+
+  // Load data on mount
   useEffect(() => {
     loadAllData()
     
-    // Check for payment status in URL parameters
+    // Handle payment status from URL
     const urlParams = new URLSearchParams(window.location.search)
     const paymentStatus = urlParams.get('payment')
     
     if (paymentStatus) {
-      // Clear the URL parameter
       const url = new URL(window.location.href)
       url.searchParams.delete('payment')
       router.replace(url.pathname, { scroll: false })
-      
-      // No toast notifications on billing page - users already see notifications during payment flow
-      // Just clean up the URL parameter without showing any toasts to prevent duplicates
-      switch (paymentStatus) {
-        case 'success':
-        case 'processing':
-        case 'pending':
-        case 'failed':
-          // All payment status notifications are handled during the payment flow
-          // No additional toasts needed on billing page redirect
-          break
-      }
     }
   }, [])
 
@@ -210,6 +171,7 @@ export default function BillingPage() {
     }
   }, [currentPage, statusFilter, typeFilter, searchTerm])
 
+  // Data loading functions
   const loadAllData = async () => {
     try {
       setLoading(true)
@@ -223,6 +185,93 @@ export default function BillingPage() {
       console.error('Error loading data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadBillingData = async () => {
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) throw new Error('No authentication token')
+
+      const response = await fetch('/api/billing/overview', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) throw new Error('Failed to load billing data')
+
+      const data = await response.json()
+      setBillingData(data)
+    } catch (error) {
+      console.error('Error loading billing data:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load billing data')
+    }
+  }
+
+  const loadPackages = async () => {
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) throw new Error('No authentication token')
+
+      const response = await fetch('/api/billing/packages', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) throw new Error('Failed to load packages')
+
+      const data = await response.json()
+      setPackagesData(data)
+      
+      if (data.user_currency) {
+        setUserCurrency(data.user_currency)
+      }
+    } catch (error) {
+      console.error('Error loading packages:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load packages')
+    }
+  }
+
+  const loadBillingHistory = async () => {
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const token = (await supabase.auth.getSession()).data.session?.access_token
+      if (!token) throw new Error('No authentication token')
+
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '10',
+        ...(statusFilter && { status: statusFilter }),
+        ...(typeFilter && { type: typeFilter }),
+        ...(searchTerm && { search: searchTerm })
+      })
+
+      const response = await fetch(`/api/billing/history?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) throw new Error('Failed to load billing history')
+
+      const data = await response.json()
+      setHistoryData(data)
+    } catch (error) {
+      console.error('Error loading billing history:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load billing history')
     }
   }
 
@@ -247,6 +296,67 @@ export default function BillingPage() {
     }
   }
 
+  // Helper functions
+  const getBillingPeriodPrice = (pkg: PaymentPackage, period: string): { price: number, originalPrice?: number, discount?: number } => {
+    if (pkg.pricing_tiers && typeof pkg.pricing_tiers === 'object' && pkg.pricing_tiers[period]) {
+      const periodTier = pkg.pricing_tiers[period]
+      
+      if (periodTier[userCurrency]) {
+        const currencyTier = periodTier[userCurrency]
+        return {
+          price: currencyTier.promo_price || currencyTier.regular_price,
+          originalPrice: currencyTier.promo_price ? currencyTier.regular_price : undefined,
+          discount: currencyTier.promo_price ? Math.round(((currencyTier.regular_price - currencyTier.promo_price) / currencyTier.regular_price) * 100) : undefined
+        }
+      }
+      
+      if (Array.isArray(pkg.pricing_tiers)) {
+        const tier = pkg.pricing_tiers.find((t: any) => t.period === period)
+        if (tier) {
+          return {
+            price: tier.promo_price || tier.regular_price,
+            originalPrice: tier.promo_price ? tier.regular_price : undefined,
+            discount: tier.discount_percentage
+          }
+        }
+      }
+    }
+    
+    return { price: pkg.price }
+  }
+
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  // Action handlers
+  const handleSubscribe = async (packageId: string) => {
+    try {
+      setSubscribing(packageId)
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
+      window.location.href = checkoutUrl
+    } catch (error) {
+      console.error('Error subscribing:', error)
+      alert(error instanceof Error ? error.message : 'Failed to redirect to checkout')
+    } finally {
+      setSubscribing(null)
+    }
+  }
+
   const handleStartTrial = async (packageId: string) => {
     try {
       setStartingTrial(packageId)
@@ -264,156 +374,6 @@ export default function BillingPage() {
     return packageName.includes('premium') || packageName.includes('pro')
   }
 
-  const loadBillingData = async () => {
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) {
-        throw new Error('User not authenticated')
-      }
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) {
-        throw new Error('No authentication token')
-      }
-
-      const response = await fetch('/api/billing/overview', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to load billing data')
-      }
-
-      const data = await response.json()
-      setBillingData(data)
-    } catch (error) {
-      console.error('Error loading billing data:', error)
-      setError(error instanceof Error ? error.message : 'Failed to load billing data')
-    }
-  }
-
-  const loadPackages = async () => {
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) {
-        throw new Error('User not authenticated')
-      }
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) {
-        throw new Error('No authentication token')
-      }
-
-      const response = await fetch('/api/billing/packages', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to load packages')
-      }
-
-      const data = await response.json()
-      setPackagesData(data)
-      
-      // Set user currency from API response
-      if (data.user_currency) {
-        setUserCurrency(data.user_currency)
-      }
-    } catch (error) {
-      console.error('Error loading packages:', error)
-      setError(error instanceof Error ? error.message : 'Failed to load packages')
-    }
-  }
-
-  const loadBillingHistory = async () => {
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) {
-        throw new Error('User not authenticated')
-      }
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) {
-        throw new Error('No authentication token')
-      }
-
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: '10',
-        ...(statusFilter && { status: statusFilter }),
-        ...(typeFilter && { type: typeFilter }),
-        ...(searchTerm && { search: searchTerm })
-      })
-
-      const response = await fetch(`/api/billing/history?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to load billing history')
-      }
-
-      const data = await response.json()
-      setHistoryData(data)
-    } catch (error) {
-      console.error('Error loading billing history:', error)
-      setError(error instanceof Error ? error.message : 'Failed to load billing history')
-    }
-  }
-
-  const getBillingPeriodPrice = (pkg: PaymentPackage, period: string): { price: number, originalPrice?: number, discount?: number } => {
-    // Check if package has new multicurrency structure
-    if (pkg.pricing_tiers && typeof pkg.pricing_tiers === 'object' && pkg.pricing_tiers[period]) {
-      const periodTier = pkg.pricing_tiers[period]
-      
-      // New multicurrency format
-      if (periodTier[userCurrency]) {
-        const currencyTier = periodTier[userCurrency]
-        return {
-          price: currencyTier.promo_price || currencyTier.regular_price,
-          originalPrice: currencyTier.promo_price ? currencyTier.regular_price : undefined,
-          discount: currencyTier.promo_price ? Math.round(((currencyTier.regular_price - currencyTier.promo_price) / currencyTier.regular_price) * 100) : undefined
-        }
-      }
-      
-      // Legacy array format - check if it's an array
-      if (Array.isArray(pkg.pricing_tiers)) {
-        const tier = pkg.pricing_tiers.find((t: any) => t.period === period)
-        if (tier) {
-          return {
-            price: tier.promo_price || tier.regular_price,
-            originalPrice: tier.promo_price ? tier.regular_price : undefined,
-            discount: tier.discount_percentage
-          }
-        }
-      }
-    }
-    
-    return { price: pkg.price }
-  }
-
-  const handleSubscribe = async (packageId: string) => {
-    try {
-      setSubscribing(packageId)
-      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
-      window.location.href = checkoutUrl
-    } catch (error) {
-      console.error('Error subscribing:', error)
-      alert(error instanceof Error ? error.message : 'Failed to redirect to checkout')
-    } finally {
-      setSubscribing(null)
-    }
-  }
-
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
@@ -423,6 +383,53 @@ export default function BillingPage() {
     setTypeFilter('')
     setSearchTerm('')
     setCurrentPage(1)
+  }
+
+  const handleSelectInvoice = (invoiceId: string) => {
+    if (selectedInvoices.includes(invoiceId)) {
+      setSelectedInvoices(selectedInvoices.filter(id => id !== invoiceId))
+    } else {
+      setSelectedInvoices([...selectedInvoices, invoiceId])
+    }
+  }
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedInvoices([])
+      setSelectAll(false)
+    } else {
+      const allIds = historyData?.transactions.map(t => t.id) || []
+      setSelectedInvoices(allIds)
+      setSelectAll(true)
+    }
+  }
+
+  const togglePlanDetails = (planId: string) => {
+    if (!showComparePlans) {
+      setShowDetails(prev => {
+        const newState: Record<string, boolean> = {}
+        Object.keys(prev).forEach(key => {
+          newState[key] = false
+        })
+        newState[planId] = !prev[planId]
+        return newState
+      })
+    }
+  }
+
+  const toggleComparePlans = () => {
+    const newShowComparePlans = !showComparePlans
+    setShowComparePlans(newShowComparePlans)
+
+    if (newShowComparePlans) {
+      const allExpanded: Record<string, boolean> = {}
+      packagesData?.packages.forEach(pkg => {
+        allExpanded[pkg.id] = true
+      })
+      setShowDetails(allExpanded)
+    } else {
+      setShowDetails({})
+    }
   }
 
   const getStatusIcon = (status: string) => {
@@ -469,85 +476,7 @@ export default function BillingPage() {
     }
   }
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
-    // Determine locale based on currency
-    const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
-    
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
-
-  const handleSelectInvoice = (invoiceId: string) => {
-    if (selectedInvoices.includes(invoiceId)) {
-      setSelectedInvoices(selectedInvoices.filter(id => id !== invoiceId))
-    } else {
-      setSelectedInvoices([...selectedInvoices, invoiceId])
-    }
-  }
-
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedInvoices([])
-      setSelectAll(false)
-    } else {
-      const allIds = historyData?.transactions.map(t => t.id) || []
-      setSelectedInvoices(allIds)
-      setSelectAll(true)
-    }
-  }
-
-  const togglePlanDetails = (planId: string) => {
-    // When not in compare mode, only expand the clicked plan and collapse others
-    if (!showComparePlans) {
-      setShowDetails(prev => {
-        const newState: Record<string, boolean> = {}
-        // Close all other cards
-        Object.keys(prev).forEach(key => {
-          newState[key] = false
-        })
-        // Toggle only the clicked card
-        newState[planId] = !prev[planId]
-        return newState
-      })
-    }
-  }
-
-  const toggleComparePlans = () => {
-    const newShowComparePlans = !showComparePlans
-    setShowComparePlans(newShowComparePlans)
-
-    if (newShowComparePlans) {
-      // Show all plan details when comparing
-      const allExpanded: Record<string, boolean> = {}
-      packagesData?.packages.forEach(pkg => {
-        allExpanded[pkg.id] = true
-      })
-      setShowDetails(allExpanded)
-    } else {
-      // Hide all details when exiting compare mode
-      setShowDetails({})
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-
-  const billingPeriods = [
-    { key: 'monthly', label: 'Monthly', suffix: '/month' },
-    { key: 'quarterly', label: '3 Months', suffix: '/3 months' },
-    { key: 'biannual', label: '6 Months', suffix: '/6 months' },
-    { key: 'annual', label: '12 Months', suffix: '/year' }
-  ]
-
+  // Loading and error states
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -562,12 +491,7 @@ export default function BillingPage() {
         <AlertCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Billing Data</h3>
         <p className="text-[#6C757D] mb-4">{error}</p>
-        <button
-          onClick={loadAllData}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
-        >
-          Try Again
-        </button>
+        <Button onClick={loadAllData}>Try Again</Button>
       </div>
     )
   }
@@ -580,15 +504,19 @@ export default function BillingPage() {
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Billing</h1>
           <p className="text-[#6C757D] mt-1">Manage your plan and billing history here.</p>
         </div>
-        <button
-          onClick={loadAllData}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors flex items-center gap-2"
-        >
-          <TrendingUp className="h-4 w-4" />
+        <Button onClick={loadAllData} variant="outline">
+          <TrendingUp className="h-4 w-4 mr-2" />
           Refresh
-        </button>
+        </Button>
       </div>
 
+      {/* Billing Stats */}
+      <BillingStats
+        billingData={billingData}
+        currentPackageId={packagesData?.current_package_id || null}
+        formatCurrency={formatCurrency}
+        userCurrency={userCurrency}
+      />
 
       {/* Billing Settings Section */}
       <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
@@ -597,325 +525,67 @@ export default function BillingPage() {
             <h2 className="text-lg font-semibold text-[#1A1A1A]">Billing settings</h2>
             <p className="text-sm text-[#6C757D]">Manage your plan and billing history here.</p>
           </div>
-          <button 
-            onClick={toggleComparePlans}
-            className="px-4 py-2 border border-[#E0E6ED] rounded-lg text-sm font-medium text-[#1A1A1A] hover:bg-[#F7F9FC] transition-colors flex items-center gap-2"
-          >
-            <Package className="h-4 w-4" />
+          <Button variant="outline" onClick={toggleComparePlans}>
+            <Package className="h-4 w-4 mr-2" />
             {showComparePlans ? 'Hide comparison' : 'Compare plans'}
-          </button>
+          </Button>
         </div>
 
-        {/* No Active Package Alert */}
-        {!packagesData?.current_package_id && (
-          <div className="mb-6 p-4 border border-[#F0A202] bg-[#F0A202]/5 rounded-lg">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-[#F0A202] flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-[#1A1A1A] mb-1">No Active Package</h3>
-                <p className="text-sm text-[#6C757D]">
-                  You don't have an active package. Subscribe to a plan below to start tracking your keywords and accessing all features.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Current Plan Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {packagesData?.packages.map((pkg) => {
-            const isCurrentPlan = pkg.is_current
-            const pricing = getBillingPeriodPrice(pkg, selectedBillingPeriod)
-
-            return (
-              <div key={pkg.id} className={`rounded-lg border p-4 relative flex flex-col h-full ${
-                isCurrentPlan 
-                  ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white' 
-                  : 'border-[#E0E6ED] bg-white hover:border-[#1A1A1A] transition-colors'
-              }`}>
-                {pkg.is_popular && !isCurrentPlan && (
-                  <div className="absolute -top-3 left-4 bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Most Popular
-                  </div>
-                )}
-
-                <div className="mb-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className={`font-semibold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                      {pkg.name}
-                    </h3>
-                    {isCurrentPlan && (
-                      <span className="bg-white text-[#1A1A1A] px-2 py-0.5 rounded text-xs font-medium">
-                        Current plan
-                      </span>
-                    )}
-                  </div>
-                  <p className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
-                    {pkg.description}
-                  </p>
-                </div>
-
-                <div className="mb-4">
-                  <div className="flex items-baseline gap-1">
-                    <span className={`text-2xl font-bold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                      {formatCurrency(pricing.price, userCurrency)}
-                    </span>
-                    <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
-                      per month
-                    </span>
-                  </div>
-                </div>
-
-                {/* Expandable Features */}
-                <div className="flex-grow">
-                  {(showComparePlans || showDetails[pkg.id]) && (
-                    <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
-                      <div className="space-y-3">
-                        {/* Database Features ONLY - no hardcoded quota features */}
-                        {pkg.features.map((feature, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
-                            <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
-                              {feature}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-auto space-y-2">
-                  {!isCurrentPlan && (
-                    <>
-                      <button 
-                        onClick={() => handleSubscribe(pkg.id)}
-                        disabled={subscribing === pkg.id}
-                        className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 bg-[#1A1A1A] text-white hover:bg-[#0d1b2a] ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        {subscribing === pkg.id ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Processing...
-                          </div>
-                        ) : 'Switch plan'}
-                      </button>
-
-                      {/* Trial Button - Only show for eligible users and eligible packages */}
-                      {trialEligible && isTrialEligiblePackage(pkg) && (
-                        <button
-                          onClick={() => handleStartTrial(pkg.id)}
-                          disabled={startingTrial === pkg.id}
-                          className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white ${startingTrial === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                          {startingTrial === pkg.id ? (
-                            <div className="flex items-center justify-center gap-2">
-                              <div className="w-4 h-4 border-2 border-[#1A1A1A] border-t-transparent rounded-full animate-spin"></div>
-                              Starting...
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              Start 3-Day Free Trial
-                            </div>
-                          )}
-                        </button>
-                      )}
-                    </>
-                  )}
-                  {isCurrentPlan && (
-                    <button 
-                      disabled
-                      className="w-full py-3 px-4 rounded-lg text-sm font-medium h-12 bg-white text-[#1A1A1A] cursor-default"
-                    >
-                      Current plan
-                    </button>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <PricingCards
+          packages={packagesData?.packages || []}
+          selectedBillingPeriod={selectedBillingPeriod}
+          setSelectedBillingPeriod={setSelectedBillingPeriod}
+          userCurrency={userCurrency}
+          subscribing={subscribing}
+          trialEligible={trialEligible}
+          startingTrial={startingTrial}
+          showDetails={showDetails}
+          showComparePlans={showComparePlans}
+          getBillingPeriodPrice={getBillingPeriodPrice}
+          formatCurrency={formatCurrency}
+          handleSubscribe={handleSubscribe}
+          handleStartTrial={handleStartTrial}
+          isTrialEligiblePackage={isTrialEligiblePackage}
+          togglePlanDetails={togglePlanDetails}
+        />
       </div>
 
-      {/* Billing History Section */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-semibold text-[#1A1A1A]">Billing history</h2>
-            <div className="flex items-center gap-4 mt-2">
-              <span className="text-sm text-[#6C757D]">
-                {historyData?.summary.total_transactions || 0} invoices selected
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6C757D]" />
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-[#E0E6ED] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1A1A] focus:border-[#1A1A1A]"
-              />
-            </div>
-            <button className="p-2 border border-[#E0E6ED] rounded-lg hover:bg-[#F7F9FC] transition-colors">
-              <Filter className="h-4 w-4 text-[#6C757D]" />
-            </button>
-            <button className="px-3 py-2 border border-[#E0E6ED] rounded-lg text-sm font-medium text-[#1A1A1A] hover:bg-[#F7F9FC] transition-colors flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Download all
-            </button>
-          </div>
-        </div>
+      {/* Package Comparison */}
+      <PackageComparison
+        packages={packagesData?.packages || []}
+        showComparePlans={showComparePlans}
+        toggleComparePlans={toggleComparePlans}
+        selectedBillingPeriod={selectedBillingPeriod}
+        userCurrency={userCurrency}
+        getBillingPeriodPrice={getBillingPeriodPrice}
+        formatCurrency={formatCurrency}
+        handleSubscribe={handleSubscribe}
+        subscribing={subscribing}
+      />
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="p-3 bg-[#F7F9FC] rounded-lg">
-            <p className="text-xl font-bold text-[#1A1A1A]">
-              {formatCurrency(historyData?.summary.total_amount_spent || 0)}
-            </p>
-            <p className="text-xs text-[#6C757D]">Total spent</p>
-          </div>
-          <div className="p-3 bg-[#F7F9FC] rounded-lg">
-            <p className="text-xl font-bold text-[#1A1A1A]">
-              {historyData?.summary.completed_transactions || 0}
-            </p>
-            <p className="text-xs text-[#6C757D]">Completed</p>
-          </div>
-          <div className="p-3 bg-[#F7F9FC] rounded-lg">
-            <p className="text-xl font-bold text-[#1A1A1A]">
-              {historyData?.summary.pending_transactions || 0}
-            </p>
-            <p className="text-xs text-[#6C757D]">Pending</p>
-          </div>
-          <div className="p-3 bg-[#F7F9FC] rounded-lg">
-            <p className="text-xl font-bold text-[#1A1A1A]">
-              {historyData?.summary.failed_transactions || 0}
-            </p>
-            <p className="text-xs text-[#6C757D]">Failed</p>
-          </div>
-        </div>
-
-        {/* Transactions Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#E0E6ED]">
-                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
-                  <input 
-                    type="checkbox" 
-                    className="rounded border-[#E0E6ED]"
-                    checked={selectAll}
-                    onChange={handleSelectAll}
-                  />
-                </th>
-                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Order ID</th>
-                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Billing Date</th>
-                <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Plan</th>
-                <th className="text-center py-2 px-4 text-xs font-medium text-[#6C757D] uppercase tracking-wider">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {historyData?.transactions.map((transaction) => (
-                <tr 
-                  key={transaction.id} 
-                  className="border-b border-[#E0E6ED] hover:bg-[#F7F9FC] cursor-pointer transition-colors"
-                  onClick={() => window.location.href = `/dashboard/settings/plans-billing/order/${transaction.id}`}
-                >
-                  <td className="py-3 px-4">
-                    <input 
-                      type="checkbox" 
-                      className="rounded border-[#E0E6ED]"
-                      checked={selectedInvoices.includes(transaction.id)}
-                      onChange={() => handleSelectInvoice(transaction.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </td>
-                  <td className="py-3 px-4 text-left">
-                    <span className="text-sm text-[#1A1A1A] font-mono">
-                      {transaction.payment_reference}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-left">
-                    <span className="text-sm text-[#1A1A1A]">
-                      {formatDate(transaction.created_at)}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-left">
-                    <span className="text-sm text-[#1A1A1A]">
-                      {transaction.package_name || transaction.package?.name || 'Unknown'}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className={`text-xs px-2 py-1 rounded-full border ${
-                      transaction.transaction_status === 'pending' || transaction.transaction_status === 'proof_uploaded'
-                        ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
-                        : getStatusColor(transaction.transaction_status).bg + ' ' + getStatusColor(transaction.transaction_status).text + ' ' + getStatusColor(transaction.transaction_status).border
-                    }`}>
-                      {getStatusText(transaction.transaction_status)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {historyData?.pagination && historyData.pagination.total_pages > 1 && (
-          <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-[#6C757D]">
-              Showing {((historyData.pagination.current_page - 1) * historyData.pagination.items_per_page) + 1} to{' '}
-              {Math.min(historyData.pagination.current_page * historyData.pagination.items_per_page, historyData.pagination.total_items)} of{' '}
-              {historyData.pagination.total_items} results
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageChange(historyData.pagination.current_page - 1)}
-                disabled={!historyData.pagination.has_prev}
-                className="p-2 border border-[#E0E6ED] rounded-lg hover:bg-[#F7F9FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="px-3 py-2 text-sm font-medium text-[#1A1A1A]">
-                {historyData.pagination.current_page} of {historyData.pagination.total_pages}
-              </span>
-              <button
-                onClick={() => handlePageChange(historyData.pagination.current_page + 1)}
-                disabled={!historyData.pagination.has_next}
-                className="p-2 border border-[#E0E6ED] rounded-lg hover:bg-[#F7F9FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Floating Action Bar - Only shows when invoices are selected */}
-      {selectedInvoices.length > 0 && (
-        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
-          <div className="bg-[#1A1A1A] text-white rounded-xl px-6 py-4 shadow-xl border border-white/10">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-white">
-                {selectedInvoices.length} invoices selected
-              </span>
-              <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors border border-white/20 text-sm">
-                  <Download className="h-3.5 w-3.5" />
-                  Download CSV
-                </button>
-                <button className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors border border-white/20 text-sm">
-                  <Download className="h-3.5 w-3.5" />
-                  Download PDF
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Billing History */}
+      <BillingHistory
+        historyData={historyData}
+        currentPage={currentPage}
+        statusFilter={statusFilter}
+        typeFilter={typeFilter}
+        searchTerm={searchTerm}
+        selectedInvoices={selectedInvoices}
+        selectAll={selectAll}
+        setCurrentPage={setCurrentPage}
+        setStatusFilter={setStatusFilter}
+        setTypeFilter={setTypeFilter}
+        setSearchTerm={setSearchTerm}
+        handlePageChange={handlePageChange}
+        handleSelectInvoice={handleSelectInvoice}
+        handleSelectAll={handleSelectAll}
+        resetFilters={resetFilters}
+        getStatusIcon={getStatusIcon}
+        getStatusText={getStatusText}
+        getStatusColor={getStatusColor}
+        formatCurrency={formatCurrency}
+        formatDate={formatDate}
+      />
     </div>
   )
 }
