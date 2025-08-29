@@ -80,12 +80,6 @@ export async function GET(request: NextRequest) {
     // Apply currency detection and pricing transformation
     let transformedPackage = profile.package
     
-    console.log('=== PROFILE DEBUG START ===')
-    console.log('profile.package:', profile.package)
-    console.log('profile.country:', profile.country)
-    console.log('Raw pricing_tiers:', profile.package?.pricing_tiers)
-    console.log('pricing_tiers type:', typeof profile.package?.pricing_tiers)
-    
     if (profile.package) {
       // Default to USD if no country data available
       const userCurrency = profile.country ? getUserCurrency(profile.country) : 'USD'
@@ -96,7 +90,6 @@ export async function GET(request: NextRequest) {
       if (typeof pricingTiers === 'string') {
         try {
           pricingTiers = JSON.parse(pricingTiers)
-          console.log('Parsed pricing_tiers from string:', pricingTiers)
         } catch (e) {
           console.error('Failed to parse pricing_tiers string:', e)
           pricingTiers = null
@@ -108,18 +101,9 @@ export async function GET(request: NextRequest) {
         const billingPeriod = packageData.billing_period || 'monthly'
         const tierData = pricingTiers[billingPeriod]
         
-        console.log('Profile API Debug:')
-        console.log('- User Country:', profile.country)
-        console.log('- User Currency:', userCurrency)
-        console.log('- Billing Period:', billingPeriod)
-        console.log('- Tier Data:', tierData)
-        
         if (tierData && tierData[userCurrency]) {
           const currencyTierData = tierData[userCurrency]
           const finalPrice = currencyTierData.promo_price || currencyTierData.regular_price
-          
-          console.log('- Currency Tier Data:', currencyTierData)
-          console.log('- Final Price:', finalPrice)
           
           transformedPackage = {
             ...packageData,
@@ -130,21 +114,14 @@ export async function GET(request: NextRequest) {
             pricing_tiers: pricingTiers
           }
         } else {
-          console.log('- No pricing found for currency:', userCurrency)
           // Fallback if no pricing_tiers found
           transformedPackage = {
             ...packageData,
             price: 0 // Default to 0 if no pricing found
           }
         }
-      } else {
-        console.log('No valid pricing_tiers found')
       }
-    } else {
-      console.log('Missing package data')
     }
-    console.log('=== PROFILE DEBUG END ===')
-    console.log('Final transformed package:', transformedPackage)
 
     // Combine profile and auth data with additional stats
     const userProfile = {
