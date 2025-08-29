@@ -14,7 +14,7 @@ import {
   PricingCards, 
   BillingHistory, 
   PackageComparison,
-  UsageOverviewCard 
+  InlineUsageStats 
 } from './components'
 
 // Type definitions
@@ -519,8 +519,8 @@ export default function BillingPage() {
         userCurrency={userCurrency}
       />
 
-      {/* Usage Overview */}
-      <UsageOverviewCard />
+      {/* Usage Statistics - Inline 3 Column Layout */}
+      <InlineUsageStats />
 
       {/* Billing Settings Section */}
       <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">

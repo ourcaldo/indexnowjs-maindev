@@ -1232,6 +1232,34 @@ JWT_SECRET=[jwt-secret-key]
 
 -- **Result**: Settings page now properly displays user's active Premium package, correct expiration date (Sept 27, 2025), and usage metrics in a clean vertical layout matching the reference design.
 
+### January 30, 2025 11:00: Settings Usage Layout Redesign - Inline Horizontal Stats ✅
+
+-- **✅ REPLACED BIG USAGE CARD WITH INLINE HORIZONTAL LAYOUT**: Complete redesign of usage display to match reference design
+  - **Layout Transformation**: Removed large separate "Plan & Usage" card and replaced with inline 3-column horizontal layout
+  - **Reference Design Match**: Layout now matches provided reference showing horizontal metric display: Daily URLs | Keywords tracked | Service accounts
+  - **Visual Consistency**: Each column displays metric label at top, large usage number below, and progress bar for visual representation
+  - **Space Optimization**: Reduced vertical space usage while maintaining all functionality and improving readability
+
+-- **✅ CREATED INLINEUSAGESTATS COMPONENT**: New dedicated component following proper React patterns
+  - **Component Architecture**: Clean, reusable component with proper TypeScript interfaces and error handling
+  - **API Integration**: Maintains all existing API calls to `/api/user/quota`, `/api/user/keyword-usage`, and `/api/billing/overview`
+  - **Progress Visualization**: Full-width progress bars for Daily URLs (blue) and Keywords tracked (amber) with percentage calculations
+  - **Loading States**: Proper loading spinner and error handling for seamless user experience
+
+-- **Technical Details**:
+  - ✅ Created `app/dashboard/settings/plans-billing/components/InlineUsageStats.tsx` - New horizontal 3-column layout component
+  - ✅ Updated `app/dashboard/settings/plans-billing/components/index.ts` - Added export for new component
+  - ✅ Modified `app/dashboard/settings/plans-billing/page.tsx` - Replaced UsageOverviewCard import and usage
+  - ✅ Maintained all existing data fetching logic and API integrations
+  - ✅ Preserved responsive design with grid system (1 column on mobile, 3 columns on desktop)
+
+-- **Files Modified**:
+  - `app/dashboard/settings/plans-billing/components/InlineUsageStats.tsx` - New component creation
+  - `app/dashboard/settings/plans-billing/components/index.ts` - Export addition
+  - `app/dashboard/settings/plans-billing/page.tsx` - Component replacement and import update
+
+-- **Result**: Settings > Plans & Billing page now displays usage metrics in horizontal inline format exactly matching the provided reference design, with improved space efficiency and visual consistency.
+
 ### January 30, 2025 02:00: Free Trial System Fixes & Replit Migration ✅
 - **✅ DATABASE POLICY INFINITE RECURSION RESOLVED**: Fixed critical policy conflicts preventing trial functionality
   - **Root Cause**: Multiple overlapping policies on `indb_auth_user_profiles` table caused infinite recursion errors
