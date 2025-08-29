@@ -204,76 +204,70 @@ export const BillingStats = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-[#E0E6ED]">
               {/* Daily URLs */}
               <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="flex items-center justify-center gap-2 mb-2">
                   <Globe className="h-4 w-4 text-[#6C757D]" />
                   <span className="text-sm font-medium text-[#6C757D]">Daily URLs</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-2xl font-bold text-[#1A1A1A]">
-                    {usageData?.daily_quota_used || 0}
-                  </div>
-                  <div className="text-sm text-[#6C757D]">
-                    {usageData?.is_unlimited ? 'Unlimited' : `${usageData?.daily_quota_limit || 500}`}
-                  </div>
-                  {!usageData?.is_unlimited && (
-                    <div className="w-full bg-[#E0E6ED] rounded-full h-2">
-                      <div 
-                        className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
-                        style={{ 
-                          width: `${getUsagePercentage(
-                            usageData?.daily_quota_used || 0, 
-                            usageData?.daily_quota_limit || 500, 
-                            usageData?.is_unlimited || false
-                          )}%` 
-                        }}
-                      />
-                    </div>
-                  )}
+                <div className="text-3xl font-bold text-[#1A1A1A] mb-1">
+                  {usageData?.daily_quota_used || 0}
                 </div>
+                <div className="text-sm text-[#6C757D] mb-3">
+                  {usageData?.daily_quota_limit || 500}
+                </div>
+                {!usageData?.is_unlimited && (
+                  <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                    <div 
+                      className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${getUsagePercentage(
+                          usageData?.daily_quota_used || 0, 
+                          usageData?.daily_quota_limit || 500, 
+                          usageData?.is_unlimited || false
+                        )}%` 
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Keywords tracked */}
               <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="flex items-center justify-center gap-2 mb-2">
                   <Users className="h-4 w-4 text-[#6C757D]" />
                   <span className="text-sm font-medium text-[#6C757D]">Keywords tracked</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-2xl font-bold text-[#1A1A1A]">
-                    {keywordUsage?.keywords_used || 147}
-                  </div>
-                  <div className="text-sm text-[#6C757D]">
-                    {keywordUsage?.is_unlimited ? 'Unlimited' : `${keywordUsage?.keywords_limit || 250}`}
-                  </div>
-                  {!keywordUsage?.is_unlimited && (
-                    <div className="w-full bg-[#E0E6ED] rounded-full h-2">
-                      <div 
-                        className="bg-[#F0A202] h-2 rounded-full transition-all duration-300"
-                        style={{ 
-                          width: `${getUsagePercentage(
-                            keywordUsage?.keywords_used || 147, 
-                            keywordUsage?.keywords_limit || 250, 
-                            keywordUsage?.is_unlimited || false
-                          )}%` 
-                        }}
-                      />
-                    </div>
-                  )}
+                <div className="text-3xl font-bold text-[#1A1A1A] mb-1">
+                  {keywordUsage?.keywords_used || 147}
                 </div>
+                <div className="text-sm text-[#6C757D] mb-3">
+                  {keywordUsage?.keywords_limit || 250}
+                </div>
+                {!keywordUsage?.is_unlimited && (
+                  <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                    <div 
+                      className="bg-[#F0A202] h-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${getUsagePercentage(
+                          keywordUsage?.keywords_used || 147, 
+                          keywordUsage?.keywords_limit || 250, 
+                          keywordUsage?.is_unlimited || false
+                        )}%` 
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Service accounts */}
               <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="flex items-center justify-center gap-2 mb-2">
                   <Server className="h-4 w-4 text-[#6C757D]" />
                   <span className="text-sm font-medium text-[#6C757D]">Service accounts</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-2xl font-bold text-[#1A1A1A]">
-                    {usageData?.service_account_count || 2}
-                  </div>
-                  <div className="text-sm text-[#6C757D]">connected</div>
+                <div className="text-3xl font-bold text-[#1A1A1A] mb-1">
+                  {usageData?.service_account_count || 2}
                 </div>
+                <div className="text-sm text-[#6C757D]">connected</div>
               </div>
             </div>
           )}
