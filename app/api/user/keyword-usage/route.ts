@@ -68,8 +68,19 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Always get the current limit from the user's package, not from stored usage record
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select(`
+        package:indb_payment_packages(
+          quota_limits
+        )
+      `)
+      .eq('user_id', userId)
+      .single()
+
     const keywordsUsed = keywordUsage.keywords_used || 0
-    const keywordsLimit = keywordUsage.keywords_limit || 0
+    const keywordsLimit = (profile?.package as any)?.quota_limits?.keywords_limit || 0
     const isUnlimited = keywordsLimit === -1
     const remainingQuota = isUnlimited ? -1 : Math.max(0, keywordsLimit - keywordsUsed)
 

@@ -88,17 +88,29 @@ export async function GET(request: NextRequest) {
         const billingPeriod = packageData.billing_period || 'monthly'
         const tierData = packageData.pricing_tiers[billingPeriod]
         
+        console.log('Profile API Debug:')
+        console.log('- User Country:', profile.country)
+        console.log('- User Currency:', userCurrency)
+        console.log('- Billing Period:', billingPeriod)
+        console.log('- Tier Data:', tierData)
+        
         if (tierData && tierData[userCurrency]) {
           const currencyTierData = tierData[userCurrency]
+          const finalPrice = currencyTierData.promo_price || currencyTierData.regular_price
+          
+          console.log('- Currency Tier Data:', currencyTierData)
+          console.log('- Final Price:', finalPrice)
+          
           transformedPackage = {
             ...packageData,
             currency: userCurrency,
-            price: currencyTierData.promo_price || currencyTierData.regular_price,
+            price: finalPrice,
             billing_period: billingPeriod,
             // Keep original pricing_tiers for frontend use
             pricing_tiers: packageData.pricing_tiers
           }
         } else {
+          console.log('- No pricing found for currency:', userCurrency)
           // Fallback if no pricing_tiers found
           transformedPackage = {
             ...packageData,
