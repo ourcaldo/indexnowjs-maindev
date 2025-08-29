@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
           name,
           slug,
           description,
-          price,
           currency,
           billing_period,
           features,
@@ -98,6 +97,12 @@ export async function GET(request: NextRequest) {
             billing_period: billingPeriod,
             // Keep original pricing_tiers for frontend use
             pricing_tiers: packageData.pricing_tiers
+          }
+        } else {
+          // Fallback if no pricing_tiers found
+          transformedPackage = {
+            ...packageData,
+            price: 0 // Default to 0 if no pricing found
           }
         }
       }
