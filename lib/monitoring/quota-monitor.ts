@@ -202,7 +202,7 @@ export class QuotaMonitor {
           severity: (alert.level === 'critical' || alert.level === 'exhausted' ? 'CRITICAL' : 'MEDIUM'),
           message: alert.message,
           user_message: `Quota ${alert.level}: ${alert.message}`,
-          endpoint: '/api/admin/quota/health',
+          endpoint: '/api/v1/admin/quota/health',
           http_method: 'GET',
           status_code: 200,
           metadata: {

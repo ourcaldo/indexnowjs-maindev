@@ -36,7 +36,7 @@ export function JobProcessorTest() {
     setLastResult(null)
 
     try {
-      const response = await fetch('/api/admin/rank-tracker/trigger-manual-check', {
+      const response = await fetch('/api/v1/admin/rank-tracker/trigger-manual-check', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -61,7 +61,7 @@ export function JobProcessorTest() {
 
   const checkStatus = async () => {
     try {
-      const response = await fetch('/api/admin/rank-tracker/trigger-manual-check')
+      const response = await fetch('/api/v1/admin/rank-tracker/trigger-manual-check')
       const data = await response.json()
       
       if (data.success) {

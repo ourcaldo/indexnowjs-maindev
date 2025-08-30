@@ -110,7 +110,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
 
   const loadPackages = async () => {
     try {
-      const response = await fetch('/api/public/packages', {
+      const response = await fetch('/api/v1/public/packages', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'

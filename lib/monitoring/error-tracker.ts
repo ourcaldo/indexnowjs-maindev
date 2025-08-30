@@ -50,7 +50,7 @@ export class ErrorTracker {
           severity: error.severity.toUpperCase(),
           message: error.errorMessage,
           user_message: `Rank check failed: ${error.errorMessage}`,
-          endpoint: '/api/keyword-tracker/check-rank',
+          endpoint: '/api/v1/rank-tracking/check-rank',
           http_method: 'POST',
           status_code: 500,
           metadata: {

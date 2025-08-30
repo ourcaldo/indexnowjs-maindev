@@ -258,7 +258,7 @@ export class MidtransClientService {
    */
   static async getMidtransConfig(token: string): Promise<{ client_key: string, environment: string }> {
     try {
-      const response = await fetch('/api/billing/midtrans-config', {
+      const response = await fetch('/api/v1/billing/midtrans-config', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

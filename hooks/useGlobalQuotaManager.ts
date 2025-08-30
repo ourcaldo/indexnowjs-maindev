@@ -97,10 +97,10 @@ export function useGlobalQuotaManager() {
 
       // Fetch both quota and notifications in parallel
       const [quotaResponse, notificationsResponse] = await Promise.all([
-        fetch('/api/user/quota', {
+        fetch('/api/v1/auth/user/quota', {
           headers: { 'Authorization': `Bearer ${session.access_token}` }
         }),
-        fetch('/api/notifications/service-account-quota', {
+        fetch('/api/v1/notifications/service-account-quota', {
           headers: { 'Authorization': `Bearer ${session.access_token}` }
         })
       ])

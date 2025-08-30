@@ -54,13 +54,13 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
 
   // Fetch keyword usage data
   const { data: keywordUsageData, isLoading: keywordUsageLoading, error: keywordUsageError } = useQuery({
-    queryKey: ['/api/user/keyword-usage'],
+    queryKey: ['/api/v1/rank-tracking/keyword-usage'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) {
         throw new Error('No auth token available')
       }
-      const response = await fetch('/api/user/keyword-usage', {
+      const response = await fetch('/api/v1/rank-tracking/keyword-usage', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'

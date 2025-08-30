@@ -65,7 +65,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) throw new Error('No authentication token')
 
-      const response = await fetch('/api/billing/packages', {
+      const response = await fetch('/api/v1/billing/packages', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -86,7 +86,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) throw new Error('No authentication token')
 
-      const response = await fetch('/api/user/profile', {
+      const response = await fetch('/api/v1/auth/user/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

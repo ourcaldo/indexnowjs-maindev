@@ -30,7 +30,7 @@ export default function GlobalQuotaWarning() {
       const { data: { session }, error } = await supabase.auth.getSession()
       if (error || !session) return
 
-      const response = await fetch('/api/user/quota', {
+      const response = await fetch('/api/v1/auth/user/quota', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }

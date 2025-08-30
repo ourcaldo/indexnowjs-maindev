@@ -35,7 +35,7 @@ export function useKeywordUsage() {
       }
 
       // Fetch keyword usage data
-      const response = await fetch('/api/user/keyword-usage', {
+      const response = await fetch('/api/v1/rank-tracking/keyword-usage', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

@@ -38,7 +38,7 @@ export class RecurringBillingJob {
     try {
       // Call the recurring payment processing endpoint
       const apiUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'
-      const response = await globalThis.fetch(`${apiUrl}/api/billing/midtrans/process-recurring`, {
+      const response = await globalThis.fetch(`${apiUrl}/api/v1/billing/midtrans/process-recurring`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
