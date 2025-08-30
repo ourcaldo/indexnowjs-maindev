@@ -1077,6 +1077,8 @@ Profile fetch error: {
 
 **Testing**: Verified admin backend loads user profiles without database errors.
 
+**Additional Fix**: Fixed frontend component `PackageSubscriptionCard.tsx` that was still expecting old `price` field instead of new `pricing_tiers` structure, preventing JavaScript runtime errors on user profile pages.
+
 ### August 30, 2025: P1 Enhancement Phase - API Routes Restructuring & Payment System Refactoring ✅
 
 #### **✅ P1.1: API Routes Restructuring - Versioned Feature-Based Organization**

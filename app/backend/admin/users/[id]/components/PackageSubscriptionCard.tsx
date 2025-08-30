@@ -8,12 +8,19 @@ import {
   DollarSign
 } from 'lucide-react'
 
+interface PricingTier {
+  currency: string
+  billing_period: string
+  regular_price: number
+  promo_price?: number
+}
+
 interface Package {
   id: string
   name: string
   slug: string
   description: string
-  price: number
+  pricing_tiers: PricingTier[]
   currency: string
   billing_period: string
   features: string[]
@@ -66,7 +73,17 @@ export function PackageSubscriptionCard({ user }: PackageSubscriptionCardProps) 
                 <p className="text-sm text-[#6C757D] mb-2">{user.package.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-[#1A1A1A]">
-                    {user.package.price === 0 ? 'Free' : `${user.package.currency} ${user.package.price.toLocaleString()}`}
+                    {(() => {
+                      // Find the pricing tier for the current currency and billing period
+                      const currentTier = user.package.pricing_tiers?.find(
+                        tier => tier.currency === user.package.currency && tier.billing_period === user.package.billing_period
+                      )
+                      
+                      if (!currentTier) return 'Free'
+                      
+                      const price = currentTier.promo_price || currentTier.regular_price
+                      return price === 0 ? 'Free' : `${currentTier.currency} ${price.toLocaleString()}`
+                    })()}
                   </span>
                   <span className="text-sm text-[#6C757D]">
                     per {user.package.billing_period}
