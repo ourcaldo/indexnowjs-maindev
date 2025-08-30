@@ -74,12 +74,38 @@ export function PackageSubscriptionCard({ user }: PackageSubscriptionCardProps) 
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-[#1A1A1A]">
                     {(() => {
+                      // Handle different possible structures for pricing_tiers
+                      let pricingTiers = user.package.pricing_tiers
+                      
+                      // If pricing_tiers is a string, try to parse it as JSON
+                      if (typeof pricingTiers === 'string') {
+                        try {
+                          pricingTiers = JSON.parse(pricingTiers)
+                        } catch (e) {
+                          console.log('Failed to parse pricing_tiers as JSON:', pricingTiers)
+                          return 'Free'
+                        }
+                      }
+                      
+                      // If it's not an array, fallback to free
+                      if (!Array.isArray(pricingTiers) || pricingTiers.length === 0) {
+                        return 'Free'
+                      }
+                      
                       // Find the pricing tier for the current currency and billing period
-                      const currentTier = user.package.pricing_tiers?.find(
+                      const currentTier = pricingTiers.find(
                         tier => tier.currency === user.package.currency && tier.billing_period === user.package.billing_period
                       )
                       
-                      if (!currentTier) return 'Free'
+                      if (!currentTier) {
+                        // If no matching tier, use the first available tier
+                        const firstTier = pricingTiers[0]
+                        if (firstTier) {
+                          const price = firstTier.promo_price || firstTier.regular_price
+                          return price === 0 ? 'Free' : `${firstTier.currency} ${price.toLocaleString()}`
+                        }
+                        return 'Free'
+                      }
                       
                       const price = currentTier.promo_price || currentTier.regular_price
                       return price === 0 ? 'Free' : `${currentTier.currency} ${price.toLocaleString()}`
