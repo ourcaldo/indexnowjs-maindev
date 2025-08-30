@@ -8,11 +8,16 @@ import {
   DollarSign
 } from 'lucide-react'
 
-interface PricingTier {
-  currency: string
-  billing_period: string
+interface PricingData {
+  promo_price: number
+  period_label: string
   regular_price: number
-  promo_price?: number
+}
+
+interface PricingTiers {
+  [billingPeriod: string]: {
+    [currency: string]: PricingData
+  }
 }
 
 interface Package {
@@ -20,7 +25,7 @@ interface Package {
   name: string
   slug: string
   description: string
-  pricing_tiers: PricingTier[]
+  pricing_tiers: PricingTiers
   currency: string
   billing_period: string
   features: string[]
@@ -87,28 +92,27 @@ export function PackageSubscriptionCard({ user }: PackageSubscriptionCardProps) 
                         }
                       }
                       
-                      // If it's not an array, fallback to free
-                      if (!Array.isArray(pricingTiers) || pricingTiers.length === 0) {
+                      // If it's not an object, fallback to free
+                      if (!pricingTiers || typeof pricingTiers !== 'object') {
                         return 'Free'
                       }
                       
-                      // Find the pricing tier for the current currency and billing period
-                      const currentTier = pricingTiers.find(
-                        tier => tier.currency === user.package.currency && tier.billing_period === user.package.billing_period
-                      )
+                      // Get pricing for current billing period and currency
+                      const billingPeriod = user.package.billing_period
+                      const currency = user.package.currency
                       
-                      if (!currentTier) {
-                        // If no matching tier, use the first available tier
-                        const firstTier = pricingTiers[0]
-                        if (firstTier) {
-                          const price = firstTier.promo_price || firstTier.regular_price
-                          return price === 0 ? 'Free' : `${firstTier.currency} ${price.toLocaleString()}`
-                        }
+                      const periodTiers = pricingTiers[billingPeriod]
+                      if (!periodTiers) {
                         return 'Free'
                       }
                       
-                      const price = currentTier.promo_price || currentTier.regular_price
-                      return price === 0 ? 'Free' : `${currentTier.currency} ${price.toLocaleString()}`
+                      const currencyData = periodTiers[currency]
+                      if (!currencyData) {
+                        return 'Free'
+                      }
+                      
+                      const price = currencyData.promo_price || currencyData.regular_price
+                      return price === 0 ? 'Free' : `${currency} ${price.toLocaleString()}`
                     })()}
                   </span>
                   <span className="text-sm text-[#6C757D]">
