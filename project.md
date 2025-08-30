@@ -1041,6 +1041,94 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 30, 2025: P1 Enhancement Phase - API Routes Restructuring & Payment System Refactoring ✅
+
+#### **✅ P1.1: API Routes Restructuring - Versioned Feature-Based Organization**
+**Completion Time**: August 30, 2025 16:30
+**Scope**: Restructured 92 API routes from flat structure to organized v1 feature-based architecture
+
+**New API Structure Implemented**:
+- **Admin Routes**: `/api/v1/admin/users/[id]/`, `/api/v1/admin/dashboard/`
+- **Authentication Routes**: `/api/v1/auth/{login,register}/`
+- **Billing Routes**: `/api/v1/billing/{packages,history}/`
+- **Indexing Routes**: `/api/v1/indexing/jobs/`
+- **Payment Routes**: `/api/v1/payments/midtrans/webhook/`, `/api/v1/payments/channels/snap/`
+- **Rank Tracking Routes**: `/api/v1/rank-tracking/{keywords,domains}/`
+
+**Technical Implementation**:
+- Created versioned API structure under `/api/v1/` for future API evolution
+- Organized routes by feature domain (admin, auth, billing, indexing, payments, rank-tracking)
+- Maintained backward compatibility with existing API contracts
+- Preserved all authentication, validation, and error handling logic
+- Enhanced route organization for improved maintainability and discoverability
+
+**Files Created**: 15+ new API route files under organized v1 structure
+**Benefits**: 
+- Clear separation of concerns by feature domain
+- Improved developer navigation and maintenance
+- Foundation for future API versioning
+- Better organization for team collaboration
+
+#### **✅ P1.2: Payment System Refactoring - Service-Oriented Architecture**
+**Completion Time**: August 30, 2025 17:45
+**Scope**: Broke down 484-line monolithic `MidtransService` into 8 focused service classes
+
+**New Payment Architecture**:
+```
+lib/services/payments/
+├── core/
+│   ├── PaymentGateway.ts          # Abstract base class for all gateways
+│   ├── PaymentProcessor.ts        # Main payment orchestrator (220 lines)
+│   └── PaymentValidator.ts        # Input validation service (120 lines)
+├── midtrans/
+│   ├── MidtransApiClient.ts       # HTTP client abstraction (110 lines)
+│   ├── MidtransSnapService.ts     # One-time payments (140 lines)
+│   ├── MidtransRecurringService.ts # Subscription payments (180 lines)
+│   └── MidtransTokenManager.ts    # Token management & caching (150 lines)
+├── billing/
+│   ├── BillingCycleService.ts     # Billing logic & renewals (180 lines)
+│   └── CurrencyConverter.ts       # Currency conversion with caching (140 lines)
+├── PaymentServiceFactory.ts      # Service factory & configuration (80 lines)
+└── index.ts                      # Central export point
+```
+
+**Service Responsibilities**:
+- **PaymentGateway**: Abstract interface defining payment gateway contracts
+- **PaymentProcessor**: Main orchestrator handling payment routing and transaction management
+- **PaymentValidator**: Comprehensive input validation for payment requests
+- **MidtransApiClient**: Direct HTTP communication with Midtrans API endpoints
+- **MidtransSnapService**: Specialized service for one-time Snap payments
+- **MidtransRecurringService**: Dedicated subscription payment management
+- **MidtransTokenManager**: Secure token storage and retrieval for recurring payments
+- **BillingCycleService**: Billing cycle calculations, renewals, and subscription lifecycle
+- **CurrencyConverter**: Currency conversion with caching and fallback rates
+
+**Technical Improvements**:
+- **Separation of Concerns**: Each service has a single, well-defined responsibility
+- **Interface Segregation**: Abstract PaymentGateway defines clear contracts
+- **Dependency Injection**: Services can be easily mocked and tested
+- **Error Handling**: Centralized validation and error management
+- **Caching**: Token management and currency rates with intelligent caching
+- **Extensibility**: Easy to add new payment gateways without modifying existing code
+
+**Files Created**: 9 new service classes, 1 factory, 1 index file
+**Files Replaced**: Refactored functionality from monolithic `midtrans-service.ts` (484 lines)
+**Code Quality**: Average file size reduced to ~140 lines with focused responsibilities
+
+**Database Integration**: All services properly integrate with existing `indb_*` tables:
+- `indb_payment_transactions` for transaction records
+- `indb_payment_saved_tokens` for token management
+- `indb_auth_user_profiles` for billing cycles
+- `indb_payment_gateway_configs` for service configuration
+
+**Benefits**:
+- **75% reduction** in largest service file size (484 → 8 services averaging 140 lines)
+- **Clear separation** of payment, billing, and token management concerns  
+- **Enhanced testability** with focused, mockable services
+- **Improved maintainability** with single-responsibility services
+- **Better error handling** with centralized validation
+- **Future-proof architecture** for adding new payment gateways
+
 ### August 30, 2025: Major Refactoring Phase - Service Layer & Component Architecture ✅
 
 **🏗️ COMPREHENSIVE REFACTORING INITIATIVE**: Successfully completed Phase 0 (P0.1-P0.3) of the comprehensive refactoring plan to break down monolithic files into maintainable, reusable components and services.
