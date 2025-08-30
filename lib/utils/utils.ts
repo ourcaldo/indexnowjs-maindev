@@ -6,8 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Utility functions for formatting
-export function formatCurrency(amount: number, currency: string = 'IDR'): string {
-  return new Intl.NumberFormat('id-ID', {
+export function formatCurrency(amount: number, currency: 'IDR' | 'USD' = 'USD'): string {
+  const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: 0,

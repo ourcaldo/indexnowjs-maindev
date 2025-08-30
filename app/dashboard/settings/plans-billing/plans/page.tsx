@@ -97,8 +97,9 @@ export default function PlansPage() {
     }
   }
 
-  const formatCurrency = (amount: number, currency: string = 'IDR') => {
-    return new Intl.NumberFormat('id-ID', {
+  const formatCurrency = (amount: number, currency: 'IDR' | 'USD' = 'USD') => {
+    const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
