@@ -162,7 +162,7 @@ export class AuthService {
     
     // Clear session from server
     try {
-      await fetch('/api/auth/session', {
+      await fetch('/api/v1/auth/session', {
         method: 'DELETE',
         credentials: 'include'
       })

@@ -83,7 +83,7 @@ export function JobProcessorTest() {
       // this would come from the keywords list
       const testKeywordId = 'test-keyword-id' // Replace with actual keyword ID
       
-      const response = await fetch('/api/keyword-tracker/check-rank', {
+      const response = await fetch('/api/v1/rank-tracking/check-rank', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

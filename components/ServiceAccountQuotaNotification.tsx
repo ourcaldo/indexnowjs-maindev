@@ -38,7 +38,7 @@ export default function ServiceAccountQuotaNotification() {
 
   const dismissNotification = async (notificationId: string) => {
     try {
-      const response = await fetch(`/api/notifications/${notificationId}/dismiss`, {
+      const response = await fetch(`/api/v1/notifications/dismiss/${notificationId}`, {
         method: 'POST'
       })
 
