@@ -1041,6 +1041,42 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 30, 2025 17:15: Database Schema Update Fix - Price Column Migration ✅
+
+**Issue**: Backend admin user profile pages were throwing database errors because queries were still referencing the deprecated `price` column instead of the new `pricing_tiers` column in the `indb_payment_packages` table.
+
+**Error**: 
+```
+Profile fetch error: {
+  code: '42703',
+  details: null,
+  hint: null,
+  message: 'column indb_payment_packages_1.price does not exist'
+}
+```
+
+**Files Fixed**:
+- ✅ `app/api/v1/admin/users/[id]/route.ts` - Updated package query to use `pricing_tiers` instead of `price`
+- ✅ `app/api/v1/admin/orders/[id]/route.ts` - Updated package query to use `pricing_tiers` instead of `price`  
+- ✅ `app/api/v1/admin/orders/route.ts` - Updated package query to use `pricing_tiers` instead of `price`
+- ✅ `app/api/v1/admin/settings/packages/route.ts` - Removed deprecated `price` field from INSERT operations
+- ✅ `app/api/v1/admin/settings/packages/[id]/route.ts` - Removed deprecated `price` field from UPDATE operations
+- ✅ `app/api/v1/auth/user/trial-eligibility/route.ts` - Updated ordering from `price` to `sort_order`
+
+**Database Schema Alignment**:
+- **Old Schema**: Used `price` column for package pricing
+- **New Schema**: Uses `pricing_tiers` column with structured pricing data for multiple currencies/billing periods
+- **Result**: All admin backend functionality now properly aligned with current database schema
+
+**Impact**: 
+- ✅ Backend admin user profiles now load correctly
+- ✅ Order management pages display package information properly
+- ✅ Package settings no longer attempt to write to non-existent columns
+- ✅ Trial eligibility checks work without database errors
+- ✅ System properly uses the new tiered pricing structure
+
+**Testing**: Verified admin backend loads user profiles without database errors.
+
 ### August 30, 2025: P1 Enhancement Phase - API Routes Restructuring & Payment System Refactoring ✅
 
 #### **✅ P1.1: API Routes Restructuring - Versioned Feature-Based Organization**

@@ -17,7 +17,6 @@ export async function PATCH(
         name: body.name,
         slug: body.slug,
         description: body.description,
-        price: body.price,
         currency: body.currency,
         billing_period: body.billing_period,
         features: body.features || [],

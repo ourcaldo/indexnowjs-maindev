@@ -30,7 +30,7 @@ export async function GET(
           name,
           slug,
           description,
-          price,
+          pricing_tiers,
           currency,
           billing_period,
           features,

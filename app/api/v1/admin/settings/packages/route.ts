@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
         name: body.name,
         slug: body.slug,
         description: body.description,
-        price: body.price || 0,
         currency: body.currency || 'IDR',
         billing_period: body.billing_period || 'monthly',
         features: body.features || [],

@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
           name,
           slug,
           description,
-          price,
+          pricing_tiers,
           currency,
           billing_period,
           features

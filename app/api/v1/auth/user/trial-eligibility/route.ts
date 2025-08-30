@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       .select('*')
       .in('slug', ['premium', 'pro'])
       .eq('is_active', true)
-      .order('price')
+      .order('sort_order')
 
     if (packagesError) {
       console.error('Error fetching packages:', packagesError)
