@@ -83,8 +83,8 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
       }
     }
 
-    // Fallback to base price
-    return { price: pkg.price || 0, originalPrice: pkg.price || 0 }
+    // No pricing found
+    return { price: 0, originalPrice: 0 }
   }
 
   const formatCurrency = (amount: number) => {

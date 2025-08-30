@@ -57,7 +57,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
       return { price, discount, originalPrice, periodLabel }
     }
 
-    return { price: selectedPackage.price, discount: 0, originalPrice: selectedPackage.price, periodLabel: billingPeriod }
+    return { price: 0, discount: 0, originalPrice: 0, periodLabel: billingPeriod }
   }
 
   const { price, discount, originalPrice, periodLabel } = calculatePrice()

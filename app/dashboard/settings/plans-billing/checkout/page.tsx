@@ -254,7 +254,7 @@ export default function CheckoutPage() {
       }
     }
 
-    return { price: selectedPackage.price, discount: 0, originalPrice: selectedPackage.price }
+    return { price: 0, discount: 0, originalPrice: 0 }
   }
 
   // Credit card submission handler

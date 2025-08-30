@@ -35,15 +35,17 @@ export class BillingCycleService {
   }
 
   /**
-   * Calculate billing amount with discounts
+   * Calculate billing amount from pricing tiers
    */
-  calculateBillingAmount(basePrice: number, billingPeriod: 'monthly' | 'yearly'): number {
-    if (billingPeriod === 'yearly') {
-      // Apply 20% discount for yearly billing
-      return basePrice * 12 * 0.8
+  calculateBillingAmountFromTiers(pricingTiers: any, billingPeriod: 'monthly' | 'yearly'): number {
+    const currency = 'IDR' // Should be determined from user location
+    
+    if (pricingTiers?.[billingPeriod]?.[currency]) {
+      const currencyTier = pricingTiers[billingPeriod][currency]
+      return currencyTier.promo_price || currencyTier.regular_price
     }
     
-    return basePrice
+    return 0 // Default if no pricing found
   }
 
   /**
@@ -58,9 +60,10 @@ export class BillingCycleService {
           package:indb_payment_packages(
             id,
             name,
-            price,
+
             currency,
-            billing_period
+            billing_period,
+            pricing_tiers
           )
         `)
         .eq('user_id', userId)
@@ -81,7 +84,7 @@ export class BillingCycleService {
         current_period_end: expiresAt || this.calculateNextBillingDate(subscribedAt, profile.package.billing_period),
         next_billing_date: this.calculateNextBillingDate(subscribedAt, profile.package.billing_period),
         billing_period: profile.package.billing_period,
-        amount: this.calculateBillingAmount(profile.package.price, profile.package.billing_period),
+        amount: this.calculateBillingAmountFromTiers(profile.package.pricing_tiers, profile.package.billing_period),
         currency: profile.package.currency,
         is_active: !expiresAt || expiresAt > currentDate
       }
@@ -138,7 +141,7 @@ export class BillingCycleService {
           package:indb_payment_packages(
             id,
             name,
-            price,
+
             currency,
             billing_period
           )
@@ -158,7 +161,7 @@ export class BillingCycleService {
         current_period_end: new Date(profile.expires_at),
         next_billing_date: new Date(profile.expires_at),
         billing_period: profile.package.billing_period,
-        amount: this.calculateBillingAmount(profile.package.price, profile.package.billing_period),
+        amount: this.calculateBillingAmountFromTiers(profile.package.pricing_tiers, profile.package.billing_period),
         currency: profile.package.currency,
         is_active: true
       }))
@@ -183,7 +186,7 @@ export class BillingCycleService {
           package:indb_payment_packages(
             id,
             name,
-            price,
+
             currency,
             billing_period
           )
@@ -202,7 +205,7 @@ export class BillingCycleService {
         current_period_end: new Date(profile.expires_at),
         next_billing_date: new Date(profile.expires_at),
         billing_period: profile.package.billing_period,
-        amount: this.calculateBillingAmount(profile.package.price, profile.package.billing_period),
+        amount: this.calculateBillingAmountFromTiers(profile.package.pricing_tiers, profile.package.billing_period),
         currency: profile.package.currency,
         is_active: false
       }))

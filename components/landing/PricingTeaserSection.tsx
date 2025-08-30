@@ -146,12 +146,12 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
 
   const getCurrentPrice = (pkg: Package) => {
     if (!pkg.pricing_tiers || typeof pkg.pricing_tiers !== 'object') {
-      return { price: pkg.price, period: pkg.billing_period }
+      return { price: 0, period: pkg.billing_period }
     }
     
     const periodData = pkg.pricing_tiers[globalBillingPeriod]
     if (!periodData || !periodData[currency]) {
-      return { price: pkg.price, period: pkg.billing_period }
+      return { price: 0, period: pkg.billing_period }
     }
     
     const tierData = periodData[currency]

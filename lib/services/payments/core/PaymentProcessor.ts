@@ -181,14 +181,17 @@ export class PaymentProcessor {
    * Calculate payment amount based on package and billing period
    */
   private calculateAmount(packageData: any, billingPeriod: string): number {
-    const basePrice = packageData.price
+    // Default currency - should be determined from user location
+    const currency = 'IDR' // This should come from payment data in real implementation
     
-    if (billingPeriod === 'yearly') {
-      // Apply 20% discount for yearly billing
-      return basePrice * 12 * 0.8
+    // Only use pricing_tiers structure
+    if (packageData.pricing_tiers?.[billingPeriod]?.[currency]) {
+      const currencyTier = packageData.pricing_tiers[billingPeriod][currency]
+      return currencyTier.promo_price || currencyTier.regular_price
     }
     
-    return basePrice
+    // If no pricing_tiers found, return 0 or throw error
+    throw new Error(`No pricing found for ${billingPeriod} billing in ${currency} currency`)
   }
 
   /**

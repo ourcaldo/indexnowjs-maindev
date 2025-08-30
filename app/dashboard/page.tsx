@@ -367,7 +367,7 @@ export default function Dashboard() {
       }
     }
     
-    return { price: pkg.price }
+    return { price: 0 }
   }
 
   // Position change indicator
@@ -424,8 +424,8 @@ export default function Dashboard() {
                   {userProfile.package.name}
                 </div>
                 <p className="text-xs text-[#6C757D] mt-1">
-                  {userProfile.package.price === 0 ? 'Free Plan' : 
-                   `${formatCurrency(userProfile.package.price, userProfile.package.currency)}/${userProfile.package.billing_period}`}
+                  {userProfile.package.slug === 'free' ? 'Free Plan' : 
+                   `Subscribed • ${userProfile.package.billing_period}`}
                 </p>
               </div>
             )}

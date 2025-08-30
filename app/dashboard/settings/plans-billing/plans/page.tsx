@@ -115,7 +115,7 @@ export default function PlansPage() {
         discount: tier.discount_percentage
       }
     }
-    return { price: pkg.price }
+    return { price: 0 }
   }
 
   const handleSubscribe = async (packageId: string) => {

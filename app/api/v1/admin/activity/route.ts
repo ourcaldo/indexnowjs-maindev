@@ -3,6 +3,46 @@ import { supabaseAdmin } from '@/lib/database'
 import { requireSuperAdminAuth } from '@/lib/auth'
 import { ActivityLogger } from '@/lib/monitoring'
 
+export async function POST(request: NextRequest) {
+  try {
+    // Verify super admin authentication
+    await requireSuperAdminAuth(request)
+
+    const body = await request.json()
+    const logger = new ActivityLogger()
+    
+    // Log the admin activity using the ActivityLogger
+    await logger.logAdminActivity(
+      body.user_id || 'system',
+      body.action_type || 'admin_action',
+      body.action_description || 'Admin action performed',
+      body.ip_address || '',
+      body.user_agent || '',
+      body.metadata || {}
+    )
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Activity logged successfully'
+    })
+
+  } catch (error: any) {
+    console.error('Admin activity log POST error:', error)
+    
+    if (error.message === 'Super admin access required') {
+      return NextResponse.json(
+        { error: 'Super admin access required' },
+        { status: 403 }
+      )
+    }
+
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Verify super admin authentication
