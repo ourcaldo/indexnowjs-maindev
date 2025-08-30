@@ -196,7 +196,7 @@ export default function BillingPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) throw new Error('No authentication token')
 
-      const response = await fetch('/api/billing/overview', {
+      const response = await fetch('/api/v1/billing/overview', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -221,7 +221,7 @@ export default function BillingPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) throw new Error('No authentication token')
 
-      const response = await fetch('/api/billing/packages', {
+      const response = await fetch('/api/v1/billing/packages', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -258,7 +258,7 @@ export default function BillingPage() {
         ...(searchTerm && { search: searchTerm })
       })
 
-      const response = await fetch(`/api/billing/history?${params}`, {
+      const response = await fetch(`/api/v1/billing/history?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -280,7 +280,7 @@ export default function BillingPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/user/trial-eligibility', {
+      const response = await fetch('/api/v1/auth/user/trial-eligibility', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

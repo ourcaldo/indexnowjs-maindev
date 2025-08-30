@@ -98,7 +98,7 @@ export default function HistoryTab() {
       if (statusFilter) params.append('status', statusFilter)
       if (typeFilter) params.append('type', typeFilter)
 
-      const response = await fetch(`/api/billing/history?${params}`, {
+      const response = await fetch(`/api/v1/billing/history?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -171,7 +171,7 @@ export default function HistoryTab() {
   const filteredTransactions = historyData?.transactions.filter(transaction => {
     if (!searchTerm) return true
     return (
-      transaction.package.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction.package?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.payment_reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.gateway_transaction_id?.toLowerCase().includes(searchTerm.toLowerCase())
     )

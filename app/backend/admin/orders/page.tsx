@@ -123,7 +123,7 @@ export default function AdminOrdersPage() {
       if (customerSearch) params.append('customer', customerSearch)
       if (packageFilter && packageFilter !== 'all') params.append('package_id', packageFilter)
 
-      const response = await fetch(`/api/admin/orders?${params}`, {
+      const response = await fetch(`/api/v1/billing/orders?${params}`, {
         headers: {
           'Authorization': `Bearer ${session.data.session.access_token}`
         }

@@ -38,7 +38,7 @@ export default function PaymentGateways() {
 
   const fetchPaymentGateways = async () => {
     try {
-      const response = await fetch('/api/admin/settings/payments', {
+      const response = await fetch('/api/v1/admin/settings/payments', {
         credentials: 'include'
       })
       if (response.ok) {
@@ -55,8 +55,8 @@ export default function PaymentGateways() {
   const handleSave = async (gateway: Partial<PaymentGateway>) => {
     try {
       const url = gateway.id 
-        ? `/api/admin/settings/payments/${gateway.id}`
-        : '/api/admin/settings/payments'
+        ? `/api/v1/admin/settings/payments/${gateway.id}`
+        : '/api/v1/admin/settings/payments'
       
       const method = gateway.id ? 'PATCH' : 'POST'
       
@@ -87,7 +87,7 @@ export default function PaymentGateways() {
     if (!confirm('Are you sure you want to delete this payment gateway?')) return
 
     try {
-      const response = await fetch(`/api/admin/settings/payments/${id}`, {
+      const response = await fetch(`/api/v1/admin/settings/payments/${id}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -106,7 +106,7 @@ export default function PaymentGateways() {
 
   const handleSetDefault = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/settings/payments/${id}/default`, {
+      const response = await fetch(`/api/v1/admin/settings/payments/${id}/default`, {
         method: 'PATCH',
         credentials: 'include'
       })

@@ -79,7 +79,7 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
         page: currentPage.toString()
       })
 
-      const response = await fetch(`/api/admin/users/${resolvedParams.id}/activity?${params}`, {
+      const response = await fetch(`/api/v1/admin/users/${resolvedParams.id}/activity?${params}`, {
         credentials: 'include'
       })
 

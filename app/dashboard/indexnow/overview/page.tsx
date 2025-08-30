@@ -42,10 +42,10 @@ export default function IndexNowOverview() {
 
   // Fetch domains
   const { data: domainsData } = useQuery({
-    queryKey: ['/api/keyword-tracker/domains'],
+    queryKey: ['/api/v1/rank-tracking/domains'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/domains', {
+      const response = await fetch('/api/v1/rank-tracking/domains', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -58,10 +58,10 @@ export default function IndexNowOverview() {
 
   // Fetch countries
   const { data: countriesData } = useQuery({
-    queryKey: ['/api/keyword-tracker/countries'],
+    queryKey: ['/api/v1/rank-tracking/countries'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/countries', {
+      const response = await fetch('/api/v1/rank-tracking/countries', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -74,7 +74,7 @@ export default function IndexNowOverview() {
 
   // Fetch keywords with filters (for display)
   const { data: keywordsData, isLoading: keywordsLoading, refetch: refetchKeywords } = useQuery({
-    queryKey: ['/api/keyword-tracker/keywords', {
+    queryKey: ['/api/v1/rank-tracking/keywords', {
       domain_id: selectedDomainId || selectedDomain || undefined,
       device_type: selectedDevice || undefined,
       country_id: selectedCountry || undefined,
@@ -93,7 +93,7 @@ export default function IndexNowOverview() {
       params.append('limit', '20')
 
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+      const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -106,10 +106,10 @@ export default function IndexNowOverview() {
 
   // Fetch total keyword counts for each domain
   const { data: keywordCountsData } = useQuery({
-    queryKey: ['/api/keyword-tracker/keywords-counts'],
+    queryKey: ['/api/v1/rank-tracking/keywords-counts'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/keywords?page=1&limit=1000', {
+      const response = await fetch('/api/v1/rank-tracking/keywords?page=1&limit=1000', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -122,7 +122,7 @@ export default function IndexNowOverview() {
 
   // Fetch ALL keywords for the selected domain for statistics calculation (independent of pagination)
   const { data: allDomainKeywordsData } = useQuery({
-    queryKey: ['/api/keyword-tracker/keywords-stats', selectedDomainId],
+    queryKey: ['/api/v1/rank-tracking/keywords-stats', selectedDomainId],
     queryFn: async () => {
       if (!selectedDomainId) return { data: [] }
       
@@ -131,7 +131,7 @@ export default function IndexNowOverview() {
       params.append('domain_id', selectedDomainId)
       params.append('limit', '1000') // Get all keywords for stats
       
-      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+      const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -184,7 +184,7 @@ export default function IndexNowOverview() {
     setIsDeleting(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/keywords/bulk-delete', {
+      const response = await fetch('/api/v1/rank-tracking/keywords/bulk-delete', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
@@ -222,7 +222,7 @@ export default function IndexNowOverview() {
     setIsAddingTag(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/keywords/add-tag', {
+      const response = await fetch('/api/v1/rank-tracking/keywords/add-tag', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,

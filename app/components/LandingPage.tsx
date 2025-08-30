@@ -108,7 +108,7 @@ export default function LandingPage() {
 
   const loadSiteSettings = async () => {
     try {
-      const response = await fetch('/api/site-settings')
+      const response = await fetch('/api/v1/admin/settings/site')
       const data = await response.json()
       if (data.success) {
         setSiteSettings(data.settings)

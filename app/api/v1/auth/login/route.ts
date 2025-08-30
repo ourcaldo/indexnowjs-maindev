@@ -55,79 +55,96 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
         }
       )
 
-      // Log failed authentication attempt
+      // Log failed login attempt (use email as temporary user ID for failed attempts)
       try {
-        await ActivityLogger.logUserActivity(
-          null, // No user ID for failed attempts
-          ActivityEventTypes.USER_LOGIN_FAILED,
-          `Failed login attempt for ${email}: ${error.message}`,
+        await ActivityLogger.logAuth(
+          email, // Use email as ID for failed attempts
+          ActivityEventTypes.LOGIN,
+          false,
           request,
-          {
-            email,
-            errorCode: error.code,
-            errorMessage: error.message,
-            loginMethod: 'password'
-          }
+          error.message
         )
       } catch (logError) {
-        logger.error('Failed to log authentication failure', { 
-          error: logError,
-          email 
-        })
+        logger.error({ error: logError, email }, 'Failed to log authentication failure')
       }
 
       return createErrorResponse(authError)
     }
 
-    if (!data.user || !data.session) {
-      return createErrorResponse({
-        type: ErrorType.AUTHENTICATION,
-        message: 'Authentication failed',
-        statusCode: 401
-      })
-    }
-
     // Log successful authentication
-    try {
-      await ActivityLogger.logUserActivity(
-        data.user.id,
-        ActivityEventTypes.USER_LOGIN_SUCCESS,
-        `User ${email} logged in successfully`,
-        request,
-        {
-          email,
-          loginMethod: 'password',
-          sessionId: data.session.access_token.substring(0, 10) + '...'
+    logger.info({
+      userId: data.user?.id,
+      email: data.user?.email,
+      endpoint,
+      loginMethod: 'password'
+    }, 'User logged in successfully')
+
+    // Log successful login with comprehensive activity logging
+    if (data.user?.id) {
+      try {
+        await ActivityLogger.logAuth(
+          data.user.id,
+          ActivityEventTypes.LOGIN,
+          true,
+          request
+        )
+      } catch (logError) {
+        logger.error({ error: logError, userId: data.user.id }, 'Failed to log successful authentication')
+      }
+
+      // Send login notification email (fire-and-forget, completely async)
+      process.nextTick(async () => {
+        try {
+          const { loginNotificationService } = await import('@/lib/email/login-notification-service')
+          const { getRequestInfo } = await import('@/lib/utils/ip-device-utils')
+          
+          // Extract request information for notification
+          const requestInfo = await getRequestInfo(request)
+          
+          // Send notification asynchronously with timeout protection
+          Promise.race([
+            loginNotificationService.sendLoginNotification({
+              userId: data.user.id,
+              userEmail: data.user.email || '',
+              userName: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'User',
+              ipAddress: requestInfo.ipAddress || 'Unknown',
+              userAgent: requestInfo.userAgent || 'Unknown',
+              deviceInfo: requestInfo.deviceInfo || undefined,
+              locationData: requestInfo.locationData || undefined,
+              loginTime: new Date().toISOString()
+            }),
+            // Timeout after 30 seconds
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Email sending timeout')), 30000))
+          ]).then(() => {
+            logger.info({ userId: data.user.id }, 'Login notification email sent successfully')
+          }).catch((notificationError) => {
+            logger.error({ error: notificationError, userId: data.user.id }, 'Failed to send login notification email')
+          })
+          
+        } catch (importError) {
+          logger.error({ error: importError, userId: data.user.id }, 'Failed to initialize login notification service')
         }
-      )
-    } catch (logError) {
-      logger.error('Failed to log successful login', { 
-        error: logError,
-        userId: data.user.id 
       })
     }
 
+    // Return user data and session
     return createApiResponse({
       user: data.user,
       session: data.session,
-      message: 'Login successful'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     const systemError = await ErrorHandlingService.createError(
       ErrorType.SYSTEM,
-      `Login system error: ${error.message}`,
+      error as Error,
       {
         severity: ErrorSeverity.HIGH,
         endpoint,
         statusCode: 500,
-        metadata: { 
-          email,
-          systemError: error.message 
-        }
+        userMessageKey: 'default',
+        metadata: { operation: 'user_login' }
       }
     )
-
     return createErrorResponse(systemError)
   }
 })

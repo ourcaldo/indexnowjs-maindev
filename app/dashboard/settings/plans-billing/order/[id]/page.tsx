@@ -72,7 +72,7 @@ export default function OrderCompletedPage() {
         return
       }
 
-      const response = await fetch(`/api/billing/transactions/${params.id}`, {
+      const response = await fetch(`/api/v1/billing/transactions/${params.id}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
@@ -141,7 +141,7 @@ export default function OrderCompletedPage() {
       formData.append('proof_file', proofFile)
       formData.append('transaction_id', transaction.id)
 
-      const response = await fetch('/api/billing/upload-proof', {
+      const response = await fetch('/api/v1/billing/upload-proof', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`

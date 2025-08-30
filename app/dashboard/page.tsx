@@ -119,7 +119,7 @@ export default function Dashboard() {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
-      const response = await fetch('/api/user/profile', {
+      const response = await fetch('/api/v1/auth/user/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -134,10 +134,10 @@ export default function Dashboard() {
 
   // Fetch domains for rank tracking
   const { data: domainsData } = useQuery({
-    queryKey: ['/api/keyword-tracker/domains'],
+    queryKey: ['/api/v1/rank-tracking/domains'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/domains', {
+      const response = await fetch('/api/v1/rank-tracking/domains', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -150,7 +150,7 @@ export default function Dashboard() {
 
   // Fetch top keywords for current domain
   const { data: keywordsData, isLoading: keywordsLoading } = useQuery({
-    queryKey: ['/api/keyword-tracker/keywords', selectedDomainId],
+    queryKey: ['/api/v1/rank-tracking/keywords', selectedDomainId],
     queryFn: async () => {
       if (!selectedDomainId) return { data: [] }
       
@@ -159,7 +159,7 @@ export default function Dashboard() {
       params.append('domain_id', selectedDomainId)
       params.append('limit', '6') // Show top 6 keywords
       
-      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+      const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -173,7 +173,7 @@ export default function Dashboard() {
 
   // Fetch all keywords for statistics
   const { data: allKeywordsData } = useQuery({
-    queryKey: ['/api/keyword-tracker/keywords-all', selectedDomainId],
+    queryKey: ['/api/v1/rank-tracking/keywords-all', selectedDomainId],
     queryFn: async () => {
       if (!selectedDomainId) return { data: [] }
       
@@ -182,7 +182,7 @@ export default function Dashboard() {
       params.append('domain_id', selectedDomainId)
       params.append('limit', '1000')
       
-      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+      const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -214,7 +214,7 @@ export default function Dashboard() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/billing/packages', {
+      const response = await fetch('/api/v1/billing/packages', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -249,7 +249,7 @@ export default function Dashboard() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/user/trial-eligibility', {
+      const response = await fetch('/api/v1/auth/user/trial-eligibility', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

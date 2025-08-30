@@ -276,7 +276,7 @@ export default function JobDetailsPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
-      const response = await fetch(`/api/jobs/${jobId}`, {
+      const response = await fetch(`/api/v1/indexing/jobs/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -316,7 +316,7 @@ export default function JobDetailsPage() {
         limit: itemsPerPage.toString()
       });
 
-      const response = await fetch(`/api/jobs/${jobId}/submissions?${params}`, {
+      const response = await fetch(`/api/v1/indexing/jobs/${jobId}/submissions?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -364,7 +364,7 @@ export default function JobDetailsPage() {
           return;
         }
 
-        const response = await fetch(`/api/jobs/${jobId}`, {
+        const response = await fetch(`/api/v1/indexing/jobs/${jobId}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -385,7 +385,7 @@ export default function JobDetailsPage() {
           });
         }
       } else {
-        const response = await fetch(`/api/jobs/${jobId}`, {
+        const response = await fetch(`/api/v1/indexing/jobs/${jobId}`, {
           method: 'PUT',
           headers: { 
             Authorization: `Bearer ${token}`,

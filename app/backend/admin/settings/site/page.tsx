@@ -52,7 +52,7 @@ export default function SiteSettings() {
 
   const fetchSiteSettings = async () => {
     try {
-      const response = await fetch('/api/admin/settings/site', {
+      const response = await fetch('/api/v1/admin/settings/site', {
         credentials: 'include'
       })
       if (response.ok) {
@@ -73,7 +73,7 @@ export default function SiteSettings() {
     setMessage(null)
 
     try {
-      const response = await fetch('/api/admin/settings/site', {
+      const response = await fetch('/api/v1/admin/settings/site', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export default function SiteSettings() {
     setMessage(null)
 
     try {
-      const response = await fetch('/api/admin/settings/site/test-email', {
+      const response = await fetch('/api/v1/admin/settings/site/test-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

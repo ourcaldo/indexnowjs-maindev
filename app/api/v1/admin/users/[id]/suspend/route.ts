@@ -3,7 +3,7 @@ import { requireSuperAdminAuth } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/database'
 import { ActivityLogger } from '@/lib/monitoring'
 
-// PATCH /api/v1/admin/users/[id]/suspend - Suspend/unsuspend user
+// PATCH /api/admin/users/[id]/suspend - Suspend/unsuspend user
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

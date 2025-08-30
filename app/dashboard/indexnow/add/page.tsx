@@ -152,9 +152,9 @@ export default function AddKeywords() {
 
   // Fetch domains
   const { data: domainsData, isLoading: domainsLoading } = useQuery({
-    queryKey: ['/api/keyword-tracker/domains'],
+    queryKey: ['/api/v1/rank-tracking/domains'],
     queryFn: async () => {
-      const response = await fetch('/api/keyword-tracker/domains')
+      const response = await fetch('/api/v1/rank-tracking/domains')
       if (!response.ok) throw new Error('Failed to fetch domains')
       return response.json()
     }
@@ -162,9 +162,9 @@ export default function AddKeywords() {
 
   // Fetch countries
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
-    queryKey: ['/api/keyword-tracker/countries'],
+    queryKey: ['/api/v1/rank-tracking/countries'],
     queryFn: async () => {
-      const response = await fetch('/api/keyword-tracker/countries')
+      const response = await fetch('/api/v1/rank-tracking/countries')
       if (!response.ok) throw new Error('Failed to fetch countries')
       return response.json()
     }
@@ -173,7 +173,7 @@ export default function AddKeywords() {
   // Create domain mutation
   const createDomainMutation = useMutation({
     mutationFn: async (domainData: { domain_name: string; display_name?: string }) => {
-      const response = await fetch('/api/keyword-tracker/domains', {
+      const response = await fetch('/api/v1/rank-tracking/domains', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(domainData)
@@ -185,7 +185,7 @@ export default function AddKeywords() {
       return response.json()
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/keyword-tracker/domains'] })
+      queryClient.invalidateQueries({ queryKey: ['/api/v1/rank-tracking/domains'] })
       setSelectedDomain(data.data.id)
       setNewDomainName('')
       setErrors({ ...errors, domain: '' })
@@ -198,7 +198,7 @@ export default function AddKeywords() {
   // Add keywords mutation
   const addKeywordsMutation = useMutation({
     mutationFn: async (keywordData: any) => {
-      const response = await fetch('/api/keyword-tracker/keywords', {
+      const response = await fetch('/api/v1/rank-tracking/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(keywordData)
@@ -210,7 +210,7 @@ export default function AddKeywords() {
       return response.json()
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/keyword-tracker/keywords'] })
+      queryClient.invalidateQueries({ queryKey: ['/api/v1/rank-tracking/keywords'] })
       router.push('/dashboard/indexnow/overview')
     },
     onError: (error: Error) => {

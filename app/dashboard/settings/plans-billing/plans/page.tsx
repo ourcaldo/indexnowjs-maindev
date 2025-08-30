@@ -76,7 +76,7 @@ export default function PlansPage() {
         throw new Error('No authentication token')
       }
 
-      const response = await fetch('/api/billing/packages', {
+      const response = await fetch('/api/v1/billing/packages', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

@@ -66,7 +66,7 @@ export default function ActivityDetailPage() {
   const fetchActivityDetail = async (id: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/activity/${id}`, {
+      const response = await fetch(`/api/v1/admin/activity/${id}`, {
         credentials: 'include'
       })
 

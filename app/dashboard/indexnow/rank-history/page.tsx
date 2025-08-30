@@ -166,10 +166,10 @@ export default function RankHistoryPage() {
 
   // Fetch domains
   const { data: domainsData } = useQuery({
-    queryKey: ['/api/keyword-tracker/domains'],
+    queryKey: ['/api/v1/rank-tracking/domains'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/domains', {
+      const response = await fetch('/api/v1/rank-tracking/domains', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -182,10 +182,10 @@ export default function RankHistoryPage() {
 
   // Fetch countries
   const { data: countriesData } = useQuery({
-    queryKey: ['/api/keyword-tracker/countries'],
+    queryKey: ['/api/v1/rank-tracking/countries'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/keyword-tracker/countries', {
+      const response = await fetch('/api/v1/rank-tracking/countries', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -198,14 +198,14 @@ export default function RankHistoryPage() {
 
   // Get all keywords for domain (for keyword count - not affected by filters)
   const { data: allDomainKeywords = [] } = useQuery({
-    queryKey: ['/api/keyword-tracker/keywords', selectedDomainId],
+    queryKey: ['/api/v1/rank-tracking/keywords', selectedDomainId],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
       const params = new URLSearchParams()
       if (selectedDomainId) params.append('domain_id', selectedDomainId)
       params.append('limit', '1000') // Get all keywords for count
       
-      const response = await fetch(`/api/keyword-tracker/keywords?${params}`, {
+      const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -219,7 +219,7 @@ export default function RankHistoryPage() {
 
   // Fetch rank history data
   const { data: rankHistory = [], isLoading } = useQuery({
-    queryKey: ['/api/keyword-tracker/rank-history', selectedDomainId, selectedDevice, selectedCountry, startDate, endDate],
+    queryKey: ['/api/v1/rank-tracking/rank-history', selectedDomainId, selectedDevice, selectedCountry, startDate, endDate],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
       const params = new URLSearchParams()
@@ -230,7 +230,7 @@ export default function RankHistoryPage() {
       if (endDate) params.append('end_date', endDate)
       params.append('limit', '1000')
       
-      const response = await fetch(`/api/keyword-tracker/rank-history?${params}`, {
+      const response = await fetch(`/api/v1/rank-tracking/rank-history?${params}`, {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'

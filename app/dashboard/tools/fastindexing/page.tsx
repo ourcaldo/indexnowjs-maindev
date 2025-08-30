@@ -64,7 +64,7 @@ export default function IndexNowPage() {
       if (!token) return
 
       // Load service accounts
-      const serviceAccountsResponse = await fetch('/api/service-accounts', {
+      const serviceAccountsResponse = await fetch('/api/v1/indexing/service-accounts', {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -74,7 +74,7 @@ export default function IndexNowPage() {
       }
 
       // Load job count for auto-generating job names
-      const jobsResponse = await fetch('/api/jobs', {
+      const jobsResponse = await fetch('/api/v1/indexing/jobs', {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -116,7 +116,7 @@ export default function IndexNowPage() {
       setParsingSitemap(true)
       const token = (await supabase.auth.getSession()).data.session?.access_token
       
-      const response = await fetch('/api/parse-sitemap', {
+      const response = await fetch('/api/v1/indexing/parse-sitemap', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -329,7 +329,7 @@ export default function IndexNowPage() {
         ...(scheduleType !== 'one-time' && startTime ? { startTime } : {})
       }
 
-      const response = await fetch('/api/jobs', {
+      const response = await fetch('/api/v1/indexing/jobs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

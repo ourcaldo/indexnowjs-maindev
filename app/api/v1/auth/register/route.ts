@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
-import { supabaseAdmin } from '@/lib/database'
+import { supabase } from '@/lib/database'
+import { createClient } from '@supabase/supabase-js'
 import { registerSchema } from '@/shared/schema'
 import { 
   publicApiRouteWrapper,
@@ -10,7 +11,7 @@ import {
 import { 
   ErrorHandlingService, 
   ErrorType, 
-  ErrorSeverity,
+  ErrorSeverity, 
   logger 
 } from '@/lib/monitoring/error-handling'
 import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
@@ -28,162 +29,195 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
     return createErrorResponse(validationResult.error)
   }
 
-  const { email, password, first_name, last_name } = validationResult.data as any
+  const { name, email, password, phoneNumber, country } = validationResult.data as { 
+    name: string; 
+    email: string; 
+    password: string;
+    phoneNumber: string;
+    country: string;
+  }
 
   try {
-    // Check if user already exists in auth.users
-    const { data: existingAuthUser } = await supabaseAdmin.auth.admin.listUsers()
-    const userExists = existingAuthUser.users?.some(user => user.email === email)
-
-    if (userExists) {
-      const existingUserError = await ErrorHandlingService.createError(
-        ErrorType.VALIDATION,
-        `User with email ${email} already exists`,
-        {
-          severity: ErrorSeverity.LOW,
-          endpoint,
-          statusCode: 409,
-          userMessageKey: 'user_already_exists',
-          metadata: { email }
-        }
-      )
-      
-      return createErrorResponse(existingUserError)
-    }
-
-    // Create user in Supabase auth
-    const { data: authData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+    // Register with Supabase
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: false,
-      user_metadata: {
-        first_name,
-        last_name,
-        role: 'user'
-      }
+      options: {
+        data: {
+          full_name: name,
+          phone_number: phoneNumber,
+          country: country,
+        },
+      },
     })
 
-    if (signUpError || !authData.user) {
-      const signUpFailureError = await ErrorHandlingService.createError(
+    if (error) {
+      const authError = await ErrorHandlingService.createError(
         ErrorType.AUTHENTICATION,
-        `Registration failed: ${signUpError?.message}`,
+        `Registration failed for ${email}: ${error.message}`,
         {
           severity: ErrorSeverity.MEDIUM,
           endpoint,
           statusCode: 400,
-          userMessageKey: 'registration_failed',
+          userMessageKey: 'default',
           metadata: { 
             email,
-            errorCode: signUpError?.code,
-            errorMessage: signUpError?.message
+            errorCode: error.code || 'unknown',
+            operation: 'user_registration'
           }
         }
       )
-      
-      return createErrorResponse(signUpFailureError)
+
+      // Log failed registration attempt
+      try {
+        await ActivityLogger.logAuth(
+          email, // Use email as ID for failed attempts
+          ActivityEventTypes.REGISTER,
+          false,
+          request,
+          error.message
+        )
+      } catch (logError) {
+        logger.error({ error: logError, email }, 'Failed to log registration failure')
+      }
+
+      return createErrorResponse(authError)
     }
 
-    // Get the default free package
-    const { data: freePackage, error: packageError } = await supabaseAdmin
-      .from('indb_payment_packages')
-      .select('id')
-      .eq('slug', 'free')
-      .eq('is_active', true)
-      .single()
+    // Update user profile with additional details after triggers create the basic profile
+    if (data.user?.id) {
+      try {
+        logger.info({ 
+          userId: data.user.id, 
+          phoneNumber, 
+          country, 
+          name 
+        }, 'Starting profile update process...')
+        
+        // Use service role client to bypass RLS policies for profile update
+        const serviceSupabase = createClient(
+          process.env.SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        )
 
-    if (packageError || !freePackage) {
-      logger.warn('Free package not found, user will be created without package', { email })
-    }
+        // Wait for triggers to create the profile
+        await new Promise(resolve => setTimeout(resolve, 3000)) // Increased to 3 seconds
+        
+        logger.info({ 
+          userId: data.user.id,
+          updateData: { phoneNumber, country, name }
+        }, 'Updating profile with service role client...')
+        
+        // First check if profile exists with service role
+        const { data: existingProfile, error: checkError } = await serviceSupabase
+          .from('indb_auth_user_profiles')
+          .select('*')
+          .eq('user_id', data.user.id)
+          .maybeSingle()
 
-    // Create user profile
-    const { error: profileError } = await supabaseAdmin
-      .from('indb_auth_user_profiles')
-      .insert({
-        user_id: authData.user.id,
-        first_name,
-        last_name,
-        full_name: `${first_name} ${last_name}`,
-        email,
-        role: 'user',
-        package_id: freePackage?.id || null,
-        subscribed_at: new Date().toISOString(),
-        expires_at: null, // Free package never expires
-        daily_quota_used: 0,
-        daily_quota_reset_date: new Date().toISOString().split('T')[0],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+        if (checkError) {
+          logger.error({ error: checkError, userId: data.user.id }, 'Service role failed to check profile')
+        } else if (!existingProfile) {
+          logger.error({ userId: data.user.id }, 'Service role: No profile found to update')
+        } else {
+          logger.info({ 
+            userId: data.user.id,
+            existingProfile: {
+              id: existingProfile.id,
+              phone_number: existingProfile.phone_number,
+              country: existingProfile.country,
+              full_name: existingProfile.full_name
+            }
+          }, 'Service role found profile, updating...')
 
-    if (profileError) {
-      // If profile creation fails, clean up the auth user
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-      
-      const profileCreationError = await ErrorHandlingService.createError(
-        ErrorType.DATABASE,
-        `Profile creation failed: ${profileError.message}`,
-        {
-          severity: ErrorSeverity.HIGH,
-          endpoint,
-          statusCode: 500,
-          metadata: { 
-            email,
-            userId: authData.user.id,
-            dbError: profileError.message
+          // Update the profile directly with service role (bypasses RLS)
+          const { data: updateResult, error: updateError } = await serviceSupabase
+            .from('indb_auth_user_profiles')
+            .update({
+              phone_number: phoneNumber,
+              country: country,
+              full_name: name
+            })
+            .eq('user_id', data.user.id)
+            .select()
+
+          if (updateError) {
+            logger.error({ 
+              error: updateError, 
+              userId: data.user.id,
+              updateData: { phoneNumber, country, name }
+            }, 'Service role failed to update user profile')
+          } else if (updateResult && updateResult.length > 0) {
+            logger.info({ 
+              userId: data.user.id,
+              updateResult,
+              updateData: { phoneNumber, country, name }
+            }, 'SUCCESS: Profile updated with phone and country using service role')
+          } else {
+            logger.error({ 
+              userId: data.user.id,
+              updateResult
+            }, 'Service role update returned no rows')
           }
         }
-      )
-      
-      return createErrorResponse(profileCreationError)
+
+
+
+
+
+
+      } catch (profileError) {
+        logger.error({ error: profileError, userId: data.user.id }, 'Failed to update user profile')
+      }
     }
 
     // Log successful registration
-    try {
-      await ActivityLogger.logUserActivity(
-        authData.user.id,
-        ActivityEventTypes.USER_REGISTRATION,
-        `New user registered: ${email}`,
-        request,
-        {
-          email,
-          firstName: first_name,
-          lastName: last_name,
-          packageId: freePackage?.id,
-          registrationMethod: 'email_password'
-        }
-      )
-    } catch (logError) {
-      logger.error('Failed to log user registration', { 
-        error: logError,
-        userId: authData.user.id 
-      })
+    logger.info({
+      userId: data.user?.id,
+      email: data.user?.email,
+      endpoint,
+      registrationMethod: 'email_password'
+    }, 'User registered successfully')
+
+    // Log successful registration with comprehensive activity logging
+    if (data.user?.id) {
+      try {
+        await ActivityLogger.logAuth(
+          data.user.id,
+          ActivityEventTypes.REGISTER,
+          true,
+          request
+        )
+      } catch (logError) {
+        logger.error({ error: logError, userId: data.user.id }, 'Failed to log successful registration')
+      }
     }
 
+    // Return user data
     return createApiResponse({
-      user: {
-        id: authData.user.id,
-        email: authData.user.email,
-        first_name,
-        last_name,
-        role: 'user'
-      },
-      message: 'Registration successful'
+      user: data.user,
+      session: data.session,
+      message: 'Registration successful. Please check your email to verify your account.',
     }, 201)
 
-  } catch (error: any) {
+  } catch (error) {
     const systemError = await ErrorHandlingService.createError(
       ErrorType.SYSTEM,
-      `Registration system error: ${error.message}`,
+      error as Error,
       {
-        severity: ErrorSeverity.HIGH,
+        severity: ErrorSeverity.CRITICAL,
         endpoint,
         statusCode: 500,
-        metadata: { 
-          email,
-          systemError: error.message 
-        }
+        userMessageKey: 'default',
+        metadata: { operation: 'user_registration', email }
       }
     )
-
     return createErrorResponse(systemError)
   }
 })

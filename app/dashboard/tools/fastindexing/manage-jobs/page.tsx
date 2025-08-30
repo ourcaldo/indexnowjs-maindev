@@ -163,7 +163,7 @@ export default function ManageJobsPage() {
         schedule: scheduleFilter
       });
 
-      const response = await fetch(`/api/jobs?${params}`, {
+      const response = await fetch(`/api/v1/indexing/jobs?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -237,7 +237,7 @@ export default function ManageJobsPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
-      const response = await fetch(`/api/jobs/${jobId}`, {
+      const response = await fetch(`/api/v1/indexing/jobs/${jobId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -284,7 +284,7 @@ export default function ManageJobsPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
-      const response = await fetch(`/api/jobs/${jobId}`, {
+      const response = await fetch(`/api/v1/indexing/jobs/${jobId}`, {
         method: 'PUT',
         headers: { 
           Authorization: `Bearer ${token}`,

@@ -85,7 +85,7 @@ export const BillingStats = ({
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/user/quota', {
+      const response = await fetch('/api/v1/auth/user/quota', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -109,7 +109,7 @@ export const BillingStats = ({
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/user/keyword-usage', {
+      const response = await fetch('/api/v1/rank-tracking/keyword-usage', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

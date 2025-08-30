@@ -10,10 +10,10 @@ export async function POST(
   try {
     // Check admin authentication
     const authResult = await requireSuperAdminAuth(request)
-    if (!authResult) {
+    if (authResult.error) {
       return NextResponse.json(
-        { error: 'Super admin access required' },
-        { status: 403 }
+        { error: authResult.error },
+        { status: authResult.status }
       )
     }
 

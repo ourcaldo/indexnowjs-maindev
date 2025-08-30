@@ -99,7 +99,7 @@ export default function BillingHistoryPage() {
       if (statusFilter) params.append('status', statusFilter)
       if (typeFilter) params.append('type', typeFilter)
 
-      const response = await fetch(`/api/billing/history?${params}`, {
+      const response = await fetch(`/api/v1/billing/history?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

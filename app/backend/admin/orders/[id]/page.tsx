@@ -162,7 +162,7 @@ export default function AdminOrderDetailPage() {
         throw new Error('Not authenticated')
       }
 
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
+      const response = await fetch(`/api/v1/admin/orders/${orderId}`, {
         headers: {
           'Authorization': `Bearer ${session.data.session.access_token}`
         }
@@ -206,7 +206,7 @@ export default function AdminOrderDetailPage() {
         throw new Error('Not authenticated')
       }
 
-      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+      const response = await fetch(`/api/v1/admin/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${session.data.session.access_token}`,

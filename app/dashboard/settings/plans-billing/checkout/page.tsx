@@ -146,13 +146,13 @@ export default function CheckoutPage() {
         if (!token) throw new Error('No authentication token')
 
         const [packageResponse, gatewaysResponse] = await Promise.all([
-          fetch(`/api/billing/packages/${package_id}`, {
+          fetch(`/api/v1/billing/packages/${package_id}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }),
-          fetch('/api/billing/payment-gateways', {
+          fetch('/api/v1/billing/payment-gateways', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -172,7 +172,7 @@ export default function CheckoutPage() {
 
         // Check trial eligibility if needed
         if (isTrialFlow) {
-          const trialResponse = await fetch('/api/user/trial-eligibility', {
+          const trialResponse = await fetch('/api/v1/auth/user/trial-eligibility', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'

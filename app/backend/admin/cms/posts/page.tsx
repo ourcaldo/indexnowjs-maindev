@@ -50,7 +50,7 @@ export default function CMSPosts() {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('/api/admin/cms/posts', {
+      const response = await fetch('/api/v1/admin/cms/posts', {
         credentials: 'include'
       })
       if (response.ok) {
@@ -68,7 +68,7 @@ export default function CMSPosts() {
     if (!confirm('Are you sure you want to delete this post?')) return
 
     try {
-      const response = await fetch(`/api/admin/cms/posts/${id}`, {
+      const response = await fetch(`/api/v1/admin/cms/posts/${id}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -83,7 +83,7 @@ export default function CMSPosts() {
 
   const handleStatusChange = async (id: string, status: string) => {
     try {
-      const response = await fetch(`/api/admin/cms/posts/${id}/status`, {
+      const response = await fetch(`/api/v1/admin/cms/posts/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
       }
 
       // Step 2: Verify admin role using direct API call
-      const response = await fetch('/api/admin/verify-role', {
+      const response = await fetch('/api/v1/admin/verify-role', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
       }
 
       // Step 4: Set admin session and redirect
-      await fetch('/api/auth/session', {
+      await fetch('/api/v1/auth/session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

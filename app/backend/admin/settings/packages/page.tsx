@@ -67,7 +67,7 @@ export default function PackageManagement() {
 
   const fetchPackages = async () => {
     try {
-      const response = await fetch('/api/admin/settings/packages', {
+      const response = await fetch('/api/v1/billing/packages', {
         credentials: 'include'
       })
       if (response.ok) {
@@ -84,8 +84,8 @@ export default function PackageManagement() {
   const handleSave = async (packageData: Partial<PaymentPackage>) => {
     try {
       const url = packageData.id 
-        ? `/api/admin/settings/packages/${packageData.id}`
-        : '/api/admin/settings/packages'
+        ? `/api/v1/billing/packages/${packageData.id}`
+        : '/api/v1/billing/packages'
       
       const method = packageData.id ? 'PATCH' : 'POST'
       
@@ -116,7 +116,7 @@ export default function PackageManagement() {
     if (!confirm('Are you sure you want to delete this package?')) return
 
     try {
-      const response = await fetch(`/api/admin/settings/packages/${id}`, {
+      const response = await fetch(`/api/v1/billing/packages/${id}`, {
         method: 'DELETE',
         credentials: 'include'
       })

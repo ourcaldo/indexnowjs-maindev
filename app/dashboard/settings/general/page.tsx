@@ -50,7 +50,7 @@ export default function GeneralSettingsPage() {
       if (!token) return
 
       // Load user settings
-      const settingsResponse = await fetch('/api/user/settings', {
+      const settingsResponse = await fetch('/api/v1/auth/user/settings', {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -84,7 +84,7 @@ export default function GeneralSettingsPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/user/settings', {
+      const response = await fetch('/api/v1/auth/user/settings', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

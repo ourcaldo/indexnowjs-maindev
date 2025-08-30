@@ -61,7 +61,7 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/admin/users', {
+      const response = await fetch('/api/v1/admin/users', {
         credentials: 'include'
       })
       if (response.ok) {
@@ -77,7 +77,7 @@ export default function UserManagement() {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}/role`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/role`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ export default function UserManagement() {
 
   const handleSuspendUser = async (userId: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}/suspend`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/suspend`, {
         method: 'PATCH',
       })
 

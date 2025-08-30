@@ -150,7 +150,7 @@ export default function UserDetail() {
   // Data fetching functions
   const fetchUser = async () => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}`, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -173,7 +173,7 @@ export default function UserDetail() {
   const fetchUserActivity = async () => {
     try {
       setActivityLoading(true)
-      const response = await fetch(`/api/admin/users/${userId}/activity?limit=10`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/activity?limit=10`, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -190,7 +190,7 @@ export default function UserDetail() {
   const fetchUserSecurity = async () => {
     try {
       setSecurityLoading(true)
-      const response = await fetch(`/api/admin/users/${userId}/security`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/security`, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -210,7 +210,7 @@ export default function UserDetail() {
     
     setActionLoading(prev => ({ ...prev, suspend: true }))
     try {
-      const response = await fetch(`/api/admin/users/${userId}/suspend`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/suspend`, {
         method: 'PATCH',
         credentials: 'include'
       })
@@ -231,7 +231,7 @@ export default function UserDetail() {
     
     setActionLoading(prev => ({ ...prev, resetPassword: true }))
     try {
-      const response = await fetch(`/api/admin/users/${userId}/reset-password`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/reset-password`, {
         method: 'POST',
         credentials: 'include'
       })
@@ -256,7 +256,7 @@ export default function UserDetail() {
     try {
       setActionLoading(prev => ({ ...prev, resetQuota: true }))
       
-      const response = await fetch(`/api/admin/users/${userId}/reset-quota`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/reset-quota`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -280,7 +280,7 @@ export default function UserDetail() {
 
   const handleChangePackage = async () => {
     try {
-      const response = await fetch('/api/admin/packages', {
+      const response = await fetch('/api/v1/billing/packages', {
         credentials: 'include'
       })
       if (response.ok) {
@@ -304,7 +304,7 @@ export default function UserDetail() {
     try {
       setActionLoading(prev => ({ ...prev, changePackage: true }))
       
-      const response = await fetch(`/api/admin/users/${userId}/change-package`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/change-package`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -338,7 +338,7 @@ export default function UserDetail() {
     try {
       setActionLoading(prev => ({ ...prev, extendSubscription: true }))
       
-      const response = await fetch(`/api/admin/users/${userId}/extend-subscription`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}/extend-subscription`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -366,7 +366,7 @@ export default function UserDetail() {
     
     setActionLoading(prev => ({ ...prev, editData: true }))
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/v1/admin/users/${userId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

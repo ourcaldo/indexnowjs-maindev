@@ -45,7 +45,7 @@ The application is built with Next.js App Router and integrates with an Express 
 **Backend Architecture:**
 - **Runtime:** Node.js 20+ with Express.js.
 - **Language:** TypeScript with ES modules.
-- **API Design:** RESTful API with comprehensive middleware.
+- **API Design:** RESTful API with comprehensive middleware, organized in versioned /api/v1/ structure.
 - **Database:** Supabase with type-safe operations, using `indb_` prefixed tables.
 - **Job Processing:** Node-cron for scheduled jobs with WebSocket real-time updates.
 - **Email System:** Nodemailer with custom HTML templates.

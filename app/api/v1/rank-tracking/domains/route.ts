@@ -1,74 +1,86 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireUserAuth } from '@/lib/auth'
+import { getServerAuthUser } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/database'
+import { z } from 'zod'
 
-// GET /api/v1/rank-tracking/domains - Get user's tracked domains
+// Validation schema
+const createDomainSchema = z.object({
+  domain_name: z.string().min(1, 'Domain name is required'),
+  display_name: z.string().optional()
+})
+
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireUserAuth(request)
+    console.log('🔍 Keyword Tracker Domains: Attempting authentication...')
+    console.log('🔍 Headers:', Object.fromEntries(request.headers.entries()))
     
-    // Fetch user's domains with keyword count
+    // Get authenticated user from server context
+    const user = await getServerAuthUser(request)
+    console.log('🔍 Authentication result:', user ? 'SUCCESS' : 'FAILED')
+    
+    if (!user) {
+      console.log('❌ No authenticated user found')
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    
+    console.log('✅ Authenticated user:', user.id, user.email)
+
+    // Get user's domains
     const { data: domains, error } = await supabaseAdmin
-      .from('indb_rank_domains')
-      .select(`
-        *,
-        keywords:indb_rank_keywords(count)
-      `)
+      .from('indb_keyword_domains')
+      .select('*')
       .eq('user_id', user.id)
+      .eq('is_active', true)
       .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching domains:', error)
       return NextResponse.json(
-        { error: 'Failed to fetch domains' },
+        { success: false, error: 'Failed to fetch domains' },
         { status: 500 }
       )
     }
 
-    // Process domains to include keyword count
-    const processedDomains = (domains || []).map(domain => ({
-      ...domain,
-      keyword_count: domain.keywords?.[0]?.count || 0,
-      keywords: undefined // Remove the count object from response
-    }))
-
     return NextResponse.json({
       success: true,
-      domains: processedDomains
+      data: domains || []
     })
 
-  } catch (error: any) {
-    console.error('Domains API error:', error)
-    
-    if (error.message === 'Authentication required') {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
+  } catch (error) {
+    console.error('Domains GET API error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
 
-// POST /api/v1/rank-tracking/domains - Add new domain for tracking
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireUserAuth(request)
-    const body = await request.json()
-
-    const { domain_name, country_code, description } = body
-
-    // Validate required fields
-    if (!domain_name || !country_code) {
+    // Get authenticated user from server context
+    const user = await getServerAuthUser(request)
+    if (!user) {
       return NextResponse.json(
-        { error: 'Missing required fields: domain_name, country_code' },
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Parse request body
+    const body = await request.json()
+    const validation = createDomainSchema.safeParse(body)
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { success: false, error: validation.error.issues[0].message },
         { status: 400 }
       )
     }
+
+    const { domain_name, display_name } = validation.data
 
     // Clean domain name (remove protocol, www, trailing slash)
     const cleanDomain = domain_name
@@ -79,31 +91,27 @@ export async function POST(request: NextRequest) {
 
     // Check if domain already exists for this user
     const { data: existingDomain } = await supabaseAdmin
-      .from('indb_rank_domains')
+      .from('indb_keyword_domains')
       .select('id')
       .eq('user_id', user.id)
       .eq('domain_name', cleanDomain)
-      .eq('country_code', country_code)
       .single()
 
     if (existingDomain) {
       return NextResponse.json(
-        { error: 'Domain already exists for this country' },
-        { status: 409 }
+        { success: false, error: 'Domain already exists' },
+        { status: 400 }
       )
     }
 
-    // Insert new domain
+    // Create new domain
     const { data: newDomain, error } = await supabaseAdmin
-      .from('indb_rank_domains')
+      .from('indb_keyword_domains')
       .insert({
         user_id: user.id,
         domain_name: cleanDomain,
-        country_code,
-        description: description || '',
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        display_name: display_name || cleanDomain,
+        verification_status: 'verified' // For now, auto-verify
       })
       .select()
       .single()
@@ -111,29 +119,20 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error creating domain:', error)
       return NextResponse.json(
-        { error: 'Failed to create domain' },
+        { success: false, error: 'Failed to create domain' },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      domain: newDomain,
-      message: 'Domain added successfully'
-    }, { status: 201 })
+      data: newDomain
+    })
 
-  } catch (error: any) {
-    console.error('Create domain API error:', error)
-    
-    if (error.message === 'Authentication required') {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
+  } catch (error) {
+    console.error('Domains POST API error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     )
   }

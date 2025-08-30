@@ -93,7 +93,7 @@ export default function ActivityLogsPage() {
         page: currentPage.toString()
       })
 
-      const response = await fetch(`/api/admin/activity?${params}`, {
+      const response = await fetch(`/api/v1/admin/activity?${params}`, {
         credentials: 'include'
       })
 

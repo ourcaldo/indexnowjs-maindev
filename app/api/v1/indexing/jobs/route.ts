@@ -1,154 +1,269 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireUserAuth } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/database'
+import { createClient } from '@supabase/supabase-js'
+import { JobLoggingService } from '@/lib/job-management/job-logging-service'
 
-// GET /api/v1/indexing/jobs - Get user's indexing jobs
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireUserAuth(request)
-    const { searchParams } = new URL(request.url)
+    // Get auth token from header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const token = authHeader.substring(7)
     
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const search = searchParams.get('search') || ''
-    const status = searchParams.get('status') || ''
-    const schedule = searchParams.get('schedule') || ''
+    // Create client with the user's token
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    // Set the auth token
+    await supabase.auth.setSession({ access_token: token, refresh_token: '' })
     
-    // Calculate offset for pagination
+    // Get the user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Parse query parameters for pagination and filtering
+    const url = new URL(request.url)
+    const page = parseInt(url.searchParams.get('page') || '1')
+    const limit = parseInt(url.searchParams.get('limit') || '10')
+    const search = url.searchParams.get('search') || ''
+    const status = url.searchParams.get('status') || ''
+    const schedule = url.searchParams.get('schedule') || ''
+
     const offset = (page - 1) * limit
 
     // Build query
     let query = supabaseAdmin
       .from('indb_indexing_jobs')
-      .select(`
-        *,
-        service_account:indb_google_service_accounts(
-          id,
-          name,
-          email
-        ),
-        url_submissions:indb_indexing_url_submissions(
-          id,
-          url,
-          status,
-          submitted_at,
-          indexed_at,
-          error_message
-        )
-      `)
+      .select('*', { count: 'exact' })
       .eq('user_id', user.id)
 
     // Apply filters
     if (search) {
-      query = query.ilike('title', `%${search}%`)
+      query = query.or(`name.ilike.%${search}%,id.ilike.%${search}%`)
     }
-    
     if (status && status !== 'All Status') {
-      query = query.eq('status', status.toLowerCase())
+      query = query.eq('status', status)
     }
-    
     if (schedule && schedule !== 'All Schedules') {
-      query = query.eq('schedule_type', schedule.toLowerCase())
+      query = query.eq('schedule_type', schedule)
     }
 
     // Apply pagination and ordering
-    const { data: jobs, error } = await query
-      .range(offset, offset + limit - 1)
+    const { data, error, count } = await query
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Error fetching jobs:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch jobs' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 })
     }
 
-    // Get total count for pagination
-    const { count: totalCount, error: countError } = await supabaseAdmin
+    // Get total count for next job number
+    const { data: allJobs } = await supabaseAdmin
       .from('indb_indexing_jobs')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
       .eq('user_id', user.id)
 
-    if (countError) {
-      console.error('Error counting jobs:', countError)
-    }
-
-    return NextResponse.json({
-      success: true,
-      jobs: jobs || [],
-      pagination: {
-        page,
-        limit,
-        total: totalCount || 0,
-        totalPages: Math.ceil((totalCount || 0) / limit)
-      }
+    return NextResponse.json({ 
+      jobs: data || [],
+      count: count || 0,
+      page,
+      limit,
+      nextJobNumber: (allJobs?.length || 0) + 1
     })
-
-  } catch (error: any) {
-    console.error('Jobs API error:', error)
-    
-    if (error.message === 'Authentication required') {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error('Error in GET /api/jobs:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// POST /api/v1/indexing/jobs - Create new indexing job
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireUserAuth(request)
-    const body = await request.json()
+    // Get auth token from header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    const { error } = await supabaseAdmin
+    const token = authHeader.substring(7)
+    
+    // Create client with the user's token
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    // Get the user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { name, type, urls, sitemapUrl, scheduleType, startTime } = body
+
+    // Import QuotaService for quota enforcement at the top
+    const { QuotaService } = await import('@/lib/monitoring/quota-service')
+
+    // Security: Sanitize inputs
+    const sanitizeInput = (input: string): string => {
+      if (typeof input !== 'string') return ''
+      return input
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/javascript:/gi, '')
+        .replace(/vbscript:/gi, '')
+        .replace(/on\w+\s*=/gi, '')
+        .trim()
+    }
+
+    const validateUrl = (url: string): boolean => {
+      try {
+        const urlObj = new URL(url)
+        return ['http:', 'https:'].includes(urlObj.protocol) && 
+               urlObj.hostname.length >= 3 && 
+               urlObj.hostname.includes('.')
+      } catch {
+        return false
+      }
+    }
+
+    const validateJobName = (name: string): boolean => {
+      const validPattern = /^[a-zA-Z0-9\s\-_#]+$/
+      return validPattern.test(name) && name.length <= 100
+    }
+
+    // Validate and sanitize inputs
+    const sanitizedName = sanitizeInput(name)
+    
+    if (!sanitizedName || !type) {
+      return NextResponse.json({ error: 'Job name and type are required' }, { status: 400 })
+    }
+
+    if (!validateJobName(sanitizedName)) {
+      return NextResponse.json({ error: 'Invalid job name format' }, { status: 400 })
+    }
+
+    if (!['manual', 'sitemap'].includes(type)) {
+      return NextResponse.json({ error: 'Invalid job type' }, { status: 400 })
+    }
+
+    if (type === 'manual') {
+      if (!urls || !Array.isArray(urls) || urls.length === 0) {
+        return NextResponse.json({ error: 'URLs are required for manual jobs' }, { status: 400 })
+      }
+
+      // Validate and sanitize URLs
+      const sanitizedUrls = urls.map(url => sanitizeInput(url)).filter(url => url.trim())
+      const invalidUrls = sanitizedUrls.filter(url => !validateUrl(url))
+      
+      if (invalidUrls.length > 0) {
+        return NextResponse.json({ error: 'Invalid URLs detected' }, { status: 400 })
+      }
+
+      // Check for duplicates 
+      const uniqueUrls = Array.from(new Set(sanitizedUrls))
+
+      // CHECK USER QUOTA BEFORE ALLOWING JOB CREATION
+      const quotaCheck = await QuotaService.canSubmitUrls(user.id, uniqueUrls.length)
+      if (!quotaCheck.canSubmit) {
+        return NextResponse.json({ 
+          error: quotaCheck.message || 'Quota exceeded. Unable to submit this many URLs.',
+          quota_exhausted: quotaCheck.quotaExhausted,
+          remaining_quota: quotaCheck.remainingQuota
+        }, { status: 400 })
+      }
+    }
+
+    if (type === 'sitemap') {
+      const sanitizedSitemapUrl = sanitizeInput(sitemapUrl)
+      if (!sanitizedSitemapUrl || !validateUrl(sanitizedSitemapUrl)) {
+        return NextResponse.json({ error: 'Valid sitemap URL is required' }, { status: 400 })
+      }
+    }
+
+    if (scheduleType && !['one-time', 'hourly', 'daily', 'weekly', 'monthly'].includes(scheduleType)) {
+      return NextResponse.json({ error: 'Invalid schedule type' }, { status: 400 })
+    }
+
+    // Check quota before creating job
+    const processedUrls = type === 'manual' 
+      ? Array.from(new Set(urls.map((url: string) => sanitizeInput(url)).filter((url: string) => url.trim())))
+      : []
+    
+    // Check user's quota using already imported service
+    const urlCount = processedUrls.length
+    
+    if (urlCount > 0) {
+      const quotaCheck = await QuotaService.canSubmitUrls(user.id, urlCount)
+      if (!quotaCheck.canSubmit) {
+        return NextResponse.json({ 
+          error: quotaCheck.message || 'Quota exceeded. Upgrade your package to submit more URLs.',
+          quotaExhausted: true,
+          remainingQuota: quotaCheck.remainingQuota
+        }, { status: 403 })
+      }
+    }
+      
+    const jobData = {
+      user_id: user.id,
+      name: sanitizedName,
+      type,
+      status: 'pending',
+      schedule_type: scheduleType || 'one-time',
+      source_data: type === 'manual' 
+        ? { urls: processedUrls } 
+        : { sitemap_url: sanitizeInput(sitemapUrl) },
+      total_urls: type === 'manual' ? processedUrls.length : 0,
+      processed_urls: 0,
+      successful_urls: 0,
+      failed_urls: 0,
+      progress_percentage: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    if (scheduleType !== 'one-time' && startTime) {
+      (jobData as any).next_run_at = startTime
+    }
+
+    const { data, error } = await supabaseAdmin
       .from('indb_indexing_jobs')
-      .insert({
-        user_id: user.id,
-        title: body.title,
-        description: body.description,
-        urls: body.urls,
-        schedule_type: body.schedule_type,
-        schedule_config: body.schedule_config,
-        service_account_id: body.service_account_id,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .insert([jobData])
+      .select()
+      .single()
 
     if (error) {
       console.error('Error creating job:', error)
-      return NextResponse.json(
-        { error: 'Failed to create job' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to create job' }, { status: 500 })
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Job created successfully'
-    }, { status: 201 })
+    // Log job creation
+    const jobLogger = JobLoggingService.getInstance();
+    await jobLogger.logJobEvent({
+      job_id: data.id,
+      level: 'INFO',
+      message: `Job created: ${data.name}`,
+      metadata: {
+        event_type: 'job_created',
+        user_id: user.id,
+        job_type: data.type,
+        schedule_type: data.schedule_type,
+        total_urls: data.total_urls,
+        created_via: 'api_endpoint'
+      }
+    });
 
-  } catch (error: any) {
-    console.error('Create job API error:', error)
-    
-    if (error.message === 'Authentication required') {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ job: data })
+  } catch (error) {
+    console.error('Error in POST /api/jobs:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

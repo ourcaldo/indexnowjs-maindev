@@ -18,7 +18,7 @@ export default function ProfileSettingsPage() {
   
   // Log page view and settings activities
   usePageViewLogger('/dashboard/settings/profile', 'Profile Settings', { section: 'profile_settings' })
-  const { logProfileActivity } = useActivityLogger()
+  const { logDashboardActivity } = useActivityLogger()
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -56,7 +56,7 @@ export default function ProfileSettingsPage() {
       if (!token) return
 
       // Load user profile
-      const profileResponse = await fetch('/api/user/profile', {
+      const profileResponse = await fetch('/api/v1/auth/user/profile', {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -71,7 +71,7 @@ export default function ProfileSettingsPage() {
       } else if (profileResponse.status === 404) {
         // Profile doesn't exist, create default values
         setProfileForm({
-          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+          full_name: user.email?.split('@')[0] || '',
           phone_number: '',
           email_notifications: false
         })
@@ -89,7 +89,7 @@ export default function ProfileSettingsPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/user/profile', {
+      const response = await fetch('/api/v1/auth/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -104,9 +104,7 @@ export default function ProfileSettingsPage() {
           description: 'Profile updated successfully',
           type: 'success'
         })
-        await logProfileActivity('profile_update', 'Profile information updated', {
-          changes: profileForm
-        })
+        await logDashboardActivity('profile_update', 'Profile information updated')
         loadData() // Refresh data
       } else {
         const error = await response.json()

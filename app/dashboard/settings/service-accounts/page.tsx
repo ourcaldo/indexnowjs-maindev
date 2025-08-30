@@ -45,7 +45,7 @@ export default function ServiceAccountsSettingsPage() {
       if (!token) return
 
       // Load service accounts
-      const serviceAccountsResponse = await fetch('/api/service-accounts', {
+      const serviceAccountsResponse = await fetch('/api/v1/indexing/service-accounts', {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -101,7 +101,7 @@ export default function ServiceAccountsSettingsPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/service-accounts', {
+      const response = await fetch('/api/v1/indexing/service-accounts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,9 +120,7 @@ export default function ServiceAccountsSettingsPage() {
           description: 'Service account added successfully',
           type: 'success'
         })
-        await logServiceAccountActivity('service_account_add', 'Service account added', {
-          display_name: displayName
-        })
+        await logServiceAccountActivity('service_account_add', 'Service account added')
         setShowAddModal(false)
         setServiceAccountJson('')
         setDisplayName('')
@@ -153,7 +151,7 @@ export default function ServiceAccountsSettingsPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch(`/api/service-accounts/${accountId}`, {
+      const response = await fetch(`/api/v1/indexing/service-accounts/${accountId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
