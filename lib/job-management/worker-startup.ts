@@ -8,6 +8,7 @@ import { quotaMonitor } from '../monitoring/quota-monitor'
 import { recurringBillingJob } from '../payment-services/recurring-billing-job'
 import { autoCancelJob } from '../payment-services/auto-cancel-job'
 import { trialMonitorJob } from './trial-monitor-job'
+import { JobMonitor } from './job-monitor'
 
 // Simple console logger for development
 const logger = {
@@ -59,7 +60,10 @@ export class WorkerStartup {
       // 5. Initialize quota monitoring
       await this.initializeQuotaMonitoring()
 
-      // 6. Add any other background workers here
+      // 6. Start indexing job monitor (CRITICAL - processes pending jobs)
+      await this.initializeJobMonitor()
+
+      // 7. Add any other background workers here
       // await this.initializeNotificationWorker()
 
       this.isInitialized = true
@@ -142,6 +146,25 @@ export class WorkerStartup {
   }
 
   /**
+   * Initialize job monitor for processing pending indexing jobs
+   */
+  private async initializeJobMonitor(): Promise<void> {
+    try {
+      logger.info('Starting indexing job monitor...')
+      
+      // Get JobMonitor instance and start it
+      const jobMonitor = JobMonitor.getInstance()
+      jobMonitor.start()
+      
+      logger.info('Indexing job monitor started - checking for pending jobs every minute')
+      
+    } catch (error) {
+      logger.error('Failed to initialize job monitor:', error)
+      throw error
+    }
+  }
+
+  /**
    * Initialize trial monitoring job scheduler
    */
   private async initializeTrialMonitoring(): Promise<void> {
@@ -192,6 +215,10 @@ export class WorkerStartup {
       
       // Stop daily rank check job
       dailyRankCheckJob.stop()
+      
+      // Stop job monitor
+      const jobMonitor = JobMonitor.getInstance()
+      jobMonitor.stop()
       
       this.isInitialized = false
       logger.info('All background workers stopped')
