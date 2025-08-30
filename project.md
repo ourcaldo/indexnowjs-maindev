@@ -321,6 +321,11 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | public             | indb_auth_user_profiles           | daily_quota_reset_date      | date                        | YES         | CURRENT_DATE                                                     |
 | public             | indb_auth_user_profiles           | email                       | text                        | YES         | null                                                             |
 | public             | indb_auth_user_profiles           | country                     | text                        | YES         | null                                                             |
+| public             | indb_auth_user_profiles           | trial_started_at            | timestamp with time zone    | YES         | null                                                             |
+| public             | indb_auth_user_profiles           | trial_status                | character varying           | YES         | 'none'::character varying                                        |
+| public             | indb_auth_user_profiles           | auto_billing_enabled        | boolean                     | YES         | false                                                            |
+| public             | indb_auth_user_profiles           | has_used_trial              | boolean                     | YES         | false                                                            |
+| public             | indb_auth_user_profiles           | trial_used_at               | timestamp with time zone    | YES         | null                                                             |
 | public             | indb_auth_user_settings           | id                          | uuid                        | NO          | uuid_generate_v4()                                               |
 | public             | indb_auth_user_settings           | user_id                     | uuid                        | NO          | null                                                             |
 | public             | indb_auth_user_settings           | timeout_duration            | integer                     | YES         | 30000                                                            |
@@ -563,11 +568,11 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | public             | indb_payment_midtrans             | metadata                    | jsonb                       | YES         | '{}'::jsonb                                                      |
 | public             | indb_payment_midtrans             | created_at                  | timestamp with time zone    | YES         | now()                                                            |
 | public             | indb_payment_midtrans             | updated_at                  | timestamp with time zone    | YES         | now()                                                            |
+| public             | indb_payment_midtrans             | trial_metadata              | jsonb                       | YES         | null                                                             |
 | public             | indb_payment_packages             | id                          | uuid                        | NO          | gen_random_uuid()                                                |
 | public             | indb_payment_packages             | name                        | text                        | NO          | null                                                             |
 | public             | indb_payment_packages             | slug                        | text                        | NO          | null                                                             |
 | public             | indb_payment_packages             | description                 | text                        | YES         | null                                                             |
-| public             | indb_payment_packages             | price                       | numeric                     | NO          | 0                                                                |
 | public             | indb_payment_packages             | currency                    | text                        | YES         | 'USD'::text                                                      |
 | public             | indb_payment_packages             | billing_period              | text                        | YES         | 'monthly'::text                                                  |
 | public             | indb_payment_packages             | features                    | jsonb                       | YES         | '[]'::jsonb                                                      |
@@ -600,6 +605,7 @@ All tables use `indb_` prefix and are located at https://base.indexnow.studio:
 | public             | indb_payment_transactions         | created_at                  | timestamp with time zone    | YES         | now()                                                            |
 | public             | indb_payment_transactions         | updated_at                  | timestamp with time zone    | YES         | now()                                                            |
 | public             | indb_payment_transactions         | billing_period              | text                        | YES         | null                                                             |
+| public             | indb_payment_transactions         | trial_metadata              | jsonb                       | YES         | null                                                             |
 | public             | indb_payment_transactions_history | id                          | uuid                        | NO          | gen_random_uuid()                                                |
 | public             | indb_payment_transactions_history | transaction_id              | uuid                        | NO          | null                                                             |
 | public             | indb_payment_transactions_history | old_status                  | text                        | YES         | null                                                             |
