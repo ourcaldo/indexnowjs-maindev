@@ -108,11 +108,9 @@ export default function LandingPage() {
 
   const loadSiteSettings = async () => {
     try {
-      const response = await fetch('/api/v1/admin/settings/site')
+      const response = await fetch('/api/v1/public/site-settings')
       const data = await response.json()
-      if (data.success) {
-        setSiteSettings(data.settings)
-      }
+      setSiteSettings(data)
     } catch (error) {
       console.error('Failed to load site settings:', error)
     }

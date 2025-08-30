@@ -4446,3 +4446,18 @@ This refactoring establishes a scalable foundation for IndexNow Studio's continu
 **Next Phase**: Ready for P1.2 Payment System optimization and P2.1 Dashboard component extraction as per refactoring plan timeline.
 
 
+
+
+**✅ CRITICAL FIX - Public Site Settings API Separation**:
+- **Issue Resolved**: Landing page was incorrectly calling admin endpoint `/api/v1/admin/settings/site` for public site information
+- **Security Risk**: Admin endpoint was exposing sensitive SMTP credentials and configuration data to public access
+- **Solution Implemented**: Created dedicated `/api/v1/public/site-settings` endpoint for safe public data access
+- **Public Data Only**: New endpoint returns only safe public information (site name, logo, contact email) without sensitive credentials
+- **Component Updated**: `app/components/LandingPage.tsx` now uses the secure public endpoint
+- **Security Restored**: Admin endpoint properly protected with authentication, public data safely accessible
+
+**Files Created/Modified**:
+- `app/api/v1/public/site-settings/route.ts`: New secure public site settings endpoint
+- `app/components/LandingPage.tsx`: Updated to use public endpoint instead of admin endpoint
+
+
