@@ -167,7 +167,7 @@ export default function CheckoutPage() {
         const packageData = await packageResponse.json()
         const gatewaysData = await gatewaysResponse.json()
 
-        setSelectedPackage(packageData.package)
+        setSelectedPackage(packageData.data)
         setPaymentGateways(gatewaysData.gateways || [])
 
         // Check trial eligibility if needed

@@ -25,16 +25,21 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // Extract and parse IP address properly (handle multiple IPs from proxy)
+    const rawIpAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || body.ip_address || ''
+    const cleanIpAddress = rawIpAddress.split(',')[0].trim() || ''
+
     // Log the activity using the ActivityLogger static method
     await ActivityLogger.logActivity({
       userId,
       eventType: body.eventType || body.action_type || 'system_action',
       actionDescription: body.actionDescription || body.action_description || 'System action performed',
-      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || body.ip_address || '',
+      ipAddress: cleanIpAddress,
       userAgent: request.headers.get('user-agent') || body.user_agent || '',
       request,
       metadata: {
         userEmail,
+        originalIpHeader: rawIpAddress,
         ...body.metadata || {}
       }
     })
