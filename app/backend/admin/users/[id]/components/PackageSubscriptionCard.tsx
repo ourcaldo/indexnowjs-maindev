@@ -7,6 +7,7 @@ import {
   BarChart3,
   DollarSign
 } from 'lucide-react'
+import { getUserCurrency } from '@/lib/utils/currency-utils'
 
 interface PricingData {
   promo_price: number
@@ -38,6 +39,7 @@ interface UserProfile {
   daily_quota_limit?: number
   daily_quota_used?: number
   daily_quota_reset_date?: string
+  country?: string
 }
 
 interface PackageSubscriptionCardProps {
@@ -97,9 +99,9 @@ export function PackageSubscriptionCard({ user }: PackageSubscriptionCardProps) 
                         return 'Free'
                       }
                       
-                      // Get pricing for current billing period and currency
+                      // Get pricing for current billing period and user's currency
                       const billingPeriod = user.package.billing_period
-                      const currency = user.package.currency
+                      const currency = getUserCurrency(user.country)
                       
                       const periodTiers = pricingTiers[billingPeriod]
                       if (!periodTiers) {
