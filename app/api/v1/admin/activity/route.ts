@@ -1,24 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
-import { requireSuperAdminAuth } from '@/lib/auth'
+import { requireSuperAdminAuth, getServerAuthUser } from '@/lib/auth'
 import { ActivityLogger } from '@/lib/monitoring'
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify super admin authentication
-    await requireSuperAdminAuth(request)
-
+    // System-level activity logging - no auth required since this is used by the system
     const body = await request.json()
     const logger = new ActivityLogger()
     
-    // Log the admin activity using the ActivityLogger
-    await logger.logAdminActivity(
-      body.user_id || 'system',
-      body.action_type || 'admin_action',
-      body.action_description || 'Admin action performed',
-      body.ip_address || '',
-      body.user_agent || '',
-      body.metadata || {}
+    // Extract user info from the request body or auth header if available
+    let userId = body.user_id || 'system'
+    let userEmail = body.user_email || ''
+    
+    // Try to get user info from auth header if not provided
+    if (!body.user_id) {
+      try {
+        const user = await getServerAuthUser(request)
+        if (user) {
+          userId = user.id
+          userEmail = user.email || ''
+        }
+      } catch (e) {
+        // No auth provided, use system
+        userId = 'system'
+      }
+    }
+    
+    // Log the activity using the ActivityLogger with service role
+    await logger.logActivity(
+      userId,
+      body.eventType || body.action_type || 'system_action', 
+      body.actionDescription || body.action_description || 'System action performed',
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || body.ip_address || '',
+      request.headers.get('user-agent') || body.user_agent || '',
+      {
+        userEmail,
+        ...body.metadata || {}
+      }
     )
 
     return NextResponse.json({ 
@@ -27,15 +46,8 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Admin activity log POST error:', error)
+    console.error('Activity log POST error:', error)
     
-    if (error.message === 'Super admin access required') {
-      return NextResponse.json(
-        { error: 'Super admin access required' },
-        { status: 403 }
-      )
-    }
-
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

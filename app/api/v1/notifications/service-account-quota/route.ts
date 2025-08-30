@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
-import { requireAuth } from '@/lib/auth'
+import { getServerAuthUser } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
-    const user = await requireAuth(request)
+    const user = await getServerAuthUser(request)
+    if (!user) {
+      throw new Error('Authentication required')
+    }
 
     // Get quota-related notifications for the authenticated user
     const { data: notifications, error } = await supabaseAdmin
       .from('indb_notifications')
       .select('*')
-      .eq('user_id', user.userId)
+      .eq('user_id', user.id)
       .eq('type', 'quota_warning')
       .eq('is_dismissed', false)
       .order('created_at', { ascending: false })
