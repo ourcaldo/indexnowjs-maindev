@@ -109,9 +109,9 @@ export default function CheckoutPage() {
       try {
         setLoading(true)
 
-        // Get authentication token and user profile
-        const user = await authService.getCurrentUser()
-        if (!user) {
+        // Get authentication token
+        const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
+        if (!token) {
           addToast({
             title: "Authentication required",
             description: "Please log in to continue.",
@@ -121,8 +121,23 @@ export default function CheckoutPage() {
           return
         }
 
-        // Auto-populate user information
-        const userName = (user as any).full_name || user.email?.split('@')[0] || ''
+        // Fetch full user profile including country data
+        const profileResponse = await fetch('/api/v1/auth/user/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (!profileResponse.ok) {
+          throw new Error('Failed to fetch user profile')
+        }
+
+        const profileData = await profileResponse.json()
+        const userProfile = profileData.profile
+
+        // Auto-populate user information from full profile
+        const userName = userProfile.full_name || userProfile.email?.split('@')[0] || ''
         const nameParts = userName.split(' ')
         const firstName = nameParts[0] || ''
         const lastName = nameParts.slice(1).join(' ') || ''
@@ -131,20 +146,17 @@ export default function CheckoutPage() {
           ...prev,
           first_name: firstName,
           last_name: lastName,
-          email: user.email || '',
-          phone: (user as any).phone_number || '',
-          country: (user as any).country || ''
+          email: userProfile.email || '',
+          phone: userProfile.phone_number || '',
+          country: userProfile.country || ''
         }))
 
-        // Set user currency
+        // Set user currency based on country from profile
         const { getUserCurrency } = await import('@/lib/utils/currency-utils')
-        const detectedCurrency = getUserCurrency((user as any).country)
+        const detectedCurrency = getUserCurrency(userProfile.country)
         setUserCurrency(detectedCurrency)
 
         // Fetch package and payment gateway data
-        const token = (await supabaseBrowser.auth.getSession()).data.session?.access_token
-        if (!token) throw new Error('No authentication token')
-
         const [packageResponse, gatewaysResponse] = await Promise.all([
           fetch(`/api/v1/billing/packages/${package_id}`, {
             headers: {
