@@ -4645,4 +4645,41 @@ This refactoring establishes a scalable foundation for IndexNow Studio's continu
 
 **Status**: ✅ **P1.1 COMPLETED** - API Routes Restructuring fully implemented and verified
 
+## Recent Changes
+
+### January 27, 2025 - Critical Error Fixes for Post-Migration Issues ✅
+
+- ✅ **ACTIVITY LOGGING SYSTEM FIXED**: Resolved critical error in activity logging API after migration
+  - **Root Cause**: ActivityLogger class was being instantiated incorrectly as instance method instead of static method
+  - **Solution**: Fixed `/api/v1/admin/activity/route.ts` to use `ActivityLogger.logActivity()` static method with proper `ActivityLogData` object structure
+  - **Method Signature**: Updated to use object parameter with `userId`, `eventType`, `actionDescription`, `ipAddress`, `userAgent`, `request`, and `metadata` properties
+  - **Result**: Activity logging now working correctly for all user actions across the dashboard without "logger.logActivity is not a function" errors
+
+- ✅ **NEXT.JS 15 ASYNC PARAMS COMPATIBILITY**: Fixed checkout and notification routes for Next.js 15 compliance
+  - **Checkout Route**: Fixed `/api/v1/billing/packages/[id]/route.ts` to properly await params object (`const packageId = (await params).id`)
+  - **Notifications Route**: Fixed `/api/v1/notifications/dismiss/[id]/route.ts` to properly await params object
+  - **Result**: Package selection and checkout flow now working without "used params.id before awaiting" errors
+
+- ✅ **NOTIFICATIONS DATABASE TABLE FIXED**: Corrected notification system to use proper table schema
+  - **Table Name**: Changed from incorrect `indb_notifications` to proper `indb_notifications_dashboard` table
+  - **Schema Alignment**: Updated notification routes to use `is_read` column instead of non-existent `is_dismissed` column
+  - **Routes Fixed**: 
+    - `/api/v1/notifications/service-account-quota/route.ts` - quota warning notifications
+    - `/api/v1/notifications/dismiss/[id]/route.ts` - notification dismissal
+  - **Result**: Service account quota notifications now displaying correctly without "relation does not exist" errors
+
+- ✅ **COMPREHENSIVE ERROR RESOLUTION**: All critical post-migration errors addressed
+  - **Activity Logging**: User actions properly tracked in `indb_security_activity_logs` table
+  - **Checkout Process**: Package selection and billing flow fully functional
+  - **Quota Monitoring**: Real-time quota notifications working correctly
+  - **Database Consistency**: All API routes using correct table names following `indb_` prefix convention
+
+**Technical Details**:
+- **ActivityLogger Fix**: Changed from instance creation to static method call with proper interface
+- **Params Handling**: Added async/await for Next.js 15 dynamic route parameters
+- **Database Schema**: Ensured all notification routes use correct `indb_notifications_dashboard` table structure
+- **Error Elimination**: Removed all "TypeError", "relation does not exist", and async params errors
+
+**Migration Status**: ✅ **COMPLETE** - All critical errors resolved, IndexNow Studio fully operational on Replit environment
+
 

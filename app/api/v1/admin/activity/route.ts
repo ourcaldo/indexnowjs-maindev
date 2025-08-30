@@ -7,8 +7,6 @@ export async function POST(request: NextRequest) {
   try {
     // System-level activity logging - no auth required since this is used by the system
     const body = await request.json()
-    const logger = new ActivityLogger()
-    
     // Extract user info from the request body or auth header if available
     let userId = body.user_id || 'system'
     let userEmail = body.user_email || ''
@@ -27,18 +25,19 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Log the activity using the ActivityLogger with service role
-    await logger.logActivity(
+    // Log the activity using the ActivityLogger static method
+    await ActivityLogger.logActivity({
       userId,
-      body.eventType || body.action_type || 'system_action', 
-      body.actionDescription || body.action_description || 'System action performed',
-      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || body.ip_address || '',
-      request.headers.get('user-agent') || body.user_agent || '',
-      {
+      eventType: body.eventType || body.action_type || 'system_action',
+      actionDescription: body.actionDescription || body.action_description || 'System action performed',
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || body.ip_address || '',
+      userAgent: request.headers.get('user-agent') || body.user_agent || '',
+      request,
+      metadata: {
         userEmail,
         ...body.metadata || {}
       }
-    )
+    })
 
     return NextResponse.json({ 
       success: true, 

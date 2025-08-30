@@ -12,11 +12,11 @@ export async function GET(request: NextRequest) {
 
     // Get quota-related notifications for the authenticated user
     const { data: notifications, error } = await supabaseAdmin
-      .from('indb_notifications')
+      .from('indb_notifications_dashboard')
       .select('*')
       .eq('user_id', user.id)
       .eq('type', 'quota_warning')
-      .eq('is_dismissed', false)
+      .eq('is_read', false)
       .order('created_at', { ascending: false })
       .limit(10)
 

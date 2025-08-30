@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const packageId = params.id
+    const packageId = (await params).id
 
     if (!packageId) {
       return NextResponse.json(

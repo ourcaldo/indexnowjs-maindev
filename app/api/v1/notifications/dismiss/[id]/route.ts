@@ -9,13 +9,13 @@ export async function POST(
   try {
     // Verify authentication
     const user = await requireAuth(request)
-    const notificationId = params.id
+    const notificationId = (await params).id
 
     // Dismiss the notification for the authenticated user
     const { error } = await supabaseAdmin
-      .from('indb_notifications')
+      .from('indb_notifications_dashboard')
       .update({ 
-        is_dismissed: true,
+        is_read: true,
         dismissed_at: new Date().toISOString()
       })
       .eq('id', notificationId)
