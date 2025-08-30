@@ -1047,6 +1047,31 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 30, 2025 18:45: Registration Flow Validation Fixes ✅
+
+**✅ PHONE NUMBER VALIDATION IMPROVEMENTS**: Fixed phone number input to only accept numeric characters and display proper error messages
+- **Client-Side Input Filtering**: Added real-time input filtering to only allow numbers, spaces, +, -, ( and ) characters
+- **Proper Error Message Display**: Fixed "true" error message issue by implementing Zod schema validation on frontend
+- **Validation Schema Enhancement**: Updated error message text from generic to user-friendly: "Phone number can only contain numbers, spaces, +, -, ( and )"
+- **Form Validation Integration**: Added `registerSchema` import and `safeParse()` validation to provide proper error messaging
+
+**✅ PACKAGE ASSIGNMENT ISSUE RESOLVED**: Confirmed database trigger removal for automatic package assignment during registration
+- **NULL Package ID**: New users now properly have NULL `package_id` instead of being auto-assigned to Basic/Free package
+- **User Confirmation**: User confirmed they removed the problematic database trigger that was auto-assigning packages
+- **Registration Flow Cleanup**: Registration process now correctly creates users without unwanted package assignments
+
+**Technical Implementation**:
+- ✅ Modified `app/register/page.tsx` - Added client-side input filtering and Zod validation for proper error handling
+- ✅ Enhanced `shared/schema.ts` - Improved phone number validation error message for better user experience
+- ✅ Added proper import of `registerSchema` for client-side form validation
+- ✅ Implemented comprehensive form validation using `safeParse()` method to extract and display first validation error
+
+**Files Modified**:
+- `app/register/page.tsx` - Added phone input filtering, Zod validation, and proper error handling
+- `shared/schema.ts` - Enhanced phone validation error message
+
+**Result**: Registration form now provides proper phone number validation with clear error messages and new users are created with NULL package_id as intended.
+
 ### August 30, 2025 17:15: Database Schema Update Fix - Price Column Migration ✅
 
 **Issue**: Backend admin user profile pages were throwing database errors because queries were still referencing the deprecated `price` column instead of the new `pricing_tiers` column in the `indb_payment_packages` table.

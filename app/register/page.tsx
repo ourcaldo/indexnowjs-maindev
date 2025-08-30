@@ -6,6 +6,7 @@ import { authService } from "@/lib/auth"
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 import { countries, findCountryByCode } from '@/lib/utils'
 import { Eye, EyeOff } from 'lucide-react'
+import { registerSchema } from '@/shared/schema'
 // We'll use a simple fetch to our detect-location API instead
 
 import DashboardPreview from '../../components/DashboardPreview'
@@ -73,8 +74,28 @@ export default function Register() {
     setIsLoading(true)
     setError("")
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match")
+    // Client-side validation using Zod schema
+    try {
+      const validationData = {
+        name: fullName,
+        email,
+        password,
+        confirmPassword,
+        phoneNumber,
+        country
+      }
+
+      const result = registerSchema.safeParse(validationData)
+      
+      if (!result.success) {
+        // Extract the first validation error
+        const firstError = result.error.errors[0]
+        setError(firstError.message)
+        setIsLoading(false)
+        return
+      }
+    } catch (validationError: any) {
+      setError("Please check your input and try again")
       setIsLoading(false)
       return
     }
@@ -344,7 +365,11 @@ export default function Register() {
               <input
                 type="tel"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => {
+                  // Only allow numbers, spaces, +, -, ( and )
+                  const value = e.target.value.replace(/[^+\-0-9\s\(\)]/g, '')
+                  setPhoneNumber(value)
+                }}
                 style={{
                   width: '100%',
                   padding: '12px 16px',

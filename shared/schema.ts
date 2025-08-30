@@ -12,7 +12,7 @@ export const registerSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string().min(8, "Please confirm your password"),
-  phoneNumber: z.string().min(3, "Please enter a valid phone number").regex(/^\+?[0-9\s\-\(\)]+$/, "Phone number must contain only numbers, spaces, +, -, ( and )"),
+  phoneNumber: z.string().min(3, "Please enter a valid phone number").regex(/^\+?[0-9\s\-\(\)]+$/, "Phone number can only contain numbers, spaces, +, -, ( and )"),
   country: z.string().min(2, "Please select a country"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
