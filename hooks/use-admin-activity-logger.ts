@@ -37,7 +37,7 @@ export function useAdminActivityLogger() {
         return
       }
 
-      const response = await fetch('/api/activity/log', {
+      const response = await fetch('/api/v1/admin/activity', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

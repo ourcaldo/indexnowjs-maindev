@@ -82,7 +82,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
       } else {
         // User not logged in - use IP detection
         try {
-          const locationResponse = await fetch('/api/detect-location')
+          const locationResponse = await fetch('/api/v1/auth/detect-location')
           if (locationResponse.ok) {
             const locationData = await locationResponse.json()
             if (locationData.country) {

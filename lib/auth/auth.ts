@@ -106,7 +106,7 @@ export class AuthService {
 
       
       // Also transfer to server-side session
-      await fetch('/api/auth/session', {
+      await fetch('/api/v1/auth/session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ export class AuthService {
   }
 
   async signUp(email: string, password: string, fullName: string, phoneNumber?: string, country?: string) {
-    const response = await fetch('/api/auth/register', {
+    const response = await fetch('/api/v1/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

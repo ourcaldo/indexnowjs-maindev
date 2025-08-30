@@ -686,7 +686,7 @@ async function handleSubscriptionEvent(body: any, transaction: any, supabaseAdmi
       try {
         // Use relative URL for server-side API calls
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'
-        const activityResponse = await fetch(`${baseUrl}/api/activity/log`, {
+        const activityResponse = await fetch(`${baseUrl}/api/v1/admin/activity`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

@@ -151,7 +151,7 @@ export class AutoCancelJob {
       if (transaction.user_id) {
         try {
           const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'
-          const activityResponse = await fetch(`${baseUrl}/api/activity/log`, {
+          const activityResponse = await fetch(`${baseUrl}/api/v1/admin/activity`, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
@@ -283,7 +283,7 @@ export class AutoCancelJob {
       if (transaction.user_id) {
         try {
           const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'
-          const activityResponse = await fetch(`${baseUrl}/api/activity/log`, {
+          const activityResponse = await fetch(`${baseUrl}/api/v1/admin/activity`, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
