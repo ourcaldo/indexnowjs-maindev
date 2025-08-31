@@ -1,6 +1,6 @@
 /**
  * IndexNow Rank Tracker API Integration Service
- * Handles rank checking via custom backend API at http://160.79.119.44:5000
+ * Handles rank checking via custom backend API (URL configured in database)
  */
 
 import { supabaseAdmin } from '../database/supabase'
@@ -54,10 +54,10 @@ export class RankTrackerService {
     if (this.config) return // Already initialized
 
     try {
-      // Get API key from database
+      // Get API key and URL from database
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
-        .select('apikey')
+        .select('apikey, api_url')
         .eq('service_name', 'custom_tracker')
         .eq('is_active', true)
         .single()
@@ -68,7 +68,7 @@ export class RankTrackerService {
 
       this.config = {
         apiKey: integration.apikey,
-        baseUrl: 'http://160.79.119.44:5000'
+        baseUrl: integration.api_url || 'http://160.79.119.44:5000'
       }
 
       logger.info('IndexNow Rank Tracker service initialized with database API key')

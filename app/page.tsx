@@ -10,12 +10,6 @@ export const metadata: Metadata = {
     title: 'IndexNow: Rank Tracker - Rank tracking, minus the bloat',
     description: 'Know where you rank—any device, any location—without the headache. Built for SEO professionals who want accuracy without complexity.',
     type: 'website',
-    images: [{
-      url: 'https://bwkasvyrzbzhcdtvsbyg.supabase.co/storage/v1/object/public/indexnow-bucket/logo/indexnow-black.png',
-      width: 1200,
-      height: 630,
-      alt: 'IndexNow: Rank Tracker - Professional Rank Tracking Made Simple'
-    }]
   },
   twitter: {
     card: 'summary_large_image',
