@@ -3,7 +3,7 @@
  */
 
 import { z } from 'zod';
-import type { CustomerInfo } from '../../services/Payments';
+import type { CustomerInfo, InvoiceItem, InvoiceDiscount, InvoiceTax } from '../../services/Payments';
 
 // Base payment request types
 export interface CreatePaymentRequest {
