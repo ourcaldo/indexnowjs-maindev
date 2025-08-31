@@ -158,118 +158,107 @@ export default function OrderSuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC]">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/dashboard/settings/plans-billing')}
-            className="mb-4 text-[#6C757D] hover:text-[#1A1A1A]"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Plans & Billing
-          </Button>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Order Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Order Summary */}
-            <Card className="bg-[#1A1A1A] text-white border-[#E0E6ED]">
-              <CardHeader>
-                <CardTitle className="text-white">Summary</CardTitle>
+    <div className="min-h-screen bg-gray-100">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 min-h-screen">
+          {/* Left Column - Dark Summary Section */}
+          <div className="bg-[#2C2C2E] text-white p-8 lg:p-12">
+            <div className="max-w-md mx-auto">
+              {/* Summary Header */}
+              <div className="mb-8">
+                <h1 className="text-2xl font-bold text-white mb-2">Summary</h1>
                 <p className="text-gray-300 text-sm">Order #{orderData.order_id}</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Package Content */}
-                <div className="flex items-start space-x-4">
+              </div>
+
+              {/* Package Content */}
+              <div className="mb-8">
+                <div className="flex items-start space-x-4 mb-6">
                   <div className="w-12 h-12 bg-white bg-opacity-10 rounded-lg flex items-center justify-center">
                     <Building2 className="w-6 h-6 text-[#3D8BFF]" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-white">{orderData.package.name}</h3>
-                    <p className="text-gray-300 text-sm mt-1">{orderData.package.description}</p>
-                    <div className="mt-3 space-y-1">
-                      {orderData.package.features?.slice(0, 3).map((feature, index) => (
+                    
+                    {/* Package Features */}
+                    <div className="mt-4 space-y-2">
+                      {orderData.package.features?.slice(0, 5).map((feature, index) => (
                         <div key={index} className="flex items-center text-sm text-gray-300">
-                          <span className="text-[#4BB543] mr-2">→</span>
+                          <span className="text-[#4BB543] mr-3">→</span>
                           {feature}
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-white">
-                      {formatCurrency(orderData.amount, orderData.currency)}
+                </div>
+
+                {/* Additional Features */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-black bg-opacity-20 rounded-lg p-3">
+                    <div className="flex items-center text-[#F0A202] text-sm">
+                      <span className="mr-2">✦</span>
+                      Progressive Freeform
                     </div>
-                    <div className="text-sm text-gray-300 capitalize">
-                      {orderData.billing_period}
+                  </div>
+                  <div className="bg-black bg-opacity-20 rounded-lg p-3">
+                    <div className="flex items-center text-[#F0A202] text-sm">
+                      <span className="mr-2">✦</span>
+                      Lifestyle
                     </div>
                   </div>
                 </div>
 
-                {/* Customer Information */}
-                <div className="border-t border-gray-600 pt-6">
-                  <div className="flex items-center mb-4">
-                    <User className="w-5 h-5 text-gray-300 mr-2" />
-                    <h4 className="font-semibold text-white">Customer</h4>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-white font-medium">
-                        {orderData.customer_info.first_name} {orderData.customer_info.last_name}
-                      </p>
-                      <p className="text-gray-300 text-sm">{orderData.customer_info.email}</p>
-                      {orderData.customer_info.phone && (
-                        <p className="text-gray-300 text-sm">{orderData.customer_info.phone}</p>
-                      )}
-                    </div>
-                    <div className="text-gray-300 text-sm">
-                      <div className="flex items-start">
-                        <MapPin className="w-4 h-4 mt-0.5 mr-1 flex-shrink-0" />
-                        <div>
-                          <p>{orderData.customer_info.address}</p>
-                          <p>{orderData.customer_info.city}, {orderData.customer_info.state}</p>
-                          <p>{orderData.customer_info.zip_code}, {orderData.customer_info.country}</p>
-                        </div>
-                      </div>
-                    </div>
+                <div className="bg-black bg-opacity-20 rounded-lg p-3 mb-6">
+                  <div className="text-[#4BB543] text-sm">
+                    <span className="mr-2">→</span>
+                    Comfort
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Payment Details */}
-            {(orderData.payment_details?.va_numbers || orderData.payment_details?.payment_code) && (
-              <Card className="border-[#E0E6ED] bg-[#FFFFFF]">
-                <CardHeader>
-                  <CardTitle className="text-[#1A1A1A] flex items-center">
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Payment Details
-                  </CardTitle>
-                  <p className="text-[#6C757D] text-sm">
-                    Complete your payment using the information below
+              {/* Customer Information */}
+              <div className="border-t border-gray-600 pt-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-8 h-8 bg-white bg-opacity-10 rounded-full flex items-center justify-center mr-3">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <h4 className="font-semibold text-white">Customer</h4>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="text-white font-medium">
+                    {orderData.customer_info.first_name} {orderData.customer_info.last_name}
                   </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  <p className="text-gray-300 text-sm">{orderData.customer_info.phone || orderData.customer_info.email}</p>
+                  <div className="text-gray-300 text-sm">
+                    <p>{orderData.customer_info.address}</p>
+                    <p>{orderData.customer_info.city}, {orderData.customer_info.state} {orderData.customer_info.zip_code}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Details */}
+              {(orderData.payment_details?.va_numbers || orderData.payment_details?.payment_code) && (
+                <div className="border-t border-gray-600 pt-6 mt-6">
+                  <h4 className="font-semibold text-white mb-4 flex items-center">
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Payment Details
+                  </h4>
+                  
                   {/* Virtual Account Numbers */}
                   {orderData.payment_details.va_numbers?.map((va, index) => (
-                    <div key={index} className="p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                    <div key={index} className="bg-black bg-opacity-30 rounded-lg p-4 mb-3">
+                      <p className="text-gray-300 text-xs uppercase tracking-wide mb-1">
+                        {va.bank} Virtual Account
+                      </p>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-[#1A1A1A] uppercase">
-                            {va.bank} Virtual Account
-                          </p>
-                          <p className="text-2xl font-mono font-bold text-[#1A1A1A] mt-2 tracking-wider">
-                            {va.va_number}
-                          </p>
-                        </div>
+                        <p className="text-white font-mono text-lg font-bold tracking-wider">
+                          {va.va_number}
+                        </p>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => copyToClipboard(va.va_number, `${va.bank.toUpperCase()} VA Number`)}
-                          className="border-[#3D8BFF] text-[#3D8BFF] hover:bg-[#3D8BFF] hover:text-white"
+                          className="text-[#3D8BFF] hover:bg-[#3D8BFF] hover:text-white h-8 w-8 p-0"
                         >
                           <Copy className="w-4 h-4" />
                         </Button>
@@ -279,118 +268,77 @@ export default function OrderSuccessPage() {
 
                   {/* Convenience Store Payment Code */}
                   {orderData.payment_details.payment_code && (
-                    <div className="p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                    <div className="bg-black bg-opacity-30 rounded-lg p-4 mb-3">
+                      <p className="text-gray-300 text-xs uppercase tracking-wide mb-1">
+                        {orderData.payment_details.store} Payment Code
+                      </p>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-[#1A1A1A] uppercase">
-                            {orderData.payment_details.store} Payment Code
-                          </p>
-                          <p className="text-2xl font-mono font-bold text-[#1A1A1A] mt-2 tracking-wider">
-                            {orderData.payment_details.payment_code}
-                          </p>
-                        </div>
+                        <p className="text-white font-mono text-lg font-bold tracking-wider">
+                          {orderData.payment_details.payment_code}
+                        </p>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => copyToClipboard(orderData.payment_details.payment_code!, 'Payment Code')}
-                          className="border-[#3D8BFF] text-[#3D8BFF] hover:bg-[#3D8BFF] hover:text-white"
+                          className="text-[#3D8BFF] hover:bg-[#3D8BFF] hover:text-white h-8 w-8 p-0"
                         >
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
                   )}
-
-                  {/* Payment Expiry */}
-                  {orderData.payment_details.expires_at && (
-                    <div className="flex items-center text-sm text-[#6C757D]">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Payment expires: {formatDate(orderData.payment_details.expires_at)}
-                    </div>
-                  )}
-
-                  <div className="text-sm text-[#6C757D] bg-[#F0A202]/10 p-3 rounded-lg border border-[#F0A202]/20">
-                    <p className="font-medium text-[#F0A202]">Important:</p>
-                    <p>Please complete your payment before the expiry time. Payment details have also been sent to your email.</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Order Information */}
-            <Card className="border-[#E0E6ED] bg-[#FFFFFF]">
-              <CardHeader>
-                <CardTitle className="text-[#1A1A1A]">Order Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-[#6C757D]">Order ID</p>
-                    <p className="font-mono text-[#1A1A1A]">{orderData.order_id}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#6C757D]">Payment Method</p>
-                    <p className="text-[#1A1A1A] capitalize">{orderData.payment_method.replace('_', ' ')}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#6C757D]">Order Date</p>
-                    <p className="text-[#1A1A1A]">{formatDate(orderData.created_at)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#6C757D]">Status</p>
-                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                      orderData.payment_status === 'paid' 
-                        ? 'bg-[#4BB543]/10 text-[#4BB543]' 
-                        : 'bg-[#F0A202]/10 text-[#F0A202]'
-                    }`}>
-                      {orderData.payment_status === 'paid' ? 'Completed' : 'Pending Payment'}
-                    </span>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+
+              {/* Contact Support */}
+              <div className="border-t border-gray-600 pt-6 mt-8">
+                <p className="text-gray-300 text-sm mb-4">
+                  Do you have problems about your order?
+                </p>
+                <Button 
+                  variant="outline"
+                  className="text-[#F0A202] border-[#F0A202] hover:bg-[#F0A202] hover:text-black bg-transparent"
+                  onClick={() => window.open('mailto:support@indexnow.studio', '_blank')}
+                >
+                  CONTACT US →
+                </Button>
+              </div>
+            </div>
           </div>
 
           {/* Right Column - Success Message */}
-          <div className="lg:col-span-1">
-            <Card className="border-[#E0E6ED] bg-[#FFFFFF] text-center sticky top-8">
-              <CardContent className="py-12">
-                <div className="w-20 h-20 bg-[#4BB543] rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle className="w-10 h-10 text-white" />
-                </div>
-                
-                <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">
-                  Order has been placed!
-                </h2>
-                
-                <p className="text-[#6C757D] mb-8">
-                  {orderData.payment_status === 'paid' 
-                    ? 'Your payment has been confirmed and your package is now active.'
-                    : 'Complete your payment to activate your package. Payment instructions have been sent to your email.'
-                  }
-                </p>
+          <div className="bg-white flex items-center justify-center p-8 lg:p-12">
+            <div className="text-center max-w-md mx-auto">
+              <div className="w-20 h-20 bg-[#4BB543] rounded-full flex items-center justify-center mx-auto mb-8">
+                <CheckCircle className="w-10 h-10 text-white" />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-[#1A1A1A] mb-4">
+                Order has saved!
+              </h2>
+              
+              <p className="text-[#6C757D] mb-12 leading-relaxed">
+                {orderData.payment_status === 'paid' 
+                  ? 'Your payment has been confirmed and ready to use.'
+                  : 'Click return home to go to back homepage.'
+                }
+              </p>
 
-                <Button 
-                  onClick={() => router.push('/dashboard/settings/plans-billing')}
-                  className="w-full bg-[#F0A202] hover:bg-[#d4891a] text-white font-medium py-3"
-                >
-                  RETURN TO PLANS & BILLING
-                </Button>
+              <Button 
+                onClick={() => router.push('/dashboard/settings/plans-billing')}
+                className="bg-[#F0A202] hover:bg-[#d4891a] text-black font-bold py-4 px-8 rounded-lg text-lg"
+              >
+                RETURN HOME →
+              </Button>
 
-                <div className="mt-8 pt-6 border-t border-[#E0E6ED]">
-                  <p className="text-sm text-[#6C757D] mb-3">
-                    Do you have problems about your order?
-                  </p>
-                  <Button 
-                    variant="outline"
-                    className="text-[#3D8BFF] border-[#3D8BFF] hover:bg-[#3D8BFF] hover:text-white"
-                    onClick={() => window.open('mailto:support@indexnow.studio', '_blank')}
-                  >
-                    CONTACT US
-                  </Button>
+              {/* Footer */}
+              <div className="mt-16 pt-8 border-t border-gray-200">
+                <div className="flex justify-between items-center text-xs text-gray-400">
+                  <p>ALL RIGHTS RESERVED © 2023</p>
+                  <p>SMARTVISION</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>
