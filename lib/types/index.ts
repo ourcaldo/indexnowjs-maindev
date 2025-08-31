@@ -1,8 +1,15 @@
 /**
  * Types barrel export for IndexNow Studio
- * Centralized type definitions
+ * Centralized type definitions with P4.1 Enhanced Type System
  */
 
+// P4.1 Enhanced Type System - New organized structure
+export * from './global';
+export * from './api';
+export * from './components';
+export * from './services';
+
+// Legacy exports for backward compatibility
 // Core types
 export type {
   ApiRequest, AuthenticatedRequest, RateLimitInfo, RateLimitConfig,
