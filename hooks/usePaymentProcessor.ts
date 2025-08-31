@@ -4,6 +4,7 @@
  * Encapsulates payment flow, loading states, and error handling
  */
 
+import '@/types/midtrans'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PaymentRouter, type PaymentRequest } from '@/lib/payment-services/payment-router'
@@ -178,7 +179,7 @@ export function usePaymentProcessor({
             })
             logPaymentActivity('payment_success', paymentData, snapResult)
             setTimeout(() => {
-              router.push('/dashboard/settings/plans-billing?payment=success')
+              router.push(`/dashboard/settings/plans-billing/orders/${result.data.order_id}`)
             }, 1500)
           },
           onPending: (snapResult) => {
@@ -190,7 +191,7 @@ export function usePaymentProcessor({
             })
             logPaymentActivity('payment_pending', paymentData, snapResult)
             setTimeout(() => {
-              router.push('/dashboard/settings/plans-billing?payment=pending')
+              router.push(`/dashboard/settings/plans-billing/orders/${result.data.order_id}`)
             }, 1500)
           },
           onError: (snapResult) => {
@@ -234,7 +235,7 @@ export function usePaymentProcessor({
           type: "success"
         })
         logPaymentActivity('payment_success', paymentData, result.data)
-        router.push('/dashboard/settings/plans-billing?payment=success')
+        router.push(`/dashboard/settings/plans-billing/orders/${result.data.order_id}`)
       } else {
         // Handle redirect payments (bank transfer, etc.)
         if (result.redirect_url) {
@@ -400,7 +401,7 @@ export function usePaymentProcessor({
 
             if (callbackResult.success) {
               // Don't show toast here - billing page will handle it via URL parameter
-              router.push('/dashboard/settings/plans-billing?payment=success')
+              router.push(`/dashboard/settings/plans-billing/orders/${orderId}`)
             } else {
               throw new Error(callbackResult.message || '3DS authentication callback failed')
             }

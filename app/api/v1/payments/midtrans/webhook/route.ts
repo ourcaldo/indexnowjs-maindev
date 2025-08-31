@@ -77,6 +77,24 @@ export async function POST(request: NextRequest) {
         break
     }
 
+    // Extract payment details for VA numbers and payment codes
+    const paymentDetails: any = {}
+    
+    if (notification.payment_type === 'bank_transfer' && notification.va_numbers) {
+      paymentDetails.va_numbers = notification.va_numbers
+      paymentDetails.payment_method = 'bank_transfer'
+    }
+    
+    if (notification.payment_type === 'cstore') {
+      paymentDetails.payment_code = notification.payment_code
+      paymentDetails.store = notification.store
+      paymentDetails.payment_method = 'convenience_store'
+    }
+    
+    if (notification.expiry_time) {
+      paymentDetails.expires_at = notification.expiry_time
+    }
+
     // Update transaction in database
     const { error: updateError } = await supabaseAdmin
       .from('indb_payment_transactions')
@@ -84,6 +102,7 @@ export async function POST(request: NextRequest) {
         status: newStatus,
         payment_status: newPaymentStatus,
         midtrans_response: notification,
+        payment_details: paymentDetails,
         updated_at: new Date().toISOString()
       })
       .eq('id', transaction.id)

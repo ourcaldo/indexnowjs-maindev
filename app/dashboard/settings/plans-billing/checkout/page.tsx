@@ -1,5 +1,6 @@
 'use client'
 
+import '@/types/midtrans'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
