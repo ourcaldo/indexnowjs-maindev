@@ -5,6 +5,7 @@ export { PackageSubscriptionCard } from './PackageSubscriptionCard'
 export { UserActivityCard } from './UserActivityCard'
 export { UserSecurityCard } from './UserSecurityCard'
 export { PackageChangeModal } from './PackageChangeModal'
+export { SystemIntegration } from './SystemIntegration'
 
 // Type definitions
 export interface UserProfile {
