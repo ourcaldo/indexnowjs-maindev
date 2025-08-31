@@ -58,8 +58,8 @@ export default class MidtransSnapHandler extends BasePaymentHandler {
         phone: this.paymentData.customer_info.phone || ''
       },
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing?payment=success`,
-        error: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing?payment=error`
+        finish: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing/orders/${orderId}`,
+        error: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing?payment=error&order_id=${orderId}`
       }
     }
 

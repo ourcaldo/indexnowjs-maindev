@@ -9,6 +9,7 @@ export async function GET(
 ) {
   try {
     const { order_id } = await params
+    console.log('[ORDER-API] Received order_id:', order_id)
 
     // Authentication
     const cookieStore = await cookies()
@@ -34,13 +35,18 @@ export async function GET(
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
+      console.log('[ORDER-API] Authentication failed:', authError?.message || 'No user found')
       return NextResponse.json({ 
         success: false, 
         message: 'Authentication required' 
       }, { status: 401 })
     }
+    
+    console.log('[ORDER-API] User authenticated:', user.id)
 
     // Fetch transaction details with package and user profile information
+    console.log('[ORDER-API] Searching for payment_reference:', order_id, 'user_id:', user.id)
+    
     const { data: transaction, error: transactionError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .select(`
@@ -52,12 +58,32 @@ export async function GET(
       .eq('user_id', user.id)
       .single()
 
+    console.log('[ORDER-API] Query result:', {
+      found: !!transaction,
+      error: transactionError?.message || null,
+      transactionId: transaction?.id || null,
+      paymentRef: transaction?.payment_reference || null
+    })
+
     if (transactionError || !transaction) {
+      console.log('[ORDER-API] Transaction not found. Checking if order exists for any user...')
+      
+      // Check if order exists for any user (debug only)
+      const { data: anyUserTransaction } = await supabaseAdmin
+        .from('indb_payment_transactions')
+        .select('id, payment_reference, user_id, transaction_status')
+        .eq('payment_reference', order_id)
+        .single()
+      
+      console.log('[ORDER-API] Order exists for any user:', !!anyUserTransaction, 'user_id:', anyUserTransaction?.user_id || 'N/A')
+      
       return NextResponse.json({
         success: false,
         message: 'Order not found'
       }, { status: 404 })
     }
+    
+    console.log('[ORDER-API] Transaction found successfully, order_id:', transaction.payment_reference)
 
     // Format response data
     const orderData = {

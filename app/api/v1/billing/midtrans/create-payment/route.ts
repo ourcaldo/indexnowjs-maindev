@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
         category: 'Subscription'
       }],
       callbacks: {
-        finish: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=success&order_id=${orderId}`,
+        finish: `https://${request.headers.get('host')}/dashboard/settings/plans-billing/orders/${orderId}`,
         error: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=failed&order_id=${orderId}`,
         pending: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=pending&order_id=${orderId}`
       },
