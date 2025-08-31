@@ -13,7 +13,10 @@ export class TrialMonitorJob {
   private isRunning = false
 
   constructor() {
-    this.setupJob()
+    // Don't setup job during build time
+    if (process.env.NEXT_PHASE !== 'phase-production-build') {
+      this.setupJob()
+    }
   }
 
   private setupJob() {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { backgroundWorker } from '@/lib/background-worker';
+import { backgroundWorker } from '@/lib/job-management/background-worker';
 
 export async function POST(request: NextRequest) {
   try {

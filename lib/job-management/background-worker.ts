@@ -1,5 +1,5 @@
 import { jobMonitor } from './job-monitor';
-import { QuotaResetMonitor } from './quota-reset-monitor';
+import { QuotaResetMonitor } from '../monitoring/quota-reset-monitor';
 
 /**
  * Background Worker Service

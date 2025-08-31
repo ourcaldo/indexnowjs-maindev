@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
-import { requireAuth } from '@/lib/auth'
+import { getServerAuthUser } from '@/lib/auth'
 
 export async function POST(
   request: NextRequest,
@@ -8,7 +8,7 @@ export async function POST(
 ) {
   try {
     // Verify authentication
-    const user = await requireAuth(request)
+    const user = await getServerAuthUser(request)
     const notificationId = (await params).id
 
     // Dismiss the notification for the authenticated user

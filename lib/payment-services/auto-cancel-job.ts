@@ -14,7 +14,10 @@ export class AutoCancelJob {
   private cronJob: any | null = null
 
   constructor() {
-    this.setupJob()
+    // Don't setup job during build time
+    if (process.env.NEXT_PHASE !== 'phase-production-build') {
+      this.setupJob()
+    }
   }
 
   private setupJob() {

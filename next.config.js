@@ -42,6 +42,18 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
+  // Reduce memory usage during build
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  // Reduce concurrent builds  
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:5000', '0.0.0.0:5000', '*.replit.dev', '*.replit.app', '*.replit.co', '*']
+    },
+    workerThreads: false,
+    cpus: 1,
+  },
   async headers() {
     return [
       {

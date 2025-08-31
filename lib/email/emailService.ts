@@ -66,12 +66,22 @@ interface TrialEndingData {
 
 export class EmailService {
   private transporter: nodemailer.Transporter | null = null
+  private isInitialized: boolean = false
 
   constructor() {
-    this.initializeTransporter()
+    // Don't initialize during build time - use lazy initialization
   }
 
   private async initializeTransporter() {
+    // Skip initialization during build process
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      return
+    }
+
+    if (this.isInitialized) {
+      return
+    }
+
     try {
       console.log('🔧 Initializing SMTP transporter...')
       
@@ -99,10 +109,17 @@ export class EmailService {
       // Test the connection
       await this.transporter.verify()
       console.log('✅ SMTP transporter initialized and verified successfully')
+      this.isInitialized = true
       
     } catch (error) {
       console.error('❌ Failed to initialize SMTP transporter:', error)
       this.transporter = null
+    }
+  }
+
+  private async ensureInitialized() {
+    if (!this.isInitialized) {
+      await this.initializeTransporter()
     }
   }
 
@@ -158,13 +175,10 @@ export class EmailService {
         timeRemaining: data.timeRemaining
       })
 
+      await this.ensureInitialized()
+      
       if (!this.transporter) {
-        console.log('🔄 Transporter not initialized, attempting to reinitialize...')
-        await this.initializeTransporter()
-        
-        if (!this.transporter) {
-          throw new Error('SMTP transporter not available')
-        }
+        throw new Error('SMTP transporter not available')
       }
 
       // Load and render template
@@ -217,13 +231,10 @@ export class EmailService {
         amount: data.amount
       })
 
+      await this.ensureInitialized()
+      
       if (!this.transporter) {
-        console.log('🔄 Transporter not initialized, attempting to reinitialize...')
-        await this.initializeTransporter()
-        
-        if (!this.transporter) {
-          throw new Error('SMTP transporter not available')
-        }
+        throw new Error('SMTP transporter not available')
       }
 
       // Load and render template
@@ -358,9 +369,7 @@ export class EmailService {
 
   async testConnection(): Promise<boolean> {
     try {
-      if (!this.transporter) {
-        await this.initializeTransporter()
-      }
+      await this.ensureInitialized()
 
       if (!this.transporter) {
         return false

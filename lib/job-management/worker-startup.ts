@@ -37,6 +37,12 @@ export class WorkerStartup {
    * Initialize all background workers and scheduled jobs
    */
   async initialize(): Promise<void> {
+    // Skip initialization during build process
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      logger.info('Skipping worker initialization during build phase')
+      return
+    }
+
     if (this.isInitialized) {
       logger.warn('Worker startup already initialized, skipping...')
       return
