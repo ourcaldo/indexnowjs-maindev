@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createMidtransService } from '@/lib/payment-services/midtrans-service'
+import { PaymentServiceFactory } from '@/lib/services/payments'
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     const { environment } = midtransGateway.configuration
 
     // Initialize Midtrans service
-    const midtransService = createMidtransService({
+    const midtransService = PaymentServiceFactory.createMidtransService('snap', {
       server_key,
       client_key,
       environment,

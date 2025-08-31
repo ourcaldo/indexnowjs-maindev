@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { createMidtransService } from '@/lib/payment-services/midtrans-service'
+import { PaymentServiceFactory } from '@/lib/services/payments'
 
 export async function POST(request: NextRequest) {
   try {
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (!gatewayError && gateway) {
-          const midtransService = createMidtransService({
+          const midtransService = PaymentServiceFactory.createMidtransService('recurring', {
             server_key: gateway.api_credentials.server_key,
             client_key: gateway.api_credentials.client_key,
             environment: gateway.configuration.environment,

@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireUserAuth } from '@/lib/auth'
-import { createMidtransService } from '@/lib/payment-services/midtrans-service'
+import { getServerAuthUser } from '@/lib/auth'
+import { PaymentServiceFactory } from '@/lib/services/payments'
 import { supabaseAdmin } from '@/lib/database'
 
 // POST /api/v1/payments/channels/snap - Process Midtrans Snap payment
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireUserAuth(request)
+    const user = await getServerAuthUser(request)
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
     const body = await request.json()
 
     const { package_id, billing_period, token_id, customer_info } = body
@@ -49,8 +55,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create Midtrans service
-    const midtransService = createMidtransService(midtransConfig)
+    // Create Midtrans service via factory
+    const midtransService = PaymentServiceFactory.createMidtransService('snap', midtransConfig)
 
     // Generate unique order ID
     const orderId = `SNAP_${user.id}_${Date.now()}`
@@ -91,10 +97,10 @@ export async function POST(request: NextRequest) {
 
     // Process payment with Midtrans
     try {
-      const chargeResult = await midtransService.createChargeTransaction({
+      const chargeResult = await midtransService.processPayment({
         order_id: orderId,
         amount_usd: amount,
-        token_id: token_id,
+        currency: packageData.currency,
         customer_details: {
           first_name: customer_info.first_name,
           last_name: customer_info.last_name,
@@ -104,6 +110,11 @@ export async function POST(request: NextRequest) {
         item_details: {
           name: `${packageData.name} - ${billing_period}`,
           description: packageData.description
+        },
+        metadata: {
+          token_id: token_id,
+          billing_period: billing_period,
+          package_id: package_id
         }
       })
 

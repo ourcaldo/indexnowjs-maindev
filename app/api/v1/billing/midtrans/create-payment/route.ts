@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
-import { createMidtransService } from '@/lib/payment-services/midtrans-service'
+import { PaymentServiceFactory } from '@/lib/services/payments'
 import { convertUsdToIdr } from '@/lib/utils/currency-converter'
 
 export async function POST(request: NextRequest) {
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     // Create Midtrans service
-    const midtransService = createMidtransService(gatewayData)
+    const midtransService = PaymentServiceFactory.createMidtransService('snap', gatewayData)
 
     // Create Snap payment with subscription setup
     const snapPayload = {

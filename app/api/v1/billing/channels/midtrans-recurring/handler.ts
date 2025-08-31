@@ -1,6 +1,6 @@
 import { BasePaymentHandler, PaymentData, PaymentResult } from '../shared/base-handler'
 import { supabaseAdmin } from '@/lib/database'
-import { createMidtransService } from '@/lib/payment-services/midtrans-service'
+import { PaymentServiceFactory } from '@/lib/services/payments'
 import { emailService } from '@/lib/email/emailService'
 
 export default class MidtransRecurringHandler extends BasePaymentHandler {
@@ -72,7 +72,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     }
 
     // Initialize Midtrans service
-    this.midtransService = createMidtransService({
+    this.midtransService = PaymentServiceFactory.createMidtransService('recurring', {
       server_key: this.gateway.api_credentials.server_key,
       client_key: this.gateway.api_credentials.client_key,
       environment: this.gateway.configuration.environment,

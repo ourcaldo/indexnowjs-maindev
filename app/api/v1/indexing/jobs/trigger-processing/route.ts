@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/database/supabase';
-import { GoogleIndexingProcessor } from '@/lib/google-services/google-indexing-processor';
+import { IndexingService } from '@/lib/services/indexing';
 import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
@@ -46,13 +46,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const processor = GoogleIndexingProcessor.getInstance();
+    const indexingService = IndexingService.getInstance();
     const results = [];
 
     // Process each job
     for (const job of pendingJobs) {
       try {
-        const result = await processor.processIndexingJob(job.id);
+        const result = await indexingService.processIndexingJob(job.id);
         results.push({
           jobId: job.id,
           name: job.name,
