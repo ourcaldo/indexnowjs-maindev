@@ -11,10 +11,10 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Button } from '@/components/dashboard/ui'
 import { 
   BillingStats, 
-  PricingCards, 
   BillingHistory, 
   PackageComparison
 } from './components'
+import PricingTable from '@/components/shared/PricingTable'
 
 // Type definitions
 interface PaymentPackage {
@@ -344,10 +344,10 @@ export default function BillingPage() {
   }
 
   // Action handlers
-  const handleSubscribe = async (packageId: string) => {
+  const handleSubscribe = async (packageId: string, period: string) => {
     try {
       setSubscribing(packageId)
-      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${period}`
       window.location.href = checkoutUrl
     } catch (error) {
       console.error('Error subscribing:', error)
@@ -369,7 +369,7 @@ export default function BillingPage() {
     }
   }
 
-  const isTrialEligiblePackage = (pkg: PaymentPackage) => {
+  const isTrialEligiblePackage = (pkg: any) => {
     const packageName = pkg.name.toLowerCase()
     return packageName.includes('premium') || packageName.includes('pro')
   }
@@ -532,22 +532,15 @@ export default function BillingPage() {
           </Button>
         </div>
 
-        <PricingCards
-          packages={packagesData?.packages || []}
-          selectedBillingPeriod={selectedBillingPeriod}
-          setSelectedBillingPeriod={setSelectedBillingPeriod}
-          userCurrency={userCurrency}
+        <PricingTable
+          showTrialButton={true}
+          trialEligible={trialEligible || false}
+          currentPackageId={packagesData?.current_package_id || null}
           subscribing={subscribing}
-          trialEligible={trialEligible}
           startingTrial={startingTrial}
-          showDetails={showDetails}
-          showComparePlans={showComparePlans}
-          getBillingPeriodPrice={getBillingPeriodPrice}
-          formatCurrency={formatCurrency}
-          handleSubscribe={handleSubscribe}
-          handleStartTrial={handleStartTrial}
+          onSubscribe={handleSubscribe}
+          onStartTrial={handleStartTrial}
           isTrialEligiblePackage={isTrialEligiblePackage}
-          togglePlanDetails={togglePlanDetails}
         />
       </div>
 

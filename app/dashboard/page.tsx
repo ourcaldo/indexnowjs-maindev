@@ -13,7 +13,6 @@ import {
   ExternalLink,
   Check,
   Star,
-  Crown,
   Clock
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -23,7 +22,7 @@ import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/database'
 import QuotaCard from '@/components/QuotaCard'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
-import { formatCurrency } from '@/lib/utils/currency-utils'
+import PricingTable from '@/components/shared/PricingTable'
 
 interface UserProfile {
   full_name: string | null;
@@ -231,10 +230,10 @@ export default function Dashboard() {
   }
 
   // Handle subscription
-  const handleSubscribe = async (packageId: string) => {
+  const handleSubscribe = async (packageId: string, period: string) => {
     try {
       setSubscribing(packageId)
-      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=monthly`
+      const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${period}`
       window.location.href = checkoutUrl
     } catch (error) {
       console.error('Error starting subscription:', error)
@@ -268,7 +267,7 @@ export default function Dashboard() {
   }
 
   // Check if package is eligible for trial (Premium or Pro plans only)
-  const isTrialEligiblePackage = (pkg: PaymentPackage) => {
+  const isTrialEligiblePackage = (pkg: any) => {
     const packageName = pkg.name.toLowerCase()
     return packageName.includes('premium') || packageName.includes('pro')
   }
@@ -325,50 +324,6 @@ export default function Dashboard() {
   const selectedDomain = domains.find((d: any) => d.id === selectedDomainId)
   const hasActivePackage = userProfile?.package || packagesData?.current_package_id
 
-  // Format currency helper - EXACT copy from Plans & Billing page
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
-    // Determine locale based on currency
-    const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
-    
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
-  
-  // Billing period pricing - EXACT copy from Plans & Billing page
-  const getBillingPeriodPrice = (pkg: any, period: string): { price: number, originalPrice?: number, discount?: number } => {
-    // Check if package has new multicurrency structure
-    if (pkg.pricing_tiers && typeof pkg.pricing_tiers === 'object' && pkg.pricing_tiers[period]) {
-      const periodTier = pkg.pricing_tiers[period]
-      
-      // New multicurrency format
-      if (periodTier['USD']) {
-        const currencyTier = periodTier['USD']
-        return {
-          price: currencyTier.promo_price || currencyTier.regular_price,
-          originalPrice: currencyTier.promo_price ? currencyTier.regular_price : undefined,
-          discount: currencyTier.promo_price ? Math.round(((currencyTier.regular_price - currencyTier.promo_price) / currencyTier.regular_price) * 100) : undefined
-        }
-      }
-      
-      // Legacy array format - check if it's an array
-      if (Array.isArray(pkg.pricing_tiers)) {
-        const tier = pkg.pricing_tiers.find((t: any) => t.period === period)
-        if (tier) {
-          return {
-            price: tier.promo_price || tier.regular_price,
-            originalPrice: tier.promo_price ? tier.regular_price : undefined,
-            discount: tier.discount_percentage
-          }
-        }
-      }
-    }
-    
-    return { price: 0 }
-  }
 
   // Position change indicator
   const PositionChange = ({ change }: { change: number | null }) => {
@@ -439,9 +394,6 @@ export default function Dashboard() {
       {!hasActivePackage && packagesData && (
         <div className="bg-white rounded-xl border border-[#E0E6ED] p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#3D8BFF] to-[#1C2331] rounded-full flex items-center justify-center mx-auto mb-4">
-              <Crown className="w-8 h-8 text-white" />
-            </div>
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
               Unlock the Power of Professional Rank Tracking
             </h2>
@@ -450,120 +402,17 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* EXACT copy from Plans & Billing page */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {packagesData?.packages.map((pkg) => {
-              const isCurrentPlan = pkg.is_current
-              const pricing = getBillingPeriodPrice(pkg, 'monthly')
-
-              return (
-                <div key={pkg.id} className={`rounded-lg border p-4 relative flex flex-col h-full ${
-                  isCurrentPlan 
-                    ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white' 
-                    : 'border-[#E0E6ED] bg-white hover:border-[#1A1A1A] transition-colors'
-                }`}>
-                  {pkg.is_popular && !isCurrentPlan && (
-                    <div className="absolute -top-3 left-4 bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-medium">
-                      Most Popular
-                    </div>
-                  )}
-
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className={`font-semibold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                        {pkg.name}
-                      </h3>
-                      {isCurrentPlan && (
-                        <span className="bg-white text-[#1A1A1A] px-2 py-0.5 rounded text-xs font-medium">
-                          Current plan
-                        </span>
-                      )}
-                    </div>
-                    <p className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
-                      {pkg.description}
-                    </p>
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="flex items-baseline gap-1">
-                      <span className={`text-2xl font-bold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                        {formatCurrency(pricing.price, 'USD')}
-                      </span>
-                      <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
-                        per month
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Expandable Features */}
-                  <div className="flex-grow">
-                    <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
-                      <div className="space-y-3">
-                        {/* Database Features ONLY - no hardcoded quota features */}
-                        {pkg.features.map((feature, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <Check className={`h-4 w-4 ${isCurrentPlan ? 'text-white' : 'text-[#4BB543]'}`} />
-                            <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
-                              {feature}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-auto space-y-2">
-                    {!isCurrentPlan && (
-                      <>
-                        <button 
-                          onClick={() => handleSubscribe(pkg.id)}
-                          disabled={subscribing === pkg.id}
-                          className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 bg-[#1A1A1A] text-white hover:bg-[#0d1b2a] ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                          {subscribing === pkg.id ? (
-                            <div className="flex items-center justify-center gap-2">
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Processing...
-                            </div>
-                          ) : 'Switch plan'}
-                        </button>
-
-                        {/* Free Trial Button - Only show for eligible users and eligible packages */}
-                        {trialEligible && isTrialEligiblePackage(pkg) && (
-                          <button
-                            onClick={() => handleStartTrial(pkg.id)}
-                            disabled={startingTrial === pkg.id}
-                            className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors h-12 border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white ${startingTrial === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          >
-                            {startingTrial === pkg.id ? (
-                              <div className="flex items-center justify-center gap-2">
-                                <div className="w-4 h-4 border-2 border-[#1A1A1A] border-t-transparent rounded-full animate-spin"></div>
-                                Starting...
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-center gap-2">
-                                <Clock className="h-4 w-4" />
-                                Start 3-Day Free Trial
-                              </div>
-                            )}
-                          </button>
-                        )}
-                      </>
-                    )}
-                    {isCurrentPlan && (
-                      <button 
-                        disabled
-                        className="w-full py-3 px-4 rounded-lg text-sm font-medium h-12 bg-white text-[#1A1A1A] cursor-default"
-                      >
-                        Current plan
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
+          <PricingTable
+            showTrialButton={true}
+            trialEligible={trialEligible || false}
+            currentPackageId={packagesData.current_package_id}
+            subscribing={subscribing}
+            startingTrial={startingTrial}
+            onSubscribe={handleSubscribe}
+            onStartTrial={handleStartTrial}
+            isTrialEligiblePackage={isTrialEligiblePackage}
+            className="mb-8"
+          />
         </div>
       )}
 
