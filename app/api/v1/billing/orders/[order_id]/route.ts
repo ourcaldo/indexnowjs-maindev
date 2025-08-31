@@ -5,10 +5,11 @@ import { supabaseAdmin } from '@/lib/database'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { order_id: string } }
+  { params }: { params: Promise<{ order_id: string }> }
 ) {
   try {
-    const { order_id } = params
+    const { order_id } = await params
+    console.log('[ORDER-API] Request received for order_id:', order_id)
 
     // Authentication
     const cookieStore = await cookies()
@@ -34,13 +35,18 @@ export async function GET(
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
+      console.log('[ORDER-API] Authentication failed:', authError?.message || 'No user found')
       return NextResponse.json({ 
         success: false, 
         message: 'Authentication required' 
       }, { status: 401 })
     }
+    
+    console.log('[ORDER-API] User authenticated:', user.id)
 
     // Fetch transaction details with package and user profile information
+    console.log('[ORDER-API] Searching for transaction with payment_reference:', order_id, 'user_id:', user.id)
+    
     const { data: transaction, error: transactionError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .select(`
@@ -52,12 +58,21 @@ export async function GET(
       .eq('user_id', user.id)
       .single()
 
+    console.log('[ORDER-API] Transaction query result:', { 
+      found: !!transaction, 
+      error: transactionError?.message || null,
+      data: transaction ? 'Transaction found' : 'No transaction'
+    })
+
     if (transactionError || !transaction) {
+      console.log('[ORDER-API] Transaction not found. Error:', transactionError?.message || 'No transaction data')
       return NextResponse.json({
         success: false,
         message: 'Order not found'
       }, { status: 404 })
     }
+    
+    console.log('[ORDER-API] Transaction found, order_id:', transaction.payment_reference)
 
     // Format response data
     const orderData = {
