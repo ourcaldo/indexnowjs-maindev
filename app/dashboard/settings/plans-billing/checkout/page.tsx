@@ -1,6 +1,6 @@
 'use client'
 
-import '@/types/midtrans'
+/// <reference path="../../../../types/midtrans.d.ts" />
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'

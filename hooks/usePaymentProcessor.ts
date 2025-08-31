@@ -4,7 +4,7 @@
  * Encapsulates payment flow, loading states, and error handling
  */
 
-import '@/types/midtrans'
+/// <reference path="../types/midtrans.d.ts" />
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PaymentRouter, type PaymentRequest } from '@/lib/payment-services/payment-router'
