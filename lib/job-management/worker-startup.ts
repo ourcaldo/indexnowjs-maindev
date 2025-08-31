@@ -48,8 +48,8 @@ export class WorkerStartup {
       // 1. Start daily rank check job scheduler
       await this.initializeRankCheckScheduler()
 
-      // 2. Start recurring billing job scheduler
-      await this.initializeRecurringBilling()
+      // 2. DISABLED: Recurring billing handled by Midtrans webhooks
+      // await this.initializeRecurringBilling()
 
       // 3. Start auto-cancel job scheduler
       await this.initializeAutoCancelService()
@@ -187,18 +187,16 @@ export class WorkerStartup {
 
   /**
    * Initialize recurring billing job scheduler
+   * DISABLED: Midtrans handles recurring payments automatically via webhooks
    */
   private async initializeRecurringBilling(): Promise<void> {
     try {
-      logger.info('Starting recurring billing job scheduler...')
+      logger.info('Recurring billing: DISABLED - Handled by Midtrans webhooks')
+      logger.info('Midtrans automatically charges customers and sends webhook notifications')
       
-      // Start the billing job scheduler
-      recurringBillingJob.start()
-      
-      // Get job status for confirmation
-      const status = recurringBillingJob.getStatus()
-      logger.info(`Recurring billing scheduler: ${status.isScheduled ? 'ACTIVE' : 'INACTIVE'}`)
-      logger.info(`Next scheduled run: ${status.description}`)
+      // Recurring billing is handled by Midtrans automatically
+      // Payment confirmations come via webhook: /api/v1/payments/midtrans/webhook
+      // No manual processing needed
       
     } catch (error) {
       logger.error('Failed to initialize recurring billing:', error)

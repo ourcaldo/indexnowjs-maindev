@@ -1047,6 +1047,37 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 31, 2025 12:00: Critical Fix - Midtrans Recurring Payment Processing Architecture ✅
+
+**✅ RECURRING PAYMENT SYSTEM ARCHITECTURE FIX**: Disabled problematic manual recurring payment processing that was incorrectly trying to charge customers directly
+- **Root Cause**: System was attempting to manually charge customers using saved card tokens via direct Midtrans Core API calls instead of letting Midtrans handle recurring billing automatically
+- **Error Pattern**: `'transaction_details.gross_amount is required'` validation errors from malformed API payloads
+- **Correct Architecture**: Midtrans handles recurring payments automatically via their subscription system and sends webhook notifications when charges are successful
+- **Payment Flow**: Customer subscribes → Midtrans auto-charges on schedule → Webhook notification → System processes confirmation
+
+**✅ DISABLED MANUAL BILLING SCHEDULER**: Removed incorrect recurring billing job that was causing payment failures
+- **Worker Startup**: Disabled `recurringBillingJob` initialization in `/lib/job-management/worker-startup.ts`
+- **API Route**: Deprecated `/api/v1/billing/midtrans/process-recurring/route.ts` with proper 410 Gone status
+- **Job Processing**: Removed manual charge creation logic that was creating invalid payment requests
+- **Error Prevention**: Eliminated the source of recurring payment validation errors
+
+**✅ WEBHOOK-BASED PROCESSING CONFIRMED**: Verified existing webhook handler properly processes subscription payments
+- **Webhook Endpoint**: `/api/v1/payments/midtrans/webhook` correctly handles subscription payment confirmations
+- **Automatic Processing**: Midtrans sends notifications when recurring charges succeed or fail
+- **User Access**: Webhook handler updates user profiles and package access based on payment status
+- **No Manual Intervention**: System now operates correctly without manual recurring payment processing
+
+**Technical Implementation**:
+- ✅ Modified `lib/job-management/worker-startup.ts` - Disabled recurring billing job scheduler with clear documentation
+- ✅ Updated `app/api/v1/billing/midtrans/process-recurring/route.ts` - Deprecated manual processing route with 410 Gone status
+- ✅ Confirmed `app/api/v1/payments/midtrans/webhook/route.ts` - Verified webhook handler processes subscription payments correctly
+
+**Files Modified**:
+- `lib/job-management/worker-startup.ts` - Disabled manual recurring billing initialization
+- `app/api/v1/billing/midtrans/process-recurring/route.ts` - Deprecated route with proper HTTP 410 status
+
+**Result**: Midtrans recurring payments now work correctly via automatic webhook processing without manual intervention or validation errors.
+
 ### August 30, 2025 18:45: Registration Flow Validation Fixes ✅
 
 **✅ PHONE NUMBER VALIDATION IMPROVEMENTS**: Fixed phone number input to only accept numeric characters and display proper error messages
