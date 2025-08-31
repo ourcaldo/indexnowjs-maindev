@@ -2,8 +2,8 @@
  * Payment-related API response types for IndexNow Studio
  */
 
-import { Package, Order, Transaction, Subscription, Invoice, PromoCode, Refund } from '../../business/PaymentTypes';
-import { ApiResponse, PaginatedResponse } from '../../common/ResponseTypes';
+import type { ApiResponse, PaginatedResponse } from '../../common/ResponseTypes';
+import type { Package, Order, Transaction, Subscription, Invoice, PromoCode, Refund, CustomerInfo, PaymentMethod, MidtransSnapResponse, MidtransRecurringResponse } from '../../services/Payments';
 
 // Payment processing responses
 export interface CreatePaymentResponse extends ApiResponse<{
@@ -78,11 +78,11 @@ export interface GetSubscriptionResponse extends ApiResponse<{
   billing: {
     nextBillingDate: Date;
     lastPayment?: Transaction;
-    paymentMethod?: PaymentMethod;
+    paymentMethod?: PaymentMethodDetails;
   };
 }> {}
 
-export interface PaymentMethod {
+export interface PaymentMethodDetails {
   id: string;
   type: 'credit_card' | 'bank_account' | 'digital_wallet';
   last4?: string;
@@ -258,17 +258,17 @@ export interface GetBillingStatisticsResponse extends ApiResponse<{
 
 // Payment method responses
 export interface AddPaymentMethodResponse extends ApiResponse<{
-  paymentMethod: PaymentMethod;
+  paymentMethod: PaymentMethodDetails;
   isDefault: boolean;
   verificationRequired?: boolean;
 }> {}
 
 export interface GetPaymentMethodsResponse extends ApiResponse<{
-  paymentMethods: PaymentMethod[];
+  paymentMethods: PaymentMethodDetails[];
   defaultMethodId?: string;
 }> {}
 
-export interface UpdatePaymentMethodResponse extends ApiResponse<PaymentMethod> {}
+export interface UpdatePaymentMethodResponse extends ApiResponse<PaymentMethodDetails> {}
 
 export interface RemovePaymentMethodResponse extends ApiResponse<{
   removed: boolean;
@@ -352,19 +352,7 @@ export interface GetPaymentAnalyticsResponse extends ApiResponse<{
 }> {}
 
 // Gateway-specific responses
-export interface MidtransSnapResponse extends ApiResponse<{
-  token: string;
-  redirectUrl: string;
-  orderId: string;
-  expiresAt: Date;
-}> {}
-
-export interface MidtransRecurringResponse extends ApiResponse<{
-  subscriptionId: string;
-  tokenId: string;
-  nextBillingDate: Date;
-  status: string;
-}> {}
+// Midtrans response types now imported from services layer
 
 export interface BankTransferResponse extends ApiResponse<{
   accountDetails: BankTransferDetails;

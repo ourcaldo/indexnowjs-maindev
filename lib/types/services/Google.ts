@@ -2,12 +2,35 @@
  * Google service-related type definitions for IndexNow Studio
  */
 
-// Re-export existing Google API types
-export type {
-  GoogleServiceAccount,
-  GoogleIndexingRequest,
-  GoogleIndexingResponse
-} from '../external/GoogleApiTypes';
+// Google API Client types - moved from external
+export interface GoogleServiceAccount {
+  type: string;
+  project_id: string;
+  private_key_id: string;
+  private_key: string;
+  client_email: string;
+  client_id: string;
+  auth_uri: string;
+  token_uri: string;
+  auth_provider_x509_cert_url: string;
+  client_x509_cert_url: string;
+}
+
+export interface GoogleIndexingRequest {
+  url: string;
+  type: 'URL_UPDATED' | 'URL_DELETED';
+}
+
+export interface GoogleIndexingResponse {
+  urlNotificationMetadata: {
+    url: string;
+    latestUpdate: {
+      url: string;
+      type: 'URL_UPDATED' | 'URL_DELETED';
+      notifyTime: string;
+    };
+  };
+}
 
 // Google API Client types
 export interface GoogleApiClientConfig {
@@ -182,7 +205,7 @@ export interface GoogleApiError {
   timestamp: Date;
 }
 
-export interface ErrorHandler {
+export interface GoogleErrorHandler {
   handleError: (error: GoogleApiError) => Promise<void>;
   shouldRetry: (error: GoogleApiError, retryCount: number) => boolean;
   getRetryDelay: (retryCount: number) => number;

@@ -2,8 +2,8 @@
  * Indexing-related API response types for IndexNow Studio
  */
 
-import { IndexingJob, JobProgress, ServiceAccount, JobStatistics } from '../../business/IndexingTypes';
-import { ApiResponse, PaginatedResponse } from '../../common/ResponseTypes';
+import type { ApiResponse, PaginatedResponse } from '../../common/ResponseTypes';
+import type { IndexingJob, JobProgress, ServiceAccount, JobStatistics } from '../../business/IndexingTypes';
 
 // Job management responses
 export interface CreateJobResponse extends ApiResponse<{
@@ -229,7 +229,7 @@ export interface GetQuotaUsageResponse extends ApiResponse<{
   lastUpdated: Date;
 }> {}
 
-export interface GetQuotaHistoryResponse extends PaginatedResponse<{
+export interface GetIndexingQuotaHistoryResponse extends PaginatedResponse<{
   date: Date;
   serviceAccountId: string;
   dailyUsage: number;

@@ -2,15 +2,52 @@
  * Database service-related type definitions for IndexNow Studio
  */
 
-// Re-export existing database types
-export type {
-  DatabaseConnection,
-  QueryOptions,
-  QueryResult,
-  TableSchema,
-  ColumnDefinition,
-  IndexDefinition
-} from '../core/DatabaseTypes';
+// Database core types - moved from core
+export interface DatabaseConnection {
+  host: string;
+  port: number;
+  database: string;
+  isConnected: boolean;
+  lastPing: Date;
+}
+
+export interface QueryOptions {
+  timeout?: number;
+  retries?: number;
+  cache?: boolean;
+  cacheTtl?: number;
+}
+
+export interface QueryResult<T = any> {
+  rows: T[];
+  rowCount: number;
+  command: string;
+  fields?: any[];
+  meta?: Record<string, any>;
+}
+
+export interface TableSchema {
+  name: string;
+  columns: ColumnDefinition[];
+  indexes: IndexDefinition[];
+  constraints: any[];
+}
+
+export interface ColumnDefinition {
+  name: string;
+  type: string;
+  nullable: boolean;
+  default?: any;
+  primaryKey: boolean;
+  unique: boolean;
+}
+
+export interface IndexDefinition {
+  name: string;
+  columns: string[];
+  unique: boolean;
+  type: string;
+}
 
 // Database service configuration
 export interface DatabaseServiceConfig {
@@ -375,7 +412,7 @@ export interface DatabaseError {
   category: 'connection' | 'syntax' | 'constraint' | 'permission' | 'timeout' | 'unknown';
 }
 
-export interface ErrorHandler {
+export interface DatabaseErrorHandler {
   handleError: (error: DatabaseError) => Promise<void>;
   shouldRetry: (error: DatabaseError, retryCount: number) => boolean;
   getRetryDelay: (retryCount: number) => number;

@@ -2,8 +2,11 @@
  * User-related API response types for IndexNow Studio
  */
 
-import { UserProfile, UserSettings, UserQuotaUsage, UserQuotaLimits, ApiKey, UserSession, UserActivity } from '../../business/UserTypes';
-import { ApiResponse, PaginatedResponse } from '../../common/ResponseTypes';
+import type { ApiResponse, PaginatedResponse } from '../../common/ResponseTypes';
+import type { 
+  UserProfile, UserSettings, UserQuotaUsage, UserQuotaLimits, 
+  ApiKey, UserSession, UserActivity 
+} from '../../global/User';
 
 // Authentication responses
 export interface LoginResponse {
@@ -101,7 +104,7 @@ export interface GetUserQuotaResponse extends ApiResponse<{
   percentageUsed: Record<string, number>;
 }> {}
 
-export interface GetQuotaHistoryResponse extends PaginatedResponse<{
+export interface GetUserQuotaHistoryResponse extends PaginatedResponse<{
   date: Date;
   usage: UserQuotaUsage;
   limits: UserQuotaLimits;
@@ -156,7 +159,7 @@ export interface StartTrialResponse extends ApiResponse<{
   };
 }> {}
 
-export interface GetSubscriptionResponse extends ApiResponse<{
+export interface GetUserSubscriptionResponse extends ApiResponse<{
   isActive: boolean;
   packageId?: string;
   packageName?: string;

@@ -2,22 +2,122 @@
  * Payment service-related type definitions for IndexNow Studio
  */
 
-// Re-export existing payment types
-export type {
-  Package,
-  Order,
-  Transaction,
-  CustomerInfo,
-  Subscription,
-  Invoice,
-  PromoCode,
-  Refund,
-  PaymentGateway,
-  PaymentStatus,
-  PaymentMethod,
-  BillingPeriod,
-  Currency
-} from '../business/PaymentTypes';
+// Payment types - consolidated from business layer
+export type PaymentMethod = 'midtrans-snap' | 'midtrans-recurring' | 'bank-transfer' | 'credit-card' | 'paypal';
+export type BillingPeriod = 'monthly' | 'quarterly' | 'biannual' | 'annual';
+export type Currency = 'USD' | 'IDR';
+export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'expired';
+
+export interface Package {
+  id: string;
+  name: string;
+  description: string;
+  features: string[];
+  pricing_tiers: Record<string, Record<string, number>>;
+  sort_order: number;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Order {
+  id: string;
+  user_id: string;
+  package_id: string;
+  amount: number;
+  currency: Currency;
+  status: PaymentStatus;
+  billing_period: BillingPeriod;
+  payment_method: PaymentMethod;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Transaction {
+  id: string;
+  order_id: string;
+  amount: number;
+  currency: Currency;
+  status: PaymentStatus;
+  gateway: string;
+  gateway_transaction_id?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface CustomerInfo {
+  email: string;
+  phone?: string;
+  first_name?: string;
+  last_name?: string;
+  address?: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state?: string;
+    postal_code?: string;
+    country: string;
+  };
+}
+
+export interface Subscription {
+  id: string;
+  user_id: string;
+  package_id: string;
+  status: 'active' | 'inactive' | 'expired' | 'cancelled';
+  start_date: Date;
+  end_date: Date;
+  billing_period: BillingPeriod;
+  auto_renewal: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Invoice {
+  id: string;
+  subscription_id: string;
+  amount: number;
+  currency: Currency;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  due_date: Date;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  max_uses?: number;
+  used_count: number;
+  valid_from: Date;
+  valid_until: Date;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Refund {
+  id: string;
+  transaction_id: string;
+  amount: number;
+  currency: Currency;
+  reason: string;
+  status: 'pending' | 'completed' | 'failed';
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface PaymentGateway {
+  id: string;
+  name: string;
+  slug: string;
+  is_active: boolean;
+  configuration: Record<string, any>;
+  created_at: Date;
+  updated_at: Date;
+}
 
 // Payment service configuration
 export interface PaymentServiceConfig {

@@ -2,6 +2,8 @@
  * Component state types for IndexNow Studio
  */
 
+import type { ThemeMode } from '../global/Application';
+
 // Modal state types
 export interface ModalState {
   isOpen: boolean;
@@ -125,7 +127,6 @@ export interface SidebarActions {
 }
 
 // Theme state types
-export type ThemeMode = 'light' | 'dark' | 'auto';
 
 export interface ThemeState {
   mode: ThemeMode;

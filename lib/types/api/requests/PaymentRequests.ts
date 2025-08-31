@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import type { CustomerInfo } from '../../services/Payments';
 
 // Base payment request types
 export interface CreatePaymentRequest {
@@ -16,24 +17,7 @@ export interface CreatePaymentRequest {
   metadata?: Record<string, any>;
 }
 
-export interface CustomerInfo {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: {
-    street: string;
-    city: string;
-    state?: string;
-    postalCode: string;
-    country: string;
-  };
-  company?: {
-    name: string;
-    taxId?: string;
-    industry?: string;
-  };
-}
+// CustomerInfo now imported from services layer
 
 export interface ProcessPaymentRequest {
   orderId: string;
@@ -135,27 +119,7 @@ export interface CreateInvoiceRequest {
   sendToCustomer?: boolean;
 }
 
-export interface InvoiceItem {
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-  metadata?: Record<string, any>;
-}
-
-export interface InvoiceDiscount {
-  description: string;
-  type: 'percentage' | 'fixed';
-  value: number;
-  amount: number;
-}
-
-export interface InvoiceTax {
-  description: string;
-  rate: number;
-  amount: number;
-  country?: string;
-}
+// Invoice types now imported from services layer
 
 export interface UpdateInvoiceRequest {
   invoiceId: string;

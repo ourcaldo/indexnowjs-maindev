@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import type { NavigationItem as GlobalNavigationItem } from '../global/Application';
 
 // Common component props
 export interface BaseComponentProps {
@@ -28,16 +29,17 @@ export interface LayoutProps extends BaseComponentProps {
 export interface SidebarProps extends BaseComponentProps {
   isCollapsed: boolean;
   onToggle: () => void;
-  navigationItems: NavigationItem[];
+  navigationItems: ComponentNavigationItem[];
   currentPath: string;
 }
 
-export interface NavigationItem {
+// Component-specific NavigationItem with React icon support
+export interface ComponentNavigationItem {
   id: string;
   label: string;
   path: string;
   icon?: React.ComponentType<{ className?: string }>;
-  children?: NavigationItem[];
+  children?: ComponentNavigationItem[];
   isActive?: boolean;
   isDisabled?: boolean;
   badge?: string | number;

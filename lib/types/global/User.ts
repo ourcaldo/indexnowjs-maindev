@@ -2,27 +2,145 @@
  * Global user-related type definitions for IndexNow Studio
  */
 
-// Re-export core user types from business layer for global access
-export type {
-  User,
-  UserProfile,
-  UserSettings,
-  UserQuota,
-  UserSubscription,
-  TrialEligibility,
-  UserRole,
-  UserStatus,
-  SubscriptionStatus,
-  NotificationSettings,
-  PrivacySettings,
-  SecuritySettings,
-  UserQuotaUsage,
-  UserQuotaLimits,
-  ApiKey,
-  EmailVerification,
-  TwoFactorAuth,
-  UserActivity
-} from '../business/UserTypes';
+// Core user types - defining them here as the authoritative source
+export type UserRole = 'user' | 'admin' | 'super_admin';
+export type UserStatus = 'active' | 'inactive' | 'suspended' | 'banned';
+export type SubscriptionStatus = 'active' | 'inactive' | 'expired' | 'trial' | 'cancelled';
+
+export interface User {
+  id: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface UserProfile {
+  id: string;
+  user_id: string;
+  email: string;
+  full_name: string;
+  phone_number?: string;
+  country?: string;
+  role: UserRole;
+  is_active: boolean;
+  subscription_status: SubscriptionStatus;
+  package_name?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface UserSettings {
+  id: string;
+  user_id: string;
+  notifications: NotificationSettings;
+  privacy: PrivacySettings;
+  security: SecuritySettings;
+  preferences: Record<string, any>;
+  updated_at: Date;
+}
+
+export interface NotificationSettings {
+  email: boolean;
+  push: boolean;
+  sms: boolean;
+  jobCompletions: boolean;
+  quotaAlerts: boolean;
+  systemUpdates: boolean;
+}
+
+export interface PrivacySettings {
+  shareUsageData: boolean;
+  allowAnalytics: boolean;
+  showInDirectory: boolean;
+}
+
+export interface SecuritySettings {
+  twoFactorEnabled: boolean;
+  sessionTimeout: number;
+  passwordChangeRequired: boolean;
+  allowedIpAddresses?: string[];
+}
+
+export interface UserQuota {
+  indexingRequests: number;
+  rankTrackingChecks: number;
+  apiCalls: number;
+}
+
+export interface UserQuotaUsage {
+  indexing_requests: number;
+  rank_tracking_checks: number;
+  api_calls: number;
+}
+
+export interface UserQuotaLimits {
+  indexing_requests: number;
+  rank_tracking_checks: number;
+  api_calls: number;
+}
+
+export interface UserSubscription {
+  id: string;
+  user_id: string;
+  package_id: string;
+  status: SubscriptionStatus;
+  start_date: Date;
+  end_date: Date;
+  auto_renewal: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface TrialEligibility {
+  isEligible: boolean;
+  hasUsedTrial: boolean;
+  trialLength: number;
+  restrictions?: string[];
+}
+
+export interface ApiKey {
+  id: string;
+  user_id: string;
+  name: string;
+  key_hash: string;
+  permissions: string[];
+  is_active: boolean;
+  last_used?: Date;
+  expires_at?: Date;
+  created_at: Date;
+}
+
+export interface EmailVerification {
+  id: string;
+  user_id: string;
+  email: string;
+  token: string;
+  verified: boolean;
+  expires_at: Date;
+  created_at: Date;
+}
+
+export interface TwoFactorAuth {
+  id: string;
+  user_id: string;
+  secret: string;
+  enabled: boolean;
+  backup_codes: string[];
+  last_used?: Date;
+  created_at: Date;
+}
+
+export interface UserActivity {
+  id: string;
+  user_id: string;
+  action: string;
+  details: Record<string, any>;
+  ip_address: string;
+  user_agent: string;
+  created_at: Date;
+}
 
 // Additional types not in business layer
 export interface UserSession {
