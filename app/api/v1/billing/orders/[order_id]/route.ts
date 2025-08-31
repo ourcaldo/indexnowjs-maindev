@@ -51,8 +51,7 @@ export async function GET(
       .from('indb_payment_transactions')
       .select(`
         *,
-        package:indb_payment_packages(id, name, description, features, quota_limits),
-        user_profile:indb_auth_user_profiles(full_name, email, phone_number)
+        package:indb_payment_packages(id, name, description, features, quota_limits)
       `)
       .eq('payment_reference', order_id)
       .eq('user_id', user.id)
