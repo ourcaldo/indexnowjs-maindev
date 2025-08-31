@@ -1047,6 +1047,16 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### August 31, 2025 17:45: Next.js 15 Billing Orders API Fix ✅
+
+**✅ NEXT.JS 15 ASYNC PARAMS COMPATIBILITY**: Fixed critical API route error preventing order success page from loading
+- **Root Cause**: Next.js 15 requires `params` object to be awaited before accessing properties
+- **Error Fixed**: "Route used params.order_id. params should be awaited before using its properties"
+- **Solution Applied**: Updated `/api/v1/billing/orders/[order_id]/route.ts` params type to `Promise<{ order_id: string }>` and properly awaited params object
+- **Database Column Fix**: Corrected API to use existing `transaction_status` column instead of non-existent `payment_status` column
+- **Payment Details Structure**: Updated payment details mapping to use correct database columns (metadata, gateway_response)
+- **Result**: Order success page now loads correctly without "sync-dynamic-apis" errors
+
 ### August 31, 2025 17:30: P4.1 Enhanced Type System Implementation COMPLETED ✅
 
 **✅ COMPREHENSIVE TYPE REORGANIZATION COMPLETED**: Successfully implemented and verified P4.1 Enhanced Type System with complete structural reorganization for improved maintainability and developer experience

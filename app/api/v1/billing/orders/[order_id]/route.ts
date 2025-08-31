@@ -9,7 +9,6 @@ export async function GET(
 ) {
   try {
     const { order_id } = await params
-    console.log('[ORDER-API] Request received for order_id:', order_id)
 
     // Authentication
     const cookieStore = await cookies()
@@ -35,18 +34,13 @@ export async function GET(
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
-      console.log('[ORDER-API] Authentication failed:', authError?.message || 'No user found')
       return NextResponse.json({ 
         success: false, 
         message: 'Authentication required' 
       }, { status: 401 })
     }
-    
-    console.log('[ORDER-API] User authenticated:', user.id)
 
     // Fetch transaction details with package and user profile information
-    console.log('[ORDER-API] Searching for transaction with payment_reference:', order_id, 'user_id:', user.id)
-    
     const { data: transaction, error: transactionError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .select(`
@@ -58,32 +52,23 @@ export async function GET(
       .eq('user_id', user.id)
       .single()
 
-    console.log('[ORDER-API] Transaction query result:', { 
-      found: !!transaction, 
-      error: transactionError?.message || null,
-      data: transaction ? 'Transaction found' : 'No transaction'
-    })
-
     if (transactionError || !transaction) {
-      console.log('[ORDER-API] Transaction not found. Error:', transactionError?.message || 'No transaction data')
       return NextResponse.json({
         success: false,
         message: 'Order not found'
       }, { status: 404 })
     }
-    
-    console.log('[ORDER-API] Transaction found, order_id:', transaction.payment_reference)
 
     // Format response data
     const orderData = {
       order_id: transaction.payment_reference,
       transaction_id: transaction.gateway_transaction_id,
       status: transaction.transaction_status,
-      payment_status: transaction.payment_status,
+      payment_status: transaction.transaction_status, // Use transaction_status for payment status
       amount: transaction.amount,
       currency: transaction.currency,
       payment_method: transaction.payment_method,
-      billing_period: transaction.billing_period,
+      billing_period: transaction.billing_period || 'one-time',
       created_at: transaction.created_at,
       updated_at: transaction.updated_at,
       
@@ -93,11 +78,16 @@ export async function GET(
       // Customer information from metadata
       customer_info: transaction.metadata?.customer_info || {},
       
-      // Payment details (VA numbers, payment codes, etc.)
-      payment_details: transaction.payment_details || {},
+      // Payment details from metadata (VA numbers, payment codes, etc.)
+      payment_details: transaction.metadata?.payment_details || transaction.gateway_response?.va_numbers ? {
+        va_numbers: transaction.gateway_response.va_numbers,
+        payment_code: transaction.gateway_response.payment_code,
+        store: transaction.gateway_response.store,
+        expires_at: transaction.gateway_response.expiry_time
+      } : {},
       
       // Full Midtrans response for additional details
-      midtrans_response: transaction.gateway_response || transaction.midtrans_response || {}
+      midtrans_response: transaction.gateway_response || {}
     }
 
     return NextResponse.json({
