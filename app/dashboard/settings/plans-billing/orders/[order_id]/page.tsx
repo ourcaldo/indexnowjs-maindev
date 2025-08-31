@@ -281,15 +281,21 @@ export default function OrderSuccessPage() {
               )}
             </div>
 
-          {/* Contact Us */}
-          <div className="border border-gray-500/70 bg-black/20 rounded-lg px-4 py-3 mt-4 flex items-center justify-between text-sm">
-            <p className="text-gray-400">Do you have problems about your order?</p>
-            <button className="text-yellow-400 font-medium flex items-center">
-              CONTACT US
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </button>
-          </div>
+            {/* Contact Support */}
+            <div className="mt-6 border border-gray-500/70 bg-black/20 rounded-lg px-4 py-3 flex items-center justify-between text-sm">
+              <p className="text-gray-400">
+                Do you have problems about your order?
+              </p>
+              <button
+                onClick={() =>
+                  window.open('mailto:support@indexnow.studio', '_blank')
+                }
+                className="text-yellow-400 font-medium flex items-center hover:underline"
+              >
+                CONTACT US →
+              </button>
             </div>
+          </div>
 
           {/* Right Column - Success */}
           <div className="bg-white flex flex-col items-center justify-center p-8 text-center">
