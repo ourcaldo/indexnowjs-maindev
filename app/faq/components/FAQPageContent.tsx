@@ -183,7 +183,7 @@ export default function FAQPageContent() {
     },
     {
       label: 'Contact',
-      href: '/#contact'
+      href: '/contact'
     }
   ]
 
