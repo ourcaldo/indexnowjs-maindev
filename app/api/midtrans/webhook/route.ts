@@ -908,7 +908,7 @@ async function handleSubscriptionRenewal(body: any, orderId: string, supabaseAdm
       amount: parseFloat(body.gross_amount || '0'),
       currency: body.currency || 'IDR',
       payment_method: 'midtrans_recurring',
-      payment_reference: renewalOrderId, // Use new renewal order ID
+      // payment_reference: renewalOrderId, // Removed - using database ID instead
       gateway_transaction_id: body.transaction_id,
       billing_period: billingPeriod,
       processed_at: new Date().toISOString(),
@@ -927,7 +927,7 @@ async function handleSubscriptionRenewal(body: any, orderId: string, supabaseAdm
       amount: renewalTransaction.amount,
       currency: renewalTransaction.currency,
       payment_method: renewalTransaction.payment_method,
-      payment_reference: renewalTransaction.payment_reference
+      // payment_reference: renewalTransaction.payment_reference // Removed - using database ID instead
     })
     
     const { data: newTransaction, error: transactionError } = await supabaseAdmin

@@ -1,0 +1,103 @@
+{
+  "success": true,
+  "data": {
+    "order_id": "3bee43ef-e3e3-49ee-8808-9e48465a653b",
+    "transaction_id": "d1656130-5d66-433d-bdd7-d3c19a052f72",
+    "status": "pending",
+    "payment_status": "pending",
+    "amount": 45,
+    "currency": "USD",
+    "payment_method": "midtrans_snap",
+    "billing_period": "monthly",
+    "created_at": "2025-08-31T17:45:38.968934+00:00",
+    "updated_at": "2025-08-31T17:45:38.968934+00:00",
+    "package": {
+      "id": "2a5b8559-d9d7-4832-836c-2c3908d2fd35",
+      "name": "Pro",
+      "features": [
+        "Unlimited Service Account",
+        "Unlimited Daily Quota for Auto Indexing",
+        "Auto Schedule Feature for IndexNow",
+        "Auto Index with Sitemap Feature"
+      ],
+      "description": "Full features for agencies and enterprises",
+      "quota_limits": {
+        "daily_urls": -1,
+        "keywords_limit": 1500,
+        "concurrent_jobs": 10,
+        "service_accounts": -1
+      }
+    },
+    "customer_info": {
+      "city": "",
+      "email": "aldodkris@gmail.com",
+      "phone": "081244001006",
+      "state": "",
+      "address": "",
+      "country": "",
+      "zip_code": "",
+      "last_name": "Dwi Kristian",
+      "first_name": "Aldo",
+      "description": ""
+    },
+    "payment_details": {
+
+    },
+    "midtrans_response": {
+      "token": "d1656130-5d66-433d-bdd7-d3c19a052f72",
+      "updated_at": "2025-08-31T17:45:57.499Z",
+      "payment_type": "snap",
+      "redirect_url": "https://app.sandbox.midtrans.com/snap/v4/redirection/d1656130-5d66-433d-bdd7-d3c19a052f72",
+      "webhook_data": {
+        "currency": "IDR",
+        "order_id": "SNAP-1756662338924-915f50e5",
+        "va_numbers": [
+          {
+            "bank": "bca",
+            "va_number": "88341167319671090277984"
+          }
+        ],
+        "expiry_time": "2025-09-02 00:45:54",
+        "merchant_id": "G643888341",
+        "status_code": "201",
+        "fraud_status": "accept",
+        "gross_amount": "741691.00",
+        "payment_type": "bank_transfer",
+        "signature_key": "6ca1969db95f3ca72666c0af2b7ebf5780b2668ab3ca5f8d969cb98ce10d6c245be4a70f1f58e8174f73d676f61f4c5ee37b5998d787022145f7f7ab4648898c",
+        "status_message": "Success, transaction is found",
+        "transaction_id": "ee535d9a-a59a-450a-95de-b0511be6c8a7",
+        "payment_amounts": [],
+        "transaction_time": "2025-09-01 00:45:54",
+        "transaction_status": "pending"
+      },
+      "snap_parameter": {
+        "callbacks": {
+          "error": "undefined/dashboard/settings/plans-billing?payment=error&order_id=SNAP-1756662338924-915f50e5",
+          "finish": "undefined/dashboard/settings/plans-billing/orders/SNAP-1756662338924-915f50e5"
+        },
+        "credit_card": {
+          "secure": true
+        },
+        "item_details": [
+          {
+            "id": "2a5b8559-d9d7-4832-836c-2c3908d2fd35",
+            "name": "Pro - monthly",
+            "price": 741691,
+            "category": "subscription",
+            "quantity": 1
+          }
+        ],
+        "customer_details": {
+          "email": "aldodkris@gmail.com",
+          "phone": "081244001006",
+          "last_name": "Dwi Kristian",
+          "first_name": "Aldo"
+        },
+        "transaction_details": {
+          "order_id": "SNAP-1756662338924-915f50e5",
+          "gross_amount": 741691
+        }
+      }
+    }
+  }
+}

@@ -673,7 +673,7 @@ export default function AdminOrderDetailPage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-[#6C757D]">Reference Number</label>
-                <p className="font-mono text-sm text-[#1A1A1A]">{order.payment_reference}</p>
+                <p className="font-mono text-sm text-[#1A1A1A]">{order.id}</p>
               </div>
               {order.gateway_transaction_id && (
                 <div>

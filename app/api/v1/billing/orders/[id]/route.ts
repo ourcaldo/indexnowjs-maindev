@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    console.log('[ORDER-API] Received transaction ID:', id)
+    console.log('[ORDER-API] Received order ID:', id)
 
     // Authentication
     const cookieStore = await cookies()
@@ -45,7 +45,7 @@ export async function GET(
     console.log('[ORDER-API] User authenticated:', user.id)
 
     // Fetch transaction details with package and user profile information
-    console.log('[ORDER-API] Searching for transaction ID:', id, 'user_id:', user.id)
+    console.log('[ORDER-API] Searching for order ID:', id, 'user_id:', user.id)
     
     const { data: transaction, error: transactionError } = await supabaseAdmin
       .from('indb_payment_transactions')
@@ -60,7 +60,7 @@ export async function GET(
     console.log('[ORDER-API] Query result:', {
       found: !!transaction,
       error: transactionError?.message || null,
-      transactionId: transaction?.id || null
+      orderId: transaction?.id || null
     })
 
     if (transactionError || !transaction) {
@@ -81,7 +81,7 @@ export async function GET(
       }, { status: 404 })
     }
     
-    console.log('[ORDER-API] Transaction found successfully, transaction ID:', transaction.id)
+    console.log('[ORDER-API] Order found successfully, order ID:', transaction.id)
 
     // Format response data
     const orderData = {
