@@ -1,8 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronDown, Mail, MessageCircle, Menu, X } from 'lucide-react'
-import { authService } from '@/lib/auth'
+import { ChevronDown, Mail, MessageCircle } from 'lucide-react'
+
+// Shared components
+import Header from '@/components/shared/Header'
+import Footer from '@/components/shared/Footer'
+import Background from '@/components/shared/Background'
+import { usePageData } from '@/hooks/shared/usePageData'
 
 interface FAQItem {
   question: string
@@ -143,62 +148,9 @@ const faqSections: FAQSection[] = [
   }
 ]
 
-interface SiteSettings {
-  site_name: string
-  site_description: string
-  site_logo_url: string
-  contact_email: string
-}
-
 export default function FAQPageContent() {
+  const { user, siteSettings, handleAuthAction } = usePageData()
   const [openSections, setOpenSections] = useState<{ [key: number]: { [key: number]: boolean } }>({})
-  const [user, setUser] = useState<any>(null)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
-  const [isHeaderSticky, setIsHeaderSticky] = useState(false)
-
-  useEffect(() => {
-    checkAuthStatus()
-    loadSiteSettings()
-    
-    // Scroll event listener for sticky header
-    const handleScroll = () => {
-      const scrollY = window.scrollY
-      setIsHeaderSticky(scrollY > 100)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    handleScroll()
-    
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  const checkAuthStatus = async () => {
-    try {
-      const currentUser = await authService.getCurrentUser()
-      setUser(currentUser)
-    } catch (error) {
-      setUser(null)
-    }
-  }
-
-  const loadSiteSettings = async () => {
-    try {
-      const response = await fetch('/api/v1/public/site-settings')
-      const data = await response.json()
-      setSiteSettings(data)
-    } catch (error) {
-      console.error('Failed to load site settings:', error)
-    }
-  }
-
-  const handleAuthAction = () => {
-    if (user) {
-      window.location.href = '/dashboard'
-    } else {
-      window.location.href = '/dashboard/login'
-    }
-  }
 
   const toggleQuestion = (sectionIndex: number, questionIndex: number) => {
     setOpenSections(prev => ({
@@ -214,153 +166,37 @@ export default function FAQPageContent() {
     return openSections[sectionIndex]?.[questionIndex] || false
   }
 
+  // Navigation configuration for the header
+  const navigation = [
+    {
+      label: 'Home',
+      href: '/'
+    },
+    {
+      label: 'Pricing',
+      href: '/pricing'
+    },
+    {
+      label: 'FAQ',
+      href: '/faq',
+      isActive: true
+    },
+    {
+      label: 'Contact',
+      href: '/#contact'
+    }
+  ]
+
   return (
     <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
-      {/* Enhanced Black glossy background with subtle patterns */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-black"></div>
-        {/* Glossy gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90"></div>
-        {/* Subtle dot pattern */}
-        <div className="absolute inset-0 opacity-[0.015]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-          backgroundSize: '50px 50px'
-        }}></div>
-        {/* Enhanced glossy light effects */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400/20 to-transparent"></div>
-        <div className="absolute top-0 left-1/3 w-96 h-96 bg-blue-500/[0.008] rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-cyan-400/[0.008] rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/[0.003] to-transparent rounded-full"></div>
-      </div>
-
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className={`transition-all duration-500 ease-in-out ${
-          isHeaderSticky 
-            ? 'px-6 py-3' 
-            : 'px-0 py-0'
-        }`}>
-          <div className={`transition-all duration-500 ease-in-out ${
-            isHeaderSticky 
-              ? 'max-w-5xl mx-auto bg-black/95 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl' 
-              : 'max-w-7xl mx-auto bg-transparent px-4 sm:px-6 lg:px-8'
-          }`}>
-            <div className={`flex justify-between items-center transition-all duration-500 ease-in-out ${
-              isHeaderSticky 
-                ? 'h-14 px-6' 
-                : 'h-16'
-            }`}>
-              {/* Logo */}
-              <div className="flex items-center">
-                <a href="/">
-                  {siteSettings?.site_logo_url ? (
-                    <img 
-                      src={siteSettings.site_logo_url} 
-                      alt={siteSettings.site_name}
-                      className="h-8 w-auto"
-                    />
-                  ) : (
-                    <span className="text-xl font-bold text-white">
-                      {siteSettings?.site_name || 'IndexNow Rank Tracker'}
-                    </span>
-                  )}
-                </a>
-              </div>
-
-              {/* Desktop Navigation */}
-              <nav className="hidden md:flex space-x-8">
-                <a 
-                  href="/"
-                  className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                >
-                  Home
-                </a>
-                <a 
-                  href="/pricing"
-                  className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                >
-                  Pricing
-                </a>
-                <a 
-                  href="/faq"
-                  className="text-sm font-medium text-white"
-                >
-                  FAQ
-                </a>
-                <a
-                  href="/#contact"
-                  className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                >
-                  Contact
-                </a>
-              </nav>
-
-              {/* Desktop Auth Button */}
-              <div className="hidden md:flex">
-                <button
-                  onClick={handleAuthAction}
-                  className={`font-medium transition-all duration-300 rounded-full ${
-                    isHeaderSticky 
-                      ? 'bg-white text-black px-4 py-2 hover:bg-gray-100 text-sm' 
-                      : 'bg-white text-black px-6 py-2 hover:bg-gray-100'
-                  }`}
-                >
-                  {user ? (isHeaderSticky ? 'Dashboard' : 'Go to Dashboard') : 'Sign In'}
-                </button>
-              </div>
-
-              {/* Mobile menu button */}
-              <div className="md:hidden flex items-center space-x-4">
-                <button
-                  onClick={handleAuthAction}
-                  className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-                >
-                  {user ? 'Dashboard' : 'Sign In'}
-                </button>
-                
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="text-white hover:text-gray-300 transition-colors"
-                >
-                  {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-black border-t border-gray-800">
-              <a
-                href="/"
-                className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium"
-              >
-                Home
-              </a>
-              <a
-                href="/pricing"
-                className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium"
-              >
-                Pricing
-              </a>
-              <a
-                href="/faq"
-                className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium"
-              >
-                FAQ
-              </a>
-              <a
-                href="/#contact"
-                className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium"
-              >
-                Contact
-              </a>
-            </div>
-          </div>
-        )}
-      </header>
+      <Background />
+      <Header 
+        user={user}
+        siteSettings={siteSettings}
+        onAuthAction={handleAuthAction}
+        navigation={navigation}
+        variant="landing"
+      />
 
       {/* Hero Section */}
       <section className="relative z-10 pt-32 pb-24">
@@ -471,6 +307,8 @@ export default function FAQPageContent() {
           </div>
         </div>
       </section>
+
+      <Footer siteSettings={siteSettings} />
     </div>
   )
 }

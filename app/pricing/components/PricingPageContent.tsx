@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { authService } from '@/lib/auth'
-import { Menu, X, Check, Star, Shield, Clock, ArrowRight, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Star, Shield, Clock, ArrowRight, MessageCircle, ChevronDown, ChevronUp, X } from 'lucide-react'
 import { usePricingData } from '@/hooks/business/usePricingData'
 import { staticPricingData, formatPrice, getSavings } from './StaticPricingData'
 
@@ -10,17 +9,14 @@ import { staticPricingData, formatPrice, getSavings } from './StaticPricingData'
 import NeonContainer from '@/components/landing/NeonContainer'
 import AdvancedNeonCard from '@/components/landing/AdvancedNeonCard'
 
-interface SiteSettings {
-  site_name: string
-  site_description: string
-  site_logo_url: string
-  contact_email: string
-}
+// Shared components
+import Header from '@/components/shared/Header'
+import Footer from '@/components/shared/Footer'
+import Background from '@/components/shared/Background'
+import { usePageData } from '@/hooks/shared/usePageData'
 
 export default function PricingPageContent() {
-  const [user, setUser] = useState<any>(null)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
+  const { user, siteSettings, handleAuthAction, handleGetStarted } = usePageData()
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
   
   // Use shared pricing hook with fallback to static data
@@ -40,46 +36,6 @@ export default function PricingPageContent() {
   const packages = !isLoading && dynamicPackages.length > 0 ? dynamicPackages : staticPricingData.packages
   const formatPriceFunc = !isLoading && dynamicPackages.length > 0 ? dynamicFormatPrice : 
     (amount: number) => formatPrice(amount, currency)
-
-  useEffect(() => {
-    checkAuthStatus()
-    loadSiteSettings()
-  }, [])
-
-  const checkAuthStatus = async () => {
-    try {
-      const currentUser = await authService.getCurrentUser()
-      setUser(currentUser)
-    } catch (error) {
-      setUser(null)
-    }
-  }
-
-  const loadSiteSettings = async () => {
-    try {
-      const response = await fetch('/api/v1/public/site-settings')
-      const data = await response.json()
-      setSiteSettings(data)
-    } catch (error) {
-      console.error('Failed to load site settings:', error)
-    }
-  }
-
-  const handleAuthAction = () => {
-    if (user) {
-      window.location.href = '/dashboard'
-    } else {
-      window.location.href = '/dashboard/login'
-    }
-  }
-
-  const handleGetStarted = () => {
-    if (user) {
-      window.location.href = '/dashboard'
-    } else {
-      window.location.href = '/register'
-    }
-  }
 
   const periodOptions = [
     { key: 'monthly' as const, label: 'Monthly' },
@@ -132,6 +88,27 @@ export default function PricingPageContent() {
     })
   }
 
+  // Navigation configuration for the header
+  const navigation = [
+    {
+      label: 'Features',
+      href: '/#features'
+    },
+    {
+      label: 'Pricing',
+      href: '/pricing',
+      isActive: true
+    },
+    {
+      label: 'FAQ',
+      href: '/faq'
+    },
+    {
+      label: 'Contact',
+      href: '/#contact'
+    }
+  ]
+
   return (
     <>
       {/* Structured Data for SEO */}
@@ -141,108 +118,14 @@ export default function PricingPageContent() {
       />
       
       <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
-        {/* Enhanced Black glossy background with subtle patterns */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-black"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90"></div>
-        <div className="absolute inset-0 opacity-[0.015]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-          backgroundSize: '50px 50px'
-        }}></div>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400/20 to-transparent"></div>
-        <div className="absolute top-0 left-1/3 w-96 h-96 bg-blue-500/[0.008] rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-cyan-400/[0.008] rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/[0.003] to-transparent rounded-full"></div>
-      </div>
-
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="px-6 py-3">
-          <div className="max-w-5xl mx-auto bg-black/95 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
-            <div className="flex justify-between items-center h-14 px-6">
-              {/* Logo */}
-              <div className="flex items-center">
-                <a href="/" className="flex items-center">
-                  {siteSettings?.site_logo_url ? (
-                    <img 
-                      src={siteSettings.site_logo_url} 
-                      alt={siteSettings.site_name}
-                      className="h-8 w-auto"
-                    />
-                  ) : (
-                    <span className="text-xl font-bold text-white">
-                      {siteSettings?.site_name || 'IndexNow Rank Tracker'}
-                    </span>
-                  )}
-                </a>
-              </div>
-
-              {/* Desktop Navigation */}
-              <nav className="hidden md:flex space-x-8">
-                <a href="/#features" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-                  Features
-                </a>
-                <a href="/pricing" className="text-sm font-medium text-white">
-                  Pricing
-                </a>
-                <a href="/#faq" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-                  FAQ
-                </a>
-                <a href="/#contact" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-                  Contact
-                </a>
-              </nav>
-
-              {/* Desktop Auth Button */}
-              <div className="hidden md:flex">
-                <button
-                  onClick={handleAuthAction}
-                  className="bg-white text-black px-4 py-2 hover:bg-gray-100 text-sm font-medium transition-all duration-300 rounded-full"
-                >
-                  {user ? 'Dashboard' : 'Sign In'}
-                </button>
-              </div>
-
-              {/* Mobile menu button */}
-              <div className="md:hidden flex items-center space-x-4">
-                <button
-                  onClick={handleAuthAction}
-                  className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-                >
-                  {user ? 'Dashboard' : 'Sign In'}
-                </button>
-                
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="text-white hover:text-gray-300 transition-colors"
-                >
-                  {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-black border-t border-gray-800">
-              <a href="/#features" className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium">
-                Features
-              </a>
-              <a href="/pricing" className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium">
-                Pricing
-              </a>
-              <a href="/#faq" className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium">
-                FAQ
-              </a>
-              <a href="/#contact" className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium">
-                Contact
-              </a>
-            </div>
-          </div>
-        )}
-      </header>
+        <Background />
+        <Header 
+          user={user}
+          siteSettings={siteSettings}
+          onAuthAction={handleAuthAction}
+          navigation={navigation}
+          variant="landing"
+        />
 
       {/* Main Content */}
       <main className="relative z-10 pt-24">
@@ -556,82 +439,7 @@ export default function PricingPageContent() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 bg-black py-16">
-        <div className="max-w-6xl mx-auto px-8">
-          <div className="relative border-t border-l border-r border-gray-600/40 rounded-t-3xl bg-gray-900/20 backdrop-blur-sm p-12">
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-black pointer-events-none"></div>
-            
-            <div className="grid md:grid-cols-5 gap-8">
-              {/* Company Info */}
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  {siteSettings?.site_logo_url ? (
-                    <img 
-                      src={siteSettings.site_logo_url} 
-                      alt={siteSettings.site_name}
-                      className="h-8 w-auto brightness-110"
-                    />
-                  ) : (
-                    <span className="text-xl font-bold text-white tracking-tight">
-                      {siteSettings?.site_name || 'IndexNow'}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Product */}
-              <div className="space-y-4">
-                <h3 className="text-white font-medium text-sm">Product</h3>
-                <ul className="space-y-2 text-sm">
-                  <li><a href="/pricing" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Pricing</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Downloads</a></li>
-                </ul>
-              </div>
-
-              {/* Resources */}
-              <div className="space-y-4">
-                <h3 className="text-white font-medium text-sm">Resources</h3>
-                <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Docs</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Blog</a></li>
-                  <li><a href="/#faq" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">FAQs</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Changelog</a></li>
-                </ul>
-              </div>
-
-              {/* Terms */}
-              <div className="space-y-4">
-                <h3 className="text-white font-medium text-sm">Terms</h3>
-                <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Terms of Service</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Privacy Policy</a></li>
-                </ul>
-              </div>
-
-              {/* Connect */}
-              <div className="space-y-4">
-                <h3 className="text-white font-medium text-sm">Connect</h3>
-                <ul className="space-y-2 text-sm">
-                  <li><a href={`mailto:${siteSettings?.contact_email || 'hello@indexnow.studio'}`} className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Contact ↗</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Forum</a></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="mt-8 relative z-10">
-              <div className="text-center">
-                <p className="text-gray-500 text-xs mb-4">
-                  Questions about pricing? Email {siteSettings?.contact_email || 'hello@indexnow.studio'} and we'll reply fast.
-                </p>
-                <p className="text-gray-500 text-xs">
-                  © 2025 {siteSettings?.site_name || 'IndexNow'}. All rights reserved.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer siteSettings={siteSettings} />
     </div>
     </>
   )
