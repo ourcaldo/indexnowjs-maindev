@@ -4978,3 +4978,86 @@ This refactoring establishes a scalable foundation for IndexNow Studio's continu
 - **Performance**: Optimized data fetching with custom hooks and proper state management
 
 **P2.2 Status**: ✅ **COMPLETE** - Admin Panel Optimization successfully finished, exceeding all target metrics
+
+### January 31, 2025 - Order ID System Analysis Complete ✅
+
+- ✅ **COMPREHENSIVE ORDER ID ANALYSIS COMPLETED**: Deep dive analysis of order ID generation, usage, and database structure throughout the entire IndexNow Studio codebase
+
+**Order ID Generation Systems Identified**:
+
+1. **Midtrans Create Payment API** (`app/api/v1/billing/midtrans/create-payment/route.ts`):
+   - **Pattern**: `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+   - **Example**: `ORDER-1756712973275-XK9P2M7NQ`
+   - **Usage**: Main entry point for Midtrans payments
+   - **Database Storage**: Stored as `payment_reference` in `indb_payment_transactions`
+
+2. **Midtrans Snap Handler** (`app/api/v1/billing/channels/midtrans-snap/handler.ts`):
+   - **Pattern**: `SNAP-${Date.now()}-${user_id.slice(0, 8)}`
+   - **Example**: `SNAP-1756712973275-915f50e5`
+   - **Usage**: Dedicated Snap payment channel handler
+   - **Database Storage**: Stored as `payment_reference` in `indb_payment_transactions`
+
+3. **Core Payment Processor** (`lib/services/payments/core/PaymentProcessor.ts`):
+   - **Pattern**: `${method}_${userPrefix}_${timestamp}`
+   - **Example**: `CRED_915f50e5_1756712973275`
+   - **Usage**: Generic payment processing system
+   - **Method Processing**: Payment method normalized to 4-char uppercase code
+
+**Database Schema - `indb_payment_transactions` Table**:
+- **Primary Key**: `id` (UUID) - Internal transaction identifier
+- **Order Reference**: `payment_reference` (TEXT) - Stores the generated order ID
+- **Gateway ID**: `gateway_transaction_id` (TEXT) - External gateway transaction reference
+- **Unique Constraint**: Order IDs are unique through timestamp + random generation
+
+**Order ID Flow Analysis**:
+
+1. **Creation Flow**:
+   ```
+   User Places Order → Generate Unique Order ID → Store as payment_reference → Send to Gateway
+   ```
+
+2. **Reference Flow**:
+   ```
+   Gateway Response → Update gateway_transaction_id → Query by payment_reference for order lookup
+   ```
+
+3. **Query Patterns Found**:
+   - **By Order ID**: `.eq('payment_reference', order_id)` - Primary lookup method
+   - **By Transaction ID**: `.eq('id', transaction_id)` - Internal record lookup
+   - **By Gateway ID**: `.eq('gateway_transaction_id', gateway_id)` - Gateway callback queries
+
+**Inconsistencies Identified**:
+- **Mixed Terminology**: Some code uses `order_id`, others use `payment_reference`, some use `transaction_id`
+- **Response Mapping**: Billing history API maps `payment_reference` to `order_id` in transformation layer
+- **Database vs API**: Database uses `payment_reference` but API responses use `order_id` for consistency
+
+**Critical Files Using Order IDs**:
+- **Payment Creation**: `app/api/v1/billing/midtrans/create-payment/route.ts`
+- **Order Lookup**: `app/api/v1/billing/orders/[order_id]/route.ts`
+- **Billing History**: `app/api/v1/billing/history/route.ts`
+- **Admin Orders**: `app/api/v1/admin/orders/route.ts` and `app/api/v1/admin/orders/[id]/route.ts`
+- **Payment Channels**: All handlers in `app/api/v1/billing/channels/`
+- **Webhook Processing**: `app/api/v1/billing/midtrans-3ds-callback/route.ts`
+
+**Uniqueness Guarantee**:
+- **Timestamp Component**: `Date.now()` ensures chronological uniqueness  
+- **Random Component**: Additional entropy prevents collisions within same millisecond
+- **Prefix Component**: Different prefixes (`ORDER-`, `SNAP-`) allow system identification
+- **User Component**: Some patterns include user ID for additional context
+
+**Metadata Storage**:
+- **transaction.metadata.midtrans_order_id**: Backup storage of order ID
+- **transaction.gateway_response.order_id**: Gateway-specific order ID storage
+- **transaction.metadata.customer_info**: Customer details linked to order
+
+**Status Tracking**:
+- Orders tracked through `transaction_status` field: `pending` → `completed`/`failed`
+- Status updates logged in `indb_payment_transactions_history` table
+- Admin panel allows manual status updates via `/api/v1/admin/orders/[id]/status/route.ts`
+
+**Analysis Summary**:
+- Order IDs are properly unique and systematically generated
+- Multiple generation patterns exist for different payment channels
+- Database consistently uses `payment_reference` as the canonical order ID field
+- API layer provides consistent `order_id` mapping for frontend consumption
+- System properly handles gateway callbacks and order status tracking
