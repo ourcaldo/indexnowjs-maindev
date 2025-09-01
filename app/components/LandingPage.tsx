@@ -112,8 +112,7 @@ export default function LandingPage() {
     },
     {
       label: 'Contact',
-      onClick: () => scrollToSection(contactRef),
-      isActive: activeSection === 'contact'
+      href: '/contact'
     }
   ]
 

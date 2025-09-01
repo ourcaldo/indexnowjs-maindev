@@ -105,7 +105,7 @@ export default function PricingPageContent() {
     },
     {
       label: 'Contact',
-      href: '/#contact'
+      href: '/contact'
     }
   ]
 

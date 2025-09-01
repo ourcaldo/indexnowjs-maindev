@@ -295,10 +295,10 @@ export default function ContactPageContent() {
                     onChange={(e) => handleInputChange('type', e.target.value as ContactType)}
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                   >
-                    <option value="Support">Support</option>
-                    <option value="Sales">Sales</option>
-                    <option value="Partnership">Partnership</option>
-                    <option value="Issues">Issues</option>
+                    <option value="Support" className="bg-gray-800 text-white">Support</option>
+                    <option value="Sales" className="bg-gray-800 text-white">Sales</option>
+                    <option value="Partnership" className="bg-gray-800 text-white">Partnership</option>
+                    <option value="Issues" className="bg-gray-800 text-white">Issues</option>
                   </select>
                 </div>
 
