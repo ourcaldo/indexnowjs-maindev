@@ -1,7 +1,7 @@
 // Replit-compatible Next.js launcher with WebSocket support
 import { spawn } from 'child_process';
 
-const port = process.env.PORT || '5000';
+const port = process.env.PORT || '8081';
 
 console.log('🚀 Starting IndexNow Pro with WebSocket support...');
 

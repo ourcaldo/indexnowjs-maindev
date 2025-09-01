@@ -22,7 +22,7 @@ const SocketHandler = (req, res) => {
       pingInterval: 25000,
       // Enhanced CORS for WebSocket
       cors: {
-        origin: ["http://localhost:5000", "https://*.replit.dev", "https://*.replit.app"],
+        origin: ["http://localhost:8081", "https://*.replit.dev", "https://*.replit.app"],
         methods: ["GET", "POST"],
         credentials: true
       },

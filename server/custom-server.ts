@@ -5,7 +5,7 @@ import { Server as SocketIOServer } from 'socket.io';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = '0.0.0.0';
-const port = parseInt(process.env.PORT || '5000', 10);
+const port = parseInt(process.env.PORT || '8081', 10);
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
@@ -29,8 +29,8 @@ app.prepare().then(() => {
     cors: {
       origin: [
         'http://localhost:3000',
-        'http://localhost:5000',
-        'http://0.0.0.0:5000',
+        'http://localhost:8081',
+        'http://0.0.0.0:8081',
         /\.replit\.dev$/,
         /\.replit\.app$/,
         /\.replit\.co$/
