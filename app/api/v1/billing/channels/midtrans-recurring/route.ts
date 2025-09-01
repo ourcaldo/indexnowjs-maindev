@@ -27,11 +27,8 @@ class MidtransRecurringHandler extends BasePaymentHandler {
     // Calculate amount
     const amount = this.calculateAmount()
     
-    // Generate order ID
-    const orderId = `ORDER-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
-
-    // Create transaction record BEFORE payment processing
-    await this.createPendingTransaction(orderId, this.gateway.id, {
+    // Create transaction record BEFORE payment processing - use database ID as order ID
+    const orderId = await this.createPendingTransaction(this.gateway.id, {
       payment_gateway_type: 'midtrans_recurring',
       token_id: this.tokenId
     })
@@ -75,7 +72,7 @@ class MidtransRecurringHandler extends BasePaymentHandler {
             requires_3ds: true
           }
         })
-        .eq('payment_reference', orderId)
+        .eq('id', orderId)
 
       return {
         success: true,
@@ -138,7 +135,7 @@ class MidtransRecurringHandler extends BasePaymentHandler {
             masked_card: chargeTransaction.masked_card
           }
         })
-        .eq('payment_reference', orderId)
+        .eq('id', orderId)
 
       // Update user subscription
       await this.updateUserSubscription(subscription, amount.finalAmount)

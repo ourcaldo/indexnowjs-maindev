@@ -171,7 +171,7 @@ export default function HistoryTab() {
     if (!searchTerm) return true
     return (
       transaction.package?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.payment_reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.gateway_transaction_id?.toLowerCase().includes(searchTerm.toLowerCase())
     )
   }) || []
@@ -241,7 +241,7 @@ export default function HistoryTab() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
               <input
                 type="text"
-                placeholder="Search by package, reference, or transaction ID..."
+                placeholder="Search by package, order ID, or transaction ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
@@ -314,7 +314,7 @@ export default function HistoryTab() {
                         <div>
                           <span className="text-[#6C757D]">Order ID: </span>
                           <span className="text-[#1A1A1A] font-mono text-xs">
-                            {transaction.payment_reference}
+                            {transaction.id}
                           </span>
                         </div>
                         <div>

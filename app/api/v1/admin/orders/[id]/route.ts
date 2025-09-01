@@ -140,7 +140,7 @@ export async function GET(
         adminUser.id,
         'order_detail_view',
         orderId,
-        `Viewed order details for ${order.payment_reference}`,
+        `Viewed order details for ${order.id}`,
         request,
         {
           orderDetailView: true,

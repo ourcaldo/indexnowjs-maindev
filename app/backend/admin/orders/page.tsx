@@ -35,7 +35,6 @@ interface OrderTransaction {
   transaction_status: 'pending' | 'proof_uploaded' | 'completed' | 'failed'
   amount: number
   currency: string
-  payment_reference: string
   payment_proof_url?: string
   created_at: string
   updated_at: string
@@ -380,7 +379,7 @@ export default function AdminOrdersPage() {
                       onClick={() => handleViewOrder(order.id)}
                       className="text-[#1A1A1A] hover:text-[#1C2331] hover:underline font-medium transition-colors text-left block"
                     >
-                      #{order.payment_reference}
+                      #{order.id}
                     </button>
                   </TableCell>
                   <TableCell>

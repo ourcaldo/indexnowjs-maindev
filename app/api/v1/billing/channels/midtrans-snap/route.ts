@@ -28,11 +28,8 @@ class MidtransSnapHandler extends BasePaymentHandler {
       finalAmount = await convertUsdToIdr(amount.finalAmount)
     }
 
-    // Generate order ID
-    const orderId = `SNAP-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
-
-    // Create transaction record BEFORE Midtrans API call
-    await this.createPendingTransaction(orderId, this.gateway.id, {
+    // Create transaction record BEFORE Midtrans API call - use database ID as order ID
+    const orderId = await this.createPendingTransaction(this.gateway.id, {
       payment_gateway_type: 'midtrans_snap',
       converted_amount: finalAmount,
       converted_currency: 'IDR'
@@ -79,7 +76,7 @@ class MidtransSnapHandler extends BasePaymentHandler {
           snap_parameter: parameter
         }
       })
-      .eq('payment_reference', orderId)
+      .eq('id', orderId)
 
     return {
       success: true,

@@ -376,7 +376,7 @@ async function processTransaction(body: any, transaction: any, supabaseAdmin: an
 
           await emailService.sendPaymentReceived(userData.email, {
             customerName: userData.full_name || 'Customer',
-            orderId: transaction.payment_reference || transaction.id,
+            orderId: transaction.id,
             packageName: packageData.name,
             billingPeriod: transaction.billing_period || 'monthly',
             amount: displayAmount,
@@ -431,7 +431,7 @@ async function sendOrderConfirmationWithDetails(body: any, transaction: any, sup
 
       const emailData: any = {
         customerName: userData.full_name || 'Customer',
-        orderId: transaction.payment_reference || transaction.id,
+        orderId: transaction.id,
         packageName: packageData.name,
         billingPeriod: transaction.billing_period || 'monthly',
         amount: displayAmount,
@@ -776,7 +776,7 @@ async function sendOrderExpiredEmail(body: any, transaction: any, supabaseAdmin:
 
       await emailService.sendOrderExpired(userData.email, {
         customerName: userData.full_name || 'Customer',
-        orderId: transaction.payment_reference || transaction.id,
+        orderId: transaction.id,
         packageName: packageData.name,
         billingPeriod: transaction.billing_period || 'monthly',
         amount: displayAmount,

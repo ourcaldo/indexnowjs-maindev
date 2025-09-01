@@ -41,7 +41,6 @@ interface OrderTransaction {
   amount: number
   currency: string
   payment_method: string
-  payment_reference: string
   payment_proof_url?: string
   gateway_transaction_id: string
   verified_by?: string
@@ -346,7 +345,7 @@ export default function AdminOrderDetailPage() {
             Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-[#1A1A1A]">Order #{order.payment_reference}</h1>
+            <h1 className="text-2xl font-bold text-[#1A1A1A]">Order #{order.id}</h1>
             <p className="text-[#6C757D]">Order details and management</p>
           </div>
         </div>
@@ -372,7 +371,7 @@ export default function AdminOrderDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-[#6C757D]">Order ID</label>
-                  <p className="font-mono text-sm text-[#1A1A1A]">{order.payment_reference}</p>
+                  <p className="font-mono text-sm text-[#1A1A1A]">{order.id}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-[#6C757D]">Amount</label>
@@ -776,7 +775,7 @@ export default function AdminOrderDetailPage() {
               <div className="p-4 bg-[#F7F9FC] rounded-lg">
                 <h4 className="font-medium text-[#1A1A1A] mb-2">Order Summary</h4>
                 <div className="text-sm space-y-1">
-                  <p><span className="text-[#6C757D]">Order:</span> <span className="text-[#1A1A1A]">#{order.payment_reference}</span></p>
+                  <p><span className="text-[#6C757D]">Order:</span> <span className="text-[#1A1A1A]">#{order.id}</span></p>
                   <p><span className="text-[#6C757D]">Customer:</span> <span className="text-[#1A1A1A]">{order.user.email}</span></p>
                   <p><span className="text-[#6C757D]">Package:</span> <span className="text-[#1A1A1A]">{order.package.name} ({order.metadata?.billing_period})</span></p>
                   <p><span className="text-[#6C757D]">Amount:</span> <span className="text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</span></p>

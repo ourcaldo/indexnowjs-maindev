@@ -521,7 +521,6 @@ export interface TransactionTable {
   currency: string;
   status: string;
   payment_method: string;
-  payment_reference?: string;
   gateway_transaction_id?: string;
   gateway_response: any;
   notes?: string;

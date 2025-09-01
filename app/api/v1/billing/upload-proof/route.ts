@@ -120,14 +120,14 @@ export async function POST(request: NextRequest) {
       await ActivityLogger.logBillingActivity(
         user.id,
         ActivityEventTypes.PAYMENT_PROOF_UPLOADED,
-        `Order #${transaction.payment_reference || transactionId.slice(0, 8)} - ${fileName}`,
+        `Order #${transactionId.slice(0, 8)} - ${fileName}`,
         request,
         {
           transaction_id: transactionId,
           file_name: fileName,
           file_size: proofFile.size,
           file_type: proofFile.type,
-          order_reference: transaction.payment_reference,
+          order_id: transactionId,
           storage_path: filePath
         }
       )

@@ -19,11 +19,8 @@ class BankTransferHandler extends BasePaymentHandler {
     // Calculate amount
     const amount = this.calculateAmount()
     
-    // Generate order ID
-    const orderId = `BT-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
-
-    // Create transaction record
-    await this.createPendingTransaction(orderId, this.gateway.id, {
+    // Create transaction record - use database ID as order ID
+    const orderId = await this.createPendingTransaction(this.gateway.id, {
       payment_gateway_type: 'bank_transfer',
       bank_details: this.gateway.configuration
     })
@@ -42,7 +39,7 @@ class BankTransferHandler extends BasePaymentHandler {
           instructions: `Please transfer ${amount.finalAmount} ${amount.currency} to the account above and upload payment proof.`
         }
       })
-      .eq('payment_reference', orderId)
+      .eq('id', orderId)
 
     return {
       success: true,
