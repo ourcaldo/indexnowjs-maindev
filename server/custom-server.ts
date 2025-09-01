@@ -28,9 +28,8 @@ app.prepare().then(() => {
     addTrailingSlash: false,
     cors: {
       origin: [
-        'http://localhost:3000',
-        'http://localhost:8081',
-        'http://0.0.0.0:8081',
+        `http://localhost:${port}`,
+        `http://0.0.0.0:${port}`,
         /\.replit\.dev$/,
         /\.replit\.app$/,
         /\.replit\.co$/

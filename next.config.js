@@ -33,7 +33,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:8081', '0.0.0.0:8081', '*.replit.dev', '*.replit.app', '*.replit.co', '*']
+      allowedOrigins: [`localhost:${process.env.PORT || '8081'}`, `0.0.0.0:${process.env.PORT || '8081'}`, '*.replit.dev', '*.replit.app', '*.replit.co', '*']
     }
   },
   allowedDevOrigins: ['*.replit.dev', '*.replit.app', '*.replit.co', '*.*.replit.co','*'],
@@ -49,7 +49,7 @@ const nextConfig = {
   // Reduce concurrent builds  
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:8081', '0.0.0.0:8081', '*.replit.dev', '*.replit.app', '*.replit.co', '*']
+      allowedOrigins: [`localhost:${process.env.PORT || '8081'}`, `0.0.0.0:${process.env.PORT || '8081'}`, '*.replit.dev', '*.replit.app', '*.replit.co', '*']
     },
     workerThreads: false,
     cpus: 1,
