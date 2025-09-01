@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { authService } from '@/lib/auth'
-import { Menu, X, Check, Star, Shield, Clock, ArrowRight, MessageCircle } from 'lucide-react'
+import { Menu, X, Check, Star, Shield, Clock, ArrowRight, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { usePricingData } from '@/hooks/business/usePricingData'
 
 // Landing Page Components - Reusing for consistent design
@@ -20,6 +20,7 @@ export default function PricingPageContent() {
   const [user, setUser] = useState<any>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
+  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
   
   // Use shared pricing hook
   const {
@@ -88,7 +89,7 @@ export default function PricingPageContent() {
     },
     {
       question: "Do I need a credit card for the free trial?",
-      answer: "No credit card required! Start your free trial immediately and explore all features. You only provide payment information when you're ready to upgrade to a paid plan."
+      answer: "Yes, a credit card is required to start your free trial. This helps prevent abuse and ensures a smooth transition to your chosen plan. You won't be charged during your 3-day trial period."
     },
     {
       question: "Can I switch plans anytime?",
@@ -219,7 +220,7 @@ export default function PricingPageContent() {
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
-              Fair, transparent pricing—built to{' '}
+              Fair, transparent pricing built to{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400">
                 grow with you
               </span>
@@ -235,7 +236,7 @@ export default function PricingPageContent() {
               <ArrowRight className="w-5 h-5" />
             </button>
             <p className="text-sm text-gray-400 mt-4">
-              14-day free trial • cancel anytime
+              3-day free trial • cancel anytime
             </p>
           </div>
         </section>
@@ -424,13 +425,33 @@ export default function PricingPageContent() {
 
             <div className="space-y-4">
               {pricingFAQs.map((faq, index) => (
-                <div key={index} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 p-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">
-                    {faq.question}
-                  </h3>
-                  <p className="text-gray-300 leading-relaxed">
-                    {faq.answer}
-                  </p>
+                <div key={index} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <div className="p-1">
+                    <button
+                      onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
+                      className="w-full text-left p-6 focus:outline-none"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-white pr-4">
+                          {faq.question}
+                        </h3>
+                        <div className="flex-shrink-0">
+                          {expandedFAQ === index ? (
+                            <ChevronUp className="w-5 h-5 text-gray-300" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-300" />
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                    {expandedFAQ === index && (
+                      <div className="px-6 pb-6">
+                        <p className="text-gray-300 leading-relaxed">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -492,10 +513,10 @@ export default function PricingPageContent() {
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-white">
-              Track rankings with clarity—without breaking the bank
+              Track rankings with clarity without breaking the bank
             </h2>
             <p className="text-xl text-gray-300 mb-8">
-              Start your 14-day free trial today and see how simple rank tracking can be.
+              Start your 3-day free trial today and see how simple rank tracking can be.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -583,7 +604,7 @@ export default function PricingPageContent() {
             <div className="mt-8 relative z-10">
               <div className="text-center">
                 <p className="text-gray-500 text-xs mb-4">
-                  Questions about pricing? Email {siteSettings?.contact_email || 'hello@indexnow.studio'}—we'll reply fast.
+                  Questions about pricing? Email {siteSettings?.contact_email || 'hello@indexnow.studio'} and we'll reply fast.
                 </p>
                 <p className="text-gray-500 text-xs">
                   © 2025 {siteSettings?.site_name || 'IndexNow'}. All rights reserved.
