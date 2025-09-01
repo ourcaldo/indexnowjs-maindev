@@ -64,8 +64,8 @@ export const AppConfig: AppConfigType = {
     name: getEnv('NEXT_PUBLIC_APP_NAME', 'IndexNow Studio'),
     version: getEnv('NEXT_PUBLIC_APP_VERSION', '1.0.0'),
     environment: (getEnv('NODE_ENV', 'development') as any) || 'development',
-    baseUrl: getEnv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000'),
-    port: getEnvNumber('PORT', 3000),
+    baseUrl: getEnv('NEXT_PUBLIC_BASE_URL', 'http://0.0.0.0:8081'),
+    port: getEnvNumber('PORT', 8081),
   },
   api: {
     timeout: getEnvNumber('API_TIMEOUT', 30000),

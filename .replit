@@ -50,6 +50,6 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node server/custom-server.ts"
+args = "npx tsx server/custom-server.ts"
 
 [agent]
