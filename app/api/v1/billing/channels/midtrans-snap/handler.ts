@@ -25,11 +25,8 @@ export default class MidtransSnapHandler extends BasePaymentHandler {
       finalAmount = await convertUsdToIdr(amount.finalAmount)
     }
 
-    // Generate order ID
-    const orderId = `SNAP-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
-
-    // Create transaction record BEFORE Midtrans API call
-    await this.createPendingTransaction(orderId, this.gateway.id, {
+    // Create transaction record BEFORE Midtrans API call and get database-generated ID
+    const transactionId = await this.createPendingTransaction(this.gateway.id, {
       payment_gateway_type: 'midtrans_snap',
       converted_amount: finalAmount,
       converted_currency: 'IDR'
@@ -38,7 +35,7 @@ export default class MidtransSnapHandler extends BasePaymentHandler {
     // Create Snap transaction
     const parameter = {
       transaction_details: {
-        order_id: orderId,
+        order_id: transactionId,
         gross_amount: finalAmount
       },
       credit_card: {
@@ -58,8 +55,8 @@ export default class MidtransSnapHandler extends BasePaymentHandler {
         phone: this.paymentData.customer_info.phone || ''
       },
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing/orders/${orderId}`,
-        error: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing?payment=error&order_id=${orderId}`
+        finish: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing/order/${transactionId}`,
+        error: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/plans-billing?payment=error&order_id=${transactionId}`
       }
     }
 
@@ -76,7 +73,7 @@ export default class MidtransSnapHandler extends BasePaymentHandler {
           snap_parameter: parameter
         }
       })
-      .eq('payment_reference', orderId)
+      .eq('id', transactionId)
 
     // Note: Order confirmation email with payment details will be sent via webhook
     // when payment method is selected (bank_transfer, cstore, etc.)
@@ -90,7 +87,7 @@ export default class MidtransSnapHandler extends BasePaymentHandler {
         redirect_url: transaction.redirect_url,
         client_key: this.gateway.api_credentials.client_key,
         environment: this.gateway.configuration.environment,
-        order_id: orderId
+        order_id: transactionId
       }
     }
   }

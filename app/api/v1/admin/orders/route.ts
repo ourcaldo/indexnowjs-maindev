@@ -57,7 +57,6 @@ export async function GET(request: NextRequest) {
         amount,
         currency,
         payment_method,
-        payment_reference,
         payment_proof_url,
         gateway_transaction_id,
         verified_by,

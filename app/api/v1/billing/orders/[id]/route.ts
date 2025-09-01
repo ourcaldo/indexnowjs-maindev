@@ -5,11 +5,11 @@ import { supabaseAdmin } from '@/lib/database'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ order_id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { order_id } = await params
-    console.log('[ORDER-API] Received order_id:', order_id)
+    const { id } = await params
+    console.log('[ORDER-API] Received transaction ID:', id)
 
     // Authentication
     const cookieStore = await cookies()
@@ -45,7 +45,7 @@ export async function GET(
     console.log('[ORDER-API] User authenticated:', user.id)
 
     // Fetch transaction details with package and user profile information
-    console.log('[ORDER-API] Searching for payment_reference:', order_id, 'user_id:', user.id)
+    console.log('[ORDER-API] Searching for transaction ID:', id, 'user_id:', user.id)
     
     const { data: transaction, error: transactionError } = await supabaseAdmin
       .from('indb_payment_transactions')
@@ -53,15 +53,14 @@ export async function GET(
         *,
         package:indb_payment_packages(id, name, description, features, quota_limits)
       `)
-      .eq('payment_reference', order_id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
     console.log('[ORDER-API] Query result:', {
       found: !!transaction,
       error: transactionError?.message || null,
-      transactionId: transaction?.id || null,
-      paymentRef: transaction?.payment_reference || null
+      transactionId: transaction?.id || null
     })
 
     if (transactionError || !transaction) {
@@ -70,8 +69,8 @@ export async function GET(
       // Check if order exists for any user (debug only)
       const { data: anyUserTransaction } = await supabaseAdmin
         .from('indb_payment_transactions')
-        .select('id, payment_reference, user_id, transaction_status')
-        .eq('payment_reference', order_id)
+        .select('id, user_id, transaction_status')
+        .eq('id', id)
         .single()
       
       console.log('[ORDER-API] Order exists for any user:', !!anyUserTransaction, 'user_id:', anyUserTransaction?.user_id || 'N/A')
@@ -82,11 +81,11 @@ export async function GET(
       }, { status: 404 })
     }
     
-    console.log('[ORDER-API] Transaction found successfully, order_id:', transaction.payment_reference)
+    console.log('[ORDER-API] Transaction found successfully, transaction ID:', transaction.id)
 
     // Format response data
     const orderData = {
-      order_id: transaction.payment_reference,
+      order_id: transaction.id,
       transaction_id: transaction.gateway_transaction_id,
       status: transaction.transaction_status,
       payment_status: transaction.transaction_status, // Use transaction_status for payment status

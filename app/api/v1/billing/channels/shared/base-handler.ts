@@ -53,10 +53,10 @@ export abstract class BasePaymentHandler {
   }
 
   // Common transaction creation BEFORE payment processing
-  async createPendingTransaction(orderId: string, gatewayId: string, additionalData: any = {}): Promise<string> {
+  async createPendingTransaction(gatewayId: string, additionalData: any = {}): Promise<string> {
     const amount = this.calculateAmount()
 
-    const { error: dbError } = await supabaseAdmin
+    const { data: transaction, error: dbError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .insert({
         user_id: this.paymentData.user.id,
@@ -67,7 +67,6 @@ export abstract class BasePaymentHandler {
         amount: amount.finalAmount,
         currency: amount.currency,
         payment_method: this.getPaymentMethodSlug(),
-        payment_reference: orderId,
         billing_period: this.paymentData.billing_period,
         metadata: {
           original_amount: amount.originalAmount,
@@ -78,17 +77,18 @@ export abstract class BasePaymentHandler {
           package_id: this.paymentData.package_id,
           billing_period: this.paymentData.billing_period,
           created_at: new Date().toISOString(),
-          midtrans_order_id: orderId,
           payment_type: this.paymentData.is_trial ? 'trial_payment' : 'regular_payment',
           ...additionalData
         }
       })
+      .select('id')
+      .single()
 
-    if (dbError) {
+    if (dbError || !transaction) {
       throw new Error('Failed to create transaction record')
     }
 
-    return orderId
+    return transaction.id
   }
 
   // Common amount calculation

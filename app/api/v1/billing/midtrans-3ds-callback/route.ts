@@ -360,7 +360,6 @@ export async function POST(request: NextRequest) {
           amount: transactionAmountUSD,
           currency: 'USD',
           payment_method: 'credit_card',
-          payment_reference: transaction_id,
           gateway_transaction_id: transaction_id,
           billing_period: billing_period,
           gateway_response: transactionDetails,

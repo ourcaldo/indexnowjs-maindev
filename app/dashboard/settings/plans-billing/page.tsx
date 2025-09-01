@@ -43,7 +43,6 @@ interface Transaction {
   amount: number
   currency: string
   payment_method: string
-  payment_reference: string
   gateway_transaction_id: string
   created_at: string
   processed_at: string | null

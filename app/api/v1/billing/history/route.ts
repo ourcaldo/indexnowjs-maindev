@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
         amount,
         currency,
         payment_method,
-        payment_reference,
         gateway_transaction_id,
         created_at,
         updated_at,
@@ -98,8 +97,7 @@ export async function GET(request: NextRequest) {
     // Transform transactions data
     const transformedTransactions = transactions?.map(transaction => ({
       id: transaction.id,
-      order_id: transaction.payment_reference,
-      payment_reference: transaction.payment_reference, // Ensure this field is included
+      order_id: transaction.id,
       transaction_type: transaction.transaction_type,
       transaction_status: transaction.transaction_status,
       amount: parseFloat(transaction.amount || '0'),
@@ -111,7 +109,7 @@ export async function GET(request: NextRequest) {
       verified_at: transaction.verified_at,
       notes: transaction.notes,
       payment_proof_url: transaction.payment_proof_url,
-      package_name: transaction.metadata?.package_name || transaction.package?.name || 'Unknown Package',
+      package_name: transaction.metadata?.package_name || (Array.isArray(transaction.package) ? transaction.package[0]?.name : transaction.package?.name) || 'Unknown Package',
       payment_method: transaction.payment_method || 'Unknown Method',
       gateway_transaction_id: transaction.gateway_transaction_id,
       customer_info: transaction.metadata?.customer_info,

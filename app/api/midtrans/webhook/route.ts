@@ -95,11 +95,11 @@ export async function POST(request: NextRequest) {
     // Find transaction to determine payment method
     let transaction = null
     
-    // First try payment_reference
+    // First try id (order_id is now the database ID)
     const { data: refTransaction } = await supabaseAdmin
       .from('indb_payment_transactions')
       .select('*')
-      .eq('payment_reference', orderId)
+      .eq('id', orderId)
       .single()
       
     if (refTransaction) {

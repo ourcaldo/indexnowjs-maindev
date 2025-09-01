@@ -54,7 +54,7 @@ async function activateUserPlan(transaction: any, adminUserId: string) {
       adminUserId,
       'plan_activation',
       transaction.user_id,
-      `Plan activated after payment confirmation for ${transaction.payment_reference}`,
+      `Plan activated after payment confirmation for order ${transaction.id}`,
       undefined,
       {
         packageId: transaction.package_id,
@@ -217,13 +217,12 @@ export async function PATCH(
         adminUser.id,
         'order_status_update',
         orderId,
-        `Updated order ${currentTransaction.payment_reference} status from ${currentTransaction.transaction_status} to ${status}`,
+        `Updated order ${currentTransaction.id} status from ${currentTransaction.transaction_status} to ${status}`,
         request,
         {
           previousStatus: currentTransaction.transaction_status,
           newStatus: status,
           orderId,
-          orderReference: currentTransaction.payment_reference,
           customerId: currentTransaction.user_id,
           notes: notes || null,
           orderStatusUpdate: true

@@ -75,8 +75,37 @@ export async function POST(request: NextRequest) {
     // Convert USD to IDR
     const idrAmount = await convertUsdToIdr(usdAmount)
 
-    // Generate unique order ID
-    const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    // Create transaction record first and get database-generated ID
+    const { data: transaction, error: transactionError } = await supabaseAdmin
+      .from('indb_payment_transactions')
+      .insert({
+        user_id: user.id,
+        package_id: package_id,
+        gateway_id: gatewayData.id,
+        transaction_type: 'subscription',
+        transaction_status: 'pending',
+        amount: usdAmount,
+        currency: 'USD',
+        payment_method: 'credit_card',
+        billing_period: billing_period,
+        metadata: {
+          billing_period: billing_period,
+          usd_amount: usdAmount,
+          idr_amount: idrAmount,
+          customer_info: customer_info
+        }
+      })
+      .select('id')
+      .single()
+
+    if (transactionError || !transaction) {
+      return NextResponse.json(
+        { error: 'Failed to create transaction record' },
+        { status: 500 }
+      )
+    }
+
+    const transactionId = transaction.id
 
     // Create Midtrans service
     const midtransService = PaymentServiceFactory.createMidtransService('snap', gatewayData)
@@ -84,7 +113,7 @@ export async function POST(request: NextRequest) {
     // Create Snap payment with subscription setup
     const snapPayload = {
       transaction_details: {
-        order_id: orderId,
+        order_id: transactionId,
         gross_amount: idrAmount
       },
       credit_card: {
@@ -115,9 +144,9 @@ export async function POST(request: NextRequest) {
         category: 'Subscription'
       }],
       callbacks: {
-        finish: `https://${request.headers.get('host')}/dashboard/settings/plans-billing/orders/${orderId}`,
-        error: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=failed&order_id=${orderId}`,
-        pending: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=pending&order_id=${orderId}`
+        finish: `https://${request.headers.get('host')}/dashboard/settings/plans-billing/order/${transactionId}`,
+        error: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=failed&order_id=${transactionId}`,
+        pending: `https://${request.headers.get('host')}/dashboard/settings/plans-billing?payment=pending&order_id=${transactionId}`
       },
       metadata: {
         user_id: user.id,
@@ -156,43 +185,31 @@ export async function POST(request: NextRequest) {
 
     const snapData = await snapResponse.json()
 
-    // Create transaction record in database
-    const { data: transaction, error: transactionError } = await supabaseAdmin
+    // Update transaction record with Midtrans response
+    const { error: updateError } = await supabaseAdmin
       .from('indb_payment_transactions')
-      .insert({
-        user_id: user.id,
-        package_id: package_id,
-        gateway_id: gatewayData.id,
-        transaction_type: 'subscription',
-        transaction_status: 'pending',
-        amount: usdAmount,
-        currency: 'USD',
-        payment_method: 'credit_card',
-        payment_reference: orderId,
+      .update({
         gateway_transaction_id: snapData.token,
-        billing_period: billing_period, // Store billing period if column exists
         gateway_response: {
           snap_token: snapData.token,
           snap_redirect_url: snapData.redirect_url,
           idr_amount: idrAmount,
-          order_id: orderId
+          order_id: transactionId
         },
         metadata: {
-          midtrans_order_id: orderId,
           snap_token: snapData.token,
-          billing_period: billing_period, // Always store in metadata as backup
+          billing_period: billing_period,
           usd_amount: usdAmount,
           idr_amount: idrAmount,
           customer_info: customer_info
         }
       })
-      .select()
-      .single()
+      .eq('id', transactionId)
 
-    if (transactionError) {
-      console.error('Transaction creation error:', transactionError)
+    if (updateError) {
+      console.error('Transaction update error:', updateError)
       return NextResponse.json(
-        { error: 'Failed to create transaction record' },
+        { error: 'Failed to update transaction record' },
         { status: 500 }
       )
     }
@@ -200,8 +217,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        transaction_id: transaction.id,
-        order_id: orderId,
+        transaction_id: transactionId,
+        order_id: transactionId,
         snap_token: snapData.token,
         snap_redirect_url: snapData.redirect_url,
         amount: {

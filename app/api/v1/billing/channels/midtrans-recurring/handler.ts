@@ -24,10 +24,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     // Calculate amount
     const amount = this.calculateAmount()
     
-    // Generate order ID
-    const orderId = `ORDER-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
-
-    // Create transaction record BEFORE payment processing with token_id
+    // Create transaction record BEFORE payment processing and get database-generated ID
     const trialMetadata = this.paymentData.is_trial ? {
       is_trial: true,
       trial_start_date: new Date().toISOString(),
@@ -39,7 +36,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       converted_amount_idr: amount.finalAmount
     } : null;
 
-    const { error: dbError } = await supabaseAdmin
+    const { data: transaction, error: dbError } = await supabaseAdmin
       .from('indb_payment_transactions')
       .insert({
         user_id: this.paymentData.user.id,
@@ -50,7 +47,6 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         amount: this.paymentData.is_trial ? 1 : this.calculateAmount().finalAmount, // Store charge amount: $1 for trials, real price for subscriptions
         currency: this.calculateAmount().currency,
         payment_method: 'midtrans_recurring',
-        payment_reference: orderId,
         billing_period: this.paymentData.billing_period,
         trial_metadata: trialMetadata,
         metadata: {
@@ -66,10 +62,14 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
           is_trial: this.paymentData.is_trial || false
         }
       })
+      .select('id')
+      .single()
 
-    if (dbError) {
+    if (dbError || !transaction) {
       throw new Error('Failed to create transaction record')
     }
+
+    const transactionId = transaction.id
 
     // Initialize Midtrans service
     this.midtransService = PaymentServiceFactory.createMidtransService('recurring', {
@@ -81,7 +81,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
 
     // Step 1: Create charge transaction with token_id from frontend tokenization
     console.log('🚀 [Midtrans Recurring] Creating charge transaction with parameters:', {
-      order_id: orderId,
+      order_id: transactionId,
       amount_usd: amount.finalAmount,
       token_id: this.tokenId.substring(0, 20) + '...',
       customer_name: `${this.paymentData.customer_info.first_name} ${this.paymentData.customer_info.last_name}`,
@@ -92,7 +92,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     const chargeAmount = this.paymentData.is_trial ? 1 : amount.finalAmount;
     
     const chargeTransaction = await this.midtransService.createChargeTransaction({
-      order_id: orderId,
+      order_id: transactionId,
       amount_usd: chargeAmount, // Use $1 for trials to meet Midtrans minimum, real price for subscriptions
       token_id: this.tokenId,  // Use token from frontend Midtrans.min.js tokenization
       customer_details: {
@@ -112,7 +112,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     // Check if 3DS authentication is required
     if (chargeTransaction.redirect_url || chargeTransaction.transaction_status === 'pending') {
       console.log('🔐 3DS Authentication required for transaction:', {
-        order_id: orderId,
+        order_id: transactionId,
         transaction_id: chargeTransaction.transaction_id,
         redirect_url: chargeTransaction.redirect_url,
         transaction_status: chargeTransaction.transaction_status
@@ -122,7 +122,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       const { data: currentTransaction } = await supabaseAdmin
         .from('indb_payment_transactions')
         .select('metadata')
-        .eq('payment_reference', orderId)
+        .eq('id', transactionId)
         .single()
 
       await supabaseAdmin
@@ -145,14 +145,14 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
             requires_3ds: true
           }
         })
-        .eq('payment_reference', orderId)
+        .eq('id', transactionId)
 
       return {
         success: true,
         requires_redirect: true,
         redirect_url: chargeTransaction.redirect_url,
         data: {
-          order_id: orderId,
+          order_id: transactionId,
           transaction_id: chargeTransaction.transaction_id,
           requires_3ds: true
         }
@@ -217,7 +217,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
           package_id: this.paymentData.package_id,
           package_name: this.packageData.name,
           billing_period: this.paymentData.billing_period,
-          order_id: orderId,
+          order_id: transactionId,
           trial_type: this.paymentData.is_trial ? 'free_trial_auto_billing' : null,
           original_trial_start: this.paymentData.is_trial ? new Date().toISOString() : null,
           subscription_type: 'recurring_payment'
@@ -242,7 +242,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
             masked_card: transactionStatus.masked_card || chargeTransaction.masked_card
           }
         })
-        .eq('payment_reference', orderId)
+        .eq('id', transactionId)
 
       // Update user subscription with trial-specific logic
       if (this.paymentData.is_trial) {
@@ -255,7 +255,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       try {
         await emailService.sendBillingConfirmation(this.paymentData.customer_info.email, {
           customerName: `${this.paymentData.customer_info.first_name} ${this.paymentData.customer_info.last_name}`.trim(),
-          orderId: orderId,
+          orderId: transactionId,
           packageName: this.packageData.name,
           billingPeriod: this.paymentData.billing_period,
           amount: `IDR ${amount.finalAmount.toLocaleString('id-ID')}`,
@@ -274,10 +274,10 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       return {
         success: true,
         data: {
-          order_id: orderId,
+          order_id: transactionId,
           transaction_id: chargeTransaction.transaction_id,
           subscription_id: subscription.id,
-          redirect_url: `/dashboard/settings/plans-billing/orders/${orderId}`
+          redirect_url: `/dashboard/settings/plans-billing/order/${transactionId}`
         }
       }
     }

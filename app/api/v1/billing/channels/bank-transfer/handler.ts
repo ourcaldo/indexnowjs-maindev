@@ -16,11 +16,8 @@ export default class BankTransferHandler extends BasePaymentHandler {
     // Calculate amount
     const amount = this.calculateAmount()
     
-    // Generate order ID
-    const orderId = `BT-${Date.now()}-${this.paymentData.user.id.slice(0, 8)}`
-
-    // Create transaction record
-    await this.createPendingTransaction(orderId, this.gateway.id, {
+    // Create transaction record and get database-generated ID
+    const transactionId = await this.createPendingTransaction(this.gateway.id, {
       payment_gateway_type: 'bank_transfer',
       bank_details: this.gateway.configuration
     })
@@ -30,7 +27,7 @@ export default class BankTransferHandler extends BasePaymentHandler {
       .from('indb_payment_transactions')
       .update({
         gateway_response: {
-          order_id: orderId,
+          order_id: transactionId,
           bank_name: this.gateway.configuration.bank_name,
           account_name: this.gateway.configuration.account_name,
           account_number: this.gateway.configuration.account_number,
@@ -39,13 +36,13 @@ export default class BankTransferHandler extends BasePaymentHandler {
           instructions: `Please transfer ${amount.finalAmount} ${amount.currency} to the account above and upload payment proof.`
         }
       })
-      .eq('payment_reference', orderId)
+      .eq('id', transactionId)
 
     // Send order confirmation email
     try {
       await emailService.sendBillingConfirmation(this.paymentData.customer_info.email, {
         customerName: `${this.paymentData.customer_info.first_name} ${this.paymentData.customer_info.last_name}`.trim(),
-        orderId: orderId,
+        orderId: transactionId,
         packageName: this.packageData.name,
         billingPeriod: this.paymentData.billing_period,
         amount: `${amount.currency} ${amount.finalAmount}`,
@@ -67,9 +64,9 @@ export default class BankTransferHandler extends BasePaymentHandler {
     return {
       success: true,
       requires_redirect: true,
-      redirect_url: `/dashboard/settings/plans-billing/order/${orderId}`,
+      redirect_url: `/dashboard/settings/plans-billing/order/${transactionId}`,
       data: {
-        order_id: orderId,
+        order_id: transactionId,
         bank_details: {
           bank_name: this.gateway.configuration.bank_name,
           account_name: this.gateway.configuration.account_name,

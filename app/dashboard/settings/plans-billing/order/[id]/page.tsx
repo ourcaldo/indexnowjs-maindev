@@ -21,7 +21,6 @@ interface Transaction {
   transaction_status: string
   amount: number
   currency: string
-  payment_reference: string
   payment_proof_url: string | null
   created_at: string
   metadata: any
@@ -72,7 +71,7 @@ export default function OrderCompletedPage() {
         return
       }
 
-      const response = await fetch(`/api/v1/billing/transactions/${params.id}`, {
+      const response = await fetch(`/api/v1/billing/orders/${params.id}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
@@ -272,7 +271,7 @@ export default function OrderCompletedPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Order ID</p>
-                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference}</p>
+                    <p className="text-sm text-[#6C757D] font-mono">{transaction.id}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Order Date</p>
@@ -430,7 +429,7 @@ export default function OrderCompletedPage() {
 
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">Reference Number</p>
-                    <p className="text-sm text-[#6C757D] font-mono">{transaction.payment_reference}</p>
+                    <p className="text-sm text-[#6C757D] font-mono">{transaction.id}</p>
                   </div>
                 </div>
               </CardContent>
