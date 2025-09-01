@@ -160,20 +160,59 @@ export default function FAQPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
+      {/* Enhanced Black glossy background with subtle patterns */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-black"></div>
+        {/* Glossy gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90"></div>
+        {/* Subtle dot pattern */}
+        <div className="absolute inset-0 opacity-[0.015]" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+          backgroundSize: '50px 50px'
+        }}></div>
+        {/* Enhanced glossy light effects */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400/20 to-transparent"></div>
+        <div className="absolute top-0 left-1/3 w-96 h-96 bg-blue-500/[0.008] rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-cyan-400/[0.008] rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/[0.003] to-transparent rounded-full"></div>
+      </div>
+
+      {/* Header Navigation */}
+      <header className="relative z-50 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            <a href="/" className="text-xl font-bold text-white">
+              IndexNow: Rank Tracker
+            </a>
+            <nav className="hidden md:flex space-x-8">
+              <a href="/" className="text-gray-300 hover:text-white transition-colors">Home</a>
+              <a href="/pricing" className="text-gray-300 hover:text-white transition-colors">Pricing</a>
+              <a href="/faq" className="text-white">FAQ</a>
+            </nav>
+            <a
+              href="/dashboard/login"
+              className="bg-white text-black px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
+            >
+              Sign In
+            </a>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="bg-white py-24 border-b border-gray-100">
+      <section className="relative z-10 py-24">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Frequently Asked Questions
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             From setup to billing, here's everything you need to know about IndexNow. 
             Still have questions? Our team is just an email away.
           </p>
           <a 
             href="mailto:hello@indexnow.studio"
-            className="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
           >
             <Mail className="w-5 h-5 mr-2" />
             Contact Support
@@ -182,28 +221,28 @@ export default function FAQPageContent() {
       </section>
 
       {/* FAQ Sections */}
-      <section className="py-16">
+      <section className="relative z-10 py-16">
         <div className="max-w-4xl mx-auto px-6">
           <div className="space-y-12">
             {faqSections.map((section, sectionIndex) => (
-              <div key={sectionIndex} className="bg-white">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-8 pb-4 border-b border-gray-200">
+              <div key={sectionIndex} className="bg-black/20 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+                <h2 className="text-2xl font-semibold text-white mb-8 pb-4 border-b border-white/20">
                   {section.title}
                 </h2>
                 <div className="space-y-4">
                   {section.items.map((item, questionIndex) => (
-                    <div key={questionIndex} className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div key={questionIndex} className="border border-white/10 rounded-lg overflow-hidden bg-white/5">
                       <button
                         onClick={() => toggleQuestion(sectionIndex, questionIndex)}
-                        className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-inset"
+                        className="w-full px-6 py-4 text-left hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-inset"
                         data-testid={`faq-question-${sectionIndex}-${questionIndex}`}
                       >
                         <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium text-gray-900 pr-4">
+                          <h3 className="text-lg font-medium text-white pr-4">
                             {item.question}
                           </h3>
                           <ChevronDown 
-                            className={`w-5 h-5 text-gray-500 transition-transform duration-200 flex-shrink-0 ${
+                            className={`w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
                               isQuestionOpen(sectionIndex, questionIndex) ? 'transform rotate-180' : ''
                             }`}
                           />
@@ -211,10 +250,10 @@ export default function FAQPageContent() {
                       </button>
                       {isQuestionOpen(sectionIndex, questionIndex) && (
                         <div 
-                          className="px-6 py-4 bg-white border-t border-gray-200"
+                          className="px-6 py-4 bg-white/10 border-t border-white/10"
                           data-testid={`faq-answer-${sectionIndex}-${questionIndex}`}
                         >
-                          <p className="text-gray-700 leading-relaxed">
+                          <p className="text-gray-300 leading-relaxed">
                             {item.answer}
                           </p>
                         </div>
@@ -225,10 +264,10 @@ export default function FAQPageContent() {
                 
                 {/* Section CTA */}
                 <div className="mt-8 text-center">
-                  <p className="text-gray-600 mb-3">Still need help with {section.title.toLowerCase()}?</p>
+                  <p className="text-gray-400 mb-3">Still need help with {section.title.toLowerCase()}?</p>
                   <a 
                     href="mailto:hello@indexnow.studio"
-                    className="text-gray-900 hover:text-gray-700 font-medium transition-colors"
+                    className="text-white hover:text-gray-300 font-medium transition-colors"
                   >
                     Contact us →
                   </a>
@@ -240,31 +279,33 @@ export default function FAQPageContent() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="bg-gray-50 py-16">
+      <section className="relative z-10 py-16">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Didn't find your answer?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Reach out and we'll get back to you quickly.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="mailto:hello@indexnow.studio"
-              className="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-              data-testid="contact-support-final"
-            >
-              <Mail className="w-5 h-5 mr-2" />
-              Contact Support
-            </a>
-            <a 
-              href="/register"
-              className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              data-testid="start-trial-final"
-            >
-              <MessageCircle className="w-5 h-5 mr-2" />
-              Start 3-Day Trial
-            </a>
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-12 border border-white/10">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Didn't find your answer?
+            </h2>
+            <p className="text-xl text-gray-300 mb-8">
+              Reach out and we'll get back to you quickly.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a 
+                href="mailto:hello@indexnow.studio"
+                className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
+                data-testid="contact-support-final"
+              >
+                <Mail className="w-5 h-5 mr-2" />
+                Contact Support
+              </a>
+              <a 
+                href="/register"
+                className="inline-flex items-center px-6 py-3 border border-white/20 text-white rounded-lg hover:bg-white/10 transition-colors"
+                data-testid="start-trial-final"
+              >
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Start 3-Day Trial
+              </a>
+            </div>
           </div>
         </div>
       </section>
