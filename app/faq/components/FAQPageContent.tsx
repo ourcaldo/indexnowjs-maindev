@@ -32,11 +32,11 @@ const faqSections: FAQSection[] = [
       },
       {
         question: 'How often do you update rankings?',
-        answer: 'We provide daily rank updates for all plans. Our Enterprise plan offers hourly updates for real-time monitoring of critical keywords.'
+        answer: 'We provide daily rank updates for all plans. Rankings are refreshed every 24 hours to ensure you have current and accurate positioning data.'
       },
       {
         question: 'Can I track competitors?',
-        answer: 'Absolutely! You can add competitors to track their rankings for the same keywords. This feature is available on Premium and Enterprise plans with different competitor limits per plan.'
+        answer: 'Yes! You can add competitors to track their rankings for the same keywords. This feature is available on the Premium plan.'
       }
     ]
   },
@@ -70,7 +70,7 @@ const faqSections: FAQSection[] = [
     items: [
       {
         question: 'Do you support white-label reports?',
-        answer: 'Yes! Our Enterprise plan includes white-label reports that you can customize with your brand. You can export as PDF, CSV, or share live branded links with your clients.'
+        answer: 'Yes! Our Premium plan includes white-label reports that you can customize with your brand. You can export as PDF, CSV, or share live branded links with your clients.'
       },
       {
         question: 'Can I automate reports?',
@@ -91,15 +91,15 @@ const faqSections: FAQSection[] = [
     items: [
       {
         question: 'Can I add team members?',
-        answer: 'Yes! Premium plans support up to 3 team members, and Enterprise plans offer unlimited team seats. Each member gets their own login with appropriate permissions.'
+        answer: 'Yes! Premium plans support up to 3 team members. Each member gets their own login with appropriate permissions.'
       },
       {
         question: 'Can I manage multiple projects or clients?',
-        answer: 'Definitely! You can create unlimited projects on Premium and Enterprise plans. Starter plan includes up to 5 domains. Each project can track different sets of keywords and competitors.'
+        answer: 'Definitely! You can create unlimited projects on the Premium plan. Starter plan includes up to 5 domains. Each project can track different sets of keywords and competitors.'
       },
       {
         question: 'Can I assign roles and permissions?',
-        answer: 'Yes! Team roles and permissions are available on Premium and Enterprise plans. You can control who can add/remove keywords, access reports, or manage billing.'
+        answer: 'Yes! Team roles and permissions are available on the Premium plan. You can control who can add/remove keywords, access reports, or manage billing.'
       }
     ]
   },
@@ -137,7 +137,7 @@ const faqSections: FAQSection[] = [
       },
       {
         question: 'Do you offer onboarding support?',
-        answer: 'Yes! We provide comprehensive self-serve documentation and video tutorials. Enterprise customers also get personalized onboarding calls to ensure optimal setup.'
+        answer: 'Yes! We provide comprehensive self-serve documentation and video tutorials. Premium customers also get priority support to help with setup and optimization.'
       }
     ]
   }
