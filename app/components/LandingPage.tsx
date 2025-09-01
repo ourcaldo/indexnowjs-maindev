@@ -202,14 +202,12 @@ export default function LandingPage() {
                 >
                   Features
                 </button>
-                <button 
-                  onClick={() => scrollToSection(pricingRef)}
-                  className={`text-sm font-medium transition-colors ${
-                    activeSection === 'pricing' ? 'text-white' : 'text-gray-300 hover:text-white'
-                  }`}
+                <a 
+                  href="/pricing"
+                  className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
                 >
                   Pricing
-                </button>
+                </a>
                 <button 
                   onClick={() => scrollToSection(faqRef)}
                   className={`text-sm font-medium transition-colors ${
@@ -272,12 +270,12 @@ export default function LandingPage() {
               >
                 Features
               </button>
-              <button
-                onClick={() => scrollToSection(pricingRef)}
-                className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium w-full text-left"
+              <a
+                href="/pricing"
+                className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium"
               >
                 Pricing
-              </button>
+              </a>
               <button
                 onClick={() => scrollToSection(faqRef)}
                 className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium w-full text-left"

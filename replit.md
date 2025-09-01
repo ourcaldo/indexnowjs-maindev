@@ -13,6 +13,12 @@ IndexNow Studio is a professional-grade, full-stack web application designed to 
 - Enterprise Security with role-based access control and auditing.
 - Smart Keyword Intelligence, Advanced Repository Insight, Intelligent Monitoring, Multi-Location Tracking, Competitor Intelligence for rank tracking.
 
+## Recent Changes
+
+**December 2024:**
+- **Pricing Architecture Refactoring (Dec 2024):** Created dedicated pricing page at `/pricing` route with comprehensive features comparison and FAQ sections. Eliminated code duplication by creating shared `usePricingData` hook to centralize pricing logic across `PricingTeaserSection` and `PricingTable` components. Updated navigation from scroll-to-section to dedicated page routing for better user experience and scalability.
+- **Shared Component Architecture:** Implemented consistent pricing data management with currency detection, package loading, price calculations, and feature extraction logic in a centralized hook, improving maintainability and consistency across the application.
+
 ## User Preferences
 
 - **Architecture:** The project strictly uses Next.js with NO VITE. Database operations require SQL queries for Supabase SQL Editor. Database table names must follow the `indb_{collections}_{table-name}` prefix.

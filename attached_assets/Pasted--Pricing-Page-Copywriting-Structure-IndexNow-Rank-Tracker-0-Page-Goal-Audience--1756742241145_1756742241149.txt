@@ -1,0 +1,104 @@
+# Pricing Page Copywriting Structure — IndexNow: Rank Tracker
+
+---
+
+## 0) Page Goal & Audience (for internal alignment)
+**Goal:** Drive free trial sign-ups and reduce friction/hesitation around pricing.  
+**Secondary goal:** Handle objections about overages, limits, and white-label features.  
+**Audience:** Freelancers, small agencies, and in-house marketers looking for a simple, predictable, and affordable rank tracker.
+
+---
+
+## 1) Hero Section (Above the Fold)
+**Headline options:**
+- “Fair, transparent pricing—built to grow with you.”
+- “Pay for rank tracking, not for bloat.”
+- “Choose the plan that fits your workflow.”
+
+**Supporting line (1–2 sentences):**  
+“No hidden fees. No confusing credits. Just straightforward plans that scale when you need them.”
+
+**Primary CTA:** “Start free”  
+*Microcopy:* “<x>-day free trial • cancel anytime” (replace <x>)
+
+---
+
+## 2) Pricing Table
+**Toggle:** “Monthly / Annual (save X%)”
+[pricing table component]
+
+**Toggle:** “Monthly / Annual (save X%)”
+
+---
+
+## 3) Value Reinforcement Strip
+**Header:** “Every plan includes”  
+**Icons + bullets (3–5 items):**
+- Local & mobile rank tracking  
+- Real-time alerts  
+- Exportable reports  
+- Secure cloud dashboard  
+- GDPR-ready privacy
+
+---
+
+## 4) Objection Handling (Pricing FAQs)
+- “What happens if I exceed my keyword limit?”  
+*(Explain clear overage or pause policy)*  
+- “Do I need a credit card for the free trial?”  
+*(yes/no, clarify)*  
+- “Can I switch plans anytime?”  
+*(flexibility reassurance)*  
+- “Do you offer discounts for annual plans?”  
+*(yes/no, specify %)*  
+- “Can I cancel anytime?”  
+*(state clearly to reduce fear)*  
+- “Is there an API available?”  
+*(if true, specify which plans)*
+
+---
+
+## 5) Comparison / Why Choose Us
+**Header:** “Why IndexNow over all-in-one tools?”  
+**Side-by-side mini table or 3-column checklist:**
+- ✅ Predictable pricing  
+- ✅ Focused rank tracking  
+- ✅ Clean, client-ready reports  
+vs.  
+- ❌ Expensive bundles  
+- ❌ Overwhelming dashboards  
+- ❌ Features you don’t use  
+
+---
+
+## 6) Social Proof / Testimonial Band
+**Short quote focus:**  
+- “Affordable but powerful.”  
+- “Easy for clients to understand.”  
+- “Finally, rank tracking that doesn’t feel bloated.”  
+Include: name, role, company logo (if possible).
+
+---
+
+## 7) Final CTA (Conversion Band)
+**Headline:** “Track rankings with clarity—without breaking the bank.”  
+**Supporting line:** “Start your <x>-day free trial today and see how simple rank tracking can be.”  
+
+**Primary CTA:** “Start free”  
+**Secondary CTA:** “Talk to sales”
+
+---
+
+## 8) Footer Micro-Blocks
+- **Mini nav:** Product • Docs/Help • Status • Contact  
+- **Compliance:** Privacy • Terms • DPA/GDPR (if applicable)  
+- **Micro reassurance:** “Questions about pricing? Email hello@<domain>—we’ll reply fast.”
+
+---
+
+## Tone, Style & UX Notes
+- **Tone:** Transparent, trustworthy, confident.  
+- **Language:** Simple and human—highlight “fair,” “clear,” “predictable.”  
+- **Layout:** Clean pricing cards with toggle for monthly/annual. CTA on every card.  
+- **Visual cues:** Highlight “Most Popular” plan (likely Pro).  
+- **Trust cues:** Add money-back guarantee or trial reassurance if possible.  

@@ -1,47 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ArrowRight, MessageCircle } from 'lucide-react'
-import { createClient } from '@/lib/database/supabase-browser'
-import { getUserCurrency } from '@/lib/utils/currency-utils'
+import { ArrowRight } from 'lucide-react'
+import { usePricingData } from '@/hooks/business/usePricingData'
 import NeonContainer from './NeonContainer'
 import AdvancedNeonCard from './AdvancedNeonCard'
-
-interface PricingTierData {
-  IDR: {
-    promo_price: number
-    period_label: string
-    regular_price: number
-  }
-  USD: {
-    promo_price: number
-    period_label: string
-    regular_price: number
-  }
-}
-
-interface Package {
-  id: string
-  name: string
-  description: string
-  price: number
-  currency: string
-  billing_period: string
-  features: string[]
-  quota_limits: {
-    daily_urls?: number
-    keywords_limit?: number
-    concurrent_jobs?: number
-    service_accounts?: number
-  }
-  is_popular: boolean
-  pricing_tiers: {
-    annual: PricingTierData
-    monthly: PricingTierData
-    biannual: PricingTierData
-    quarterly: PricingTierData
-  }
-}
 
 interface PricingTeaserSectionProps {
   onGetStarted: () => void
@@ -49,180 +11,17 @@ interface PricingTeaserSectionProps {
 }
 
 export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }: PricingTeaserSectionProps) {
-  const [packages, setPackages] = useState<Package[]>([])
-  const [globalBillingPeriod, setGlobalBillingPeriod] = useState<'monthly' | 'quarterly' | 'biannual' | 'annual'>('monthly')
-  const [currency, setCurrency] = useState<'USD' | 'IDR'>('USD')
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    detectCurrencyAndLoadPackages()
-  }, [])
-
-  const detectCurrencyAndLoadPackages = async () => {
-    try {
-      setIsLoading(true)
-      
-      // Step 1: Check if user is logged in
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      let detectedCurrency: 'USD' | 'IDR' = 'USD'
-      
-      if (user) {
-        // User is logged in - get country from profile
-        const { data: profile } = await supabase
-          .from('indb_auth_user_profiles')
-          .select('country')
-          .eq('user_id', user.id)
-          .single()
-        
-        if (profile?.country) {
-          detectedCurrency = getUserCurrency(profile.country)
-        }
-      } else {
-        // User not logged in - use IP detection
-        try {
-          const locationResponse = await fetch('/api/v1/auth/detect-location')
-          if (locationResponse.ok) {
-            const locationData = await locationResponse.json()
-            if (locationData.country) {
-              detectedCurrency = getUserCurrency(locationData.country)
-            }
-          }
-        } catch (error) {
-          console.log('IP detection failed, using default USD')
-        }
-      }
-      
-      setCurrency(detectedCurrency)
-      
-      // Step 2: Load packages
-      await loadPackages()
-      
-    } catch (error) {
-      console.error('Failed to detect currency:', error)
-      setCurrency('USD')
-      await loadPackages()
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const loadPackages = async () => {
-    try {
-      const response = await fetch('/api/v1/public/packages', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success && data.packages) {
-          setPackages(data.packages)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load packages:', error)
-    }
-  }
-
-  const formatPrice = (price: number, currency: string = 'USD') => {
-    if (currency === 'IDR') {
-      return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0
-      }).format(price)
-    } else {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0
-      }).format(price)
-    }
-  }
-
-  const getCurrentPrice = (pkg: Package) => {
-    if (!pkg.pricing_tiers || typeof pkg.pricing_tiers !== 'object') {
-      return { price: 0, period: pkg.billing_period }
-    }
-    
-    const periodData = pkg.pricing_tiers[globalBillingPeriod]
-    if (!periodData || !periodData[currency]) {
-      return { price: 0, period: pkg.billing_period }
-    }
-    
-    const tierData = periodData[currency]
-    return { 
-      price: tierData.promo_price || tierData.regular_price, 
-      period: tierData.period_label,
-      originalPrice: tierData.regular_price !== tierData.promo_price ? tierData.regular_price : null
-    }
-  }
-
-  const getKeywordLimit = (pkg: Package) => {
-    const keywordLimit = pkg.quota_limits?.keywords_limit || 0
-    if (keywordLimit >= 10000) return '10K+'
-    if (keywordLimit >= 5000) return '5K+'
-    if (keywordLimit >= 2000) return '2K+'
-    if (keywordLimit >= 1000) return '1K+'
-    if (keywordLimit >= 500) return '500'
-    if (keywordLimit >= 100) return '100'
-    return keywordLimit.toString()
-  }
-
-  const getFeaturesList = (pkg: Package): string[] => {
-    const features: string[] = []
-    
-    // Extract quota limits
-    const keywordLimit = pkg.quota_limits?.keywords_limit || 0
-    const serviceAccounts = pkg.quota_limits?.service_accounts || 1
-    const concurrentJobs = pkg.quota_limits?.concurrent_jobs || 1
-    const dailyUrls = pkg.quota_limits?.daily_urls || 0
-    
-    // Add keyword limit
-    if (keywordLimit === -1) {
-      features.push('Unlimited Keywords')
-    } else if (keywordLimit >= 1000) {
-      features.push(`${Math.floor(keywordLimit / 1000)}K+ Keywords`)
-    } else {
-      features.push(`${keywordLimit} Keywords`)
-    }
-    
-    // Add service accounts
-    if (serviceAccounts === -1) {
-      features.push('Unlimited Service Accounts')
-    } else if (serviceAccounts === 1) {
-      features.push('1 Service Account')
-    } else {
-      features.push(`${serviceAccounts} Service Accounts`)
-    }
-    
-    // Add daily URLs for indexing
-    if (dailyUrls === -1) {
-      features.push('Unlimited Daily Indexing')
-    } else if (dailyUrls > 0) {
-      features.push(`${dailyUrls} Daily URL Quota`)
-    }
-    
-    // Add concurrent jobs
-    if (concurrentJobs > 1) {
-      features.push(`${concurrentJobs} Concurrent Jobs`)
-    }
-    
-    // Add package-specific features from database features array
-    if (pkg.features && Array.isArray(pkg.features)) {
-      pkg.features.forEach(feature => {
-        if (feature && !features.some(f => f.toLowerCase().includes(feature.toLowerCase().substring(0, 10)))) {
-          features.push(feature)
-        }
-      })
-    }
-    
-    return features
-  }
+  const {
+    packages,
+    selectedPeriod,
+    currency,
+    isLoading,
+    setSelectedPeriod,
+    formatPrice,
+    getPricing,
+    getFeaturesList,
+    getSavingsPercentage
+  } = usePricingData({ maxPackages: 3 })
 
   const periodOptions = [
     { key: 'monthly' as const, label: 'Monthly' },
@@ -244,9 +43,6 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
     )
   }
 
-  // Take up to 3 packages for display
-  const displayPackages = packages.slice(0, 3)
-
   return (
     <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -261,24 +57,27 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
         {/* Period Tabs */}
         <div className="flex justify-center mb-12">
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 inline-flex items-center">
-            {periodOptions.map((option) => (
-              <button
-                key={option.key}
-                onClick={() => setGlobalBillingPeriod(option.key)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                  globalBillingPeriod === option.key
-                    ? 'bg-white text-black shadow-lg'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <span>{option.label}</span>
-                {globalBillingPeriod === option.key && option.key !== 'monthly' && (
-                  <span className="ml-2 text-xs text-green-600 font-semibold">
-                    Save {option.key === 'annual' ? '16%' : option.key === 'biannual' ? '12%' : '8%'}
-                  </span>
-                )}
-              </button>
-            ))}
+            {periodOptions.map((option) => {
+              const savings = getSavingsPercentage(option.key)
+              return (
+                <button
+                  key={option.key}
+                  onClick={() => setSelectedPeriod(option.key)}
+                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    selectedPeriod === option.key
+                      ? 'bg-white text-black shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {selectedPeriod === option.key && savings && (
+                    <span className="ml-2 text-xs text-green-600 font-semibold">
+                      Save {savings}%
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -286,8 +85,8 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
         <div className="grid md:grid-cols-3 gap-8">
         <NeonContainer className="contents">
           {(mousePosition, isTracking) => 
-            displayPackages.map((pkg, index) => {
-              const pricing = getCurrentPrice(pkg)
+            packages.map((pkg, index) => {
+              const pricing = getPricing(pkg)
               const isPopular = pkg.is_popular
               const features = getFeaturesList(pkg)
               
@@ -324,22 +123,22 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                   {pricing.originalPrice && (
                     <div className="mb-2">
                       <span className="text-lg text-gray-500 line-through">
-                        {formatPrice(pricing.originalPrice, currency)}
+                        {formatPrice(pricing.originalPrice)}
                       </span>
                     </div>
                   )}
                   {/* Current Price */}
                   <div className="mb-2">
                     <span className="text-4xl font-bold text-white">
-                      {formatPrice(pricing.price, currency)}
+                      {formatPrice(pricing.price)}
                     </span>
                   </div>
                   {/* Period Label */}
                   <div>
                     <span className="text-gray-400 text-sm">
-                      per {globalBillingPeriod === 'monthly' ? 'month' : 
-                           globalBillingPeriod === 'quarterly' ? '3 Months' :
-                           globalBillingPeriod === 'biannual' ? '6 Months' : 'year'}
+                      per {selectedPeriod === 'monthly' ? 'month' : 
+                           selectedPeriod === 'quarterly' ? '3 months' :
+                           selectedPeriod === 'biannual' ? '6 months' : 'year'}
                     </span>
                   </div>
                 </div>

@@ -1,37 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Check, Clock } from 'lucide-react'
-import { getUserCurrency, formatCurrency as formatCurrencyUtil } from '@/lib/utils/currency-utils'
-import { createClient } from '@/lib/database/supabase-browser'
-
-interface PricingTier {
-  promo_price: number
-  regular_price: number
-  period_label: string
-}
-
-interface PricingTiers {
-  [period: string]: {
-    USD: PricingTier
-    IDR: PricingTier
-  }
-}
-
-interface PackageData {
-  id: string
-  name: string
-  slug: string
-  description: string
-  features: string[]
-  quota_limits: {
-    daily_urls: number
-    keywords_limit: number
-    concurrent_jobs: number
-    service_accounts: number
-  }
-  pricing_tiers: PricingTiers
-  is_active: boolean
-  sort_order: number
-}
+import { usePricingData, type PackageData, type BillingPeriod } from '@/hooks/business/usePricingData'
 
 interface PricingTableProps {
   showTrialButton?: boolean
@@ -56,89 +25,17 @@ const PricingTable: React.FC<PricingTableProps> = ({
   isTrialEligiblePackage = () => false,
   className = ''
 }) => {
-  const [packages, setPackages] = useState<PackageData[]>([])
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('monthly')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [userCurrency, setUserCurrency] = useState<'USD' | 'IDR'>('USD')
-
-  // Load packages data and detect user currency
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Load packages
-        const packagesResponse = await fetch('/api/v1/public/packages')
-        if (!packagesResponse.ok) throw new Error('Failed to load packages')
-        
-        const packagesData = await packagesResponse.json()
-        setPackages(packagesData.packages || [])
-
-        // Detect user currency from profile
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (user) {
-          // User is logged in - get country from profile
-          const { data: profile } = await supabase
-            .from('indb_auth_user_profiles')
-            .select('country')
-            .eq('user_id', user.id)
-            .single()
-          
-          if (profile?.country) {
-            setUserCurrency(getUserCurrency(profile.country))
-          }
-        }
-        // If user not logged in, default to USD (already set in state)
-        
-      } catch (err) {
-        setError('Failed to load pricing data')
-        console.error('Error loading data:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadData()
-  }, [])
-
-  // Extract available periods from the first package (they should all have the same periods)
-  const getAvailablePeriods = () => {
-    if (packages.length === 0) return []
-    
-    const firstPackage = packages[0]
-    const periods = Object.keys(firstPackage.pricing_tiers)
-    
-    // Define the order: monthly → quarterly → biannual → annual
-    const periodOrder = ['monthly', 'quarterly', 'biannual', 'annual']
-    
-    return periodOrder.filter(period => periods.includes(period))
-  }
-
-  // Get pricing for a package and period
-  const getPricing = (pkg: PackageData, period: string) => {
-    const periodData = pkg.pricing_tiers[period]
-    if (!periodData || !periodData[userCurrency]) {
-      return { price: 0, originalPrice: 0, discount: 0, periodLabel: 'Monthly' }
-    }
-
-    const currencyData = periodData[userCurrency]
-    const price = currencyData.promo_price || currencyData.regular_price
-    const originalPrice = currencyData.regular_price
-    const discount = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0
-
-    return {
-      price,
-      originalPrice: discount > 0 ? originalPrice : undefined,
-      discount: discount > 0 ? discount : undefined,
-      periodLabel: currencyData.period_label
-    }
-  }
-
-  // Format currency using the utility function
-  const formatCurrency = (amount: number) => {
-    return formatCurrencyUtil(amount, userCurrency)
-  }
+  const {
+    packages,
+    selectedPeriod,
+    isLoading: loading,
+    error,
+    setSelectedPeriod,
+    formatPrice: formatCurrency,
+    getPricing,
+    getAvailablePeriods,
+    getPeriodLabel
+  } = usePricingData()
 
   if (loading) {
     return (
@@ -163,7 +60,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
       {/* Period Selector */}
       <div className="flex flex-wrap gap-2 justify-center">
         {availablePeriods.map((period) => {
-          const periodLabel = packages[0]?.pricing_tiers[period]?.[userCurrency]?.period_label || period
+          const periodLabel = getPeriodLabel(period)
           return (
             <button
               key={period}
@@ -196,7 +93,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
               }`}
             >
               {/* Popular Badge */}
-              {pkg.slug === 'premium' && !isCurrentPlan && (
+              {pkg.is_popular && !isCurrentPlan && (
                 <div className="absolute -top-3 left-4 bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-medium">
                   Most Popular
                 </div>
