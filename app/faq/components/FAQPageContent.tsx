@@ -36,7 +36,7 @@ const faqSections: FAQSection[] = [
       },
       {
         question: 'Can I track competitors?',
-        answer: 'Yes! You can add competitors to track their rankings for the same keywords. This feature is available on the Premium plan.'
+        answer: 'Currently, our focus is on tracking your own website\'s keyword rankings. Competitor tracking is planned for future updates.'
       }
     ]
   },
@@ -69,16 +69,16 @@ const faqSections: FAQSection[] = [
     title: 'Features & Reporting',
     items: [
       {
-        question: 'Do you support white-label reports?',
-        answer: 'Yes! Our Premium plan includes white-label reports that you can customize with your brand. You can export as PDF, CSV, or share live branded links with your clients.'
+        question: 'Can I export my ranking data?',
+        answer: 'Yes! You can view your ranking data in the dashboard and export it as needed. We\'re working on additional export formats like CSV and PDF for future updates.'
       },
       {
-        question: 'Can I automate reports?',
-        answer: 'Absolutely! You can schedule weekly, monthly, or custom interval reports to be automatically sent to you and your team via email.'
+        question: 'How do I track my keyword progress?',
+        answer: 'Your dashboard displays real-time ranking data with position changes over time. You can view rankings by domain, device type, and location to monitor your SEO progress.'
       },
       {
-        question: 'Do you support ranking alerts?',
-        answer: 'Yes! Set custom thresholds for ranking improvements or drops. Get instant notifications when keywords move significantly, so you can react quickly to changes.'
+        question: 'How often is my ranking data updated?',
+        answer: 'We update all keyword rankings daily to provide you with current and accurate position data across all your tracked keywords.'
       },
       {
         question: 'Is there an API available?',
@@ -90,16 +90,16 @@ const faqSections: FAQSection[] = [
     title: 'Account & Team Management',
     items: [
       {
-        question: 'Can I add team members?',
-        answer: 'Yes! Premium plans support up to 3 team members. Each member gets their own login with appropriate permissions.'
+        question: 'How many keywords can I track?',
+        answer: 'The Starter plan includes 100 keywords, while the Premium plan allows up to 1,000 keywords. You can track keywords across multiple domains within your keyword limit.'
       },
       {
-        question: 'Can I manage multiple projects or clients?',
-        answer: 'Definitely! You can create unlimited projects on the Premium plan. Starter plan includes up to 5 domains. Each project can track different sets of keywords and competitors.'
+        question: 'Can I track multiple domains?',
+        answer: 'Yes! The Starter plan supports up to 5 domains, and the Premium plan allows up to 25 domains. You can organize keywords by domain to track different websites.'
       },
       {
-        question: 'Can I assign roles and permissions?',
-        answer: 'Yes! Team roles and permissions are available on the Premium plan. You can control who can add/remove keywords, access reports, or manage billing.'
+        question: 'How do I organize my keywords?',
+        answer: 'You can organize keywords by domain and add custom tags to group related keywords. This helps you manage large keyword lists and filter results in your dashboard.'
       }
     ]
   },
@@ -119,8 +119,8 @@ const faqSections: FAQSection[] = [
         answer: 'We maintain 99.9% uptime and monitor our systems 24/7. You can check our current status and historical uptime data on our status page.'
       },
       {
-        question: 'Can I export my data?',
-        answer: 'Yes! You can export your ranking data as CSV or Excel files at any time. All historical data remains accessible, and you own your data completely.'
+        question: 'Can I access my historical ranking data?',
+        answer: 'Yes! All your ranking history is preserved and accessible through the dashboard. You can view ranking trends and changes over time for all your tracked keywords.'
       }
     ]
   },
