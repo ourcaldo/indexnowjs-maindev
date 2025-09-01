@@ -132,7 +132,7 @@ export default function ContactPageContent() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="How can I run Supabase locally?"
+                  placeholder="How do I track keyword rankings?"
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                   readOnly
                 />
