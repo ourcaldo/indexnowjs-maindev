@@ -51,6 +51,16 @@ interface OrderData {
     payment_method?: string
     expires_at?: string
   }
+  midtrans_response?: {
+    webhook_data?: {
+      va_numbers?: Array<{
+        va_number: string
+        bank: string
+      }>
+      payment_code?: string
+      store?: string
+    }
+  }
 }
 
 export default function OrderSuccessPage() {
@@ -168,16 +178,22 @@ export default function OrderSuccessPage() {
                 </p>
               </div>
 
-              {/* Package Features */}
-              <div className="space-y-2 mb-8">
-                {orderData.package.features?.map((feature, i) => (
-                  <p
-                    key={i}
-                    className="flex items-center text-sm text-gray-200"
-                  >
-                    <span className="mr-2">→</span> {feature}
-                  </p>
-                ))}
+              {/* Package Information */}
+              <div className="mb-8">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-white">{orderData.package.name} - {orderData.billing_period}</h3>
+                  <p className="text-gray-400 text-sm">{orderData.package.description}</p>
+                </div>
+                <div className="space-y-2">
+                  {orderData.package.features?.map((feature, i) => (
+                    <p
+                      key={i}
+                      className="flex items-center text-sm text-gray-200"
+                    >
+                      <span className="mr-2">→</span> {feature}
+                    </p>
+                  ))}
+                </div>
               </div>
 
               {/* Customer Information */}
@@ -214,21 +230,24 @@ export default function OrderSuccessPage() {
 
               {/* Payment Details */}
               {(orderData.payment_details?.va_numbers ||
-                orderData.payment_details?.payment_code) && (
+                orderData.payment_details?.payment_code ||
+                orderData.midtrans_response?.webhook_data?.va_numbers ||
+                orderData.midtrans_response?.webhook_data?.payment_code) && (
                 <div className="mt-8">
                   <h4 className="font-semibold text-white mb-4 flex items-center">
                     <CreditCard className="w-4 h-4 mr-2" />
                     Payment Details
                   </h4>
 
-                  {orderData.payment_details.va_numbers?.map(
+                  {/* Display VA numbers from payment_details or midtrans_response */}
+                  {(orderData.payment_details?.va_numbers || orderData.midtrans_response?.webhook_data?.va_numbers)?.map(
                     (va, index) => (
                       <div
                         key={index}
                         className="bg-black bg-opacity-30 rounded-lg p-4 mb-3"
                       >
                         <p className="text-gray-300 text-xs uppercase tracking-wide mb-1">
-                          {va.bank} Virtual Account
+                          {va.bank.toUpperCase()} Virtual Account
                         </p>
                         <div className="flex items-center justify-between">
                           <p className="text-white font-mono text-lg font-bold tracking-wider">
@@ -252,21 +271,22 @@ export default function OrderSuccessPage() {
                     )
                   )}
 
-                  {orderData.payment_details.payment_code && (
+                  {/* Display payment code from payment_details or midtrans_response */}
+                  {(orderData.payment_details?.payment_code || orderData.midtrans_response?.webhook_data?.payment_code) && (
                     <div className="bg-black bg-opacity-30 rounded-lg p-4 mb-3">
                       <p className="text-gray-300 text-xs uppercase tracking-wide mb-1">
-                        {orderData.payment_details.store} Payment Code
+                        {(orderData.payment_details?.store || orderData.midtrans_response?.webhook_data?.store || 'Payment')} Code
                       </p>
                       <div className="flex items-center justify-between">
                         <p className="text-white font-mono text-lg font-bold tracking-wider">
-                          {orderData.payment_details.payment_code}
+                          {orderData.payment_details?.payment_code || orderData.midtrans_response?.webhook_data?.payment_code}
                         </p>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() =>
                             copyToClipboard(
-                              orderData.payment_details.payment_code!,
+                              (orderData.payment_details?.payment_code || orderData.midtrans_response?.webhook_data?.payment_code)!,
                               'Payment Code'
                             )
                           }
@@ -314,14 +334,14 @@ export default function OrderSuccessPage() {
               onClick={() =>
                 router.push('/dashboard/settings/plans-billing')
               }
-              className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold rounded-lg px-6 py-2"
+              className="bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-bold rounded-lg px-6 py-2"
             >
               RETURN HOME →
             </Button>
 
             <div className="mt-20 pt-6 border-t border-gray-200 w-full text-xs text-gray-400 flex justify-between">
-              <p>ALL RIGHTS RESERVED © 2023</p>
-              <p>SMARTVISION</p>
+              <p>ALL RIGHTS RESERVED © 2025</p>
+              <p>INDEXNOW STUDIO</p>
             </div>
           </div>
         </div>
