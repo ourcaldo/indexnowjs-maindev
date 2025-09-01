@@ -70,7 +70,7 @@ const faqSections: FAQSection[] = [
     items: [
       {
         question: 'Can I export my ranking data?',
-        answer: 'Yes! You can view your ranking data in the dashboard and export it as needed. We\'re working on additional export formats like CSV and PDF for future updates.'
+        answer: 'You can view all your ranking data in the dashboard. Export functionality is currently being developed for future updates.'
       },
       {
         question: 'How do I track my keyword progress?',
@@ -91,11 +91,11 @@ const faqSections: FAQSection[] = [
     items: [
       {
         question: 'How many keywords can I track?',
-        answer: 'The Starter plan includes 100 keywords, while the Premium plan allows up to 1,000 keywords. You can track keywords across multiple domains within your keyword limit.'
+        answer: 'The Basic plan includes 50 keywords, Premium allows up to 250 keywords, and Pro supports up to 1,500 keywords. You can track keywords across unlimited domains within your keyword limit.'
       },
       {
         question: 'Can I track multiple domains?',
-        answer: 'Yes! The Starter plan supports up to 5 domains, and the Premium plan allows up to 25 domains. You can organize keywords by domain to track different websites.'
+        answer: 'Yes! All plans support unlimited domains. You can organize keywords by domain to track different websites within your keyword limit.'
       },
       {
         question: 'How do I organize my keywords?',
