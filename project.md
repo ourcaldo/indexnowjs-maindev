@@ -1059,6 +1059,7 @@ JWT_SECRET=[jwt-secret-key]
 -- **Collapsible FAQ Implementation**: Converted static FAQ display to interactive collapsible format using useState and Chevron icons
 -- **Visual Feedback**: Added ChevronDown/ChevronUp icons to indicate expandable/collapsible state of FAQ items
 -- **Smooth Interactions**: Enhanced user experience with hover effects and smooth transitions for FAQ section
+-- **Content Accuracy Fix**: Removed incorrect "Is there an API available?" FAQ entry since no public API is currently offered
 
 **Files Modified:**
 -- `app/pricing/components/PricingPageContent.tsx` - Fixed trial duration, credit card requirements, removed em-dashes, implemented collapsible FAQ

@@ -102,10 +102,6 @@ export default function PricingPageContent() {
     {
       question: "Can I cancel anytime?",
       answer: "Yes, you can cancel your subscription at any time. There are no cancellation fees, and you'll retain access to your data until the end of your billing period."
-    },
-    {
-      question: "Is there an API available?",
-      answer: "Yes! Our API is available on Premium and Enterprise plans, allowing you to integrate rank tracking data into your own applications and workflows."
     }
   ]
 
