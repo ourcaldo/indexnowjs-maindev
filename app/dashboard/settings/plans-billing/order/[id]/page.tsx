@@ -82,7 +82,45 @@ export default function OrderCompletedPage() {
       }
 
       const data = await response.json()
-      setTransaction(data.transaction)
+      console.log('API Response:', data) // Debug log
+      
+      if (data.success && data.data) {
+        // Map API response to frontend Transaction interface
+        const orderData = data.data
+        const mappedTransaction = {
+          id: orderData.order_id,
+          user_id: '', // Not needed for frontend
+          package_id: orderData.package?.id || '',
+          gateway_id: '', // Not needed for frontend
+          transaction_type: 'purchase',
+          transaction_status: orderData.status,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          payment_proof_url: null, // Will be set if exists
+          created_at: orderData.created_at,
+          metadata: orderData,
+          package: orderData.package || {
+            id: '',
+            name: 'Unknown Package',
+            description: '',
+            features: []
+          },
+          gateway: {
+            id: '',
+            name: orderData.payment_method || 'Unknown Gateway',
+            configuration: {}
+          },
+          customer_info: orderData.customer_info || {
+            first_name: '',
+            last_name: '',
+            email: '',
+            phone_number: ''
+          }
+        }
+        setTransaction(mappedTransaction)
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (error) {
       console.error('Error fetching transaction:', error)
       addToast({
