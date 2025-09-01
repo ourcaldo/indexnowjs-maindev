@@ -22,6 +22,7 @@ interface Transaction {
   amount: number
   currency: string
   payment_proof_url: string | null
+  billing_period: string
   created_at: string
   metadata: any
   package: {
@@ -97,6 +98,7 @@ export default function OrderCompletedPage() {
           amount: orderData.amount,
           currency: orderData.currency,
           payment_proof_url: null, // Will be set if exists
+          billing_period: orderData.billing_period || 'one-time',
           created_at: orderData.created_at,
           metadata: orderData,
           package: orderData.package || {
