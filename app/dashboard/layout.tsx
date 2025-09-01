@@ -10,6 +10,22 @@ import QuotaNotification from '@/components/QuotaNotification'
 import ServiceAccountQuotaNotification from '@/components/ServiceAccountQuotaNotification'
 import QueryProvider from '@/components/QueryProvider'
 
+// Cookie utilities for sidebar state persistence
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+  return null
+}
+
+const setCookie = (name: string, value: string, days: number = 30) => {
+  if (typeof document === 'undefined') return
+  const expires = new Date()
+  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
+}
+
 
 export default function DashboardLayout({
   children,
@@ -22,6 +38,7 @@ export default function DashboardLayout({
   const [mounted, setMounted] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [cookiesLoaded, setCookiesLoaded] = useState(false)
   
   // Site settings hooks
   const siteName = useSiteName()
@@ -29,10 +46,24 @@ export default function DashboardLayout({
   const iconUrl = useSiteLogo(false) // Always get icon for mobile header
   useFavicon() // Automatically updates favicon
 
-  // Prevent hydration mismatch
+  // Prevent hydration mismatch and load sidebar state from cookies
   useEffect(() => {
     setMounted(true)
+    
+    // Load sidebar state from cookies
+    const savedCollapsedState = getCookie('sidebar-collapsed')
+    if (savedCollapsedState !== null) {
+      setSidebarCollapsed(savedCollapsedState === 'true')
+    }
+    setCookiesLoaded(true)
   }, [])
+  
+  // Save sidebar state to cookies when it changes
+  useEffect(() => {
+    if (cookiesLoaded) {
+      setCookie('sidebar-collapsed', sidebarCollapsed.toString())
+    }
+  }, [sidebarCollapsed, cookiesLoaded])
 
   useEffect(() => {
     let isMounted = true
@@ -134,7 +165,11 @@ export default function DashboardLayout({
             <Sidebar 
               isOpen={sidebarOpen}
               onToggle={() => setSidebarOpen(!sidebarOpen)}
-              onCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+              onCollapse={() => {
+                const newState = !sidebarCollapsed
+                setSidebarCollapsed(newState)
+                setCookie('sidebar-collapsed', newState.toString())
+              }}
               user={user}
               isCollapsed={sidebarCollapsed}
             />

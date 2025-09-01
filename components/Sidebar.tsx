@@ -46,8 +46,8 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   
   // Site settings hooks
   const siteName = useSiteName()
-  const logoUrl = useSiteLogo(!isCollapsed) // Full logo when expanded, icon when collapsed
-  const iconUrl = useSiteLogo(false) // Always get icon for mobile header
+  const logoUrl = useSiteLogo(!isCollapsed) // Full logo when expanded, icon when collapsed  
+  const iconUrl = useSiteLogo(false) // Always get icon for mobile header and collapsed state
   
   // Get user profile with role information
   const { user: userProfile } = useUserProfile()
@@ -253,9 +253,9 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
               {logoUrl ? (
                 <img 
                   src={logoUrl} 
-                  alt={`${siteName} Logo`}
-                  className={isCollapsed ? "h-8 w-8 object-contain" : ""}
-                  style={!isCollapsed ? { width: '106.664px', height: '60px' } : {}}
+                  alt={`${siteName} ${isCollapsed ? 'Icon' : 'Logo'}`}
+                  className={isCollapsed ? "h-8 w-8 object-contain" : "object-contain"}
+                  style={!isCollapsed ? { width: '106.664px', height: '60px' } : { width: '32px', height: '32px' }}
                 />
               ) : (
                 <div className="flex items-center">
@@ -264,7 +264,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                   </div>
                   {!isCollapsed && (
                     <div className="ml-3">
-                      <h1 className="text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
+                      <h1 className="text-lg font-bold text-[#1A1A1A]">{siteName}</h1>
                       <p className="text-xs text-[#6C757D]">User Dashboard</p>
                     </div>
                   )}
@@ -416,6 +416,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                 <img 
                   src={logoUrl} 
                   alt={`${siteName} Logo`}
+                  className="object-contain"
                   style={{ width: '106.664px', height: '60px' }}
                 />
               ) : (
@@ -424,7 +425,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                     <Shield className="h-5 w-5 text-white" />
                   </div>
                   <div className="ml-3">
-                    <h1 className="text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
+                    <h1 className="text-lg font-bold text-[#1A1A1A]">{siteName}</h1>
                     <p className="text-xs text-[#6C757D]">User Dashboard</p>
                   </div>
                 </div>

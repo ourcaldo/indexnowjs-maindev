@@ -1047,6 +1047,38 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 1, 2025 06:00: Sidebar Enhancement with Logo State Management & Cookie Persistence ✅
+
+**✅ DYNAMIC LOGO STATE MANAGEMENT**: Enhanced sidebar to properly display different logos based on sidebar state
+- **Expanded State**: Uses `site_logo_url` from site settings API for full brand logo display
+- **Collapsed State**: Uses `site_icon_url` from site settings API for compact icon display
+- **Enhanced Sizing**: Proper sizing for both states - full logo (106.664px × 60px) when expanded, icon (32px × 32px) when collapsed
+- **No Fallback Generic Icons**: Removed generic fallback icons as requested, uses only site-specific logos from API
+
+**✅ COOKIE-BASED STATE PERSISTENCE**: Implemented persistent sidebar state across page navigation
+- **Cookie Management**: Added cookie utilities for reading/writing sidebar collapsed state
+- **State Recovery**: Sidebar state automatically restored from cookies on page load/refresh
+- **Cross-Navigation Persistence**: Sidebar remains in same state (collapsed/expanded) when navigating between dashboard pages
+- **30-Day Expiration**: Cookie expires after 30 days for optimal user experience
+
+**✅ SITE SETTINGS API INTEGRATION**: Enhanced integration with site settings for dynamic branding
+- **Real-time Logo Updates**: Uses existing `useSiteLogo()` hook with proper expanded/collapsed parameter handling
+- **API Endpoint**: Fetches logos from `/api/v1/public/site-settings` API endpoint
+- **Responsive Design**: Maintains proper logo display across desktop and mobile views
+- **Brand Consistency**: Ensures consistent branding across all sidebar states
+
+**✅ ENHANCED USER EXPERIENCE**: Improved sidebar interaction and visual feedback
+- **Smooth Transitions**: Maintained existing transition animations for state changes
+- **Tooltip Support**: Preserved collapsed state tooltips for menu items
+- **Mobile Compatibility**: Enhanced mobile sidebar with proper logo handling
+- **Visual Hierarchy**: Improved layout spacing and logo positioning for both states
+
+**Files Modified:**
+- `app/dashboard/layout.tsx` - Added cookie utilities and sidebar state persistence logic
+- `components/Sidebar.tsx` - Enhanced logo display logic and proper site name integration
+
+**Result:** Sidebar now displays proper site logos based on state, persists user preference across navigation, and integrates seamlessly with site settings API without any fallback generic icons
+
 ### September 1, 2025 05:43: Order Success Page Enhancement ✅
 
 **✅ PAYMENT DETAILS DISPLAY FIX**: Fixed payment details not showing correctly for bank transfer and convenience store payment methods

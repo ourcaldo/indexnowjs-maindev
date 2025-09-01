@@ -70,11 +70,10 @@ class SiteSettingsService {
       const response = await fetch('/api/v1/public/site-settings')
       if (response.ok) {
         const data = await response.json()
-        if (data.success && data.settings) {
-          this.cachedSettings = data.settings
-          this.cacheExpiry = now + this.CACHE_DURATION
-          return data.settings
-        }
+        // API returns settings directly, not wrapped in success/settings structure
+        this.cachedSettings = data
+        this.cacheExpiry = now + this.CACHE_DURATION
+        return data
       }
     } catch (error) {
       console.warn('Failed to fetch site settings, using defaults:', error)
@@ -91,8 +90,8 @@ class SiteSettingsService {
   async getLogoUrl(isExpanded: boolean = true): Promise<string> {
     const settings = await this.getSiteSettings()
     return isExpanded 
-      ? settings.site_logo_url || DEFAULT_SETTINGS.site_logo_url!
-      : settings.site_icon_url || DEFAULT_SETTINGS.site_icon_url!
+      ? settings.site_logo_url || ''
+      : settings.site_icon_url || ''
   }
 
   /**
