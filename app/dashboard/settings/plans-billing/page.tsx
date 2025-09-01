@@ -141,8 +141,6 @@ export default function BillingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [typeFilter, setTypeFilter] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
-  const [selectAll, setSelectAll] = useState(false)
 
   // Hooks
   const router = useRouter()
@@ -385,24 +383,6 @@ export default function BillingPage() {
     setCurrentPage(1)
   }
 
-  const handleSelectInvoice = (invoiceId: string) => {
-    if (selectedInvoices.includes(invoiceId)) {
-      setSelectedInvoices(selectedInvoices.filter(id => id !== invoiceId))
-    } else {
-      setSelectedInvoices([...selectedInvoices, invoiceId])
-    }
-  }
-
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedInvoices([])
-      setSelectAll(false)
-    } else {
-      const allIds = historyData?.transactions.map(t => t.id) || []
-      setSelectedInvoices(allIds)
-      setSelectAll(true)
-    }
-  }
 
   const togglePlanDetails = (planId: string) => {
     if (!showComparePlans) {
@@ -538,7 +518,7 @@ export default function BillingPage() {
           currentPackageId={packagesData?.current_package_id || null}
           subscribing={subscribing}
           startingTrial={startingTrial}
-          onSubscribe={handleSubscribe}
+          onSubscribe={(packageId: string) => handleSubscribe(packageId, selectedBillingPeriod)}
           onStartTrial={handleStartTrial}
           isTrialEligiblePackage={isTrialEligiblePackage}
         />
@@ -553,7 +533,7 @@ export default function BillingPage() {
         userCurrency={userCurrency}
         getBillingPeriodPrice={getBillingPeriodPrice}
         formatCurrency={formatCurrency}
-        handleSubscribe={handleSubscribe}
+        handleSubscribe={(packageId: string) => handleSubscribe(packageId, selectedBillingPeriod)}
         subscribing={subscribing}
       />
 
@@ -564,15 +544,11 @@ export default function BillingPage() {
         statusFilter={statusFilter}
         typeFilter={typeFilter}
         searchTerm={searchTerm}
-        selectedInvoices={selectedInvoices}
-        selectAll={selectAll}
         setCurrentPage={setCurrentPage}
         setStatusFilter={setStatusFilter}
         setTypeFilter={setTypeFilter}
         setSearchTerm={setSearchTerm}
         handlePageChange={handlePageChange}
-        handleSelectInvoice={handleSelectInvoice}
-        handleSelectAll={handleSelectAll}
         resetFilters={resetFilters}
         getStatusIcon={getStatusIcon}
         getStatusText={getStatusText}

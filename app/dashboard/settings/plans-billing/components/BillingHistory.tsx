@@ -67,15 +67,11 @@ interface BillingHistoryProps {
   statusFilter: string
   typeFilter: string
   searchTerm: string
-  selectedInvoices: string[]
-  selectAll: boolean
   setCurrentPage: (page: number) => void
   setStatusFilter: (status: string) => void
   setTypeFilter: (type: string) => void
   setSearchTerm: (term: string) => void
   handlePageChange: (page: number) => void
-  handleSelectInvoice: (invoiceId: string) => void
-  handleSelectAll: () => void
   resetFilters: () => void
   getStatusIcon: (status: string) => React.ReactNode
   getStatusText: (status: string) => string
@@ -90,15 +86,11 @@ export const BillingHistory = ({
   statusFilter,
   typeFilter,
   searchTerm,
-  selectedInvoices,
-  selectAll,
   setCurrentPage,
   setStatusFilter,
   setTypeFilter,
   setSearchTerm,
   handlePageChange,
-  handleSelectInvoice,
-  handleSelectAll,
   resetFilters,
   getStatusIcon,
   getStatusText,
@@ -106,19 +98,19 @@ export const BillingHistory = ({
   formatCurrency,
   formatDate
 }: BillingHistoryProps) => {
+  
+  const handleRowClick = (transactionId: string) => {
+    window.location.href = `/dashboard/settings/plans-billing/order/${transactionId}`
+  }
   const columns = [
     {
-      key: 'select',
-      header: 'Select',
+      key: 'order_id',
+      header: 'ORDER ID',
       render: (value: any, transaction: Transaction) => (
-        <input
-          type="checkbox"
-          checked={selectedInvoices.includes(transaction.id)}
-          onChange={() => handleSelectInvoice(transaction.id)}
-          className="rounded"
-        />
-      ),
-      width: '50px'
+        <div className="font-medium text-[#1A1A1A]">
+          #{transaction.id.slice(-8).toUpperCase()}
+        </div>
+      )
     },
     {
       key: 'package',
@@ -158,22 +150,6 @@ export const BillingHistory = ({
           </div>
         )
       }
-    },
-    {
-      key: 'payment_method',
-      header: 'PAYMENT METHOD',
-      render: (value: any, transaction: Transaction) => (
-        <div>
-          <div className="text-sm text-[#1A1A1A] capitalize">
-            {transaction.payment_method?.replace('_', ' ') || 'N/A'}
-          </div>
-          {transaction.gateway && (
-            <div className="text-xs text-[#6C757D]">
-              via {transaction.gateway.name}
-            </div>
-          )}
-        </div>
-      )
     },
     {
       key: 'created_at',
@@ -282,17 +258,102 @@ export const BillingHistory = ({
       )}
 
       {/* Transactions Table */}
-      <DataTable
-        data={historyData?.transactions || []}
-        columns={columns}
-        loading={false}
-        emptyMessage="No transactions found"
-        pagination={historyData?.pagination ? {
-          currentPage: historyData.pagination.current_page,
-          totalPages: historyData.pagination.total_pages,
-          onPageChange: handlePageChange
-        } : undefined}
-      />
+      <div className="bg-white rounded-lg border border-[#E0E6ED] overflow-hidden">
+        {historyData?.transactions && historyData.transactions.length > 0 ? (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
+                  <tr>
+                    {columns.map((column) => (
+                      <th
+                        key={column.key}
+                        className={`px-6 py-3 text-xs font-medium tracking-wider text-[#6C757D] ${
+                          column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left'
+                        }`}
+                      >
+                        {column.header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-[#E0E6ED]">
+                  {historyData.transactions.map((transaction) => (
+                    <tr 
+                      key={transaction.id}
+                      className="hover:bg-[#F7F9FC]/50 transition-colors cursor-pointer"
+                      onClick={() => handleRowClick(transaction.id)}
+                    >
+                      {columns.map((column) => (
+                        <td
+                          key={column.key}
+                          className={`px-6 py-4 whitespace-nowrap text-sm ${
+                            column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left'
+                          }`}
+                        >
+                          {column.render ? column.render(transaction[column.key as keyof Transaction], transaction) : (transaction as any)[column.key]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Pagination */}
+            {historyData.pagination && (
+              <div className="px-6 py-3 flex items-center justify-between border-t border-[#E0E6ED] bg-[#F7F9FC]">
+                <div className="flex-1 flex justify-between sm:hidden">
+                  <button
+                    onClick={() => handlePageChange(Math.max(historyData.pagination.current_page - 1, 1))}
+                    disabled={historyData.pagination.current_page === 1}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => handlePageChange(Math.min(historyData.pagination.current_page + 1, historyData.pagination.total_pages))}
+                    disabled={historyData.pagination.current_page === historyData.pagination.total_pages}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-[#6C757D]">
+                      Page <span className="font-medium">{historyData.pagination.current_page}</span> of{' '}
+                      <span className="font-medium">{historyData.pagination.total_pages}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                      <button
+                        onClick={() => handlePageChange(Math.max(historyData.pagination.current_page - 1, 1))}
+                        disabled={historyData.pagination.current_page === 1}
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handlePageChange(Math.min(historyData.pagination.current_page + 1, historyData.pagination.total_pages))}
+                        disabled={historyData.pagination.current_page === historyData.pagination.total_pages}
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-[#6C757D]">No transactions found</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
