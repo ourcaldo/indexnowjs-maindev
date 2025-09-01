@@ -1136,6 +1136,29 @@ JWT_SECRET=[jwt-secret-key]
 
 **Result**: Sidebar now displays only genuine logo branding when configured, with no placeholder elements when logo is unavailable.
 
+### September 1, 2025 11:45: Pricing Display Bug Fix ✅
+
+**✅ PRICING DISPLAY BUG RESOLVED**: Fixed payment amount showing $0 instead of actual package pricing
+-- **Root Cause**: Billing overview API was hardcoding amount_paid to 0 when subscription data came from user profile rather than formal subscription records
+-- **API Enhancement**: Updated `app/api/v1/billing/overview/route.ts` to calculate actual pricing based on package pricing tiers
+-- **Currency Logic**: Added proper currency detection using user's country from profile data via `getUserCurrency()` utility
+-- **Pricing Calculation**: Implemented proper amount calculation using package pricing_tiers based on user currency and billing period
+
+**Technical Implementation**:
+-- **Import Added**: Added `getUserCurrency` import from currency utils for proper currency detection
+-- **Profile-Based Pricing**: When subscription comes from user profile, now calculates actual amount using package pricing tiers
+-- **Fallback Logic**: Maintains fallback to package.price if pricing_tiers structure is unavailable
+-- **Currency Support**: Properly handles both IDR and USD pricing based on user's country (Indonesia = IDR, others = USD)
+-- **Billing Period**: Respects package billing period (monthly/yearly) for accurate pricing calculation
+
+**Code Changes**:
+-- **Lines 105-127**: Enhanced subscription data creation logic to calculate proper amount_paid
+-- **Currency Detection**: Uses `getUserCurrency(userProfile.country)` to determine user's currency
+-- **Pricing Tiers**: Accesses `userProfile.package.pricing_tiers[billingPeriod][userCurrency]` for accurate pricing
+-- **Promo Support**: Prioritizes promo_price over regular_price when available
+
+**Result**: Users now see correct payment amounts in their subscription details instead of $0, improving billing transparency and user experience.
+
 ### September 1, 2025 06:00: Sidebar Enhancement with Logo State Management & Cookie Persistence ✅
 
 **✅ DYNAMIC LOGO STATE MANAGEMENT**: Enhanced sidebar to properly display different logos based on sidebar state

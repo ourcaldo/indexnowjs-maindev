@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import { authService } from '@/lib/auth'
+import { getUserCurrency } from '@/lib/utils/currency-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -98,6 +99,19 @@ export async function GET(request: NextRequest) {
         billing_period: currentSubscription.billing_period
       }
     } else if (userProfile.package_id && userProfile.package) {
+      // Calculate actual pricing based on user's country and package pricing tiers
+      const userCurrency = getUserCurrency(userProfile.country)
+      const billingPeriod = userProfile.package.billing_period || 'monthly'
+      
+      let calculatedAmount = 0
+      if (userProfile.package.pricing_tiers?.[billingPeriod]?.[userCurrency]) {
+        const currencyTier = userProfile.package.pricing_tiers[billingPeriod][userCurrency]
+        calculatedAmount = currencyTier.promo_price || currencyTier.regular_price || 0
+      } else {
+        // Fallback to package.price if no pricing tiers
+        calculatedAmount = userProfile.package.price || 0
+      }
+
       // Use profile data when user has direct package assignment
       subscriptionData = {
         package_name: userProfile.package.name || 'Unknown',
@@ -105,8 +119,8 @@ export async function GET(request: NextRequest) {
         subscription_status: userProfile.expires_at && new Date(userProfile.expires_at) > new Date() ? 'active' : 'expired',
         expires_at: userProfile.expires_at,
         subscribed_at: userProfile.subscribed_at,
-        amount_paid: 0, // No amount data in profile
-        billing_period: userProfile.package.billing_period || 'monthly'
+        amount_paid: calculatedAmount,
+        billing_period: billingPeriod
       }
     }
 
