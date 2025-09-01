@@ -208,14 +208,12 @@ export default function LandingPage() {
                 >
                   Pricing
                 </a>
-                <button 
-                  onClick={() => scrollToSection(faqRef)}
-                  className={`text-sm font-medium transition-colors ${
-                    activeSection === 'faq' ? 'text-white' : 'text-gray-300 hover:text-white'
-                  }`}
+                <a 
+                  href="/faq"
+                  className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
                 >
                   FAQ
-                </button>
+                </a>
                 <button 
                   onClick={() => scrollToSection(contactRef)}
                   className={`text-sm font-medium transition-colors ${
@@ -276,12 +274,12 @@ export default function LandingPage() {
               >
                 Pricing
               </a>
-              <button
-                onClick={() => scrollToSection(faqRef)}
-                className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium w-full text-left"
+              <a
+                href="/faq"
+                className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium"
               >
                 FAQ
-              </button>
+              </a>
               <button
                 onClick={() => scrollToSection(contactRef)}
                 className="block px-3 py-2 text-white hover:text-gray-300 text-sm font-medium w-full text-left"
@@ -420,7 +418,7 @@ export default function LandingPage() {
                 <ul className="space-y-2 text-sm">
                   <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Docs</a></li>
                   <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Blog</a></li>
-                  <li><button onClick={() => scrollToSection(faqRef)} className="text-gray-400 hover:text-gray-300 transition-colors duration-200">FAQs</button></li>
+                  <li><a href="/faq" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">FAQs</a></li>
                   <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Changelog</a></li>
                 </ul>
               </div>
