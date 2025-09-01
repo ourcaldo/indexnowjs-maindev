@@ -6,8 +6,10 @@
 export interface SiteSettings {
   id: string
   site_name: string
+  site_tagline: string | null
   site_description: string
   site_logo_url: string | null
+  white_logo: string | null
   site_icon_url: string | null
   site_favicon_url: string | null
   contact_email: string | null
@@ -30,8 +32,10 @@ export interface SiteSettings {
 const DEFAULT_SETTINGS: SiteSettings = {
   id: '474f9d67-17b5-4e11-9c46-b61614d17a59',
   site_name: 'IndexNow Studio',
+  site_tagline: 'Rank Tracking Made Simple for Smarter SEO Decisions',
   site_description: 'Professional URL indexing automation platform',
   site_logo_url: null,
+  white_logo: 'https://bwkasvyrzbzhcdtvsbyg.supabase.co/storage/v1/object/public/indexnow-bucket/logo/IndexNow.png',
   site_icon_url: null,
   site_favicon_url: null,
   contact_email: 'aldo@indexnow.studio',

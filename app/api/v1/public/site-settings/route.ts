@@ -8,8 +8,10 @@ export async function GET(request: NextRequest) {
       .from('indb_site_settings')
       .select(`
         site_name,
+        site_tagline,
         site_description,
         site_logo_url,
+        white_logo,
         site_icon_url,
         site_favicon_url,
         contact_email,
@@ -31,8 +33,10 @@ export async function GET(request: NextRequest) {
     if (!settings) {
       return NextResponse.json({
         site_name: 'IndexNow Studio',
+        site_tagline: 'Rank Tracking Made Simple for Smarter SEO Decisions',
         site_description: 'Professional Google Indexing Tool',
         site_logo_url: null,
+        white_logo: 'https://bwkasvyrzbzhcdtvsbyg.supabase.co/storage/v1/object/public/indexnow-bucket/logo/IndexNow.png',
         site_icon_url: null,
         site_favicon_url: null,
         contact_email: 'contact@indexnow.studio',
@@ -45,8 +49,10 @@ export async function GET(request: NextRequest) {
     // Return only public fields (no SMTP credentials or sensitive data)
     return NextResponse.json({
       site_name: settings.site_name,
+      site_tagline: settings.site_tagline,
       site_description: settings.site_description,
       site_logo_url: settings.site_logo_url,
+      white_logo: settings.white_logo,
       site_icon_url: settings.site_icon_url,
       site_favicon_url: settings.site_favicon_url,
       contact_email: settings.contact_email,

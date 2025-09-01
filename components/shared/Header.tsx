@@ -14,7 +14,7 @@ export interface HeaderProps {
   user?: any
   siteSettings?: {
     site_name: string
-    site_logo_url: string
+    white_logo: string
   } | null
   onAuthAction: () => void
   navigation: NavigationItem[]
@@ -74,17 +74,11 @@ export default function Header({
             {/* Logo */}
             <div className="flex items-center">
               <a href="/" className="flex items-center">
-                {siteSettings?.site_logo_url ? (
-                  <img 
-                    src={siteSettings.site_logo_url} 
-                    alt={siteSettings.site_name}
-                    className="h-8 w-auto"
-                  />
-                ) : (
-                  <span className="text-xl font-bold text-white">
-                    {siteSettings?.site_name || 'IndexNow Rank Tracker'}
-                  </span>
-                )}
+                <img 
+                  src={siteSettings?.white_logo} 
+                  alt={siteSettings?.site_name}
+                  className="h-8 w-auto"
+                />
               </a>
             </div>
 

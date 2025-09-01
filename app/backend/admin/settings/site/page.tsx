@@ -19,8 +19,10 @@ import {
 interface SiteSettings {
   id: string
   site_name: string
+  site_tagline: string | null
   site_description: string
   site_logo_url: string | null
+  white_logo: string | null
   site_icon_url: string | null
   site_favicon_url: string | null
   contact_email: string | null
@@ -228,6 +230,20 @@ export default function SiteSettings() {
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              Site Tagline
+            </label>
+            <input
+              type="text"
+              value={settings.site_tagline || ''}
+              onChange={(e) => updateSettings('site_tagline', e.target.value)}
+              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              placeholder="Rank Tracking Made Simple for Smarter SEO Decisions"
+            />
+            <p className="text-xs text-[#6C757D] mt-1">Short tagline that appears in page titles and branding</p>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
               Site Description
             </label>
             <textarea
@@ -274,6 +290,20 @@ export default function SiteSettings() {
               placeholder="https://example.com/logo.png"
             />
             <p className="text-xs text-[#6C757D] mt-1">Main logo for header and branding</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              White Logo URL
+            </label>
+            <input
+              type="url"
+              value={settings.white_logo || ''}
+              onChange={(e) => updateSettings('white_logo', e.target.value)}
+              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              placeholder="https://example.com/white-logo.png"
+            />
+            <p className="text-xs text-[#6C757D] mt-1">White version for dark backgrounds</p>
           </div>
 
           <div>

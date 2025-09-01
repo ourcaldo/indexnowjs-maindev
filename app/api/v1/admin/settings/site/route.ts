@@ -71,8 +71,10 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
     const {
       site_name,
+      site_tagline,
       site_description,
       site_logo_url,
+      white_logo,
       site_icon_url,
       site_favicon_url,
       contact_email,
@@ -86,8 +88,10 @@ export async function PATCH(request: NextRequest) {
       .from('indb_site_settings')
       .update({
         site_name,
+        site_tagline,
         site_description,
         site_logo_url,
+        white_logo,
         site_icon_url,
         site_favicon_url,
         contact_email,

@@ -2,7 +2,7 @@
 
 interface SiteSettings {
   site_name: string
-  site_logo_url: string
+  white_logo: string
   contact_email: string
 }
 
@@ -25,17 +25,11 @@ export default function Footer({ siteSettings, onScrollToPricing }: FooterProps)
             <div className="space-y-4">
               {/* Company Logo/Name */}
               <div className="flex items-center">
-                {siteSettings?.site_logo_url ? (
-                  <img 
-                    src={siteSettings.site_logo_url} 
-                    alt={siteSettings.site_name}
-                    className="h-8 w-auto brightness-110"
-                  />
-                ) : (
-                  <span className="text-xl font-bold text-white tracking-tight">
-                    {siteSettings?.site_name || 'IndexNow'}
-                  </span>
-                )}
+                <img 
+                  src={siteSettings?.white_logo} 
+                  alt={siteSettings?.site_name}
+                  className="h-8 w-auto brightness-110"
+                />
               </div>
               {/* Social Media Icons */}
               <div className="flex space-x-3">
@@ -109,7 +103,7 @@ export default function Footer({ siteSettings, onScrollToPricing }: FooterProps)
           {/* Copyright section - INSIDE the open container like Qoder */}
           <div className="mt-8 relative z-10">
             <p className="text-gray-500 text-xs">
-              © 2025 {siteSettings?.site_name || 'IndexNow'}. All rights reserved.
+              © 2025 {siteSettings?.site_name}. All rights reserved.
             </p>
           </div>
         </div>
