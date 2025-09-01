@@ -77,7 +77,7 @@ export default function Header({
                 <img 
                   src={siteSettings?.white_logo} 
                   alt={siteSettings?.site_name}
-                  className="h-8 w-auto"
+                  className="h-20 w-auto"
                 />
               </a>
             </div>

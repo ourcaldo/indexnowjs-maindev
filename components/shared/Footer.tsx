@@ -28,7 +28,7 @@ export default function Footer({ siteSettings, onScrollToPricing }: FooterProps)
                 <img 
                   src={siteSettings?.white_logo} 
                   alt={siteSettings?.site_name}
-                  className="h-8 w-auto brightness-110"
+                  className="h-20 w-auto brightness-110"
                 />
               </div>
               {/* Social Media Icons */}
