@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { authService } from '@/lib/auth'
 import { Menu, X, Check, Star, Shield, Clock, ArrowRight, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { usePricingData } from '@/hooks/business/usePricingData'
+import { staticPricingData, formatPrice, getSavings } from './StaticPricingData'
 
 // Landing Page Components - Reusing for consistent design
 import NeonContainer from '@/components/landing/NeonContainer'
@@ -22,18 +23,23 @@ export default function PricingPageContent() {
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
   
-  // Use shared pricing hook
+  // Use shared pricing hook with fallback to static data
   const {
-    packages,
+    packages: dynamicPackages,
     selectedPeriod,
     currency,
     isLoading,
     setSelectedPeriod,
-    formatPrice,
+    formatPrice: dynamicFormatPrice,
     getPricing,
     getFeaturesList,
     getSavingsPercentage
   } = usePricingData()
+  
+  // Use static data for SEO and fallback when dynamic data isn't loaded
+  const packages = !isLoading && dynamicPackages.length > 0 ? dynamicPackages : staticPricingData.packages
+  const formatPriceFunc = !isLoading && dynamicPackages.length > 0 ? dynamicFormatPrice : 
+    (amount: number) => formatPrice(amount, currency)
 
   useEffect(() => {
     checkAuthStatus()
@@ -105,9 +111,37 @@ export default function PricingPageContent() {
     }
   ]
 
+  // Generate structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product", 
+    "name": "IndexNow Rank Tracker",
+    "description": "Professional rank tracking tool for SEO professionals and digital marketers",
+    "offers": packages.map((pkg) => {
+      const pricing = !isLoading && dynamicPackages.length > 0 ? getPricing(pkg) : {
+        price: pkg.pricing_tiers.monthly[currency].promo_price
+      }
+      return {
+        "@type": "Offer",
+        "name": pkg.name,
+        "description": pkg.description,
+        "price": pricing.price,
+        "priceCurrency": currency,
+        "availability": "https://schema.org/InStock"
+      }
+    })
+  }
+
   return (
-    <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
-      {/* Enhanced Black glossy background with subtle patterns */}
+    <>
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
+      <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
+        {/* Enhanced Black glossy background with subtle patterns */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-black"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90"></div>
@@ -267,113 +301,101 @@ export default function PricingPageContent() {
               </div>
             </div>
 
-            {/* Pricing Cards */}
-            {isLoading ? (
-              <div className="grid md:grid-cols-3 gap-8">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 animate-pulse">
-                    <div className="h-6 bg-white/10 rounded mb-4"></div>
-                    <div className="h-4 bg-white/5 rounded mb-8"></div>
-                    <div className="h-8 bg-white/10 rounded mb-4"></div>
-                    <div className="space-y-3">
-                      {[1, 2, 3, 4].map((j) => (
-                        <div key={j} className="h-4 bg-white/5 rounded"></div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-3 gap-8">
-                <NeonContainer className="contents">
-                  {(mousePosition, isTracking) => 
-                    packages.slice(0, 3).map((pkg) => {
-                      const pricing = getPricing(pkg)
-                      const isPopular = pkg.is_popular
-                      const features = getFeaturesList(pkg)
-                      
-                      return (
-                        <AdvancedNeonCard 
-                          key={pkg.id} 
-                          intensity={isPopular ? "high" : "medium"} 
-                          className="p-8 flex flex-col h-full min-h-[500px]"
-                          mousePosition={mousePosition}
-                          isTracking={isTracking}
-                        >
-                          {/* Popular Badge */}
-                          {isPopular && (
-                            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                              <div className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                                MOST POPULAR
-                              </div>
+            {/* Pricing Cards - Always render with static fallback for SEO */}
+            <div className="grid md:grid-cols-3 gap-8">
+              <NeonContainer className="contents">
+                {(mousePosition, isTracking) => 
+                  packages.slice(0, 3).map((pkg) => {
+                    // Get pricing from dynamic data if available, otherwise use static
+                    const pricing = !isLoading && dynamicPackages.length > 0 ? getPricing(pkg) : {
+                      price: pkg.pricing_tiers[selectedPeriod][currency].promo_price,
+                      originalPrice: pkg.pricing_tiers[selectedPeriod][currency].regular_price !== pkg.pricing_tiers[selectedPeriod][currency].promo_price ? 
+                        pkg.pricing_tiers[selectedPeriod][currency].regular_price : undefined
+                    }
+                    const isPopular = pkg.is_popular
+                    const features = !isLoading && dynamicPackages.length > 0 ? getFeaturesList(pkg) : pkg.features
+                    
+                    return (
+                      <AdvancedNeonCard 
+                        key={pkg.id} 
+                        intensity={isPopular ? "high" : "medium"} 
+                        className="p-8 flex flex-col h-full min-h-[500px]"
+                        mousePosition={mousePosition}
+                        isTracking={isTracking}
+                      >
+                        {/* Popular Badge */}
+                        {isPopular && (
+                          <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                            <div className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                              MOST POPULAR
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Plan Name */}
+                        <div className="mb-6">
+                          <h3 className="text-2xl font-bold text-white mb-2">
+                            {pkg.name}
+                          </h3>
+                          <p className="text-gray-300 text-sm">
+                            {pkg.description}
+                          </p>
+                        </div>
+                        
+                        {/* Price */}
+                        <div className="mb-8">
+                          {pricing.originalPrice && (
+                            <div className="mb-2">
+                              <span className="text-lg text-gray-500 line-through">
+                                {formatPriceFunc(pricing.originalPrice)}
+                              </span>
                             </div>
                           )}
-                          
-                          {/* Plan Name */}
-                          <div className="mb-6">
-                            <h3 className="text-2xl font-bold text-white mb-2">
-                              {pkg.name}
-                            </h3>
-                            <p className="text-gray-300 text-sm">
-                              {pkg.description}
-                            </p>
+                          <div className="mb-2">
+                            <span className="text-4xl font-bold text-white">
+                              {formatPriceFunc(pricing.price)}
+                            </span>
                           </div>
-                          
-                          {/* Price */}
-                          <div className="mb-8">
-                            {pricing.originalPrice && (
-                              <div className="mb-2">
-                                <span className="text-lg text-gray-500 line-through">
-                                  {formatPrice(pricing.originalPrice)}
+                          <div>
+                            <span className="text-gray-400 text-sm">
+                              per {selectedPeriod === 'monthly' ? 'month' : 
+                                   selectedPeriod === 'quarterly' ? '3 months' :
+                                   selectedPeriod === 'biannual' ? '6 months' : 'year'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Features */}
+                        <div className="flex-grow">
+                          <ul className="space-y-3 mb-8">
+                            {features.map((feature, featureIndex) => (
+                              <li key={featureIndex} className="flex items-start">
+                                <div className="flex-shrink-0 w-5 h-5 mt-0.5">
+                                  <Check className="w-5 h-5 text-green-400" />
+                                </div>
+                                <span className="ml-3 text-gray-300 text-sm">
+                                  {feature}
                                 </span>
-                              </div>
-                            )}
-                            <div className="mb-2">
-                              <span className="text-4xl font-bold text-white">
-                                {formatPrice(pricing.price)}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-gray-400 text-sm">
-                                per {selectedPeriod === 'monthly' ? 'month' : 
-                                     selectedPeriod === 'quarterly' ? '3 months' :
-                                     selectedPeriod === 'biannual' ? '6 months' : 'year'}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {/* Features */}
-                          <div className="flex-grow">
-                            <ul className="space-y-3 mb-8">
-                              {features.map((feature, featureIndex) => (
-                                <li key={featureIndex} className="flex items-start">
-                                  <div className="flex-shrink-0 w-5 h-5 mt-0.5">
-                                    <Check className="w-5 h-5 text-green-400" />
-                                  </div>
-                                  <span className="ml-3 text-gray-300 text-sm">
-                                    {feature}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          
-                          {/* CTA Button */}
-                          <div className="mt-auto">
-                            <button
-                              onClick={handleGetStarted}
-                              className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
-                            >
-                              Get started
-                            </button>
-                          </div>
-                        </AdvancedNeonCard>
-                      )
-                    })
-                  }
-                </NeonContainer>
-              </div>
-            )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        {/* CTA Button */}
+                        <div className="mt-auto">
+                          <button
+                            onClick={handleGetStarted}
+                            className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+                          >
+                            Get started
+                          </button>
+                        </div>
+                      </AdvancedNeonCard>
+                    )
+                  })
+                }
+              </NeonContainer>
+            </div>
           </div>
         </section>
 
@@ -611,5 +633,6 @@ export default function PricingPageContent() {
         </div>
       </footer>
     </div>
+    </>
   )
 }
