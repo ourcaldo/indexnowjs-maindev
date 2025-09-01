@@ -1,0 +1,133 @@
+
+# FAQ Page Copywriting Structure — IndexNow: Rank Tracker
+
+In FAQ, I want all FAQ is collapsable by default like the reference images.
+
+---
+
+## 0) Page Goal & Audience (for internal alignment)
+**Goal:** Reduce friction by answering common pre-signup and post-signup questions clearly.  
+**Audience:** Prospects comparing tools, new trial users, agencies evaluating scalability, and decision-makers worried about hidden costs.  
+**Tone:** Helpful, transparent, concise, and human (not overly technical).
+
+---
+
+## 1) Hero Section
+**Headline options:**
+- “Frequently Asked Questions”
+- “Got questions? We’ve got clear answers.”
+- “Everything you need to know about IndexNow”
+
+**Supporting line:**  
+“From setup to billing, here’s a quick guide to how IndexNow works. Still stuck? Our team is just an email away.”
+
+**CTA (optional inline):** “Contact support”
+
+---
+
+## 2) General Product FAQs
+- **What is IndexNow?**  
+A simple, powerful rank tracker built for marketers, agencies, and SEO professionals who need accuracy without bloat.
+
+- **How accurate is IndexNow’s data?**  
+Explain location/device simulation, neutralizing personalization, and scheduled tracking.
+
+- **Can I track mobile and local rankings?**  
+Yes—track desktop and mobile, with location granularity down to city or ZIP (replace with exact capability).
+
+- **How often do you update rankings?**  
+Daily/weekly/on-demand (state exact availability).
+
+- **Can I track competitors?**  
+Yes—add competitors per project (state limit per plan).
+
+---
+
+## 3) Pricing & Billing FAQs
+- **Is there a free trial?**  
+Yes—<x>-day trial with no obligation (replace with exact length).
+
+- **Do I need a credit card to start?**  
+(Answer truthfully: yes/no).
+
+- **What happens if I exceed my keyword limit?**  
+Explain clear overage, pausing, or upgrade path.
+
+- **Can I change or cancel my plan anytime?**  
+Yes—describe flexibility and whether billing is prorated.
+
+- **Do you offer discounts for annual billing?**  
+State percentage and availability.
+
+---
+
+## 4) Features & Reporting FAQs
+- **Do you support white-label reports?**  
+Yes (state which plans) — export as PDF, CSV, or share live links.
+
+- **Can I automate reports?**  
+Yes—schedule weekly or monthly reports.
+
+- **Do you support alerts?**  
+Yes—set custom thresholds for ranking jumps/drops.
+
+- **Is there an API?**  
+Yes/No — specify which plans, what it can do.
+
+---
+
+## 5) Account & Team FAQs
+- **Can I add team members?**  
+Yes—number of seats depends on plan.
+
+- **Can I manage multiple projects/clients?**  
+Yes—unlimited projects in higher tiers; specify plan limits.
+
+- **Can I assign roles/permissions?**  
+Yes—team roles are available in Pro/Agency plans.
+
+---
+
+## 6) Technical & Privacy FAQs
+- **Is my data secure?**  
+Yes—hosted securely with encrypted connections.
+
+- **Are you GDPR compliant?**  
+Yes—fully GDPR-friendly.
+
+- **Do you have uptime guarantees?**  
+Share uptime stats (e.g., 99.9%) and link to status page.
+
+- **Can I export my data?**  
+Yes—download CSV, Excel, or via API (if available).
+
+---
+
+## 7) Trial → Paid Transition FAQs
+- **What happens after my free trial ends?**  
+Explain if project/data is saved, and how to continue.
+
+- **Will my settings/keywords be lost if I upgrade?**  
+No—all data and settings carry over.
+
+- **Do you offer onboarding support?**  
+Yes—self-serve docs and/or live demo available.
+
+---
+
+## 8) Final CTA / Contact Band
+**Headline:** “Didn’t find your answer?”  
+**Subline:** “Reach out and we’ll get back quickly.”  
+**CTA options:**  
+- “Contact support”  
+- “Book a demo”  
+- “Email hello@<domain>”  
+
+---
+
+## UX / Style Notes
+- Organize FAQs by **accordion sections** (General • Pricing • Features • Teams • Technical).  
+- Use **plain language**; avoid jargon.  
+- Link to deeper docs/tutorials where relevant.  
+- Add **search bar** for FAQ filtering.  
+- End every section with a soft CTA: “Still need help? → Contact us.”  
