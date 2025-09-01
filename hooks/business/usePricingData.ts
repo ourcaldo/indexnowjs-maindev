@@ -130,8 +130,11 @@ export const usePricingData = (options: UsePricingDataOptions = {}) => {
 
       if (response.ok) {
         const data = await response.json()
-        if (data.success && data.packages) {
-          let packagesData = data.packages as PackageData[]
+        if (data.packages && Array.isArray(data.packages)) {
+          let packagesData = data.packages.map((pkg: any) => ({
+            ...pkg,
+            is_popular: pkg.is_popular || pkg.slug === 'premium' // Default Premium as popular if not set
+          })) as PackageData[]
           
           // Limit packages if specified
           if (maxPackages) {
