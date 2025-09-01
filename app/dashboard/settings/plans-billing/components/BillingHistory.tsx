@@ -106,8 +106,8 @@ export const BillingHistory = ({
       key: 'order_id',
       header: 'ORDER ID',
       render: (value: any, transaction: Transaction) => (
-        <div className="font-medium text-[#1A1A1A]">
-          #{transaction.id.slice(-8).toUpperCase()}
+        <div className="font-medium text-[#1A1A1A] font-mono text-xs">
+          {transaction.id}
         </div>
       )
     },
