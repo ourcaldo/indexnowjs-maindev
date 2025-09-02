@@ -87,21 +87,25 @@ export default function Login() {
           position: 'relative'
         }}>
           {/* Mobile Logo on left side */}
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            left: '20px',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            <span style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#ffffff'
+          {logoUrl && (
+            <div style={{
+              position: 'absolute',
+              top: '20px',
+              left: '20px',
+              display: 'flex',
+              alignItems: 'center'
             }}>
-              IndexNow
-            </span>
-          </div>
+              <img 
+                src={logoUrl} 
+                alt="Logo"
+                style={{
+                  height: '36px',
+                  width: 'auto',
+                  maxWidth: '180px'
+                }}
+              />
+            </div>
+          )}
           
           <div style={{ 
             overflow: 'hidden', 
@@ -129,7 +133,7 @@ export default function Login() {
         position: 'relative'
       }}>
         {/* Desktop Logo on left side */}
-        {!isMobile && (
+        {!isMobile && logoUrl && (
           <div style={{
             position: 'absolute',
             top: '40px',
@@ -137,25 +141,15 @@ export default function Login() {
             display: 'flex',
             alignItems: 'center'
           }}>
-            {logoUrl ? (
-              <img 
-                src={logoUrl} 
-                alt={`${siteName} Logo`}
-                style={{
-                  height: '72px',
-                  width: 'auto',
-                  maxWidth: '360px'
-                }}
-              />
-            ) : (
-              <span style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1a1a1a'
-              }}>
-                {siteName}
-              </span>
-            )}
+            <img 
+              src={logoUrl} 
+              alt="Logo"
+              style={{
+                height: '72px',
+                width: 'auto',
+                maxWidth: '360px'
+              }}
+            />
           </div>
         )}
 
