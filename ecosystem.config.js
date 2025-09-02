@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'indexnow-pro',
+    name: 'indexnow-studio',
     script: 'npm',
     args: 'run start',
     cwd: './',
