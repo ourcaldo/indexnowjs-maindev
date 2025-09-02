@@ -322,7 +322,8 @@ export default function Dashboard() {
   const hasActivePackage = userProfile?.package || packagesData?.current_package_id
   
   // Overall loading state - show skeleton when any critical data is still loading
-  const isDataLoading = loading || domainsLoading || (selectedDomainId && (keywordsLoading || allKeywordsLoading))
+  // Only show skeleton for initial loading and domains loading, not for keyword queries
+  const isDataLoading = loading || domainsLoading
 
 
   // Position change indicator

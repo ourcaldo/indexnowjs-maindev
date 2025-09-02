@@ -608,34 +608,6 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
         />
       )}
 
-      {/* Mobile Header - Show when sidebar is closed */}
-      <div className="md:hidden bg-white border-b border-[#E5E7EB] p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              onClick={onToggle}
-              className="p-2 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] mr-3 transition-colors"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-            {iconUrl ? (
-              <img 
-                src={iconUrl} 
-                alt={`${siteName} Icon`}
-                className="h-6 w-6"
-              />
-            ) : (
-              <div className="h-6 w-6 bg-[#3D8BFF] rounded flex items-center justify-center">
-                <Shield className="h-4 w-4 text-white" />
-              </div>
-            )}
-            <h1 className="ml-2 text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
-          </div>
-          {user && (
-            <p className="text-sm text-[#6C757D] truncate max-w-32">{user.email}</p>
-          )}
-        </div>
-      </div>
     </>
   )
 }
