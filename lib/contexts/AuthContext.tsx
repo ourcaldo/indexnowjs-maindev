@@ -4,6 +4,17 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { authService, AuthUser } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 
+// Global auth state to persist across route changes
+let globalAuthState: {
+  user: AuthUser | null
+  isAuthenticated: boolean
+  isInitialized: boolean
+} = {
+  user: null,
+  isAuthenticated: false,
+  isInitialized: false
+}
+
 interface AuthContextType {
   user: AuthUser | null
   loading: boolean
@@ -29,10 +40,10 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [authChecked, setAuthChecked] = useState(false)
-  const [isInitializing, setIsInitializing] = useState(true)
+  const [user, setUser] = useState<AuthUser | null>(globalAuthState.user)
+  const [loading, setLoading] = useState(!globalAuthState.isInitialized)
+  const [authChecked, setAuthChecked] = useState(globalAuthState.isInitialized)
+  const [hasInitialized, setHasInitialized] = useState(globalAuthState.isInitialized)
 
   // Auth state cache with 5-minute expiration
   const [authCache, setAuthCache] = useState<{
@@ -54,6 +65,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       timestamp: Date.now(),
       isValid: true
     })
+    
+    // Update global state
+    globalAuthState.user = userData
+    globalAuthState.isAuthenticated = !!userData
+    globalAuthState.isInitialized = true
   }
 
   const invalidateAuthCache = () => {
@@ -62,11 +78,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const checkAuth = async (useCache = true) => {
     try {
+      // Use global state if already initialized
+      if (globalAuthState.isInitialized && useCache) {
+        setUser(globalAuthState.user)
+        setLoading(false)
+        setAuthChecked(true)
+        setHasInitialized(true)
+        return globalAuthState.user
+      }
+      
       // Use cached auth state if valid
       if (useCache && isAuthCacheValid() && authCache) {
         setUser(authCache.user)
         setLoading(false)
         setAuthChecked(true)
+        setHasInitialized(true)
         return authCache.user
       }
 
@@ -85,7 +111,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setLoading(false)
       setAuthChecked(true)
-      setIsInitializing(false)
+      setHasInitialized(true)
     }
   }
 
@@ -111,12 +137,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
 
     const initializeAuth = async () => {
+      // Only initialize once globally
+      if (globalAuthState.isInitialized) {
+        setUser(globalAuthState.user)
+        setLoading(false)
+        setAuthChecked(true)
+        setHasInitialized(true)
+        return
+      }
+      
       // Skip auth check for login page
       if (typeof window !== 'undefined' && window.location.pathname === '/login') {
         if (isMounted) {
           setLoading(false)
           setAuthChecked(true)
-          setIsInitializing(false)
+          setHasInitialized(true)
+          globalAuthState.isInitialized = true
         }
         return
       }
@@ -173,6 +209,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         updateAuthCache(authUser)
         setLoading(false)
         setAuthChecked(true)
+        setHasInitialized(true)
       }
     })
 
@@ -186,9 +223,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
-    loading: loading || isInitializing,
-    authChecked,
-    isAuthenticated,
+    loading: hasInitialized ? loading : true,
+    authChecked: hasInitialized ? authChecked : false,
+    isAuthenticated: hasInitialized && isAuthenticated,
     signOut,
     refreshAuth,
   }
