@@ -10,7 +10,25 @@ export interface AuthUser {
 
 export class AuthService {
   private isInitialized = false
+  private userCache: { user: AuthUser | null; timestamp: number } | null = null
+  private readonly CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
   
+  private isUserCacheValid(): boolean {
+    if (!this.userCache) return false
+    return Date.now() - this.userCache.timestamp < this.CACHE_DURATION
+  }
+
+  private setCacheUser(user: AuthUser | null): void {
+    this.userCache = {
+      user,
+      timestamp: Date.now()
+    }
+  }
+
+  private clearUserCache(): void {
+    this.userCache = null
+  }
+
   private async initializeAuth() {
     if (this.isInitialized || typeof window === 'undefined') {
       return
@@ -65,24 +83,35 @@ export class AuthService {
     }
   }
 
-  async getCurrentUser(): Promise<AuthUser | null> {
+  async getCurrentUser(useCache: boolean = true): Promise<AuthUser | null> {
     try {
+      // Use cached user if valid and caching is enabled
+      if (useCache && this.isUserCacheValid() && this.userCache) {
+        return this.userCache.user
+      }
+
       await this.initializeAuth()
       
       const { data: { user }, error } = await supabase.auth.getUser()
       
-      if (error || !user) {
-        return null
+      let authUser: AuthUser | null = null
+      
+      if (!error && user) {
+        authUser = {
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.full_name,
+          emailVerification: user.email_confirmed_at ? true : false,
+        }
       }
-
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.user_metadata?.full_name,
-        emailVerification: user.email_confirmed_at ? true : false,
-      }
+      
+      // Update cache with the result
+      this.setCacheUser(authUser)
+      
+      return authUser
     } catch (error) {
       console.error('Get current user error:', error)
+      this.clearUserCache()
       return null
     }
   }
@@ -148,6 +177,9 @@ export class AuthService {
   }
 
   async signOut() {
+    // Clear user cache
+    this.clearUserCache()
+    
     // Clear client-side cookies
     if (typeof document !== 'undefined') {
       document.cookie = 'sb-access-token=; path=/; max-age=0'
@@ -194,16 +226,13 @@ export class AuthService {
     }
   }
 
-  onAuthStateChange(callback: (user: AuthUser | null) => void) {
+  onAuthStateChange(callback: (user: any) => void) {
     return supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+      // Clear cache on any auth state change
+      this.clearUserCache()
+      
       if (session?.user) {
-        const authUser: AuthUser = {
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.user_metadata?.full_name,
-          emailVerification: session.user.email_confirmed_at ? true : false,
-        }
-        callback(authUser)
+        callback(session.user)
       } else {
         callback(null)
       }

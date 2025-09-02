@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import SkeletonSidebar from '@/components/SkeletonSidebar'
-import { authService, AuthUser } from '@/lib/auth'
+import { useAuth } from '@/lib/contexts/AuthContext'
 import { ToastContainer } from '@/components/ui/toast'
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 import QuotaNotification from '@/components/QuotaNotification'
@@ -33,11 +32,10 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Use global auth context instead of local state
+  const { user, loading, authChecked, isAuthenticated } = useAuth()
+  
   const [mounted, setMounted] = useState(false)
-  const [authChecked, setAuthChecked] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [cookiesLoaded, setCookiesLoaded] = useState(false)
@@ -67,73 +65,11 @@ export default function DashboardLayout({
     }
   }, [sidebarCollapsed, cookiesLoaded])
 
-  useEffect(() => {
-    let isMounted = true
-
-    const checkAuth = async () => {
-      // Skip auth check for login page
-      if (typeof window !== 'undefined' && window.location.pathname === '/login') {
-        if (isMounted) {
-          setLoading(false)
-          setAuthChecked(true)
-        }
-        return
-      }
-
-      try {
-        const currentUser = await authService.getCurrentUser()
-        
-        if (!isMounted) return
-
-        if (!currentUser) {
-          router.push('/login')
-          return
-        }
-
-        setUser(currentUser)
-      } catch (error) {
-        console.error('Auth check error:', error)
-        if (isMounted) {
-          router.push('/')
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-          setAuthChecked(true)
-        }
-      }
-    }
-
-    checkAuth()
-
-    // Set up auth state change listener
-    const { data: { subscription } } = authService.onAuthStateChange((user) => {
-      if (!isMounted) return
-      
-      // Skip auth redirect for login page
-      if (typeof window !== 'undefined' && window.location.pathname === '/login') {
-        return
-      }
-      
-      if (!user) {
-        router.push('/login')
-      } else {
-        setUser(user)
-        setLoading(false)
-        setAuthChecked(true)
-      }
-    })
-
-    return () => {
-      isMounted = false
-      subscription?.unsubscribe()
-    }
-  }, [router])
+  // No longer need auth checking useEffect - handled by AuthProvider globally
 
   // Check if we're on the login page
   const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/login'
   const isAuthenticating = !authChecked || loading
-  const isAuthenticated = authChecked && !loading && user
 
   // Wrap ALL dashboard content with QueryProvider to prevent QueryClient errors
   return (
@@ -213,8 +149,8 @@ export default function DashboardLayout({
                 </div>
               </div>
 
-              {/* Authentication Loading State */}
-              {isAuthenticating && (
+              {/* Authentication Loading State - Only show during initial auth, not route changes */}
+              {isAuthenticating && !isAuthenticated && (
                 <div className="flex items-center justify-center min-h-96">
                   <div className="text-center">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mb-4"></div>
