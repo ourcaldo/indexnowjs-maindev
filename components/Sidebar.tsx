@@ -434,79 +434,98 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
         </div>
       </div>
 
+      {/* Mobile Sidebar Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={onToggle}
+        />
+      )}
+
       {/* Mobile Sidebar */}
-      <div className={`fixed left-0 top-0 z-50 h-full w-64 bg-white border-r border-[#E5E7EB] transform transition-transform duration-300 ease-in-out md:hidden ${
+      <div className={`fixed left-0 top-0 z-50 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-5">
-            <div className="flex items-center">
-              {isLoading ? (
-                <div className="h-12 w-24 bg-gray-200 animate-pulse rounded"></div>
-              ) : logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt={`${siteName} Logo`}
-                  className="object-contain"
-                  style={{ width: '106.664px', height: '60px' }}
-                />
-              ) : (
-                <div className="flex items-center">
-                  <div className="h-8 w-8 bg-[#3D8BFF] rounded-lg flex items-center justify-center">
+          <div className="bg-gradient-to-r from-[#3D8BFF] to-[#6366F1] px-6 py-6 text-white">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                {isLoading ? (
+                  <div className="h-8 w-8 bg-white/20 animate-pulse rounded-lg"></div>
+                ) : iconUrl ? (
+                  <img 
+                    src={iconUrl} 
+                    alt={`${siteName} Icon`}
+                    className="h-8 w-8 rounded-lg"
+                  />
+                ) : (
+                  <div className="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center">
                     <Shield className="h-5 w-5 text-white" />
                   </div>
-                  <div className="ml-3">
-                    <h1 className="text-lg font-bold text-[#1A1A1A]">{siteName}</h1>
-                    <p className="text-xs text-[#6C757D]">User Dashboard</p>
-                  </div>
+                )}
+                <div className="ml-3">
+                  <h1 className="text-lg font-bold">{siteName}</h1>
                 </div>
-              )}
+              </div>
+              <button 
+                onClick={onToggle}
+                className="p-2 rounded-lg hover:bg-white/10 text-white transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <button 
-              onClick={onToggle}
-              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            
+            {/* User info in header */}
+            {user && (
+              <div className="flex items-center space-x-3 pt-2 border-t border-white/20">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mt-2">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <div className="mt-2">
+                  <p className="text-sm font-medium text-white">{user.email}</p>
+                  <p className="text-xs text-white/70">User Dashboard</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Search Bar */}
-          <div className="px-4 mb-6">
+          <div className="px-6 py-4 bg-gray-50">
             {isLoading ? (
-              <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+              <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
             ) : (
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#9CA3AF]" />
                 <input
                   type="text"
-                  placeholder="Search"
+                  placeholder="Search navigation..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent transition-colors"
+                  className="w-full pl-12 pr-4 py-3 text-sm bg-white border border-[#E5E7EB] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent transition-colors shadow-sm"
                 />
               </div>
             )}
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 overflow-y-auto">
+          <nav className="flex-1 px-4 py-2 overflow-y-auto">
             {isLoading ? (
               // Skeleton navigation while loading
               <div className="space-y-6">
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <div className="px-3 mb-3"><div className="h-3 w-20 bg-gray-200 animate-pulse rounded"></div></div>
-                  <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <div className="px-3 mb-3"><div className="h-3 w-32 bg-gray-200 animate-pulse rounded"></div></div>
-                  <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
-                  <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
+                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <div className="px-3 mb-3"><div className="h-3 w-16 bg-gray-200 animate-pulse rounded"></div></div>
-                  <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
-                  <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
+                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
                 </div>
               </div>
             ) : (
@@ -584,6 +603,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                     </div>
                     <a 
                       href="/dashboard/settings/plans-billing"
+                      onClick={onToggle}
                       className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors block text-center"
                     >
                       {!hasActivePackage ? 'Subscribe now →' : 'Upgrade plan →'}
@@ -595,32 +615,18 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
             )}
           </div>
 
-          {/* Bottom Section */}
-          <div className="border-t border-[#E5E7EB] p-4">
+          {/* Sign Out Section */}
+          <div className="border-t border-[#E5E7EB] px-4 py-4">
             {isLoading ? (
-              <>
-                <div className="mb-3">
-                  <div className="h-4 w-32 bg-gray-200 animate-pulse rounded mb-1"></div>
-                  <div className="h-3 w-24 bg-gray-200 animate-pulse rounded"></div>
-                </div>
-                <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
-              </>
+              <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
             ) : (
-              <>
-                {user && (
-                  <div className="mb-3">
-                    <p className="text-sm font-medium text-[#1A1A1A] truncate">{user.email}</p>
-                    <p className="text-xs text-[#6C757D] truncate">User Dashboard</p>
-                  </div>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-[#DC2626] rounded-lg hover:bg-[#FEF2F2] transition-colors"
-                >
-                  <LogOut className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <span>Sign out</span>
-                </button>
-              </>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center px-4 py-3 text-sm font-medium text-[#DC2626] rounded-xl hover:bg-[#FEF2F2] transition-colors border border-red-100 shadow-sm"
+              >
+                <LogOut className="mr-2 h-5 w-5 flex-shrink-0" />
+                <span>Sign out</span>
+              </button>
             )}
           </div>
         </div>
