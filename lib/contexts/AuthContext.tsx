@@ -9,10 +9,12 @@ let globalAuthState: {
   user: AuthUser | null
   isAuthenticated: boolean
   isInitialized: boolean
+  promise: Promise<AuthUser | null> | null
 } = {
   user: null,
   isAuthenticated: false,
-  isInitialized: false
+  isInitialized: false,
+  promise: null
 }
 
 interface AuthContextType {
@@ -43,7 +45,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(globalAuthState.user)
   const [loading, setLoading] = useState(!globalAuthState.isInitialized)
   const [authChecked, setAuthChecked] = useState(globalAuthState.isInitialized)
-  const [hasInitialized, setHasInitialized] = useState(globalAuthState.isInitialized)
 
   // Auth state cache with 5-minute expiration
   const [authCache, setAuthCache] = useState<{
@@ -137,12 +138,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isMounted = true
 
     const initializeAuth = async () => {
-      // Only initialize once globally
+      // If already initialized globally, just update local state
       if (globalAuthState.isInitialized) {
-        setUser(globalAuthState.user)
-        setLoading(false)
-        setAuthChecked(true)
-        setHasInitialized(true)
+        if (isMounted) {
+          setUser(globalAuthState.user)
+          setLoading(false)
+          setAuthChecked(true)
+        }
+        return
+      }
+      
+      // If there's already a promise running, wait for it
+      if (globalAuthState.promise) {
+        try {
+          const result = await globalAuthState.promise
+          if (isMounted) {
+            setUser(result)
+            setLoading(false)
+            setAuthChecked(true)
+          }
+        } catch (error) {
+          console.error('Auth promise error:', error)
+          if (isMounted) {
+            setLoading(false)
+            setAuthChecked(true)
+          }
+        }
         return
       }
       
@@ -151,13 +172,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (isMounted) {
           setLoading(false)
           setAuthChecked(true)
-          setHasInitialized(true)
           globalAuthState.isInitialized = true
         }
         return
       }
 
-      const currentUser = await checkAuth(false)
+      // Start the auth check and store the promise
+      globalAuthState.promise = checkAuth(false)
+      const currentUser = await globalAuthState.promise
+      globalAuthState.promise = null
       
       if (!isMounted) return
 
@@ -209,7 +232,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         updateAuthCache(authUser)
         setLoading(false)
         setAuthChecked(true)
-        setHasInitialized(true)
       }
     })
 
@@ -223,9 +245,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
-    loading: hasInitialized ? loading : true,
-    authChecked: hasInitialized ? authChecked : false,
-    isAuthenticated: hasInitialized && isAuthenticated,
+    loading,
+    authChecked,
+    isAuthenticated,
     signOut,
     refreshAuth,
   }

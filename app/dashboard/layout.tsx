@@ -69,7 +69,9 @@ export default function DashboardLayout({
 
   // Check if we're on the login page
   const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/login'
-  const isAuthenticating = !authChecked || loading
+  
+  // Only show loading for initial auth check, not subsequent route changes
+  const isAuthenticating = !mounted || (!authChecked && loading && !user)
 
   // Wrap ALL dashboard content with QueryProvider to prevent QueryClient errors
   return (
