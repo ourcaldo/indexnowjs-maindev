@@ -53,3 +53,4 @@ task = "shell.exec"
 args = "npx tsx server/custom-server.ts"
 
 [agent]
+expertMode = true
