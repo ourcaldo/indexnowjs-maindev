@@ -93,6 +93,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const { data: { subscription } } = authService.onAuthStateChange(async (supabaseUser) => {
       if (!supabaseUser) {
         setUser(null)
+        setLoading(false)
+        setAuthChecked(true)
         
         // Only redirect if not on public route
         if (typeof window !== 'undefined') {
@@ -113,11 +115,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         
         setUser(authUser)
+        setLoading(false)
+        setAuthChecked(true)
       }
     })
 
     return () => subscription?.unsubscribe();
-  }, [initialized, router])
+  }, [initialized])
 
   const isAuthenticated = authChecked && !loading && !!user
 
