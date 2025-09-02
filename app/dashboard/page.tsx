@@ -99,6 +99,7 @@ export default function Dashboard() {
   const router = useRouter()
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authChecking, setAuthChecking] = useState(true);
   const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
   const [packagesData, setPackagesData] = useState<{ packages: PaymentPackage[], current_package_id: string | null } | null>(null);
   const [subscribing, setSubscribing] = useState<string | null>(null);
@@ -113,10 +114,11 @@ export default function Dashboard() {
   const loadUserProfile = async (): Promise<void> => {
     try {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
+      
       if (!token) {
         return Promise.resolve();
       }
-
+      
       // Add timeout wrapper to prevent hanging
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
@@ -354,20 +356,25 @@ export default function Dashboard() {
     }
   }
 
-  // Load user data with comprehensive error handling and timeout
+  // Handle authentication state and dashboard data loading using auth listener
   useEffect(() => {
+    let isMounted = true;
+    let authListener: any = null;
+    
     const loadDashboardData = async () => {
       logDashboardActivity('dashboard_data_loading_started', 'Dashboard data loading initiated', {
         timestamp: new Date().toISOString()
       });
       
       try {
-        // Use Promise.allSettled to ensure all promises complete regardless of individual failures
+        // Load dashboard data
         const results = await Promise.allSettled([
           loadUserProfile(),
           loadPackages(),
           checkTrialEligibility()
         ]);
+        
+        if (!isMounted) return;
         
         // Log any rejected promises for debugging
         results.forEach((result, index) => {
@@ -387,18 +394,82 @@ export default function Dashboard() {
         });
         
       } catch (error: any) {
-        // This should not happen with Promise.allSettled, but just in case
+        if (!isMounted) return;
+        
         logDashboardActivity('dashboard_data_loading_error', 'Dashboard data loading encountered error', {
           error: error.message,
           timestamp: new Date().toISOString()
         });
       } finally {
-        // Always set loading to false, regardless of success or failure
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     
-    loadDashboardData();
+    const handleAuthStateChange = async (event: string, session: any) => {
+      if (!isMounted) return;
+      
+      
+      if (event === 'SIGNED_IN' && session?.access_token) {
+        setAuthChecking(false);
+        await loadDashboardData();
+      } else if (event === 'SIGNED_OUT' || !session) {
+        setAuthChecking(false);
+        setLoading(false);
+        router.push('/login');
+      } else if (event === 'TOKEN_REFRESHED' && session?.access_token) {
+        setAuthChecking(false);
+      }
+    };
+    
+    const initializeAuth = async () => {
+      
+      try {
+        // First check current session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+        
+        
+        if (session?.access_token) {
+          setAuthChecking(false);
+          await loadDashboardData();
+        } else {
+          // Set up auth state listener for redirect scenarios
+          authListener = supabase.auth.onAuthStateChange(handleAuthStateChange);
+          
+          // Give the auth state change some time to fire, then check again
+          setTimeout(async () => {
+            if (!isMounted) return;
+            
+            const { data: { session: retrySession } } = await supabase.auth.getSession();
+            if (!retrySession?.access_token) {
+              setAuthChecking(false);
+              setLoading(false);
+              router.push('/login');
+            }
+          }, 2000);
+        }
+        
+      } catch (error: any) {
+        if (!isMounted) return;
+        
+        setAuthChecking(false);
+        setLoading(false);
+        router.push('/login');
+      }
+    };
+    
+    initializeAuth();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      if (authListener && authListener.data && authListener.data.subscription) {
+        authListener.data.subscription.unsubscribe();
+      }
+    };
   }, [])
 
   // Calculate rank statistics
@@ -429,8 +500,8 @@ export default function Dashboard() {
   const hasActivePackage = userProfile?.package || packagesData?.current_package_id
   
   // Overall loading state - show skeleton when any critical data is still loading
-  // Only show skeleton for initial loading and domains loading, not for keyword queries
-  const isDataLoading = loading || domainsLoading
+  // Show skeleton during auth check, initial data loading, or domains loading
+  const isDataLoading = authChecking || loading || domainsLoading
 
 
   // Position change indicator
