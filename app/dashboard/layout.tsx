@@ -196,18 +196,12 @@ export default function DashboardLayout({
             {/* Mobile header */}
             <div className="lg:hidden bg-white border-b border-[#E0E6ED] px-4 py-3 flex items-center justify-between">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
-                {iconUrl ? (
+                {iconUrl && (
                   <img 
                     src={iconUrl} 
-                    alt={`${siteName} Icon`}
+                    alt="Icon"
                     className="w-6 h-6 rounded flex-shrink-0"
                   />
-                ) : (
-                  <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{backgroundColor: '#1C2331'}}>
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                    </svg>
-                  </div>
                 )}
                 <h1 className="text-lg font-semibold text-[#1A1A1A] truncate">{siteName}</h1>
               </div>

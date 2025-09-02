@@ -237,24 +237,16 @@ export default function Register() {
             alignItems: 'center',
             zIndex: 10
           }}>
-            {logoUrl ? (
+            {logoUrl && (
               <img 
                 src={logoUrl} 
-                alt={`${siteName} Logo`}
+                alt="Logo"
                 style={{
                   height: '48px',
                   width: 'auto',
                   maxWidth: '280px'
                 }}
               />
-            ) : (
-              <span style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1a1a1a'
-              }}>
-                {siteName}
-              </span>
             )}
           </div>
         )}

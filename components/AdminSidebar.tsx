@@ -212,25 +212,13 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             isCollapsed ? 'flex flex-col items-center space-y-4' : 'flex items-center justify-between'
           }`}>
             <div className="flex items-center">
-              {logoUrl ? (
+              {logoUrl && (
                 <img 
                   src={logoUrl} 
-                  alt={`${siteName} Admin Logo`}
+                  alt="Admin Logo"
                   className={isCollapsed ? "h-8 w-8 object-contain" : ""}
                   style={!isCollapsed ? { width: '106.664px', height: '60px' } : {}}
                 />
-              ) : (
-                <div className="flex items-center">
-                  <div className="h-8 w-8 bg-[#3D8BFF] rounded-lg flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-white" />
-                  </div>
-                  {!isCollapsed && (
-                    <div className="ml-3">
-                      <h1 className="text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
-                      <p className="text-xs text-[#6C757D]">Admin Panel</p>
-                    </div>
-                  )}
-                </div>
               )}
             </div>
             <button 
@@ -311,22 +299,12 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-5">
             <div className="flex items-center">
-              {logoUrl ? (
+              {logoUrl && (
                 <img 
                   src={logoUrl} 
-                  alt={`${siteName} Admin Logo`}
+                  alt="Admin Logo"
                   style={{ width: '106.664px', height: '60px' }}
                 />
-              ) : (
-                <div className="flex items-center">
-                  <div className="h-8 w-8 bg-[#3D8BFF] rounded-lg flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="ml-3">
-                    <h1 className="text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
-                    <p className="text-xs text-[#6C757D]">Admin Panel</p>
-                  </div>
-                </div>
               )}
             </div>
             <button 

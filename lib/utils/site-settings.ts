@@ -111,7 +111,7 @@ class SiteSettingsService {
    */
   async getSiteName(): Promise<string> {
     const settings = await this.getSiteSettings()
-    return settings.site_name || DEFAULT_SETTINGS.site_name
+    return settings.site_name || ''
   }
 
   /**

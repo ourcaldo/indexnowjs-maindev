@@ -252,17 +252,13 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                 <div className={`bg-gray-200 animate-pulse rounded ${
                   isCollapsed ? 'h-8 w-8' : 'h-12 w-24'
                 }`}></div>
-              ) : logoUrl ? (
+              ) : logoUrl && (
                 <img 
                   src={logoUrl} 
-                  alt={`${siteName} ${isCollapsed ? 'Icon' : 'Logo'}`}
+                  alt={isCollapsed ? 'Icon' : 'Logo'}
                   className={isCollapsed ? "h-8 w-8 object-contain" : "object-contain"}
                   style={!isCollapsed ? { width: '106.664px', height: '60px' } : { width: '32px', height: '32px' }}
                 />
-              ) : (
-                <div className={`bg-gray-200 animate-pulse rounded ${
-                  isCollapsed ? 'h-8 w-8' : 'h-12 w-24'
-                }`}></div>
               )}
             </div>
             <button 

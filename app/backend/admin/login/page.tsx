@@ -97,14 +97,12 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-[#1A1A1A] rounded-full flex items-center justify-center">
-            {logoUrl ? (
+            {logoUrl && (
               <img 
                 src={logoUrl} 
-                alt={`${siteName} Admin Logo`}
+                alt="Admin Logo"
                 className="w-12 h-12 object-contain filter brightness-0 invert"
               />
-            ) : (
-              <Shield className="w-8 h-8 text-white" />
             )}
           </div>
           <div>
