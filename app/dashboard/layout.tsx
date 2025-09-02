@@ -84,8 +84,8 @@ export default function DashboardLayout({
     )
   }
 
-  // Only block the app on the very first load
-  if (loading) {
+  // Only show loading if auth has never been checked
+  if (loading && !authChecked) {
     return (
       <QueryProvider>
         <ToastContainer>
