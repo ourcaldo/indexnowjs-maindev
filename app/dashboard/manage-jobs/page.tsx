@@ -149,9 +149,7 @@ export default function ManageJobsPage() {
   const loadJobs = useCallback(async () => {
     try {
       setLoading(true);
-      const user = await authService.getCurrentUser();
-      if (!user) return;
-
+      // Auth handled by AuthProvider - get session token directly
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
@@ -231,9 +229,7 @@ export default function ManageJobsPage() {
 
   const handleDeleteJob = async (jobId: string) => {
     try {
-      const user = await authService.getCurrentUser();
-      if (!user) return;
-
+      // Auth handled by AuthProvider - get session token directly
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
@@ -278,9 +274,7 @@ export default function ManageJobsPage() {
 
   const handleRerunJob = async (jobId: string) => {
     try {
-      const user = await authService.getCurrentUser();
-      if (!user) return;
-
+      // Auth handled by AuthProvider - get session token directly
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 

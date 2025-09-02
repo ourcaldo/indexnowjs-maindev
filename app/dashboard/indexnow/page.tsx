@@ -56,10 +56,7 @@ export default function IndexNowPage() {
   const loadData = async () => {
     try {
       setLoadingServiceAccounts(true)
-      const user = await authService.getCurrentUser()
-      if (!user) return
-
-      setCurrentUser(user)
+      // Auth handled by AuthProvider - get session token directly
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 

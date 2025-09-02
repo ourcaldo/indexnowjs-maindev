@@ -84,7 +84,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(globalAuthState.user)
         setLoading(false)
         setAuthChecked(true)
-        setHasInitialized(true)
         return globalAuthState.user
       }
       
@@ -93,7 +92,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(authCache.user)
         setLoading(false)
         setAuthChecked(true)
-        setHasInitialized(true)
         return authCache.user
       }
 
@@ -112,7 +110,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setLoading(false)
       setAuthChecked(true)
-      setHasInitialized(true)
     }
   }
 

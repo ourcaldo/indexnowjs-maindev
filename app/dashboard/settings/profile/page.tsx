@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/database'
 import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/lib/contexts/AuthContext'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { 
   User, 
@@ -14,11 +15,12 @@ import {
 
 export default function ProfileSettingsPage() {
   const { addToast } = useToast()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   
   // Log page view and settings activities
   usePageViewLogger('/dashboard/settings/profile', 'Profile Settings', { section: 'profile_settings' })
-  const { logDashboardActivity } = useActivityLogger()
+  const { logDashboardActivity, logProfileActivity } = useActivityLogger()
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -48,10 +50,7 @@ export default function ProfileSettingsPage() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const user = await authService.getCurrentUser()
-      if (!user) return
-
-      setCurrentUser(user as any)
+      // Auth handled by AuthProvider - get session token directly
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 

@@ -109,12 +109,9 @@ export default function Dashboard() {
   usePageViewLogger('/dashboard', 'Dashboard', { section: 'main_dashboard' })
   const { logDashboardActivity } = useActivityLogger()
 
-  // Fetch user profile
+  // Fetch user profile using session token only (no auth check needed - handled by AuthProvider)
   const loadUserProfile = async () => {
     try {
-      const user = await authService.getCurrentUser();
-      if (!user) return;
-
       const token = (await supabase.auth.getSession()).data.session?.access_token;
       if (!token) return;
 
