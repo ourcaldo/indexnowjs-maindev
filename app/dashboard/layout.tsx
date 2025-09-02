@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import SkeletonSidebar from '@/components/SkeletonSidebar'
 import { useAuth } from '@/lib/contexts/AuthContext'
@@ -35,19 +34,11 @@ export default function DashboardLayout({
 }) {
   // Use global auth context instead of local state
   const { user, loading, authChecked, isAuthenticated } = useAuth()
-  const router = useRouter()
   
   const [mounted, setMounted] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [cookiesLoaded, setCookiesLoaded] = useState(false)
-  
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
-    }
-  }, [loading, user, router])
   
   // Site settings hooks
   const siteName = useSiteName()
