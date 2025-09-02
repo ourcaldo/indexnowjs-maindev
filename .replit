@@ -12,12 +12,12 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [[ports]]
-localPort = 8081
-externalPort = 8081
+localPort = 5000
+externalPort = 80
 
 [[ports]]
 localPort = 8081
-externalPort = 80
+externalPort = 8081
 
 [env]
 PORT = "8081"
