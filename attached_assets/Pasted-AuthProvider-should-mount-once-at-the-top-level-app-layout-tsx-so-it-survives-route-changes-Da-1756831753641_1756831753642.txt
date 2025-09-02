@@ -1,0 +1,125 @@
+AuthProvider should mount once at the top-level (app/layout.tsx) → so it survives route changes.
+
+DashboardLayout should use that context → no need to re-run checks on every navigation.
+
+Show full-page “Authenticating…” only on the very first load. After that, keep sidebar/layout persistent.
+
+✅ AuthProvider (app/context/AuthProvider.tsx)
+"use client";
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type AuthContextType = {
+  user: any | null;
+  loading: boolean;
+};
+
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+});
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (initialized) return;
+    setInitialized(true);
+
+    // Initial session load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for login/logout
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [initialized]);
+
+  return (
+    <AuthContext.Provider value={{ user, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+✅ Root Layout (app/layout.tsx)
+import { AuthProvider } from "@/context/AuthProvider";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
+    </html>
+  );
+}
+
+✅ Dashboard Layout (app/dashboard/layout.tsx)
+"use client";
+
+import { useAuth } from "@/context/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import Sidebar from "@/components/Sidebar";
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [loading, user, router]);
+
+  if (loading) {
+    // Only block the app on the very first load
+    return <div className="flex items-center justify-center h-screen">Authenticating...</div>;
+  }
+
+  if (!user) {
+    return null; // Redirecting
+  }
+
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main className="flex-1 p-4">{children}</main>
+    </div>
+  );
+}
+
+🔄 Flow
+
+First app load → AuthProvider runs getSession() → show full-page "Authenticating…".
+
+Session found → user stored in context → sidebar + dashboard show.
+
+Navigate to another page → context already has user, so loading = false, no "Authenticating…" flash.
+
+Logout → onAuthStateChange("SIGNED_OUT") clears user → DashboardLayout redirects to /login.
+
+👉 This way:
+
+Loader only appears once (initial load).
+
+Sidebar persists between routes.
+
+Route changes are instant, no auth flashing.

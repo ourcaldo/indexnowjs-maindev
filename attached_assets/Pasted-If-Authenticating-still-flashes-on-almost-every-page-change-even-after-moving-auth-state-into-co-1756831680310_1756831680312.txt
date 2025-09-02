@@ -1,0 +1,65 @@
+If "Authenticating…" still flashes on almost every page change, even after moving auth state into context, that means something is still forcing a re-validation cycle instead of reusing the session already in memory.
+
+🔍 Most Common Causes
+
+Global auth context re-mounts on every route
+
+If your <AuthProvider> is declared inside app/dashboard/layout.tsx instead of at the top level (app/layout.tsx), then every navigation under /dashboard will re-mount the provider, resetting loading = true.
+
+✅ Fix: Move <AuthProvider> into the root layout so it only initializes once.
+
+Session fetch runs too aggressively
+
+If your useEffect in AuthProvider is calling:
+
+supabase.auth.getSession()
+
+
+on every mount, you’ll always see a loading state until the async call finishes.
+
+✅ Fix: Add an initialized flag so it only runs once per app lifecycle. Example:
+
+useEffect(() => {
+  if (initialized) return;
+  setInitialized(true);
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    setUser(session?.user ?? null);
+    setLoading(false);
+  });
+}, [initialized]);
+
+
+Router or layout dependency triggers re-init
+
+If your auth check depends on [router] or something tied to navigation, then every route change re-triggers it.
+
+✅ Fix: Only run auth init on mount, not per navigation.
+
+Middleware duplication
+
+If you also have middleware.ts that forces a supabase.auth.getUser() check server-side on every route, and your client then repeats the same check, you’ll see redundant “Authenticating…” flashes.
+
+✅ Fix: Let middleware handle protection (redirects for unauthenticated users), while client context only manages already-known session state.
+
+UI state logic too broad
+
+If you wrote:
+
+if (loading) return <div>Authenticating...</div>
+
+
+in your DashboardLayout, you’re blocking the entire page render until auth finishes — even when user is already in context.
+
+✅ Fix:
+
+Show full-page loader only on first app load.
+
+For route changes, just show skeletons/placeholders in the main content (sidebar should stay visible).
+
+🔧 Next Step to Debug
+
+Can you confirm:
+
+Where you mounted <AuthProvider>? (app/layout.tsx or app/dashboard/layout.tsx?)
+
+Whether your AuthProvider calls getSession() on every route mount?
