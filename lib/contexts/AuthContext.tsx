@@ -42,144 +42,41 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter()
-  const [user, setUser] = useState<AuthUser | null>(globalAuthState.user)
-  const [loading, setLoading] = useState(!globalAuthState.isInitialized)
-  const [authChecked, setAuthChecked] = useState(globalAuthState.isInitialized)
-
-  // Auth state cache with 5-minute expiration
-  const [authCache, setAuthCache] = useState<{
-    user: AuthUser | null
-    timestamp: number
-    isValid: boolean
-  } | null>(null)
-
-  const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
-
-  const isAuthCacheValid = () => {
-    if (!authCache) return false
-    return Date.now() - authCache.timestamp < CACHE_DURATION
-  }
-
-  const updateAuthCache = (userData: AuthUser | null) => {
-    setAuthCache({
-      user: userData,
-      timestamp: Date.now(),
-      isValid: true
-    })
-    
-    // Update global state
-    globalAuthState.user = userData
-    globalAuthState.isAuthenticated = !!userData
-    globalAuthState.isInitialized = true
-  }
-
-  const invalidateAuthCache = () => {
-    setAuthCache(null)
-  }
-
-  const checkAuth = async (useCache = true) => {
-    try {
-      // Use global state if already initialized
-      if (globalAuthState.isInitialized && useCache) {
-        setUser(globalAuthState.user)
-        setLoading(false)
-        setAuthChecked(true)
-        return globalAuthState.user
-      }
-      
-      // Use cached auth state if valid
-      if (useCache && isAuthCacheValid() && authCache) {
-        setUser(authCache.user)
-        setLoading(false)
-        setAuthChecked(true)
-        return authCache.user
-      }
-
-      // Perform fresh auth check
-      const currentUser = await authService.getCurrentUser()
-      
-      setUser(currentUser)
-      updateAuthCache(currentUser)
-      
-      return currentUser
-    } catch (error) {
-      console.error('Auth check error:', error)
-      setUser(null)
-      invalidateAuthCache()
-      return null
-    } finally {
-      setLoading(false)
-      setAuthChecked(true)
-    }
-  }
-
-  const refreshAuth = async () => {
-    invalidateAuthCache()
-    setLoading(true)
-    await checkAuth(false)
-  }
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [authChecked, setAuthChecked] = useState(false)
+  const [initialized, setInitialized] = useState(false)
 
   const signOut = async () => {
     try {
       await authService.signOut()
       setUser(null)
-      invalidateAuthCache()
       router.push('/login')
     } catch (error) {
       console.error('Sign out error:', error)
     }
   }
 
-  // Initial auth check - only runs once on app startup
+  const refreshAuth = async () => {
+    // For the simple pattern, just refetch current user
+    try {
+      const currentUser = await authService.getCurrentUser()
+      setUser(currentUser)
+    } catch (error) {
+      console.error('Refresh auth error:', error)
+      setUser(null)
+    }
+  }
+
   useEffect(() => {
-    let isMounted = true
+    if (initialized) return;
+    setInitialized(true);
 
-    const initializeAuth = async () => {
-      // If already initialized globally, just update local state
-      if (globalAuthState.isInitialized) {
-        if (isMounted) {
-          setUser(globalAuthState.user)
-          setLoading(false)
-          setAuthChecked(true)
-        }
-        return
-      }
-      
-      // If there's already a promise running, wait for it
-      if (globalAuthState.promise) {
-        try {
-          const result = await globalAuthState.promise
-          if (isMounted) {
-            setUser(result)
-            setLoading(false)
-            setAuthChecked(true)
-          }
-        } catch (error) {
-          console.error('Auth promise error:', error)
-          if (isMounted) {
-            setLoading(false)
-            setAuthChecked(true)
-          }
-        }
-        return
-      }
-      
-      // Skip auth check for login page
-      if (typeof window !== 'undefined' && window.location.pathname === '/login') {
-        if (isMounted) {
-          setLoading(false)
-          setAuthChecked(true)
-          globalAuthState.isInitialized = true
-        }
-        return
-      }
-
-      // Start the auth check and store the promise
-      globalAuthState.promise = checkAuth(false)
-      const currentUser = await globalAuthState.promise
-      globalAuthState.promise = null
-      
-      if (!isMounted) return
+    // Initial session load
+    authService.getCurrentUser().then((currentUser) => {
+      setUser(currentUser)
+      setLoading(false)
+      setAuthChecked(true)
 
       // Only redirect to login if we're not on a public route
       if (!currentUser && typeof window !== 'undefined') {
@@ -190,22 +87,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           router.push('/login')
         }
       }
-    }
+    });
 
-    initializeAuth()
-
-    // Set up auth state change listener - only listens for actual auth changes
+    // Listen for login/logout
     const { data: { subscription } } = authService.onAuthStateChange(async (supabaseUser) => {
-      if (!isMounted) return
-      
-      // Skip handling for login page
-      if (typeof window !== 'undefined' && window.location.pathname === '/login') {
-        return
-      }
-      
       if (!supabaseUser) {
         setUser(null)
-        invalidateAuthCache()
         
         // Only redirect if not on public route
         if (typeof window !== 'undefined') {
@@ -226,17 +113,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
         
         setUser(authUser)
-        updateAuthCache(authUser)
-        setLoading(false)
-        setAuthChecked(true)
       }
     })
 
-    return () => {
-      isMounted = false
-      subscription?.unsubscribe()
-    }
-  }, []) // No router dependency - only run once
+    return () => subscription?.unsubscribe();
+  }, [initialized, router])
 
   const isAuthenticated = authChecked && !loading && !!user
 
