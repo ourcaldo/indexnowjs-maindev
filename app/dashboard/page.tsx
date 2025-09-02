@@ -129,7 +129,7 @@ export default function Dashboard() {
   };
 
   // Fetch domains for rank tracking
-  const { data: domainsData } = useQuery({
+  const { data: domainsData, isLoading: domainsLoading } = useQuery({
     queryKey: ['/api/v1/rank-tracking/domains'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -168,7 +168,7 @@ export default function Dashboard() {
   })
 
   // Fetch all keywords for statistics
-  const { data: allKeywordsData } = useQuery({
+  const { data: allKeywordsData, isLoading: allKeywordsLoading } = useQuery({
     queryKey: ['/api/v1/rank-tracking/keywords-all', selectedDomainId],
     queryFn: async () => {
       if (!selectedDomainId) return { data: [] }
@@ -320,6 +320,9 @@ export default function Dashboard() {
   const rankStats = calculateRankStats()
   const selectedDomain = domains.find((d: any) => d.id === selectedDomainId)
   const hasActivePackage = userProfile?.package || packagesData?.current_package_id
+  
+  // Overall loading state - show skeleton when any critical data is still loading
+  const isDataLoading = loading || domainsLoading || (selectedDomainId && (keywordsLoading || allKeywordsLoading))
 
 
   // Position change indicator
@@ -370,7 +373,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* User Profile Card */}
-      {loading ? (
+      {isDataLoading ? (
         <UserProfileSkeleton />
       ) : userProfile && hasActivePackage ? (
         <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
@@ -414,7 +417,7 @@ export default function Dashboard() {
       ) : null}
 
       {/* No Active Package State */}
-      {loading ? (
+      {isDataLoading ? (
         <div className="bg-white rounded-xl border border-[#E0E6ED] p-8">
           <div className="text-center mb-8">
             <div className="h-8 bg-[#E0E6ED] rounded w-96 mx-auto mb-3 animate-pulse"></div>
@@ -481,7 +484,7 @@ export default function Dashboard() {
       ) : null}
 
       {/* Domain Selection & Rank Stats */}
-      {loading ? (
+      {isDataLoading ? (
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {/* Domain Header Skeleton */}

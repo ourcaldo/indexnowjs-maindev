@@ -213,10 +213,59 @@ export default function ProfileSettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-6xl mx-auto">
-        <div className="flex items-center justify-center h-64">
-          <RefreshCw className="w-8 h-8 animate-spin" />
-          <span className="ml-2">Loading profile...</span>
+      <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+        {/* Profile Information Skeleton */}
+        <div className="p-6 rounded-lg flex flex-col" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
+          <div className="h-6 w-48 mb-6 bg-[#E0E6ED] rounded animate-pulse" />
+          
+          <div className="flex-1 space-y-6">
+            <div>
+              <div className="h-4 w-20 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
+              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
+            </div>
+            
+            <div>
+              <div className="h-4 w-24 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
+              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
+              <div className="h-3 w-64 mt-1 bg-[#E0E6ED] rounded animate-pulse" />
+            </div>
+            
+            <div>
+              <div className="h-4 w-28 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
+              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <div className="h-4 w-4 bg-[#E0E6ED] rounded animate-pulse" />
+              <div className="h-4 w-40 bg-[#E0E6ED] rounded animate-pulse" />
+            </div>
+          </div>
+          
+          <div className="h-10 w-32 mt-6 bg-[#E0E6ED] rounded animate-pulse" />
+        </div>
+
+        {/* Password Change Skeleton */}
+        <div className="p-6 rounded-lg flex flex-col" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
+          <div className="h-6 w-40 mb-6 bg-[#E0E6ED] rounded animate-pulse" />
+          
+          <div className="flex-1 space-y-6">
+            <div>
+              <div className="h-4 w-32 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
+              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
+            </div>
+            
+            <div>
+              <div className="h-4 w-28 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
+              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
+            </div>
+            
+            <div>
+              <div className="h-4 w-36 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
+              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
+            </div>
+          </div>
+          
+          <div className="h-10 w-36 mt-6 bg-[#E0E6ED] rounded animate-pulse" />
         </div>
       </div>
     )
