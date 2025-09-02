@@ -343,10 +343,36 @@ export default function Dashboard() {
     }
   }
 
+  // Skeleton loading for user profile card
+  const UserProfileSkeleton = () => (
+    <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 bg-[#E0E6ED] rounded-full animate-pulse"></div>
+          <div>
+            <div className="h-5 bg-[#E0E6ED] rounded w-48 mb-2 animate-pulse"></div>
+            <div className="h-4 bg-[#E0E6ED] rounded w-64 animate-pulse"></div>
+          </div>
+        </div>
+        <div className="w-20 h-8 bg-[#E0E6ED] rounded-full animate-pulse"></div>
+      </div>
+      <div className="grid md:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-[#F7F9FC] rounded-lg p-4 border border-[#E0E6ED]">
+            <div className="h-3 bg-[#E0E6ED] rounded w-20 mb-2 animate-pulse"></div>
+            <div className="h-6 bg-[#E0E6ED] rounded w-12 animate-pulse"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <div className="space-y-8">
       {/* User Profile Card */}
-      {userProfile && hasActivePackage && (
+      {loading ? (
+        <UserProfileSkeleton />
+      ) : userProfile && hasActivePackage ? (
         <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center space-x-4">
@@ -385,10 +411,31 @@ export default function Dashboard() {
 
           {hasActivePackage && <QuotaCard userProfile={userProfile} />}
         </div>
-      )}
+      ) : null}
 
       {/* No Active Package State */}
-      {!hasActivePackage && packagesData && (
+      {loading ? (
+        <div className="bg-white rounded-xl border border-[#E0E6ED] p-8">
+          <div className="text-center mb-8">
+            <div className="h-8 bg-[#E0E6ED] rounded w-96 mx-auto mb-3 animate-pulse"></div>
+            <div className="h-6 bg-[#E0E6ED] rounded w-80 mx-auto mb-6 animate-pulse"></div>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="border border-[#E0E6ED] rounded-lg p-6">
+                <div className="h-6 bg-[#E0E6ED] rounded w-24 mb-4 animate-pulse"></div>
+                <div className="h-8 bg-[#E0E6ED] rounded w-16 mb-4 animate-pulse"></div>
+                <div className="space-y-2 mb-6">
+                  {Array.from({ length: 4 }).map((_, j) => (
+                    <div key={j} className="h-4 bg-[#E0E6ED] rounded w-full animate-pulse"></div>
+                  ))}
+                </div>
+                <div className="h-10 bg-[#E0E6ED] rounded w-full animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : !hasActivePackage && packagesData ? (
         <div className="bg-white rounded-xl border border-[#E0E6ED] p-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
@@ -411,7 +458,7 @@ export default function Dashboard() {
             className="mb-8"
           />
         </div>
-      )}
+      ) : null}
 
       {/* Domain Selection & Rank Stats */}
       {hasActivePackage && domains.length === 0 ? (
@@ -430,6 +477,68 @@ export default function Dashboard() {
             <Plus className="w-4 h-4 mr-2" />
             Add Your First Domain
           </button>
+        </div>
+      ) : null}
+
+      {/* Domain Selection & Rank Stats */}
+      {loading ? (
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Domain Header Skeleton */}
+            <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-[#E0E6ED] rounded-lg animate-pulse"></div>
+                  <div>
+                    <div className="h-5 bg-[#E0E6ED] rounded w-32 mb-1 animate-pulse"></div>
+                    <div className="h-4 bg-[#E0E6ED] rounded w-24 animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <div className="h-8 bg-[#E0E6ED] rounded w-24 animate-pulse"></div>
+                  <div className="h-8 bg-[#E0E6ED] rounded w-20 animate-pulse"></div>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bg-[#F7F9FC] rounded-lg p-4 border border-[#E0E6ED]">
+                    <div className="h-3 bg-[#E0E6ED] rounded w-20 mb-2 animate-pulse"></div>
+                    <div className="h-6 bg-[#E0E6ED] rounded w-12 animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Keywords Skeleton */}
+            <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="h-6 bg-[#E0E6ED] rounded w-48 animate-pulse"></div>
+                <div className="h-4 bg-[#E0E6ED] rounded w-24 animate-pulse"></div>
+              </div>
+              <div className="space-y-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                    <div className="flex-1">
+                      <div className="h-4 bg-[#E0E6ED] rounded w-1/3 mb-2 animate-pulse"></div>
+                      <div className="h-3 bg-[#E0E6ED] rounded w-1/2 animate-pulse"></div>
+                    </div>
+                    <div className="h-6 bg-[#E0E6ED] rounded w-12 animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+              <div className="h-5 bg-[#E0E6ED] rounded w-24 mb-4 animate-pulse"></div>
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-12 bg-[#E0E6ED] rounded animate-pulse"></div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       ) : hasActivePackage ? (
         <div className="grid lg:grid-cols-3 gap-8">

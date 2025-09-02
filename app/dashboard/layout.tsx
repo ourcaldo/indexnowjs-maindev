@@ -84,22 +84,6 @@ export default function DashboardLayout({
     )
   }
 
-  // Only show loading if auth has never been checked
-  if (loading && !authChecked) {
-    return (
-      <QueryProvider>
-        <ToastContainer>
-          <div className="flex items-center justify-center min-h-screen bg-[#F7F9FC]">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mb-4"></div>
-              <p className="text-[#6C757D] font-medium">Loading Dashboard...</p>
-              <p className="text-sm text-[#9CA3AF] mt-1">Please wait while we load your data</p>
-            </div>
-          </div>
-        </ToastContainer>
-      </QueryProvider>
-    )
-  }
 
   // If no user, return null (redirecting)
   if (!user) {
