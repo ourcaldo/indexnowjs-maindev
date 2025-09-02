@@ -58,7 +58,7 @@ export function useSiteLogo(isExpanded: boolean = true) {
 }
 
 export function useSiteName() {
-  const [siteName, setSiteName] = useState<string>('IndexNow Pro')
+  const [siteName, setSiteName] = useState<string>('IndexNow Studio')
   
   useEffect(() => {
     const fetchName = async () => {

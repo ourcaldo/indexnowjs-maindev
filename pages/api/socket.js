@@ -81,7 +81,7 @@ const SocketHandler = (req, res) => {
       
       // Send connection confirmation
       socket.emit('connection', {
-        message: 'Connected to IndexNow Pro WebSocket',
+        message: 'Connected to IndexNow Studio WebSocket',
         clientId: socket.id
       })
 

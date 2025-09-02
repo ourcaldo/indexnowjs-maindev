@@ -159,7 +159,7 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Admin Dashboard</h1>
-          <p className="text-[#6C757D] mt-1">Overview of IndexNow Pro system metrics</p>
+          <p className="text-[#6C757D] mt-1">Overview of IndexNow Studio system metrics</p>
         </div>
         <button
           onClick={fetchDashboardStats}

@@ -3,7 +3,7 @@ import { spawn } from 'child_process';
 
 const port = process.env.PORT || '8081';
 
-console.log('🚀 Starting IndexNow Pro with WebSocket support...');
+console.log('🚀 Starting IndexNow Studio with WebSocket support...');
 
 // Use the custom server with WebSocket support instead of default Next.js dev server
 const serverProcess = spawn('npx', ['tsx', 'server/custom-server.ts'], {

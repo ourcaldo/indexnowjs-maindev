@@ -54,9 +54,9 @@ export async function POST(request: NextRequest) {
 
     // Send test email
     const testEmailOptions = {
-      from: `${smtp_from_name || 'IndexNow Pro'} <${smtp_from_email}>`,
+      from: `${smtp_from_name || 'IndexNow Studio'} <${smtp_from_email}>`,
       to: adminUser?.email || smtp_from_email, // Send to admin user's email
-      subject: 'IndexNow Pro - SMTP Test Email',
+      subject: 'IndexNow Studio - SMTP Test Email',
       html: `
         <!DOCTYPE html>
         <html>
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
           </div>
           
           <div style="margin-top: 30px; text-align: center; color: #6C757D; font-size: 12px;">
-            <p>IndexNow Pro - Professional URL Indexing Platform</p>
+            <p>IndexNow Studio - Professional URL Indexing Platform</p>
           </div>
         </body>
         </html>

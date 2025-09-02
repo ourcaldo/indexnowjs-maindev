@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const status = getBackgroundServicesStatus();
     
     return NextResponse.json({
-      system: 'IndexNow Pro Background Worker',
+      system: 'IndexNow Studio Background Worker',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       backgroundServices: status,

@@ -38,7 +38,7 @@ export default function DashboardPreview() {
       {/* Header */}
       <div className="relative z-10 p-6 border-b border-white/10">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">IndexNow Pro Dashboard</h3>
+          <h3 className="text-lg font-semibold text-white">IndexNow Studio Dashboard</h3>
           <div className="flex space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-xs text-green-400">Live</span>

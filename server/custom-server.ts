@@ -71,7 +71,7 @@ app.prepare().then(() => {
   (global as any).globalNamespace = globalNamespace;
 
   server.listen(port, hostname, () => {
-    console.log(`🚀 IndexNow Pro server ready on http://${hostname}:${port}`);
+    console.log(`🚀 IndexNow Studio server ready on http://${hostname}:${port}`);
     console.log(`📡 WebSocket server initialized on http://${hostname}:${port}/socket.io`);
   });
 

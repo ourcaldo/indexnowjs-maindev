@@ -49,7 +49,7 @@ export class WorkerStartup {
     }
 
     try {
-      logger.info('Initializing IndexNow Pro backend workers...')
+      logger.info('Initializing IndexNow Studio backend workers...')
 
       // 1. Start daily rank check job scheduler
       await this.initializeRankCheckScheduler()

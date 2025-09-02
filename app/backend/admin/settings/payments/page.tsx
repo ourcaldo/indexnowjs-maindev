@@ -218,7 +218,7 @@ export default function PaymentGateways() {
                   value={formData.configuration?.account_name || ''}
                   onChange={(e) => updateConfigurationField('account_name', e.target.value)}
                   className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
-                  placeholder="PT. IndexNow Pro"
+                  placeholder="PT. IndexNow Studio"
                 />
               </div>
 

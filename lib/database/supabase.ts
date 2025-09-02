@@ -38,7 +38,7 @@ export const supabase = (() => {
       },
       global: {
         headers: {
-          'x-client-info': 'indexnow-pro'
+          'x-client-info': 'indexnow-studio'
         }
       }
     })

@@ -4,6 +4,6 @@ export async function GET() {
   return NextResponse.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    message: 'IndexNow Pro API is running' 
+    message: 'IndexNow Studio API is running' 
   });
 }

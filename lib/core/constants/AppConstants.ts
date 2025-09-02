@@ -236,7 +236,7 @@ export const DEFAULT_SETTINGS = {
     DEFAULT_SCHEDULE: SCHEDULE_TYPES.ONE_TIME,
   },
   SYSTEM: {
-    SITE_NAME: 'IndexNow Pro',
+    SITE_NAME: 'IndexNow Studio',
     SITE_DESCRIPTION: 'Professional URL indexing automation platform',
     SMTP_PORT: 465,
     SMTP_SECURE: true,
