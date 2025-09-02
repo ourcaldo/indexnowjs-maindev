@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import SkeletonSidebar from '@/components/SkeletonSidebar'
 import { useAuth } from '@/lib/contexts/AuthContext'
@@ -34,11 +35,19 @@ export default function DashboardLayout({
 }) {
   // Use global auth context instead of local state
   const { user, loading, authChecked, isAuthenticated } = useAuth()
+  const router = useRouter()
   
   const [mounted, setMounted] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [cookiesLoaded, setCookiesLoaded] = useState(false)
+  
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [loading, user, router])
   
   // Site settings hooks
   const siteName = useSiteName()
@@ -70,20 +79,6 @@ export default function DashboardLayout({
   // Check if we're on the login page
   const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/login'
   
-  // Prevent loading flash during route changes by adding a small delay
-  // Only show loading after 100ms delay to filter out quick auth state flickers
-  const [showLoading, setShowLoading] = useState(false)
-  
-  useEffect(() => {
-    if (loading && !user) {
-      const timer = setTimeout(() => setShowLoading(true), 100)
-      return () => clearTimeout(timer)
-    } else {
-      setShowLoading(false)
-    }
-  }, [loading, user])
-  
-  const isAuthenticating = showLoading
 
   // Wrap ALL dashboard content with QueryProvider to prevent QueryClient errors
   return (
@@ -96,31 +91,41 @@ export default function DashboardLayout({
           </div>
         )}
 
-        {/* Main dashboard layout - always maintain structure */}
-        {!isLoginPage && (
+        {/* Simple loading state - only on initial auth check */}
+        {!isLoginPage && loading && (
+          <div className="flex items-center justify-center min-h-screen bg-[#F7F9FC]">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mb-4"></div>
+              <p className="text-[#6C757D] font-medium">Authenticating...</p>
+              <p className="text-sm text-[#9CA3AF] mt-1">Please wait while we verify your session</p>
+            </div>
+          </div>
+        )}
+
+        {/* If user is not authenticated, return null (will redirect) */}
+        {!isLoginPage && !loading && !user && null}
+
+        {/* Main dashboard layout - only render when authenticated */}
+        {!isLoginPage && !loading && user && (
           <div className="min-h-screen bg-[#F7F9FC]">
-            {/* Sidebar - always present */}
-            {isAuthenticated ? (
-              <Sidebar 
-                isOpen={sidebarOpen}
-                onToggle={() => setSidebarOpen(!sidebarOpen)}
-                onCollapse={() => {
-                  const newState = !sidebarCollapsed
-                  setSidebarCollapsed(newState)
-                  setCookie('sidebar-collapsed', newState.toString())
-                }}
-                user={user}
-                isCollapsed={sidebarCollapsed}
-              />
-            ) : (
-              <SkeletonSidebar isCollapsed={sidebarCollapsed} />
-            )}
+            {/* Sidebar */}
+            <Sidebar 
+              isOpen={sidebarOpen}
+              onToggle={() => setSidebarOpen(!sidebarOpen)}
+              onCollapse={() => {
+                const newState = !sidebarCollapsed
+                setSidebarCollapsed(newState)
+                setCookie('sidebar-collapsed', newState.toString())
+              }}
+              user={user}
+              isCollapsed={sidebarCollapsed}
+            />
 
             {/* Main content area */}
             <div className={`transition-all duration-300 ml-0 ${
               sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
             }`}>
-              {/* Mobile header - always show on mobile */}
+              {/* Mobile header */}
               <div className="lg:hidden bg-white border-b border-[#E0E6ED] px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-3 min-w-0 flex-1">
                   {iconUrl ? (
@@ -144,13 +149,11 @@ export default function DashboardLayout({
                   )}
                 </div>
                 <div className="flex items-center space-x-2">
-                  {/* Notification icon - moved from dashboard page for mobile */}
                   <button className="lg:hidden p-2 rounded-lg transition-colors" style={{backgroundColor: '#F7F9FC', color: '#6C757D'}} onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#E0E6ED'} onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'}>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                   </button>
-                  {/* Hamburger menu */}
                   <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className="p-2 rounded-md text-[#6C757D] hover:bg-[#F7F9FC] flex-shrink-0"
@@ -163,33 +166,17 @@ export default function DashboardLayout({
                 </div>
               </div>
 
-              {/* Authentication Loading State - Only show during initial auth, not route changes */}
-              {isAuthenticating && (
-                <div className="flex items-center justify-center min-h-96">
-                  <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mb-4"></div>
-                    <p className="text-[#6C757D] font-medium">Authenticating...</p>
-                    <p className="text-sm text-[#9CA3AF] mt-1">Please wait while we verify your session</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Authenticated Content */}
-              {isAuthenticated && (
-                <>
-                  {/* Service Account Quota Notification */}
-                  <ServiceAccountQuotaNotification />
-                  
-                  {/* Page content */}
-                  <main className="p-6">
-                    {children}
-                  </main>
-                </>
-              )}
+              {/* Service Account Quota Notification */}
+              <ServiceAccountQuotaNotification />
+              
+              {/* Page content */}
+              <main className="p-6">
+                {children}
+              </main>
             </div>
             
             {/* Quota Notifications */}
-            {isAuthenticated && <QuotaNotification />}
+            <QuotaNotification />
           </div>
         )}
       </ToastContainer>
