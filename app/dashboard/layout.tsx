@@ -213,11 +213,6 @@ export default function DashboardLayout({
                   </div>
                 )}
                 <h1 className="text-lg font-semibold text-[#1A1A1A] truncate">{siteName}</h1>
-                {user && (
-                  <span className="text-sm text-[#6C757D] truncate ml-auto pr-2" style={{maxWidth: '140px'}}>
-                    {user.email}
-                  </span>
-                )}
               </div>
               <div className="flex items-center space-x-2">
                 <button className="p-2 rounded-lg transition-colors" style={{backgroundColor: '#F7F9FC', color: '#6C757D'}} onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#E0E6ED'} onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'}>

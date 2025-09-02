@@ -447,47 +447,15 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-[#3D8BFF] to-[#6366F1] px-6 py-6 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                {isLoading ? (
-                  <div className="h-8 w-8 bg-white/20 animate-pulse rounded-lg"></div>
-                ) : iconUrl ? (
-                  <img 
-                    src={iconUrl} 
-                    alt={`${siteName} Icon`}
-                    className="h-8 w-8 rounded-lg"
-                  />
-                ) : (
-                  <div className="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-white" />
-                  </div>
-                )}
-                <div className="ml-3">
-                  <h1 className="text-lg font-bold">{siteName}</h1>
-                </div>
-              </div>
-              <button 
-                onClick={onToggle}
-                className="p-2 rounded-lg hover:bg-white/10 text-white transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            {/* User info in header */}
-            {user && (
-              <div className="flex items-center space-x-3 pt-2 border-t border-white/20">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mt-2">
-                  <User className="h-5 w-5 text-white" />
-                </div>
-                <div className="mt-2">
-                  <p className="text-sm font-medium text-white">{user.email}</p>
-                  <p className="text-xs text-white/70">User Dashboard</p>
-                </div>
-              </div>
-            )}
+          {/* Mobile Header with Close Button */}
+          <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-[#1A1A1A]">Navigation</h2>
+            <button 
+              onClick={onToggle}
+              className="p-2 rounded-lg hover:bg-gray-200 text-[#6C757D] transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Search Bar */}
