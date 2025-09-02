@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import SkeletonSidebar from '@/components/SkeletonSidebar'
 import { authService, AuthUser } from '@/lib/auth'
 import { ToastContainer } from '@/components/ui/toast'
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
@@ -36,6 +37,7 @@ export default function DashboardLayout({
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [cookiesLoaded, setCookiesLoaded] = useState(false)
@@ -73,6 +75,7 @@ export default function DashboardLayout({
       if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/login') {
         if (isMounted) {
           setLoading(false)
+          setAuthChecked(true)
         }
         return
       }
@@ -96,6 +99,7 @@ export default function DashboardLayout({
       } finally {
         if (isMounted) {
           setLoading(false)
+          setAuthChecked(true)
         }
       }
     }
@@ -116,6 +120,7 @@ export default function DashboardLayout({
       } else {
         setUser(user)
         setLoading(false)
+        setAuthChecked(true)
       }
     })
 
@@ -125,56 +130,43 @@ export default function DashboardLayout({
     }
   }, [router])
 
+  // Check if we're on the login page
+  const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/dashboard/login'
+  const isAuthenticating = !authChecked || loading
+  const isAuthenticated = authChecked && !loading && user
+
   // Wrap ALL dashboard content with QueryProvider to prevent QueryClient errors
   return (
     <QueryProvider>
       <ToastContainer>
         {/* For login page, render without authentication UI */}
-        {mounted && typeof window !== 'undefined' && window.location.pathname === '/dashboard/login' && (
+        {isLoginPage && (
           <div className="min-h-screen bg-[#F7F9FC]">
             {children}
           </div>
         )}
 
-        {/* Don't render main dashboard until mounted to prevent hydration issues */}
-        {!mounted && (
-          <div className="min-h-screen bg-[#F7F9FC]"></div>
-        )}
-
-        {/* Loading state during authentication check */}
-        {mounted && typeof window !== 'undefined' && window.location.pathname !== '/dashboard/login' && loading && (
-          <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A]"></div>
-              <p className="mt-4 text-[#6C757D]">Loading...</p>
-            </div>
-          </div>
-        )}
-
-        {/* Unauthenticated state (should redirect to login) */}
-        {mounted && typeof window !== 'undefined' && window.location.pathname !== '/dashboard/login' && !loading && !user && (
+        {/* Main dashboard layout - always maintain structure */}
+        {!isLoginPage && (
           <div className="min-h-screen bg-[#F7F9FC]">
-            {children}
-          </div>
-        )}
+            {/* Sidebar - always present */}
+            {isAuthenticated ? (
+              <Sidebar 
+                isOpen={sidebarOpen}
+                onToggle={() => setSidebarOpen(!sidebarOpen)}
+                onCollapse={() => {
+                  const newState = !sidebarCollapsed
+                  setSidebarCollapsed(newState)
+                  setCookie('sidebar-collapsed', newState.toString())
+                }}
+                user={user}
+                isCollapsed={sidebarCollapsed}
+              />
+            ) : (
+              <SkeletonSidebar isCollapsed={sidebarCollapsed} />
+            )}
 
-        {/* Authenticated dashboard UI */}
-        {mounted && typeof window !== 'undefined' && window.location.pathname !== '/dashboard/login' && !loading && user && (
-          <div className="min-h-screen bg-[#F7F9FC]">
-            {/* Sidebar */}
-            <Sidebar 
-              isOpen={sidebarOpen}
-              onToggle={() => setSidebarOpen(!sidebarOpen)}
-              onCollapse={() => {
-                const newState = !sidebarCollapsed
-                setSidebarCollapsed(newState)
-                setCookie('sidebar-collapsed', newState.toString())
-              }}
-              user={user}
-              isCollapsed={sidebarCollapsed}
-            />
-
-            {/* Main content */}
+            {/* Main content area */}
             <div className={`transition-all duration-300 ml-0 ${
               sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
             }`}>
@@ -221,17 +213,33 @@ export default function DashboardLayout({
                 </div>
               </div>
 
-              {/* Service Account Quota Notification */}
-              <ServiceAccountQuotaNotification />
-              
-              {/* Page content */}
-              <main className="p-6">
-                {children}
-              </main>
+              {/* Authentication Loading State */}
+              {isAuthenticating && (
+                <div className="flex items-center justify-center min-h-96">
+                  <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mb-4"></div>
+                    <p className="text-[#6C757D] font-medium">Authenticating...</p>
+                    <p className="text-sm text-[#9CA3AF] mt-1">Please wait while we verify your session</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Authenticated Content */}
+              {isAuthenticated && (
+                <>
+                  {/* Service Account Quota Notification */}
+                  <ServiceAccountQuotaNotification />
+                  
+                  {/* Page content */}
+                  <main className="p-6">
+                    {children}
+                  </main>
+                </>
+              )}
             </div>
             
             {/* Quota Notifications */}
-            <QuotaNotification />
+            {isAuthenticated && <QuotaNotification />}
           </div>
         )}
       </ToastContainer>
