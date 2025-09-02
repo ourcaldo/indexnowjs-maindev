@@ -72,7 +72,7 @@ export default function DashboardLayout({
 
     const checkAuth = async () => {
       // Skip auth check for login page
-      if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/login') {
+      if (typeof window !== 'undefined' && window.location.pathname === '/login') {
         if (isMounted) {
           setLoading(false)
           setAuthChecked(true)
@@ -86,7 +86,7 @@ export default function DashboardLayout({
         if (!isMounted) return
 
         if (!currentUser) {
-          router.push('/dashboard/login')
+          router.push('/login')
           return
         }
 
@@ -111,12 +111,12 @@ export default function DashboardLayout({
       if (!isMounted) return
       
       // Skip auth redirect for login page
-      if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/login') {
+      if (typeof window !== 'undefined' && window.location.pathname === '/login') {
         return
       }
       
       if (!user) {
-        router.push('/dashboard/login')
+        router.push('/login')
       } else {
         setUser(user)
         setLoading(false)
@@ -131,7 +131,7 @@ export default function DashboardLayout({
   }, [router])
 
   // Check if we're on the login page
-  const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/dashboard/login'
+  const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/login'
   const isAuthenticating = !authChecked || loading
   const isAuthenticated = authChecked && !loading && user
 

@@ -42,7 +42,7 @@ export function usePageData() {
     if (user) {
       window.location.href = '/dashboard'
     } else {
-      window.location.href = '/dashboard/login'
+      window.location.href = '/login'
     }
   }
 
