@@ -32,8 +32,8 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Use global auth context instead of local state
-  const { user, loading, authChecked, isAuthenticated } = useAuth()
+  // Use ONLY global auth context
+  const { user, loading } = useAuth()
   
   const [mounted, setMounted] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -65,8 +65,6 @@ export default function DashboardLayout({
     }
   }, [sidebarCollapsed, cookiesLoaded])
 
-  // No longer need auth checking useEffect - handled by AuthProvider globally
-
   // Check if we're on the login page
   const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/login'
   
@@ -84,9 +82,8 @@ export default function DashboardLayout({
     )
   }
 
-
-  // If authentication is still being checked or no user, show skeleton
-  if (!authChecked || (authChecked && !user)) {
+  // Show loading only while auth is checking
+  if (loading) {
     return (
       <QueryProvider>
         <ToastContainer>
