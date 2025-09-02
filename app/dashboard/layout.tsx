@@ -70,9 +70,20 @@ export default function DashboardLayout({
   // Check if we're on the login page
   const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/login'
   
-  // Simplified loading state - only show when no user and still loading auth check
-  // Following the suggested pattern: show loader only until auth is confirmed, never on route changes
-  const isAuthenticating = loading && !user
+  // Prevent loading flash during route changes by adding a small delay
+  // Only show loading after 100ms delay to filter out quick auth state flickers
+  const [showLoading, setShowLoading] = useState(false)
+  
+  useEffect(() => {
+    if (loading && !user) {
+      const timer = setTimeout(() => setShowLoading(true), 100)
+      return () => clearTimeout(timer)
+    } else {
+      setShowLoading(false)
+    }
+  }, [loading, user])
+  
+  const isAuthenticating = showLoading
 
   // Wrap ALL dashboard content with QueryProvider to prevent QueryClient errors
   return (
