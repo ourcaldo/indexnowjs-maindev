@@ -109,23 +109,45 @@ export default function Dashboard() {
   usePageViewLogger('/dashboard', 'Dashboard', { section: 'main_dashboard' })
   const { logDashboardActivity } = useActivityLogger()
 
-  // Fetch user profile using session token only (no auth check needed - handled by AuthProvider)
-  const loadUserProfile = async () => {
+  // Fetch user profile with timeout and proper error handling
+  const loadUserProfile = async (): Promise<void> => {
     try {
       const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) return;
+      if (!token) {
+        return Promise.resolve();
+      }
 
+      // Add timeout wrapper to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
       const response = await fetch('/api/v1/auth/user/profile', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
         setUserProfile(data.profile);
+      } else {
+        // Log non-2xx responses but continue with loading
+        logDashboardActivity('dashboard_api_error', 'User profile API call failed', {
+          endpoint: 'user_profile',
+          status: response.status,
+          statusText: response.statusText
+        });
       }
-    } catch (error) {
-      console.error('Error loading user profile:', error);
+    } catch (error: any) {
+      // Log error but ensure Promise resolves
+      logDashboardActivity('dashboard_api_error', 'User profile API call error', {
+        endpoint: 'user_profile',
+        error: error.message,
+        timeout: error.name === 'AbortError'
+      });
     }
+    return Promise.resolve();
   };
 
   // Fetch domains for rank tracking
@@ -201,29 +223,53 @@ export default function Dashboard() {
     }
   }, [domains, selectedDomainId])
 
-  // Load packages data
-  const loadPackages = async () => {
+  // Load packages data with timeout and proper error handling
+  const loadPackages = async (): Promise<void> => {
     try {
       const user = await authService.getCurrentUser()
-      if (!user) return
+      if (!user) {
+        return Promise.resolve();
+      }
 
       const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
+      if (!token) {
+        return Promise.resolve();
+      }
+
+      // Add timeout wrapper to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
       const response = await fetch('/api/v1/billing/packages', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        signal: controller.signal
       })
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json()
         setPackagesData(data)
+      } else {
+        // Log non-2xx responses but continue with loading
+        logDashboardActivity('dashboard_api_error', 'Billing packages API call failed', {
+          endpoint: 'billing_packages',
+          status: response.status,
+          statusText: response.statusText
+        });
       }
-    } catch (error) {
-      console.error('Error loading packages:', error)
+    } catch (error: any) {
+      // Log error but ensure Promise resolves
+      logDashboardActivity('dashboard_api_error', 'Billing packages API call error', {
+        endpoint: 'billing_packages',
+        error: error.message,
+        timeout: error.name === 'AbortError'
+      });
     }
+    return Promise.resolve();
   }
 
   // Handle subscription
@@ -239,28 +285,51 @@ export default function Dashboard() {
     }
   }
 
-  // Check trial eligibility
-  const checkTrialEligibility = async () => {
+  // Check trial eligibility with timeout and proper error handling
+  const checkTrialEligibility = async (): Promise<void> => {
     try {
       const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
+      if (!token) {
+        setTrialEligible(false);
+        return Promise.resolve();
+      }
+
+      // Add timeout wrapper to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
       const response = await fetch('/api/v1/auth/user/trial-eligibility', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        signal: controller.signal
       })
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const result = await response.json()
         setTrialEligible(result.eligible)
       } else {
         setTrialEligible(false)
+        // Log non-2xx responses
+        logDashboardActivity('dashboard_api_error', 'Trial eligibility API call failed', {
+          endpoint: 'trial_eligibility',
+          status: response.status,
+          statusText: response.statusText
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       setTrialEligible(false)
+      // Log error but ensure Promise resolves
+      logDashboardActivity('dashboard_api_error', 'Trial eligibility API call error', {
+        endpoint: 'trial_eligibility',
+        error: error.message,
+        timeout: error.name === 'AbortError'
+      });
     }
+    return Promise.resolve();
   }
 
   // Check if package is eligible for trial (Premium or Pro plans only)
@@ -285,13 +354,51 @@ export default function Dashboard() {
     }
   }
 
-  // Load user data
+  // Load user data with comprehensive error handling and timeout
   useEffect(() => {
-    Promise.all([
-      loadUserProfile(),
-      loadPackages(),
-      checkTrialEligibility()
-    ]).finally(() => setLoading(false))
+    const loadDashboardData = async () => {
+      logDashboardActivity('dashboard_data_loading_started', 'Dashboard data loading initiated', {
+        timestamp: new Date().toISOString()
+      });
+      
+      try {
+        // Use Promise.allSettled to ensure all promises complete regardless of individual failures
+        const results = await Promise.allSettled([
+          loadUserProfile(),
+          loadPackages(),
+          checkTrialEligibility()
+        ]);
+        
+        // Log any rejected promises for debugging
+        results.forEach((result, index) => {
+          const endpoints = ['user_profile', 'billing_packages', 'trial_eligibility'];
+          if (result.status === 'rejected') {
+            logDashboardActivity('dashboard_promise_rejected', `Promise rejected for ${endpoints[index]}`, {
+              endpoint: endpoints[index],
+              error: result.reason?.message || 'Unknown error'
+            });
+          }
+        });
+        
+        logDashboardActivity('dashboard_data_loading_completed', 'Dashboard data loading finished', {
+          timestamp: new Date().toISOString(),
+          successful_calls: results.filter(r => r.status === 'fulfilled').length,
+          failed_calls: results.filter(r => r.status === 'rejected').length
+        });
+        
+      } catch (error: any) {
+        // This should not happen with Promise.allSettled, but just in case
+        logDashboardActivity('dashboard_data_loading_error', 'Dashboard data loading encountered error', {
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+      } finally {
+        // Always set loading to false, regardless of success or failure
+        setLoading(false);
+      }
+    };
+    
+    loadDashboardData();
   }, [])
 
   // Calculate rank statistics
