@@ -1,0 +1,103 @@
+1. Introduce a Global Auth Context
+
+Instead of checking Supabase on every route change in DashboardLayout, do it once at the app root and persist the result:
+
+// context/AuthProvider.tsx
+"use client";
+import { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type AuthContextType = {
+  user: any | null;
+  loading: boolean;
+};
+
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+});
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+2. Wrap Your App with Provider
+
+In app/layout.tsx (or App.tsx if CRA/Vite):
+
+<AuthProvider>
+  {children}
+</AuthProvider>
+
+3. Simplify DashboardLayout
+
+Now you don’t need to run checkAuth() on every route change.
+Just consume the context:
+
+import { useAuth } from "@/context/AuthProvider";
+import { useRouter } from "next/navigation";
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  if (loading) {
+    return <div>Authenticating...</div>;
+  }
+
+  if (!user) {
+    router.push("/login");
+    return null;
+  }
+
+  return (
+    <div className="dashboard-layout">
+      <Sidebar />
+      <main>{children}</main>
+    </div>
+  );
+}
+
+🔄 Result
+
+First load → Loader shows until Supabase confirms session.
+
+Route change → Uses context state, no loader flash.
+
+Logout → onAuthStateChange clears context → redirect to /login.
+
+🛠️ Optional Optimizations
+
+Use isInitialized flag in context instead of loading for cleaner state handling.
+
+Pre-fetch user data on server (middleware.ts) only for protected routes → but avoid double client-side validation.
+
+If performance still feels sluggish, cache the session in memory and refresh in the background, not blocking UI.
