@@ -21,8 +21,7 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
-import { useUserProfile } from '@/hooks/useUserProfile'
-import { useKeywordUsage } from '@/hooks/useKeywordUsage'
+import { useDashboardData } from '@/hooks/useDashboardData'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/database'
 
@@ -49,53 +48,15 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
   const logoUrl = useSiteLogo(!isCollapsed) // Full logo when expanded, icon when collapsed  
   const iconUrl = useSiteLogo(false) // Always get icon for mobile header and collapsed state
   
-  // Get user profile with role information
-  const { user: userProfile } = useUserProfile()
+  // Get all dashboard data from merged endpoint
+  const { data: dashboardData, isLoading: dashboardLoading } = useDashboardData()
   
-  // Get keyword usage data
-  const { keywordUsage, loading: keywordLoading } = useKeywordUsage()
-  
-  // Get packages data to check for active package with proper auth
-  const { data: packagesData } = useQuery({
-    queryKey: ['packages'],
-    queryFn: async () => {
-      const user = await authService.getCurrentUser()
-      if (!user) throw new Error('User not authenticated')
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) throw new Error('No authentication token')
-
-      const response = await fetch('/api/v1/billing/packages', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) throw new Error('Failed to fetch packages')
-      return response.json()
-    }
-  })
-  
-  // Get detailed user profile data for package information with proper auth
-  const { data: detailedUserProfile } = useQuery({
-    queryKey: ['user-profile-detailed'],
-    queryFn: async () => {
-      const user = await authService.getCurrentUser()
-      if (!user) throw new Error('User not authenticated')
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) throw new Error('No authentication token')
-
-      const response = await fetch('/api/v1/auth/user/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) throw new Error('Failed to fetch user profile')
-      return response.json()
-    }
-  })
+  // Extract data from dashboard response
+  const userProfile = dashboardData?.user?.profile
+  const keywordUsage = dashboardData?.rankTracking?.usage
+  const packagesData = dashboardData?.billing
+  const detailedUserProfile = dashboardData?.user?.profile
+  const keywordLoading = dashboardLoading
 
   const handleLogout = async () => {
     try {
