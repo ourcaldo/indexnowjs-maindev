@@ -83,6 +83,7 @@ export default function TiptapEditor({
       TableCell,
     ],
     content,
+    immediatelyRender: false, // Fix SSR hydration issues
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
