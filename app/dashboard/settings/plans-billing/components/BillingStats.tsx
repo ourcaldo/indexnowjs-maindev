@@ -66,10 +66,7 @@ export const BillingStats = ({
   const loadUsageData = async () => {
     try {
       setUsageLoading(true)
-      await Promise.all([
-        loadQuotaData(),
-        loadKeywordUsageData()
-      ])
+      await loadDashboardData()
     } catch (error) {
       console.error('Error loading usage data:', error)
     } finally {
@@ -77,7 +74,7 @@ export const BillingStats = ({
     }
   }
 
-  const loadQuotaData = async () => {
+  const loadDashboardData = async () => {
     try {
       const user = await authService.getCurrentUser()
       if (!user) return
@@ -85,7 +82,7 @@ export const BillingStats = ({
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/v1/auth/user/quota', {
+      const response = await fetch('/api/v1/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -93,35 +90,12 @@ export const BillingStats = ({
       })
 
       if (response.ok) {
-        const data = await response.json()
-        setUsageData(data.quota)
+        const dashboardData = await response.json()
+        setUsageData(dashboardData.user?.quota)
+        setKeywordUsage(dashboardData.rankTracking?.usage)
       }
     } catch (error) {
-      console.error('Error loading usage data:', error)
-    }
-  }
-
-  const loadKeywordUsageData = async () => {
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) return
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
-
-      const response = await fetch('/api/v1/rank-tracking/keyword-usage', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setKeywordUsage(data)
-      }
-    } catch (error) {
-      console.error('Error loading keyword usage:', error)
+      console.error('Error loading dashboard data:', error)
     }
   }
 

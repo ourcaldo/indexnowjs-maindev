@@ -30,7 +30,7 @@ export default function GlobalQuotaWarning() {
       const { data: { session }, error } = await supabase.auth.getSession()
       if (error || !session) return
 
-      const response = await fetch('/api/v1/auth/user/quota', {
+      const response = await fetch('/api/v1/dashboard', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
@@ -38,7 +38,7 @@ export default function GlobalQuotaWarning() {
 
       if (response.ok) {
         const data = await response.json()
-        setQuotaInfo(data.quota)
+        setQuotaInfo(data.user?.quota)
       }
     } catch (error) {
       console.error('Failed to fetch quota info:', error)

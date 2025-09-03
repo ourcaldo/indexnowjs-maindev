@@ -45,11 +45,7 @@ export const UsageOverviewCard = () => {
   const loadAllData = async () => {
     try {
       setLoading(true)
-      await Promise.all([
-        loadUsageData(),
-        loadKeywordUsage(),
-        loadBillingData()
-      ])
+      await loadDashboardData()
     } catch (error) {
       console.error('Error loading usage data:', error)
     } finally {
@@ -57,7 +53,7 @@ export const UsageOverviewCard = () => {
     }
   }
 
-  const loadUsageData = async () => {
+  const loadDashboardData = async () => {
     try {
       const user = await authService.getCurrentUser()
       if (!user) return
@@ -65,7 +61,7 @@ export const UsageOverviewCard = () => {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/v1/auth/user/quota', {
+      const response = await fetch('/api/v1/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -73,59 +69,13 @@ export const UsageOverviewCard = () => {
       })
 
       if (response.ok) {
-        const data = await response.json()
-        setUsageData(data.quota)
+        const dashboardData = await response.json()
+        setUsageData(dashboardData.user?.quota)
+        setKeywordUsage(dashboardData.rankTracking?.usage)
+        setBillingData(dashboardData.billing)
       }
     } catch (error) {
-      console.error('Error loading usage data:', error)
-    }
-  }
-
-  const loadKeywordUsage = async () => {
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) return
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
-
-      const response = await fetch('/api/v1/rank-tracking/keyword-usage', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setKeywordUsage(data)
-      }
-    } catch (error) {
-      console.error('Error loading keyword usage:', error)
-    }
-  }
-
-  const loadBillingData = async () => {
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) return
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
-
-      const response = await fetch('/api/v1/billing/overview', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setBillingData(data)
-      }
-    } catch (error) {
-      console.error('Error loading billing data:', error)
+      console.error('Error loading dashboard data:', error)
     }
   }
 

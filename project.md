@@ -5108,6 +5108,32 @@ This refactoring establishes a scalable foundation for IndexNow Studio's continu
 
 ## Recent Changes
 
+### September 3, 2025: Dashboard API Calls Optimization - Individual API Call Elimination ✅
+
+**✅ DASHBOARD API CALLS OPTIMIZATION COMPLETED**: Successfully eliminated remaining individual API calls in favor of merged dashboard endpoint
+- **Problem**: After implementing merged dashboard endpoint, several components were still calling individual APIs: `/api/v1/auth/user/quota`, `/api/v1/rank-tracking/keyword-usage`, `/api/v1/notifications/service-account-quota`
+- **Solution**: Updated all remaining components and hooks to use the unified `/api/v1/dashboard` endpoint instead of individual API calls
+- **Performance Impact**: Further reduced redundant API calls on dashboard pages, improving loading speed and reducing server load
+
+**✅ HOOK UPDATES FOR MERGED ENDPOINTS**: Updated global quota management and billing components to use consolidated data source
+- **Updated `useGlobalQuotaManager`**: Modified to fetch data from `/api/v1/dashboard` instead of separate quota and notification endpoints
+- **Updated `BillingStats` Component**: Replaced individual API calls to quota and keyword usage endpoints with single dashboard call
+- **Updated `UsageOverviewCard` Component**: Consolidated three separate API calls (quota, keyword usage, billing overview) into one dashboard call
+- **Updated `GlobalQuotaWarning` Component**: Modified to use dashboard endpoint for consistency across all quota-related components
+
+**✅ COMPREHENSIVE API CALL CLEANUP**: Verified elimination of redundant individual API calls throughout dashboard
+- **Before**: Dashboard components making separate calls to `/api/v1/auth/user/quota`, `/api/v1/rank-tracking/keyword-usage`, `/api/v1/notifications/service-account-quota`
+- **After**: All dashboard data loading through single `/api/v1/dashboard` endpoint with proper error handling and data structure
+- **Console Verification**: Confirmed clean console output with no redundant API calls on dashboard load
+
+**Files Modified:**
+- `hooks/useGlobalQuotaManager.ts` - Updated to use merged dashboard endpoint instead of individual quota and notification calls
+- `components/GlobalQuotaWarning.tsx` - Modified to fetch quota data from dashboard endpoint
+- `app/dashboard/settings/plans-billing/components/BillingStats.tsx` - Consolidated three individual API calls into single dashboard call
+- `app/dashboard/settings/plans-billing/components/UsageOverviewCard.tsx` - Replaced multiple API calls with unified dashboard data fetch
+
+**Result:** Dashboard now loads efficiently with minimal API calls, providing faster user experience and reduced server load while maintaining all functionality.
+
 ### September 3, 2025 - API Performance Optimization - Merged Dashboard Endpoints Created ✅
 
 - ✅ **DASHBOARD API PERFORMANCE OPTIMIZATION**: Created merged API endpoints to reduce dashboard loading times by eliminating multiple individual API calls

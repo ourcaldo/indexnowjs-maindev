@@ -95,27 +95,18 @@ export function useGlobalQuotaManager() {
         return errorData
       }
 
-      // Fetch both quota and notifications in parallel
-      const [quotaResponse, notificationsResponse] = await Promise.all([
-        fetch('/api/v1/auth/user/quota', {
-          headers: { 'Authorization': `Bearer ${session.access_token}` }
-        }),
-        fetch('/api/v1/notifications/service-account-quota', {
-          headers: { 'Authorization': `Bearer ${session.access_token}` }
-        })
-      ])
+      // Use merged dashboard endpoint for better performance
+      const dashboardResponse = await fetch('/api/v1/dashboard', {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      })
 
       let quotaInfo = globalQuotaData.quotaInfo
       let notifications = globalQuotaData.notifications
 
-      if (quotaResponse.ok) {
-        const quotaData = await quotaResponse.json()
-        quotaInfo = quotaData.quota
-      }
-
-      if (notificationsResponse.ok) {
-        const notificationData = await notificationsResponse.json()
-        notifications = notificationData.notifications || []
+      if (dashboardResponse.ok) {
+        const dashboardData = await dashboardResponse.json()
+        quotaInfo = dashboardData.user?.quota || quotaInfo
+        notifications = dashboardData.notifications || notifications
       }
 
       const updatedData = {
