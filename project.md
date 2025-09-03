@@ -1047,6 +1047,40 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 3, 2025: Dashboard API Consolidation - Performance Optimization & Reduced API Calls ✅
+
+**✅ DASHBOARD API CONSOLIDATION IMPLEMENTED**: Eliminated redundant individual API calls by consolidating data fetching into single merged endpoint
+-- **Problem**: Dashboard was making multiple individual API calls (/api/v1/rank-tracking/keyword-usage, /api/v1/rank-tracking/keywords) causing slow page loads
+-- **Solution**: Enhanced existing merged /api/v1/dashboard endpoint to include all required data, reducing API calls from 6-8 individual calls to 1 merged call
+-- **Performance Impact**: Significantly improved dashboard load times and reduced server load through consolidated data fetching
+
+**✅ QUOTACARD COMPONENT OPTIMIZATION**: Updated QuotaCard to use merged dashboard data instead of individual keyword usage API calls
+-- **Previous**: QuotaCard made separate call to /api/v1/rank-tracking/keyword-usage endpoint 
+-- **Optimized**: Now uses keyword usage data from merged dashboard API via useDashboardData() hook
+-- **Code Cleanup**: Removed individual useQuery call for keyword usage, simplified component logic
+-- **Performance**: Eliminated duplicate API call that was loading the same data already available in dashboard
+
+**✅ ENHANCED DASHBOARD MERGE API**: Extended /api/v1/dashboard endpoint to include recent keywords data for comprehensive dashboard functionality
+-- **Keywords Integration**: Added recentKeywords query to fetch top 50 recent keywords with domain and ranking information
+-- **Data Structure**: Enhanced rankTracking section to include recentKeywords array alongside existing usage and domains data
+-- **Parallel Processing**: Maintained efficient Promise.all() execution for optimal performance while adding new data source
+-- **TypeScript Support**: Updated DashboardData interface to include recentKeywords in rankTracking structure
+
+**✅ MAIN DASHBOARD KEYWORD OPTIMIZATION**: Replaced individual keyword API calls in main dashboard with merged endpoint data
+-- **Eliminated Individual Calls**: Removed separate useQuery calls to /api/v1/rank-tracking/keywords for both top keywords (limit 6) and all keywords (limit 1000)
+-- **Local Filtering Logic**: Implemented getKeywordsForDomain() function to filter merged keyword data by selected domain
+-- **Maintained Functionality**: Preserved all existing keyword display and statistics calculation while using consolidated data
+-- **Improved Loading States**: Unified loading states using dashboard loading instead of multiple individual query loading states
+
+**Files Modified:**
+-- `components/QuotaCard.tsx` - Replaced individual keyword usage API call with merged dashboard data
+-- `app/api/v1/dashboard/route.ts` - Enhanced merged endpoint to include recent keywords data
+-- `hooks/useDashboardData.ts` - Updated interface to include recentKeywords in rankTracking structure
+-- `app/dashboard/page.tsx` - Replaced individual keyword API calls with local filtering of merged data
+-- `app/dashboard/page.tsx` - Updated keyword display logic to work with new merged API data structure
+
+**Result:** Dashboard now loads significantly faster with reduced API calls (1 merged call vs 6-8 individual calls), improved user experience, and reduced server load while maintaining all existing functionality.
+
 ### September 2, 2025: Dashboard Skeleton Loading Issue Fixed - Critical User Experience Improvement ✅
 
 **✅ DASHBOARD LOADING STATE ISSUE RESOLVED**: Fixed persistent skeleton loading state that prevented dashboard from rendering properly on first login

@@ -49,7 +49,8 @@ export async function GET(request: NextRequest) {
       trialEligibilityResult,
       packagesResult,
       domainsResult,
-      serviceAccountQuotaResult
+      serviceAccountQuotaResult,
+      recentKeywordsResult
     ] = await Promise.all([
       // User Profile
       supabaseAdmin
@@ -125,7 +126,33 @@ export async function GET(request: NextRequest) {
         .eq('type', 'quota_warning')
         .eq('is_read', false)
         .order('created_at', { ascending: false })
-        .limit(10)
+        .limit(10),
+
+      // Recent Keywords for Dashboard Overview
+      supabaseAdmin
+        .from('indb_keyword_keywords')
+        .select(`
+          id,
+          keyword,
+          device_type,
+          domain:indb_keyword_domains(
+            id,
+            domain_name,
+            display_name
+          ),
+          country:indb_keyword_countries(
+            name,
+            iso2_code
+          ),
+          recent_ranking:indb_keyword_rankings(
+            position,
+            check_date
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(50) // Get top 50 keywords for dashboard overview
     ])
 
     // Get additional user statistics
@@ -332,6 +359,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Process Recent Keywords for Dashboard
+    let recentKeywords: any[] = []
+    if (!recentKeywordsResult.error && recentKeywordsResult.data) {
+      recentKeywords = recentKeywordsResult.data
+    }
+
     // Build the merged response
     const dashboardData = {
       user: {
@@ -346,7 +379,8 @@ export async function GET(request: NextRequest) {
       },
       rankTracking: {
         usage: keywordUsage,
-        domains: domainsResult.data || []
+        domains: domainsResult.data || [],
+        recentKeywords: recentKeywords
       },
       notifications: serviceAccountQuotaResult.data || []
     }

@@ -4,8 +4,7 @@ import { useEffect } from 'react'
 import { TrendingUp, AlertTriangle, Package, Search } from 'lucide-react'
 import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
 import { useQuotaUpdates } from '@/hooks/useGlobalWebSocket'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/database'
+import { useDashboardData } from '@/hooks/useDashboardData'
 
 interface QuotaInfo {
   daily_quota_used: number
@@ -39,6 +38,14 @@ interface QuotaCardProps {
 
 export default function QuotaCard({ userProfile }: QuotaCardProps) {
   const { quotaInfo, loading, refreshQuota } = useGlobalQuotaManager()
+  
+  // Get keyword usage data from merged dashboard API
+  const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useDashboardData()
+  
+  // Extract keyword usage data from dashboard
+  const keywordUsageData = dashboardData?.rankTracking?.usage
+  const keywordUsageLoading = dashboardLoading
+  const keywordUsageError = dashboardError
 
   // Fetch quota data on component mount only
   useEffect(() => {
@@ -50,31 +57,6 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
   // Subscribe to real-time quota updates via WebSocket
   useQuotaUpdates((quotaUpdate) => {
     // Quota will be automatically updated through the global manager
-  })
-
-  // Fetch keyword usage data
-  const { data: keywordUsageData, isLoading: keywordUsageLoading, error: keywordUsageError } = useQuery({
-    queryKey: ['/api/v1/rank-tracking/keyword-usage'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
-        throw new Error('No auth token available')
-      }
-      const response = await fetch('/api/v1/rank-tracking/keyword-usage', {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error('Keyword usage API error:', response.status, errorData)
-        throw new Error(`Failed to fetch keyword usage: ${response.status}`)
-      }
-      return response.json()
-    },
-    retry: 1,
-    retryDelay: 1000
   })
 
 

@@ -15,6 +15,7 @@ export interface DashboardData {
   rankTracking: {
     usage: any;
     domains: any[];
+    recentKeywords: any[];
   };
   notifications: any[];
 }
