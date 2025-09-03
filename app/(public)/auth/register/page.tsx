@@ -9,7 +9,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { registerSchema } from '@/shared/schema'
 // We'll use a simple fetch to our detect-location API instead
 
-import DashboardPreview from '../../components/DashboardPreview'
+import DashboardPreview from '@/components/DashboardPreview'
 
 export default function Register() {
   const router = useRouter()

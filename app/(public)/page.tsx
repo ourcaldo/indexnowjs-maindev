@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import LandingPage from './components/LandingPage'
+import LandingPage from '@/app/components/LandingPage'
 import ClientOnlyWrapper from '@/components/ClientOnlyWrapper'
 
 export const metadata: Metadata = {

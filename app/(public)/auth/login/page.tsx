@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { authService } from "@/lib/auth"
 import { useFavicon, useSiteName, useSiteLogo } from '@/hooks/use-site-settings'
 
-import DashboardPreview from '../../components/DashboardPreview'
+import DashboardPreview from '@/components/DashboardPreview'
 
 export default function Login() {
   const router = useRouter()
