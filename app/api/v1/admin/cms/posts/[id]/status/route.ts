@@ -8,6 +8,7 @@ export async function PATCH(
 ) {
   try {
     await requireServerSuperAdminAuth(request)
+    const { id } = await params
     const body = await request.json()
 
     if (!body.status) {
@@ -34,7 +35,7 @@ export async function PATCH(
     const { data: post, error } = await supabaseAdmin
       .from('indb_cms_posts')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 

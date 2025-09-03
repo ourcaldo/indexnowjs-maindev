@@ -8,11 +8,12 @@ export async function GET(
 ) {
   try {
     await requireServerSuperAdminAuth(request)
+    const { id } = await params
 
     const { data: post, error } = await supabaseAdmin
       .from('indb_cms_posts')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) {
@@ -63,6 +64,7 @@ export async function PUT(
 ) {
   try {
     const adminUser = await requireServerSuperAdminAuth(request)
+    const { id } = await params
     const body = await request.json()
 
     if (!adminUser) {
@@ -98,7 +100,7 @@ export async function PUT(
     const { data: post, error } = await supabaseAdmin
       .from('indb_cms_posts')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -123,11 +125,12 @@ export async function DELETE(
 ) {
   try {
     await requireServerSuperAdminAuth(request)
+    const { id } = await params
 
     const { data: post, error } = await supabaseAdmin
       .from('indb_cms_posts')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
