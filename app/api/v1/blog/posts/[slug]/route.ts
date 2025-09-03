@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/database'
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const supabase = supabaseAdmin
   
   try {
-    const { slug } = params
+    const { slug } = await params
     
     if (!slug) {
       return NextResponse.json(

@@ -3,9 +3,10 @@ import { notFound } from 'next/navigation'
 import SinglePostContent from './components/SinglePostContent'
 
 // Generate metadata for each blog post
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/v1/blog/posts/${params.slug}`, {
+    const { slug } = await params
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/v1/blog/posts/${slug}`, {
       cache: 'no-store'
     })
     
@@ -65,9 +66,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function SinglePostPage({ params }: { params: { slug: string } }) {
+export default async function SinglePostPage({ params }: { params: Promise<{ slug: string }> }) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/v1/blog/posts/${params.slug}`, {
+    const { slug } = await params
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/v1/blog/posts/${slug}`, {
       cache: 'no-store'
     })
     
