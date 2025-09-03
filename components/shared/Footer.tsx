@@ -75,7 +75,7 @@ export default function Footer({ siteSettings, onScrollToPricing }: FooterProps)
               <h3 className="text-white font-medium text-sm">Resources</h3>
               <ul className="space-y-2 text-sm">
                 <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Docs</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Blog</a></li>
+                <li><a href="/blog" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Blog</a></li>
                 <li><a href="/faq" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">FAQs</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Changelog</a></li>
               </ul>

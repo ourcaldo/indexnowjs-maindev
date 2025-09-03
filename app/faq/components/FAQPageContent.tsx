@@ -177,6 +177,10 @@ export default function FAQPageContent() {
       href: '/pricing'
     },
     {
+      label: 'Blog',
+      href: '/blog'
+    },
+    {
       label: 'FAQ',
       href: '/faq',
       isActive: true

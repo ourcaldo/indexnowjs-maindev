@@ -107,6 +107,10 @@ export default function LandingPage() {
       href: '/pricing'
     },
     {
+      label: 'Blog',
+      href: '/blog'
+    },
+    {
       label: 'FAQ',
       href: '/faq'
     },

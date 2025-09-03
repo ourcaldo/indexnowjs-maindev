@@ -100,6 +100,10 @@ export default function PricingPageContent() {
       isActive: true
     },
     {
+      label: 'Blog',
+      href: '/blog'
+    },
+    {
       label: 'FAQ',
       href: '/faq'
     },

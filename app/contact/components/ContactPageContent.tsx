@@ -45,6 +45,10 @@ export default function ContactPageContent() {
       href: '/pricing'
     },
     {
+      label: 'Blog',
+      href: '/blog'
+    },
+    {
       label: 'FAQ',
       href: '/faq'
     },
