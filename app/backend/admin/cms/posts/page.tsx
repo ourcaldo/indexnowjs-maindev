@@ -153,7 +153,10 @@ export default function CMSPosts() {
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Posts</h1>
           <p className="text-[#6C757D] mt-1">Manage blog posts and content articles</p>
         </div>
-        <button className="flex items-center space-x-2 px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors">
+        <button 
+          onClick={() => window.location.href = '/backend/admin/cms/posts/create'}
+          className="flex items-center space-x-2 px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+        >
           <Plus className="h-4 w-4" />
           <span>New Post</span>
         </button>
@@ -321,7 +324,11 @@ export default function CMSPosts() {
                       <button className="p-1 text-[#6C757D] hover:text-[#3D8BFF] hover:bg-[#3D8BFF]/10 rounded">
                         <Eye className="h-4 w-4" />
                       </button>
-                      <button className="p-1 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded">
+                      <button 
+                        onClick={() => window.location.href = `/backend/admin/cms/posts/${post.id}/edit`}
+                        className="p-1 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded"
+                        title="Edit post"
+                      >
                         <Edit3 className="h-4 w-4" />
                       </button>
                       <select

@@ -72,7 +72,7 @@ Based on current `indb_cms_posts` table structure:
 #### 2.1 Create Post Form Component
 - **File**: `app/backend/admin/cms/posts/create/page.tsx`
 - **Features**:
-  - Rich text editor (TinyMCE or similar)
+  - Rich text editor (Tiptap with advanced features)
   - Featured image upload
   - SEO metadata fields
   - Tag management
@@ -154,9 +154,9 @@ Based on current `indb_cms_posts` table structure:
 ### Phase 6: UI/UX Polish (Priority: LOW)
 
 #### 6.1 Enhanced Post Editor
-- **Rich Text Features**: Advanced formatting, code blocks, tables
-- **Media Gallery**: Integrated image browser
-- **Block Editor**: WordPress-style block editor option
+- **Rich Text Features**: Advanced Tiptap formatting, code blocks with syntax highlighting, tables, collaborative editing
+- **Media Gallery**: Integrated image browser with drag-and-drop
+- **Block Editor**: Tiptap-based modular block editor with custom extensions
 
 #### 6.2 Improved Admin Interface
 - **Dashboard Widgets**: Post stats, recent activity
@@ -205,17 +205,25 @@ lib/
 ## Dependencies to Install
 
 ```bash
-# Rich Text Editor
-npm install @tinymce/tinymce-react
+# Rich Text Editor - Tiptap
+npm install @tiptap/react @tiptap/pm @tiptap/starter-kit
+npm install @tiptap/extension-text-style @tiptap/extension-font-family
+npm install @tiptap/extension-color @tiptap/extension-highlight
+npm install @tiptap/extension-link @tiptap/extension-image
+npm install @tiptap/extension-code-block-lowlight
+npm install @tiptap/extension-table @tiptap/extension-table-row @tiptap/extension-table-cell @tiptap/extension-table-header
 
-# Form Handling (if not using existing)
-npm install react-hook-form @hookform/resolvers zod
+# Form Handling (already exists)
+# react-hook-form @hookform/resolvers zod (already installed)
 
 # Image Handling
 npm install sharp @supabase/storage-js
 
 # Utility Libraries
 npm install slugify date-fns
+
+# Syntax Highlighting for code blocks
+npm install lowlight
 ```
 
 ## Database Queries Required
