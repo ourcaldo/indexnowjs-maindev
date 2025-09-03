@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
         meta_title: body.meta_title,
         meta_description: body.meta_description,
         tags: body.tags || [],
+        category: body.category || 'uncategorized',
         published_at: body.status === 'published' ? new Date().toISOString() : null
       })
       .select()

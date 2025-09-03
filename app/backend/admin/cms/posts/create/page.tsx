@@ -30,14 +30,8 @@ export default function CreatePostPage() {
 
       const result = await response.json()
       
-      // Redirect based on post status
-      if (data.status === 'published') {
-        // Redirect to the published post
-        router.push(`/blog/${data.slug}`)
-      } else {
-        // Redirect back to posts list
-        router.push('/backend/admin/cms/posts')
-      }
+      // Stay on the page after successful creation
+      // User can navigate manually if needed
     } catch (error) {
       console.error('Create post error:', error)
       throw error // Re-throw to be handled by PostForm
