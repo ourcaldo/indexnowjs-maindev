@@ -71,13 +71,14 @@ class SiteSettingsService {
     }
 
     try {
-      const response = await fetch('/api/v1/public/site-settings')
+      const response = await fetch('/api/v1/public/settings')
       if (response.ok) {
         const data = await response.json()
-        // API returns settings directly, not wrapped in success/settings structure
-        this.cachedSettings = data
+        // Extract site settings from merged response
+        const siteSettings = data.siteSettings
+        this.cachedSettings = siteSettings
         this.cacheExpiry = now + this.CACHE_DURATION
-        return data
+        return siteSettings
       }
     } catch (error) {
       console.warn('Failed to fetch site settings, using defaults:', error)

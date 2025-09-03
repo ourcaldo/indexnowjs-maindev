@@ -23,6 +23,7 @@ import { supabase } from '@/lib/database'
 import QuotaCard from '@/components/QuotaCard'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import PricingTable from '@/components/shared/PricingTable'
+import { useDashboardData } from '@/hooks/useDashboardData'
 
 interface UserProfile {
   full_name: string | null;
@@ -109,63 +110,18 @@ export default function Dashboard() {
   usePageViewLogger('/dashboard', 'Dashboard', { section: 'main_dashboard' })
   const { logDashboardActivity } = useActivityLogger()
 
-  // Fetch user profile with timeout and proper error handling
-  const loadUserProfile = async (): Promise<void> => {
-    try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      
-      if (!token) {
-        return Promise.resolve();
-      }
-      
-      // Add timeout wrapper to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-      
-      const response = await fetch('/api/v1/auth/user/profile', {
-        headers: { Authorization: `Bearer ${token}` },
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
+  // Use merged dashboard data
+  const { 
+    data: dashboardData, 
+    isLoading: dashboardLoading, 
+    error: dashboardError 
+  } = useDashboardData()
 
-      if (response.ok) {
-        const data = await response.json();
-        setUserProfile(data.profile);
-      } else {
-        // Log non-2xx responses but continue with loading
-        logDashboardActivity('dashboard_api_error', 'User profile API call failed', {
-          endpoint: 'user_profile',
-          status: response.status,
-          statusText: response.statusText
-        });
-      }
-    } catch (error: any) {
-      // Log error but ensure Promise resolves
-      logDashboardActivity('dashboard_api_error', 'User profile API call error', {
-        endpoint: 'user_profile',
-        error: error.message,
-        timeout: error.name === 'AbortError'
-      });
-    }
-    return Promise.resolve();
-  };
+  // Individual API loading functions replaced by merged dashboard endpoint
 
-  // Fetch domains for rank tracking
-  const { data: domainsData, isLoading: domainsLoading } = useQuery({
-    queryKey: ['/api/v1/rank-tracking/domains'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/v1/rank-tracking/domains', {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) throw new Error('Failed to fetch domains')
-      return response.json()
-    }
-  })
+  // Use domains from merged dashboard data
+  const domainsData = dashboardData?.rankTracking?.domains
+  const domainsLoading = dashboardLoading
 
   // Fetch top keywords for current domain
   const { data: keywordsData, isLoading: keywordsLoading } = useQuery({
@@ -213,7 +169,7 @@ export default function Dashboard() {
     enabled: !!selectedDomainId
   })
 
-  const domains = domainsData?.data || []
+  const domains = domainsData || []
   const topKeywords = keywordsData?.data || []
   const allKeywords = allKeywordsData?.data || []
 
@@ -224,54 +180,7 @@ export default function Dashboard() {
     }
   }, [domains, selectedDomainId])
 
-  // Load packages data with timeout and proper error handling
-  const loadPackages = async (): Promise<void> => {
-    try {
-      const user = await authService.getCurrentUser()
-      if (!user) {
-        return Promise.resolve();
-      }
-
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) {
-        return Promise.resolve();
-      }
-
-      // Add timeout wrapper to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch('/api/v1/billing/packages', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        signal: controller.signal
-      })
-      
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json()
-        setPackagesData(data)
-      } else {
-        // Log non-2xx responses but continue with loading
-        logDashboardActivity('dashboard_api_error', 'Billing packages API call failed', {
-          endpoint: 'billing_packages',
-          status: response.status,
-          statusText: response.statusText
-        });
-      }
-    } catch (error: any) {
-      // Log error but ensure Promise resolves
-      logDashboardActivity('dashboard_api_error', 'Billing packages API call error', {
-        endpoint: 'billing_packages',
-        error: error.message,
-        timeout: error.name === 'AbortError'
-      });
-    }
-    return Promise.resolve();
-  }
+  // Packages data now loaded from merged dashboard endpoint
 
   // Handle subscription
   const handleSubscribe = async (packageId: string, period: string) => {
@@ -286,52 +195,7 @@ export default function Dashboard() {
     }
   }
 
-  // Check trial eligibility with timeout and proper error handling
-  const checkTrialEligibility = async (): Promise<void> => {
-    try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) {
-        setTrialEligible(false);
-        return Promise.resolve();
-      }
-
-      // Add timeout wrapper to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-      const response = await fetch('/api/v1/auth/user/trial-eligibility', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        signal: controller.signal
-      })
-      
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const result = await response.json()
-        setTrialEligible(result.eligible)
-      } else {
-        setTrialEligible(false)
-        // Log non-2xx responses
-        logDashboardActivity('dashboard_api_error', 'Trial eligibility API call failed', {
-          endpoint: 'trial_eligibility',
-          status: response.status,
-          statusText: response.statusText
-        });
-      }
-    } catch (error: any) {
-      setTrialEligible(false)
-      // Log error but ensure Promise resolves
-      logDashboardActivity('dashboard_api_error', 'Trial eligibility API call error', {
-        endpoint: 'trial_eligibility',
-        error: error.message,
-        timeout: error.name === 'AbortError'
-      });
-    }
-    return Promise.resolve();
-  }
+  // Trial eligibility now loaded from merged dashboard endpoint
 
   // Check if package is eligible for trial (Premium or Pro plans only)
   const isTrialEligiblePackage = (pkg: any) => {
@@ -355,67 +219,47 @@ export default function Dashboard() {
     }
   }
 
-  // Load dashboard data when user is authenticated
+  // Process dashboard data when it loads
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadDashboardData = async () => {
-      if (!isMounted) return;
-      
-      logDashboardActivity('dashboard_data_loading_started', 'Dashboard data loading initiated', {
-        timestamp: new Date().toISOString()
-      });
-      
-      try {
-        // Load dashboard data
-        const results = await Promise.allSettled([
-          loadUserProfile(),
-          loadPackages(),
-          checkTrialEligibility()
-        ]);
-        
-        if (!isMounted) return;
-        
-        // Log any rejected promises for debugging
-        results.forEach((result, index) => {
-          const endpoints = ['user_profile', 'billing_packages', 'trial_eligibility'];
-          if (result.status === 'rejected') {
-            logDashboardActivity('dashboard_promise_rejected', `Promise rejected for ${endpoints[index]}`, {
-              endpoint: endpoints[index],
-              error: result.reason?.message || 'Unknown error'
-            });
-          }
-        });
-        
-        logDashboardActivity('dashboard_data_loading_completed', 'Dashboard data loading finished', {
-          timestamp: new Date().toISOString(),
-          successful_calls: results.filter(r => r.status === 'fulfilled').length,
-          failed_calls: results.filter(r => r.status === 'rejected').length
-        });
-        
-      } catch (error: any) {
-        if (!isMounted) return;
-        
-        logDashboardActivity('dashboard_data_loading_error', 'Dashboard data loading encountered error', {
-          error: error.message,
-          timestamp: new Date().toISOString()
-        });
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+    if (dashboardData && !dashboardLoading) {
+      // Set user profile from merged data
+      if (dashboardData.user?.profile) {
+        setUserProfile(dashboardData.user.profile)
       }
-    };
-    
-    // Only load data when user is available from global auth context
-    if (router && typeof window !== 'undefined') {
-      loadDashboardData();
+      
+      // Set packages data from merged data  
+      if (dashboardData.billing) {
+        setPackagesData(dashboardData.billing)
+      }
+      
+      // Set trial eligibility from merged data
+      if (dashboardData.user?.trial !== undefined) {
+        setTrialEligible(dashboardData.user.trial)
+      }
+      
+      // Set loading to false when dashboard data is ready
+      setLoading(false)
+      
+      logDashboardActivity('dashboard_data_loaded_from_merged_api', 'Dashboard data loaded from merged endpoint', {
+        timestamp: new Date().toISOString(),
+        has_user_data: !!dashboardData.user,
+        has_billing_data: !!dashboardData.billing,
+        has_indexing_data: !!dashboardData.indexing,
+        has_rank_tracking_data: !!dashboardData.rankTracking
+      })
     }
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [router])
+  }, [dashboardData, dashboardLoading])
+  
+  // Handle dashboard loading errors
+  useEffect(() => {
+    if (dashboardError) {
+      logDashboardActivity('dashboard_data_error', 'Dashboard merged API error', {
+        error: dashboardError.message,
+        timestamp: new Date().toISOString()
+      })
+      setLoading(false)
+    }
+  }, [dashboardError])
 
   // Calculate rank statistics
   const calculateRankStats = (): RankStats => {
