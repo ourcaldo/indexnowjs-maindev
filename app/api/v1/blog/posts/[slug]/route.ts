@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/database/supabase'
-import { activityLogger } from '@/lib/monitoring/activity-logger'
+import { createClient } from '@supabase/supabase-js'
 
 export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
-  const supabase = createClient()
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
   
   try {
     const { slug } = params
@@ -31,11 +33,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
         published_at,
         created_at,
         updated_at,
-        author_id,
-        indb_auth_user_profiles!indb_cms_posts_author_id_fkey(
-          full_name,
-          avatar_url
-        )
+        author_id
       `)
       .eq('slug', slug)
       .eq('status', 'published')
@@ -51,14 +49,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
         )
       }
       
-      await activityLogger.logError(
-        'SINGLE_POST_API_ERROR',
-        `Failed to fetch post with slug ${slug}: ${postError?.message}`,
-        null,
-        'single-post-api',
-        { slug, error: postError?.message }
-      )
-      
+      console.error('Failed to fetch post:', postError)
       return NextResponse.json(
         { error: 'Failed to fetch post' },
         { status: 500 }
@@ -75,10 +66,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
         excerpt,
         featured_image_url,
         tags,
-        published_at,
-        indb_auth_user_profiles!indb_cms_posts_author_id_fkey(
-          full_name
-        )
+        published_at
       `)
       .eq('status', 'published')
       .eq('post_type', 'post')
@@ -102,8 +90,8 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
       created_at: post.created_at,
       updated_at: post.updated_at,
       author: {
-        name: post.indb_auth_user_profiles?.full_name || 'Anonymous',
-        avatar_url: post.indb_auth_user_profiles?.avatar_url
+        name: 'IndexNow Studio Team',
+        avatar_url: null
       }
     }
     
@@ -117,7 +105,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
       tags: relatedPost.tags || [],
       published_at: relatedPost.published_at,
       author: {
-        name: relatedPost.indb_auth_user_profiles?.full_name || 'Anonymous'
+        name: 'IndexNow Studio Team'
       }
     })) || []
     
@@ -127,17 +115,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     })
     
   } catch (error) {
-    await activityLogger.logError(
-      'SINGLE_POST_SYSTEM_ERROR',
-      `System error in single post API: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      null,
-      'single-post-api',
-      { 
-        slug: params.slug,
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      }
-    )
-    
+    console.error('System error in single post API:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/database/supabase'
-import { activityLogger } from '@/lib/monitoring/activity-logger'
+import { createClient } from '@supabase/supabase-js'
 
 export async function GET(request: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
   
   try {
     const { searchParams } = new URL(request.url)
@@ -29,11 +31,7 @@ export async function GET(request: NextRequest) {
         tags,
         published_at,
         created_at,
-        author_id,
-        indb_auth_user_profiles!indb_cms_posts_author_id_fkey(
-          full_name,
-          avatar_url
-        )
+        author_id
       `)
       .eq('status', 'published')
       .eq('post_type', 'post')
@@ -54,14 +52,7 @@ export async function GET(request: NextRequest) {
     const { data: posts, error, count } = await query
     
     if (error) {
-      await activityLogger.logError(
-        'BLOG_API_ERROR',
-        `Failed to fetch blog posts: ${error.message}`,
-        null,
-        'blog-posts-api',
-        { page, limit, tag, search, error: error.message }
-      )
-      
+      console.error('Failed to fetch blog posts:', error)
       return NextResponse.json(
         { error: 'Failed to fetch blog posts' },
         { status: 500 }
@@ -91,8 +82,8 @@ export async function GET(request: NextRequest) {
       published_at: post.published_at,
       created_at: post.created_at,
       author: {
-        name: post.indb_auth_user_profiles?.full_name || 'Anonymous',
-        avatar_url: post.indb_auth_user_profiles?.avatar_url
+        name: 'IndexNow Studio Team',
+        avatar_url: null
       }
     })) || []
     
@@ -113,14 +104,7 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error) {
-    await activityLogger.logError(
-      'BLOG_API_SYSTEM_ERROR',
-      `System error in blog posts API: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      null,
-      'blog-posts-api',
-      { error: error instanceof Error ? error.message : 'Unknown error' }
-    )
-    
+    console.error('System error in blog posts API:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
