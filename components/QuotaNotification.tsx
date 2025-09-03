@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
 import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
-import { useQuotaUpdates } from '@/hooks/useGlobalWebSocket'
 
 export default function QuotaNotification() {
   const { quotaInfo, refreshQuota } = useGlobalQuotaManager()
@@ -18,9 +17,7 @@ export default function QuotaNotification() {
     }
   }, [quotaInfo, refreshQuota])
 
-  // Subscribe to real-time quota updates via WebSocket
-  useQuotaUpdates((quotaUpdate) => {
-  })
+  // Note: Real-time updates via WebSocket removed - quota updates are now handled manually
 
   // Check quota status and show appropriate notification
   useEffect(() => {

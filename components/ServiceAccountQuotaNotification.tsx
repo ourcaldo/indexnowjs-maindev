@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { AlertTriangle, X, Clock } from 'lucide-react'
 import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
-import { useNotificationUpdates } from '@/hooks/useGlobalWebSocket'
 
 interface QuotaNotification {
   id: string
@@ -29,10 +28,7 @@ export default function ServiceAccountQuotaNotification() {
     }
   }, [notifications])
 
-  // Subscribe to real-time notification updates via WebSocket
-  useNotificationUpdates((newNotification) => {
-    setLocalNotifications(prev => [newNotification, ...prev])
-  })
+  // Note: Real-time updates via WebSocket removed - notifications are now handled manually
 
 
 

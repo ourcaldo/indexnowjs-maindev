@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { TrendingUp, AlertTriangle, Package, Search } from 'lucide-react'
 import { useGlobalQuotaManager } from '@/hooks/useGlobalQuotaManager'
-import { useQuotaUpdates } from '@/hooks/useGlobalWebSocket'
 import { useDashboardData } from '@/hooks/useDashboardData'
 
 interface QuotaInfo {
@@ -54,10 +53,7 @@ export default function QuotaCard({ userProfile }: QuotaCardProps) {
     }
   }, [quotaInfo, refreshQuota])
 
-  // Subscribe to real-time quota updates via WebSocket
-  useQuotaUpdates((quotaUpdate) => {
-    // Quota will be automatically updated through the global manager
-  })
+  // Note: Real-time updates via WebSocket removed - quota updates are now handled manually
 
 
 

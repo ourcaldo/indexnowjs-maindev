@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import GlobalWebSocketProvider from '@/components/GlobalWebSocketProvider'
 import { AuthProvider } from '@/lib/contexts/AuthContext'
 
 // Initialize background services on server-side only once
@@ -32,9 +31,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <GlobalWebSocketProvider>
-            {children}
-          </GlobalWebSocketProvider>
+          {children}
         </AuthProvider>
       </body>
     </html>

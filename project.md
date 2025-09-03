@@ -5651,3 +5651,58 @@ Public settings endpoint returns:
 - **TypeScript Integration**: Complete type safety with dedicated type definition files
 - **Background Processing**: Automated job processing and monitoring systems for both features
 - **Real-time Updates**: WebSocket integration for live status updates and progress monitoring
+
+### September 03, 2025 - WebSocket Architecture Optimization Complete ✅
+
+- ✅ **WEBSOCKET ISOLATION IMPLEMENTED**: Successfully restructured WebSocket architecture to only initialize on FastIndexing pages, eliminating unnecessary connections on landing page and other dashboard pages
+
+**Problem Identified**:
+- **Global WebSocket Issue**: `GlobalWebSocketProvider` was wrapped around entire application in root `app/layout.tsx`
+- **Unnecessary Connections**: WebSocket connections were being established on landing page (`/`), login pages, contact pages, and all dashboard pages
+- **Performance Impact**: WebSocket connections consuming resources even when not needed for job tracking
+
+**Solution Implemented**:
+
+1. **FastIndexing-Specific WebSocket Architecture**:
+   - **Created**: `hooks/useFastIndexingWebSocket.ts` - Specialized hook handling only job-related events (`job_update`, `job_progress`, `job_completed`, `job_failed`)
+   - **Created**: `components/FastIndexingWebSocketProvider.tsx` - Provider component that only initializes on FastIndexing pages
+   - **Created**: `app/dashboard/tools/fastindexing/layout.tsx` - Layout wrapper that applies WebSocket provider only to FastIndexing tool
+
+2. **Removed Global WebSocket Dependencies**:
+   - **Removed**: `GlobalWebSocketProvider` from root `app/layout.tsx` 
+   - **Cleaned**: `components/QuotaCard.tsx` - Removed `useQuotaUpdates` WebSocket subscription
+   - **Cleaned**: `components/QuotaNotification.tsx` - Removed `useQuotaUpdates` WebSocket subscription  
+   - **Cleaned**: `components/ServiceAccountQuotaNotification.tsx` - Removed `useNotificationUpdates` WebSocket subscription
+
+3. **WebSocket Event Isolation**:
+   - **Job Events**: `job_update`, `job_progress`, `job_completed`, `job_failed` → FastIndexing pages only
+   - **Quota/Notification Events**: Removed WebSocket dependency, now handled through manual API refresh
+   - **Room Management**: Added `joinJobRoom()` and `leaveJobRoom()` functions for job-specific updates
+
+**Technical Benefits**:
+- ✅ **Landing Page Performance**: No WebSocket connections on landing page (`/`)
+- ✅ **Resource Optimization**: WebSocket only active when needed for job monitoring
+- ✅ **Clean Architecture**: Clear separation between FastIndexing real-time needs and general dashboard
+- ✅ **Maintained Functionality**: All FastIndexing job tracking features preserved with real-time updates
+- ✅ **Better User Experience**: Faster page loads on non-FastIndexing pages
+
+**File Structure After Optimization**:
+```
+📁 WebSocket Architecture:
+   ├── hooks/useFastIndexingWebSocket.ts              ← FastIndexing-only WebSocket hook
+   ├── components/FastIndexingWebSocketProvider.tsx   ← Provider for FastIndexing pages only
+   ├── app/dashboard/tools/fastindexing/layout.tsx    ← Applies WebSocket provider to FastIndexing tool
+   └── app/layout.tsx                                 ← Clean root layout without global WebSocket
+```
+
+**Pages With WebSocket**:
+- ✅ `/dashboard/tools/fastindexing/*` - All FastIndexing pages have real-time job updates
+
+**Pages Without WebSocket**:
+- ✅ `/` - Landing page (clean, no connections)
+- ✅ `/login` - Login page
+- ✅ `/contact` - Contact page
+- ✅ `/pricing` - Pricing page
+- ✅ `/dashboard/*` - All other dashboard pages (except FastIndexing)
+
+**Migration Status**: ✅ **COMPLETE** - WebSocket architecture successfully optimized for FastIndexing-only usage
