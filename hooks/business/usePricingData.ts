@@ -121,7 +121,7 @@ export const usePricingData = (options: UsePricingDataOptions = {}) => {
 
   const loadPackages = async () => {
     try {
-      const response = await fetch('/api/v1/public/packages', {
+      const response = await fetch('/api/v1/public/settings', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -130,8 +130,8 @@ export const usePricingData = (options: UsePricingDataOptions = {}) => {
 
       if (response.ok) {
         const data = await response.json()
-        if (data.packages && Array.isArray(data.packages)) {
-          let packagesData = data.packages.map((pkg: any) => ({
+        if (data.packages && data.packages.packages && Array.isArray(data.packages.packages)) {
+          let packagesData = data.packages.packages.map((pkg: any) => ({
             ...pkg,
             is_popular: pkg.is_popular || pkg.slug === 'premium' // Default Premium as popular if not set
           })) as PackageData[]

@@ -30,9 +30,9 @@ export function usePageData() {
 
   const loadSiteSettings = async () => {
     try {
-      const response = await fetch('/api/v1/public/site-settings')
+      const response = await fetch('/api/v1/public/settings')
       const data = await response.json()
-      setSiteSettings(data)
+      setSiteSettings(data.siteSettings)
     } catch (error) {
       console.error('Failed to load site settings:', error)
     }
