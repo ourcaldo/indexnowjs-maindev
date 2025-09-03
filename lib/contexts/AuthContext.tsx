@@ -80,10 +80,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Only redirect to login if we're not on a public route
       if (!currentUser && typeof window !== 'undefined') {
-        const publicRoutes = ['/', '/register', '/forgot-password', '/login', '/pricing', '/contact', '/faq']
+        const publicRoutes = ['/', '/register', '/forgot-password', '/login', '/pricing', '/contact', '/faq', '/blog']
         const currentPath = window.location.pathname
         
-        if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/backend/admin')) {
+        if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/backend/admin') && !currentPath.startsWith('/blog/')) {
           router.push('/login')
         }
       }
@@ -98,10 +98,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // Only redirect if not on public route
         if (typeof window !== 'undefined') {
-          const publicRoutes = ['/', '/register', '/forgot-password', '/login', '/pricing', '/contact', '/faq']
+          const publicRoutes = ['/', '/register', '/forgot-password', '/login', '/pricing', '/contact', '/faq', '/blog']
           const currentPath = window.location.pathname
           
-          if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/backend/admin')) {
+          if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/backend/admin') && !currentPath.startsWith('/blog/')) {
             router.push('/login')
           }
         }
