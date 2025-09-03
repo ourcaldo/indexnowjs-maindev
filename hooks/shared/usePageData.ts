@@ -7,6 +7,7 @@ interface SiteSettings {
   site_name: string
   site_description: string
   site_logo_url: string
+  white_logo: string
   contact_email: string
 }
 
