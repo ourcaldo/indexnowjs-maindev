@@ -6377,6 +6377,24 @@ ON public.indb_cms_posts(category, status);
 
 ## Recent Changes
 
+
+### September 04, 2025 - Login Route Redirect Elimination ✅
+
+- 🔧 **LOGIN ROUTING FIXED**: Eliminated all `/login` redirects to ensure direct `/auth/login` routing
+  - **Issue**: Sign In button in header was still redirecting to `/login` which then redirected to `/auth/login`
+  - **Root Cause**: `handleAuthAction` function in `hooks/shared/usePageData.ts` was using `/login` instead of `/auth/login`
+  - **Solution**: Updated `handleAuthAction` to redirect directly to `/auth/login` for unauthenticated users
+  - **Middleware Updated**: Removed `/login` from public routes list since the route no longer exists
+  
+- ✅ **CHANGES IMPLEMENTED**:
+  - **Fixed**: `hooks/shared/usePageData.ts` line 46: `'/login'` → `'/auth/login'`
+  - **Updated**: `middleware.ts` removed `/login` from `publicRoutes` array
+  - **Verified**: No `/login` directory exists, all login references now point to `/auth/login`
+  
+- 🎯 **RESULT**: Users clicking Sign In button now go directly to `/auth/login` without any redirects
+  - **Before**: Sign In → `/login` → redirect to `/auth/login` (2 requests)
+  - **After**: Sign In → `/auth/login` (1 direct request)
+
 ### September 04, 2025 - Multi-Category Support Database Fix 🔧
 
 - ⚠️ **DATABASE FIX REQUIRED**: Identified missing `categories` column in `indb_cms_posts` table causing update failures
