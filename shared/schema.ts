@@ -90,6 +90,29 @@ export const changePasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
+// Site settings schema with SEO management
+export const updateSiteSettingsSchema = z.object({
+  site_name: z.string().min(1, "Site name is required").optional(),
+  site_tagline: z.string().optional(),
+  site_description: z.string().optional(),
+  site_logo_url: z.string().url().optional().or(z.literal("")),
+  white_logo: z.string().url().optional().or(z.literal("")),
+  site_icon_url: z.string().url().optional().or(z.literal("")),
+  site_favicon_url: z.string().url().optional().or(z.literal("")),
+  contact_email: z.string().email().optional().or(z.literal("")),
+  support_email: z.string().email().optional().or(z.literal("")),
+  maintenance_mode: z.boolean().optional(),
+  registration_enabled: z.boolean().optional(),
+  robots_txt_content: z.string().optional(),
+  sitemap_enabled: z.boolean().optional(),
+  sitemap_posts_enabled: z.boolean().optional(),
+  sitemap_pages_enabled: z.boolean().optional(),
+  sitemap_categories_enabled: z.boolean().optional(),
+  sitemap_tags_enabled: z.boolean().optional(),
+  sitemap_max_urls_per_file: z.number().min(100).max(50000).optional(),
+  sitemap_change_frequency: z.enum(['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never']).optional(),
+});
+
 // Type exports
 export type LoginRequest = z.infer<typeof loginSchema>;
 export type RegisterRequest = z.infer<typeof registerSchema>;
@@ -102,6 +125,7 @@ export type CreateServiceAccountRequest = z.infer<typeof createServiceAccountSch
 export type UpdateUserProfileRequest = z.infer<typeof updateUserProfileSchema>;
 export type UpdateUserSettingsRequest = z.infer<typeof updateUserSettingsSchema>;
 export type ChangePasswordRequest = z.infer<typeof changePasswordSchema>;
+export type UpdateSiteSettingsRequest = z.infer<typeof updateSiteSettingsSchema>;
 
 // User type from Supabase
 export interface User {

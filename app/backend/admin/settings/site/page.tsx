@@ -13,7 +13,10 @@ import {
   Server,
   Lock,
   Shield,
-  TestTube2
+  TestTube2,
+  Search,
+  FileText,
+  Map
 } from 'lucide-react'
 
 interface SiteSettings {
@@ -37,6 +40,14 @@ interface SiteSettings {
   smtp_from_email: string | null
   smtp_secure: boolean
   smtp_enabled: boolean
+  robots_txt_content: string | null
+  sitemap_enabled: boolean
+  sitemap_posts_enabled: boolean
+  sitemap_pages_enabled: boolean
+  sitemap_categories_enabled: boolean
+  sitemap_tags_enabled: boolean
+  sitemap_max_urls_per_file: number
+  sitemap_change_frequency: string
   created_at: string
   updated_at: string
 }
@@ -374,6 +385,216 @@ export default function SiteSettings() {
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#3D8BFF]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3D8BFF]"></div>
             </label>
+          </div>
+        </div>
+      </div>
+
+      {/* SEO Management */}
+      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="flex items-center space-x-2 mb-6">
+          <Search className="h-5 w-5 text-[#4BB543]" />
+          <h2 className="text-lg font-semibold text-[#1A1A1A]">SEO Management</h2>
+        </div>
+
+        {/* Robots.txt Section */}
+        <div className="space-y-6">
+          <div className="border border-[#E0E6ED] rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <FileText className="h-4 w-4 text-[#3D8BFF]" />
+              <h3 className="text-md font-medium text-[#1A1A1A]">Robots.txt Configuration</h3>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+                Robots.txt Content
+              </label>
+              <textarea
+                value={settings.robots_txt_content || ''}
+                onChange={(e) => updateSettings('robots_txt_content', e.target.value)}
+                rows={12}
+                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent font-mono text-sm"
+                placeholder={`User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://indexnow.studio/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /backend/
+
+# Allow important directories
+Allow: /blog/
+Allow: /pricing/
+Allow: /contact/
+Allow: /faq/
+
+# Crawl delay
+Crawl-delay: 1`}
+              />
+              <p className="text-xs text-[#6C757D] mt-1">
+                Configure how search engines crawl your site. Changes are cached for 1 hour. 
+                <a href="/robots.txt" target="_blank" className="text-[#3D8BFF] hover:underline ml-1">
+                  View current robots.txt
+                </a>
+              </p>
+            </div>
+          </div>
+
+          {/* Sitemap Configuration */}
+          <div className="border border-[#E0E6ED] rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <Map className="h-4 w-4 text-[#F0A202]" />
+              <h3 className="text-md font-medium text-[#1A1A1A]">Sitemap Configuration</h3>
+            </div>
+
+            <div className="space-y-4">
+              {/* Master Sitemap Toggle */}
+              <div className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg">
+                <div>
+                  <h4 className="text-sm font-medium text-[#1A1A1A]">Enable Sitemaps</h4>
+                  <p className="text-xs text-[#6C757D]">Generate XML sitemaps for search engines</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.sitemap_enabled}
+                    onChange={(e) => updateSettings('sitemap_enabled', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#3D8BFF]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3D8BFF]"></div>
+                </label>
+              </div>
+
+              {settings.sitemap_enabled && (
+                <>
+                  {/* Individual Sitemap Toggles */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="flex items-center justify-between p-3 border border-[#E0E6ED] rounded-lg">
+                      <div>
+                        <span className="text-sm font-medium text-[#1A1A1A]">Posts</span>
+                        <p className="text-xs text-[#6C757D]">Blog posts</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={settings.sitemap_posts_enabled}
+                        onChange={(e) => updateSettings('sitemap_posts_enabled', e.target.checked)}
+                        className="w-4 h-4 text-[#3D8BFF] border-gray-300 rounded focus:ring-[#3D8BFF]"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 border border-[#E0E6ED] rounded-lg">
+                      <div>
+                        <span className="text-sm font-medium text-[#1A1A1A]">Pages</span>
+                        <p className="text-xs text-[#6C757D]">Static pages</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={settings.sitemap_pages_enabled}
+                        onChange={(e) => updateSettings('sitemap_pages_enabled', e.target.checked)}
+                        className="w-4 h-4 text-[#3D8BFF] border-gray-300 rounded focus:ring-[#3D8BFF]"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 border border-[#E0E6ED] rounded-lg">
+                      <div>
+                        <span className="text-sm font-medium text-[#1A1A1A]">Categories</span>
+                        <p className="text-xs text-[#6C757D]">Blog categories</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={settings.sitemap_categories_enabled}
+                        onChange={(e) => updateSettings('sitemap_categories_enabled', e.target.checked)}
+                        className="w-4 h-4 text-[#3D8BFF] border-gray-300 rounded focus:ring-[#3D8BFF]"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 border border-[#E0E6ED] rounded-lg">
+                      <div>
+                        <span className="text-sm font-medium text-[#1A1A1A]">Tags</span>
+                        <p className="text-xs text-[#6C757D]">Blog tags</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={settings.sitemap_tags_enabled}
+                        onChange={(e) => updateSettings('sitemap_tags_enabled', e.target.checked)}
+                        className="w-4 h-4 text-[#3D8BFF] border-gray-300 rounded focus:ring-[#3D8BFF]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sitemap Settings */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+                        Max URLs per Sitemap File
+                      </label>
+                      <input
+                        type="number"
+                        min="100"
+                        max="50000"
+                        value={settings.sitemap_max_urls_per_file}
+                        onChange={(e) => updateSettings('sitemap_max_urls_per_file', parseInt(e.target.value) || 5000)}
+                        className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                        placeholder="5000"
+                      />
+                      <p className="text-xs text-[#6C757D] mt-1">Maximum URLs per sitemap file (100-50000, max 50MB)</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+                        Change Frequency
+                      </label>
+                      <select
+                        value={settings.sitemap_change_frequency}
+                        onChange={(e) => updateSettings('sitemap_change_frequency', e.target.value)}
+                        className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                      >
+                        <option value="always">Always</option>
+                        <option value="hourly">Hourly</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="never">Never</option>
+                      </select>
+                      <p className="text-xs text-[#6C757D] mt-1">How frequently content changes (hint for search engines)</p>
+                    </div>
+                  </div>
+
+                  {/* Sitemap Links */}
+                  <div className="bg-[#F7F9FC] rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">Generated Sitemaps</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                      <a href="/sitemap.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                        📋 Main Sitemap Index
+                      </a>
+                      {settings.sitemap_posts_enabled && (
+                        <a href="/sitemap-posts.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                          📝 Posts Sitemap
+                        </a>
+                      )}
+                      {settings.sitemap_pages_enabled && (
+                        <a href="/sitemap-pages.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                          📄 Pages Sitemap
+                        </a>
+                      )}
+                      {settings.sitemap_categories_enabled && (
+                        <a href="/sitemap-categories.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                          🏷️ Categories Sitemap
+                        </a>
+                      )}
+                      {settings.sitemap_tags_enabled && (
+                        <a href="/sitemap-tags.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                          🏷️ Tags Sitemap
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
