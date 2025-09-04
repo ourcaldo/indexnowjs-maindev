@@ -6269,4 +6269,35 @@ ON public.indb_cms_posts(category, status);
 
 **Status**: ✅ **COMPLETE** - Advanced blog system with category filtering, table of contents, dynamic archives, and author system fully operational
 
+## Recent Changes
+
+### September 04, 2025 - Multi-Category Support Database Fix 🔧
+
+- ⚠️ **DATABASE FIX REQUIRED**: Identified missing `categories` column in `indb_cms_posts` table causing update failures
+  - **Issue**: CMS post updates failing with "Could not find the 'categories' column" error (PGRST204)
+  - **Root Cause**: Backend code expects `categories` JSONB column to store array of category IDs, but column doesn't exist in database
+  - **Impact**: Users cannot create or update posts with multiple categories
+  
+- 🔧 **SOLUTION PROVIDED**: SQL query to add missing `categories` column:
+  ```sql
+  -- Add categories column to store array of category IDs
+  ALTER TABLE public.indb_cms_posts 
+  ADD COLUMN IF NOT EXISTS categories jsonb DEFAULT '[]'::jsonb;
+  
+  -- Add index for better performance on categories queries
+  CREATE INDEX IF NOT EXISTS idx_indb_cms_posts_categories 
+  ON public.indb_cms_posts USING gin (categories);
+  ```
+
+- 📋 **TECHNICAL DETAILS**:
+  - **Current Structure**: Posts table has `category` (text) and `main_category_id` (uuid) columns
+  - **Missing Component**: `categories` JSONB array to store multiple category IDs for multi-category support
+  - **Code Ready**: Backend API already implements multi-category logic, just needs database column
+  - **Performance**: GIN index added for efficient JSONB array queries
+  - **Backward Compatibility**: Maintains existing single category support while adding multi-category functionality
+
+- 🎯 **USER ACTION REQUIRED**: Run the provided SQL in Supabase SQL Editor to resolve the issue
+
+**Status**: 🚨 **PENDING USER DATABASE UPDATE** - Multi-category support blocked pending database schema update
+
 
