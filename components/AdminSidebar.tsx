@@ -23,8 +23,7 @@ import {
   BarChart3,
   TrendingUp,
   Moon,
-  Sun,
-  Zap
+  Sun
 } from 'lucide-react'
 import type { AdminUser } from '@/lib/auth'
 import { authService } from '@/lib/auth'
@@ -254,29 +253,6 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             {filteredSections.map(section => renderSection(section))}
           </nav>
 
-          {/* Upgrade Section */}
-          {!isCollapsed && (
-            <div className="px-4 py-4">
-              <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
-                <div className="flex items-center mb-2">
-                  <Zap className="h-5 w-5 mr-2" />
-                  <span className="text-sm font-semibold">Usage Limit</span>
-                </div>
-                <div className="mb-3">
-                  <div className="text-xs text-blue-100 mb-1">1,234/5,000 Monthly Limit</div>
-                  <div className="w-full bg-white/20 rounded-full h-2">
-                    <div 
-                      className="bg-white rounded-full h-2 transition-all duration-300" 
-                      style={{ width: '24.68%' }}
-                    ></div>
-                  </div>
-                </div>
-                <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  Upgrade plan →
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Bottom Section */}
           <div className="border-t border-[#E5E7EB] p-4">
@@ -334,27 +310,6 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             {filteredSections.map(section => renderSection(section))}
           </nav>
 
-          {/* Upgrade Section */}
-          <div className="px-4 py-4">
-            <div className="bg-gradient-to-br from-[#3D8BFF] to-[#6366F1] rounded-xl p-4 text-white">
-              <div className="flex items-center mb-2">
-                <Zap className="h-5 w-5 mr-2" />
-                <span className="text-sm font-semibold">Usage Limit</span>
-              </div>
-              <div className="mb-3">
-                <div className="text-xs text-blue-100 mb-1">1,234/5,000 Monthly Limit</div>
-                <div className="w-full bg-white/20 rounded-full h-2">
-                  <div 
-                    className="bg-white rounded-full h-2 transition-all duration-300" 
-                    style={{ width: '24.68%' }}
-                  ></div>
-                </div>
-              </div>
-              <button className="w-full bg-white text-[#3D8BFF] text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
-                Upgrade plan →
-              </button>
-            </div>
-          </div>
 
           {/* Bottom Section */}
           <div className="border-t border-[#E5E7EB] p-4">
