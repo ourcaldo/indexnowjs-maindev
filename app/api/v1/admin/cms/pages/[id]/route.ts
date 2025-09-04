@@ -131,7 +131,6 @@ export async function PUT(
     if (body.content !== undefined) {
       updateData.content = body.content ? sanitizeContent(body.content) : null
     }
-    if (body.template !== undefined) updateData.template = body.template
     if (body.featured_image_url !== undefined) updateData.featured_image_url = body.featured_image_url || null
     
     if (body.status !== undefined) {

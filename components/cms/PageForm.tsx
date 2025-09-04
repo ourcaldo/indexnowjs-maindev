@@ -37,7 +37,6 @@ export default function PageForm({
       title: initialData?.title || '',
       slug: initialData?.slug || '',
       content: initialData?.content || '',
-      template: 'default',
       featured_image_url: initialData?.featured_image_url || '',
       status: initialData?.status || 'draft',
       meta_title: initialData?.meta_title || '',
@@ -200,8 +199,6 @@ export default function PageForm({
             )}
           </div>
 
-          {/* Template is fixed to default */}
-          <input type="hidden" {...form.register('template')} value="default" />
 
           {/* Custom Code Editor */}
           <CustomCodeEditor

@@ -6,7 +6,6 @@ export const PageFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255, 'Title must be less than 255 characters'),
   slug: z.string().min(1, 'Slug is required').max(255, 'Slug must be less than 255 characters'),
   content: z.string().optional(),
-  template: z.enum(['default']).default('default'),
   featured_image_url: z.string().url('Featured image must be a valid URL').optional().or(z.literal('')),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   meta_title: z.string().max(255, 'Meta title must be less than 255 characters').optional(),

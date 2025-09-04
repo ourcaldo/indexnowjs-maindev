@@ -15,13 +15,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Allow public routes (landing page, register, etc.)
-  const publicRoutes = ['/', '/register', '/forgot-password']
-  if (publicRoutes.includes(pathname)) {
+  // Allow all public routes - only restrict /backend/admin and /dashboard routes
+  const restrictedRoutes = ['/dashboard']
+  const isRestrictedRoute = restrictedRoutes.some(route => pathname.startsWith(route))
+  
+  if (!isRestrictedRoute) {
     return NextResponse.next()
   }
 
-  // Handle regular routes
+  // Handle regular authentication for restricted routes like /dashboard
   let response = NextResponse.next({
     request: {
       headers: request.headers,

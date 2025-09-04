@@ -6381,6 +6381,31 @@ ON public.indb_cms_posts(category, status);
 
 ### September 04, 2025 - Template Logic PGRST116 Database Errors Fixed ✅
 
+### September 04, 2025 - Template UI & Public Page Access Fixed ✅
+
+- 🔧 **TEMPLATE UI COMPLETELY REMOVED**: Eliminated template selection UI and backend logic
+  - **Issue**: Template selector was still visible in admin backend despite being simplified to default only
+  - **Root Cause**: Form schema, API routes, and UI components still contained template references
+  - **Solution**: Removed template field from PageFormSchema, API routes, and form components
+  
+- 🌐 **PUBLIC PAGE ACCESS FIXED**: Resolved middleware blocking public CMS pages
+  - **Issue**: Created CMS pages required login to access, blocking public visitors
+  - **Root Cause**: Middleware was restricting all routes except specific publicRoutes array
+  - **Solution**: Changed middleware to only restrict /dashboard routes, allowing all other pages to be public
+  
+- ✅ **BACKEND TEMPLATE LOGIC REMOVED**:
+  - **PageFormSchema**: Removed `template: z.enum(['default']).default('default')` field completely
+  - **PageForm Component**: Removed template from defaultValues and hidden input field
+  - **API Routes**: Updated POST/PUT routes to hardcode `template: 'default'` in database operations
+  - **Middleware**: Changed from whitelist approach to blacklist approach for route restrictions
+  
+- 🎯 **RESULTS**: Clean admin interface and proper public access
+  - **Admin UI**: No more confusing template selector in page creation/editing
+  - **Public Access**: CMS pages now accessible without login (e.g., /privacy-policy, /about)
+  - **Database**: Template field still exists in DB but hardcoded to 'default' for consistency
+
+
+
 - 🔧 **CRITICAL DATABASE ERRORS RESOLVED**: Fixed PGRST116 "JSON object requested, multiple (or no) rows returned" errors
   - **Root Cause**: `getPageBySlug` function in `app/(public)/[slug]/page.tsx` was missing `published_at` filter, causing queries to fail when no published pages existed
   - **Template Logic Simplified**: Removed complex template enum validation that conflicted with simplified schema

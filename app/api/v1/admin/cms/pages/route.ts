@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
     const status = searchParams.get('status') as PageFilters['status'] || 'all'
-    const template = searchParams.get('template') as PageFilters['template'] || 'all'
     const search = searchParams.get('search') || ''
     const is_homepage = searchParams.get('is_homepage') === 'true' ? true : 
                        searchParams.get('is_homepage') === 'false' ? false : undefined
@@ -31,10 +30,6 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status)
     }
 
-    // Apply template filter
-    if (template && template !== 'all') {
-      query = query.eq('template', template)
-    }
 
     // Apply homepage filter
     if (is_homepage !== undefined) {
@@ -172,7 +167,7 @@ export async function POST(request: NextRequest) {
         title: validatedData.title,
         slug: validatedData.slug,
         content: sanitizedContent,
-        template: validatedData.template,
+        template: 'default',
         featured_image_url: validatedData.featured_image_url || null,
         author_id: adminUser.id,
         status: validatedData.status,
