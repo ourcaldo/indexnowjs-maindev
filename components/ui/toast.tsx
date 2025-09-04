@@ -22,7 +22,9 @@ export function ToastContainer({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<Toast[]>([])
 
   const addToast = React.useCallback((toast: Omit<Toast, 'id'>) => {
-    const id = typeof window !== 'undefined' ? Date.now().toString() : Math.random().toString(36)
+    const id = typeof window !== 'undefined' 
+      ? `${Date.now()}-${Math.random().toString(36).substr(2, 9)}` 
+      : Math.random().toString(36).substr(2, 9)
     const newToast = { ...toast, id }
     setToasts((prev) => [...prev, newToast])
     
