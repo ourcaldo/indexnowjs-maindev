@@ -2,10 +2,6 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import DefaultPageContent from './components/DefaultPageContent'
-import LandingPageContent from './components/LandingPageContent'
-import AboutPageContent from './components/AboutPageContent'
-import ContactPageContent from './components/ContactPageContent'
-import ServicesPageContent from './components/ServicesPageContent'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -17,7 +13,7 @@ interface CMSPage {
   title: string
   slug: string
   content: string | null
-  template: string
+  template: 'default'
   featured_image_url: string | null
   status: string
   meta_title: string | null
@@ -128,20 +124,9 @@ export default async function DynamicPage({ params }: PageProps) {
     notFound()
   }
 
-  // Render based on template
+  // Always use default template for static pages
   const renderPageContent = () => {
-    switch (page.template) {
-      case 'landing':
-        return <LandingPageContent page={page} />
-      case 'about':
-        return <AboutPageContent page={page} />
-      case 'contact':
-        return <ContactPageContent page={page} />
-      case 'services':
-        return <ServicesPageContent page={page} />
-      default:
-        return <DefaultPageContent page={page} />
-    }
+    return <DefaultPageContent page={page} />
   }
 
   return (

@@ -7,8 +7,6 @@ import { PageFormSchema, PageFormData } from '@/lib/cms/pageValidation'
 import { generateSlug, generatePageMetaTitle, generatePageMetaDescription } from '@/lib/cms/pageValidation'
 import TiptapEditor from './TiptapEditor'
 import ImageUploader from './ImageUploader'
-import TemplateSelector from './TemplateSelector'
-import HomepageToggle from './HomepageToggle'
 import CustomCodeEditor from './CustomCodeEditor'
 import PageSEOFields from './PageSEOFields'
 import PagePublishControls from './PagePublishControls'
@@ -39,7 +37,7 @@ export default function PageForm({
       title: initialData?.title || '',
       slug: initialData?.slug || '',
       content: initialData?.content || '',
-      template: initialData?.template || 'default',
+      template: 'default',
       featured_image_url: initialData?.featured_image_url || '',
       status: initialData?.status || 'draft',
       meta_title: initialData?.meta_title || '',
@@ -55,7 +53,6 @@ export default function PageForm({
   const watchedContent = watch('content')
   const watchedSlug = watch('slug')
   const watchedStatus = watch('status')
-  const watchedTemplate = watch('template')
   const watchedMetaTitle = watch('meta_title')
   const watchedMetaDescription = watch('meta_description')
   const watchedCustomCSS = watch('custom_css')
@@ -203,11 +200,8 @@ export default function PageForm({
             )}
           </div>
 
-          {/* Template Selector */}
-          <TemplateSelector
-            selectedTemplate={watchedTemplate}
-            onTemplateChange={(template) => setValue('template', template as 'default' | 'landing' | 'about' | 'contact' | 'services')}
-          />
+          {/* Template is fixed to default */}
+          <input type="hidden" {...form.register('template')} value="default" />
 
           {/* Custom Code Editor */}
           <CustomCodeEditor
@@ -233,27 +227,16 @@ export default function PageForm({
           {/* Publish Controls */}
           <PagePublishControls
             status={watchedStatus}
-            template={watchedTemplate}
             onStatusChange={(status) => setValue('status', status)}
-            onTemplateChange={(template) => setValue('template', 'default')}
             onSave={() => handleSubmit(handleFormSubmit)()}
             onPreview={handlePreview}
             isLoading={isLoading}
             isDirty={isDirty}
           />
 
-          {/* Form Actions */}
-          <div className="space-y-2">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full px-4 py-2 bg-[#3D8BFF] hover:bg-[#3D8BFF]/90 disabled:bg-[#6C757D]/50 text-white text-sm font-medium rounded-lg transition-colors"
-              data-testid="button-submit-page"
-            >
-              {isLoading ? 'Saving...' : mode === 'create' ? 'Create Page' : 'Update Page'}
-            </button>
-            
-            {onCancel && (
+          {/* Cancel Button */}
+          {onCancel && (
+            <div className="space-y-2">
               <button
                 type="button"
                 onClick={onCancel}
@@ -262,8 +245,8 @@ export default function PageForm({
               >
                 Cancel
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Form Status */}
           {isDirty && (

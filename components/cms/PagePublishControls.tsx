@@ -14,9 +14,7 @@ import {
 
 interface PagePublishControlsProps {
   status: 'draft' | 'published' | 'archived'
-  template: 'default'
   onStatusChange: (status: 'draft' | 'published' | 'archived') => void
-  onTemplateChange: (template: 'default') => void
   onSave: () => void
   onPreview?: () => void
   isLoading?: boolean
@@ -26,16 +24,13 @@ interface PagePublishControlsProps {
 
 export default function PagePublishControls({
   status,
-  template,
   onStatusChange,
-  onTemplateChange,
   onSave,
   onPreview,
   isLoading = false,
   isDirty = false,
   className = ""
 }: PagePublishControlsProps) {
-  const [showTemplateInfo, setShowTemplateInfo] = useState(false)
 
   const getStatusConfig = (currentStatus: string) => {
     switch (currentStatus) {
@@ -66,45 +61,9 @@ export default function PagePublishControls({
     }
   }
 
-  const getTemplateConfig = (templateType: string) => {
-    switch (templateType) {
-      case 'landing':
-        return {
-          icon: Globe,
-          label: 'Landing Page',
-          description: 'Full-width layout with hero section'
-        }
-      case 'about':
-        return {
-          icon: Globe,
-          label: 'About Page',
-          description: 'Team and company information layout'
-        }
-      case 'contact':
-        return {
-          icon: Globe,
-          label: 'Contact Page',
-          description: 'Contact form and information layout'
-        }
-      case 'services':
-        return {
-          icon: Globe,
-          label: 'Services Page',
-          description: 'Service listings and features layout'
-        }
-      default:
-        return {
-          icon: Layout,
-          label: 'Default',
-          description: 'Standard page layout with sidebar'
-        }
-    }
-  }
 
   const statusConfig = getStatusConfig(status)
-  const templateConfig = getTemplateConfig(template)
   const StatusIcon = statusConfig.icon
-  const TemplateIcon = templateConfig.icon
 
   return (
     <div className={`bg-white border border-[#E0E6ED] rounded-lg p-4 space-y-4 ${className}`}>
@@ -139,39 +98,6 @@ export default function PagePublishControls({
         </div>
       </div>
 
-      {/* Page Template - Hidden since only default is available */}
-      <div style={{ display: 'none' }}>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-[#1A1A1A]">Page Template</h3>
-        </div>
-        
-        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E0E6ED] bg-[#F7F9FC]`}>
-          <TemplateIcon className="h-4 w-4 text-[#6C757D]" />
-          <span className="text-sm font-medium text-[#1A1A1A]">
-            {templateConfig.label}
-          </span>
-        </div>
-
-        {showTemplateInfo && (
-          <div className="mt-2 p-3 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
-            <p className="text-xs text-[#6C757D]">{templateConfig.description}</p>
-          </div>
-        )}
-
-        <select
-          value={template}
-          onChange={(e) => onTemplateChange(e.target.value as any)}
-          className="mt-2 w-full px-3 py-2 text-sm border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
-          disabled={isLoading}
-          data-testid="select-template"
-        >
-          <option value="default">Default Page</option>
-          <option value="landing">Landing Page</option>
-          <option value="about">About Page</option>
-          <option value="contact">Contact Page</option>
-          <option value="services">Services Page</option>
-        </select>
-      </div>
 
       {/* Action Buttons */}
       <div className="space-y-2 pt-2 border-t border-[#E0E6ED]">
