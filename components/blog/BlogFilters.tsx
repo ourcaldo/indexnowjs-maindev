@@ -79,7 +79,7 @@ export default function BlogFilters({
         {/* Search Input */}
         <form onSubmit={handleSearchSubmit} className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-12 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search blog posts..."
@@ -92,7 +92,7 @@ export default function BlogFilters({
               <button
                 type="button"
                 onClick={handleSearchClear}
-                className="absolute right-3 top-1/2 transform -translate-y-12 text-gray-400 hover:text-white"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
                 data-testid="blog-search-clear"
               >
                 <X className="w-5 h-5" />
