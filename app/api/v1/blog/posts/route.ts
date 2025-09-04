@@ -42,7 +42,9 @@ export async function GET(request: NextRequest) {
     // Apply tag filter if provided
     if (tag) {
       // Handle both array and text-based tags
-      query = query.or(`tags.cs.["${tag}"],tags.ilike.%${tag}%`)
+      // For JSONB arrays: use containment operator
+      // For text fields: convert to text and use ILIKE
+      query = query.or(`tags.cs.["${tag}"],tags::text.ilike.%${tag}%`)
     }
     
     // Apply category filter if provided (support both old and new category system)
@@ -87,7 +89,9 @@ export async function GET(request: NextRequest) {
     // Apply same filters to total count
     if (tag) {
       // Handle both array and text-based tags
-      totalQuery = totalQuery.or(`tags.cs.["${tag}"],tags.ilike.%${tag}%`)
+      // For JSONB arrays: use containment operator
+      // For text fields: convert to text and use ILIKE
+      totalQuery = totalQuery.or(`tags.cs.["${tag}"],tags::text.ilike.%${tag}%`)
     }
     
     if (category) {
