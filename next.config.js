@@ -36,7 +36,7 @@ const nextConfig = {
       allowedOrigins: [`localhost:5000`, `0.0.0.0:5000`, '*.replit.dev', '*.replit.app', '*.replit.co', '*']
     }
   },
-  allowedDevOrigins: ['*.replit.dev', '*.replit.app', '*.replit.co', '*.replit.app', 'localhost:5000', '0.0.0.0:5000'],
+  allowedDevOrigins: ['*.replit.dev', '*.replit.app', '*.replit.co', '*.janeway.replit.dev', 'localhost:5000', '0.0.0.0:5000'],
 
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,

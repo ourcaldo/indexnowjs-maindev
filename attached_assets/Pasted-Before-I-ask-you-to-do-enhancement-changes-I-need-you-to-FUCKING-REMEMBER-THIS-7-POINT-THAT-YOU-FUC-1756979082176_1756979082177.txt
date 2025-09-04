@@ -1,0 +1,107 @@
+Before I ask you to do enhancement/changes, I need you to FUCKING REMEMBER THIS 7 POINT THAT YOU FUCKING STILL MISS IT.
+1. Deep dive into this project, read all code, file and information, specificly in project.md (not replit.md, but still read the replit.md) where you can get the all related this project, database structure and detailed changes log. Don't just fucking use grep to get few lines to read it, fucking open the file and read the full context.
+2. Always and keep remember that you're SHOULDN'T delete any information in project.md, for every update and changes, you should write in Recent Changes inside the project.md with proper timeline format like the other without delete anything.
+3. If you need to make debug/test file to fix the problem, then make it. But keep in mind to delete that file again after it's solved and before you end the action chain.
+4. For after every changes you made, don't forget to add it in timeline changlongs in project.md in Recent Changes section.
+5. As this project using Supabase database, which you didn't have access directly to it, if you need to know the database format beside that I put in project.md, you can give me SQL queries for me to run to see, changes or update database related. Keep in your mind to not push anything related to DB in your local.
+6. If you need to add debug, never use console.log that can appear on user's browser, we don't want that.
+7. New features or any that I ask must be good refactoed code, not single code that handle all functions.
+
+Then, before I ask you to do an enhacement in CMS backend and frontend of archive blog page. Even though it's already good, there's still room for an enhacement. Please read what I said carefully:
+1. Before I ask you to enhace the category selector as you made the category list is hardcoded before, so I can't add the category by myself. Then, you give me the SQL queries to run, and after I run it, it's made 2 new tables which is "indb_cms_post_categories" and "indb_cms_categories" I'll give you the SQL that you give to me before for you to read. The tables "indb_cms_categories" is clearly have data row related to categories that I add, but the "indb_cms_post_categories" it's have another records, which it's should be inside of indb_cms_posts, the records of the post_categories is:
+INSERT INTO "public"."indb_cms_post_categories" ("id", "post_id", "category_id", "is_primary", "created_at") VALUES ('3a9c9728-fd79-4692-9c26-8b2114d2fafd', '9782cb12-2d3e-4101-beac-03e5325d6e36', '4bfd5bf2-696d-496b-8764-892352b1b320', 'true', '2025-09-04 08:17:38.750269+00');
+
+I bit of confused why you add so much new tables?
+
+The logic is still same, each post can have multiple categories, but it's have 1 main/parent categories, it's same like wordpress.
+
+This is the current of cms_posts: INSERT INTO "public"."indb_cms_posts" ("id", "title", "slug", "content", "excerpt", "featured_image_url", "author_id", "status", "post_type", "meta_title", "meta_description", "tags", "published_at", "created_at", "updated_at", "category", "main_category_id") VALUES ('7c13784b-ce9c-4bbc-a524-73db2950af51', 'How Google Crawler Works? This is the Answer!', 'how-google-crawler-works-this-is-the-answer', '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pretium diam nec justo iaculis sollicitudin. Praesent posuere lacus sit amet dapibus rutrum. Nam at luctus nulla, a ultricies mi. Quisque ut quam scelerisque, vulputate leo sed, vulputate lacus. Ut dictum congue diam quis finibus. In sit amet sodales erat. Etiam dignissim, felis non mollis sagittis, risus libero varius massa, quis pulvinar nunc metus quis enim. Integer tellus ipsum, pharetra eget vestibulum id, gravida pretium odio. Praesent nec neque at mauris fringilla dictum eget et nisi. Integer eu metus auctor, semper purus vel, ultrices elit. Praesent vulputate fringilla pharetra. Nulla vestibulum vel lorem porta eleifend. Pellentesque id bibendum eros. Aenean eu feugiat lacus. Aenean dolor tellus, commodo id dictum eget, fringilla a elit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p><p>Aenean sit amet sodales dolor, auctor scelerisque sapien. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sit amet sodales magna. Morbi nibh lorem, vehicula id tristique vel, commodo a massa. Aenean eget felis in est dapibus tempus. Mauris at turpis in ex sagittis consequat in at enim. Curabitur laoreet nisi quis rutrum venenatis. Sed volutpat, quam ut rhoncus vehicula, arcu est tempus nisl, in tincidunt velit lorem in diam. Nunc luctus fringilla ornare. Cras nec ipsum sed nisl sagittis lacinia sed sed risus. Suspendisse at dui et tortor tincidunt rhoncus.</p><p>Phasellus nulla magna, suscipit vel urna maximus, molestie pellentesque erat. Sed convallis nulla ut libero pulvinar, vitae egestas urna convallis. Aliquam egestas, lacus ac scelerisque finibus, ligula urna consequat ipsum, a lacinia ante erat eu diam. Integer a ante cursus, dictum nisi in, volutpat nulla. Curabitur finibus dapibus porta. Nulla est libero, euismod vel vestibulum id, tincidunt pharetra nisi. Praesent in consectetur arcu. Donec hendrerit tortor condimentum, dapibus lacus et, fringilla tellus. Vestibulum fermentum purus rhoncus malesuada ultrices. Nunc eget ipsum vel ex vestibulum sodales sit amet ac magna.</p><p>Morbi non magna vehicula, pellentesque nunc sit amet, bibendum risus. Vivamus vitae lacinia quam. Nulla quam libero, tempus non lobortis id, ultricies non libero. Sed purus tortor, lacinia non feugiat id, tincidunt eu enim. Donec efficitur nibh in enim auctor, vitae efficitur odio consectetur. Pellentesque varius urna quis consequat aliquet. Morbi nisl ligula, ultricies quis neque sit amet, varius congue sapien. Maecenas interdum risus metus, at cursus magna dictum eget. Proin ac porttitor orci, iaculis molestie nibh. Suspendisse quis tortor malesuada quam auctor vehicula ac sed dolor. Aliquam rutrum iaculis eros et interdum. Morbi at posuere dui. Phasellus ante ligula, pretium eu urna eget, placerat consectetur velit. In pellentesque sollicitudin tortor quis consectetur. Integer eget dui et neque aliquet pharetra. Vestibulum dictum ex sit amet arcu facilisis luctus.</p><p>Duis imperdiet in dolor ac fringilla. Vestibulum malesuada elit vitae leo maximus finibus. Praesent condimentum lorem in turpis egestas mattis. Integer at varius risus, vitae pharetra ligula. Integer quam nunc, convallis vel sem at, consectetur iaculis arcu. In euismod commodo elit eget placerat. In sit amet quam quis nunc congue ultrices quis non lorem. In id lobortis massa. Nam ut nulla porttitor, sagittis leo ac, commodo enim. Vivamus vel rhoncus nulla. Vestibulum semper magna purus, ac laoreet lectus euismod vel. Duis in blandit nisi. Fusce sit amet urna non quam aliquam aliquam.</p>', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pretium diam nec justo iaculis sollicitudin. Praesent posuere lacus sit amet dapibus...', '', '915f50e5-0902-466a-b1af-bdf19d789722', 'published', 'blog', 'How Google Crawler Works? This is the Answer!', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pretium diam nec justo iaculis sollicitudin. Praesent posuere lacus sit amet dapibus.', '["technical", "google crawler"]', '2025-09-04 09:28:50.045+00', '2025-09-03 18:55:22.712249+00', '2025-09-04 09:28:50.045+00', 'f6559c1d-e89d-4ac0-8ce8-48092434ac85', '4ce0420f-526a-4f07-b385-ba51afd5fb0d');
+
+The SQL that you ask me to run before which create 2 new tables:
+-- 1. Create categories table
+CREATE TABLE IF NOT EXISTS public.indb_cms_categories (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    name text NOT NULL,
+    slug text NOT NULL UNIQUE,
+    description text,
+    parent_id uuid REFERENCES public.indb_cms_categories(id) ON DELETE SET NULL,
+    post_count integer DEFAULT 0,
+    is_active boolean DEFAULT true,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- 2. Create post-categories junction table for multiple category support
+CREATE TABLE IF NOT EXISTS public.indb_cms_post_categories (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    post_id uuid NOT NULL REFERENCES public.indb_cms_posts(id) ON DELETE CASCADE,
+    category_id uuid NOT NULL REFERENCES public.indb_cms_categories(id) ON DELETE CASCADE,
+    is_primary boolean DEFAULT false,
+    created_at timestamptz DEFAULT now(),
+    UNIQUE(post_id, category_id)
+);
+
+-- 3. Add main_category_id to posts table
+ALTER TABLE public.indb_cms_posts 
+ADD COLUMN IF NOT EXISTS main_category_id uuid REFERENCES public.indb_cms_categories(id) ON DELETE SET NULL;
+
+-- 4. Insert default categories
+INSERT INTO public.indb_cms_categories (name, slug, description) 
+VALUES 
+    ('Case Studies', 'case-studies', 'Real-world examples and success stories'),
+    ('SEO Guide', 'seo-guide', 'Search engine optimization tutorials and guides'),
+    ('Tutorials', 'tutorials', 'Step-by-step tutorials and how-to guides'),
+    ('News', 'news', 'Latest news and updates'),
+    ('General', 'general', 'General blog posts and articles')
+ON CONFLICT (slug) DO NOTHING;
+
+-- 5. Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_indb_cms_categories_slug ON public.indb_cms_categories(slug);
+CREATE INDEX IF NOT EXISTS idx_indb_cms_categories_parent_id ON public.indb_cms_categories(parent_id);
+CREATE INDEX IF NOT EXISTS idx_indb_cms_categories_is_active ON public.indb_cms_categories(is_active);
+CREATE INDEX IF NOT EXISTS idx_indb_cms_post_categories_post_id ON public.indb_cms_post_categories(post_id);
+CREATE INDEX IF NOT EXISTS idx_indb_cms_post_categories_category_id ON public.indb_cms_post_categories(category_id);
+CREATE INDEX IF NOT EXISTS idx_indb_cms_posts_main_category_id ON public.indb_cms_posts(main_category_id);
+
+-- 6. Enable Row Level Security
+ALTER TABLE public.indb_cms_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.indb_cms_post_categories ENABLE ROW LEVEL SECURITY;
+
+-- 7. Create RLS policies for categories
+CREATE POLICY "Allow public read access to categories" ON public.indb_cms_categories
+    FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Allow authenticated users to manage categories" ON public.indb_cms_categories
+    FOR ALL USING (auth.role() = 'authenticated');
+
+-- 8. Create RLS policies for post-categories junction
+CREATE POLICY "Allow public read access to post categories" ON public.indb_cms_post_categories
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow authenticated users to manage post categories" ON public.indb_cms_post_categories
+    FOR ALL USING (auth.role() = 'authenticated');
+
+-- 9. Migrate existing data - match string categories to new category IDs
+UPDATE public.indb_cms_posts 
+SET main_category_id = (
+    SELECT id FROM public.indb_cms_categories 
+    WHERE slug = public.indb_cms_posts.category
+)
+WHERE main_category_id IS NULL;
+
+-- 10. Set default category for posts without a match
+UPDATE public.indb_cms_posts 
+SET main_category_id = (
+    SELECT id FROM public.indb_cms_categories WHERE slug = 'general' LIMIT 1
+)
+WHERE main_category_id IS NULL;
+
+-- 11. Populate junction table with existing posts primary categories
+INSERT INTO public.indb_cms_post_categories (post_id, category_id, is_primary)
+SELECT 
+    p.id,
+    p.main_category_id,
+    true
+FROM public.indb_cms_posts p
+WHERE p.main_category_id IS NOT NULL
+ON CONFLICT (post_id, category_id) DO NOTHING;
