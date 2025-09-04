@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     
     const offset = (page - 1) * limit
     
-    // Build the query with category names
+    // Build the query with category names from join
     let query = supabase
       .from('indb_cms_posts')
       .select(`
@@ -27,12 +27,11 @@ export async function GET(request: NextRequest) {
         meta_title,
         meta_description,
         tags,
-        category,
         post_type,
         published_at,
         created_at,
         author_id,
-        main_category:main_category_id(id, name, slug)
+        main_category:indb_cms_categories!main_category_id(id, name, slug)
       `)
       .eq('status', 'published')
       .not('published_at', 'is', null)
@@ -61,9 +60,6 @@ export async function GET(request: NextRequest) {
       
       if (categoryData) {
         query = query.eq('main_category_id', categoryData.id)
-      } else {
-        // Fallback to old category system
-        query = query.eq('category', category)
       }
     }
     
@@ -107,9 +103,6 @@ export async function GET(request: NextRequest) {
       
       if (categoryData) {
         totalQuery = totalQuery.eq('main_category_id', categoryData.id)
-      } else {
-        // Fallback to old category system
-        totalQuery = totalQuery.eq('category', category)
       }
     }
     
@@ -149,8 +142,8 @@ export async function GET(request: NextRequest) {
       meta_title: post.meta_title,
       meta_description: post.meta_description,
       tags: post.tags || [],
-      category: (post as any).main_category?.slug || post.category || 'uncategorized',
-      category_name: (post as any).main_category?.name || (post.category !== 'uncategorized' ? post.category.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 'Uncategorized'),
+      category: (post as any).main_category?.slug || 'uncategorized',
+      category_name: (post as any).main_category?.name || 'Uncategorized',
       post_type: post.post_type || 'post',
       published_at: post.published_at,
       created_at: post.created_at,

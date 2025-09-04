@@ -41,7 +41,6 @@ export default function PostForm({
       featured_image_url: initialData?.featured_image_url || '',
       status: initialData?.status || 'draft',
       post_type: initialData?.post_type || 'post',
-      category: initialData?.category || 'uncategorized',
       selectedCategories: initialData?.selectedCategories || [],
       mainCategory: initialData?.mainCategory,
       meta_title: initialData?.meta_title || '',
@@ -242,16 +241,8 @@ export default function PostForm({
               onChange={(selectedCategories, mainCategory) => {
                 setValue('selectedCategories', selectedCategories)
                 setValue('mainCategory', mainCategory)
-                // For backward compatibility, also set the category field to the main category slug
-                if (mainCategory) {
-                  // We'll need to get the slug from the category ID
-                  setValue('category', mainCategory)
-                }
               }}
             />
-            {errors.category && (
-              <p className="mt-1 text-sm text-[#E63946]">{errors.category.message}</p>
-            )}
           </div>
 
           {/* Tags */}

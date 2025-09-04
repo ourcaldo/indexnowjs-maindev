@@ -106,8 +106,6 @@ export async function PUT(
     if (body.meta_title !== undefined) updateData.meta_title = body.meta_title
     if (body.meta_description !== undefined) updateData.meta_description = body.meta_description
     if (body.tags !== undefined) updateData.tags = body.tags
-    if (body.category !== undefined) updateData.category = body.category
-    
     // Handle multiple categories - store directly in cms_posts table
     if (body.selectedCategories !== undefined) {
       updateData.categories = body.selectedCategories // Array of category IDs stored in posts table
@@ -115,20 +113,6 @@ export async function PUT(
     
     if (body.mainCategory !== undefined) {
       updateData.main_category_id = body.mainCategory
-      
-      // Also update the category field for backward compatibility
-      if (body.mainCategory) {
-        // Get the category slug for the main category
-        const { data: mainCategoryData, error: categoryError } = await supabaseAdmin
-          .from('indb_cms_categories')
-          .select('slug')
-          .eq('id', body.mainCategory)
-          .single()
-        
-        if (!categoryError && mainCategoryData) {
-          updateData.category = mainCategoryData.slug
-        }
-      }
     }
 
     // Always update the updated_at timestamp

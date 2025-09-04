@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       )
     }
     
-    // Fetch the main post
+    // Fetch the main post with category slug from join
     const { data: post, error: postError } = await supabase
       .from('indb_cms_posts')
       .select(`
@@ -27,12 +27,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         meta_title,
         meta_description,
         tags,
-        category,
         post_type,
         published_at,
         created_at,
         updated_at,
-        author_id
+        author_id,
+        main_category:indb_cms_categories!main_category_id(slug)
       `)
       .eq('slug', slug)
       .eq('status', 'published')
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       meta_title: post.meta_title || post.title,
       meta_description: post.meta_description || post.excerpt,
       tags: post.tags || [],
-      category: post.category || 'uncategorized',
+      category: post.main_category?.slug || 'uncategorized',
       post_type: post.post_type || 'post',
       published_at: post.published_at,
       created_at: post.created_at,

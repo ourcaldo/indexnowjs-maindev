@@ -10,7 +10,6 @@ export const PostFormSchema = z.object({
   featured_image_url: z.string().url('Featured image must be a valid URL').optional().or(z.literal('')),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   post_type: z.enum(['post', 'news', 'blog']).default('post'),
-  category: z.string().min(1, 'Category is required').default('uncategorized'),
   selectedCategories: z.array(z.string()).optional().default([]),
   mainCategory: z.string().optional(),
   meta_title: z.string().max(255, 'Meta title must be less than 255 characters').optional(),
