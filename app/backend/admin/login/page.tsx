@@ -81,8 +81,10 @@ export default function AdminLoginPage() {
         })
       })
 
-      // Success - redirect to admin dashboard
-      router.push('/backend/admin')
+      // Success - redirect to admin dashboard with a small delay to ensure session is set
+      setTimeout(() => {
+        window.location.href = '/backend/admin'
+      }, 100)
       
     } catch (error: any) {
       console.error('Admin login error:', error)
