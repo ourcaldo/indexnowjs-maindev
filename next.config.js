@@ -52,7 +52,7 @@ const nextConfig = {
       allowedOrigins: [`localhost:5000`, `0.0.0.0:5000`, '*.replit.dev', '*.replit.app', '*.replit.co', '*']
     },
     workerThreads: false,
-    cpus: 1,
+    cpus: 10,
   },
   async headers() {
     return [
