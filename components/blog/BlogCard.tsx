@@ -61,14 +61,14 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
           </div>
         )}
         
-        {/* Tags overlay */}
-        {post.tags.length > 0 && (
+        {/* Category overlay */}
+        {post.category && post.category !== 'uncategorized' && (
           <div className="absolute top-4 left-4">
             <span 
               className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600/90 text-white"
-              data-testid={`blog-tag-${post.slug}`}
+              data-testid={`blog-category-${post.slug}`}
             >
-              {post.tags[0]}
+              {post.category}
             </span>
           </div>
         )}

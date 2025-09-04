@@ -72,7 +72,7 @@ export default function BlogFilters({
         {/* Search Input */}
         <form onSubmit={handleSearchSubmit} className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-12 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search blog posts..."
@@ -85,7 +85,7 @@ export default function BlogFilters({
               <button
                 type="button"
                 onClick={handleSearchClear}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                className="absolute right-3 top-1/2 transform -translate-y-12 text-gray-400 hover:text-white"
                 data-testid="blog-search-clear"
               >
                 <X className="w-5 h-5" />
@@ -129,7 +129,7 @@ export default function BlogFilters({
                     </button>
                   )}
                 </div>
-                
+
                 {availableTags.length > 0 ? (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {availableTags.map((tag) => (
@@ -211,7 +211,7 @@ export default function BlogFilters({
               </button>
             </div>
           )}
-          
+
           {currentTag && (
             <div className="flex items-center gap-2 bg-blue-600/20 border border-blue-500/30 px-3 py-1 rounded-full">
               <Filter className="w-4 h-4 text-blue-400" />
@@ -225,7 +225,7 @@ export default function BlogFilters({
               </button>
             </div>
           )}
-          
+
           {currentCategory && (
             <div className="flex items-center gap-2 bg-green-600/20 border border-green-500/30 px-3 py-1 rounded-full">
               <span className="text-green-300 text-sm capitalize">{currentCategory}</span>
