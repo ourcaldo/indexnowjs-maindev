@@ -10,7 +10,7 @@ interface CMSPage {
   template: string
   featured_image_url: string | null
   status: string
-  is_homepage: boolean
+  // Removed is_homepage field
   meta_title: string | null
   meta_description: string | null
   custom_css: string | null

@@ -80,10 +80,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Only redirect to login if we're not on a public route
       if (!currentUser && typeof window !== 'undefined') {
-        const publicRoutes = ['/', '/register', '/forgot-password', '/auth/login', '/pricing', '/contact', '/faq', '/blog']
         const currentPath = window.location.pathname
         
-        if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/backend/admin') && !currentPath.startsWith('/blog/')) {
+        // Define protected routes that require authentication
+        const protectedRoutes = ['/dashboard']
+        const isProtectedRoute = protectedRoutes.some(route => currentPath.startsWith(route))
+        
+        // Don't redirect if on admin routes (handled by admin middleware)
+        const isAdminRoute = currentPath.startsWith('/backend/admin')
+        
+        if (isProtectedRoute && !isAdminRoute) {
           router.push('/auth/login')
         }
       }
@@ -96,12 +102,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setLoading(false)
         setAuthChecked(true)
         
-        // Only redirect if not on public route
+        // Only redirect if on protected route
         if (typeof window !== 'undefined') {
-          const publicRoutes = ['/', '/register', '/forgot-password', '/auth/login', '/pricing', '/contact', '/faq', '/blog']
           const currentPath = window.location.pathname
           
-          if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/backend/admin') && !currentPath.startsWith('/blog/')) {
+          // Define protected routes that require authentication
+          const protectedRoutes = ['/dashboard']
+          const isProtectedRoute = protectedRoutes.some(route => currentPath.startsWith(route))
+          
+          // Don't redirect if on admin routes (handled by admin middleware)
+          const isAdminRoute = currentPath.startsWith('/backend/admin')
+          
+          if (isProtectedRoute && !isAdminRoute) {
             router.push('/auth/login')
           }
         }

@@ -13,8 +13,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '12')
     const status = searchParams.get('status') as PageFilters['status'] || 'all'
     const search = searchParams.get('search') || ''
-    const is_homepage = searchParams.get('is_homepage') === 'true' ? true : 
-                       searchParams.get('is_homepage') === 'false' ? false : undefined
+    // Removed homepage filtering capability
 
     const offset = (page - 1) * limit
 
@@ -31,10 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
 
-    // Apply homepage filter
-    if (is_homepage !== undefined) {
-      query = query.eq('is_homepage', is_homepage)
-    }
+    // Removed homepage filtering capability
 
     // Apply search filter
     if (search) {

@@ -149,11 +149,7 @@ export default function EditPage() {
                 <h1 className="text-2xl font-bold text-[#1A1A1A]">Edit Page</h1>
                 <p className="text-[#6C757D] text-sm">
                   Editing: <span className="font-medium">{page.title}</span>
-                  {page.is_homepage && (
-                    <span className="ml-2 px-2 py-1 text-xs bg-[#4BB543]/10 text-[#4BB543] rounded-full">
-                      Homepage
-                    </span>
-                  )}
+                  {/* Removed homepage badge */}
                 </p>
               </div>
             </div>

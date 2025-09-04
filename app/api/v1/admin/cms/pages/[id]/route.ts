@@ -90,7 +90,7 @@ export async function PUT(
     // Check if page exists
     const { data: existingPage, error: fetchError } = await supabaseAdmin
       .from('indb_cms_pages')
-      .select('id, slug, is_homepage')
+      .select('id, slug')
       .eq('id', id)
       .single()
 
@@ -143,17 +143,7 @@ export async function PUT(
       }
     }
     
-    if (body.is_homepage !== undefined) {
-      updateData.is_homepage = body.is_homepage
-      // If setting as homepage, unset other homepage pages
-      if (body.is_homepage && !existingPage.is_homepage) {
-        await supabaseAdmin
-          .from('indb_cms_pages')
-          .update({ is_homepage: false })
-          .eq('is_homepage', true)
-          .neq('id', id)
-      }
-    }
+    // Removed homepage functionality
     
     if (body.meta_title !== undefined) updateData.meta_title = body.meta_title || null
     if (body.meta_description !== undefined) updateData.meta_description = body.meta_description || null
@@ -204,7 +194,7 @@ export async function DELETE(
     // Check if page is currently the homepage
     const { data: pageToDelete, error: fetchError } = await supabaseAdmin
       .from('indb_cms_pages')
-      .select('id, title, is_homepage')
+      .select('id, title')
       .eq('id', id)
       .single()
 
@@ -216,12 +206,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Failed to fetch page' }, { status: 500 })
     }
 
-    // Prevent deletion of homepage (optional protection)
-    if (pageToDelete.is_homepage) {
-      return NextResponse.json({ 
-        error: 'Cannot delete the current homepage. Please set another page as homepage first.' 
-      }, { status: 400 })
-    }
+    // Removed homepage deletion protection
 
     const { data: page, error } = await supabaseAdmin
       .from('indb_cms_pages')

@@ -15,7 +15,6 @@ import {
   CheckCircle,
   AlertTriangle,
   Clock,
-  Home,
   Globe
 } from 'lucide-react'
 import { CMSPage, PageFilters, PageSortOptions } from '@/types/pages'
@@ -298,12 +297,7 @@ export default function CMSPages() {
                               <h3 className="text-sm font-medium text-[#1A1A1A] truncate">
                                 {page.title}
                               </h3>
-                              {page.is_homepage && (
-                                <div className="flex items-center gap-1 px-2 py-1 text-xs bg-[#4BB543]/10 text-[#4BB543] rounded-full">
-                                  <Home className="h-3 w-3" />
-                                  Homepage
-                                </div>
-                              )}
+                              {/* Removed homepage badge */}
                             </div>
                             <p className="text-xs text-[#6C757D] truncate">
                               /{page.slug}
@@ -394,14 +388,7 @@ export default function CMSPages() {
             Showing {filteredPages.length} of {pages.length} pages
           </div>
           <div className="flex items-center gap-2">
-            <a
-              href="/backend/admin/cms/pages/homepage"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded-lg transition-colors"
-              data-testid="button-homepage-settings"
-            >
-              <Home className="h-4 w-4" />
-              Homepage Settings
-            </a>
+            {/* Removed Homepage Settings link */}
           </div>
         </div>
       )}

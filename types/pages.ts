@@ -9,7 +9,7 @@ export interface CMSPage {
   featured_image_url: string | null
   author_id: string
   status: 'draft' | 'published' | 'archived'
-  is_homepage: boolean
+  // Removed is_homepage field
   meta_title: string | null
   meta_description: string | null
   custom_css: string | null
@@ -49,7 +49,7 @@ export interface PageCreateRequest {
   template?: 'default' | 'landing' | 'about' | 'contact' | 'services'
   featured_image_url?: string
   status?: 'draft' | 'published' | 'archived'
-  is_homepage?: boolean
+  // Removed is_homepage field
   meta_title?: string
   meta_description?: string
   custom_css?: string
@@ -63,7 +63,7 @@ export interface PageUpdateRequest {
   template?: 'default' | 'landing' | 'about' | 'contact' | 'services'
   featured_image_url?: string
   status?: 'draft' | 'published' | 'archived'
-  is_homepage?: boolean
+  // Removed is_homepage field
   meta_title?: string
   meta_description?: string
   custom_css?: string
@@ -74,16 +74,7 @@ export interface PageStatusUpdateRequest {
   status: 'draft' | 'published' | 'archived'
 }
 
-export interface HomepageSettings {
-  current_homepage_id: string | null
-  current_homepage_slug: string | null
-  current_homepage_title: string | null
-  is_custom_homepage: boolean
-}
-
-export interface HomepageUpdateRequest {
-  page_id: string
-}
+// Removed HomepageSettings and HomepageUpdateRequest interfaces
 
 export interface SlugValidationResponse {
   isUnique: boolean
@@ -171,7 +162,7 @@ export interface PageFilters {
   status?: PageStatus | 'all'
   template?: PageTemplateId | 'all'
   search?: string
-  is_homepage?: boolean
+  // Removed is_homepage field
 }
 
 export interface PageSortOptions {
