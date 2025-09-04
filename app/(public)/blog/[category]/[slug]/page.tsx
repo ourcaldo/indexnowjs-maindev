@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation'
 import SinglePostContent from './components/SinglePostContent'
 
 // Generate metadata for each blog post
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ category: string; slug: string }> }): Promise<Metadata> {
   try {
-    const { slug } = await params
+    const { category, slug } = await params
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/v1/blog/posts/${slug}`, {
       cache: 'no-store'
     })
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         title: post.meta_title || post.title,
         description: post.meta_description || post.excerpt,
         type: 'article',
-        url: `/blog/${post.slug}`,
+        url: `/blog/${post.category}/${post.slug}`,
         images: post.featured_image_url ? [
           {
             url: post.featured_image_url,
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         images: post.featured_image_url ? [post.featured_image_url] : undefined,
       },
       alternates: {
-        canonical: `/blog/${post.slug}`
+        canonical: `/blog/${post.category}/${post.slug}`
       },
       robots: {
         index: true,
@@ -66,9 +66,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
-export default async function SinglePostPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function SinglePostPage({ params }: { params: Promise<{ category: string; slug: string }> }) {
   try {
-    const { slug } = await params
+    const { category, slug } = await params
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/v1/blog/posts/${slug}`, {
       cache: 'no-store'
     })
@@ -78,6 +78,11 @@ export default async function SinglePostPage({ params }: { params: Promise<{ slu
     }
     
     const { post, related_posts } = await response.json()
+    
+    // Validate that the category in the URL matches the post's category
+    if (post.category !== category) {
+      notFound()
+    }
     
     // Generate structured data for the blog post
     const postStructuredData = {
@@ -100,7 +105,7 @@ export default async function SinglePostPage({ params }: { params: Promise<{ slu
       },
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": `https://indexnow.studio/blog/${post.slug}`
+        "@id": `https://indexnow.studio/blog/${post.category}/${post.slug}`
       },
       "keywords": post.tags?.join(', '),
       "articleSection": "SEO & Digital Marketing",

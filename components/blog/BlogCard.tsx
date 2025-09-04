@@ -12,6 +12,7 @@ interface BlogPost {
   featured_image_url?: string
   published_at: string
   tags: string[]
+  category: string
   author: {
     name: string
     avatar_url?: string
@@ -89,7 +90,7 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
 
         {/* Title */}
         <h3 className="text-xl font-semibold text-white mb-3 line-clamp-2 group-hover:text-blue-400 transition-colors">
-          <Link href={`/blog/${post.slug}`} data-testid={`blog-title-link-${post.slug}`}>
+          <Link href={`/blog/${post.category}/${post.slug}`} data-testid={`blog-title-link-${post.slug}`}>
             {post.title}
           </Link>
         </h3>
@@ -101,7 +102,7 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
 
         {/* Read more link */}
         <Link
-          href={`/blog/${post.slug}`}
+          href={`/blog/${post.category}/${post.slug}`}
           className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors group"
           data-testid={`blog-read-more-${post.slug}`}
         >

@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         meta_title,
         meta_description,
         tags,
+        category,
         published_at,
         created_at,
         author_id
@@ -76,6 +77,7 @@ export async function GET(request: NextRequest) {
       meta_title: post.meta_title,
       meta_description: post.meta_description,
       tags: post.tags || [],
+      category: post.category || 'uncategorized',
       published_at: post.published_at,
       created_at: post.created_at,
       author: {

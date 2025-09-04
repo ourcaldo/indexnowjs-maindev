@@ -22,6 +22,7 @@ interface BlogPost {
   featured_image_url?: string
   published_at: string
   tags: string[]
+  category: string
   author: {
     name: string
     avatar_url?: string
