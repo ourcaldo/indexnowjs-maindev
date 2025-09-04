@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Search, Eye, Globe, Share2 } from 'lucide-react'
+import { usePublicSettings } from '@/hooks/usePublicSettings'
 
 interface PageSEOFieldsProps {
   title: string
@@ -23,15 +24,25 @@ export default function PageSEOFields({
   className = ""
 }: PageSEOFieldsProps) {
   const [showPreview, setShowPreview] = useState(false)
+  const { settings } = usePublicSettings()
 
-  // Auto-generate meta title from page title if empty
+  // Auto-generate meta title from page title with site title if empty
   useEffect(() => {
     if (!metaTitle && title) {
-      onMetaTitleChange(title)
+      const siteTitle = settings?.site_name || 'IndexNow Studio'
+      const generatedMetaTitle = `${title} | ${siteTitle}`
+      onMetaTitleChange(generatedMetaTitle)
     }
-  }, [title, metaTitle, onMetaTitleChange])
+  }, [title, metaTitle, onMetaTitleChange, settings?.site_name])
 
-  const getMetaTitleDisplay = () => metaTitle || title || 'Untitled Page'
+  const getMetaTitleDisplay = () => {
+    if (metaTitle) return metaTitle
+    if (title) {
+      const siteTitle = settings?.site_name || 'IndexNow Studio'
+      return `${title} | ${siteTitle}`
+    }
+    return 'Untitled Page'
+  }
   const getMetaDescriptionDisplay = () => metaDescription || 'No description available.'
   const getUrlDisplay = () => `indexnow.studio/${slug || 'page-slug'}`
 

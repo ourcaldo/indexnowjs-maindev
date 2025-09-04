@@ -231,19 +231,7 @@ export default function PageForm({
             isDirty={isDirty}
           />
 
-          {/* Cancel Button */}
-          {onCancel && (
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="w-full px-4 py-2 bg-[#F7F9FC] hover:bg-[#E0E6ED] text-[#1A1A1A] text-sm font-medium rounded-lg transition-colors"
-                data-testid="button-cancel"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
+          
 
           {/* Form Status */}
           {isDirty && (

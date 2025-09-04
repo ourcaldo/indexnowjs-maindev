@@ -37,15 +37,15 @@ export async function isSlugUnique(slug: string, excludeId?: string): Promise<bo
     if (excludeId) {
       params.append('excludeId', excludeId)
     }
-    
+
     const response = await fetch(`/api/v1/admin/cms/pages/validate-slug?${params}`, {
       credentials: 'include'
     })
-    
+
     if (!response.ok) {
       return false
     }
-    
+
     const data = await response.json()
     return data.isUnique
   } catch (error) {
@@ -90,19 +90,19 @@ export function sanitizeCustomJS(js: string): string {
 export function generatePageExcerpt(content: string, maxLength: number = 120): string {
   // Strip HTML tags and get plain text
   const plainText = content.replace(/<[^>]*>/g, '').trim()
-  
+
   if (plainText.length <= maxLength) {
     return plainText
   }
-  
+
   // Find the last complete word within the limit
   const truncated = plainText.substring(0, maxLength)
   const lastSpaceIndex = truncated.lastIndexOf(' ')
-  
+
   if (lastSpaceIndex > 0) {
     return truncated.substring(0, lastSpaceIndex) + '...'
   }
-  
+
   return truncated + '...'
 }
 
@@ -119,16 +119,31 @@ export function isValidImageSize(file: File, maxSizeMB: number = 5): boolean {
 }
 
 // Generate SEO-friendly meta title for pages
-export function generatePageMetaTitle(title: string, siteName?: string): string {
-  const maxLength = 60
-  let metaTitle = title
-  
-  if (siteName) {
-    const withSiteName = `${title} | ${siteName}`
-    metaTitle = withSiteName.length <= maxLength ? withSiteName : title
+export function generatePageMetaTitle(title: string, siteName: string = 'IndexNow Studio'): string {
+  if (!title?.trim()) return siteName
+
+  // If title already contains the site name, don't duplicate it
+  if (title.toLowerCase().includes(siteName.toLowerCase())) {
+    return title
   }
-  
-  return metaTitle.length > maxLength ? title.substring(0, 57) + '...' : metaTitle
+
+  // Truncate meta title to a reasonable length (e.g., 60 characters)
+  const maxLength = 60
+  const combinedTitle = `${title} | ${siteName}`
+
+  if (combinedTitle.length > maxLength) {
+    // If combined title exceeds max length, truncate the page title and append site name if possible
+    const remainingLength = maxLength - siteName.length - 3 // account for ' | '
+    if (remainingLength > 0) {
+      const truncatedTitle = title.substring(0, remainingLength)
+      return `${truncatedTitle} | ${siteName}`
+    } else {
+      // If even the site name is too long, just return a truncated version of the site name
+      return siteName.substring(0, maxLength)
+    }
+  }
+
+  return combinedTitle
 }
 
 // Generate SEO-friendly meta description for pages
