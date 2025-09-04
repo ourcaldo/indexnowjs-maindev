@@ -16,7 +16,7 @@ IndexNow Studio is a professional-grade, full-stack web application designed to 
 ## Recent Changes
 
 **September 2025:**
-- **Replit Environment Setup (Sep 2025):** Successfully imported and configured the application for Replit environment. Configured Node.js 20, installed all dependencies, and set up the development workflow. The Next.js application is running properly on port 5000 with proper host configuration for Replit's proxy environment. Deployment configuration has been set up for autoscale deployment.
+- **Replit Environment Setup (Sep 2025):** Successfully imported and configured the application for Replit environment. Configured Node.js 20, installed all dependencies, and set up the development workflow. The Next.js application is running properly on port 5000 with proper host configuration for Replit's proxy environment. Deployment configuration has been set up for autoscale deployment. All database connections are configured with external Supabase instance. Background services are disabled in development mode for optimal performance.
 
 **December 2024:**
 - **Pricing Architecture Refactoring (Dec 2024):** Created dedicated pricing page at `/pricing` route with comprehensive features comparison and FAQ sections. Eliminated code duplication by creating shared `usePricingData` hook to centralize pricing logic across `PricingTeaserSection` and `PricingTable` components. Updated navigation from scroll-to-section to dedicated page routing for better user experience and scalability.
