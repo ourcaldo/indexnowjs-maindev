@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { SitemapGenerator } from '@/lib/services/sitemap/SitemapGenerator'
+import { SitemapOrchestrator } from '@/lib/services/sitemap/SitemapOrchestrator'
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
     const protocol = request.headers.get('x-forwarded-proto') || 'https'
     const baseUrl = `${protocol}://${host}`
     
-    const generator = new SitemapGenerator(baseUrl)
-    const sitemap = await generator.generateTagsSitemap()
+    const orchestrator = new SitemapOrchestrator(baseUrl)
+    const sitemap = await orchestrator.generateTagsSitemap()
 
     return new NextResponse(sitemap, {
       headers: {
