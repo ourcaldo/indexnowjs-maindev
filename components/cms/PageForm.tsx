@@ -42,7 +42,6 @@ export default function PageForm({
       template: initialData?.template || 'default',
       featured_image_url: initialData?.featured_image_url || '',
       status: initialData?.status || 'draft',
-      is_homepage: initialData?.is_homepage || false,
       meta_title: initialData?.meta_title || '',
       meta_description: initialData?.meta_description || '',
       custom_css: initialData?.custom_css || '',
@@ -57,7 +56,6 @@ export default function PageForm({
   const watchedSlug = watch('slug')
   const watchedStatus = watch('status')
   const watchedTemplate = watch('template')
-  const watchedIsHomepage = watch('is_homepage')
   const watchedMetaTitle = watch('meta_title')
   const watchedMetaDescription = watch('meta_description')
   const watchedCustomCSS = watch('custom_css')
@@ -222,8 +220,8 @@ export default function PageForm({
           {/* SEO Fields */}
           <PageSEOFields
             title={watchedTitle}
-            metaTitle={watchedMetaTitle}
-            metaDescription={watchedMetaDescription}
+            metaTitle={watchedMetaTitle || ''}
+            metaDescription={watchedMetaDescription || ''}
             slug={watchedSlug}
             onMetaTitleChange={(value) => setValue('meta_title', value)}
             onMetaDescriptionChange={(value) => setValue('meta_description', value)}
@@ -236,21 +234,12 @@ export default function PageForm({
           <PagePublishControls
             status={watchedStatus}
             template={watchedTemplate}
-            isHomepage={watchedIsHomepage}
             onStatusChange={(status) => setValue('status', status)}
             onTemplateChange={(template) => setValue('template', template)}
             onSave={() => handleSubmit(handleFormSubmit)()}
             onPreview={handlePreview}
             isLoading={isLoading}
             isDirty={isDirty}
-          />
-
-          {/* Homepage Toggle */}
-          <HomepageToggle
-            isHomepage={watchedIsHomepage}
-            pageTitle={watchedTitle}
-            onHomepageChange={(isHomepage) => setValue('is_homepage', isHomepage)}
-            disabled={watchedStatus !== 'published'}
           />
 
           {/* Form Actions */}

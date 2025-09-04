@@ -164,13 +164,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Slug already exists' }, { status: 400 })
     }
 
-    // If setting as homepage, unset other homepage pages
-    if (validatedData.is_homepage) {
-      await supabaseAdmin
-        .from('indb_cms_pages')
-        .update({ is_homepage: false })
-        .eq('is_homepage', true)
-    }
 
     // Create the page
     const { data: page, error } = await supabaseAdmin
@@ -183,7 +176,6 @@ export async function POST(request: NextRequest) {
         featured_image_url: validatedData.featured_image_url || null,
         author_id: adminUser.id,
         status: validatedData.status,
-        is_homepage: validatedData.is_homepage,
         meta_title: validatedData.meta_title || null,
         meta_description: validatedData.meta_description || null,
         custom_css: sanitizedCSS,

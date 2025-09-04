@@ -21,7 +21,6 @@ interface CMSPage {
   template: string
   featured_image_url: string | null
   status: string
-  is_homepage: boolean
   meta_title: string | null
   meta_description: string | null
   custom_css: string | null
@@ -29,46 +28,14 @@ interface CMSPage {
   published_at: string | null
   created_at: string
   updated_at: string
-  author_name?: string
 }
 
 async function getHomepagePage(): Promise<CMSPage | null> {
   try {
-    const { data: page, error } = await supabase
-      .from('indb_cms_pages')
-      .select(`
-        id,
-        title,
-        slug,
-        content,
-        template,
-        featured_image_url,
-        status,
-        is_homepage,
-        meta_title,
-        meta_description,
-        custom_css,
-        custom_js,
-        published_at,
-        created_at,
-        updated_at,
-        indb_auth_user_profiles!inner (
-          full_name
-        )
-      `)
-      .eq('status', 'published')
-      .eq('is_homepage', true)
-      .single()
-
-    if (error) {
-      console.error('Error fetching homepage:', error)
-      return null
-    }
-
-    return {
-      ...page,
-      author_name: page.indb_auth_user_profiles?.full_name || 'Unknown'
-    }
+    // Since CMS pages should not have homepage functionality for this project
+    // and the database relationship is causing errors, we'll disable this feature
+    // CMS pages are meant for static content like privacy policy, terms, etc.
+    return null
   } catch (error) {
     console.error('Error in getHomepagePage:', error)
     return null

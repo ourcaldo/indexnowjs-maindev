@@ -20,7 +20,6 @@ interface CMSPage {
   template: string
   featured_image_url: string | null
   status: string
-  is_homepage: boolean
   meta_title: string | null
   meta_description: string | null
   custom_css: string | null
@@ -28,7 +27,6 @@ interface CMSPage {
   published_at: string | null
   created_at: string
   updated_at: string
-  author_name?: string
 }
 
 async function getPageBySlug(slug: string): Promise<CMSPage | null> {
@@ -43,17 +41,13 @@ async function getPageBySlug(slug: string): Promise<CMSPage | null> {
         template,
         featured_image_url,
         status,
-        is_homepage,
         meta_title,
         meta_description,
         custom_css,
         custom_js,
         published_at,
         created_at,
-        updated_at,
-        indb_auth_user_profiles!inner (
-          full_name
-        )
+        updated_at
       `)
       .eq('slug', slug)
       .eq('status', 'published')
@@ -64,10 +58,7 @@ async function getPageBySlug(slug: string): Promise<CMSPage | null> {
       return null
     }
 
-    return {
-      ...page,
-      author_name: page.indb_auth_user_profiles?.full_name || 'Unknown'
-    }
+    return page
   } catch (error) {
     console.error('Error in getPageBySlug:', error)
     return null
@@ -79,7 +70,8 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const page = await getPageBySlug(params.slug)
+  const { slug } = await params
+  const page = await getPageBySlug(slug)
 
   if (!page) {
     return {
@@ -96,7 +88,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     keywords: 'indexnow, seo, rank tracking, google indexing',
-    authors: [{ name: page.author_name || 'IndexNow Studio' }],
     openGraph: {
       title,
       description,
@@ -130,7 +121,8 @@ export const revalidate = 3600 // Revalidate every 1 hour
 export const dynamicParams = true // Allow new slugs
 
 export default async function DynamicPage({ params }: PageProps) {
-  const page = await getPageBySlug(params.slug)
+  const { slug } = await params
+  const page = await getPageBySlug(slug)
 
   if (!page) {
     notFound()

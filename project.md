@@ -6444,4 +6444,37 @@ ON public.indb_cms_posts(category, status);
 
 **Status**: ✅ **ISR OPTIMIZATION COMPLETE** - Pages CMS implementation plan now includes comprehensive ISR strategy for optimal performance and user experience
 
+### September 04, 2025 - CRITICAL CMS Pages Fixes - Database & Homepage Issues Resolved 🔧
+
+- 🛠️ **DATABASE RELATIONSHIP ERROR FIXED**: Resolved critical database relationship errors between `indb_cms_pages` and `indb_auth_user_profiles`
+  - **Root Cause**: CMS pages were attempting to use inner joins with user profiles table causing PGRST200 errors
+  - **Solution**: Removed problematic joins and simplified page queries to only fetch necessary page data
+  - **Author Information Removed**: Static pages (privacy policy, terms, etc.) should never display author information - completely removed author functionality from pages
+  - **Database Schema Alignment**: Fixed schema mismatches and removed dependency on user profile relationships for pages
+
+- 🏠 **HOMEPAGE FUNCTIONALITY PROPERLY DISABLED**: Removed inappropriate homepage setting option from CMS pages
+  - **Context**: CMS pages are meant for static content like privacy policy, terms of service, contact pages - NOT for homepage management
+  - **Homepage Logic Disabled**: Modified `app/(public)/page.tsx` to disable custom homepage functionality and always use default landing page
+  - **UI Components Updated**: Removed homepage toggle and related controls from PageForm and PagePublishControls components
+  - **Validation Schema Cleaned**: Removed `is_homepage` field from PageFormSchema and related validation logic
+
+- ⚙️ **NEXT.JS 15 COMPATIBILITY FIXES**: Fixed modern Next.js async params handling
+  - **Dynamic Routes Fixed**: Updated `app/(public)/[slug]/page.tsx` to properly await params before accessing slug property
+  - **TypeScript Errors Resolved**: Fixed all LSP diagnostics and compilation errors in CMS pages components
+  - **Async API Alignment**: Updated both `generateMetadata` and page component to use `await params` pattern
+
+- 🧹 **CODE CLEANUP & REFACTORING**: Comprehensive cleanup of CMS pages implementation
+  - **API Routes Cleaned**: Removed homepage-related logic from `/api/v1/admin/cms/pages/route.ts`
+  - **Component Interfaces Updated**: Removed `isHomepage` props and related functionality from all page components
+  - **Validation Simplified**: Streamlined PageFormSchema to only include fields relevant to static content pages
+  - **Import Cleanup**: Removed unused imports and dependencies related to homepage functionality
+
+- ✅ **TESTING & VERIFICATION**: All errors resolved and application running cleanly
+  - **Database Errors Gone**: No more PGRST200 relationship errors when loading pages
+  - **Homepage Loads Correctly**: Default landing page loads without attempting to fetch non-existent custom homepage
+  - **CMS Interface Working**: Admin pages interface now loads without homepage-related errors
+  - **Privacy Policy Accessible**: Static pages like privacy policy now load correctly via `/[slug]` routing
+
+**Status**: ✅ **CRITICAL FIXES COMPLETE** - CMS pages system now works correctly for its intended purpose (static content management) without inappropriate homepage functionality or database relationship errors
+
 

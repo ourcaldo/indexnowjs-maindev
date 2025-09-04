@@ -15,7 +15,6 @@ import {
 interface PagePublishControlsProps {
   status: 'draft' | 'published' | 'archived'
   template: 'default' | 'landing' | 'about' | 'contact' | 'services'
-  isHomepage: boolean
   onStatusChange: (status: 'draft' | 'published' | 'archived') => void
   onTemplateChange: (template: 'default' | 'landing' | 'about' | 'contact' | 'services') => void
   onSave: () => void
@@ -28,7 +27,6 @@ interface PagePublishControlsProps {
 export default function PagePublishControls({
   status,
   template,
-  isHomepage,
   onStatusChange,
   onTemplateChange,
   onSave,
@@ -119,14 +117,6 @@ export default function PagePublishControls({
             <span className={`text-sm font-medium ${statusConfig.color}`}>
               {statusConfig.label}
             </span>
-            {isHomepage && status === 'published' && (
-              <div className="ml-auto">
-                <div className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-[#4BB543]/10 text-[#4BB543] rounded-full">
-                  <Home className="h-3 w-3" />
-                  Homepage
-                </div>
-              </div>
-            )}
           </div>
           
           <div className="grid grid-cols-3 gap-2">
@@ -225,8 +215,7 @@ export default function PagePublishControls({
       
       {status === 'published' && (
         <div className="text-xs text-[#4BB543] bg-[#4BB543]/5 p-3 rounded-lg">
-          <strong>Published:</strong> Page is live and visible to all visitors. 
-          {isHomepage && ' This page is set as your website homepage.'}
+          <strong>Published:</strong> Page is live and visible to all visitors.
         </div>
       )}
       

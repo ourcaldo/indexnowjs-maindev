@@ -9,7 +9,6 @@ export const PageFormSchema = z.object({
   template: z.enum(['default', 'landing', 'about', 'contact', 'services']).default('default'),
   featured_image_url: z.string().url('Featured image must be a valid URL').optional().or(z.literal('')),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
-  is_homepage: z.boolean().default(false),
   meta_title: z.string().max(255, 'Meta title must be less than 255 characters').optional(),
   meta_description: z.string().max(500, 'Meta description must be less than 500 characters').optional(),
   custom_css: z.string().optional(),
@@ -20,13 +19,8 @@ export const PageStatusUpdateSchema = z.object({
   status: z.enum(['draft', 'published', 'archived'])
 })
 
-export const HomepageUpdateSchema = z.object({
-  page_id: z.string().uuid()
-})
-
 export type PageFormData = z.infer<typeof PageFormSchema>
 export type PageStatusUpdateData = z.infer<typeof PageStatusUpdateSchema>
-export type HomepageUpdateData = z.infer<typeof HomepageUpdateSchema>
 
 // Slug generation utility
 export function generateSlug(title: string): string {
