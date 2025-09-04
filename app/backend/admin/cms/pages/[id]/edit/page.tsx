@@ -59,6 +59,9 @@ export default function EditPage() {
     setIsLoading(true)
     
     try {
+      // Track original status for more accurate toast messages
+      const originalStatus = page?.status
+      
       const response = await fetch(`/api/v1/admin/cms/pages/${pageId}`, {
         method: 'PUT',
         headers: {
@@ -76,9 +79,25 @@ export default function EditPage() {
       const result = await response.json()
       setPage(result.page)
       
+      // Create contextual toast message
+      let description = `Your page "${data.title}" has been updated`
+      
+      // Only mention status change if it actually changed
+      if (originalStatus !== data.status) {
+        if (data.status === 'published') {
+          description += ' and published'
+        } else if (originalStatus === 'published' && data.status === 'draft') {
+          description += ' and unpublished'
+        } else {
+          description += ` and saved as ${data.status}`
+        }
+      }
+      
+      description += '.'
+      
       addToast({
         title: 'Page updated successfully',
-        description: `Your page "${data.title}" has been updated and ${data.status === 'published' ? 'published' : 'saved as ' + data.status}.`,
+        description: description,
       })
       
     } catch (error) {

@@ -92,28 +92,6 @@ export default function PageForm({
     try {
       await onSubmit(data)
       setIsDirty(false)
-      
-      // Create a single, clear toast message based on mode and status
-      let title = ''
-      let description = ''
-      
-      if (mode === 'create') {
-        title = 'Page created successfully'
-        description = data.status === 'published' 
-          ? 'Your page has been created and published.' 
-          : `Your page has been created as ${data.status}.`
-      } else {
-        title = 'Page updated successfully'
-        description = data.status === 'published' 
-          ? `Your page "${data.title}" has been updated and published.`
-          : `Your page "${data.title}" has been updated as ${data.status}.`
-      }
-      
-      addToast({
-        title,
-        description,
-        type: 'success'
-      })
     } catch (error) {
       console.error('Form submission error:', error)
       addToast({

@@ -1047,6 +1047,35 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 4, 2025: CMS Page Editor Duplicate Toast Notification Fix ✅
+
+**✅ DUPLICATE TOAST NOTIFICATION ISSUE RESOLVED**: Fixed multiple duplicate toast notifications appearing when editing and saving CMS pages
+-- **Issue**: When editing a page and clicking save, users were seeing 2-4 identical toast notifications saying "Page updated successfully" and "Your page 'Privacy Policy' has been updated and published"
+-- **Root Cause**: Both the parent component (edit page) AND the PageForm component were showing toast notifications after successful operations
+-- **Technical Analysis**: 
+  - Edit page handler (`app/backend/admin/cms/pages/[id]/edit/page.tsx`) showed toast after API call succeeded
+  - PageForm component (`components/cms/PageForm.tsx`) showed ANOTHER toast after onSubmit prop succeeded
+  - This created a chain: User saves → PageForm calls onSubmit → Edit page shows toast → PageForm shows another toast
+-- **Solution**: Removed duplicate toast logic from PageForm component while preserving error handling
+  - PageForm now only handles error toasts (when API calls fail)
+  - Parent components (create/edit pages) handle all success toasts
+  - This ensures only one toast per action with contextual messaging
+
+**✅ CONTEXTUAL TOAST MESSAGING IMPROVEMENT**: Enhanced toast messages to show accurate status change information
+-- **Issue**: Toast messages always said "has been updated and published" even when status didn't change
+-- **Enhancement**: Toast messages now track original status and only mention status changes when they actually occur
+-- **Examples**:
+  - Content-only changes: "Your page 'Privacy Policy' has been updated."
+  - Status changes: "Your page 'Privacy Policy' has been updated and published."
+  - Unpublishing: "Your page 'Privacy Policy' has been updated and unpublished."
+-- **Result**: Toast notifications are now accurate and contextual, eliminating user confusion
+
+**Files Modified:**
+-- `components/cms/PageForm.tsx` - Removed duplicate success toast logic, kept error handling
+-- `app/backend/admin/cms/pages/[id]/edit/page.tsx` - Enhanced toast messaging with status change tracking
+
+**Status**: ✅ **COMPLETE** - Toast notification system now works correctly with single, contextual messages
+
 ### September 4, 2025: Complete CMS Pages System Implementation ✅
 
 -- ✅ **FULL 6-PHASE IMPLEMENTATION COMPLETE**: Successfully implemented entire CMS Pages system in single session
