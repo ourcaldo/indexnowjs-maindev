@@ -235,7 +235,7 @@ export default function PageForm({
             status={watchedStatus}
             template={watchedTemplate}
             onStatusChange={(status) => setValue('status', status)}
-            onTemplateChange={(template) => setValue('template', template)}
+            onTemplateChange={(template) => setValue('template', 'default')}
             onSave={() => handleSubmit(handleFormSubmit)()}
             onPreview={handlePreview}
             isLoading={isLoading}

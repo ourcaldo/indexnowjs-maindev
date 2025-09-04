@@ -1,6 +1,9 @@
 'use client'
 
-import { Calendar, User } from 'lucide-react'
+import Header from '@/components/shared/Header'
+import Footer from '@/components/shared/Footer'
+import Background from '@/components/shared/Background'
+import { usePageData } from '@/hooks/shared/usePageData'
 
 interface CMSPage {
   id: string
@@ -10,7 +13,6 @@ interface CMSPage {
   template: string
   featured_image_url: string | null
   status: string
-  is_homepage: boolean
   meta_title: string | null
   meta_description: string | null
   custom_css: string | null
@@ -18,7 +20,6 @@ interface CMSPage {
   published_at: string | null
   created_at: string
   updated_at: string
-  author_name?: string
 }
 
 interface DefaultPageContentProps {
@@ -26,136 +27,68 @@ interface DefaultPageContentProps {
 }
 
 export default function DefaultPageContent({ page }: DefaultPageContentProps) {
+  const { user, siteSettings, handleAuthAction } = usePageData()
+
+  const navigation = [
+    { label: 'Home', href: '/' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'Contact', href: '/contact' }
+  ]
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="relative min-h-screen">
+      <Background />
+      
       {/* Header */}
-      <header className="bg-[#1A1A1A] text-white">
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="max-w-4xl">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-              {page.title}
-            </h1>
-            
-            {page.meta_description && (
-              <p className="text-xl text-[#F7F9FC] leading-relaxed mb-8">
-                {page.meta_description}
-              </p>
-            )}
-            
-            {/* Page Meta */}
-            <div className="flex flex-wrap items-center gap-6 text-sm text-[#F7F9FC]">
-              {page.author_name && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>By {page.author_name}</span>
-                </div>
-              )}
-              {page.published_at && (
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Published {new Date(page.published_at).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header 
+        user={user}
+        siteSettings={siteSettings}
+        onAuthAction={handleAuthAction}
+        navigation={navigation}
+        variant="page"
+        currentPage={page.slug}
+      />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2">
-            {/* Featured Image */}
-            {page.featured_image_url && (
-              <div className="mb-8">
-                <img 
-                  src={page.featured_image_url}
-                  alt={page.title}
-                  className="w-full h-64 lg:h-96 object-cover rounded-lg"
-                />
-              </div>
+      <main className="relative pt-16">
+        {/* Page Header */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
+              {page.title}
+            </h1>
+            {page.published_at && (
+              <p className="text-gray-400 text-lg">
+                Published {new Date(page.published_at).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
             )}
+          </div>
+        </section>
 
-            {/* Page Content */}
-            <div className="prose prose-lg max-w-none">
+        {/* Content Section */}
+        <section className="py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="prose prose-lg prose-invert max-w-none">
               <div 
                 dangerouslySetInnerHTML={{ 
                   __html: page.content || '<p>No content available.</p>' 
                 }} 
-                className="leading-relaxed text-[#1A1A1A]"
+                className="text-gray-300 leading-relaxed [&>h1]:text-white [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mb-6 [&>h2]:text-white [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-12 [&>h2]:mb-6 [&>h3]:text-white [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-8 [&>h3]:mb-4 [&>h4]:text-white [&>h4]:text-lg [&>h4]:font-semibold [&>h4]:mt-6 [&>h4]:mb-3 [&>p]:mb-6 [&>p]:leading-relaxed [&>ul]:mb-6 [&>ol]:mb-6 [&>li]:mb-2 [&>li]:text-gray-300 [&>a]:text-blue-400 [&>a]:hover:text-blue-300 [&>a]:underline [&>strong]:text-white [&>em]:text-gray-200 [&>blockquote]:border-l-4 [&>blockquote]:border-blue-500 [&>blockquote]:pl-6 [&>blockquote]:italic [&>blockquote]:text-gray-400"
               />
             </div>
           </div>
-
-          {/* Sidebar */}
-          <div className="space-y-8">
-            {/* Page Info */}
-            <div className="bg-[#F7F9FC] rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">Page Information</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-[#6C757D]">Template:</span>
-                  <span className="text-[#1A1A1A] font-medium">Default Page</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#6C757D]">Author:</span>
-                  <span className="text-[#1A1A1A] font-medium">{page.author_name || 'Unknown'}</span>
-                </div>
-                {page.published_at && (
-                  <div className="flex justify-between">
-                    <span className="text-[#6C757D]">Published:</span>
-                    <span className="text-[#1A1A1A] font-medium">
-                      {new Date(page.published_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-[#6C757D]">Last Updated:</span>
-                  <span className="text-[#1A1A1A] font-medium">
-                    {new Date(page.updated_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <div className="bg-[#F7F9FC] rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">Quick Links</h3>
-              <div className="space-y-2">
-                <a 
-                  href="/"
-                  className="block px-4 py-2 text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded transition-colors"
-                >
-                  Home
-                </a>
-                <a 
-                  href="/blog"
-                  className="block px-4 py-2 text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded transition-colors"
-                >
-                  Blog
-                </a>
-                <a 
-                  href="/contact"
-                  className="block px-4 py-2 text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded transition-colors"
-                >
-                  Contact
-                </a>
-                <a 
-                  href="/pricing"
-                  className="block px-4 py-2 text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded transition-colors"
-                >
-                  Pricing
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
+        </section>
       </main>
+
+      {/* Footer */}
+      <Footer 
+        siteSettings={siteSettings}
+      />
     </div>
   )
 }

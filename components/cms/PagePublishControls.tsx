@@ -14,9 +14,9 @@ import {
 
 interface PagePublishControlsProps {
   status: 'draft' | 'published' | 'archived'
-  template: 'default' | 'landing' | 'about' | 'contact' | 'services'
+  template: 'default'
   onStatusChange: (status: 'draft' | 'published' | 'archived') => void
-  onTemplateChange: (template: 'default' | 'landing' | 'about' | 'contact' | 'services') => void
+  onTemplateChange: (template: 'default') => void
   onSave: () => void
   onPreview?: () => void
   isLoading?: boolean
@@ -139,18 +139,10 @@ export default function PagePublishControls({
         </div>
       </div>
 
-      {/* Page Template */}
-      <div>
+      {/* Page Template - Hidden since only default is available */}
+      <div style={{ display: 'none' }}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium text-[#1A1A1A]">Page Template</h3>
-          <button
-            onClick={() => setShowTemplateInfo(!showTemplateInfo)}
-            className="text-xs text-[#3D8BFF] hover:text-[#3D8BFF]/80"
-            type="button"
-            data-testid="button-template-info"
-          >
-            {showTemplateInfo ? 'Hide' : 'Show'} Info
-          </button>
         </div>
         
         <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E0E6ED] bg-[#F7F9FC]`}>

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Layout, Home, User, Mail, Briefcase, Eye } from 'lucide-react'
+import { Layout, Eye } from 'lucide-react'
 
 export interface PageTemplate {
-  id: 'default' | 'landing' | 'about' | 'contact' | 'services'
+  id: 'default'
   name: string
   description: string
   icon: typeof Layout
@@ -15,32 +15,8 @@ const PAGE_TEMPLATES: PageTemplate[] = [
   {
     id: 'default',
     name: 'Default',
-    description: 'Standard page layout with content and sidebar',
+    description: 'Standard static page layout for privacy policy, terms of service, and other legal/informational content',
     icon: Layout
-  },
-  {
-    id: 'landing',
-    name: 'Landing Page',
-    description: 'Full-width landing page with hero section and CTA',
-    icon: Home
-  },
-  {
-    id: 'about',
-    name: 'About Page',
-    description: 'Team showcase, company story, and mission statement',
-    icon: User
-  },
-  {
-    id: 'contact',
-    name: 'Contact Page',
-    description: 'Contact form, location map, and contact information',
-    icon: Mail
-  },
-  {
-    id: 'services',
-    name: 'Services Page',
-    description: 'Service listings, features, and pricing information',
-    icon: Briefcase
   }
 ]
 
