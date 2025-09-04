@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
     
     // Apply tag filter if provided
     if (tag) {
-      query = query.contains('tags', [tag])
+      // Handle both array and text-based tags
+      query = query.or(`tags.cs.["${tag}"],tags.ilike.%${tag}%`)
     }
     
     // Apply category filter if provided (support both old and new category system)
@@ -76,12 +77,40 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    // Get total count for pagination
-    const { count: totalCount } = await supabase
+    // Get total count for pagination with same filters
+    let totalQuery = supabase
       .from('indb_cms_posts')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'published')
       .not('published_at', 'is', null)
+    
+    // Apply same filters to total count
+    if (tag) {
+      // Handle both array and text-based tags
+      totalQuery = totalQuery.or(`tags.cs.["${tag}"],tags.ilike.%${tag}%`)
+    }
+    
+    if (category) {
+      // First try new category system by slug
+      const { data: categoryData } = await supabase
+        .from('indb_cms_categories')
+        .select('id')
+        .eq('slug', category)
+        .single()
+      
+      if (categoryData) {
+        totalQuery = totalQuery.eq('main_category_id', categoryData.id)
+      } else {
+        // Fallback to old category system
+        totalQuery = totalQuery.eq('category', category)
+      }
+    }
+    
+    if (search) {
+      totalQuery = totalQuery.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%,content.ilike.%${search}%`)
+    }
+    
+    const { count: totalCount } = await totalQuery
     
     const totalPages = Math.ceil((totalCount || 0) / limit)
     

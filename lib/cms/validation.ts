@@ -11,6 +11,8 @@ export const PostFormSchema = z.object({
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   post_type: z.enum(['post', 'news', 'blog']).default('post'),
   category: z.string().min(1, 'Category is required').default('uncategorized'),
+  selectedCategories: z.array(z.string()).optional().default([]),
+  mainCategory: z.string().optional(),
   meta_title: z.string().max(255, 'Meta title must be less than 255 characters').optional(),
   meta_description: z.string().max(500, 'Meta description must be less than 500 characters').optional(),
   tags: z.array(z.string()).default([])

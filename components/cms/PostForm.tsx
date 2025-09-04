@@ -42,6 +42,8 @@ export default function PostForm({
       status: initialData?.status || 'draft',
       post_type: initialData?.post_type || 'post',
       category: initialData?.category || 'uncategorized',
+      selectedCategories: initialData?.selectedCategories || [],
+      mainCategory: initialData?.mainCategory,
       meta_title: initialData?.meta_title || '',
       meta_description: initialData?.meta_description || '',
       tags: initialData?.tags || []
@@ -58,6 +60,8 @@ export default function PostForm({
   const watchedMetaTitle = watch('meta_title')
   const watchedMetaDescription = watch('meta_description')
   const watchedTags = watch('tags')
+  const watchedSelectedCategories = watch('selectedCategories')
+  const watchedMainCategory = watch('mainCategory')
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -232,10 +236,18 @@ export default function PostForm({
 
           {/* Category */}
           <div className="bg-white border border-[#E0E6ED] rounded-lg p-4">
-            <h3 className="text-sm font-medium text-[#1A1A1A] mb-3">Category</h3>
             <CategorySelector
-              value={form.getValues('category') || 'uncategorized'}
-              onChange={(category) => setValue('category', category)}
+              selectedCategories={watchedSelectedCategories || []}
+              mainCategory={watchedMainCategory}
+              onChange={(selectedCategories, mainCategory) => {
+                setValue('selectedCategories', selectedCategories)
+                setValue('mainCategory', mainCategory)
+                // For backward compatibility, also set the category field to the main category slug
+                if (mainCategory) {
+                  // We'll need to get the slug from the category ID
+                  setValue('category', mainCategory)
+                }
+              }}
             />
             {errors.category && (
               <p className="mt-1 text-sm text-[#E63946]">{errors.category.message}</p>
