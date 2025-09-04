@@ -138,32 +138,17 @@ export function generatePageMetaDescription(content: string, maxLength: number =
   return excerpt
 }
 
-// Validate template type
+// Validate template type - simplified to only default
 export function isValidTemplate(template: string): boolean {
-  const validTemplates = ['default', 'landing', 'about', 'contact', 'services']
-  return validTemplates.includes(template)
+  return template === 'default'
 }
 
-// Get template display name
+// Get template display name - simplified
 export function getTemplateDisplayName(template: string): string {
-  const templateNames = {
-    'default': 'Default',
-    'landing': 'Landing Page',
-    'about': 'About Page',
-    'contact': 'Contact Page',
-    'services': 'Services Page'
-  }
-  return templateNames[template as keyof typeof templateNames] || 'Default'
+  return 'Default'
 }
 
-// Get template description
+// Get template description - simplified  
 export function getTemplateDescription(template: string): string {
-  const templateDescriptions = {
-    'default': 'Standard page layout with header and content area',
-    'landing': 'Hero section with call-to-action and features',
-    'about': 'Company information and team presentation',
-    'contact': 'Contact form and business information',
-    'services': 'Service listings with descriptions and pricing'
-  }
-  return templateDescriptions[template as keyof typeof templateDescriptions] || 'Standard page layout'
+  return 'Standard page layout with header and content area'
 }
