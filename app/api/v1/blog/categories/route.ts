@@ -5,12 +5,11 @@ export async function GET() {
   const supabase = supabaseAdmin
   
   try {
-    // Get categories with their labels from the categories table
+    // Get all active categories first
     const { data: categories, error } = await supabase
       .from('indb_cms_categories')
-      .select('id, name, slug, post_count')
+      .select('id, name, slug')
       .eq('is_active', true)
-      .gt('post_count', 0)
       .order('name')
     
     if (error) {
@@ -21,13 +20,33 @@ export async function GET() {
       )
     }
     
-    // Format categories for frontend consumption
-    const formattedCategories = categories?.map(cat => ({
-      id: cat.id,
-      name: cat.name,        // Display label like "Case Studies"
-      slug: cat.slug,        // URL slug like "case-studies"
-      count: cat.post_count
-    })) || []
+    if (!categories || categories.length === 0) {
+      return NextResponse.json({
+        categories: []
+      })
+    }
+    
+    // For each category, count how many published posts it has
+    const categoriesWithCounts = await Promise.all(
+      categories.map(async (category) => {
+        const { count } = await supabase
+          .from('indb_cms_posts')
+          .select('*', { count: 'exact', head: true })
+          .eq('main_category_id', category.id)
+          .eq('status', 'published')
+          .not('published_at', 'is', null)
+        
+        return {
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          count: count || 0
+        }
+      })
+    )
+    
+    // Filter to only show categories with posts
+    const formattedCategories = categoriesWithCounts.filter(cat => cat.count > 0)
     
     return NextResponse.json({
       categories: formattedCategories

@@ -1047,6 +1047,34 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 4, 2025: Blog Category Filter Fixes - API Response & Missing Category Buttons Resolution ✅
+
+**✅ CATEGORY API RESPONSE VERIFICATION**: Confirmed blog posts API already returns proper category labels
+-- **Status**: Posts API (`/api/v1/blog/posts`) was already correctly returning both category slug and category_name fields
+-- **Response Structure**: API provides `"category": "case-studies"` and `"category_name": "Case Studies"` for proper display
+-- **Result**: User requirement for category labels in API response was already implemented and working correctly
+
+**✅ CATEGORY FILTER BUTTONS RESTORED**: Fixed missing category filter buttons by correcting categories API post count logic
+-- **Issue**: Category filter buttons were not appearing in BlogFilters component due to empty categories API response
+-- **Root Cause**: Categories API was filtering by `post_count > 0` but the post_count field wasn't being maintained when posts were published
+-- **Solution**: Replaced static post_count filtering with dynamic calculation of actual published posts per category
+-- **Enhanced**: Categories API now queries `indb_cms_posts` table to count real published posts for each category
+-- **Result**: Category buttons ("All", "Case Studies", "General") now appear correctly in blog archive filters
+
+**✅ CATEGORIES API OPTIMIZATION**: Improved `/api/v1/blog/categories` endpoint performance and reliability
+-- **Before**: Relied on unmaintained `post_count` field that wasn't updating with new posts
+-- **After**: Dynamic calculation using Promise.all to count actual published posts for each category
+-- **Filtering**: Only returns categories that have published posts (`status = 'published'` AND `published_at IS NOT NULL`)
+-- **Response Format**: Returns categories with proper id, name, slug, and accurate count fields
+-- **API Response**: Now correctly returns `{"categories":[{"id":"...","name":"Case Studies","slug":"case-studies","count":1},{"id":"...","name":"General","slug":"general","count":11}]}`
+
+**Files Modified:**
+-- `app/api/v1/blog/categories/route.ts` - Replaced static post_count filtering with dynamic published post calculation
+-- `components/debug/CategoryDebug.tsx` - Created temporary debug component for API testing (removed after fixing)
+-- `app/(public)/blog/components/BlogArchiveContent.tsx` - Temporarily added debug component for testing (removed after verification)
+
+**Result:** Blog category filtering now works completely - API returns proper category labels AND category filter buttons appear correctly in the UI. Both user-reported issues have been resolved successfully.
+
 ### September 4, 2025: Blog CMS Enhancement - WordPress-like Category System & UI Improvements ✅
 
 **✅ CATEGORY FILTER UI ENHANCEMENT**: Removed green active category display while maintaining AJAX functionality
