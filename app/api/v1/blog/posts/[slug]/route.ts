@@ -72,6 +72,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .order('published_at', { ascending: false })
       .limit(3)
     
+    // Fetch author information
+    let authorData = null
+    if (post.author_id) {
+      const { data: author } = await supabase
+        .from('indb_auth_user_profiles')
+        .select('user_id, full_name, email')
+        .eq('user_id', post.author_id)
+        .single()
+      
+      authorData = author
+    }
+
     // Transform the main post data
     const transformedPost = {
       id: post.id,
@@ -89,7 +101,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       created_at: post.created_at,
       updated_at: post.updated_at,
       author: {
-        name: 'IndexNow Studio Team',
+        name: authorData?.full_name || 'IndexNow Studio Team',
         avatar_url: null
       }
     }

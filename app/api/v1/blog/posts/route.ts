@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
     const tag = searchParams.get('tag')
+    const category = searchParams.get('category')
     const search = searchParams.get('search')
     
     const offset = (page - 1) * limit
@@ -42,6 +43,11 @@ export async function GET(request: NextRequest) {
       query = query.contains('tags', [tag])
     }
     
+    // Apply category filter if provided
+    if (category) {
+      query = query.eq('category', category)
+    }
+    
     // Apply search filter if provided
     if (search) {
       query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%,content.ilike.%${search}%`)
@@ -66,6 +72,24 @@ export async function GET(request: NextRequest) {
     
     const totalPages = Math.ceil((totalCount || 0) / limit)
     
+    // Fetch author information for posts
+    const authorIds = posts?.map(post => post.author_id).filter(Boolean) || []
+    let authorsMap: Record<string, any> = {}
+    
+    if (authorIds.length > 0) {
+      const { data: authors } = await supabase
+        .from('indb_auth_user_profiles')
+        .select('user_id, full_name, email')
+        .in('user_id', authorIds)
+      
+      if (authors) {
+        authorsMap = authors.reduce((map, author) => {
+          map[author.user_id] = author
+          return map
+        }, {} as Record<string, any>)
+      }
+    }
+    
     // Transform the data to include author information
     const transformedPosts = posts?.map(post => ({
       id: post.id,
@@ -81,7 +105,7 @@ export async function GET(request: NextRequest) {
       published_at: post.published_at,
       created_at: post.created_at,
       author: {
-        name: 'IndexNow Studio Team',
+        name: authorsMap[post.author_id]?.full_name || 'IndexNow Studio Team',
         avatar_url: null
       }
     })) || []
@@ -98,6 +122,7 @@ export async function GET(request: NextRequest) {
       },
       filters: {
         tag: tag || null,
+        category: category || null,
         search: search || null
       }
     })

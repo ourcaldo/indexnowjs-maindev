@@ -6094,4 +6094,77 @@ ON public.indb_cms_posts(category, status);
 
 **Implementation Status**: ✅ **COMPLETE** - CMS backend with Tiptap rich text editor fully operational and ready for content creation
 
+### September 04, 2025 - Advanced Blog System Enhancements Complete ✅
+
+- ✅ **CATEGORY AJAX FILTERING SYSTEM**: Implemented dynamic category filtering on blog archive page with seamless user experience
+  - **Category Filter Buttons**: Added horizontal category buttons below search bar for instant filtering without page reload
+  - **API Enhancement**: Extended `/api/v1/blog/posts` to support category parameter filtering with proper query building
+  - **Categories Endpoint**: Created `/api/v1/blog/categories` route to fetch available categories from published posts
+  - **Real-time Updates**: Category selection dynamically updates post grid with loading states and proper pagination reset
+  - **Visual Feedback**: Active category highlighting with project color scheme (blue accent #3D8BFF)
+
+- ✅ **DYNAMIC TABLE OF CONTENTS**: Added auto-generated, collapsible table of contents to single blog posts
+  - **Smart HTML Parsing**: Automatic extraction of h1-h6 headings from blog post content with unique ID generation
+  - **Interactive Navigation**: Click-to-scroll functionality with smooth scrolling and 80px header offset
+  - **Active Section Highlighting**: Intersection Observer implementation for current section highlighting during scroll
+  - **Collapsible Interface**: Toggle button to show/hide TOC with persistent state and clean UI design
+  - **Responsive Design**: Proper indentation levels (h2-h6) with project color scheme integration
+
+- ✅ **DYNAMIC ARCHIVE PAGES**: Created dedicated archive pages for category and tag-based content organization
+  - **Category Archives**: `/blog/category/[category]` route with dedicated CategoryArchiveContent component
+  - **Tag Archives**: `/blog/tag/[tag]` route with dedicated TagArchiveContent component  
+  - **SEO Optimization**: Full metadata generation, Open Graph tags, and proper canonical URLs for all archive pages
+  - **404 Handling**: Proper validation to ensure categories/tags exist before rendering, with notFound() for invalid requests
+  - **Consistent UI**: Breadcrumb navigation, post counts, pagination, and error handling matching main blog design
+
+- ✅ **DYNAMIC AUTHOR SYSTEM**: Replaced hardcoded author with database-driven author information from user profiles
+  - **Database Integration**: Updated blog posts API to fetch author data from `indb_auth_user_profiles` table using `author_id` reference
+  - **Efficient Queries**: Implemented batch author fetching to avoid N+1 query problems in list views
+  - **Single Post Enhancement**: Updated `/api/v1/blog/posts/[slug]` to fetch and display actual author names
+  - **Fallback Handling**: Graceful fallback to "IndexNow Studio Team" when author data is unavailable
+  - **Full Name Display**: Uses `full_name` field from user profiles for professional author attribution
+
+**Technical Implementation Details**:
+
+- **Category Filtering Architecture**: 
+  - Extended BlogFilters component with category button section and state management
+  - Added category parameter to fetchPosts function with proper URL parameter handling
+  - Implemented category selection logic with automatic page reset and active state tracking
+  - Created dedicated categories API endpoint with error handling and unique category extraction
+
+- **Table of Contents System**:
+  - Built TableOfContents component with HTML parsing and DOM manipulation
+  - Implemented intersection observer for scroll-based active section tracking
+  - Added heading ID injection and smooth scroll navigation with proper offset calculation
+  - Used project color scheme (#3D8BFF blue accent) for active states and interactive elements
+
+- **Archive Page Architecture**:
+  - Created modular archive components (CategoryArchiveContent, TagArchiveContent) with shared patterns
+  - Implemented dynamic metadata generation for SEO optimization
+  - Added proper error handling, loading states, and empty state management
+  - Used consistent navigation patterns and breadcrumb implementation
+
+- **Author System Refactoring**:
+  - Modified database queries to include author relationship data
+  - Implemented efficient author data fetching with mapping for bulk operations
+  - Updated both list and detail API endpoints with consistent author data structure
+  - Maintained backward compatibility with fallback author names
+
+**User Experience Improvements**:
+- **Faster Content Discovery**: Category filtering enables instant content browsing without page reloads
+- **Enhanced Reading Experience**: Table of contents improves navigation for longer blog posts
+- **Better Content Organization**: Dedicated archive pages provide focused browsing experiences
+- **Professional Attribution**: Real author names enhance content credibility and personal branding
+- **Consistent Navigation**: Breadcrumbs and back links maintain clear site hierarchy
+- **Mobile Responsive**: All new features optimized for mobile and tablet viewing
+
+**SEO & Performance Benefits**:
+- **Improved Site Structure**: Category and tag archives enhance search engine crawlability
+- **Better Internal Linking**: Table of contents creates additional internal anchor links
+- **Enhanced Metadata**: Dynamic metadata generation for all archive pages improves search visibility
+- **Faster Load Times**: Efficient database queries and component optimization reduce page load times
+- **User Engagement**: Better navigation and content discovery increase time on site
+
+**Status**: ✅ **COMPLETE** - Advanced blog system with category filtering, table of contents, dynamic archives, and author system fully operational
+
 

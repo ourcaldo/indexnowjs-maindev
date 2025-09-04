@@ -12,6 +12,7 @@ import { usePageData } from '@/hooks/shared/usePageData'
 import PostHeader from '@/components/blog/PostHeader'
 import PostContent from '@/components/blog/PostContent'
 import RelatedPosts from '@/components/blog/RelatedPosts'
+import TableOfContents from '@/components/blog/TableOfContents'
 
 interface BlogPost {
   id: string
@@ -118,6 +119,12 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
               featured_image_url={post.featured_image_url}
               readTime={readTime}
               className="mb-12"
+            />
+
+            {/* Table of Contents */}
+            <TableOfContents 
+              content={post.content}
+              className="mb-8"
             />
 
             {/* Post Content */}

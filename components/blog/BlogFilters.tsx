@@ -6,18 +6,24 @@ import { Search, X, Filter } from 'lucide-react'
 interface BlogFiltersProps {
   onSearch: (query: string) => void
   onTagFilter: (tag: string | null) => void
+  onCategoryFilter: (category: string | null) => void
   currentSearch?: string
   currentTag?: string
+  currentCategory?: string
   availableTags?: string[]
+  availableCategories?: string[]
   className?: string
 }
 
 export default function BlogFilters({ 
   onSearch, 
   onTagFilter, 
+  onCategoryFilter,
   currentSearch = '', 
   currentTag = '', 
+  currentCategory = '',
   availableTags = [],
+  availableCategories = [],
   className = '' 
 }: BlogFiltersProps) {
   const [searchInput, setSearchInput] = useState(currentSearch)
@@ -42,13 +48,22 @@ export default function BlogFilters({
     setIsFilterOpen(false)
   }
 
+  const handleCategorySelect = (category: string) => {
+    if (currentCategory === category) {
+      onCategoryFilter(null)
+    } else {
+      onCategoryFilter(category)
+    }
+  }
+
   const clearAllFilters = () => {
     setSearchInput('')
     onSearch('')
     onTagFilter(null)
+    onCategoryFilter(null)
   }
 
-  const hasActiveFilters = currentSearch || currentTag
+  const hasActiveFilters = currentSearch || currentTag || currentCategory
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -91,9 +106,9 @@ export default function BlogFilters({
           >
             <Filter className="w-5 h-5" />
             <span>Filters</span>
-            {currentTag && (
+            {(currentTag || currentCategory) && (
               <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                1
+                {(currentTag ? 1 : 0) + (currentCategory ? 1 : 0)}
               </span>
             )}
           </button>
@@ -143,6 +158,44 @@ export default function BlogFilters({
         </div>
       </div>
 
+      {/* Category Filter Buttons */}
+      {availableCategories.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-300">Filter by Category</h3>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => onCategoryFilter(null)}
+              className={`
+                px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                ${!currentCategory
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-900/50 border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                }
+              `}
+              data-testid="category-filter-all"
+            >
+              All
+            </button>
+            {availableCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => handleCategorySelect(category)}
+                className={`
+                  px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize
+                  ${currentCategory === category
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-900/50 border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                  }
+                `}
+                data-testid={`category-filter-${category.replace(/\s+/g, '-').toLowerCase()}`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Active Filters Display */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2" data-testid="active-filters">
@@ -168,6 +221,20 @@ export default function BlogFilters({
                 onClick={() => onTagFilter(null)}
                 className="text-blue-400 hover:text-blue-300"
                 data-testid="active-tag-filter-clear"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          
+          {currentCategory && (
+            <div className="flex items-center gap-2 bg-green-600/20 border border-green-500/30 px-3 py-1 rounded-full">
+              <Filter className="w-4 h-4 text-green-400" />
+              <span className="text-green-300 text-sm capitalize">{currentCategory}</span>
+              <button
+                onClick={() => onCategoryFilter(null)}
+                className="text-green-400 hover:text-green-300"
+                data-testid="active-category-filter-clear"
               >
                 <X className="w-4 h-4" />
               </button>

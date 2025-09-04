@@ -44,6 +44,7 @@ interface BlogResponse {
   pagination: PaginationData
   filters: {
     tag: string | null
+    category: string | null
     search: string | null
   }
 }
@@ -57,7 +58,9 @@ export default function BlogArchiveContent() {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [availableTags, setAvailableTags] = useState<string[]>([])
+  const [availableCategories, setAvailableCategories] = useState<string[]>([])
 
   // Navigation configuration for the header
   const navigation = [
@@ -84,7 +87,7 @@ export default function BlogArchiveContent() {
     }
   ]
 
-  const fetchPosts = useCallback(async (page: number = 1, search: string = '', tag: string | null = null) => {
+  const fetchPosts = useCallback(async (page: number = 1, search: string = '', tag: string | null = null, category: string | null = null) => {
     setLoading(true)
     setError(null)
     
@@ -96,6 +99,7 @@ export default function BlogArchiveContent() {
       
       if (search) params.append('search', search)
       if (tag) params.append('tag', tag)
+      if (category) params.append('category', category)
       
       const response = await fetch(`/api/v1/blog/posts?${params}`)
       
@@ -122,9 +126,26 @@ export default function BlogArchiveContent() {
     }
   }, [])
 
+  // Fetch categories on component mount
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await fetch('/api/v1/blog/categories')
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableCategories(data.categories || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    }
+  }, [])
+
   useEffect(() => {
-    fetchPosts(currentPage, searchQuery, selectedTag)
-  }, [fetchPosts, currentPage, searchQuery, selectedTag])
+    fetchCategories()
+  }, [fetchCategories])
+
+  useEffect(() => {
+    fetchPosts(currentPage, searchQuery, selectedTag, selectedCategory)
+  }, [fetchPosts, currentPage, searchQuery, selectedTag, selectedCategory])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -133,6 +154,11 @@ export default function BlogArchiveContent() {
 
   const handleTagFilter = (tag: string | null) => {
     setSelectedTag(tag)
+    setCurrentPage(1) // Reset to first page when filtering
+  }
+
+  const handleCategoryFilter = (category: string | null) => {
+    setSelectedCategory(category)
     setCurrentPage(1) // Reset to first page when filtering
   }
 
@@ -193,9 +219,12 @@ export default function BlogArchiveContent() {
             <BlogFilters
               onSearch={handleSearch}
               onTagFilter={handleTagFilter}
+              onCategoryFilter={handleCategoryFilter}
               currentSearch={searchQuery}
               currentTag={selectedTag || ''}
+              currentCategory={selectedCategory || ''}
               availableTags={availableTags}
+              availableCategories={availableCategories}
               className="mb-12"
             />
 
