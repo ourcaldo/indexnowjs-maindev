@@ -260,15 +260,20 @@ Create page-specific versions of existing components:
 
 ### Phase 5: Public Frontend Implementation
 
-#### 5.1 Dynamic Page Routing
-**Dynamic Page Route**
+#### 5.1 Dynamic Page Routing with ISR
+**Dynamic Page Route with ISR**
 - **File**: `app/(public)/[slug]/page.tsx`
 - **Features**:
-  - Fetch page by slug
+  - Fetch page by slug with ISR caching
   - Template-based rendering
   - SEO optimization
   - Custom CSS/JS injection
   - 404 handling for unpublished pages
+- **ISR Configuration**:
+  - `revalidate: 3600` (1 hour) for regular pages
+  - `revalidate: 86400` (24 hours) for stable content pages
+  - On-demand revalidation when pages are updated in admin
+  - Static generation for all published pages at build time
 
 **Page Components by Template**
 - **File**: `app/(public)/[slug]/components/`
@@ -278,14 +283,18 @@ Create page-specific versions of existing components:
   - `ContactPageContent.tsx` - Contact page layout
   - `ServicesPageContent.tsx` - Services page layout
 
-#### 5.2 Homepage Implementation
-**Homepage Route Override**
+#### 5.2 Homepage Implementation with ISR
+**Homepage Route Override with ISR**
 - **File**: `app/(public)/page.tsx`
 - **Logic**:
   - Check if custom homepage is set
   - Render custom page content if available
   - Fall back to default landing page
   - Handle homepage not found scenarios
+- **ISR Configuration**:
+  - `revalidate: 1800` (30 minutes) for homepage content
+  - On-demand revalidation when homepage setting changes
+  - Automatic cache invalidation on homepage updates
 
 ### Phase 6: Advanced Features
 
@@ -310,6 +319,14 @@ Create page-specific versions of existing components:
 - Change comparison
 - Draft management
 
+#### 6.4 Advanced ISR Features
+**Smart Cache Management**
+- Template-specific revalidation strategies
+- Conditional revalidation based on content change type
+- Batch revalidation for multiple pages
+- Performance monitoring and cache hit analytics
+- A/B testing support with ISR variants
+
 ## Implementation Details
 
 ### Authentication & Authorization
@@ -323,11 +340,48 @@ Create page-specific versions of existing components:
 - **Structured Data**: JSON-LD for pages
 - **Sitemap Integration**: Automatic sitemap updates
 
-### Performance Considerations
-- **Caching**: Implement page caching for published pages
-- **Image Optimization**: Featured image optimization
-- **Code Splitting**: Template-based code splitting
-- **Database Indexes**: Ensure proper indexing for slug queries
+### Performance Considerations & ISR Implementation
+
+#### ISR (Incremental Static Regeneration) Strategy
+- **Static Generation**: Pre-generate all published pages at build time
+- **Revalidation Intervals**:
+  - **Homepage**: `revalidate: 1800` (30 minutes) - More frequent due to higher traffic
+  - **Regular Pages**: `revalidate: 3600` (1 hour) - Standard content pages
+  - **Stable Pages**: `revalidate: 86400` (24 hours) - About, Terms, Privacy pages
+- **On-Demand Revalidation**: Trigger cache updates when content changes via admin panel
+- **Fallback Strategy**: `fallback: 'blocking'` for new pages to ensure immediate availability
+
+#### Cache Invalidation Implementation
+```typescript
+// Backend API - Trigger revalidation when page is updated
+export async function revalidatePage(slug: string) {
+  await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/revalidate?path=/${slug}&secret=${process.env.REVALIDATION_TOKEN}`)
+}
+
+// Revalidation API route at /api/revalidate/route.ts
+export async function GET(request: NextRequest) {
+  const path = request.nextUrl.searchParams.get('path')
+  const secret = request.nextUrl.searchParams.get('secret')
+  
+  if (secret !== process.env.REVALIDATION_TOKEN) {
+    return NextResponse.json({ message: 'Invalid token' }, { status: 401 })
+  }
+  
+  try {
+    await revalidatePath(path)
+    return NextResponse.json({ revalidated: true })
+  } catch (err) {
+    return NextResponse.json({ message: 'Error revalidating' }, { status: 500 })
+  }
+}
+```
+
+#### Additional Performance Optimizations
+- **Image Optimization**: Next.js Image component with featured image optimization
+- **Code Splitting**: Template-based code splitting for different page layouts
+- **Database Indexes**: Proper indexing on `slug`, `status`, and `published_at` columns
+- **Static Assets**: Serve images, CSS, JS from CDN with proper caching headers
+- **Compression**: Gzip/Brotli compression for all static assets
 
 ### Security Measures
 - **Content Sanitization**: Sanitize custom CSS/JS
