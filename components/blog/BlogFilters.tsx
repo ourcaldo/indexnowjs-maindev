@@ -159,9 +159,8 @@ export default function BlogFilters({
       </div>
 
       {/* Category Filter Buttons */}
-      {availableCategories.length > 0 && (
+      {availableCategories.filter(cat => cat !== 'uncategorized').length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-gray-300">Filter by Category</h3>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => onCategoryFilter(null)}
@@ -176,7 +175,7 @@ export default function BlogFilters({
             >
               All
             </button>
-            {availableCategories.map((category) => (
+            {availableCategories.filter(cat => cat !== 'uncategorized').map((category) => (
               <button
                 key={category}
                 onClick={() => handleCategorySelect(category)}
@@ -229,7 +228,6 @@ export default function BlogFilters({
           
           {currentCategory && (
             <div className="flex items-center gap-2 bg-green-600/20 border border-green-500/30 px-3 py-1 rounded-full">
-              <Filter className="w-4 h-4 text-green-400" />
               <span className="text-green-300 text-sm capitalize">{currentCategory}</span>
               <button
                 onClick={() => onCategoryFilter(null)}
