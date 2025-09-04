@@ -72,7 +72,7 @@ export default function DefaultPageContent({ page }: DefaultPageContentProps) {
 
         {/* Content Section */}
         <section className="px-4 sm:px-6 lg:px-8 pb-20">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <div className="prose prose-lg prose-invert max-w-none">
               <div 
                 dangerouslySetInnerHTML={{ 
