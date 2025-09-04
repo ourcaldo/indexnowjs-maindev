@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { requireServerSuperAdminAuth } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/database'
 import { HomepageUpdateSchema } from '@/lib/cms/pageValidation'
@@ -112,6 +113,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to set homepage' }, { status: 500 })
     }
 
+    // Revalidate homepage and specific page cache
+    try {
+      revalidatePath('/')
+      revalidatePath(`/${newHomepage.slug}`)
+    } catch (revalidationError) {
+      console.error('Error revalidating cache:', revalidationError)
+      // Continue anyway, don't fail the request
+    }
+
     return NextResponse.json({ 
       message: 'Homepage updated successfully',
       homepage: {
@@ -146,6 +156,14 @@ export async function DELETE(request: NextRequest) {
     if (error) {
       console.error('Failed to remove homepage setting:', error)
       return NextResponse.json({ error: 'Failed to remove homepage setting' }, { status: 500 })
+    }
+
+    // Revalidate homepage cache
+    try {
+      revalidatePath('/')
+    } catch (revalidationError) {
+      console.error('Error revalidating homepage cache:', revalidationError)
+      // Continue anyway, don't fail the request
     }
 
     return NextResponse.json({ 
