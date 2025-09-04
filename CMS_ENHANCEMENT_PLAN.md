@@ -6,23 +6,13 @@ This document outlines the detailed step-by-step implementation plan for enhanci
 ## Phase 1: Robots.txt Management System
 
 ### 1.1 Backend Database Schema Updates
-**Time Estimate: 30 minutes**
+**Time Estimate: 15 minutes**
 
-#### Database Table Creation
-Create new table for robots.txt management:
+#### Add Robots.txt Column to Site Settings
+Add robots.txt management column to existing `indb_site_settings` table:
 ```sql
-CREATE TABLE indb_cms_robots_config (
-  id SERIAL PRIMARY KEY,
-  content TEXT NOT NULL,
-  is_active BOOLEAN DEFAULT true,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_by UUID REFERENCES auth.users(id)
-);
-```
-
-#### Default Robots.txt Content
-```
-User-agent: *
+ALTER TABLE public.indb_site_settings 
+ADD COLUMN robots_txt_content TEXT DEFAULT 'User-agent: *
 Allow: /
 
 # Sitemap
@@ -41,29 +31,32 @@ Allow: /contact/
 Allow: /faq/
 
 # Crawl delay
-Crawl-delay: 1
+Crawl-delay: 1';
 ```
+
+#### Site Settings Integration
+The robots.txt content will now be managed as part of the existing site settings system, allowing for centralized configuration management alongside other site-wide settings like site name, description, and SMTP configuration.
 
 ### 1.2 Backend API Endpoints
 **Time Estimate: 1 hour**
 
-#### Create API Routes
-- `GET /api/v1/admin/seo/robots` - Get current robots.txt content
-- `POST /api/v1/admin/seo/robots` - Update robots.txt content
+#### Update Existing Site Settings API
+- Extend `GET /api/v1/admin/settings/site` - Include robots.txt content
+- Extend `POST /api/v1/admin/settings/site` - Update robots.txt content
 - `POST /api/v1/admin/seo/robots/revalidate` - Trigger cache revalidation
 
 #### API Implementation Details
 ```typescript
-// File: app/api/v1/admin/seo/robots/route.ts
+// Update existing: app/api/v1/admin/settings/site/route.ts
 export async function GET() {
-  // Fetch current robots config from database
+  // Fetch site settings including robots_txt_content
   // Return with cache headers
 }
 
 export async function POST(request: Request) {
   // Validate admin permissions
-  // Update robots config in database
-  // Trigger ISR revalidation
+  // Update site settings including robots_txt_content
+  // Trigger ISR revalidation for robots.txt
   // Return success response
 }
 ```
@@ -116,33 +109,25 @@ export async function GET() {
 
 ## Phase 2: Comprehensive Sitemap System
 
-### 2.1 Database Schema for Sitemap Management
-**Time Estimate: 45 minutes**
+### 2.1 Sitemap Configuration Management
+**Time Estimate: 15 minutes**
 
-#### Sitemap Configuration Table
+#### Add Sitemap Settings to Site Settings Table
 ```sql
-CREATE TABLE indb_cms_sitemap_config (
-  id SERIAL PRIMARY KEY,
-  sitemap_type VARCHAR(50) NOT NULL, -- 'main', 'posts', 'pages', 'categories', 'tags'
-  is_enabled BOOLEAN DEFAULT true,
-  max_urls_per_file INTEGER DEFAULT 5000,
-  change_frequency VARCHAR(20) DEFAULT 'weekly',
-  priority DECIMAL(2,1) DEFAULT 0.5,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+ALTER TABLE public.indb_site_settings 
+ADD COLUMN sitemap_enabled BOOLEAN DEFAULT true,
+ADD COLUMN sitemap_posts_enabled BOOLEAN DEFAULT true,
+ADD COLUMN sitemap_pages_enabled BOOLEAN DEFAULT true,
+ADD COLUMN sitemap_categories_enabled BOOLEAN DEFAULT true,
+ADD COLUMN sitemap_tags_enabled BOOLEAN DEFAULT true,
+ADD COLUMN sitemap_max_urls_per_file INTEGER DEFAULT 5000,
+ADD COLUMN sitemap_change_frequency VARCHAR(20) DEFAULT 'weekly';
 ```
 
-#### Sitemap Cache Table (for performance)
-```sql
-CREATE TABLE indb_cms_sitemap_cache (
-  id SERIAL PRIMARY KEY,
-  sitemap_url VARCHAR(255) NOT NULL,
-  content TEXT NOT NULL,
-  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  expires_at TIMESTAMP,
-  urls_count INTEGER
-);
-```
+#### No Additional Tables Required
+- Configuration stored in existing `indb_site_settings` table
+- Cache handled by ISR (Incremental Static Regeneration) and Next.js caching
+- No need for separate cache tables - leverage built-in Next.js optimization
 
 ### 2.2 Sitemap Architecture Design
 **Time Estimate: 2 hours**
@@ -182,9 +167,9 @@ class SitemapGenerator {
 }
 ```
 
-#### Database Queries Optimization
+#### Database Queries Using Existing Tables
 ```sql
--- Posts sitemap query
+-- Posts sitemap query (using existing tables only)
 SELECT 
   'blog/' || main_category.slug || '/' || posts.slug as url,
   posts.updated_at,
@@ -203,6 +188,27 @@ WHERE posts.status = 'published'
   AND posts.published_at IS NOT NULL
 ORDER BY posts.updated_at DESC
 LIMIT 5000 OFFSET ?;
+
+-- Categories sitemap query
+SELECT 
+  'blog/category/' || slug as url,
+  updated_at,
+  'weekly' as changefreq,
+  '0.8' as priority
+FROM indb_cms_categories 
+ORDER BY updated_at DESC;
+
+-- Tags sitemap query (from posts table)
+SELECT DISTINCT 
+  'blog/tag/' || LOWER(REPLACE(tag_value, ' ', '-')) as url,
+  MAX(posts.updated_at) as updated_at,
+  'monthly' as changefreq,
+  '0.6' as priority
+FROM indb_cms_posts posts,
+LATERAL unnest(posts.tags) AS tag_value
+WHERE posts.status = 'published'
+GROUP BY tag_value
+ORDER BY updated_at DESC;
 ```
 
 ### 2.4 API Routes Implementation
