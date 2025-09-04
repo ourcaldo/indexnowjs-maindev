@@ -28,6 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         meta_description,
         tags,
         category,
+        post_type,
         published_at,
         created_at,
         updated_at,
@@ -35,7 +36,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       `)
       .eq('slug', slug)
       .eq('status', 'published')
-      .eq('post_type', 'post')
       .not('published_at', 'is', null)
       .single()
     
@@ -67,7 +67,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         published_at
       `)
       .eq('status', 'published')
-      .eq('post_type', 'post')
       .not('published_at', 'is', null)
       .neq('id', post.id)
       .order('published_at', { ascending: false })
@@ -85,6 +84,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       meta_description: post.meta_description || post.excerpt,
       tags: post.tags || [],
       category: post.category || 'uncategorized',
+      post_type: post.post_type || 'post',
       published_at: post.published_at,
       created_at: post.created_at,
       updated_at: post.updated_at,

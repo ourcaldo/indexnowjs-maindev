@@ -27,12 +27,12 @@ export async function GET(request: NextRequest) {
         meta_description,
         tags,
         category,
+        post_type,
         published_at,
         created_at,
         author_id
       `)
       .eq('status', 'published')
-      .eq('post_type', 'post')
       .not('published_at', 'is', null)
       .order('published_at', { ascending: false })
       .range(offset, offset + limit - 1)
@@ -62,7 +62,6 @@ export async function GET(request: NextRequest) {
       .from('indb_cms_posts')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'published')
-      .eq('post_type', 'post')
       .not('published_at', 'is', null)
     
     const totalPages = Math.ceil((totalCount || 0) / limit)
@@ -78,6 +77,7 @@ export async function GET(request: NextRequest) {
       meta_description: post.meta_description,
       tags: post.tags || [],
       category: post.category || 'uncategorized',
+      post_type: post.post_type || 'post',
       published_at: post.published_at,
       created_at: post.created_at,
       author: {

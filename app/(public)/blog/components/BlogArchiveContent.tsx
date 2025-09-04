@@ -23,6 +23,7 @@ interface BlogPost {
   published_at: string
   tags: string[]
   category: string
+  post_type: string
   author: {
     name: string
     avatar_url?: string

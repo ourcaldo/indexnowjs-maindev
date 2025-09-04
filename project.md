@@ -1047,6 +1047,40 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 4, 2025: Blog Archive Filtering Fix - All Post Types Now Visible in Archive ✅
+
+**✅ BLOG ARCHIVE FILTERING CORRECTED**: Removed restrictive post_type filtering that was hiding "Blog" type posts from the archive page
+-- **Issue**: Blog archive was only showing posts with post_type="post", excluding posts with post_type="blog" from appearing in the archive
+-- **Root Cause**: Both API endpoints (/api/v1/blog/posts and /api/v1/blog/posts/[slug]) had .eq("post_type", "post") filter that excluded other content types
+-- **Solution**: Removed post_type filtering restrictions to display all published posts regardless of their type classification
+-- **Result**: Blog archive now displays all published posts including both "Blog" and "Post" types as intended
+
+**✅ DYNAMIC SCHEMA MARKUP IMPLEMENTATION**: Enhanced structured data to use appropriate schema types based on post content type
+-- **Previous**: All posts used "BlogPosting" schema markup regardless of actual content type
+-- **Enhanced**: Dynamic schema selection based on post_type field for better SEO optimization:
+  - "blog" type → "BlogPosting" schema
+  - "post" type → "Article" schema  
+  - "news" type → "NewsArticle" schema
+  - "review" type → "Review" schema
+  - "tutorial"/"guide" type → "HowTo" schema
+  - "faq" type → "FAQPage" schema
+-- **SEO Benefit**: Search engines now receive more accurate content classification through proper structured data
+
+**✅ API RESPONSE ENHANCEMENT**: Added post_type field to all blog API responses for frontend schema markup determination
+-- **List Endpoint**: Enhanced /api/v1/blog/posts to include post_type field in SELECT query and response transformation
+-- **Single Post Endpoint**: Updated /api/v1/blog/posts/[slug] to include post_type in data fetching and response
+-- **TypeScript Interfaces**: Updated BlogPost interfaces across components to include post_type field for type safety
+-- **Frontend Access**: Components now have access to post_type for conditional rendering and schema markup logic
+
+**Files Modified:**
+-- `app/api/v1/blog/posts/route.ts` - Removed .eq("post_type", "post") filter and added post_type to SELECT/response
+-- `app/api/v1/blog/posts/[slug]/route.ts` - Removed post_type filtering and enhanced response with post_type field
+-- `app/(public)/blog/[category]/[slug]/page.tsx` - Implemented dynamic schema markup based on post_type
+-- `components/blog/BlogCard.tsx` - Updated BlogPost interface to include post_type field
+-- `app/(public)/blog/components/BlogArchiveContent.tsx` - Enhanced BlogPost interface with post_type
+
+**Result:** Blog archive now displays all published content types (Blog, Post, News, etc.) as intended. Enhanced SEO through proper schema markup differentiation based on content type. Fixed the core issue where newly created "Blog" type posts were not appearing in the archive.
+
 ### September 4, 2025: Blog Routing Architecture Fix - Category-based URL Structure Implementation ✅
 
 **✅ BLOG ROUTING STRUCTURE CORRECTED**: Fixed blog routing from `/blog/[slug]` to proper `/blog/[category]/[slug]` pattern for SEO-friendly category-based URLs

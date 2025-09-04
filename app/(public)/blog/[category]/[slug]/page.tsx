@@ -84,10 +84,30 @@ export default async function SinglePostPage({ params }: { params: Promise<{ cat
       notFound()
     }
     
-    // Generate structured data for the blog post
+    // Generate structured data based on post type
+    const getSchemaType = (postType: string) => {
+      switch (postType?.toLowerCase()) {
+        case 'blog':
+          return "BlogPosting"
+        case 'post':
+          return "Article"
+        case 'news':
+          return "NewsArticle"
+        case 'review':
+          return "Review"
+        case 'tutorial':
+        case 'guide':
+          return "HowTo"
+        case 'faq':
+          return "FAQPage"
+        default:
+          return "Article"
+      }
+    }
+    
     const postStructuredData = {
       "@context": "https://schema.org",
-      "@type": "BlogPosting",
+      "@type": getSchemaType(post.post_type),
       "headline": post.title,
       "description": post.excerpt || post.meta_description,
       "image": post.featured_image_url ? [post.featured_image_url] : undefined,
