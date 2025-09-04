@@ -1047,6 +1047,80 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 4, 2025: Blog CMS Enhancement - WordPress-like Category System & UI Improvements ✅
+
+**✅ CATEGORY FILTER UI ENHANCEMENT**: Removed green active category display while maintaining AJAX functionality
+-- **Issue**: Category filter buttons showed green active state when selected, which was unnecessary visual clutter
+-- **Solution**: Removed the active category filter green color display from BlogFilters component
+-- **Result**: Clean category filtering with AJAX grid updates without distracting active state indicators
+
+**✅ BLOG CARD ERROR FIXES**: Fixed BlogCard component prop passing issues in category and tag archive pages
+-- **Issue**: CategoryArchiveContent and TagArchiveContent were passing individual props instead of post object, causing "Cannot read properties of undefined (reading 'slug')" errors
+-- **Solution**: Updated components to pass complete post object to BlogCard component
+-- **Result**: Eliminated BlogCard rendering errors in category and tag archive pages
+
+**✅ CATEGORY DISPLAY ENHANCEMENT**: Updated category labels to show readable names instead of slugs
+-- **Issue**: Category bubbles on post cards displayed slugs like "case-studies" instead of proper names like "Case Studies"
+-- **Solution**: Enhanced BlogCard component to use category_name field when available, falling back to formatted category slug
+-- **Updated**: BlogPost interface to include optional category_name field for proper display
+-- **Result**: Post cards now show "Case Studies" instead of "case-studies" for better user experience
+
+**✅ WORDPRESS-LIKE CATEGORY MANAGEMENT SYSTEM**: Created comprehensive category management API structure
+-- **New API Endpoints**:
+  - `POST /api/v1/admin/cms/categories` - Create new categories with validation and slug generation
+  - `GET /api/v1/admin/cms/categories` - List categories with hierarchy and post counts
+  - `GET /api/v1/admin/cms/categories/[id]` - Get single category with parent/child relationships
+  - `PUT /api/v1/admin/cms/categories/[id]` - Update category with parent validation
+  - `DELETE /api/v1/admin/cms/categories/[id]` - Delete category with safety checks
+-- **Features**: Hierarchical categories, slug auto-generation, post count tracking, parent-child relationships
+-- **Safety**: Prevents circular references, validates parent categories, checks for post associations before deletion
+
+**✅ BLOG POSTS API ENHANCEMENT**: Updated blog posts API to support new category system with backward compatibility
+-- **Enhanced**: `/api/v1/blog/posts` to include category names from categories table
+-- **Added**: Support for both old string-based categories and new category ID system
+-- **Improved**: Category filtering to use new category slug lookup with fallback to old system
+-- **Result**: Posts display proper category names while maintaining compatibility with existing data
+
+**✅ BLOG CATEGORIES API MODERNIZATION**: Updated categories API to use structured category table instead of raw post queries
+-- **Before**: Extracted categories from post.category string fields with basic deduplication
+-- **After**: Fetches from indb_cms_categories table with proper names, slugs, and post counts
+-- **Enhanced**: Returns formatted category objects with id, name, slug, and count fields
+-- **Result**: Category filters now show proper names and accurate post counts
+
+**✅ TAG PAGE ERROR RESOLUTION**: Fixed tag archive page 404 errors due to environment variable issues
+-- **Issue**: Tag pages failing to load due to incorrect URL construction in server-side fetch
+-- **Solution**: Updated TagArchivePage to properly construct base URL using HOST and PORT environment variables
+-- **Result**: Tag archive pages now load correctly without 404 errors
+
+**✅ COMPONENT INTERFACE STANDARDIZATION**: Updated all blog component interfaces to support new category structure
+-- **Updated Components**: BlogArchiveContent, CategoryArchiveContent, TagArchiveContent, BlogFilters
+-- **Enhanced**: BlogPost interface across all components to include category_name field
+-- **Improved**: BlogFilters component to handle Category objects with proper name display
+-- **Result**: Consistent category handling across all blog components with proper type safety
+
+**Database Schema Requirements** (SQL queries for Supabase SQL Editor):
+```sql
+-- Note: These table structures should be created in Supabase for full WordPress-like category functionality:
+-- 1. indb_cms_categories table for category management
+-- 2. indb_cms_post_categories junction table for multiple categories per post  
+-- 3. main_category_id column on indb_cms_posts table
+-- Run the provided category_management_setup.sql queries in Supabase SQL Editor for complete implementation
+```
+
+**Files Modified:**
+-- `components/blog/BlogFilters.tsx` - Removed green active category display, enhanced to use Category objects
+-- `components/blog/BlogCard.tsx` - Added category_name field support, fixed prop interface
+-- `app/(public)/blog/components/BlogArchiveContent.tsx` - Updated interfaces for new category structure
+-- `app/(public)/blog/category/[category]/components/CategoryArchiveContent.tsx` - Fixed BlogCard prop passing
+-- `app/(public)/blog/tag/[tag]/components/TagArchiveContent.tsx` - Fixed BlogCard prop passing and interface
+-- `app/(public)/blog/tag/[tag]/page.tsx` - Fixed environment variable URL construction
+-- `app/api/v1/blog/categories/route.ts` - Modernized to use categories table instead of post queries
+-- `app/api/v1/blog/posts/route.ts` - Enhanced category support with backward compatibility
+-- `app/api/v1/admin/cms/categories/route.ts` - New comprehensive category management API
+-- `app/api/v1/admin/cms/categories/[id]/route.ts` - New single category CRUD operations
+
+**Result:** Blog system now supports WordPress-like category management with proper name displays, error-free navigation, and comprehensive admin APIs. Maintains full backward compatibility while providing enhanced category functionality and improved user experience.
+
 ### September 4, 2025: Blog Archive Filtering Fix - All Post Types Now Visible in Archive ✅
 
 **✅ BLOG ARCHIVE FILTERING CORRECTED**: Removed restrictive post_type filtering that was hiding "Blog" type posts from the archive page

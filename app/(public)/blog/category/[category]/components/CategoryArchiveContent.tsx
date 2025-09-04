@@ -23,6 +23,7 @@ interface BlogPost {
   published_at: string
   tags: string[]
   category: string
+  category_name?: string
   post_type: string
   author: {
     name: string
@@ -214,17 +215,7 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-12" data-testid="category-posts-grid">
                   {posts.map((post) => (
-                    <BlogCard
-                      key={post.id}
-                      title={post.title}
-                      excerpt={post.excerpt}
-                      slug={post.slug}
-                      category={post.category}
-                      published_at={post.published_at}
-                      tags={post.tags}
-                      featured_image_url={post.featured_image_url}
-                      author={post.author}
-                    />
+                    <BlogCard key={post.id} post={post} />
                   ))}
                 </div>
 

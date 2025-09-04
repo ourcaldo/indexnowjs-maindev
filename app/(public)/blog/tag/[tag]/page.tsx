@@ -49,7 +49,8 @@ export default async function TagArchivePage({ params }: { params: Promise<{ tag
     const { tag } = await params
     
     // Verify that the tag exists by checking if there are any posts
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/v1/blog/posts?tag=${tag}&limit=1`, {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://${process.env.HOST || '0.0.0.0'}:${process.env.PORT || 5000}`
+    const response = await fetch(`${baseUrl}/api/v1/blog/posts?tag=${tag}&limit=1`, {
       cache: 'no-store'
     })
     

@@ -5,13 +5,13 @@ export async function GET() {
   const supabase = supabaseAdmin
   
   try {
-    // Get distinct categories from published posts
+    // Get categories with their labels from the categories table
     const { data: categories, error } = await supabase
-      .from('indb_cms_posts')
-      .select('category')
-      .eq('status', 'published')
-      .not('published_at', 'is', null)
-      .not('category', 'is', null)
+      .from('indb_cms_categories')
+      .select('id, name, slug, post_count')
+      .eq('is_active', true)
+      .gt('post_count', 0)
+      .order('name')
     
     if (error) {
       console.error('Failed to fetch categories:', error)
@@ -21,17 +21,16 @@ export async function GET() {
       )
     }
     
-    // Extract unique categories and filter out empty ones
-    const uniqueCategories = Array.from(
-      new Set(
-        categories
-          ?.map(item => item.category)
-          .filter(category => category && category.trim() !== '')
-      )
-    ).sort()
+    // Format categories for frontend consumption
+    const formattedCategories = categories?.map(cat => ({
+      id: cat.id,
+      name: cat.name,        // Display label like "Case Studies"
+      slug: cat.slug,        // URL slug like "case-studies"
+      count: cat.post_count
+    })) || []
     
     return NextResponse.json({
-      categories: uniqueCategories
+      categories: formattedCategories
     })
     
   } catch (error) {

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     
     const offset = (page - 1) * limit
     
-    // Build the query
+    // Build the query with category names
     let query = supabase
       .from('indb_cms_posts')
       .select(`
@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
         post_type,
         published_at,
         created_at,
-        author_id
+        author_id,
+        main_category:main_category_id(id, name, slug)
       `)
       .eq('status', 'published')
       .not('published_at', 'is', null)
@@ -43,9 +44,21 @@ export async function GET(request: NextRequest) {
       query = query.contains('tags', [tag])
     }
     
-    // Apply category filter if provided
+    // Apply category filter if provided (support both old and new category system)
     if (category) {
-      query = query.eq('category', category)
+      // First try new category system by slug
+      const { data: categoryData } = await supabase
+        .from('indb_cms_categories')
+        .select('id')
+        .eq('slug', category)
+        .single()
+      
+      if (categoryData) {
+        query = query.eq('main_category_id', categoryData.id)
+      } else {
+        // Fallback to old category system
+        query = query.eq('category', category)
+      }
     }
     
     // Apply search filter if provided
@@ -90,7 +103,7 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // Transform the data to include author information
+    // Transform the data to include author and category information
     const transformedPosts = posts?.map(post => ({
       id: post.id,
       title: post.title,
@@ -100,7 +113,8 @@ export async function GET(request: NextRequest) {
       meta_title: post.meta_title,
       meta_description: post.meta_description,
       tags: post.tags || [],
-      category: post.category || 'uncategorized',
+      category: (post as any).main_category?.slug || post.category || 'uncategorized',
+      category_name: (post as any).main_category?.name || (post.category !== 'uncategorized' ? post.category.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 'Uncategorized'),
       post_type: post.post_type || 'post',
       published_at: post.published_at,
       created_at: post.created_at,

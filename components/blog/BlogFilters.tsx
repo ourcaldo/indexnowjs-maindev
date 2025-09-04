@@ -3,6 +3,13 @@
 import { useState } from 'react'
 import { Search, X, Filter } from 'lucide-react'
 
+interface Category {
+  id: string
+  name: string
+  slug: string
+  count?: number
+}
+
 interface BlogFiltersProps {
   onSearch: (query: string) => void
   onTagFilter: (tag: string | null) => void
@@ -11,7 +18,7 @@ interface BlogFiltersProps {
   currentTag?: string
   currentCategory?: string
   availableTags?: string[]
-  availableCategories?: string[]
+  availableCategories?: Category[]
   className?: string
 }
 
@@ -48,11 +55,11 @@ export default function BlogFilters({
     setIsFilterOpen(false)
   }
 
-  const handleCategorySelect = (category: string) => {
-    if (currentCategory === category) {
+  const handleCategorySelect = (categorySlug: string) => {
+    if (currentCategory === categorySlug) {
       onCategoryFilter(null)
     } else {
-      onCategoryFilter(category)
+      onCategoryFilter(categorySlug)
     }
   }
 
@@ -159,7 +166,7 @@ export default function BlogFilters({
       </div>
 
       {/* Category Filter Buttons */}
-      {availableCategories.filter(cat => cat !== 'uncategorized').length > 0 && (
+      {availableCategories.filter(cat => cat.slug !== 'uncategorized').length > 0 && (
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             <button
@@ -175,20 +182,20 @@ export default function BlogFilters({
             >
               All
             </button>
-            {availableCategories.filter(cat => cat !== 'uncategorized').map((category) => (
+            {availableCategories.filter(cat => cat.slug !== 'uncategorized').map((category) => (
               <button
-                key={category}
-                onClick={() => handleCategorySelect(category)}
+                key={category.id}
+                onClick={() => handleCategorySelect(category.slug)}
                 className={`
-                  px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize
-                  ${currentCategory === category
+                  px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                  ${currentCategory === category.slug
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-900/50 border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 hover:text-white'
                   }
                 `}
-                data-testid={`category-filter-${category.replace(/\s+/g, '-').toLowerCase()}`}
+                data-testid={`category-filter-${category.slug}`}
               >
-                {category}
+                {category.name}
               </button>
             ))}
           </div>
@@ -226,18 +233,6 @@ export default function BlogFilters({
             </div>
           )}
 
-          {currentCategory && (
-            <div className="flex items-center gap-2 bg-green-600/20 border border-green-500/30 px-3 py-1 rounded-full">
-              <span className="text-green-300 text-sm capitalize">{currentCategory}</span>
-              <button
-                onClick={() => onCategoryFilter(null)}
-                className="text-green-400 hover:text-green-300"
-                data-testid="active-category-filter-clear"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>

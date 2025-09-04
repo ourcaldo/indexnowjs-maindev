@@ -13,6 +13,7 @@ interface BlogPost {
   published_at: string
   tags: string[]
   category: string
+  category_name?: string
   post_type: string
   author: {
     name: string
@@ -68,7 +69,7 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
               className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600/90 text-white"
               data-testid={`blog-category-${post.slug}`}
             >
-              {post.category}
+              {post.category_name || post.category}
             </span>
           </div>
         )}

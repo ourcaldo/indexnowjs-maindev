@@ -23,11 +23,19 @@ interface BlogPost {
   published_at: string
   tags: string[]
   category: string
+  category_name?: string
   post_type: string
   author: {
     name: string
     avatar_url?: string
   }
+}
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  count?: number
 }
 
 interface PaginationData {
@@ -60,7 +68,7 @@ export default function BlogArchiveContent() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [availableTags, setAvailableTags] = useState<string[]>([])
-  const [availableCategories, setAvailableCategories] = useState<string[]>([])
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([])
 
   // Navigation configuration for the header
   const navigation = [
