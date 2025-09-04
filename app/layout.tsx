@@ -7,13 +7,21 @@ import FaviconProvider from '@/components/FaviconProvider'
 // Initialize background services on server-side only once
 if (typeof window === 'undefined' && !(global as any).backgroundServicesInitialized) {
   (global as any).backgroundServicesInitialized = true;
-  import('../lib/job-management/worker-startup').then(({ workerStartup }) => {
-    workerStartup.initialize().then(() => {
-      console.log('IndexNow Studio background services initialized successfully');
-    }).catch((error) => {
-      console.error('Failed to initialize background services:', error);
+  
+  // Check if background services are disabled in development
+  const disableBackgroundServices = process.env.DISABLE_BACKGROUND_SERVICES === 'true';
+  
+  if (disableBackgroundServices) {
+    console.log('Background services initialization disabled in development mode');
+  } else {
+    import('../lib/job-management/worker-startup').then(({ workerStartup }) => {
+      workerStartup.initialize().then(() => {
+        console.log('IndexNow Studio background services initialized successfully');
+      }).catch((error) => {
+        console.error('Failed to initialize background services:', error);
+      });
     });
-  });
+  }
 }
 
 const inter = Inter({ subsets: ['latin'] })

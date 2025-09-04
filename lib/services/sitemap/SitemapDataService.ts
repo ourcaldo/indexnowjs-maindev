@@ -2,6 +2,8 @@ import { supabaseAdmin } from '@/lib/database'
 
 export class SitemapDataService {
   async getPosts(page: number = 1, limit: number = 5000): Promise<any[]> {
+    const startTime = Date.now()
+    
     try {
       const offset = (page - 1) * limit
 
@@ -12,13 +14,20 @@ export class SitemapDataService {
           title,
           slug,
           updated_at,
-          indb_cms_categories:category_id (
+          published_at,
+          featured,
+          main_category_id,
+          indb_cms_categories!main_category_id (
             slug
           )
         `)
         .eq('status', 'published')
+        .not('published_at', 'is', null)
         .order('updated_at', { ascending: false })
         .range(offset, offset + limit - 1)
+
+      const endTime = Date.now()
+      console.log(`[PERF] Posts sitemap query took ${endTime - startTime}ms for page ${page}`)
 
       if (error) {
         console.error('Error fetching posts for sitemap:', error)
@@ -33,11 +42,16 @@ export class SitemapDataService {
   }
 
   async getCategories(): Promise<any[]> {
+    const startTime = Date.now()
+    
     try {
       const { data, error } = await supabaseAdmin
         .from('indb_cms_categories')
-        .select('id, name, slug')
-        .order('name')
+        .select('id, name, slug, updated_at')
+        .order('updated_at', { ascending: false })
+
+      const endTime = Date.now()
+      console.log(`[PERF] Categories sitemap query took ${endTime - startTime}ms`)
 
       if (error) {
         console.error('Error fetching categories for sitemap:', error)
@@ -52,28 +66,42 @@ export class SitemapDataService {
   }
 
   async getTagsFromPosts(): Promise<string[]> {
+    const startTime = Date.now()
+    
     try {
       const { data, error } = await supabaseAdmin
         .from('indb_cms_posts')
-        .select('tags')
+        .select('tags, updated_at')
         .eq('status', 'published')
         .not('tags', 'is', null)
+        .order('updated_at', { ascending: false })
+
+      const endTime = Date.now()
+      console.log(`[PERF] Tags sitemap query took ${endTime - startTime}ms`)
 
       if (error) {
         console.error('Error fetching tags for sitemap:', error)
         return []
       }
 
-      // Extract and flatten all tags
-      const allTags: string[] = []
+      // Extract and flatten all tags with timestamps for last update
+      const tagMap = new Map<string, string>()
       data?.forEach(post => {
         if (Array.isArray(post.tags)) {
-          allTags.push(...post.tags)
+          post.tags.forEach((tag: string) => {
+            if (tag && tag.trim()) {
+              const cleanTag = tag.trim()
+              // Keep the most recent update time for each tag
+              if (!tagMap.has(cleanTag) || post.updated_at > tagMap.get(cleanTag)!) {
+                tagMap.set(cleanTag, post.updated_at)
+              }
+            }
+          })
         }
       })
 
       // Return unique tags
-      return Array.from(new Set(allTags.filter(tag => tag && tag.trim())))
+      return Array.from(tagMap.keys())
     } catch (error) {
       console.error('Failed to fetch tags for sitemap:', error)
       return []
