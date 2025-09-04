@@ -41,9 +41,12 @@ export async function GET(request: NextRequest) {
     
     // Apply tag filter if provided
     if (tag) {
-      // Use JSONB containment operator for tag matching
-      // Pass the tag as a JSON array string for proper JSONB query
-      query = query.contains('tags', [tag])
+      // Clean the tag parameter and ensure proper JSON formatting
+      const cleanTag = String(tag).trim().replace(/^"|"$/g, '')
+      console.log("Tag param:", tag)
+      console.log("Clean tag:", cleanTag)
+      console.log("Contains value:", [cleanTag])
+      query = query.contains('tags', [cleanTag])
     }
     
     // Apply category filter if provided (support both old and new category system)
@@ -87,9 +90,9 @@ export async function GET(request: NextRequest) {
     
     // Apply same filters to total count
     if (tag) {
-      // Use JSONB containment operator for tag matching
-      // Pass the tag as a JSON array string for proper JSONB query
-      totalQuery = totalQuery.contains('tags', [tag])
+      // Clean the tag parameter and ensure proper JSON formatting
+      const cleanTag = String(tag).trim().replace(/^"|"$/g, '')
+      totalQuery = totalQuery.contains('tags', [cleanTag])
     }
     
     if (category) {
