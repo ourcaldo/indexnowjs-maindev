@@ -86,7 +86,7 @@ export default function OrderSuccessPage() {
           (await supabaseBrowser.auth.getSession()).data.session
             ?.access_token
         if (!token) {
-          router.push('/login')
+          router.push('/auth/login')
           return
         }
 

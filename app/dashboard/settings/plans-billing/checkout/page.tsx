@@ -118,7 +118,7 @@ export default function CheckoutPage() {
             description: "Please log in to continue.",
             type: "error"
           })
-          router.push('/login')
+          router.push('/auth/login')
           return
         }
 
@@ -374,7 +374,7 @@ export default function CheckoutPage() {
           description: "Please log in again to continue.",
           type: "error"
         })
-        router.push('/login')
+        router.push('/auth/login')
         return
       }
 

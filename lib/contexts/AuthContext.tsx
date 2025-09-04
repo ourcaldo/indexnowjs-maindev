@@ -51,7 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await authService.signOut()
       setUser(null)
-      router.push('/login')
+      router.push('/auth/login')
     } catch (error) {
       console.error('Sign out error:', error)
     }
@@ -80,11 +80,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Only redirect to login if we're not on a public route
       if (!currentUser && typeof window !== 'undefined') {
-        const publicRoutes = ['/', '/register', '/forgot-password', '/login', '/pricing', '/contact', '/faq', '/blog']
+        const publicRoutes = ['/', '/register', '/forgot-password', '/auth/login', '/pricing', '/contact', '/faq', '/blog']
         const currentPath = window.location.pathname
         
         if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/backend/admin') && !currentPath.startsWith('/blog/')) {
-          router.push('/login')
+          router.push('/auth/login')
         }
       }
     });
@@ -98,11 +98,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // Only redirect if not on public route
         if (typeof window !== 'undefined') {
-          const publicRoutes = ['/', '/register', '/forgot-password', '/login', '/pricing', '/contact', '/faq', '/blog']
+          const publicRoutes = ['/', '/register', '/forgot-password', '/auth/login', '/pricing', '/contact', '/faq', '/blog']
           const currentPath = window.location.pathname
           
           if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/backend/admin') && !currentPath.startsWith('/blog/')) {
-            router.push('/login')
+            router.push('/auth/login')
           }
         }
       } else {

@@ -66,7 +66,7 @@ export default function DashboardLayout({
   }, [sidebarCollapsed, cookiesLoaded])
 
   // Check if we're on the login page
-  const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/login'
+  const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/auth/login'
   
 
   // Check if we're on the login page
