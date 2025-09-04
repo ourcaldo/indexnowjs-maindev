@@ -54,7 +54,7 @@ export default function DefaultPageContent({ page }: DefaultPageContentProps) {
       <main className="relative pt-16">
         {/* Page Header */}
         <section className="py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
               {page.title}
             </h1>
