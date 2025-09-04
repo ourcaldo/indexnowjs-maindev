@@ -43,10 +43,11 @@ export async function GET(request: NextRequest) {
     if (tag) {
       // Clean the tag parameter and ensure proper JSON formatting
       const cleanTag = String(tag).trim().replace(/^"|"$/g, '')
+      const tagJson = JSON.stringify([cleanTag])
       console.log("Tag param:", tag)
       console.log("Clean tag:", cleanTag)
-      console.log("Contains value:", [cleanTag])
-      query = query.contains('tags', [cleanTag])
+      console.log("Tag JSON:", tagJson)
+      query = query.filter('tags', 'cs', tagJson)
     }
     
     // Apply category filter if provided (support both old and new category system)
@@ -92,7 +93,8 @@ export async function GET(request: NextRequest) {
     if (tag) {
       // Clean the tag parameter and ensure proper JSON formatting
       const cleanTag = String(tag).trim().replace(/^"|"$/g, '')
-      totalQuery = totalQuery.contains('tags', [cleanTag])
+      const tagJson = JSON.stringify([cleanTag])
+      totalQuery = totalQuery.filter('tags', 'cs', tagJson)
     }
     
     if (category) {
