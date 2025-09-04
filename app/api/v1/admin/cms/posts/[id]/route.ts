@@ -45,26 +45,12 @@ export async function GET(
       }
     }
 
-    // Get selected categories for this post
-    const { data: categoryAssociations, error: categoryError } = await supabaseAdmin
-      .from('indb_cms_post_categories')
-      .select(`
-        category_id,
-        indb_cms_categories!inner(id, name, slug)
-      `)
-      .eq('post_id', id)
-
-    let selectedCategories: string[] = []
-    if (!categoryError && categoryAssociations) {
-      selectedCategories = categoryAssociations.map(assoc => assoc.category_id)
-    }
-
     const postWithAuthor = {
       ...post,
       author_name: authorName,
       author_email: authorEmail,
-      selectedCategories, // Array of category IDs
-      mainCategory: post.main_category_id // Main category ID
+      selectedCategories: post.categories || [], // Array of category IDs from posts table
+      mainCategory: post.main_category_id // Main category ID from posts table
     }
 
     return NextResponse.json({ post: postWithAuthor })
@@ -122,7 +108,11 @@ export async function PUT(
     if (body.tags !== undefined) updateData.tags = body.tags
     if (body.category !== undefined) updateData.category = body.category
     
-    // Handle multiple categories WordPress-style
+    // Handle multiple categories - store directly in cms_posts table
+    if (body.selectedCategories !== undefined) {
+      updateData.categories = body.selectedCategories // Array of category IDs stored in posts table
+    }
+    
     if (body.mainCategory !== undefined) {
       updateData.main_category_id = body.mainCategory
       
@@ -157,32 +147,6 @@ export async function PUT(
         return NextResponse.json({ error: 'Post not found' }, { status: 404 })
       }
       return NextResponse.json({ error: 'Failed to update post' }, { status: 500 })
-    }
-
-    // Handle multiple categories via junction table
-    if (body.selectedCategories !== undefined) {
-      // First, remove all existing category associations for this post
-      await supabaseAdmin
-        .from('indb_cms_post_categories')
-        .delete()
-        .eq('post_id', id)
-      
-      // Then, add new category associations
-      if (body.selectedCategories && body.selectedCategories.length > 0) {
-        const categoryAssociations = body.selectedCategories.map((categoryId: string) => ({
-          post_id: id,
-          category_id: categoryId
-        }))
-        
-        const { error: associationError } = await supabaseAdmin
-          .from('indb_cms_post_categories')
-          .insert(categoryAssociations)
-        
-        if (associationError) {
-          console.error('Failed to update category associations:', associationError)
-          // Don't fail the whole request if category associations fail
-        }
-      }
     }
 
     return NextResponse.json({ post })
