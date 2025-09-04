@@ -92,15 +92,34 @@ export default function PageForm({
     try {
       await onSubmit(data)
       setIsDirty(false)
+      
+      // Create a single, clear toast message based on mode and status
+      let title = ''
+      let description = ''
+      
+      if (mode === 'create') {
+        title = 'Page created successfully'
+        description = data.status === 'published' 
+          ? 'Your page has been created and published.' 
+          : `Your page has been created as ${data.status}.`
+      } else {
+        title = 'Page updated successfully'
+        description = data.status === 'published' 
+          ? `Your page "${data.title}" has been updated and published.`
+          : `Your page "${data.title}" has been updated as ${data.status}.`
+      }
+      
       addToast({
-        title: mode === 'create' ? 'Page created successfully' : 'Page updated successfully',
-        description: `Your page has been ${data.status === 'published' ? 'published' : 'saved as ' + data.status}.`,
+        title,
+        description,
+        type: 'success'
       })
     } catch (error) {
       console.error('Form submission error:', error)
       addToast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to save page',
+        type: 'error'
       })
     }
   }
