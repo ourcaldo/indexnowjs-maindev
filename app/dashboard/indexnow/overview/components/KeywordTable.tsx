@@ -73,12 +73,13 @@ export const KeywordTable = ({
           <thead>
             <tr style={{backgroundColor: '#F7F9FC', borderBottom: '1px solid #E0E6ED'}}>
               <th className="px-6 py-3 text-left">
-                <label className="flex items-center cursor-pointer">
+                <label className="flex items-center cursor-pointer h-full">
                   <input
                     type="checkbox"
                     checked={selectedKeywords.length === filteredKeywords.length && filteredKeywords.length > 0}
                     onChange={handleSelectAll}
-                    className="mr-3"
+                    className="mr-3 flex-shrink-0"
+                    style={{marginTop: '1px'}}
                   />
                   <span className="text-xs font-medium tracking-wider" style={{color: '#6C757D'}}>
                     KEYWORD
