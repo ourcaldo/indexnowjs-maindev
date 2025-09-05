@@ -2,18 +2,18 @@ import { Metadata } from 'next'
 import BlogArchiveContent from './components/BlogArchiveContent'
 
 export const metadata: Metadata = {
-  title: 'Blog - IndexNow Studio | SEO Insights & Rank Tracking Tips',
+  title: 'Blog - IndexNow Studio',
   description: 'Discover expert SEO insights, rank tracking strategies, and digital marketing tips. Stay updated with the latest trends in search engine optimization and website indexing.',
   keywords: 'SEO blog, rank tracking tips, digital marketing insights, search engine optimization, website indexing, SEO strategies, SERP analysis, keyword research',
   openGraph: {
-    title: 'Blog - IndexNow Studio | SEO Insights & Rank Tracking Tips',
+    title: 'Blog - IndexNow Studio',
     description: 'Expert SEO insights and rank tracking strategies to boost your website\'s search performance.',
     type: 'website',
     url: '/blog',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Blog - IndexNow Studio | SEO Insights & Rank Tracking Tips',
+    title: 'Blog - IndexNow Studio',
     description: 'Expert SEO insights and rank tracking strategies to boost your website\'s search performance.',
   },
   alternates: {

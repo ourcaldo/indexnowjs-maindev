@@ -11,18 +11,18 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     const categoryName = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ')
     
     return {
-      title: `${categoryName} - Blog Category | IndexNow Studio`,
+      title: `${categoryName} - Blog Category - IndexNow Studio`,
       description: `Explore all blog posts in the ${categoryName} category. Discover insights about SEO, rank tracking, and digital marketing.`,
       keywords: `${categoryName}, SEO, rank tracking, digital marketing, IndexNow Studio, blog`,
       openGraph: {
-        title: `${categoryName} - Blog Category | IndexNow Studio`,
+        title: `${categoryName} - Blog Category - IndexNow Studio`,
         description: `Explore all blog posts in the ${categoryName} category. Discover insights about SEO, rank tracking, and digital marketing.`,
         type: 'website',
         url: `/blog/category/${category}`,
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${categoryName} - Blog Category | IndexNow Studio`,
+        title: `${categoryName} - Blog Category - IndexNow Studio`,
         description: `Explore all blog posts in the ${categoryName} category. Discover insights about SEO, rank tracking, and digital marketing.`,
       },
       alternates: {
