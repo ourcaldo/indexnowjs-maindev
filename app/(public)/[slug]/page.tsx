@@ -69,6 +69,15 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
+  
+  // Prevent CMS route from overriding static auth routes
+  if (slug === 'login' || slug === 'register') {
+    return {
+      title: 'Page Not Found',
+      description: 'The requested page could not be found.'
+    }
+  }
+  
   const page = await getPageBySlug(slug)
 
   if (!page) {
@@ -120,6 +129,12 @@ export const dynamicParams = true // Allow new slugs
 
 export default async function DynamicPage({ params }: PageProps) {
   const { slug } = await params
+  
+  // Prevent CMS route from overriding static auth routes
+  if (slug === 'login' || slug === 'register') {
+    notFound()
+  }
+  
   const page = await getPageBySlug(slug)
 
   if (!page) {

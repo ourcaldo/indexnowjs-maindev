@@ -147,7 +147,7 @@ export default function Register() {
             We've sent you a confirmation link at <strong>{email}</strong>. Click the link to verify your account.
           </p>
           <button
-            onClick={() => router.push('/auth/login'))
+            onClick={() => router.push('/auth/login')}
             style={{
               width: '100%',
               padding: '12px 24px',
