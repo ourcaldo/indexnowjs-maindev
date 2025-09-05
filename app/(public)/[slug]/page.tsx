@@ -27,6 +27,7 @@ interface CMSPage {
 
 async function getPageBySlug(slug: string): Promise<CMSPage | null> {
   try {
+    // Use .maybeSingle() instead of .single() to avoid PGRST116 errors
     const { data: page, error } = await supabase
       .from('indb_cms_pages')
       .select(`
@@ -48,7 +49,7 @@ async function getPageBySlug(slug: string): Promise<CMSPage | null> {
       .eq('slug', slug)
       .eq('status', 'published')
       .not('published_at', 'is', null)
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Error fetching page:', error)
