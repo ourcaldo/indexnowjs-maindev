@@ -77,7 +77,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  const title = page.meta_title || page.title || 'IndexNow Studio'
+  const title = page.meta_title || `${page.title} - IndexNow Studio` || 'IndexNow Studio'
   const description = page.meta_description || 'Professional web application for automated Google URL indexing and rank tracking'
   const url = `https://indexnow.studio/${page.slug}`
 
