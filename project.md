@@ -6651,4 +6651,30 @@ ON public.indb_cms_posts(category, status);
 
 **Status**: ✅ **CRITICAL FIXES COMPLETE** - CMS pages system now works correctly for its intended purpose (static content management) without inappropriate homepage functionality or database relationship errors
 
+### September 05, 2025 - Authentication Routes Conflict Fixed 🔧
+
+- 🛠️ **ROUTING CONFLICT RESOLVED**: Fixed critical routing conflict between CMS dynamic [slug] route and authentication pages
+  - **Root Cause**: Dynamic `app/(public)/[slug]/page.tsx` route was intercepting `/login` and `/register` URLs intended for authentication
+  - **Issue Impact**: Users trying to access `/login` and `/register` were getting 404 errors as CMS route tried to find non-existent pages in database
+  - **Technical Problem**: Next.js App Router was matching dynamic route patterns before static routes for certain URL structures
+
+- 🚀 **SOLUTION IMPLEMENTED**: Created static redirect pages to preserve original authentication URLs
+  - **Static Routes Created**: Added `app/(public)/login/page.tsx` and `app/(public)/register/page.tsx`
+  - **Redirect Logic**: Both pages use `router.replace()` to seamlessly redirect to existing auth pages at `/auth/login` and `/auth/register`
+  - **URL Preservation**: Users can continue using familiar `/login` and `/register` URLs without any breaking changes
+  - **Route Priority**: Static routes now take precedence over dynamic [slug] route for authentication paths
+
+- ⚙️ **DEFENSIVE PROGRAMMING ADDED**: Enhanced CMS route with authentication path exclusions
+  - **Dual Protection**: Added exclusion logic in `app/(public)/[slug]/page.tsx` for 'login' and 'register' slugs
+  - **Metadata Function Protected**: Both `generateMetadata` and main component now check for auth routes
+  - **Graceful Fallback**: Auth route attempts in CMS handler return proper 404 to allow static routes to handle
+
+- ✅ **TESTING VERIFIED**: All authentication and CMS routes now work correctly
+  - **Login Access**: `/login` → redirects to `/auth/login` (200 OK)
+  - **Register Access**: `/register` → redirects to `/auth/register` (200 OK)  
+  - **CMS Pages**: `/privacy`, `/terms`, etc. continue working through dynamic [slug] route
+  - **No Breaking Changes**: Existing functionality preserved while fixing the routing conflict
+
+**Status**: ✅ **ROUTING CONFLICT FIXED** - Authentication pages restored to original URLs while maintaining CMS functionality
+
 
