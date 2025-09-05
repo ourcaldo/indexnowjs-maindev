@@ -73,13 +73,12 @@ export const KeywordTable = ({
           <thead>
             <tr style={{backgroundColor: '#F7F9FC', borderBottom: '1px solid #E0E6ED'}}>
               <th className="px-6 py-3 text-left">
-                <label className="flex items-center cursor-pointer h-full">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={selectedKeywords.length === filteredKeywords.length && filteredKeywords.length > 0}
                     onChange={handleSelectAll}
-                    className="mr-3 flex-shrink-0"
-                    style={{marginTop: '1px'}}
+                    className="mr-3 w-4 h-4 flex-shrink-0"
                   />
                   <span className="text-xs font-medium tracking-wider" style={{color: '#6C757D'}}>
                     KEYWORD
@@ -118,7 +117,7 @@ export const KeywordTable = ({
                       type="checkbox"
                       checked={selectedKeywords.includes(keyword.id)}
                       onChange={() => handleKeywordSelect(keyword.id)}
-                      className="mr-3"
+                      className="mr-3 w-4 h-4 flex-shrink-0"
                     />
                     <div>
                       <div className="font-medium text-sm" style={{color: '#1A1A1A'}}>
