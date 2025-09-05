@@ -1,0 +1,76 @@
+Console Error
+
+
+The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [This is demo 3, true, function(name, value1) {
+        let options = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
+        const field = get(_fields, name);
+        const isFieldArray = _names.array.has(name);
+        const cloneValue = cloneObject(value1);
+        set(_formValues, name, cloneValue);
+        if (isFieldArray) {
+            _subjects.array.next({
+                name,
+                values: cloneObject(_formValues)
+            });
+            if ((_proxyFormState.isDirty || _proxyFormState.dirtyFields || _proxySubscribeFormState.isDirty || _proxySubscribeFormState.dirtyFields) && options.shouldDirty) {
+                _subjects.state.next({
+                    name,
+                    dirtyFields: getDirtyFields(_defaultValues, _formValues),
+                    isDirty: _getDirty(name, cloneValue)
+                });
+            }
+        } else {
+            field && !field._f && !isNullOrUndefined(cloneValue) ? setValues(name, cloneValue, options) : setFieldValue(name, cloneValue, options);
+        }
+        isWatched(name, _names) && _subjects.state.next({
+            ..._formState,
+            name
+        });
+        _subjects.state.next({
+            name: _state.mount ? name : undefined,
+            values: cloneObject(_formValues)
+        });
+    }]
+Incoming: [edit, This is demo 3, true, function(name, value1) {
+        let options = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
+        const field = get(_fields, name);
+        const isFieldArray = _names.array.has(name);
+        const cloneValue = cloneObject(value1);
+        set(_formValues, name, cloneValue);
+        if (isFieldArray) {
+            _subjects.array.next({
+                name,
+                values: cloneObject(_formValues)
+            });
+            if ((_proxyFormState.isDirty || _proxyFormState.dirtyFields || _proxySubscribeFormState.isDirty || _proxySubscribeFormState.dirtyFields) && options.shouldDirty) {
+                _subjects.state.next({
+                    name,
+                    dirtyFields: getDirtyFields(_defaultValues, _formValues),
+                    isDirty: _getDirty(name, cloneValue)
+                });
+            }
+        } else {
+            field && !field._f && !isNullOrUndefined(cloneValue) ? setValues(name, cloneValue, options) : setFieldValue(name, cloneValue, options);
+        }
+        isWatched(name, _names) && _subjects.state.next({
+            ..._formState,
+            name
+        });
+        _subjects.state.next({
+            name: _state.mount ? name : undefined,
+            values: cloneObject(_formValues)
+        });
+    }]
+
+components/cms/PageForm.tsx (69:12) @ PageForm
+
+
+  67 |
+  68 |   // Auto-generate slug from title (only for new pages)
+> 69 |   useEffect(() => {
+     |            ^
+  70 |     if (mode === 'create' && watchedTitle && !slugManuallyEdited) {
+  71 |       const newSlug = generateSlug(watchedTitle)
+  72 |       setValue('slug', newSlug)

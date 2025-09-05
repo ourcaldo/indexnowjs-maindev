@@ -111,15 +111,8 @@ export default function PageForm({
   }
 
   const handleSlugChange = (value: string) => {
-    // Allow user to type freely, only apply basic cleaning
-    const cleanedValue = value
-      .toLowerCase()
-      .replace(/\s+/g, '-') // Replace spaces with dashes
-      .replace(/[^a-z0-9-]/g, '') // Remove invalid characters but keep dashes
-      .replace(/-+/g, '-') // Replace multiple consecutive dashes with single dash
-      .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
-    
-    setValue('slug', cleanedValue)
+    // Let user type ANYTHING - no immediate cleaning
+    setValue('slug', value)
     setSlugManuallyEdited(true)
   }
 
