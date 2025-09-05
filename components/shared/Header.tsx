@@ -31,21 +31,19 @@ export default function Header({
   currentPage 
 }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isHeaderSticky, setIsHeaderSticky] = useState(variant === 'page')
+  const [isHeaderSticky, setIsHeaderSticky] = useState(false)
 
   useEffect(() => {
-    if (variant === 'landing') {
-      const handleScroll = () => {
-        const scrollY = window.scrollY
-        setIsHeaderSticky(scrollY > 100)
-      }
-
-      window.addEventListener('scroll', handleScroll)
-      handleScroll()
-      
-      return () => window.removeEventListener('scroll', handleScroll)
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      setIsHeaderSticky(scrollY > 100)
     }
-  }, [variant])
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll()
+    
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleNavigationClick = (item: NavigationItem) => {
     if (item.onClick) {
@@ -64,7 +62,7 @@ export default function Header({
         <div className={`transition-all duration-500 ease-in-out ${
           isHeaderSticky 
             ? 'max-w-5xl mx-auto bg-black/95 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl' 
-            : 'max-w-7xl mx-auto bg-transparent px-4 sm:px-6 lg:px-8'
+            : 'w-full bg-black/90 backdrop-blur-md px-4 sm:px-6 lg:px-8'
         }`}>
           <div className={`flex justify-between items-center transition-all duration-500 ease-in-out ${
             isHeaderSticky 
