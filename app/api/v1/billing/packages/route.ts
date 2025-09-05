@@ -65,7 +65,8 @@ export async function GET(request: NextRequest) {
       is_current: pkg.id === userProfile?.package_id,
       pricing_tiers: pkg.pricing_tiers || {},
       user_currency: userCurrency,
-      user_country: userCountry
+      user_country: userCountry,
+      free_trial_enabled: pkg.free_trial_enabled || false
     })) || []
 
     return NextResponse.json({

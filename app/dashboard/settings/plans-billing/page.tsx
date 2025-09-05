@@ -367,8 +367,7 @@ export default function BillingPage() {
   }
 
   const isTrialEligiblePackage = (pkg: any) => {
-    const packageName = pkg.name.toLowerCase()
-    return packageName.includes('premium') || packageName.includes('pro')
+    return pkg.free_trial_enabled === true
   }
 
   const handlePageChange = (newPage: number) => {

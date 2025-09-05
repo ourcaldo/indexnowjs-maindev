@@ -165,10 +165,9 @@ export default function Dashboard() {
 
   // Trial eligibility now loaded from merged dashboard endpoint
 
-  // Check if package is eligible for trial (Premium or Pro plans only)
+  // Check if package is eligible for trial (based on database configuration)
   const isTrialEligiblePackage = (pkg: any) => {
-    const packageName = pkg.name.toLowerCase()
-    return packageName.includes('premium') || packageName.includes('pro')
+    return pkg.free_trial_enabled === true
   }
 
   // Handle trial subscription

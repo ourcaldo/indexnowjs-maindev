@@ -50,6 +50,7 @@ interface PaymentPackage {
   }
   is_popular: boolean
   is_current: boolean
+  free_trial_enabled?: boolean
   pricing_tiers: Record<string, PricingTier> | Array<{
     period: string
     period_label: string
@@ -216,10 +217,9 @@ export default function PlansTab() {
     }
   }
 
-  // Check if package is eligible for trial (Premium or Pro plans only)
+  // Check if package is eligible for trial (based on database configuration)
   const isTrialEligiblePackage = (pkg: PaymentPackage) => {
-    const packageName = pkg.name.toLowerCase()
-    return packageName.includes('premium') || packageName.includes('pro')
+    return pkg.free_trial_enabled === true
   }
 
   if (loading) {

@@ -32,6 +32,7 @@ interface PaymentPackage {
   pricing_tiers: any
   features: string[]
   description: string
+  free_trial_enabled?: boolean
 }
 
 interface PaymentGateway {

@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
           quota_limits,
           pricing_tiers,
           is_active,
-          sort_order
+          sort_order,
+          free_trial_enabled
         `)
         .eq('is_active', true)
         .order('sort_order', { ascending: true })

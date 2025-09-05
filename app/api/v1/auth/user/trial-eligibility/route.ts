@@ -69,11 +69,11 @@ export async function GET(request: NextRequest) {
     }
 
 
-    // Get available trial packages (Premium and Pro only)
+    // Get available trial packages (based on database configuration)
     const { data: packages, error: packagesError } = await supabase
       .from('indb_payment_packages')
       .select('*')
-      .in('slug', ['premium', 'pro'])
+      .eq('free_trial_enabled', true)
       .eq('is_active', true)
       .order('sort_order')
 
