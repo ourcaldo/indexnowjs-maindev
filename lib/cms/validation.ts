@@ -105,7 +105,7 @@ export function generateMetaTitle(title: string, siteName?: string): string {
   let metaTitle = title
   
   if (siteName) {
-    const withSiteName = `${title} | ${siteName}`
+    const withSiteName = `${title} - ${siteName}`
     metaTitle = withSiteName.length <= maxLength ? withSiteName : title
   }
   

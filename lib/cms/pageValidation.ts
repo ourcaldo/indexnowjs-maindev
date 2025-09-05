@@ -129,14 +129,14 @@ export function generatePageMetaTitle(title: string, siteName: string = 'IndexNo
 
   // Truncate meta title to a reasonable length (e.g., 60 characters)
   const maxLength = 60
-  const combinedTitle = `${title} | ${siteName}`
+  const combinedTitle = `${title} - ${siteName}`
 
   if (combinedTitle.length > maxLength) {
     // If combined title exceeds max length, truncate the page title and append site name if possible
-    const remainingLength = maxLength - siteName.length - 3 // account for ' | '
+    const remainingLength = maxLength - siteName.length - 3 // account for ' - '
     if (remainingLength > 0) {
       const truncatedTitle = title.substring(0, remainingLength)
-      return `${truncatedTitle} | ${siteName}`
+      return `${truncatedTitle} - ${siteName}`
     } else {
       // If even the site name is too long, just return a truncated version of the site name
       return siteName.substring(0, maxLength)
