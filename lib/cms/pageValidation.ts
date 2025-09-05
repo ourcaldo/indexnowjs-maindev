@@ -1,10 +1,14 @@
 import { z } from 'zod'
 import slugify from 'slugify'
+import { VALIDATION_PATTERNS, FIELD_LIMITS } from '@/lib/core/constants/ValidationRules'
 
 // Page validation schemas
 export const PageFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255, 'Title must be less than 255 characters'),
-  slug: z.string().min(1, 'Slug is required').max(255, 'Slug must be less than 255 characters'),
+  slug: z.string()
+    .min(FIELD_LIMITS.SLUG.min, 'Slug is required')
+    .max(FIELD_LIMITS.SLUG.max, 'Slug must be less than 100 characters')
+    .regex(VALIDATION_PATTERNS.SLUG, 'Slug can only contain lowercase letters, numbers, and dashes (no consecutive dashes or dashes at start/end)'),
   content: z.string().optional(),
   featured_image_url: z.string().url('Featured image must be a valid URL').optional().or(z.literal('')),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),

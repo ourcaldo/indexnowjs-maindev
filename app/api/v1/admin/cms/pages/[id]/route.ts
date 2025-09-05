@@ -107,12 +107,16 @@ export async function PUT(
     
     if (body.title !== undefined) updateData.title = body.title
     if (body.slug !== undefined) {
+      // Trim and normalize slugs for comparison
+      const newSlug = body.slug.trim()
+      const existingSlug = existingPage.slug.trim()
+      
       // Check if new slug already exists (excluding current page)
-      if (body.slug !== existingPage.slug) {
+      if (newSlug !== existingSlug) {
         const { data: slugConflict, error: slugError } = await supabaseAdmin
           .from('indb_cms_pages')
-          .select('id')
-          .eq('slug', body.slug)
+          .select('id, slug')
+          .eq('slug', newSlug)
           .neq('id', id)
           .single()
 
@@ -122,10 +126,13 @@ export async function PUT(
         }
 
         if (slugConflict) {
-          return NextResponse.json({ error: 'Slug already exists' }, { status: 400 })
+          console.error(`Slug conflict detected: new="${newSlug}", existing="${existingSlug}", conflict_page_id="${slugConflict.id}", conflict_slug="${slugConflict.slug}", current_page_id="${id}"`)
+          return NextResponse.json({ 
+            error: `Slug "${newSlug}" is already used by another page` 
+          }, { status: 400 })
         }
       }
-      updateData.slug = body.slug
+      updateData.slug = newSlug
     }
     
     if (body.content !== undefined) {

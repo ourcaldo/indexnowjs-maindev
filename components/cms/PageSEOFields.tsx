@@ -30,7 +30,7 @@ export default function PageSEOFields({
   useEffect(() => {
     if (!metaTitle && title) {
       const siteTitle = settings?.site_name || 'IndexNow Studio'
-      const generatedMetaTitle = `${title} | ${siteTitle}`
+      const generatedMetaTitle = `${title} - ${siteTitle}`
       onMetaTitleChange(generatedMetaTitle)
     }
   }, [title, metaTitle, onMetaTitleChange, settings?.site_name])
@@ -39,7 +39,7 @@ export default function PageSEOFields({
     if (metaTitle) return metaTitle
     if (title) {
       const siteTitle = settings?.site_name || 'IndexNow Studio'
-      return `${title} | ${siteTitle}`
+      return `${title} - ${siteTitle}`
     }
     return 'Untitled Page'
   }

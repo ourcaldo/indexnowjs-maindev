@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sign In | IndexNow Studio',
+  title: 'Sign In - IndexNow Studio',
   description: 'Sign in to your IndexNow Studio account to manage your URL indexing operations',
 }
 

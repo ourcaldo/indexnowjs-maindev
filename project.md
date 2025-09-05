@@ -6677,4 +6677,47 @@ ON public.indb_cms_posts(category, status);
 
 **Status**: ✅ **ROUTING CONFLICT FIXED** - Authentication pages restored to original URLs while maintaining CMS functionality
 
+### September 05, 2025 - Meta Title Separators Unified & CMS Slug Issues Fixed 🔧
+
+- 🎯 **META TITLE SEPARATORS UNIFIED**: All meta title separators now consistently use dash "-" instead of mixed pipe "|" and dash separators
+  - **Issue Fixed**: User reported seeing inconsistent separators with pipe "|" still used in some places instead of unified dash "-" format
+  - **Format Standardized**: All meta titles now follow `{page title} - {site name}` format using dash separator
+  - **Files Updated**: Fixed separator inconsistencies in login layouts and PageSEOFields component
+
+- ✅ **CHANGES IMPLEMENTED**:
+  - **Fixed**: `app/login/layout.tsx` - Changed `'Sign In | IndexNow Studio'` to `'Sign In - IndexNow Studio'`
+  - **Fixed**: `app/(public)/auth/login/layout.tsx` - Changed `'Sign In | IndexNow Studio'` to `'Sign In - IndexNow Studio'`
+  - **Fixed**: `components/cms/PageSEOFields.tsx` - Lines 33 & 42: Changed `\`${title} | ${siteTitle}\`` to `\`${title} - ${siteTitle}\``
+  - **Verified**: All title separators now consistently use dash "-" format
+
+- 🔧 **CMS PAGE SLUG AUTO-REWRITING FIXED**: Custom page slugs no longer get overwritten when editing existing pages
+  - **Root Cause**: `slugManuallyEdited` state started as `false` even when editing pages with custom slugs, causing auto-generation to overwrite manual slugs
+  - **Solution**: Added initialization logic to detect existing custom slugs and set `slugManuallyEdited` to `true` when slug doesn't match auto-generated version
+  - **Code Updated**: `components/cms/PageForm.tsx` - Added useEffect to initialize slug editing state based on existing data
+
+- 🛠️ **DRAFT TO PUBLISHED STATUS UPDATE ERROR FIXED**: Eliminated "slug already used" error when changing page status
+  - **Issue**: Status updates failed with slug uniqueness errors due to whitespace comparison issues
+  - **Root Cause**: Slug comparison in API route didn't handle trailing/leading whitespace, causing false positives in uniqueness checks
+  - **Solution**: Added slug trimming and normalization in `app/api/v1/admin/cms/pages/[id]/route.ts`
+  - **Enhanced Logging**: Added detailed error logging to help debug future slug conflicts
+
+- ⚙️ **SLUG VALIDATION ENHANCED**: Improved page slug validation to properly support dashes and follow consistent patterns
+  - **Pattern Applied**: Updated PageFormSchema to use centralized VALIDATION_PATTERNS.SLUG regex: `^[a-z0-9]+(?:-[a-z0-9]+)*$`
+  - **Validation Rules**: Integrated FIELD_LIMITS and VALIDATION_PATTERNS from ValidationRules.ts for consistency
+  - **Dashes Supported**: Confirmed dashes are properly supported in slugs (no consecutive dashes, no start/end dashes)
+  - **Code Updated**: `lib/cms/pageValidation.ts` - Enhanced slug validation with proper pattern matching
+
+- 📋 **TECHNICAL IMPROVEMENTS**:
+  - **Consistent Validation**: Page slug validation now uses same patterns as other parts of the application
+  - **Better Error Messages**: Slug validation provides clear feedback about allowed characters and patterns
+  - **Whitespace Handling**: API routes now properly trim and normalize slugs before comparison
+  - **State Management**: Form state correctly tracks manual slug edits to prevent unwanted auto-generation
+
+- 🎯 **FINAL RESULT**: All meta title separator and CMS page slug issues resolved
+  - **Before**: Mixed separators (| and -), slug auto-rewriting on edit, status update errors, unclear slug validation
+  - **After**: Unified dash separators, preserved custom slugs, smooth status updates, clear slug validation with dash support
+  - **User Experience**: CMS page editing now works as expected with reliable slug handling and consistent title formatting
+
+**Status**: ✅ **COMPLETE** - All separator inconsistencies and CMS slug handling issues resolved with improved validation and error handling
+
 
