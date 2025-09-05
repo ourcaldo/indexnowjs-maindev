@@ -147,7 +147,7 @@ export default function CMSPages() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end mb-8">
         <div className="mt-4 sm:mt-0">
           <a
             href="/backend/admin/cms/pages/create"
