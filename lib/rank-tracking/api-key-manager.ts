@@ -1,6 +1,6 @@
 /**
  * API Key Manager Service
- * Manages IndexNow Rank Tracker API integration and quota tracking
+ * Manages Firecrawl API integration and credit tracking
  */
 
 import { supabaseAdmin } from '../database/supabase'
@@ -29,12 +29,12 @@ export class APIKeyManager {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'custom_tracker')
+        .eq('service_name', 'firecrawl')
         .eq('is_active', true)
         .single()
 
       if (error || !integration) {
-        logger.warn('No active IndexNow Rank Tracker API integration found. Attempting to activate first available integration...')
+        logger.warn('No active Firecrawl API integration found. Attempting to activate first available integration...')
         
         // Try to activate the first available API key
         const activated = await this.activateNextAvailableAPIKey()
@@ -43,14 +43,14 @@ export class APIKeyManager {
           return await this.getActiveAPIKey()
         }
         
-        logger.error('No IndexNow Rank Tracker API integration available at all')
+        logger.error('No Firecrawl API integration available at all')
         return null
       }
 
-      // Check if current key has quota available
-      const hasQuota = integration.api_quota_used < integration.api_quota_limit
-      if (!hasQuota) {
-        logger.warn(`Current API key exhausted (${integration.api_quota_used}/${integration.api_quota_limit}). Switching to next available key...`)
+      // Check if current key has credits available (minimum 10 credits needed)
+      const hasCredits = (integration.api_quota_limit - integration.api_quota_used) >= 10
+      if (!hasCredits) {
+        logger.warn(`Current API key has insufficient credits (${integration.api_quota_limit - integration.api_quota_used} remaining). Switching to next available key...`)
         
         // Deactivate current exhausted key
         await supabaseAdmin
@@ -65,7 +65,7 @@ export class APIKeyManager {
           return await this.getActiveAPIKey()
         }
         
-        logger.error('No alternative API keys with available quota found')
+        logger.error('No alternative API keys with available credits found')
         return null
       }
 
@@ -78,14 +78,14 @@ export class APIKeyManager {
   }
 
   /**
-   * Get available quota (site-level) - NO MORE DAILY RESET
+   * Get available credits (site-level) - Variable credit consumption
    */
   async getAvailableQuota(): Promise<number> {
     try {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('api_quota_limit, api_quota_used')
-        .eq('service_name', 'custom_tracker')
+        .eq('service_name', 'firecrawl')
         .eq('is_active', true)
         .single()
 
@@ -94,84 +94,23 @@ export class APIKeyManager {
       }
 
       const available = integration.api_quota_limit - integration.api_quota_used
-      // Check if we have at least 10 quota for the next request (each request consumes 10 credits)
+      // Return available credits (minimum 10 needed for search requests)
       return Math.max(0, available)
 
     } catch (error) {
-      logger.error('Error getting available quota:', error)
+      logger.error('Error getting available credits:', error)
       return 0
     }
   }
 
   /**
-   * Update quota usage after SUCCESSFUL API call (site-level) - consumes 10 quota per request
-   * If quota will be exhausted, deactivates current API key and switches to next available one
+   * Update credit usage after API call - Variable credit consumption based on results
+   * Credits are updated from the Firecrawl API response, not a fixed amount
    */
   async updateQuotaUsage(apiKey: string): Promise<void> {
-    try {
-      // First get current quota usage and limit for the specific API key
-      const { data: currentData } = await supabaseAdmin
-        .from('indb_site_integration')
-        .select('id, api_quota_used, api_quota_limit')
-        .eq('apikey', apiKey)
-        .eq('is_active', true)
-        .single()
-
-      if (!currentData) {
-        logger.error(`No active API key found matching: ${apiKey}`)
-        return
-      }
-
-      // Consume 10 quota per successful request
-      const newQuotaUsed = (currentData.api_quota_used || 0) + 10
-      const quotaLimit = currentData.api_quota_limit || 0
-
-      // Check if quota will be exhausted after this request
-      const isQuotaExhausted = newQuotaUsed >= quotaLimit
-
-      if (isQuotaExhausted) {
-        logger.warn(`API key quota exhausted: ${newQuotaUsed}/${quotaLimit}. Deactivating API key.`)
-        
-        // Deactivate current API key
-        await supabaseAdmin
-          .from('indb_site_integration')
-          .update({
-            api_quota_used: newQuotaUsed,
-            is_active: false, // Deactivate exhausted API key
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', currentData.id)
-
-        logger.info(`API key deactivated. Attempting to activate next available key...`)
-        
-        // Try to activate next available API key
-        const activated = await this.activateNextAvailableAPIKey()
-        if (activated) {
-          logger.info('Successfully switched to next available API key')
-        } else {
-          logger.error('No more API keys available. All quota exhausted.')
-        }
-
-      } else {
-        // Normal quota update
-        const { error } = await supabaseAdmin
-          .from('indb_site_integration')
-          .update({
-            api_quota_used: newQuotaUsed,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', currentData.id)
-
-        if (error) {
-          logger.error('Error updating quota usage:', error)
-        } else {
-          logger.info(`Updated site-level quota usage: +10 (Total: ${newQuotaUsed}/${quotaLimit})`)
-        }
-      }
-
-    } catch (error) {
-      logger.error('Error updating quota usage:', error)
-    }
+    // Note: Credit usage is now handled by RankTrackerService after each API call
+    // This method is kept for compatibility but credits are updated via updateCreditUsage()
+    logger.info('Credit usage updated via Firecrawl API response tracking')
   }
 
   /**
@@ -191,24 +130,24 @@ export class APIKeyManager {
    */
   private async activateNextAvailableAPIKey(): Promise<boolean> {
     try {
-      // Find next available IndexNow Rank Tracker API integration that is inactive but has quota remaining
+      // Find next available Firecrawl API integration that is inactive but has credits remaining
       const { data: availableKeys, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'custom_tracker')
+        .eq('service_name', 'firecrawl')
         .eq('is_active', false)
         .order('created_at', { ascending: true })
 
       if (error || !availableKeys || availableKeys.length === 0) {
-        logger.error('No alternative API integrations available. All Custom Tracker API quota exhausted.')
+        logger.error('No alternative API integrations available. All Firecrawl API credits exhausted.')
         return false
       }
 
-      // Find the first key with available quota (no quota reset, just check current quota)
+      // Find the first key with available credits (minimum 10 credits needed)
       for (const key of availableKeys) {
-        const availableQuota = key.api_quota_limit - key.api_quota_used
+        const availableCredits = key.api_quota_limit - key.api_quota_used
         
-        if (availableQuota >= 10) { // Need at least 10 credits for next request
+        if (availableCredits >= 10) { // Need at least 10 credits for next request
           // Activate this API key
           const { error: activateError } = await supabaseAdmin
             .from('indb_site_integration')
@@ -219,17 +158,17 @@ export class APIKeyManager {
             .eq('id', key.id)
 
           if (!activateError) {
-            logger.info(`Successfully activated alternative API key with ${availableQuota} quota remaining`)
+            logger.info(`Successfully activated alternative API key with ${availableCredits} credits remaining`)
             return true
           } else {
             logger.error('Error activating alternative API key:', activateError)
           }
         } else {
-          logger.info(`Skipping API key with insufficient quota: ${availableQuota}/10 required`)
+          logger.info(`Skipping API key with insufficient credits: ${availableCredits}/10 required`)
         }
       }
 
-      logger.error('No API integrations with available quota found. All Custom Tracker API quota exhausted.')
+      logger.error('No API integrations with available credits found. All Firecrawl API credits exhausted.')
       return false
 
     } catch (error) {
@@ -239,14 +178,14 @@ export class APIKeyManager {
   }
 
   /**
-   * Get API key information with quota details (site-level)
+   * Get API key information with credit details (site-level)
    */
   async getAPIKeyInfo(): Promise<APIKeyInfo | null> {
     try {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'custom_tracker')
+        .eq('service_name', 'firecrawl')
         .eq('is_active', true)
         .single()
 
@@ -281,7 +220,7 @@ export class APIKeyManager {
   }
 
   /**
-   * Get total number of available API keys and quota status
+   * Get total number of available API keys and credit status
    */
   async getAPIKeysSummary(): Promise<{
     totalKeys: number
@@ -294,7 +233,7 @@ export class APIKeyManager {
       const { data: allKeys, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'custom_tracker')
+        .eq('service_name', 'firecrawl')
 
       if (error || !allKeys) {
         return { totalKeys: 0, activeKeys: 0, totalQuota: 0, usedQuota: 0, availableQuota: 0 }

@@ -1,6 +1,6 @@
 /**
- * IndexNow Rank Tracker API Integration Service
- * Handles rank checking via custom backend API (URL configured in database)
+ * Firecrawl Rank Tracker API Integration Service
+ * Handles rank checking via Firecrawl API for search result analysis
  */
 
 import { supabaseAdmin } from '../database/supabase'
@@ -15,6 +15,39 @@ const logger = {
 interface RankTrackerConfig {
   apiKey: string
   baseUrl: string
+}
+
+interface FirecrawlSearchRequest {
+  query: string
+  sources: string[]
+  categories: string[]
+  limit: number
+  location: string
+}
+
+interface FirecrawlSearchResult {
+  url: string
+  title: string
+  description: string
+  position: number
+}
+
+interface FirecrawlApiResponse {
+  success: boolean
+  data: {
+    web: FirecrawlSearchResult[]
+    creditsUsed: number
+  }
+}
+
+interface FirecrawlCreditResponse {
+  success: boolean
+  data: {
+    remainingCredits: number
+    planCredits: number | null
+    billingPeriodStart: string | null
+    billingPeriodEnd: string | null
+  }
 }
 
 interface RankCheckRequest {
@@ -32,17 +65,6 @@ interface RankCheckResponse {
   errorMessage?: string
 }
 
-interface CustomApiResponse {
-  keyword: string
-  domain: string
-  device: 'desktop' | 'mobile'
-  country: string
-  rank: number | null
-  url: string | null
-  error: string | null
-  attempts: number
-  execution_time: number
-}
 
 export class RankTrackerService {
   private config: RankTrackerConfig | null = null
@@ -58,20 +80,20 @@ export class RankTrackerService {
       const { data: integration, error } = await supabaseAdmin
         .from('indb_site_integration')
         .select('apikey, api_url')
-        .eq('service_name', 'custom_tracker')
+        .eq('service_name', 'firecrawl')
         .eq('is_active', true)
         .single()
 
       if (error || !integration?.apikey) {
-        throw new Error('No active Custom Tracker API integration found in database')
+        throw new Error('No active Firecrawl API integration found in database')
       }
 
       this.config = {
         apiKey: integration.apikey,
-        baseUrl: integration.api_url || 'http://160.79.119.44:5000'
+        baseUrl: integration.api_url || 'https://api.firecrawl.dev'
       }
 
-      logger.info('IndexNow Rank Tracker service initialized with database API key')
+      logger.info('Firecrawl Rank Tracker service initialized with database API key')
 
     } catch (error) {
       logger.error('Failed to initialize Rank Tracker service:', error)
@@ -80,7 +102,7 @@ export class RankTrackerService {
   }
 
   /**
-   * Check keyword ranking position for a specific domain
+   * Check keyword ranking position for a specific domain using Firecrawl
    */
   async checkKeywordRank(request: RankCheckRequest): Promise<RankCheckResponse> {
     try {
@@ -88,36 +110,40 @@ export class RankTrackerService {
       await this.initialize()
       
       if (!this.config) {
-        throw new Error('Rank Tracker service not properly initialized')
+        throw new Error('Firecrawl service not properly initialized')
       }
 
-      logger.info(`IndexNow Rank Tracker: Checking rank for keyword "${request.keyword}" domain "${request.domain}"`)
+      logger.info(`Firecrawl: Checking rank for keyword "${request.keyword}" domain "${request.domain}"`)
 
-      // Build API request body for custom backend
-      const requestBody = {
-        keyword: request.keyword,
-        domain: request.domain,
-        devices: request.deviceType, // "desktop" or "mobile"
-        country: request.country.toUpperCase(), // Ensure uppercase country code (ID, US, etc.)
-        max_pages: 50,
-        headless: true,
-        max_retries: 3,
-        use_proxy: true,
-        max_processing_time: 120
-      }
-
-      // Make API request
-      const response = await this.makeRequest(requestBody)
+      // Convert country code to full country name
+      const countryName = this.convertCountryCodeToName(request.country)
       
-      if (response.error) {
-        throw new Error(response.error || 'Unknown API error')
+      // Build Firecrawl search request
+      const searchRequest: FirecrawlSearchRequest = {
+        query: request.keyword,
+        sources: ['web'],
+        categories: [],
+        limit: 100,
+        location: countryName
       }
 
-      // Process response - custom backend returns rank directly
-      return this.processResponse(response)
+      // Make API request to Firecrawl
+      const response = await this.makeFirecrawlRequest(searchRequest)
+      
+      if (!response.success) {
+        throw new Error('Firecrawl API request failed')
+      }
+
+      // Process response to find domain position
+      const result = this.processFirecrawlResponse(response, request.domain)
+      
+      // Update credit usage in database
+      await this.updateCreditUsage(response.data.creditsUsed)
+      
+      return result
 
     } catch (error) {
-      logger.error('IndexNow Rank Tracker rank check failed:', error)
+      logger.error('Firecrawl rank check failed:', error)
       return {
         position: null,
         url: null,
@@ -129,27 +155,34 @@ export class RankTrackerService {
   }
 
   /**
-   * Process Custom Tracker API response to extract domain ranking
+   * Process Firecrawl API response to extract domain ranking
    */
-  private processResponse(response: CustomApiResponse): RankCheckResponse {
-    logger.info(`IndexNow Rank Tracker: Processing response for keyword "${response.keyword}"`)
+  private processFirecrawlResponse(response: FirecrawlApiResponse, targetDomain: string): RankCheckResponse {
+    logger.info(`Firecrawl: Processing ${response.data.web.length} search results`)
 
-    if (response.rank && response.rank > 0) {
-      logger.info(`IndexNow Rank Tracker: Found domain at position ${response.rank}`)
-      return {
-        position: response.rank,
-        url: response.url,
-        found: true,
-        totalResults: 50 // Assuming max_pages: 50 means 50*10 = 500 results checked
+    const cleanTargetDomain = this.extractDomain(targetDomain)
+    
+    // Search through results to find our domain
+    for (const result of response.data.web) {
+      const resultDomain = this.extractDomain(result.url)
+      
+      if (resultDomain === cleanTargetDomain) {
+        logger.info(`Firecrawl: Found domain "${cleanTargetDomain}" at position ${result.position}`)
+        return {
+          position: result.position,
+          url: result.url,
+          found: true,
+          totalResults: response.data.web.length
+        }
       }
-    } else {
-      logger.info(`IndexNow Rank Tracker: Domain not found in search results`)
-      return {
-        position: null,
-        url: null,
-        found: false,
-        totalResults: 50
-      }
+    }
+
+    logger.info(`Firecrawl: Domain "${cleanTargetDomain}" not found in search results`)
+    return {
+      position: null,
+      url: null,
+      found: false,
+      totalResults: response.data.web.length
     }
   }
 
@@ -168,73 +201,195 @@ export class RankTrackerService {
   }
 
   /**
-   * Make HTTP request to Custom Tracker API with error handling and retries
+   * Make HTTP request to Firecrawl API with error handling and retries
    */
-  private async makeRequest(requestBody: any): Promise<CustomApiResponse> {
+  private async makeFirecrawlRequest(searchRequest: FirecrawlSearchRequest): Promise<FirecrawlApiResponse> {
     if (!this.config) {
       throw new Error('Service not initialized')
     }
 
-    const url = `${this.config.baseUrl}/track-keyword`
+    const url = `${this.config.baseUrl}/v2/search`
 
-    logger.info(`IndexNow Rank Tracker: Making request to ${url} for keyword "${requestBody.keyword}"`)
+    logger.info(`Firecrawl: Making search request for keyword "${searchRequest.query}" in location "${searchRequest.location}"`)
 
     // Retry logic
     let lastError: Error | null = null
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        logger.info(`IndexNow Rank Tracker: Sending request with headers: X-API-Key: ***masked***, Host: localhost`)
-        logger.info(`IndexNow Rank Tracker: Request body: ${JSON.stringify(requestBody)}`)
+        logger.info(`Firecrawl: Sending request to ${url}`)
+        logger.info(`Firecrawl: Request body: ${JSON.stringify(searchRequest)}`)
         
         const response = await fetch(url, {
           method: 'POST',
           headers: {
-            'X-API-Key': this.config.apiKey,
-            'Host': 'localhost',
+            'Authorization': `Bearer ${this.config.apiKey}`,
             'Content-Type': 'application/json',
             'User-Agent': 'IndexNow-Studio-Rank-Tracker/1.0'
           },
-          body: JSON.stringify(requestBody),
-          timeout: 150000 // 150 second timeout (longer than max_processing_time)
-        } as any)
+          body: JSON.stringify(searchRequest)
+        })
 
-        logger.info(`IndexNow Rank Tracker: Response status: ${response.status} ${response.statusText}`)
+        logger.info(`Firecrawl: Response status: ${response.status} ${response.statusText}`)
 
         if (!response.ok) {
-          // Handle 403 as expected response (not an error)
-          if (response.status === 403) {
-            logger.info(`IndexNow Rank Tracker: 403 response received (expected behavior)`)
-            const data = await response.json().catch(() => ({ rank: null, message: 'Access forbidden' }))
-            return data
-          }
-          
-          // Try to get response body for more details for other errors
           let errorDetails = ''
           try {
             errorDetails = await response.text()
-            logger.error(`IndexNow Rank Tracker: Error response body: ${errorDetails}`)
+            logger.error(`Firecrawl: Error response body: ${errorDetails}`)
           } catch (e) {
-            logger.error('IndexNow Rank Tracker: Could not read error response body')
+            logger.error('Firecrawl: Could not read error response body')
           }
           throw new Error(`HTTP ${response.status}: ${response.statusText}${errorDetails ? ` - ${errorDetails}` : ''}`)
         }
 
-        const data = await response.json()
-        logger.info(`IndexNow Rank Tracker: Request successful, rank: ${data.rank}, execution time: ${data.execution_time}s`)
+        const data = await response.json() as FirecrawlApiResponse
+        logger.info(`Firecrawl: Request successful, found ${data.data.web.length} results, used ${data.data.creditsUsed} credits`)
         return data
 
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error))
-        logger.warn(`IndexNow Rank Tracker: Attempt ${attempt}/3 failed:`, lastError.message)
+        logger.warn(`Firecrawl: Attempt ${attempt}/3 failed:`, lastError.message)
         
         if (attempt < 3) {
-          // Wait before retry: 5s, 10s (longer delays for custom backend)
-          await this.delay(attempt * 5000)
+          // Wait before retry: 2s, 4s
+          await this.delay(attempt * 2000)
         }
       }
     }
 
     throw lastError || new Error('All retry attempts failed')
+  }
+
+  /**
+   * Convert ISO2 country code to full country name for Firecrawl
+   */
+  private convertCountryCodeToName(countryCode: string): string {
+    const countryMap: Record<string, string> = {
+      'ID': 'Indonesia',
+      'US': 'United States',
+      'MY': 'Malaysia',
+      'SG': 'Singapore',
+      'TH': 'Thailand',
+      'PH': 'Philippines',
+      'VN': 'Vietnam',
+      'GB': 'United Kingdom',
+      'AU': 'Australia',
+      'CA': 'Canada',
+      'IN': 'India',
+      'JP': 'Japan',
+      'KR': 'South Korea',
+      'CN': 'China',
+      'HK': 'Hong Kong',
+      'TW': 'Taiwan',
+      'DE': 'Germany',
+      'FR': 'France',
+      'IT': 'Italy',
+      'ES': 'Spain',
+      'NL': 'Netherlands',
+      'BR': 'Brazil',
+      'MX': 'Mexico',
+      'AR': 'Argentina',
+      'CL': 'Chile',
+      'CO': 'Colombia',
+      'PE': 'Peru',
+      'ZA': 'South Africa',
+      'EG': 'Egypt',
+      'NG': 'Nigeria',
+      'KE': 'Kenya',
+      'MA': 'Morocco',
+      'TR': 'Turkey',
+      'SA': 'Saudi Arabia',
+      'AE': 'United Arab Emirates',
+      'IL': 'Israel',
+      'RU': 'Russia',
+      'UA': 'Ukraine',
+      'PL': 'Poland',
+      'CZ': 'Czech Republic',
+      'HU': 'Hungary',
+      'RO': 'Romania',
+      'BG': 'Bulgaria',
+      'HR': 'Croatia',
+      'RS': 'Serbia',
+      'SK': 'Slovakia',
+      'SI': 'Slovenia',
+      'LT': 'Lithuania',
+      'LV': 'Latvia',
+      'EE': 'Estonia',
+      'FI': 'Finland',
+      'SE': 'Sweden',
+      'NO': 'Norway',
+      'DK': 'Denmark',
+      'IS': 'Iceland'
+    }
+    
+    return countryMap[countryCode.toUpperCase()] || countryCode
+  }
+
+  /**
+   * Update credit usage in database after API call
+   */
+  private async updateCreditUsage(creditsUsed: number): Promise<void> {
+    try {
+      // Get current credit info
+      const creditInfo = await this.getCreditUsage()
+      if (!creditInfo) {
+        logger.error('Could not get credit usage info to update database')
+        return
+      }
+
+      // Update the database with remaining credits
+      const { error } = await supabaseAdmin
+        .from('indb_site_integration')
+        .update({
+          api_quota_used: creditInfo.data.planCredits ? (creditInfo.data.planCredits - creditInfo.data.remainingCredits) : 0,
+          api_quota_limit: creditInfo.data.planCredits || creditInfo.data.remainingCredits,
+          updated_at: new Date().toISOString()
+        })
+        .eq('service_name', 'firecrawl')
+        .eq('is_active', true)
+
+      if (error) {
+        logger.error('Error updating credit usage:', error)
+      } else {
+        logger.info(`Updated credit usage: ${creditsUsed} credits used, ${creditInfo.data.remainingCredits} remaining`)
+      }
+
+    } catch (error) {
+      logger.error('Error updating credit usage:', error)
+    }
+  }
+
+  /**
+   * Get current credit usage from Firecrawl API
+   */
+  private async getCreditUsage(): Promise<FirecrawlCreditResponse | null> {
+    try {
+      if (!this.config) {
+        throw new Error('Service not initialized')
+      }
+
+      const url = `${this.config.baseUrl}/v2/team/credit-usage`
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      const data = await response.json() as FirecrawlCreditResponse
+      logger.info(`Credit usage check: ${data.data.remainingCredits} credits remaining`)
+      return data
+
+    } catch (error) {
+      logger.error('Error getting credit usage:', error)
+      return null
+    }
   }
 
   /**

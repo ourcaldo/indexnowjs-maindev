@@ -1,0 +1,57 @@
+{
+    "success": true,
+    "data": {
+        "web": [{
+            "url": "https://keywordtool.io/",
+            "title": "Keyword Tool ⚠️ Google Keyword Planner【Search FREE】",
+            "description": "Keyword Tool is free online keyword research instrument that uses Google Autocomplete to generate hundreds of relevant long-tail keywords for any topic.",
+            "position": 1
+        }, {
+            "url": "https://www.washingtonpost.com/games/keyword/",
+            "title": "Keyword | One word to spell 'em all - The Washington Post",
+            "description": "Keyword, a new game from The Washington Post, gives you six words — each missing one letter — and you have to find the word that connects them.",
+            "position": 2
+        }, {
+            "url": "https://www.keyword.io/",
+            "title": "Free keyword research tool - Find longtail and related keywords",
+            "description": "This free tool provides keyword suggestions from many sources, including Google, Amazon, and more, to find longtail keywords for SEO, PPC, and content creation.",
+            "position": 3
+        }, {
+            "url": "https://business.google.com/en-all/ad-tools/keyword-planner/",
+            "title": "Research Keywords for Campaigns with Keyword Planner",
+            "description": "Google Keyword Planner is a free keyword search tool to help advertisers build keyword lists for search campaigns. It also includes a keyword generator tool to ...",
+            "position": 4
+        }, {
+            "url": "https://ads.google.com/intl/id_id/home/tools/keyword-planner/",
+            "title": "Menemukan Kata Kunci Kampanye dengan Keyword Planner",
+            "description": "Setelah membuka Keyword Planner, Anda dapat membuat rencana kata kunci dengan menelusuri kata kunci baru, mengklik opsi “Temukan kata kunci baru”, atau ...",
+            "position": 5
+        }, {
+            "url": "https://www.wordstream.com/keywords",
+            "title": "Free Keyword Tool | WordStream",
+            "description": "WordStream's Free Keyword Tool gives you hundreds of relevant keyword results, plus additional, actionable information like competition level and estimated CPC ...",
+            "position": 6
+        }, {
+            "url": "https://cmlabs.co/id-id/seo-guidelines/panduan-kata-kunci",
+            "title": "Apa Itu Keyword? Pengertian, Contoh, dan Tips Memilihnya - cmlabs",
+            "description": "Keyword adalah kata atau frasa yang dimasukkan pengguna untuk mencari informasi tertentu di search engine. Temukan contoh dan tips ...",
+            "position": 7
+        }, {
+            "url": "https://www.semrush.com/analytics/keywordmagic/",
+            "title": "Free Keyword Tool: Find Keywords & Suggestions Instantly - Semrush",
+            "description": "Keyword Magic Tool is a free tool to find keywords and keyword ideas from real Google searches.",
+            "position": 8
+        }, {
+            "url": "https://ahrefs.com/keyword-generator",
+            "title": "Free Keyword Generator Tool: Find 100+ Keyword Ideas in Seconds",
+            "description": "Find relevant keywords from our database of over 8 billion queries. Just enter up to ten words or phrases and choose from one of six keyword ideas reports.",
+            "position": 9
+        }, {
+            "url": "https://blog.google/",
+            "title": "The Keyword | Google Product and Technology News and Stories",
+            "description": "Get the latest news and stories about Google products, technology and innovation on the Keyword, Google's official blog.",
+            "position": 10
+        }]
+    },
+    "creditsUsed": 10
+}

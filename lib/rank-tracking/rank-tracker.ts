@@ -49,18 +49,18 @@ export class RankTracker {
       // 1. Get site-level API key from database
       const apiKey = await this.apiKeyManager.getActiveAPIKey()
       if (!apiKey) {
-        throw new Error('No active IndexNow Rank Tracker API integration found. Please contact admin to configure API integration.')
+        throw new Error('No active Firecrawl API integration found. Please contact admin to configure API integration.')
       }
 
-      // 2. Check remaining quota (site-level) - need at least 10 quota per request
-      const availableQuota = await this.apiKeyManager.getAvailableQuota()
-      if (availableQuota < 10) {
-        throw new Error(`Insufficient quota: ${availableQuota} remaining. Need 10 quota per request. Contact admin.`)
+      // 2. Check remaining credits (site-level) - need at least 10 credits per request
+      const availableCredits = await this.apiKeyManager.getAvailableQuota()
+      if (availableCredits < 10) {
+        throw new Error(`Insufficient credits: ${availableCredits} remaining. Need minimum 10 credits per request. Contact admin.`)
       }
 
-      logger.info(`Site has ${availableQuota} API calls remaining`)
+      logger.info(`Site has ${availableCredits} API credits remaining`)
 
-      // 3. Initialize IndexNow Rank Tracker service (loads API key from database)
+      // 3. Initialize Firecrawl Rank Tracker service (loads API key from database)
       this.rankTrackerService = new RankTrackerService()
 
       // 4. Make rank check request
@@ -73,10 +73,10 @@ export class RankTracker {
 
       // 5. Handle API response with error logging
       if (!rankResult.errorMessage) {
-        await this.apiKeyManager.updateQuotaUsage(apiKey)
-        logger.info(`API quota consumed for successful request: keyword ${keywordData.keyword}`)
+        // Credit usage is automatically updated by RankTrackerService after each API call
+        logger.info(`API credits consumed for successful request: keyword ${keywordData.keyword}`)
       } else {
-        logger.warn(`API quota NOT consumed for failed request: ${rankResult.errorMessage}`)
+        logger.warn(`API request failed: ${rankResult.errorMessage}`)
         // Log API-level errors to error tracking system
         await this.logRankCheckError(keywordData, rankResult.errorMessage, 'api_error')
       }
@@ -91,7 +91,7 @@ export class RankTracker {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Rank tracking failed for keyword ${keywordData.id}:`, error)
+      logger.error(`Firecrawl rank tracking failed for keyword ${keywordData.id}:`, error)
       
       // Log error to error tracking system with proper classification
       await this.logRankCheckError(keywordData, errorMessage, this.classifyError(errorMessage))
@@ -125,8 +125,8 @@ export class RankTracker {
           keyword_id: keywordId,
           position: result.position,
           url: result.url,
-          search_volume: null, // IndexNow Rank Tracker doesn't provide search volume
-          difficulty_score: null, // IndexNow Rank Tracker doesn't provide difficulty
+          search_volume: null, // Firecrawl doesn't provide search volume
+          difficulty_score: null, // Firecrawl doesn't provide difficulty
           check_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
           device_type: keyword.device_type,
           country_id: keyword.country_id,
@@ -266,7 +266,7 @@ export class RankTracker {
   private classifyError(errorMessage: string): 'quota_exceeded' | 'api_error' | 'parsing_error' | 'network_error' | 'authentication_error' {
     const message = errorMessage.toLowerCase()
     
-    if (message.includes('quota') || message.includes('limit exceeded') || message.includes('insufficient')) {
+    if (message.includes('credit') || message.includes('quota') || message.includes('limit exceeded') || message.includes('insufficient')) {
       return 'quota_exceeded'
     }
     
