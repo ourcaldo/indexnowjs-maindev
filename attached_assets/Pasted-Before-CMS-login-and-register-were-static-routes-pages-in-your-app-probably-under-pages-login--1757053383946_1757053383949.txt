@@ -1,0 +1,63 @@
+Before CMS
+
+/login and /register were static routes/pages in your app (probably under pages/login.tsx or app/login/page.tsx in Next.js).
+
+They worked fine because the router knew exactly which file to serve.
+
+After CMS / Catch-all Dynamic Route
+
+You created something like [slug].tsx or app/[slug]/page.tsx to serve CMS pages like /privacy, /terms, /tos.
+
+That dynamic route also catches /login and /register, since they also match the [slug] pattern.
+
+Inside your code, when /login is requested, your CMS logic checks the database for a "login" slug → not found → returns 404.
+
+That’s why your auth pages broke.
+
+✅ How to Fix
+You need to tell the router to prioritize static routes over dynamic ones. There are a few ways:
+
+If you’re using Next.js (Pages Router):
+
+Ensure pages/login.tsx and pages/register.tsx exist.
+
+Place your CMS route as pages/[slug].tsx.
+
+Next.js automatically prioritizes exact matches (/login) over dynamic (/[slug]).
+👉 If it’s still broken, it means your [slug].tsx is catch-all ([...slug].tsx). That will override everything, including /login.
+
+// pages/[slug].tsx (NOT [...slug].tsx)
+If you must use catch-all ([...slug]), then add an exception:
+
+export async function getServerSideProps(context) {
+const slug = context.params.slug?.[0] ?? "";
+
+// Prevent overriding login/register
+if (slug === "login" || slug === "register") {
+return { notFound: true }; // Let Next.js serve static route
+}
+
+// Your CMS fetch logic here...
+}
+
+If you’re using Next.js (App Router):
+
+Keep /app/login/page.tsx and /app/register/page.tsx as static routes.
+
+CMS should be /app/[slug]/page.tsx (not [...slug]).
+
+If you really need catch-all ([...slug]), then add logic in notFound():
+
+export default async function Page({ params }) {
+const slug = params.slug?.[0] ?? "";
+
+if (slug === "login" || slug === "register") {
+notFound(); // Fallback to static pages
+}
+
+// Fetch from DB
+}
+
+⚡ Summary:
+Your CMS route is overriding /login and /register.
+👉 Solution: don’t use a greedy catch-all unless you add exceptions, or restructure your routes so static auth pages take precedence.
