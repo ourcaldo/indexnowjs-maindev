@@ -158,7 +158,7 @@ export default function EditPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => router.back()}
+                onClick={() => router.push('/backend/admin/cms/pages')}
                 className="p-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
                 data-testid="button-back"
               >

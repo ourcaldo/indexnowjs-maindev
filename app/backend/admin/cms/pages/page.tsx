@@ -149,10 +149,6 @@ export default function CMSPages() {
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#1A1A1A] flex items-center gap-3">
-            <FileText className="h-8 w-8 text-[#3D8BFF]" />
-            Pages Management
-          </h1>
           <p className="text-[#6C757D] mt-2">Create and manage your website pages</p>
         </div>
         <div className="mt-4 sm:mt-0">
