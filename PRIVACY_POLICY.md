@@ -2,282 +2,254 @@
 
 **Last Updated: September 06, 2025**
 
-## 1. Introduction and Data Controller Information
+IndexNow Studio and its affiliates ("IndexNow Studio," "we," "our," and/or "us") value the privacy of individuals who use our website and related services (collectively, our "Services"). This privacy policy (the "Privacy Policy") explains how we collect, use, and share information from or about you or your device as you use the Services. By using our Services, you agree to the collection, use, disclosure, and procedures this Privacy Policy describes. Beyond the Privacy Policy, your use of our Services is also subject to our Terms of Service.
 
-IndexNow Studio ("we," "our," or "us") is committed to protecting and respecting your privacy. This Privacy Policy explains how we collect, use, store, and share information about you when you use our rank tracking and SEO indexing platform ("Service").
+## 1. Information We Collect
 
-**Data Controller Contact Information:**
-- Service Name: IndexNow Studio
-- Website: https://indexnow.studio
-- Database Infrastructure: Hosted at https://base.indexnow.studio
+We may collect a variety of information from or about you or your devices from various sources, as described below.
 
-## 2. Information We Collect
+If you do not provide your information when requested, you may not be able to use some or all of our Services if that information is necessary to provide you with our Services or if we are legally required to collect it.
 
-### 2.1 Personal Information You Provide
+### A. Information You Provide to Us
 
-**Account Registration Data:**
-- Full name
-- Email address
-- Password (encrypted and hashed)
-- Phone number (optional)
-- Country/region information
+**Registration and Profile Information**. When you register for an account, we ask you for your email address, full name, and may also request your phone number and country information. If you sign up using a social media account, we will also receive information from those social media services such as your name, email address, and profile photo, in accordance with your privacy settings on those social media services.
 
-**Profile Information:**
-- User preferences and settings
-- Dashboard configuration preferences
-- Subscription and billing information
+**Payment Information**. When you add a credit card or payment method to your account, our third-party payment processor Midtrans will receive and process your payment card information. We may store tokenized payment information for recurring billing purposes.
 
-**Business Information:**
-- Website URLs and domains you track
-- Keywords and search terms
-- SEO project data and configurations
+**Business and SEO Data**. When you use our Services, you provide us with website URLs, domains, keywords, search terms, ranking data, and other SEO-related information that you wish to track and analyze.
 
-### 2.2 Automatically Collected Information
+**Communications**. When you communicate with us, we may receive additional information about you. For example, when you communicate with our Customer Support Team, we will receive your name, email address, phone number, the contents of a message or attachments that you may send to us, and other information you choose to provide. If you subscribe to our newsletter, then we will collect certain information from you, such as your email address. When we send you emails, we may use technologies such as web beacons to track whether you open them to learn how to deliver a better customer experience and improve our Services.
 
-**Technical Data:**
-- IP address and geographical location (via IP-API service)
-- Browser type, version, and language settings
-- Device information and operating system
-- Referral URLs and page views
+**Google Service Accounts**. If you connect Google service accounts for indexing purposes, we will receive and store your service account credentials and configuration data necessary to provide indexing services through Google APIs.
 
-**Usage Data:**
-- Login/logout timestamps and activity logs
-- Feature usage patterns and dashboard interactions
-- API request logs and quota consumption
-- System performance and error tracking
+### B. Information We Collect Automatically When You Use Our Services
 
-**Authentication and Session Data:**
-- Session tokens and refresh tokens (stored securely)
-- Login attempts and security events
-- Multi-factor authentication data
+When you use the Services, we use a variety of electronic tools, such as cookies, pixel tags, and similar technologies (collectively referred to in this Privacy Policy as "cookies") to automatically generate information about how you use and interact with the Services as discussed in this section.
 
-### 2.3 Website and SEO Data
+**What are Cookies?** Cookies are small files of letters and numbers that we store on your browser or the hard drive of your computer, or small graphic images placed on web pages or in emails. They can be stored either for a single browser session or more permanently. We use cookies to collect information about your browsing activities, distinguish you from other users, provide functionality, and analyze use of the Services. Our third-party partners, such as analytics providers, may use these technologies to collect information about your online activities over time and across different services. The types of cookies we and third parties may use to collect information are as follows:
 
-**Indexing Data:**
-- URLs submitted for Google indexing
-- Sitemap content and structure
-- Website metadata and content analysis
-- Search ranking positions and historical data
+- **Strictly necessary cookies.** Some cookies are strictly necessary to make the Services available to you. We cannot provide you with the Services without this type of cookies. These include authentication tokens and session management cookies.
+- **Functional cookies.** These are used to recognize you when you return to the Services. This enables us to adapt our content for you, and remember your preferences (for example, your sidebar layout preferences).
+- **Analytical or Performance cookies.** We also use cookies for analytics purposes in order to operate, maintain and improve our Services. We may use our own analytics cookies or use third party analytics providers to collect and process certain analytics data on our behalf. These providers may also collect information about your use of other websites, apps, and online resources.
 
-**Keyword Tracking:**
-- Keyword performance metrics
-- Search volume and difficulty scores
-- Ranking history across different locations and devices
-- Competitor analysis data
+**What information do we automatically collect as you use the Services?**
 
-## 3. Cookies and Tracking Technologies
+**Device Information**. We receive information about the device and software you use to access our Services, including internet protocol (IP) address, Internet Service Provider, web browser type, operating system version, phone carrier and manufacturer, application installations, device type and identifiers, and mobile advertising identifiers.
 
-### 3.1 Essential Cookies
+**Location Information**. We may infer your general location information from other information we collect from and about you (for example, your IP address may indicate your general geographic region). We do not collect precise geolocation data.
 
-We use essential cookies that are necessary for the Service to function:
+**Usage Information**. To help us understand and analyze how you use our Services and to help us improve them, we automatically receive information about your interactions with our Services, like the pages or other content you view or interact with, the searches you conduct, your comments, any content you enter or post, API requests you make, keywords you track, and the dates and times of your visits.
 
-- **Authentication Cookies:** `sb-access-token`, `sb-refresh-token` for secure user sessions
-- **Session Management:** Supabase authentication tokens with 7-day access token expiry and 30-day refresh token expiry
-- **Security Cookies:** CSRF protection and secure session management
+**Activity Logging**. We maintain comprehensive activity logs including login/logout events, feature usage, API quota consumption, admin actions, and security events for audit trail and compliance purposes.
 
-### 3.2 Functional Cookies
+### C. Information We Receive from Third Parties
 
-- **User Preferences:** `sidebar-collapsed` to remember dashboard layout preferences
-- **Storage Keys:** `sb-auth-token` for persistent authentication state in localStorage
+**Information from third party services.** If you choose to link our Services to a third-party account (such as Google Search Console), we may receive information about you, including your profile information and your use of the third-party account, in accordance with your settings on such third-party account. If you wish to limit the information available to us, you should visit the privacy settings of your third-party accounts to learn about your options.
 
-### 3.3 Cookie Configuration
+**Payment Processors**. We receive transaction information from Midtrans including payment status, billing details, and transaction IDs for subscription management purposes.
 
-Our cookies are configured with:
-- `SameSite=Lax` for cross-site request protection
-- `path=/` for site-wide accessibility
-- Secure transmission over HTTPS
-- Automatic expiration based on session requirements
+**Other third parties.** We may receive additional information about you, such as demographic data or IP geolocation data, from third parties such as data or marketing partners and combine it with other information we have about you.
 
-## 4. How We Use Your Information
+## 2. How We Use the Information We Collect
 
-### 4.1 Service Provision
+We use the information we collect:
 
-- **Account Management:** Creating and managing your user account and authentication
-- **SEO Services:** Providing rank tracking, keyword monitoring, and indexing services
-- **Platform Functionality:** Enabling dashboard features, API access, and real-time updates
+- To provide, maintain, improve, and enhance our Services including rank tracking, keyword monitoring, and URL indexing;
+- To communicate with you, provide you with updates and other information relating to our Services, provide information that you request, respond to comments and questions, and otherwise provide customer support;
+- To facilitate the connection of third-party services or applications, such as Google APIs for indexing;
+- For marketing purposes, such as developing and providing promotional and advertising materials that may be useful, relevant, valuable or otherwise of interest to you;
+- To personalize your experience on our Services such as presenting tailored content and dashboard configurations;
+- To facilitate transactions and payments through Midtrans and manage subscriptions;
+- To detect and prevent fraud, and respond to trust and safety issues that may arise;
+- For compliance purposes, including enforcing our Terms of Service or other legal rights, or as may be required by applicable laws and regulations or requested by any judicial process or governmental agency;
+- To generate analytics and insights about Service usage and performance;
+- To maintain comprehensive audit trails and activity logging for security and compliance; and
+- For other purposes for which we provide specific notice at the time the information is collected.
 
-### 4.2 Communication
+**De-Identified Information.** Please note that we may de-identify the information we collect from and about you so that it can no longer be reasonably linked to you or your device. Once information has been de-identified in this way, we can use and share it for any purpose in our discretion, and this Privacy Policy no longer applies to such information.
 
-- **Transactional Emails:** Order confirmations, billing notifications, and account updates
-- **Service Notifications:** Trial expiration alerts, quota warnings, and system maintenance updates
-- **Security Communications:** Login alerts, security notifications, and account protection measures
+## 3. Legal Bases for Processing Information
 
-### 4.3 Analytics and Improvement
+Various global privacy laws (such as those in the European Economic Area, United Kingdom, and Brazil) require that we have a "legal basis" to process your information. The legal bases on which we rely to process your information include:
 
-- **Usage Analytics:** Understanding feature adoption and user behavior patterns
-- **Performance Monitoring:** System optimization and error tracking
-- **Service Enhancement:** Improving platform functionality and user experience
+- **Consent.** You have consented to the use of your information, for example, where legally required, to send you marketing communications or to process your Google service account credentials.
+- **Contractual necessity.** We need your information to provide you with the Services, for example to facilitate your registration, provide rank tracking services, process payments, and respond to your inquiries.
+- **Compliance with a legal obligation.** We have a legal obligation to use your information, for example to comply with tax and accounting obligations, or to maintain audit trails as required by data protection laws.
+- **Legitimate interests.** We have a legitimate interest in using your information for a business purpose that does not override your individual rights and interests. For example, we have a legitimate interest in using your information for product development and internal analytics purposes, to improve the accuracy of our SEO tracking technologies, fraud prevention, and otherwise to improve the safety, security, and performance of our Services.
 
-### 4.4 Legal and Compliance
+## 4. How We Share the Information We Collect
 
-- **Activity Logging:** Comprehensive audit trails for security and compliance purposes
-- **Fraud Prevention:** Detecting and preventing unauthorized access and suspicious activities
-- **Legal Obligations:** Complying with applicable laws and regulations
+We share information with the following categories of third parties.
 
-## 5. Third-Party Services and Data Sharing
+**Affiliates.** We may share any information we receive with our corporate affiliates under common ownership or control for any of the purposes described in this Privacy Policy.
 
-### 5.1 Essential Service Providers
+**Service Providers.** We may share any information we receive with vendors retained in connection with the provision of our Services and that process your information on our behalf. These entities include:
+- Database hosting and authentication service providers
+- Payment processing companies for billing management
+- Google for indexing API services and service account management
+- Email service providers for transactional email delivery
+- Geolocation service providers
+- Analytics, security, machine learning, and fraud prevention companies
 
-**Supabase (Database and Authentication)**
-- Purpose: Primary database hosting, user authentication, and real-time functionality
-- Data Shared: All user account data, application data, and usage metrics
-- Location: Self-hosted instance at https://base.indexnow.studio
-- Retention: As per your account lifecycle and legal requirements
+**Google APIs Integration.** When you use our Google indexing features, we share your website URLs and indexing requests with Google through their Indexing API in accordance with your instructions and Google's terms of service.
 
-**Google APIs (Indexing Services)**
-- Purpose: URL submission to Google Search Console Indexing API
-- Data Shared: Website URLs, indexing requests, and service account credentials
-- Processing: Google service accounts with limited scopes for indexing operations
-- Retention: As per Google's data retention policies
+**As Required by Law and Similar Disclosures.** We may access, preserve, and disclose your information if we believe in good faith that doing so is required or appropriate to: (a) comply with law enforcement requests and legal process, such as a court order or subpoenas; (b) respond to your requests; or (c) protect your, our, or others' rights, property, or safety. For the avoidance of doubt, the disclosure of your information may occur if you post any objectionable content on or through the Services.
 
-### 5.2 Payment Processing
+**Merger, Sale, or Other Asset Transfers.** We may disclose and transfer your information to service providers, advisors, potential transactional partners, or other third parties in connection with the consideration, negotiation, or completion of a corporate transaction in which we are acquired by or merged with another company or we sell, liquidate, or transfer all or a portion of our business or assets.
 
-**Midtrans (Payment Gateway)**
-- Purpose: Processing subscription payments and billing transactions
-- Data Shared: Payment details, billing information, and transaction data
-- Services: Both one-time Snap payments and recurring subscription management
-- Security: PCI DSS compliant payment processing with tokenized card storage
+**Consent.** We may also disclose information from or about you with your permission.
 
-### 5.3 Communication Services
+## 5. Your Rights and Choices
 
-**SMTP Email Services (Nodemailer)**
-- Purpose: Sending transactional emails and notifications
-- Data Shared: Email addresses, names, and message content
-- Configuration: Secure SMTP with TLS encryption
-- Templates: Billing confirmations, trial notifications, and system alerts
+**Account Management.** You can access, update, and modify your account information through your dashboard settings at any time.
 
-### 5.4 External APIs and Integrations
+**Marketing Communications.** You can unsubscribe from our promotional emails via the link provided in the emails. Even if you opt-out of receiving promotional messages from us, you will continue to receive administrative messages from us regarding your account and Services.
 
-**IP-API Service**
-- Purpose: Geographical location detection for security and localization
-- Data Shared: IP addresses for country and region identification
-- Fallback: Used when GeoIP-lite data files are unavailable
+**How to Block Cookies.** You can change your browser settings to block, disable, or notify you when you receive a Cookie, delete Cookies, or browse our Services using your browser's anonymous usage setting. However, if you use your browser settings to block all Cookies (including essential Cookies) you may not be able to access all or parts of our Services, or some portions of the Services may not function properly.
 
-## 6. Data Storage and Security
+**Data Export.** You can export your SEO data, keyword tracking information, and account settings through your dashboard.
 
-### 6.1 Data Storage
+**Account Deletion.** You can request deletion of your account and associated data through your account settings or by contacting us. We will delete your data within 30 days of your request, subject to legal retention requirements.
 
-- **Primary Database:** PostgreSQL hosted on Supabase infrastructure
-- **Authentication:** JWT tokens with automatic refresh mechanisms
-- **File Storage:** Secure file uploads and document management
-- **Backup Systems:** Regular automated backups with encryption
+### Your European Privacy Rights
 
-### 6.2 Security Measures
+If you are located in the European Economic Area or the United Kingdom, you have the additional rights described below.
 
-**Encryption:**
-- Data encryption in transit using TLS/SSL
-- Password hashing with industry-standard algorithms
-- Encrypted storage of sensitive credentials and API keys
+- You may request access to the information we maintain about you, update and correct inaccuracies in your information, restrict or object to the processing of your information, have the information anonymized or deleted, as appropriate, or exercise your right to data portability to easily transfer your information to another company (where technically feasible). In addition, you also have the right to lodge a complaint with a supervisory authority, including in your country of residence, place of work or where an incident took place.
+- You may withdraw any consent you previously provided to us regarding the processing of your information, at any time and free of charge. We will apply your preferences going forward and this will not affect the lawfulness of the processing before you withdrew your consent.
 
-**Access Controls:**
-- Role-based access control (user, admin, super_admin)
-- Multi-factor authentication support
-- Session timeout and automatic logout
-- IP-based security monitoring
+You may exercise these rights by contacting us using the contact details at the end of this Privacy Policy. Before responding to your request, we may ask you to provide reasonable information to verify your identity. Please note that there are exceptions and limitations to each of these rights, and that while any changes you make will be reflected in active user databases instantly or within a reasonable period of time, we may retain information for backups, archiving, prevention of fraud and abuse, analytics, satisfaction of legal obligations, or where we otherwise reasonably believe that we have a legitimate reason to do so.
 
-**Monitoring:**
-- Comprehensive activity logging and audit trails
-- Real-time security event detection
-- Automated threat detection and response
-- Regular security assessments and updates
+## 6. Notice at Collection
 
-### 6.3 Data Retention
+The following table summarizes the categories of "personal information" (as defined under relevant state laws) that we collect from and about you, the purposes for which we use each category, and the third parties to which we share each category for a business purpose.
 
-**Account Data:** Retained for the duration of your active account plus 30 days after account closure
-**Analytics Data:** Aggregated usage data retained for 24 months for service improvement
-**Security Logs:** Activity logs retained for 12 months for security and compliance purposes
-**Billing Records:** Transaction records retained as required by applicable tax and accounting regulations
+| **Category of Personal Information** | **Purposes of Use** | **Categories of Third Parties** |
+|---|---|---|
+| Registration and profile information (name, email, phone, country) | - Provide the Services<br>- Communicate with you<br>- Marketing and advertising<br>- Personalization<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Payment information | - Facilitate transactions<br>- Subscription management<br>- Legal and compliance purposes | - Service providers<br>- Entities for legal compliance |
+| Communications | - Communicate with you<br>- Customer support<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
+| SEO and business data (URLs, keywords, rankings) | - Provide SEO services<br>- Rank tracking<br>- Keyword monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google APIs)<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Device information | - Provide the Services<br>- Security monitoring<br>- Personalization<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Location information | - Provide the Services<br>- Security monitoring<br>- Personalization<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Usage information and activity logs | - Provide the Services<br>- Analytics and improvement<br>- Security monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Google service account data | - Provide indexing services<br>- Google API integration<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google APIs)<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Third-party information | - Provide the Services<br>- Analytics and improvement<br>- Security monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
 
-## 7. Your Rights and Choices
+## 7. Additional Information for California Residents
 
-### 7.1 Access and Control
+If you are a California resident, the California Consumer Privacy Act ("CCPA") requires us to provide you with a summary of the categories of "personal information" (as defined under the CCPA) that we collect from and about you, the purposes for which we use each category, and the third parties to which we share each category for a business purpose. You may find this summary in the section "Notice at collection" above.
 
-**Account Management:**
-- View and update your personal information through your dashboard
-- Modify privacy settings and communication preferences
-- Download your data in standard formats
+If you are a California resident, you may exercise the following rights with regard to data where we determine the purposes and means of processing:
 
-**Data Portability:**
-- Export your SEO data, keywords, and performance metrics
-- Transfer service account configurations
-- Backup your project settings and preferences
+- The right to request a copy of the personal information that we have collected about you in the prior 12 months.
+- The right to request details about the categories of personal information we collect, the categories of sources, the business or commercial purposes for collecting information, and the categories of third parties with which we share information.
+- The right to request deletion of the personal information that we have collected about you, subject to certain exemptions.
+- The right to opt out of the sale of your personal information. We do not "sell" personal information as such term is defined in the CCPA.
+- The right to opt out from profiling, defined as the automated processing of personal information to assess or forecast aspects of your behavior.
+- The right to request us to correct errors in the personal information that we hold about you.
 
-### 7.2 Communication Preferences
+California residents can submit access and deletion requests by emailing us at privacy@indexnow.studio. California residents can also request that we delete your information through your account settings. You have the right not to receive discriminatory treatment for the exercise of your CCPA privacy rights, subject to certain limitations.
 
-**Email Communications:**
-- Opt-out of marketing communications (while maintaining essential service emails)
-- Customize notification frequency and types
-- Manage trial and billing notification preferences
+An authorized agent may submit an access or deletion request on your behalf by sending a written authorization signed by you to privacy@indexnow.studio. We may still require you to directly verify your identity and confirm that you provided the authorized agent permission to submit the request.
 
-### 7.3 Account Deletion
+## 8. Additional Information for Colorado Residents
 
-**Complete Account Removal:**
-- Request permanent deletion of your account and associated data
-- 30-day grace period for account recovery
-- Secure deletion of all personal and business data
+If you are a Colorado resident, the Colorado Privacy Act ("CPA") requires us to provide you with a summary of the categories of "personal information" (as defined under the CPA) that we collect from and about you, the purposes for which we use each category, and the third parties to which we share each category for a business purpose. You may find this summary in the section "Notice at collection" above.
 
-## 8. Regional Privacy Rights
+If you are a Colorado resident, you may exercise the following rights with regard to data where we determine the purposes and means of processing:
 
-### 8.1 European Union (GDPR)
+- The right to request a copy of the personal information that we have collected about you in the prior 12 months. We will not charge a fee for up to two requests per year.
+- The right to request details about the categories of personal information we collect, the categories of sources, the business or commercial purposes for collecting information, and the categories of third parties with which we share information.
+- The right to request deletion of the personal information that we have collected about you, subject to certain exemptions.
+- The right to opt out of the sale of your personal information. We do not "sell" personal information as such term is defined in the CPA.
+- The right to opt out from profiling, defined as the automated processing of personal information to assess or forecast aspects of your behavior.
+- The right to request us to correct errors in the personal information that we hold about you.
+- The right to appeal if we decline a request that you have made.
 
-If you are located in the EU, you have the following additional rights:
-- **Right to Access:** Request copies of your personal data
-- **Right to Rectification:** Correct inaccurate or incomplete data
-- **Right to Erasure:** Request deletion of your personal data
-- **Right to Restrict Processing:** Limit how we use your data
-- **Right to Data Portability:** Transfer your data to another service
-- **Right to Object:** Object to processing based on legitimate interests
+Colorado residents can submit access and deletion requests by emailing us at privacy@indexnow.studio. You have the right not to receive discriminatory treatment for the exercise of your CPA privacy rights, subject to certain limitations.
 
-### 8.2 California (CCPA)
+An authorized agent may submit an access or deletion request on your behalf by sending a written authorization signed by you to privacy@indexnow.studio. We may still require you to directly verify your identity and confirm that you provided the authorized agent permission to submit the request.
 
-If you are a California resident, you have the right to:
-- Know what categories of personal information we collect
-- Request deletion of your personal information
-- Opt-out of the sale of personal information (we do not sell personal information)
-- Non-discrimination for exercising your privacy rights
+## 9. Additional Information for Connecticut Residents
 
-### 8.3 Other Jurisdictions
+If you are a Connecticut resident, the Connecticut Data Privacy Act ("CDPA") requires us to provide you with a summary of the categories of "personal information" (as defined under the CDPA) that we collect from and about you, the purposes for which we use each category, and the third parties to which we share each category for a business purpose. You may find this summary in the section "Notice at collection" above.
 
-We comply with applicable privacy laws in all jurisdictions where we operate and will honor similar rights as required by local legislation.
+If you are a Connecticut resident, you may exercise the following rights with regard to data where we determine the purposes and means of processing:
 
-## 9. Children's Privacy
+- The right to request a copy of the personal information that we have collected about you in the prior 12 months. We will not charge a fee for up to one request per year.
+- The right to request details about the categories of personal information we collect, the categories of sources, the business or commercial purposes for collecting information, and the categories of third parties with which we share information.
+- The right to request deletion of the personal information that we have collected about you, subject to certain exemptions.
+- The right to opt out of the sale of your personal information. We do not "sell" personal information as such term is defined in the CDPA.
+- The right to opt out from profiling, defined as the automated processing of personal information to assess or forecast aspects of your behavior.
+- The right to request us to correct errors in the personal information that we hold about you.
+- The right to appeal if we decline a request that you have made.
 
-Our Service is not intended for users under the age of 18. We do not knowingly collect personal information from children under 18. If we become aware that a child under 18 has provided us with personal information, we will delete such information immediately.
+Connecticut residents can submit access and deletion requests by emailing us at privacy@indexnow.studio. You have the right not to receive discriminatory treatment for the exercise of your CDPA privacy rights, subject to certain limitations.
 
-## 10. International Data Transfers
+An authorized agent may submit an access or deletion request on your behalf by sending a written authorization signed by you to privacy@indexnow.studio. We may still require you to directly verify your identity and confirm that you provided the authorized agent permission to submit the request.
+
+## 10. Third Parties
+
+Our Services may contain links to other websites, products, or services that we do not own or operate. We are not responsible for the privacy practices of these third parties. Please be aware that this Privacy Policy does not apply to your activities on these third-party services or any information you disclose to these third parties. We encourage you to read their privacy policies before providing any information to them.
+
+## 11. Retention
+
+We take measures to delete your information or maintain it in a de-identified form when it is no longer necessary to be kept in identifiable form for the purposes for which we process it, unless we are required by law to keep this information for a longer period. When determining the specific retention period, we take into account various criteria, such as the type of service provided to you, the nature and length of our relationship with you, and mandatory retention periods provided by applicable law and any statute of limitations.
+
+**Specific Retention Periods:**
+- **Account Data:** Retained for the duration of your active account plus 30 days after account closure
+- **Analytics Data:** Aggregated usage data retained for 24 months for service improvement
+- **Security Logs:** Activity logs retained for 12 months for security and compliance purposes
+- **Billing Records:** Transaction records retained as required by applicable tax and accounting regulations
+- **Email Communications:** Transactional emails retained for 12 months; marketing communications until unsubscribe
+
+When you request to delete your account, we delete your data within 30 days.
+
+## 12. Security
+
+We use a variety of technical, organizational, and physical safeguards designed to safeguard the information we maintain, including:
+
+- **Encryption:** Data encryption in transit using TLS/SSL and password hashing with industry-standard algorithms
+- **Access Controls:** Role-based access control (user, admin, super_admin) with multi-factor authentication support
+- **Monitoring:** Real-time security event detection, IP-based security monitoring, and automated threat detection
+- **Infrastructure:** Secure cloud hosting with regular security assessments and updates
+
+However, as our Services are hosted electronically, we can make no guarantees as to the security or privacy of your information.
+
+## 13. Children's Privacy
+
+Our Services are directed to a general audience and are not directed to children under the age of 18. By agreeing to our Privacy Policy and Terms of Service, you represent that you are 18 years of age or older and are allowed to use our Services according to your country's applicable age limits. If we learn that a child is under the age of 18 in the United States, or is under the applicable age requirement in another jurisdiction, we will take reasonable steps to obtain parental consent or delete the user's personal information from our files as soon as is practicable. Please contact us at privacy@indexnow.studio if you believe that a user has provided us with representations in violation of this Privacy Policy.
+
+## 14. International Data Transfers
 
 Your data may be transferred to and processed in countries other than your country of residence. We ensure appropriate safeguards are in place for international transfers, including:
 - Standard Contractual Clauses for EU data transfers
 - Adequacy decisions where applicable
-- Appropriate technical and organizational measures
+- Appropriate technical and organizational measures to protect your data
 
-## 11. Business Transfers
-
-In the event of a merger, acquisition, or sale of assets, your information may be transferred to the new entity. We will provide notice before your personal information is transferred and becomes subject to a different privacy policy.
-
-## 12. Updates to This Privacy Policy
+## 15. Updates to This Privacy Policy
 
 We may update this Privacy Policy periodically to reflect changes in our practices or applicable laws. We will:
 - Notify you of material changes via email or platform notification
 - Update the "Last Updated" date at the top of this policy
 - Maintain previous versions for your reference
 
-## 13. Contact Information
+## 16. Contact Information
 
-### 13.1 Privacy Inquiries
+### Privacy Inquiries
 
 For questions about this Privacy Policy or our data practices, please contact us at:
 - **Email:** privacy@indexnow.studio
 - **Support Portal:** Through your dashboard support system
 - **Response Time:** We aim to respond to privacy inquiries within 72 hours
 
-### 13.2 Data Protection Officer
+### Data Protection Officer
 
 For GDPR-related inquiries or to exercise your privacy rights:
 - **Email:** dpo@indexnow.studio
-- **Postal Address:** [To be provided based on business registration]
 
-### 13.3 Regulatory Complaints
+### Regulatory Complaints
 
 If you believe we have not addressed your privacy concerns adequately, you have the right to file a complaint with your local data protection authority.
 
