@@ -7,8 +7,9 @@ export async function POST(request: NextRequest) {
     const secret = searchParams.get('secret')
     const path = searchParams.get('path')
 
-    // Validate secret (you can make this more secure)
-    if (secret !== 'revalidate-secret') {
+    // Validate secret using environment variable
+    const expectedSecret = process.env.REVALIDATE_SECRET || 'default-revalidate-secret'
+    if (secret !== expectedSecret) {
       return NextResponse.json(
         { error: 'Invalid secret' },
         { status: 401 }
