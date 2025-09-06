@@ -174,9 +174,8 @@ export default function BillingPage() {
       setLoading(true)
       await Promise.all([
         loadBillingData(),
-        loadPackages(),
         loadBillingHistory(),
-        checkTrialEligibility()
+        loadDashboardData() // Replace individual calls with merged dashboard API
       ])
     } catch (error) {
       console.error('Error loading data:', error)
@@ -210,7 +209,7 @@ export default function BillingPage() {
     }
   }
 
-  const loadPackages = async () => {
+  const loadDashboardData = async () => {
     try {
       const user = await authService.getCurrentUser()
       if (!user) throw new Error('User not authenticated')
@@ -218,24 +217,32 @@ export default function BillingPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) throw new Error('No authentication token')
 
-      const response = await fetch('/api/v1/billing/packages', {
+      const response = await fetch('/api/v1/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
 
-      if (!response.ok) throw new Error('Failed to load packages')
+      if (!response.ok) throw new Error('Failed to load dashboard data')
 
       const data = await response.json()
-      setPackagesData(data)
       
-      if (data.user_currency) {
-        setUserCurrency(data.user_currency)
+      // Extract packages data from dashboard response
+      if (data.billing) {
+        setPackagesData(data.billing)
+        if (data.billing.user_currency) {
+          setUserCurrency(data.billing.user_currency)
+        }
+      }
+      
+      // Extract trial eligibility from dashboard response
+      if (data.user?.trial) {
+        setTrialEligible(data.user.trial.eligible)
       }
     } catch (error) {
-      console.error('Error loading packages:', error)
-      setError(error instanceof Error ? error.message : 'Failed to load packages')
+      console.error('Error loading dashboard data:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load dashboard data')
     }
   }
 
@@ -272,26 +279,6 @@ export default function BillingPage() {
     }
   }
 
-  const checkTrialEligibility = async () => {
-    try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token
-      if (!token) return
-
-      const response = await fetch('/api/v1/auth/user/trial-eligibility', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        setTrialEligible(result.eligible)
-      }
-    } catch (error) {
-      setTrialEligible(false)
-    }
-  }
 
   // Helper functions
   const getBillingPeriodPrice = (pkg: PaymentPackage, period: string): { price: number, originalPrice?: number, discount?: number } => {
