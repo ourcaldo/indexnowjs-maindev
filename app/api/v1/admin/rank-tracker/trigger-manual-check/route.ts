@@ -22,18 +22,31 @@ export async function POST(request: NextRequest) {
     // Check if user is admin (you might have a different admin check)
     // For now, we'll allow any authenticated user for testing
     
-    // 2. Check if workers are initialized (with retry for timing issues)
+    // 2. Check if workers are actually ready (enhanced validation)
     let workerStatus = workerStartup.getStatus()
     
-    // If workers aren't initialized yet, wait a bit and try again (handles async init timing)
-    if (!workerStatus.isInitialized) {
-      // Wait 2 seconds for workers to finish initializing
-      await new Promise(resolve => setTimeout(resolve, 2000))
+    // If workers aren't ready yet, wait a bit and try again (handles async init timing)
+    if (!workerStatus.actuallyReady) {
+      // Wait 3 seconds for workers to finish initializing
+      await new Promise(resolve => setTimeout(resolve, 3000))
       workerStatus = workerStartup.getStatus()
       
-      if (!workerStatus.isInitialized) {
+      if (!workerStatus.actuallyReady) {
+        const notReady = Object.entries(workerStatus.serviceStates)
+          .filter(([_, ready]) => !ready)
+          .map(([service, _]) => service)
+          .join(', ')
+        
         return NextResponse.json(
-          { success: false, error: 'Background workers not initialized' },
+          { 
+            success: false, 
+            error: `Background workers not fully initialized. Services not ready: ${notReady}`,
+            debug: {
+              isInitialized: workerStatus.isInitialized,
+              actuallyReady: workerStatus.actuallyReady,
+              serviceStates: workerStatus.serviceStates
+            }
+          },
           { status: 503 }
         )
       }
@@ -65,7 +78,12 @@ export async function POST(request: NextRequest) {
       data: {
         triggeredAt: new Date().toISOString(),
         beforeStats,
-        jobStatus: dailyRankCheckJob.getStatus()
+        jobStatus: dailyRankCheckJob.getStatus(),
+        workerStatus: {
+          isInitialized: workerStatus.isInitialized,
+          actuallyReady: workerStatus.actuallyReady,
+          serviceStates: workerStatus.serviceStates
+        }
       }
     })
 
@@ -92,14 +110,19 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get worker and job status
+    // Get worker and job status with enhanced validation
     const workerStatus = workerStartup.getStatus()
     const stats = await dailyRankCheckJob.getStats()
 
     return NextResponse.json({
       success: true,
       data: {
-        workerStatus,
+        workerStatus: {
+          isInitialized: workerStatus.isInitialized,
+          actuallyReady: workerStatus.actuallyReady,
+          rankCheckJobStatus: workerStatus.rankCheckJobStatus,
+          serviceStates: workerStatus.serviceStates
+        },
         currentStats: stats,
         timestamp: new Date().toISOString()
       }
