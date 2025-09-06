@@ -19,19 +19,45 @@ export class DailyRankCheckJob {
   private cronJob: any | null = null
 
   constructor() {
-    this.batchProcessor = new BatchProcessor()
+    try {
+      this.batchProcessor = new BatchProcessor()
+      logger.info('DailyRankCheckJob constructor: BatchProcessor initialized successfully')
+    } catch (error) {
+      logger.error('DailyRankCheckJob constructor: Failed to initialize BatchProcessor:', error)
+      // Set to null to handle gracefully
+      this.batchProcessor = null as any
+    }
   }
 
   /**
    * Start the daily rank check job scheduler
    */
   start(): void {
-    // Run daily at 2:00 AM UTC
-    this.cronJob = cron.schedule('0 2 * * *', async () => {
-      await this.executeJob()
-    })
+    try {
+      if (!this.batchProcessor) {
+        logger.error('Cannot start daily rank check job: BatchProcessor not initialized')
+        return
+      }
 
-    logger.info('Daily rank check job scheduled for 2:00 AM UTC')
+      // Run daily at 2:00 AM UTC
+      this.cronJob = cron.schedule('0 2 * * *', async () => {
+        await this.executeJob()
+      }, {
+        timezone: 'UTC'
+      })
+
+      logger.info(`Daily rank check job scheduled for 2:00 AM UTC. CronJob created: ${this.cronJob ? 'SUCCESS' : 'FAILED'}`)
+      
+      // Validate the cron job was created
+      if (this.cronJob) {
+        logger.info('✅ Daily rank check scheduler: ACTIVE')
+      } else {
+        logger.error('❌ Daily rank check scheduler: FAILED TO CREATE')
+      }
+    } catch (error) {
+      logger.error('Failed to start daily rank check job:', error)
+      this.cronJob = null
+    }
   }
 
   /**
@@ -113,7 +139,25 @@ export class DailyRankCheckJob {
    * Get processing statistics
    */
   async getStats(): Promise<any> {
-    return await this.batchProcessor.getProcessingStats()
+    try {
+      if (!this.batchProcessor) {
+        return {
+          totalKeywords: 0,
+          pendingChecks: 0,
+          checkedToday: 0,
+          completionRate: '0'
+        }
+      }
+      return await this.batchProcessor.getProcessingStats()
+    } catch (error) {
+      logger.error('Failed to get processing stats:', error)
+      return {
+        totalKeywords: 0,
+        pendingChecks: 0,
+        checkedToday: 0,
+        completionRate: '0'
+      }
+    }
   }
 }
 

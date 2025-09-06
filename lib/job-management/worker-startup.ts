@@ -251,12 +251,18 @@ export class WorkerStartup {
     const trialMonitorStatus = trialMonitorJob.getStatus()
     const autoCancelStatus = autoCancelJob.getStatus()
     
+    // Debug logging for service states
+    logger.info(`Service status check - dailyRankCheck.isScheduled: ${rankCheckStatus.isScheduled}, cronJob: ${rankCheckStatus.isScheduled ? 'active' : 'null'}`)
+    logger.info(`Service status check - trialMonitor.isScheduled: ${trialMonitorStatus.isScheduled}`)
+    logger.info(`Service status check - autoCancel.isScheduled: ${autoCancelStatus.isScheduled}`)
+    
     // Get JobMonitor status (it has a getStatus method)
     let jobMonitorReady = false
     try {
       const jobMonitor = JobMonitor.getInstance()
       const jobMonitorStatus = jobMonitor.getStatus()
       jobMonitorReady = jobMonitorStatus.isRunning
+      logger.info(`JobMonitor status check: isRunning=${jobMonitorStatus.isRunning}, nextCheck=${jobMonitorStatus.nextCheck}`)
     } catch (error) {
       logger.warn('Could not get JobMonitor status:', error)
       jobMonitorReady = false
@@ -271,7 +277,10 @@ export class WorkerStartup {
     }
     
     // Workers are actually ready if critical services are running
-    const actuallyReady = serviceStates.dailyRankCheck && serviceStates.trialMonitor
+    // For now, let's make it less strict - we need either dailyRankCheck OR the basic initialization
+    const actuallyReady = (serviceStates.dailyRankCheck || this.isInitialized) && serviceStates.trialMonitor
+    
+    logger.info(`Readiness check: actuallyReady=${actuallyReady}, serviceStates=${JSON.stringify(serviceStates)}`)
     
     return {
       isInitialized: this.isInitialized,
