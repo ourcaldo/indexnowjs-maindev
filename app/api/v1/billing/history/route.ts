@@ -31,28 +31,36 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit
 
-    // Build query using existing payment transactions table with gateway join
+    // Get detail level from query params (default to 'basic' for performance)
+    const detail = url.searchParams.get('detail') || 'basic'
+    
+    // Build optimized query - exclude heavy fields unless explicitly requested
+    const baseFields = `
+      id,
+      transaction_type,
+      transaction_status,
+      amount,
+      currency,
+      payment_method,
+      gateway_transaction_id,
+      created_at,
+      updated_at,
+      processed_at,
+      verified_at,
+      notes,
+      payment_proof_url,
+      gateway:indb_payment_gateways(id, name, slug),
+      package:indb_payment_packages(id, name, slug)
+    `
+    
+    // Only include heavy fields when detail=full is requested
+    const selectFields = detail === 'full' 
+      ? `${baseFields}, metadata, gateway_response`
+      : baseFields
+
     let query = supabaseAdmin
       .from('indb_payment_transactions')
-      .select(`
-        id,
-        transaction_type,
-        transaction_status,
-        amount,
-        currency,
-        payment_method,
-        gateway_transaction_id,
-        created_at,
-        updated_at,
-        processed_at,
-        verified_at,
-        notes,
-        metadata,
-        payment_proof_url,
-        gateway_response,
-        gateway:indb_payment_gateways(id, name, slug),
-        package:indb_payment_packages(id, name, slug)
-      `, { count: 'exact' })
+      .select(selectFields, { count: 'exact' })
       .eq('user_id', user.id)
 
     // Apply filters
@@ -77,24 +85,50 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get summary statistics
-    const { data: summaryStats } = await supabaseAdmin
-      .from('indb_payment_transactions')
-      .select('transaction_status, amount, currency')
-      .eq('user_id', user.id)
+    // Get optimized summary statistics using aggregation functions
+    const [
+      { data: totalStats },
+      { data: completedStats },
+      { data: pendingStats },
+      { data: failedStats },
+      { data: amountStats }
+    ] = await Promise.all([
+      supabaseAdmin
+        .from('indb_payment_transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id),
+      supabaseAdmin
+        .from('indb_payment_transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('transaction_status', 'completed'),
+      supabaseAdmin
+        .from('indb_payment_transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('transaction_status', 'pending'),
+      supabaseAdmin
+        .from('indb_payment_transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('transaction_status', 'failed'),
+      supabaseAdmin
+        .from('indb_payment_transactions')
+        .select('amount')
+        .eq('user_id', user.id)
+        .eq('transaction_status', 'completed')
+    ])
 
-    // Calculate summary
+    // Calculate summary using aggregated data (much more efficient)
     const summary = {
-      total_transactions: summaryStats?.length || 0,
-      completed_transactions: summaryStats?.filter(t => t.transaction_status === 'completed').length || 0,
-      pending_transactions: summaryStats?.filter(t => t.transaction_status === 'pending').length || 0,
-      failed_transactions: summaryStats?.filter(t => t.transaction_status === 'failed').length || 0,
-      total_amount_spent: summaryStats
-        ?.filter(t => t.transaction_status === 'completed')
-        .reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0) || 0
+      total_transactions: totalStats?.length || 0,
+      completed_transactions: completedStats?.length || 0,
+      pending_transactions: pendingStats?.length || 0,
+      failed_transactions: failedStats?.length || 0,
+      total_amount_spent: amountStats?.reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0) || 0
     }
 
-    // Transform transactions data
+    // Transform transactions data - handle optional metadata fields based on detail level
     const transformedTransactions = transactions?.map(transaction => ({
       id: transaction.id,
       order_id: transaction.id,
@@ -102,6 +136,7 @@ export async function GET(request: NextRequest) {
       transaction_status: transaction.transaction_status,
       amount: parseFloat(transaction.amount || '0'),
       currency: transaction.currency,
+      // Only include metadata-dependent fields when available (detail=full)
       billing_period: transaction.metadata?.billing_period || 'monthly',
       created_at: transaction.created_at,
       updated_at: transaction.updated_at,
@@ -109,13 +144,23 @@ export async function GET(request: NextRequest) {
       verified_at: transaction.verified_at,
       notes: transaction.notes,
       payment_proof_url: transaction.payment_proof_url,
-      package_name: transaction.metadata?.package_name || (Array.isArray(transaction.package) ? transaction.package[0]?.name : transaction.package?.name) || 'Unknown Package',
+      package_name: transaction.metadata?.package_name || 
+        (Array.isArray(transaction.package) ? transaction.package[0]?.name : transaction.package?.name) || 
+        'Unknown Package',
       payment_method: transaction.payment_method || 'Unknown Method',
       gateway_transaction_id: transaction.gateway_transaction_id,
-      customer_info: transaction.metadata?.customer_info,
-      package: transaction.package || { name: transaction.metadata?.package_name || 'Unknown Package', slug: 'unknown' },
+      // Conditionally include heavy fields only when requested
+      ...(detail === 'full' && {
+        customer_info: transaction.metadata?.customer_info,
+        gateway_response: transaction.gateway_response,
+        full_metadata: transaction.metadata
+      }),
+      package: transaction.package || { 
+        name: transaction.metadata?.package_name || 'Unknown Package', 
+        slug: 'unknown' 
+      },
       gateway: transaction.gateway || { name: 'Unknown Gateway', slug: 'unknown' },
-      subscription: null // Add this to match the interface
+      subscription: null
     })) || []
 
     // Calculate pagination info
