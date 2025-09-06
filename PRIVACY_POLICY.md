@@ -14,7 +14,7 @@ If you do not provide your information when requested, you may not be able to us
 
 **Registration and Profile Information**. When you register for an account, we ask you for your email address, full name, and may also request your phone number and country information. If you sign up using a social media account, we will also receive information from those social media services such as your name, email address, and profile photo, in accordance with your privacy settings on those social media services.
 
-**Payment Information**. When you add a credit card or payment method to your account, our third-party payment processor will receive and process your payment card information. We may store secure payment information for recurring billing purposes.
+**Payment Information**. When you add a credit card or payment method to your account, our third-party payment processor will receive and process your payment card information. We do not store sensitive payment details such as credit card numbers, CVV codes, or full payment card information. We may store secure payment references for recurring billing purposes.
 
 **Business and SEO Data**. When you use our Services, you provide us with website URLs, domains, keywords, search terms, ranking data, and other SEO-related information that you wish to track and analyze.
 
