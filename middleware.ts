@@ -2,6 +2,131 @@ import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { adminMiddleware } from './app/backend/admin/middleware'
 
+// Route protection configuration
+interface RouteProtection {
+  patterns: string[]
+  authLevel: 'user' | 'admin' | 'super_admin'
+  redirect?: string
+}
+
+const PROTECTED_ROUTES: RouteProtection[] = [
+  // User authentication required
+  {
+    patterns: ['/dashboard'],
+    authLevel: 'user',
+    redirect: '/auth/login'
+  },
+  // Admin authentication required
+  {
+    patterns: ['/api/system/', '/api/revalidate', '/api/debug/'],
+    authLevel: 'admin',
+    redirect: '/backend/admin/login'
+  },
+  // User-specific API routes requiring authentication
+  {
+    patterns: ['/api/v1/auth/user/', '/api/v1/billing/'],
+    authLevel: 'user',
+    redirect: '/auth/login'
+  }
+]
+
+// Public routes that should never be protected
+const PUBLIC_ROUTES = [
+  '/auth/',
+  '/backend/admin/login',
+  '/api/health',
+  '/api/midtrans/webhook',
+  '/api/v1/payments/midtrans/webhook',
+  '/api/v1/auth/login',
+  '/api/v1/auth/register',
+  '/api/v1/auth/detect-location',
+  '/',
+  '/about',
+  '/contact',
+  '/privacy',
+  '/terms'
+]
+
+async function checkUserAuthentication(request: NextRequest): Promise<{ user: any; role: string } | null> {
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll() {
+            // Cannot set cookies in middleware
+          },
+        },
+      }
+    )
+
+    const { data: { user }, error } = await supabase.auth.getUser()
+    
+    if (error || !user) {
+      return null
+    }
+
+    // For admin routes, check admin role using service client
+    if (request.nextUrl.pathname.startsWith('/api/system/') || 
+        request.nextUrl.pathname.startsWith('/api/debug/') ||
+        request.nextUrl.pathname === '/api/revalidate') {
+      
+      const { createClient } = require('@supabase/supabase-js')
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('indb_auth_user_profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
+
+      if (profileError || !profile) {
+        return null
+      }
+
+      return { user, role: profile.role }
+    }
+
+    return { user, role: 'user' }
+    
+  } catch (error) {
+    return null
+  }
+}
+
+function isPublicRoute(pathname: string): boolean {
+  return PUBLIC_ROUTES.some(route => pathname.startsWith(route))
+}
+
+function getRequiredAuthLevel(pathname: string): { authLevel: string; redirect: string } | null {
+  for (const protection of PROTECTED_ROUTES) {
+    if (protection.patterns.some(pattern => pathname.startsWith(pattern))) {
+      return { authLevel: protection.authLevel, redirect: protection.redirect || '/auth/login' }
+    }
+  }
+  return null
+}
+
+function hasRequiredAccess(userRole: string, requiredLevel: string): boolean {
+  const roleHierarchy = {
+    'user': 1,
+    'admin': 2,
+    'super_admin': 3
+  }
+  
+  const userLevel = roleHierarchy[userRole as keyof typeof roleHierarchy] || 0
+  const requiredLevelValue = roleHierarchy[requiredLevel as keyof typeof roleHierarchy] || 0
+  
+  return userLevel >= requiredLevelValue
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
@@ -15,41 +140,63 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Allow all public routes - only restrict /backend/admin and /dashboard routes
-  const restrictedRoutes = ['/dashboard']
-  const isRestrictedRoute = restrictedRoutes.some(route => pathname.startsWith(route))
-  
-  if (!isRestrictedRoute) {
+  // Allow all public routes
+  if (isPublicRoute(pathname)) {
     return NextResponse.next()
   }
 
-  // Handle regular authentication for restricted routes like /dashboard
+  // Check if route requires protection
+  const protection = getRequiredAuthLevel(pathname)
+  if (!protection) {
+    return NextResponse.next()
+  }
+
+  // Verify authentication for protected routes
+  const authResult = await checkUserAuthentication(request)
+  
+  if (!authResult) {
+    // No authentication - redirect to appropriate login
+    const redirectUrl = new URL(protection.redirect, request.url)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // Check if user has required access level
+  if (!hasRequiredAccess(authResult.role, protection.authLevel)) {
+    // Insufficient privileges - redirect to appropriate login
+    const redirectUrl = new URL(protection.redirect, request.url)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // User is authenticated and has required access level
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
+  // For dashboard routes, refresh session if needed
+  if (pathname.startsWith('/dashboard')) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value)
+              response.cookies.set(name, value, options)
+            })
+          },
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
-          })
-        },
-      },
-    }
-  )
+      }
+    )
 
-  // This will refresh session if expired
-  await supabase.auth.getUser()
+    // This will refresh session if expired
+    await supabase.auth.getUser()
+  }
 
   return response
 }
