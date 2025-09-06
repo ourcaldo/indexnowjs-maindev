@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
     // Verify super admin authentication
     const adminUser = await requireSuperAdminAuth(request)
 
-    // Fetch user profiles with package information
-    const { data: profiles, error: profilesError } = await supabaseAdmin
-      .from('indb_auth_user_profiles')
+    // Use materialized view to get all user data in a single query (fixes N+1 problem)
+    const { data: usersWithAuthData, error: usersError } = await supabaseAdmin
+      .from('indb_admin_user_summary')
       .select(`
         *,
         package:indb_payment_packages(
@@ -22,50 +22,12 @@ export async function GET(request: NextRequest) {
       `)
       .order('created_at', { ascending: false })
 
-    if (profilesError) {
-      console.error('Error fetching user profiles:', profilesError)
+    if (usersError) {
+      console.error('Error fetching users from materialized view:', usersError)
       return NextResponse.json(
-        { error: 'Failed to fetch user profiles' },
+        { error: 'Failed to fetch user data' },
         { status: 500 }
       )
-    }
-
-    // Get auth data for each user using admin API
-    const usersWithAuthData = []
-    
-    for (const profile of profiles || []) {
-      try {
-        const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(profile.user_id)
-        
-        if (!authError && authUser?.user) {
-          usersWithAuthData.push({
-            ...profile,
-            email: authUser.user.email,
-            email_confirmed_at: authUser.user.email_confirmed_at,
-            last_sign_in_at: authUser.user.last_sign_in_at,
-            auth_created_at: authUser.user.created_at
-          })
-        } else {
-          // Include profile even if auth data fetch failed
-          usersWithAuthData.push({
-            ...profile,
-            email: null,
-            email_confirmed_at: null,
-            last_sign_in_at: null,
-            auth_created_at: null
-          })
-        }
-      } catch (authFetchError) {
-        console.error(`Failed to fetch auth data for user ${profile.user_id}:`, authFetchError)
-        // Include profile even if auth data fetch failed
-        usersWithAuthData.push({
-          ...profile,
-          email: null,
-          email_confirmed_at: null,
-          last_sign_in_at: null,
-          auth_created_at: null
-        })
-      }
     }
 
     // Log admin activity using enhanced tracking
@@ -75,14 +37,14 @@ export async function GET(request: NextRequest) {
           adminUser.id,
           'user_list_view',
           undefined,
-          `Viewed users list (${usersWithAuthData.length} users)`,
+          `Viewed users list (${usersWithAuthData?.length || 0} users)`,
           request,
           { 
             userListView: true,
-            totalUsers: usersWithAuthData.length,
-            activeUsers: usersWithAuthData.filter(u => u.role === 'user').length,
-            adminUsers: usersWithAuthData.filter(u => u.role === 'admin').length,
-            superAdminUsers: usersWithAuthData.filter(u => u.role === 'super_admin').length
+            totalUsers: usersWithAuthData?.length || 0,
+            activeUsers: usersWithAuthData?.filter(u => u.role === 'user').length || 0,
+            adminUsers: usersWithAuthData?.filter(u => u.role === 'admin').length || 0,
+            superAdminUsers: usersWithAuthData?.filter(u => u.role === 'super_admin').length || 0
           }
         )
       } catch (logError) {
