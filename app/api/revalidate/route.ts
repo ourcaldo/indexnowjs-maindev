@@ -1,20 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
+import { requireServerAdminAuth } from '@/lib/auth/server-auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const secret = searchParams.get('secret')
-    const path = searchParams.get('path')
-
-    // Validate secret using environment variable
-    const expectedSecret = process.env.REVALIDATE_SECRET || 'default-revalidate-secret'
-    if (secret !== expectedSecret) {
-      return NextResponse.json(
-        { error: 'Invalid secret' },
-        { status: 401 }
-      )
+    // Method 1: Admin authentication (preferred)
+    // Try admin authentication first
+    let isAuthenticated = false
+    try {
+      await requireServerAdminAuth(request)
+      isAuthenticated = true
+    } catch {
+      // Fall back to secret-based authentication
     }
+
+    // Method 2: Secret-based authentication (fallback for programmatic access)
+    if (!isAuthenticated) {
+      const { searchParams } = new URL(request.url)
+      const secret = searchParams.get('secret')
+
+      // Validate secret using environment variable (no fallback for security)
+      const expectedSecret = process.env.REVALIDATE_SECRET
+      if (!expectedSecret) {
+        return NextResponse.json(
+          { error: 'Revalidate secret not configured' },
+          { status: 500 }
+        )
+      }
+
+      if (secret !== expectedSecret) {
+        return NextResponse.json(
+          { error: 'Invalid secret or authentication required' },
+          { status: 401 }
+        )
+      }
+    }
+
+    const { searchParams } = new URL(request.url)
+    const path = searchParams.get('path')
 
     if (!path) {
       return NextResponse.json(
