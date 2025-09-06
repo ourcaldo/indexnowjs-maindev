@@ -28,8 +28,8 @@ When you use the Services, we use a variety of electronic tools, such as cookies
 
 **What are Cookies?** Cookies are small files of letters and numbers that we store on your browser or the hard drive of your computer, or small graphic images placed on web pages or in emails. They can be stored either for a single browser session or more permanently. We use cookies to collect information about your browsing activities, distinguish you from other users, provide functionality, and analyze use of the Services. Our third-party partners, such as analytics providers, may use these technologies to collect information about your online activities over time and across different services. The types of cookies we and third parties may use to collect information are as follows:
 
-- **Strictly necessary cookies.** Some cookies are strictly necessary to make the Services available to you. We cannot provide you with the Services without this type of cookies. These include authentication tokens and session management cookies.
-- **Functional cookies.** These are used to recognize you when you return to the Services. This enables us to adapt our content for you, and remember your preferences (for example, your sidebar layout preferences).
+- **Strictly necessary cookies.** Some cookies are strictly necessary to make the Services available to you. We cannot provide you with the Services without this type of cookies. These include cookies necessary for login and session management.
+- **Functional cookies.** These are used to recognize you when you return to the Services. This enables us to adapt our content for you, and remember your preferences (for example, your dashboard layout preferences).
 - **Analytical or Performance cookies.** We also use cookies for analytics purposes in order to operate, maintain and improve our Services. We may use our own analytics cookies or use third party analytics providers to collect and process certain analytics data on our behalf. These providers may also collect information about your use of other websites, apps, and online resources.
 
 **What information do we automatically collect as you use the Services?**
@@ -40,7 +40,7 @@ When you use the Services, we use a variety of electronic tools, such as cookies
 
 **Usage Information**. To help us understand and analyze how you use our Services and to help us improve them, we automatically receive information about your interactions with our Services, like the pages or other content you view or interact with, the searches you conduct, your comments, any content you enter or post, keywords you track, and the dates and times of your visits.
 
-**Activity Logging**. We maintain comprehensive activity logs including login/logout events, feature usage, and security events for compliance purposes.
+**Activity Monitoring**. We maintain records of user activity including login events, feature usage, and security events for compliance purposes.
 
 ### C. Information We Receive from Third Parties
 
@@ -48,7 +48,7 @@ When you use the Services, we use a variety of electronic tools, such as cookies
 
 **Payment Processors**. We receive transaction information from our payment processing partners including payment status and billing details for subscription management purposes.
 
-**Other third parties.** We may receive additional information about you, such as demographic data or IP geolocation data, from third parties such as data or marketing partners and combine it with other information we have about you.
+**Other third parties.** We may receive additional information about you, such as demographic data or general location information, from third parties such as data or marketing partners and combine it with other information we have about you.
 
 ## 2. How We Use the Information We Collect
 
@@ -58,7 +58,7 @@ We use the information we collect:
 - To communicate with you, provide you with updates and other information relating to our Services, provide information that you request, respond to comments and questions, and otherwise provide customer support;
 - To facilitate the connection of third-party services or applications for indexing;
 - For marketing purposes, such as developing and providing promotional and advertising materials that may be useful, relevant, valuable or otherwise of interest to you;
-- To personalize your experience on our Services such as presenting tailored content and dashboard configurations;
+- To personalize your experience on our Services such as presenting tailored content;
 - To facilitate transactions and payments and manage subscriptions;
 - To detect and prevent fraud, and respond to trust and safety issues that may arise;
 - For compliance purposes, including enforcing our Terms of Service or other legal rights, or as may be required by applicable laws and regulations or requested by any judicial process or governmental agency;
@@ -84,12 +84,12 @@ We share information with the following categories of third parties.
 **Affiliates.** We may share any information we receive with our corporate affiliates under common ownership or control for any of the purposes described in this Privacy Policy.
 
 **Service Providers.** We may share any information we receive with vendors retained in connection with the provision of our Services and that process your information on our behalf. These entities include:
-- Cloud hosting and authentication service providers
+- Hosting and authentication service providers
 - Third-party payment processors for billing management
 - Google for indexing services
 - Email service providers for transactional email delivery
-- Geolocation service providers
-- Analytics, security, machine learning, and fraud prevention companies
+- Location service providers
+- Analytics, security, and fraud prevention companies
 
 **Google Services Integration.** When you use our Google indexing features, we share your website URLs with Google in accordance with your instructions and Google's terms of service.
 
@@ -107,7 +107,7 @@ We share information with the following categories of third parties.
 
 **How to Block Cookies.** You can change your browser settings to block, disable, or notify you when you receive a Cookie, delete Cookies, or browse our Services using your browser's anonymous usage setting. However, if you use your browser settings to block all Cookies (including essential Cookies) you may not be able to access all or parts of our Services, or some portions of the Services may not function properly.
 
-**Data Export.** You can export your SEO data, keyword tracking information, and account settings through your dashboard.
+**Data Export.** You can export your data and account information through your dashboard.
 
 **Account Deletion.** You can request deletion of your account and associated data through your account settings or by contacting us. We will delete your data within 30 days of your request, subject to legal retention requirements.
 
@@ -118,7 +118,7 @@ If you are located in the European Economic Area or the United Kingdom, you have
 - You may request access to the information we maintain about you, update and correct inaccuracies in your information, restrict or object to the processing of your information, have the information anonymized or deleted, as appropriate, or exercise your right to data portability to easily transfer your information to another company (where technically feasible). In addition, you also have the right to lodge a complaint with a supervisory authority, including in your country of residence, place of work or where an incident took place.
 - You may withdraw any consent you previously provided to us regarding the processing of your information, at any time and free of charge. We will apply your preferences going forward and this will not affect the lawfulness of the processing before you withdrew your consent.
 
-You may exercise these rights by contacting us using the contact details at the end of this Privacy Policy. Before responding to your request, we may ask you to provide reasonable information to verify your identity. Please note that there are exceptions and limitations to each of these rights, and that while any changes you make will be reflected in active user databases instantly or within a reasonable period of time, we may retain information for backups, archiving, prevention of fraud and abuse, analytics, satisfaction of legal obligations, or where we otherwise reasonably believe that we have a legitimate reason to do so.
+You may exercise these rights by contacting us using the contact details at the end of this Privacy Policy. Before responding to your request, we may ask you to provide reasonable information to verify your identity. Please note that there are exceptions and limitations to each of these rights, and that while any changes you make will be reflected in our systems instantly or within a reasonable period of time, we may retain information for backups, archiving, prevention of fraud and abuse, analytics, satisfaction of legal obligations, or where we otherwise reasonably believe that we have a legitimate reason to do so.
 
 ## 6. Notice at Collection
 
