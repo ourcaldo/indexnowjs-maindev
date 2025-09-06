@@ -6973,3 +6973,61 @@ ON public.indb_cms_posts(category, status);
   - **User Experience**: Super admin can now successfully trigger manual rank checks via test-backend page
 
 **Status**: ✅ **BACKGROUND WORKER FIX COMPLETE** - Manual rank tracker trigger now properly validates service states and allows successful execution when services are actually operational
+
+### September 06, 2025 - Rank Tracking Overview Page Enhancements ✅
+
+- 🔧 **CRITICAL FIXES IMPLEMENTED**: Resolved multiple data display and calculation issues in `/dashboard/indexnow/overview` page
+  - **Issue 1**: Position change calculations (1D, 3D, 7D) were not working due to faulty logic querying wrong data sources
+  - **Issue 2**: URL column was empty because of incorrect data mapping between API response and frontend display
+  - **Issue 3**: Improving (1D) cards showed placeholder data instead of actual calculated improvements
+  - **Issue 4**: Missing visual position indicators for rank changes
+
+- ⚡ **POSITION CHANGE CALCULATION OVERHAUL**: Completely rewritten position change logic in keywords API
+  - **Previous Logic**: Attempted to find previous positions within `indb_keyword_rankings` using flawed time-based filtering
+  - **New Logic**: Properly queries `indb_keyword_rank_history` table for specific historical dates
+  - **Technical Implementation**:
+    - Calculate exact target dates (yesterday, 3 days ago, 7 days ago) using proper date arithmetic
+    - Query `indb_keyword_rank_history` with specific `check_date` values instead of time ranges
+    - Create lookup maps for efficient position comparison across keywords
+    - Return accurate position changes where positive values indicate improvement (lower position numbers)
+
+- 🎯 **URL DISPLAY ENHANCEMENT**: Fixed URL column showing empty values
+  - **Root Cause**: Frontend component expected `keyword.url` but API returned `current_url`
+  - **Solution**: Updated KeywordTable component to check both `current_url` and `url` properties
+  - **TypeScript Fix**: Added `current_url` property to Keyword interface for proper type safety
+
+- 📊 **IMPROVING COUNT ACCURACY**: Fixed "Improving (1D)" statistics card to show actual data
+  - **Previous**: Always showed 0 because position_1d calculations weren't working
+  - **Current**: Properly counts keywords where `position_1d > 0` (indicating improved rankings)
+  - **Data Source**: Uses actual calculated position changes from historical data
+
+- 🚀 **VISUAL POSITION INDICATORS**: Added trend arrows throughout the interface
+  - **Overview Table Position Column**: Shows small trend icons next to current position
+    - Green up arrow (TrendingUp) for improved positions (`position_1d > 0`)
+    - Red down arrow (TrendingDown) for declined positions (`position_1d < 0`)
+    - Gray minus icon for no change (`position_1d = 0`)
+  - **Rank History Table**: Added trend indicators to each date cell
+    - Compares position with previous day to show day-over-day trends
+    - Uses same color scheme: green for improvements, red for declines
+    - Positioned next to rank number for immediate visual feedback
+
+- 🛠️ **TECHNICAL IMPROVEMENTS**:
+  - **Database Query Optimization**: Specific date-based queries instead of time range filtering
+  - **Error Handling**: Proper null checks for missing historical data
+  - **Type Safety**: Updated interfaces to match API response structure
+  - **Performance**: Efficient lookup maps for position history instead of nested array searches
+
+- ✅ **FILES MODIFIED**:
+  - `app/api/v1/rank-tracking/keywords/route.ts` - Rewritten position change calculation logic
+  - `app/dashboard/indexnow/overview/components/KeywordTable.tsx` - Added URL fallback, position indicators, and TypeScript interface updates
+  - `app/dashboard/indexnow/rank-history/page.tsx` - Added trend indicators to historical rank display
+  - `app/dashboard/indexnow/overview/page.tsx` - Fixed improving count calculation comment
+
+- 🎯 **USER EXPERIENCE IMPROVEMENTS**:
+  - **Change (1D) Column**: Now displays actual position changes instead of being empty
+  - **URL Column**: Shows working links to ranked URLs from database
+  - **Improving Cards**: Displays real improvement statistics based on actual rank changes
+  - **Visual Feedback**: Immediate visual indicators for position trends across both overview and history pages
+  - **Data Accuracy**: All statistics now based on actual database queries rather than placeholder logic
+
+**Status**: ✅ **RANK TRACKING OVERVIEW ENHANCEMENT COMPLETE** - All position change calculations working correctly with proper historical data queries, URL display fixed, improving counts accurate, and visual trend indicators implemented across overview and rank history pages
