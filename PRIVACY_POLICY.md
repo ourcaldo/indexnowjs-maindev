@@ -20,7 +20,7 @@ If you do not provide your information when requested, you may not be able to us
 
 **Communications**. When you communicate with us, we may receive additional information about you. For example, when you communicate with our Customer Support Team, we will receive your name, email address, phone number, the contents of a message or attachments that you may send to us, and other information you choose to provide. If you subscribe to our newsletter, then we will collect certain information from you, such as your email address. When we send you emails, we may use technologies such as web beacons to track whether you open them to learn how to deliver a better customer experience and improve our Services.
 
-**Google Service Accounts**. If you connect Google service accounts for indexing purposes, we will receive and store your service account credentials and configuration data necessary to provide indexing services through Google APIs.
+**Google Service Accounts**. If you connect Google service accounts for indexing purposes, we will receive and store your service account credentials and configuration data necessary to provide indexing services.
 
 ### B. Information We Collect Automatically When You Use Our Services
 
@@ -38,15 +38,15 @@ When you use the Services, we use a variety of electronic tools, such as cookies
 
 **Location Information**. We may infer your general location information from other information we collect from and about you (for example, your IP address may indicate your general geographic region). We do not collect precise geolocation data.
 
-**Usage Information**. To help us understand and analyze how you use our Services and to help us improve them, we automatically receive information about your interactions with our Services, like the pages or other content you view or interact with, the searches you conduct, your comments, any content you enter or post, API requests you make, keywords you track, and the dates and times of your visits.
+**Usage Information**. To help us understand and analyze how you use our Services and to help us improve them, we automatically receive information about your interactions with our Services, like the pages or other content you view or interact with, the searches you conduct, your comments, any content you enter or post, keywords you track, and the dates and times of your visits.
 
-**Activity Logging**. We maintain comprehensive activity logs including login/logout events, feature usage, API quota consumption, admin actions, and security events for audit trail and compliance purposes.
+**Activity Logging**. We maintain comprehensive activity logs including login/logout events, feature usage, and security events for audit trail and compliance purposes.
 
 ### C. Information We Receive from Third Parties
 
 **Information from third party services.** If you choose to link our Services to a third-party account (such as Google Search Console), we may receive information about you, including your profile information and your use of the third-party account, in accordance with your settings on such third-party account. If you wish to limit the information available to us, you should visit the privacy settings of your third-party accounts to learn about your options.
 
-**Payment Processors**. We receive transaction information from Midtrans including payment status, billing details, and transaction IDs for subscription management purposes.
+**Payment Processors**. We receive transaction information from our payment processing partners including payment status, billing details, and transaction IDs for subscription management purposes.
 
 **Other third parties.** We may receive additional information about you, such as demographic data or IP geolocation data, from third parties such as data or marketing partners and combine it with other information we have about you.
 
@@ -59,7 +59,7 @@ We use the information we collect:
 - To facilitate the connection of third-party services or applications, such as Google APIs for indexing;
 - For marketing purposes, such as developing and providing promotional and advertising materials that may be useful, relevant, valuable or otherwise of interest to you;
 - To personalize your experience on our Services such as presenting tailored content and dashboard configurations;
-- To facilitate transactions and payments through Midtrans and manage subscriptions;
+- To facilitate transactions and payments and manage subscriptions;
 - To detect and prevent fraud, and respond to trust and safety issues that may arise;
 - For compliance purposes, including enforcing our Terms of Service or other legal rights, or as may be required by applicable laws and regulations or requested by any judicial process or governmental agency;
 - To generate analytics and insights about Service usage and performance;
@@ -72,7 +72,7 @@ We use the information we collect:
 
 Various global privacy laws (such as those in the European Economic Area, United Kingdom, and Brazil) require that we have a "legal basis" to process your information. The legal bases on which we rely to process your information include:
 
-- **Consent.** You have consented to the use of your information, for example, where legally required, to send you marketing communications or to process your Google service account credentials.
+- **Consent.** You have consented to the use of your information, for example, where legally required, to send you marketing communications or to connect third-party services.
 - **Contractual necessity.** We need your information to provide you with the Services, for example to facilitate your registration, provide rank tracking services, process payments, and respond to your inquiries.
 - **Compliance with a legal obligation.** We have a legal obligation to use your information, for example to comply with tax and accounting obligations, or to maintain audit trails as required by data protection laws.
 - **Legitimate interests.** We have a legitimate interest in using your information for a business purpose that does not override your individual rights and interests. For example, we have a legitimate interest in using your information for product development and internal analytics purposes, to improve the accuracy of our SEO tracking technologies, fraud prevention, and otherwise to improve the safety, security, and performance of our Services.
@@ -85,13 +85,13 @@ We share information with the following categories of third parties.
 
 **Service Providers.** We may share any information we receive with vendors retained in connection with the provision of our Services and that process your information on our behalf. These entities include:
 - Database hosting and authentication service providers
-- Payment processing companies for billing management
-- Google for indexing API services and service account management
+- Payment processing partners for billing management
+- Google for indexing services and service account management
 - Email service providers for transactional email delivery
 - Geolocation service providers
 - Analytics, security, machine learning, and fraud prevention companies
 
-**Google APIs Integration.** When you use our Google indexing features, we share your website URLs and indexing requests with Google through their Indexing API in accordance with your instructions and Google's terms of service.
+**Google Services Integration.** When you use our Google indexing features, we share your website URLs and indexing requests with Google in accordance with your instructions and Google's terms of service.
 
 **As Required by Law and Similar Disclosures.** We may access, preserve, and disclose your information if we believe in good faith that doing so is required or appropriate to: (a) comply with law enforcement requests and legal process, such as a court order or subpoenas; (b) respond to your requests; or (c) protect your, our, or others' rights, property, or safety. For the avoidance of doubt, the disclosure of your information may occur if you post any objectionable content on or through the Services.
 
@@ -129,11 +129,11 @@ The following table summarizes the categories of "personal information" (as defi
 | Registration and profile information (name, email, phone, country) | - Provide the Services<br>- Communicate with you<br>- Marketing and advertising<br>- Personalization<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
 | Payment information | - Facilitate transactions<br>- Subscription management<br>- Legal and compliance purposes | - Service providers<br>- Entities for legal compliance |
 | Communications | - Communicate with you<br>- Customer support<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
-| SEO and business data (URLs, keywords, rankings) | - Provide SEO services<br>- Rank tracking<br>- Keyword monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google APIs)<br>- Entities for legal compliance<br>- Entities for business transactions |
+| SEO and business data (URLs, keywords, rankings) | - Provide SEO services<br>- Rank tracking<br>- Keyword monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google services)<br>- Entities for legal compliance<br>- Entities for business transactions |
 | Device information | - Provide the Services<br>- Security monitoring<br>- Personalization<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
 | Location information | - Provide the Services<br>- Security monitoring<br>- Personalization<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
 | Usage information and activity logs | - Provide the Services<br>- Analytics and improvement<br>- Security monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
-| Google service account data | - Provide indexing services<br>- Google API integration<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google APIs)<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Google service account data | - Provide indexing services<br>- Google service integration<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google services)<br>- Entities for legal compliance<br>- Entities for business transactions |
 | Third-party information | - Provide the Services<br>- Analytics and improvement<br>- Security monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
 
 ## 7. Additional Information for California Residents
