@@ -1,9 +1,12 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/database/supabase';
 import { getBackgroundServicesStatus } from '@/lib/job-management/worker-startup';
+import { requireServerAdminAuth } from '@/lib/auth/server-auth';
 
 export async function GET(request: NextRequest) {
   try {
+    // Require admin authentication to access system status
+    await requireServerAdminAuth(request);
     // Get job statistics
     const { data: jobStats, error: jobError } = await supabaseAdmin
       .from('indb_indexing_jobs')
@@ -36,9 +39,18 @@ export async function GET(request: NextRequest) {
       backgroundWorker: workerStatus
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting system status:', error);
-    return Response.json(
+    
+    // Handle authentication errors
+    if (error.message === 'Admin access required') {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+    
+    return NextResponse.json(
       { error: 'Failed to get system status' }, 
       { status: 500 }
     );
