@@ -1,5 +1,5 @@
 import React from 'react'
-import { Smartphone, Monitor, Globe, ExternalLink } from 'lucide-react'
+import { Smartphone, Monitor, Globe, ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { Card, Badge } from '@/components/dashboard/ui'
 import { PositionChange } from '@/components/dashboard/enhanced'
 
@@ -15,6 +15,7 @@ interface Keyword {
   }
   last_updated?: string
   url?: string
+  current_url?: string
   tags?: string[]
 }
 
@@ -152,9 +153,22 @@ export const KeywordTable = ({
                   </div>
                 </td>
                 <td className="p-3 text-center">
-                  <span className="text-lg font-semibold" style={{ color: '#1A1A1A' }}>
-                    {keyword.current_position || '-'}
-                  </span>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-lg font-semibold" style={{ color: '#1A1A1A' }}>
+                      {keyword.current_position || '-'}
+                    </span>
+                    {keyword.position_1d !== null && keyword.position_1d !== undefined && (
+                      <div className="flex items-center">
+                        {keyword.position_1d > 0 ? (
+                          <TrendingUp className="w-3 h-3" style={{ color: '#4BB543' }} />
+                        ) : keyword.position_1d < 0 ? (
+                          <TrendingDown className="w-3 h-3" style={{ color: '#E63946' }} />
+                        ) : (
+                          <Minus className="w-3 h-3" style={{ color: '#6C757D' }} />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="p-3 text-center">
                   <PositionChange change={keyword.position_1d ?? null} />
@@ -185,9 +199,9 @@ export const KeywordTable = ({
                   </div>
                 </td>
                 <td className="p-3 text-center">
-                  {keyword.url ? (
+                  {(keyword.current_url || keyword.url) ? (
                     <a
-                      href={keyword.url}
+                      href={keyword.current_url || keyword.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-sm hover:underline justify-center"

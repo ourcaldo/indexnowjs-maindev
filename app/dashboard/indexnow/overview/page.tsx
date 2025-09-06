@@ -279,7 +279,7 @@ export default function IndexNowOverview() {
     ? Math.round(statsKeywords.reduce((sum: number, k: any) => sum + (k.current_position || 100), 0) / statsKeywords.length) 
     : 0
   const topTenCount = statsKeywords.filter((k: any) => k.current_position && k.current_position <= 10).length
-  const improvingCount = statsKeywords.filter((k: any) => k.position_1d && k.position_1d > 0).length
+  const improvingCount = statsKeywords.filter((k: any) => k.position_1d && k.position_1d > 0).length // Positive means improved position
 
   return (
     <div className="space-y-6">

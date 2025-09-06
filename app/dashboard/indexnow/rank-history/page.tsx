@@ -14,7 +14,10 @@ import {
   Monitor,
   Tag,
   X,
-  Plus
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Minus
 } from 'lucide-react'
 
 // Simple UI Components using project color scheme
@@ -700,20 +703,41 @@ export default function RankHistoryPage() {
                                   {item.keyword}
                                 </div>
                               </td>
-                              {dateColumns.map((date) => {
+                              {dateColumns.map((date, dateIndex) => {
                                 const dayData = item.history[date]
                                 const position = dayData?.position
+                                
+                                // Get previous day's position for trend comparison
+                                const previousDate = dateColumns[dateIndex + 1] // Next index since dates are reversed
+                                const previousDayData = previousDate ? item.history[previousDate] : null
+                                const previousPosition = previousDayData?.position
+                                
+                                // Calculate trend (positive means improved - lower number)
+                                const trend = position && previousPosition ? 
+                                  previousPosition - position : null
+                                
                                 return (
                                   <td key={date} className="text-center py-3 px-2 text-sm">
                                     {position ? (
-                                      <span className={`font-medium ${
-                                        position <= 3 ? 'text-green-600' :
-                                        position <= 10 ? 'text-blue-600' :
-                                        position <= 50 ? 'text-orange-600' :
-                                        'text-red-600'
-                                      }`}>
-                                        {position}
-                                      </span>
+                                      <div className="flex items-center justify-center gap-1">
+                                        <span className={`font-medium ${
+                                          position <= 3 ? 'text-green-600' :
+                                          position <= 10 ? 'text-blue-600' :
+                                          position <= 50 ? 'text-orange-600' :
+                                          'text-red-600'
+                                        }`}>
+                                          {position}
+                                        </span>
+                                        {trend !== null && trend !== 0 && (
+                                          <div className="ml-1">
+                                            {trend > 0 ? (
+                                              <TrendingUp className="w-3 h-3" style={{ color: '#4BB543' }} />
+                                            ) : (
+                                              <TrendingDown className="w-3 h-3" style={{ color: '#E63946' }} />
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
                                     ) : (
                                       <span style={{color: '#E0E6ED'}}>-</span>
                                     )}
