@@ -22,13 +22,21 @@ export async function POST(request: NextRequest) {
     // Check if user is admin (you might have a different admin check)
     // For now, we'll allow any authenticated user for testing
     
-    // 2. Check if workers are initialized
-    const workerStatus = workerStartup.getStatus()
+    // 2. Check if workers are initialized (with retry for timing issues)
+    let workerStatus = workerStartup.getStatus()
+    
+    // If workers aren't initialized yet, wait a bit and try again (handles async init timing)
     if (!workerStatus.isInitialized) {
-      return NextResponse.json(
-        { success: false, error: 'Background workers not initialized' },
-        { status: 503 }
-      )
+      // Wait 2 seconds for workers to finish initializing
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      workerStatus = workerStartup.getStatus()
+      
+      if (!workerStatus.isInitialized) {
+        return NextResponse.json(
+          { success: false, error: 'Background workers not initialized' },
+          { status: 503 }
+        )
+      }
     }
 
     // 3. Check if job is already running
