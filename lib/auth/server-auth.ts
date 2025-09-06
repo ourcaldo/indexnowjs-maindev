@@ -62,14 +62,6 @@ async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | nu
       return null
     }
 
-    // Check if user is super admin (hardcoded for now)
-    const knownSuperAdmins = ['aldodkris@gmail.com']
-    const isSuperAdmin = knownSuperAdmins.includes(user.email || '')
-    
-    if (isSuperAdmin) {
-  
-    }
-
     // Get user profile from database
     const { data: userProfile, error: profileError } = await supabaseAdmin
       .from('indb_auth_user_profiles')
@@ -78,15 +70,12 @@ async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | nu
       .single()
 
     if (profileError) {
-  
-      // For super admins, allow access even if profile doesn't exist
-      if (!isSuperAdmin) {
-        return null
-      }
+      return null
     }
 
-    const role = userProfile?.role || (isSuperAdmin ? 'super_admin' : 'user')
+    const role = userProfile?.role || 'user'
     const isAdmin = role === 'admin' || role === 'super_admin'
+    const isSuperAdmin = role === 'super_admin'
 
     return {
       id: user.id,
@@ -194,10 +183,6 @@ export async function getServerAuthUser(request?: NextRequest): Promise<AdminUse
       return null
     }
 
-    // Check if user is super admin (hardcoded for now)
-    const knownSuperAdmins = ['aldodkris@gmail.com']
-    const isSuperAdmin = knownSuperAdmins.includes(user.email || '')
-    
     // Get user profile from database (but don't require admin role)
     const { data: userProfile } = await supabaseAdmin
       .from('indb_auth_user_profiles')
@@ -205,8 +190,9 @@ export async function getServerAuthUser(request?: NextRequest): Promise<AdminUse
       .eq('user_id', user.id)
       .single()
 
-    const role = userProfile?.role || (isSuperAdmin ? 'super_admin' : 'user')
+    const role = userProfile?.role || 'user'
     const isAdmin = role === 'admin' || role === 'super_admin'
+    const isSuperAdmin = role === 'super_admin'
 
     return {
       id: user.id,
