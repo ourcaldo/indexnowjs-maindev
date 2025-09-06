@@ -14,13 +14,13 @@ If you do not provide your information when requested, you may not be able to us
 
 **Registration and Profile Information**. When you register for an account, we ask you for your email address, full name, and may also request your phone number and country information. If you sign up using a social media account, we will also receive information from those social media services such as your name, email address, and profile photo, in accordance with your privacy settings on those social media services.
 
-**Payment Information**. When you add a credit card or payment method to your account, our third-party payment processor Midtrans will receive and process your payment card information. We may store tokenized payment information for recurring billing purposes.
+**Payment Information**. When you add a credit card or payment method to your account, our third-party payment processor will receive and process your payment card information. We may store secure payment information for recurring billing purposes.
 
 **Business and SEO Data**. When you use our Services, you provide us with website URLs, domains, keywords, search terms, ranking data, and other SEO-related information that you wish to track and analyze.
 
 **Communications**. When you communicate with us, we may receive additional information about you. For example, when you communicate with our Customer Support Team, we will receive your name, email address, phone number, the contents of a message or attachments that you may send to us, and other information you choose to provide. If you subscribe to our newsletter, then we will collect certain information from you, such as your email address. When we send you emails, we may use technologies such as web beacons to track whether you open them to learn how to deliver a better customer experience and improve our Services.
 
-**Google Service Accounts**. If you connect Google service accounts for indexing purposes, we will receive and store your service account credentials and configuration data necessary to provide indexing services.
+**Google Service Accounts**. If you connect Google service accounts for indexing purposes, we will securely process your service account information to provide indexing services.
 
 ### B. Information We Collect Automatically When You Use Our Services
 
@@ -40,13 +40,13 @@ When you use the Services, we use a variety of electronic tools, such as cookies
 
 **Usage Information**. To help us understand and analyze how you use our Services and to help us improve them, we automatically receive information about your interactions with our Services, like the pages or other content you view or interact with, the searches you conduct, your comments, any content you enter or post, keywords you track, and the dates and times of your visits.
 
-**Activity Logging**. We maintain comprehensive activity logs including login/logout events, feature usage, and security events for audit trail and compliance purposes.
+**Activity Logging**. We maintain comprehensive activity logs including login/logout events, feature usage, and security events for compliance purposes.
 
 ### C. Information We Receive from Third Parties
 
 **Information from third party services.** If you choose to link our Services to a third-party account (such as Google Search Console), we may receive information about you, including your profile information and your use of the third-party account, in accordance with your settings on such third-party account. If you wish to limit the information available to us, you should visit the privacy settings of your third-party accounts to learn about your options.
 
-**Payment Processors**. We receive transaction information from our payment processing partners including payment status, billing details, and transaction IDs for subscription management purposes.
+**Payment Processors**. We receive transaction information from our payment processing partners including payment status and billing details for subscription management purposes.
 
 **Other third parties.** We may receive additional information about you, such as demographic data or IP geolocation data, from third parties such as data or marketing partners and combine it with other information we have about you.
 
@@ -56,14 +56,14 @@ We use the information we collect:
 
 - To provide, maintain, improve, and enhance our Services including rank tracking, keyword monitoring, and URL indexing;
 - To communicate with you, provide you with updates and other information relating to our Services, provide information that you request, respond to comments and questions, and otherwise provide customer support;
-- To facilitate the connection of third-party services or applications, such as Google APIs for indexing;
+- To facilitate the connection of third-party services or applications for indexing;
 - For marketing purposes, such as developing and providing promotional and advertising materials that may be useful, relevant, valuable or otherwise of interest to you;
 - To personalize your experience on our Services such as presenting tailored content and dashboard configurations;
 - To facilitate transactions and payments and manage subscriptions;
 - To detect and prevent fraud, and respond to trust and safety issues that may arise;
 - For compliance purposes, including enforcing our Terms of Service or other legal rights, or as may be required by applicable laws and regulations or requested by any judicial process or governmental agency;
 - To generate analytics and insights about Service usage and performance;
-- To maintain comprehensive audit trails and activity logging for security and compliance; and
+- To maintain security monitoring and compliance records; and
 - For other purposes for which we provide specific notice at the time the information is collected.
 
 **De-Identified Information.** Please note that we may de-identify the information we collect from and about you so that it can no longer be reasonably linked to you or your device. Once information has been de-identified in this way, we can use and share it for any purpose in our discretion, and this Privacy Policy no longer applies to such information.
@@ -72,9 +72,9 @@ We use the information we collect:
 
 Various global privacy laws (such as those in the European Economic Area, United Kingdom, and Brazil) require that we have a "legal basis" to process your information. The legal bases on which we rely to process your information include:
 
-- **Consent.** You have consented to the use of your information, for example, where legally required, to send you marketing communications or to connect third-party services.
+- **Consent.** You have consented to the use of your information, for example, where legally required, to send you marketing communications.
 - **Contractual necessity.** We need your information to provide you with the Services, for example to facilitate your registration, provide rank tracking services, process payments, and respond to your inquiries.
-- **Compliance with a legal obligation.** We have a legal obligation to use your information, for example to comply with tax and accounting obligations, or to maintain audit trails as required by data protection laws.
+- **Compliance with a legal obligation.** We have a legal obligation to use your information, for example to comply with tax and accounting obligations, or to maintain records as required by data protection laws.
 - **Legitimate interests.** We have a legitimate interest in using your information for a business purpose that does not override your individual rights and interests. For example, we have a legitimate interest in using your information for product development and internal analytics purposes, to improve the accuracy of our SEO tracking technologies, fraud prevention, and otherwise to improve the safety, security, and performance of our Services.
 
 ## 4. How We Share the Information We Collect
@@ -84,14 +84,14 @@ We share information with the following categories of third parties.
 **Affiliates.** We may share any information we receive with our corporate affiliates under common ownership or control for any of the purposes described in this Privacy Policy.
 
 **Service Providers.** We may share any information we receive with vendors retained in connection with the provision of our Services and that process your information on our behalf. These entities include:
-- Database hosting and authentication service providers
-- Payment processing partners for billing management
-- Google for indexing services and service account management
+- Cloud hosting and authentication service providers
+- Third-party payment processors for billing management
+- Google for indexing services
 - Email service providers for transactional email delivery
 - Geolocation service providers
 - Analytics, security, machine learning, and fraud prevention companies
 
-**Google Services Integration.** When you use our Google indexing features, we share your website URLs and indexing requests with Google in accordance with your instructions and Google's terms of service.
+**Google Services Integration.** When you use our Google indexing features, we share your website URLs with Google in accordance with your instructions and Google's terms of service.
 
 **As Required by Law and Similar Disclosures.** We may access, preserve, and disclose your information if we believe in good faith that doing so is required or appropriate to: (a) comply with law enforcement requests and legal process, such as a court order or subpoenas; (b) respond to your requests; or (c) protect your, our, or others' rights, property, or safety. For the avoidance of doubt, the disclosure of your information may occur if you post any objectionable content on or through the Services.
 
@@ -132,8 +132,8 @@ The following table summarizes the categories of "personal information" (as defi
 | SEO and business data (URLs, keywords, rankings) | - Provide SEO services<br>- Rank tracking<br>- Keyword monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google services)<br>- Entities for legal compliance<br>- Entities for business transactions |
 | Device information | - Provide the Services<br>- Security monitoring<br>- Personalization<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
 | Location information | - Provide the Services<br>- Security monitoring<br>- Personalization<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
-| Usage information and activity logs | - Provide the Services<br>- Analytics and improvement<br>- Security monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
-| Google service account data | - Provide indexing services<br>- Google service integration<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google services)<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Usage information and security logs | - Provide the Services<br>- Analytics and improvement<br>- Security monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
+| Google integration data | - Provide indexing services<br>- Third-party service integration<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers (Google services)<br>- Entities for legal compliance<br>- Entities for business transactions |
 | Third-party information | - Provide the Services<br>- Analytics and improvement<br>- Security monitoring<br>- Legal and compliance purposes<br>- With consent | - Affiliates<br>- Service providers<br>- Entities for legal compliance<br>- Entities for business transactions |
 
 ## 7. Additional Information for California Residents
@@ -200,7 +200,7 @@ We take measures to delete your information or maintain it in a de-identified fo
 **Specific Retention Periods:**
 - **Account Data:** Retained for the duration of your active account plus 30 days after account closure
 - **Analytics Data:** Aggregated usage data retained for 24 months for service improvement
-- **Security Logs:** Activity logs retained for 12 months for security and compliance purposes
+- **Security Records:** Activity records retained for 12 months for security and compliance purposes
 - **Billing Records:** Transaction records retained as required by applicable tax and accounting regulations
 - **Email Communications:** Transactional emails retained for 12 months; marketing communications until unsubscribe
 
@@ -208,11 +208,11 @@ When you request to delete your account, we delete your data within 30 days.
 
 ## 12. Security
 
-We use a variety of technical, organizational, and physical safeguards designed to safeguard the information we maintain, including:
+We use a variety of organizational and physical safeguards designed to safeguard the information we maintain, including:
 
-- **Encryption:** Data encryption in transit using TLS/SSL and password hashing with industry-standard algorithms
-- **Access Controls:** Role-based access control (user, admin, super_admin) with multi-factor authentication support
-- **Monitoring:** Real-time security event detection, IP-based security monitoring, and automated threat detection
+- **Encryption:** Data encryption in transit and secure password storage
+- **Access Controls:** Role-based access control with multi-factor authentication support
+- **Monitoring:** Real-time security monitoring and automated threat detection
 - **Infrastructure:** Secure cloud hosting with regular security assessments and updates
 
 However, as our Services are hosted electronically, we can make no guarantees as to the security or privacy of your information.
@@ -226,7 +226,7 @@ Our Services are directed to a general audience and are not directed to children
 Your data may be transferred to and processed in countries other than your country of residence. We ensure appropriate safeguards are in place for international transfers, including:
 - Standard Contractual Clauses for EU data transfers
 - Adequacy decisions where applicable
-- Appropriate technical and organizational measures to protect your data
+- Appropriate organizational and security measures to protect your data
 
 ## 15. Updates to This Privacy Policy
 
