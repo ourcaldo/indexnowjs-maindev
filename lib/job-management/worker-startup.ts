@@ -233,15 +233,40 @@ export class WorkerStartup {
   }
 
   /**
-   * Get initialization status
+   * Get initialization status with comprehensive service validation
    */
   getStatus(): {
     isInitialized: boolean
     rankCheckJobStatus: any
+    actuallyReady: boolean
+    serviceStates: {
+      dailyRankCheck: boolean
+      trialMonitor: boolean
+      autoCancel: boolean
+      jobMonitor: boolean
+    }
   } {
+    // Check actual service states rather than just the boolean flag
+    const rankCheckStatus = dailyRankCheckJob.getStatus()
+    const trialMonitorStatus = trialMonitorJob.getStatus()
+    const autoCancelStatus = autoCancelJob.getStatus()
+    
+    // A service is considered ready if it's scheduled (has active cron job)
+    const serviceStates = {
+      dailyRankCheck: rankCheckStatus.isScheduled,
+      trialMonitor: trialMonitorStatus.isScheduled,
+      autoCancel: autoCancelStatus.isScheduled,
+      jobMonitor: true // JobMonitor doesn't have a getStatus method, assume ready if no errors
+    }
+    
+    // Workers are actually ready if critical services are running
+    const actuallyReady = serviceStates.dailyRankCheck && serviceStates.trialMonitor
+    
     return {
       isInitialized: this.isInitialized,
-      rankCheckJobStatus: dailyRankCheckJob.getStatus()
+      rankCheckJobStatus: rankCheckStatus,
+      actuallyReady,
+      serviceStates
     }
   }
 
@@ -249,8 +274,21 @@ export class WorkerStartup {
    * Manual trigger for rank check job (for testing/admin)
    */
   async triggerManualRankCheck(): Promise<void> {
-    if (!this.isInitialized) {
-      throw new Error('Workers not initialized. Call initialize() first.')
+    // Use enhanced status check instead of just boolean flag
+    const status = this.getStatus()
+    
+    if (!status.actuallyReady) {
+      const serviceStates = Object.entries(status.serviceStates)
+        .filter(([_, ready]) => !ready)
+        .map(([service, _]) => service)
+        .join(', ')
+      
+      throw new Error(`Background workers not fully initialized. Services not ready: ${serviceStates}`)
+    }
+
+    // Additional check: ensure dailyRankCheckJob is specifically ready
+    if (!status.serviceStates.dailyRankCheck) {
+      throw new Error('Daily rank check service not initialized')
     }
 
     logger.info('Manually triggering rank check job...')
@@ -262,13 +300,18 @@ export class WorkerStartup {
    */
   getBackgroundServicesStatus(): {
     isInitialized: boolean
+    actuallyReady: boolean
     rankCheckJob: any
     quotaHealth: any
     uptime: number
     services: string[]
+    serviceStates: any
   } {
+    const status = this.getStatus()
+    
     return {
       isInitialized: this.isInitialized,
+      actuallyReady: status.actuallyReady,
       rankCheckJob: dailyRankCheckJob.getStatus(),
       quotaHealth: 'monitoring_active',
       uptime: process.uptime(),
@@ -276,7 +319,8 @@ export class WorkerStartup {
         'daily_rank_check_scheduler',
         'quota_monitoring',
         'error_tracking'
-      ]
+      ],
+      serviceStates: status.serviceStates
     }
   }
 }
