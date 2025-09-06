@@ -13,6 +13,7 @@ export class BackgroundWorker {
   private static instance: BackgroundWorker;
   private isStarted = false;
   private quotaResetMonitor: QuotaResetMonitor;
+  private statusLogInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.quotaResetMonitor = QuotaResetMonitor.getInstance();
@@ -46,8 +47,13 @@ export class BackgroundWorker {
       this.isStarted = true;
       console.log('✅ Background worker started successfully');
       
-      // Log status every 5 minutes
-      setInterval(() => {
+      // Clear any existing status logging interval before creating a new one
+      if (this.statusLogInterval) {
+        clearInterval(this.statusLogInterval);
+      }
+      
+      // Log status every 5 minutes - store interval reference for proper cleanup
+      this.statusLogInterval = setInterval(() => {
         this.logStatus();
       }, 5 * 60 * 1000);
       
@@ -73,6 +79,13 @@ export class BackgroundWorker {
       
       // Stop quota reset monitor
       this.quotaResetMonitor.stop();
+      
+      // Clear status logging interval to prevent memory leaks
+      if (this.statusLogInterval) {
+        clearInterval(this.statusLogInterval);
+        this.statusLogInterval = null;
+        console.log('✅ Status logging interval cleared');
+      }
       
       this.isStarted = false;
       console.log('✅ Background worker stopped successfully');

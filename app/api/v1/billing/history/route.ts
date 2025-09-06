@@ -35,28 +35,28 @@ export async function GET(request: NextRequest) {
     const detail = url.searchParams.get('detail') || 'basic'
     
     // Build optimized query - exclude heavy fields unless explicitly requested
-    const baseFields = `
-      id,
-      transaction_type,
-      transaction_status,
-      amount,
-      currency,
-      payment_method,
-      gateway_transaction_id,
-      created_at,
-      updated_at,
-      processed_at,
-      verified_at,
-      notes,
-      payment_proof_url,
-      gateway:indb_payment_gateways(id, name, slug),
-      package:indb_payment_packages(id, name, slug)
-    `
+    const baseFields = [
+      'id',
+      'transaction_type',
+      'transaction_status', 
+      'amount',
+      'currency',
+      'payment_method',
+      'gateway_transaction_id',
+      'created_at',
+      'updated_at',
+      'processed_at',
+      'verified_at',
+      'notes',
+      'payment_proof_url',
+      'gateway:indb_payment_gateways(id, name, slug)',
+      'package:indb_payment_packages(id, name, slug)'
+    ]
     
     // Only include heavy fields when detail=full is requested
     const selectFields = detail === 'full' 
-      ? `${baseFields}, metadata, gateway_response`
-      : baseFields
+      ? [...baseFields, 'metadata', 'gateway_response'].join(',')
+      : baseFields.join(',')
 
     let query = supabaseAdmin
       .from('indb_payment_transactions')
@@ -129,39 +129,57 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform transactions data - handle optional metadata fields based on detail level
-    const transformedTransactions = transactions?.map(transaction => ({
-      id: transaction.id,
-      order_id: transaction.id,
-      transaction_type: transaction.transaction_type,
-      transaction_status: transaction.transaction_status,
-      amount: parseFloat(transaction.amount || '0'),
-      currency: transaction.currency,
-      // Only include metadata-dependent fields when available (detail=full)
-      billing_period: transaction.metadata?.billing_period || 'monthly',
-      created_at: transaction.created_at,
-      updated_at: transaction.updated_at,
-      processed_at: transaction.processed_at,
-      verified_at: transaction.verified_at,
-      notes: transaction.notes,
-      payment_proof_url: transaction.payment_proof_url,
-      package_name: transaction.metadata?.package_name || 
-        (Array.isArray(transaction.package) ? transaction.package[0]?.name : transaction.package?.name) || 
-        'Unknown Package',
-      payment_method: transaction.payment_method || 'Unknown Method',
-      gateway_transaction_id: transaction.gateway_transaction_id,
-      // Conditionally include heavy fields only when requested
-      ...(detail === 'full' && {
-        customer_info: transaction.metadata?.customer_info,
-        gateway_response: transaction.gateway_response,
-        full_metadata: transaction.metadata
-      }),
-      package: transaction.package || { 
-        name: transaction.metadata?.package_name || 'Unknown Package', 
-        slug: 'unknown' 
-      },
-      gateway: transaction.gateway || { name: 'Unknown Gateway', slug: 'unknown' },
-      subscription: null
-    })) || []
+    const transformedTransactions = (transactions || [])
+      .map(transaction => {
+        // Ensure we have a valid transaction object
+        if (!transaction || typeof transaction !== 'object' || 'error' in transaction) {
+          return null
+        }
+        
+        // Use type assertion to help TypeScript understand the structure
+        const tx = transaction as any
+        
+        const baseData = {
+          id: tx.id,
+          order_id: tx.id,
+          transaction_type: tx.transaction_type,
+          transaction_status: tx.transaction_status,
+          amount: parseFloat(tx.amount || '0'),
+          currency: tx.currency,
+          created_at: tx.created_at,
+          updated_at: tx.updated_at,
+          processed_at: tx.processed_at,
+          verified_at: tx.verified_at,
+          notes: tx.notes,
+          payment_proof_url: tx.payment_proof_url,
+          payment_method: tx.payment_method || 'Unknown Method',
+          gateway_transaction_id: tx.gateway_transaction_id,
+          package: tx.package || { name: 'Unknown Package', slug: 'unknown' },
+          gateway: tx.gateway || { name: 'Unknown Gateway', slug: 'unknown' },
+          subscription: null
+        }
+        
+        // Add metadata-dependent fields
+        if (detail === 'full' && tx.metadata) {
+          return {
+            ...baseData,
+            billing_period: tx.metadata?.billing_period || 'monthly',
+            package_name: tx.metadata?.package_name || 
+              (Array.isArray(tx.package) ? tx.package[0]?.name : tx.package?.name) || 
+              'Unknown Package',
+            customer_info: tx.metadata?.customer_info,
+            gateway_response: tx.gateway_response,
+            full_metadata: tx.metadata
+          }
+        } else {
+          return {
+            ...baseData,
+            billing_period: 'monthly',
+            package_name: (Array.isArray(tx.package) ? tx.package[0]?.name : tx.package?.name) || 'Unknown Package'
+          }
+        }
+      })
+      .filter((tx): tx is NonNullable<typeof tx> => tx !== null)
 
     // Calculate pagination info
     const totalPages = Math.ceil((count || 0) / limit)
