@@ -130,54 +130,73 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Process keywords with ranking history
+    // Get keyword IDs for position change calculation
+    const keywordIds = (keywords || []).map((k: any) => k.id)
+    
+    // Calculate target dates for position changes
+    const today = new Date()
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+    const threeDaysAgo = new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000)
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+    
+    // Format dates as YYYY-MM-DD for database query
+    const formatDate = (date: Date) => date.toISOString().split('T')[0]
+    const todayStr = formatDate(today)
+    const yesterdayStr = formatDate(yesterday)
+    const threeDaysAgoStr = formatDate(threeDaysAgo)
+    const sevenDaysAgoStr = formatDate(sevenDaysAgo)
+    
+    // Fetch historical position data from rank history table
+    const { data: historicalData } = await supabaseAdmin
+      .from('indb_keyword_rank_history')
+      .select('keyword_id, position, check_date')
+      .in('keyword_id', keywordIds)
+      .in('check_date', [yesterdayStr, threeDaysAgoStr, sevenDaysAgoStr])
+    
+    // Create lookup maps for position changes
+    const positionHistory: { [keywordId: string]: { [date: string]: number | null } } = {}
+    
+    if (historicalData) {
+      historicalData.forEach((record: any) => {
+        if (!positionHistory[record.keyword_id]) {
+          positionHistory[record.keyword_id] = {}
+        }
+        positionHistory[record.keyword_id][record.check_date] = record.position
+      })
+    }
+
+    // Process keywords with proper position change calculations
     const processedKeywords = (keywords || []).map((keyword: any) => {
-      // Ensure rankings is an array before sorting
+      // Get current ranking data
       const rankings = Array.isArray(keyword.rankings) ? keyword.rankings : 
                       keyword.rankings ? [keyword.rankings] : []
-      const sortedRankings = rankings.sort((a: any, b: any) => 
-        new Date(b.check_date).getTime() - new Date(a.check_date).getTime()
-      )
+      const currentRanking = rankings.length > 0 ? rankings[0] : null
       
-      const currentRanking = sortedRankings[0]
-      const previousRankings = sortedRankings.slice(1, 4) // Last 3 previous rankings
+      // Calculate position changes using historical data
+      const keywordHistory = positionHistory[keyword.id] || {}
+      const currentPosition = currentRanking?.position || null
       
-      // Calculate position changes
       const get1DChange = () => {
-        const yesterday = previousRankings.find((r: any) => {
-          const date = new Date(r.check_date)
-          const today = new Date(currentRanking?.check_date || new Date())
-          return Math.abs(today.getTime() - date.getTime()) <= 24 * 60 * 60 * 1000
-        })
-        if (!yesterday || !currentRanking) return null
-        return (yesterday.position || 0) - (currentRanking.position || 0)
+        const yesterdayPosition = keywordHistory[yesterdayStr]
+        if (!yesterdayPosition || !currentPosition) return null
+        return yesterdayPosition - currentPosition // Positive means improved (lower number)
       }
 
       const get3DChange = () => {
-        const threeDaysAgo = previousRankings.find((r: any) => {
-          const date = new Date(r.check_date)
-          const today = new Date(currentRanking?.check_date || new Date())
-          const diffDays = Math.abs(today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
-          return diffDays >= 2 && diffDays <= 4
-        })
-        if (!threeDaysAgo || !currentRanking) return null
-        return (threeDaysAgo.position || 0) - (currentRanking.position || 0)
+        const threeDaysAgoPosition = keywordHistory[threeDaysAgoStr]
+        if (!threeDaysAgoPosition || !currentPosition) return null
+        return threeDaysAgoPosition - currentPosition
       }
 
       const get7DChange = () => {
-        const sevenDaysAgo = previousRankings.find((r: any) => {
-          const date = new Date(r.check_date)
-          const today = new Date(currentRanking?.check_date || new Date())
-          const diffDays = Math.abs(today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
-          return diffDays >= 6 && diffDays <= 8
-        })
-        if (!sevenDaysAgo || !currentRanking) return null
-        return (sevenDaysAgo.position || 0) - (currentRanking.position || 0)
+        const sevenDaysAgoPosition = keywordHistory[sevenDaysAgoStr]
+        if (!sevenDaysAgoPosition || !currentPosition) return null
+        return sevenDaysAgoPosition - currentPosition
       }
 
       return {
         ...keyword,
-        current_position: currentRanking?.position || null,
+        current_position: currentPosition,
         current_url: currentRanking?.url || null,
         search_volume: currentRanking?.search_volume || null,
         last_updated: currentRanking?.check_date || null,
