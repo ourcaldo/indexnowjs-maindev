@@ -251,12 +251,23 @@ export class WorkerStartup {
     const trialMonitorStatus = trialMonitorJob.getStatus()
     const autoCancelStatus = autoCancelJob.getStatus()
     
+    // Get JobMonitor status (it has a getStatus method)
+    let jobMonitorReady = false
+    try {
+      const jobMonitor = JobMonitor.getInstance()
+      const jobMonitorStatus = jobMonitor.getStatus()
+      jobMonitorReady = jobMonitorStatus.isRunning
+    } catch (error) {
+      logger.warn('Could not get JobMonitor status:', error)
+      jobMonitorReady = false
+    }
+    
     // A service is considered ready if it's scheduled (has active cron job)
     const serviceStates = {
       dailyRankCheck: rankCheckStatus.isScheduled,
       trialMonitor: trialMonitorStatus.isScheduled,
       autoCancel: autoCancelStatus.isScheduled,
-      jobMonitor: true // JobMonitor doesn't have a getStatus method, assume ready if no errors
+      jobMonitor: jobMonitorReady
     }
     
     // Workers are actually ready if critical services are running
