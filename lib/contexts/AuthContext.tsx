@@ -51,7 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await authService.signOut()
       setUser(null)
-      router.push('/auth/login')
+      router.push('/login')
     } catch (error) {
       console.error('Sign out error:', error)
     }
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const isAdminRoute = currentPath.startsWith('/backend/admin')
         
         if (isProtectedRoute && !isAdminRoute) {
-          router.push('/auth/login')
+          router.push('/login')
         }
       }
     });
@@ -114,7 +114,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const isAdminRoute = currentPath.startsWith('/backend/admin')
           
           if (isProtectedRoute && !isAdminRoute) {
-            router.push('/auth/login')
+            router.push('/login')
           }
         }
       } else {
