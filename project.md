@@ -1081,6 +1081,44 @@ JWT_SECRET=[jwt-secret-key]
 
 **Status**: ✅ **COMPLETE** - 3D secure popup is now more compact with cleaner UI while maintaining full payment security
 
+### September 7, 2025: Midtrans Recurring Payment Service Method Fix ✅
+
+**✅ PAYMENT PROCESSING ERROR RESOLUTION**: Fixed critical "createChargeTransaction is not a function" error in Midtrans recurring payment processing
+-- **Issue**: MidtransRecurringHandler was calling `this.midtransService.createChargeTransaction()` method that didn't exist in MidtransRecurringService class
+-- **Root Cause**: Missing method implementations in the MidtransRecurringService class that were expected by the payment handler
+-- **Error Details**: TypeError: this.midtransService.createChargeTransaction is not a function at line 94 in handler.ts
+-- **Payment Flow Impact**: Prevented all recurring payment processing with credit cards, blocking user subscriptions
+
+**✅ MISSING SERVICE METHODS IMPLEMENTATION**: Added all required payment processing methods to MidtransRecurringService class
+-- **createChargeTransaction Method**: Added method to handle initial charge transactions with token saving for recurring payments
+  - Supports USD to IDR conversion with proper billing details
+  - Includes 3D secure authentication configuration
+  - Returns transaction details including redirect URLs for 3DS authentication
+  - Handles customer details and billing address formatting for Indonesia
+-- **getTransactionStatus Method**: Added method to retrieve transaction status and saved token information
+  - Essential for retrieving saved_token_id after successful charges
+  - Provides masked card information and transaction metadata
+-- **createSubscriptionWithAmount Method**: Added specialized subscription creation method matching handler requirements
+  - Takes amount as first parameter and options object as second (handler format)
+  - Handles trial and regular subscription scheduling logic
+  - Supports metadata and customer details for subscription tracking
+
+**Files Modified:**
+-- `lib/services/payments/midtrans/MidtransRecurringService.ts` - Added missing payment processing methods
+-- `app/api/v1/billing/channels/midtrans-recurring/handler.ts` - Updated method call to use correct method name
+
+**Technical Implementation Details:**
+-- **Method Signatures Added**:
+  - `createChargeTransaction(params)` - Creates initial charge with token saving
+  - `getTransactionStatus(transactionId)` - Retrieves transaction and token details 
+  - `createSubscriptionWithAmount(amount, options)` - Creates subscriptions with handler-expected parameters
+-- **3D Secure Integration**: Charge transaction includes proper authentication configuration and callback setup
+-- **Token Management**: Proper saved_token_id handling for recurring payment processing
+-- **Currency Conversion**: USD to IDR conversion integrated throughout payment flow
+-- **Error Handling**: Comprehensive try-catch blocks with descriptive error messages for debugging
+
+**Status**: ✅ **COMPLETE** - Midtrans recurring payment processing fully functional with all required service methods implemented
+
 ### September 4, 2025: CMS Page Editor Duplicate Toast Notification Fix ✅
 
 **✅ DUPLICATE TOAST NOTIFICATION ISSUE RESOLVED**: Fixed multiple duplicate toast notifications appearing when editing and saving CMS pages
