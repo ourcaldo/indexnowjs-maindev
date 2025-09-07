@@ -17,7 +17,6 @@ import { createLowlight } from 'lowlight'
 import { 
   Bold, 
   Italic, 
-  Underline, 
   Strikethrough,
   Code,
   Link as LinkIcon,
@@ -27,10 +26,8 @@ import {
   Quote,
   Undo,
   Redo,
-  Type,
-  Palette,
-  Table as TableIcon,
-  Code2
+  Code2,
+  Table as TableIcon
 } from 'lucide-react'
 
 interface TiptapEditorProps {
@@ -46,18 +43,16 @@ export default function TiptapEditor({
   placeholder = "Start writing your post...",
   className = ""
 }: TiptapEditorProps) {
-  
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        codeBlock: false, // We'll use CodeBlockLowlight instead
+        codeBlock: false,
       }),
       TextStyle,
       FontFamily,
       Color,
-      Highlight.configure({
-        multicolor: true,
-      }),
+      Highlight.configure({ multicolor: true }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -75,15 +70,13 @@ export default function TiptapEditor({
           class: 'bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg p-4 font-mono text-sm',
         },
       }),
-      Table.configure({
-        resizable: true,
-      }),
+      Table.configure({ resizable: true }),
       TableRow,
       TableHeader,
       TableCell,
     ],
     content,
-    immediatelyRender: false, // Fix SSR hydration issues
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
@@ -126,9 +119,9 @@ export default function TiptapEditor({
   }
 
   return (
-    <div className="border border-[#E0E6ED] rounded-lg overflow-hidden">
+    <div className="border border-[#E0E6ED] rounded-lg">
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 border-b border-[#E0E6ED] bg-[#F7F9FC] p-3">
+      <div className="sticky top-0 z-20 border-b border-[#E0E6ED] bg-[#F7F9FC] p-3 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           {/* Basic formatting */}
           <div className="flex items-center border-r border-[#E0E6ED] pr-2 mr-2">
