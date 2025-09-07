@@ -77,13 +77,13 @@ export async function POST(request: NextRequest) {
     const { server_key, client_key, merchant_id } = midtransGateway.api_credentials
     const { environment } = midtransGateway.configuration
 
-    // Initialize Midtrans service
-    const midtransService = PaymentServiceFactory.createMidtransService('snap', {
+    // Initialize Midtrans service - use recurring service type
+    const midtransService = PaymentServiceFactory.createMidtransService('recurring', {
       server_key,
       client_key,
       environment,
       merchant_id
-    })
+    }) as import('@/lib/services/payments/midtrans/MidtransRecurringService').MidtransRecurringService
 
     // Get transaction status to check 3DS result
     console.log('🔍 Checking transaction status after 3DS authentication')
@@ -267,7 +267,7 @@ export async function POST(request: NextRequest) {
       });
       
       // Create subscription using saved_token_id from transaction status (NOT the original temporary token)
-      const subscription = await midtransService.createSubscription(realPackageAmount, {
+      const subscription = await midtransService.createSubscriptionWithAmount(realPackageAmount, {
         name: isTrialTransaction ? 
           `${realPackageForMatching.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
           `${realPackageForMatching.name}_${billing_period}`.toUpperCase(),
