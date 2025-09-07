@@ -196,7 +196,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
         new Date(Date.now() + 8 * 60 * 1000) : // 8 minutes for trial (testing purposes)
         new Date(Date.now() + (this.paymentData.billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000);
       
-      const subscription = await this.midtransService.createSubscription(subscriptionAmount, {
+      const subscription = await this.midtransService.createSubscriptionWithAmount(subscriptionAmount, {
         name: subscriptionName,
         token: savedTokenId,
         schedule: {

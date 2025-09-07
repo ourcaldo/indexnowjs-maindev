@@ -64,6 +64,148 @@ export class MidtransRecurringService extends PaymentGateway {
   }
 
   /**
+   * Create charge transaction for recurring payments
+   * This method is used by the handler to create the initial charge
+   */
+  async createChargeTransaction(params: {
+    order_id: string
+    amount_usd: number
+    token_id: string
+    customer_details: any
+    item_details: any
+  }): Promise<any> {
+    try {
+      // Convert USD to IDR
+      const idrAmount = await convertUsdToIdr(params.amount_usd)
+      const grossAmount = Math.round(idrAmount)
+
+      // Create charge request
+      const chargeRequest = {
+        payment_type: 'credit_card',
+        transaction_details: {
+          order_id: params.order_id,
+          gross_amount: grossAmount,
+        },
+        credit_card: {
+          token_id: params.token_id,
+          save_token_id: true,
+          authentication: true,
+          callback_type: "js_event"
+        },
+        item_details: [
+          {
+            id: 'recurring_payment_item',
+            price: grossAmount,
+            quantity: 1,
+            name: params.item_details.name,
+            description: params.item_details.description,
+          }
+        ],
+        customer_details: {
+          ...params.customer_details,
+          billing_address: {
+            first_name: params.customer_details.first_name,
+            last_name: params.customer_details.last_name,
+            email: params.customer_details.email,
+            phone: params.customer_details.phone || '',
+            address: "Jakarta",
+            city: "Jakarta",
+            postal_code: "12190",
+            country_code: "IDN"
+          }
+        }
+      }
+
+      const response = await this.apiClient.createCharge(chargeRequest)
+
+      return {
+        transaction_id: response.transaction_id,
+        order_id: response.order_id,
+        status: response.transaction_status,
+        redirect_url: response.redirect_url,
+        requires_redirect: !!response.redirect_url,
+        saved_token_id: response.saved_token_id,
+        transaction_status: response.transaction_status,
+        status_message: response.status_message,
+        metadata: response
+      }
+
+    } catch (error: any) {
+      throw new Error(`Charge transaction failed: ${error.message}`)
+    }
+  }
+
+  /**
+   * Get transaction status
+   */
+  async getTransactionStatus(transactionId: string): Promise<any> {
+    try {
+      const response = await this.apiClient.getTransactionStatus(transactionId)
+
+      return {
+        transaction_id: response.transaction_id,
+        order_id: response.order_id,
+        transaction_status: response.transaction_status,
+        saved_token_id: response.saved_token_id,
+        masked_card: response.masked_card,
+        metadata: response
+      }
+
+    } catch (error: any) {
+      throw new Error(`Failed to get transaction status: ${error.message}`)
+    }
+  }
+
+  /**
+   * Create recurring subscription with direct amount and options
+   * Used by the MidtransRecurringHandler
+   */
+  async createSubscriptionWithAmount(amount: number, options: any): Promise<any> {
+    try {
+      // Convert USD to IDR
+      const idrAmount = await convertUsdToIdr(amount)
+
+      // Calculate start time
+      const startTime = options.schedule?.start_time || new Date(Date.now() + 2 * 60 * 1000)
+      const minStartTime = new Date(Date.now() + 60 * 1000)
+      const actualStartTime = startTime < minStartTime ? minStartTime : startTime
+
+      const subscriptionRequest = {
+        name: options.name,
+        amount: Math.round(idrAmount).toString(),
+        currency: 'IDR',
+        payment_type: 'credit_card',
+        token: options.token,
+        schedule: {
+          interval: options.schedule?.interval || 1,
+          interval_unit: options.schedule?.interval_unit || 'month',
+          max_interval: options.schedule?.max_interval || 12,
+          start_time: this.formatMidtransDateTime(actualStartTime),
+        },
+        retry_schedule: {
+          interval: 1,
+          interval_unit: 'day',
+          max_interval: 3,
+        },
+        metadata: options.metadata,
+        customer_details: options.customer_details,
+      }
+
+      const response = await this.apiClient.createSubscription(subscriptionRequest)
+
+      return {
+        id: response.id,
+        status: response.status,
+        next_execution_at: response.schedule?.next_execution_at,
+        metadata: response
+      }
+
+    } catch (error: any) {
+      throw new Error(`Subscription creation failed: ${error.message}`)
+    }
+  }
+
+  /**
    * Create recurring subscription
    */
   async createSubscription(request: SubscriptionRequest): Promise<SubscriptionResponse> {
