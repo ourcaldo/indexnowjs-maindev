@@ -128,7 +128,7 @@ export default function TiptapEditor({
   return (
     <div className="border border-[#E0E6ED] rounded-lg overflow-hidden">
       {/* Toolbar */}
-      <div className="border-b border-[#E0E6ED] bg-[#F7F9FC] p-3">
+      <div className="sticky top-0 z-10 border-b border-[#E0E6ED] bg-[#F7F9FC] p-3">
         <div className="flex flex-wrap items-center gap-2">
           {/* Basic formatting */}
           <div className="flex items-center border-r border-[#E0E6ED] pr-2 mr-2">
