@@ -49,7 +49,7 @@ While using the Service, you agree not to:
 
 **3. Content and Data Standards**
 
-You are responsible for all content and data you submit to the Service. You must ensure that your use complies with applicable privacy laws and that you have necessary rights to monitor and track the websites and keywords you submit.
+You are responsible for all content and data you submit to the Service. You must ensure that your use complies with applicable privacy laws, our Privacy Policy, and that you have necessary rights to monitor and track the websites and keywords you submit.
 
 **4. Rate Limits and Fair Use**
 
@@ -59,11 +59,11 @@ We implement reasonable usage limits to ensure fair access and optimal performan
 
 **1. Subscription Plans**
 
-The Service offers multiple subscription plans with different features, limits, and pricing. Current plans and pricing are displayed on our pricing page and may be updated from time to time. Your subscription includes access to features according to your selected plan.
+The Service offers multiple subscription plans with different features, quotas, and pricing tiers. These include keyword tracking limits, domain monitoring quotas, indexing request allowances, and support levels. Current plans and pricing are displayed on our pricing page and may be updated from time to time. Your subscription includes access to features according to your selected plan's specifications.
 
 **2. Billing and Payment**
 
-Subscription fees are charged in advance on a recurring basis according to your selected billing cycle (monthly, quarterly, biannual, or annual). Payment is due immediately upon subscription or renewal. We accept various payment methods as indicated during checkout.
+Subscription fees are charged in advance on a recurring basis according to your selected billing cycle (monthly, quarterly, biannual, or annual). Payment is due immediately upon subscription or renewal. We accept various payment methods as indicated during checkout. All prices are displayed in your local currency when available, and currency conversion rates may apply.
 
 **3. Automatic Renewal**
 
@@ -161,7 +161,7 @@ THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIN
 
 **2. Limitation of Liability**
 
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR LIABILITY TO YOU FOR ANY DAMAGES ARISING FROM OR RELATED TO THESE TERMS OR THE SERVICE IS LIMITED TO THE AMOUNT YOU PAID FOR THE SERVICE IN THE 12 MONTHS PRECEDING THE CLAIM.
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR LIABILITY TO YOU FOR ANY DAMAGES ARISING FROM OR RELATED TO THESE TERMS, PRIVACY POLICY, OR THE SERVICE IS LIMITED TO THE AMOUNT YOU PAID FOR THE SERVICE IN THE 12 MONTHS PRECEDING THE CLAIM.
 
 **3. Exclusion of Damages**
 
@@ -173,7 +173,11 @@ The Service may integrate with or depend on third-party services. We are not res
 
 **5. Data Accuracy**
 
-We do not guarantee the accuracy, completeness, or timeliness of data provided through the Service. You should verify important information independently and not rely solely on Service data for critical business decisions.
+We do not guarantee the accuracy, completeness, or timeliness of rank tracking data, indexing status reports, or other information provided through the Service. Search engine ranking data may vary due to personalization, geographic location, and algorithm changes. You should verify important information independently and not rely solely on Service data for critical business decisions.
+
+**6. Real-time Features and Background Processing**
+
+The Service includes real-time updates, background job processing, and automated scheduling features. While we strive for reliability, these features may experience delays, interruptions, or temporary failures due to technical limitations, maintenance, or external service dependencies.
 
 ## H. Termination and Account Closure
 
@@ -183,7 +187,7 @@ You may terminate your account at any time by following the account closure proc
 
 **2. Termination by Us**
 
-We may suspend or terminate your account at our discretion for violations of these Terms, non-payment, fraudulent activity, or other reasons that may harm the Service or other users. We will provide reasonable notice when possible.
+We may suspend or terminate your account at our discretion for violations of these Terms or Privacy Policy, non-payment, fraudulent activity, or other reasons that may harm the Service or other users. We will provide reasonable notice when possible.
 
 **3. Effect of Termination**
 
@@ -201,11 +205,11 @@ We will retain your data for a reasonable period after termination to allow for 
 
 **1. Modification of Terms**
 
-We reserve the right to modify these Terms at any time. Changes will be effective upon posting the updated Terms on our website. We will provide notice of material changes through the Service or by email. Your continued use of the Service after changes indicates acceptance of the modified Terms.
+We reserve the right to modify these Terms and Privacy Policy at any time. Changes will be effective upon posting the updated Terms or Privacy Policy on our website. We will provide notice of material changes through the Service or by email. Your continued use of the Service after changes indicates acceptance of the modified Terms and Privacy Policy.
 
 **2. Governing Law and Jurisdiction**
 
-These Terms are governed by and construed in accordance with applicable law. Any disputes arising from these Terms or the Service will be subject to the exclusive jurisdiction of competent courts.
+These Terms and Privacy Policy are governed by and construed in accordance with applicable law. Any disputes arising from these Terms, Privacy Policy, or the Service will be subject to the exclusive jurisdiction of competent courts.
 
 **3. Severability**
 
@@ -237,7 +241,7 @@ Provisions of these Terms that by their nature should survive termination will s
 
 ## J. Contact Information
 
-For questions about these Terms, the Service, or to exercise your rights, please contact us through:
+For questions about these Terms, Privacy Policy, the Service, or to exercise your rights, please contact us through:
 
 - Support channels available in your account dashboard
 - Email support as provided on our website
