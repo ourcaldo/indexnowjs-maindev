@@ -4,7 +4,7 @@ Last updated: September 07, 2025
 
 **IndexNow Studio Terms of Service**
 
-By accessing or using IndexNow Studio ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Service.
+By accessing or using IndexNow Studio ("the Service"), you agree to be bound by these Terms of Service ("Terms") and Privacy Policy. If you do not agree to these Terms, you may not access or use the Service.
 
 ## A. Agreement and Account Terms
 
