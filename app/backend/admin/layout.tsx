@@ -7,6 +7,22 @@ import { AdminSidebar } from '@/components/AdminSidebar'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { ToastContainer } from '@/components/ui/toast'
 
+// Cookie utilities for sidebar state persistence
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+  return null
+}
+
+const setCookie = (name: string, value: string, days: number = 30) => {
+  if (typeof document === 'undefined') return
+  const expires = new Date()
+  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
+}
+
 export default function AdminLayout({
   children,
 }: {
@@ -16,6 +32,7 @@ export default function AdminLayout({
   const [isLoading, setIsLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [cookiesLoaded, setCookiesLoaded] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -30,6 +47,23 @@ export default function AdminLayout({
     }
     checkAdminAccess()
   }, [router, isLoginPage])
+
+  // Load sidebar state from cookies
+  useEffect(() => {
+    // Load sidebar state from cookies
+    const savedCollapsedState = getCookie('admin-sidebar-collapsed')
+    if (savedCollapsedState !== null) {
+      setSidebarCollapsed(savedCollapsedState === 'true')
+    }
+    setCookiesLoaded(true)
+  }, [])
+  
+  // Save sidebar state to cookies when it changes
+  useEffect(() => {
+    if (cookiesLoaded) {
+      setCookie('admin-sidebar-collapsed', sidebarCollapsed.toString())
+    }
+  }, [sidebarCollapsed, cookiesLoaded])
 
   const checkAdminAccess = async () => {
     try {
