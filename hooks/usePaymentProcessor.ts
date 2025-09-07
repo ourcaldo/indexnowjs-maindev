@@ -288,31 +288,27 @@ export function usePaymentProcessor({
             justify-content: center; align-items: center; padding: 20px;
           `
           
-          // Create modal content container
+          // Create modal content container - made more compact
           const modalContent = document.createElement('div')
           modalContent.style.cssText = `
-            position: relative; width: 75%; height: 90vh; background: white; 
+            position: relative; width: 65%; height: 80vh; background: white; 
             border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             display: flex; flex-direction: column;
           `
           
-          // Create header with cancel button
+          // Create minimal header with only cancel button
           const header = document.createElement('div')
           header.style.cssText = `
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; border-bottom: 1px solid #e0e6ed; background: #f7f9fc;
-            border-radius: 8px 8px 0 0;
+            display: flex; justify-content: flex-end; align-items: center;
+            padding: 8px 12px; border-bottom: 1px solid #e0e6ed; background: #f7f9fc;
+            border-radius: 8px 8px 0 0; min-height: 32px;
           `
-          
-          const title = document.createElement('h3')
-          title.textContent = 'Complete Payment Authentication'
-          title.style.cssText = 'margin: 0; color: #1a1a1a; font-size: 16px; font-weight: 600;'
           
           const cancelButton = document.createElement('button')
           cancelButton.textContent = '✕'
           cancelButton.style.cssText = `
-            background: none; border: none; font-size: 20px; color: #6c757d;
-            cursor: pointer; padding: 4px 8px; border-radius: 4px;
+            background: none; border: none; font-size: 18px; color: #6c757d;
+            cursor: pointer; padding: 2px 6px; border-radius: 4px;
             transition: background-color 0.2s;
           `
           cancelButton.onmouseover = () => cancelButton.style.backgroundColor = '#e0e6ed'
@@ -327,7 +323,6 @@ export function usePaymentProcessor({
             })
           }
           
-          header.appendChild(title)
           header.appendChild(cancelButton)
           
           // Create iframe with exact Midtrans specifications
