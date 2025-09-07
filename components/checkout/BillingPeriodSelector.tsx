@@ -63,33 +63,51 @@ export default function BillingPeriodSelector({
         <p className="text-sm text-[#6C757D]">Choose your preferred billing cycle</p>
       </CardHeader>
       <CardContent>
-        <RadioGroup value={selectedPeriod} onValueChange={onPeriodChange}>
+        <RadioGroup 
+          value={selectedPeriod} 
+          onValueChange={(value) => {
+            console.log('BillingPeriodSelector: Changing period from', selectedPeriod, 'to', value)
+            onPeriodChange(value)
+          }}
+        >
           <div className="space-y-3">
-            {periodOptions.map((option) => {
+            {periodOptions.map((option, index) => {
               const discount = calculateDiscount(option.regular_price, option.promo_price)
               const finalPrice = option.promo_price || option.regular_price
               const isSelected = selectedPeriod === option.period
 
               return (
                 <div
-                  key={option.period}
+                  key={`${option.period}-${index}`}
                   className={`relative border rounded-lg p-3 cursor-pointer transition-all ${
                     isSelected 
                       ? 'border-[#3D8BFF] bg-[#3D8BFF]/5' 
                       : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
                   }`}
-                  onClick={() => onPeriodChange(option.period)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    console.log('Clicked on period option:', option.period)
+                    onPeriodChange(option.period)
+                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <RadioGroupItem 
                         value={option.period} 
-                        id={option.period}
+                        id={`period-${option.period}-${index}`}
                         className={isSelected ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED] text-[#6C757D]'}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                        }}
                       />
                       <Label 
-                        htmlFor={option.period} 
+                        htmlFor={`period-${option.period}-${index}`}
                         className="cursor-pointer flex items-center space-x-2"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          console.log('Label clicked for period:', option.period)
+                          onPeriodChange(option.period)
+                        }}
                       >
                         <span className="font-medium text-[#1A1A1A]">
                           {option.period_label}
