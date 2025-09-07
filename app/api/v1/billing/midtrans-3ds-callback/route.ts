@@ -110,10 +110,10 @@ export async function POST(request: NextRequest) {
       
       console.log('💳 Using saved_token_id from transaction status:', savedTokenId.substring(0, 20) + '...')
       
-      // Get the original transaction record for metadata
+      // Get the original transaction record for metadata and amount
       const { data: existingTransaction } = await supabase
         .from('indb_payment_transactions')
-        .select('id, metadata')
+        .select('id, metadata, amount, package_id')
         .eq('gateway_transaction_id', transaction_id)
         .maybeSingle()
 
@@ -165,63 +165,85 @@ export async function POST(request: NextRequest) {
       // Extract package and billing info from original transaction metadata or create default values
       // Since we don't have access to original request data, we'll need to get package from transaction amount
       
-      console.log('📦 Fetching all packages to determine which one matches transaction amount...')
-      const { data: allPackages, error: packagesError } = await supabase
-        .from('indb_payment_packages')
-        .select('*')
-        .eq('is_active', true)
-      
-      if (packagesError || !allPackages) {
-        throw new Error('Failed to fetch packages for amount matching')
-      }
-      
-      // Convert IDR amount back to USD to match with packages
-      const transactionAmountIDR = parseFloat(transactionDetails.gross_amount)
-      const USD_TO_IDR_RATE = 16300 // Approximate rate, should match the conversion used in main endpoint
-      const transactionAmountUSD = Math.round(transactionAmountIDR / USD_TO_IDR_RATE)
-      
-      console.log('💰 Transaction amount analysis:', {
-        idr_amount: transactionAmountIDR,
-        calculated_usd: transactionAmountUSD
-      })
-      
-      // Find matching package by price (checking both regular and promo prices)
+      // Get transaction amount and package from the original transaction record
+      let transactionAmountUSD = existingTransaction?.amount || 0
       let matchedPackage = null
       let billing_period = 'monthly' // Default billing period
       
-      for (const pkg of allPackages) {
-        const pricing = pkg.pricing_tiers || {}
-        const monthlyUSD = pricing.monthly?.USD
-        const yearlyUSD = pricing.yearly?.USD
+      console.log('💰 Using original transaction amount:', transactionAmountUSD)
+      
+      // If we have a package_id in the original transaction, use that directly
+      if (existingTransaction?.package_id) {
+        console.log('📦 Using package_id from original transaction:', existingTransaction.package_id)
+        const { data: packageFromTransaction } = await supabase
+          .from('indb_payment_packages')
+          .select('*')
+          .eq('id', existingTransaction.package_id)
+          .single()
         
-        // Check monthly pricing
-        if (monthlyUSD && (monthlyUSD.regular_price === transactionAmountUSD || monthlyUSD.promo_price === transactionAmountUSD)) {
-          matchedPackage = pkg
-          billing_period = 'monthly'
-          break
+        if (packageFromTransaction) {
+          matchedPackage = packageFromTransaction
+          // Get billing period from metadata if available
+          billing_period = existingTransaction.metadata?.billing_period || 'monthly'
+          console.log('✅ Found package from transaction record:', {
+            id: matchedPackage.id,
+            name: matchedPackage.name,
+            billing_period: billing_period
+          })
+        }
+      }
+      
+      // Fallback: fetch and match packages by amount if no package_id
+      if (!matchedPackage) {
+        console.log('📦 Fetching all packages to determine which one matches transaction amount...')
+        const { data: allPackages, error: packagesError } = await supabase
+          .from('indb_payment_packages')
+          .select('*')
+          .eq('is_active', true)
+        
+        if (packagesError || !allPackages) {
+          throw new Error('Failed to fetch packages for amount matching')
         }
         
-        // Check yearly pricing
-        if (yearlyUSD && (yearlyUSD.regular_price === transactionAmountUSD || yearlyUSD.promo_price === transactionAmountUSD)) {
-          matchedPackage = pkg
-          billing_period = 'yearly'
-          break
+        // Find matching package by price
+        for (const pkg of allPackages) {
+          const pricing = pkg.pricing_tiers || {}
+          const monthlyUSD = pricing.monthly?.USD
+          const yearlyUSD = pricing.yearly?.USD
+          
+          // Check monthly pricing
+          if (monthlyUSD && (monthlyUSD.regular_price === transactionAmountUSD || monthlyUSD.promo_price === transactionAmountUSD)) {
+            matchedPackage = pkg
+            billing_period = 'monthly'
+            break
+          }
+          
+          // Check yearly pricing
+          if (yearlyUSD && (yearlyUSD.regular_price === transactionAmountUSD || yearlyUSD.promo_price === transactionAmountUSD)) {
+            matchedPackage = pkg
+            billing_period = 'yearly'
+            break
+          }
+          
+          // Fallback: check base price
+          if (pkg.price === transactionAmountUSD) {
+            matchedPackage = pkg
+            billing_period = pkg.billing_period || 'monthly'
+            break
+          }
         }
         
-        // Fallback: check base price
-        if (pkg.price === transactionAmountUSD) {
-          matchedPackage = pkg
-          billing_period = pkg.billing_period || 'monthly'
-          break
+        if (!matchedPackage && allPackages.length > 0) {
+          console.warn('⚠️ Could not match transaction amount to package, using first active package')
+          matchedPackage = allPackages[0] // Fallback to first package
         }
       }
       
       if (!matchedPackage) {
-        console.warn('⚠️ Could not match transaction amount to package, using first active package')
-        matchedPackage = allPackages[0] // Fallback to first package
+        throw new Error('No package found for subscription creation')
       }
       
-      console.log('📦 Matched package:', {
+      console.log('📦 Final matched package:', {
         id: matchedPackage.id,
         name: matchedPackage.name,
         amount_usd: transactionAmountUSD,
@@ -244,16 +266,29 @@ export async function POST(request: NextRequest) {
           realPackageAmount = packageDetails.price;
           console.log('🔍 [TRIAL] Using real package price from metadata:', packageDetails);
           
-          // Re-match package using the real package ID if available
-          if (packageDetails.id) {
-            const realPackageMatch = allPackages.find(pkg => pkg.id === packageDetails.id);
-            if (realPackageMatch) {
-              realPackageForMatching = realPackageMatch;
-              console.log('🔍 [TRIAL] Re-matched package using real package ID:', realPackageMatch.name);
-            }
+          // Re-match package using the real package ID if available - use the existing matchedPackage if IDs match
+          if (packageDetails.id && matchedPackage.id === packageDetails.id) {
+            realPackageForMatching = matchedPackage;
+            console.log('🔍 [TRIAL] Package IDs match, using current matched package:', matchedPackage.name);
           }
         } else {
           console.warn('⚠️ [TRIAL] No package details in metadata, using transaction amount');
+        }
+      } else {
+        // For non-trial transactions, use the matched package price for subscription
+        // This ensures we use the correct package price, not potentially incorrect transaction amount
+        if (matchedPackage.price) {
+          realPackageAmount = matchedPackage.price;
+          console.log('🔍 [NON-TRIAL] Using package price from matched package:', realPackageAmount);
+        } else if (matchedPackage.pricing_tiers) {
+          // Try to get price from pricing tiers
+          const pricing = matchedPackage.pricing_tiers;
+          if (billing_period === 'monthly' && pricing.monthly?.USD) {
+            realPackageAmount = pricing.monthly.USD.regular_price || pricing.monthly.USD.promo_price;
+          } else if (billing_period === 'yearly' && pricing.yearly?.USD) {
+            realPackageAmount = pricing.yearly.USD.regular_price || pricing.yearly.USD.promo_price;
+          }
+          console.log('🔍 [NON-TRIAL] Using price from pricing tiers:', realPackageAmount);
         }
       }
       
