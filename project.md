@@ -1119,6 +1119,43 @@ JWT_SECRET=[jwt-secret-key]
 
 **Status**: ✅ **COMPLETE** - Midtrans recurring payment processing fully functional with all required service methods implemented
 
+### September 7, 2025: Midtrans 3DS Callback Service Method Fix ✅
+
+**✅ 3DS CALLBACK ERROR RESOLUTION**: Fixed critical "getTransactionStatus is not a function" error in Midtrans 3DS authentication callback processing
+-- **Issue**: After 3D secure authentication, the callback was failing with "TypeError: midtransService.getTransactionStatus is not a function" error
+-- **Root Cause**: The 3DS callback route was using `PaymentServiceFactory.createMidtransService('snap', ...)` which creates a Snap service instead of a Recurring service
+-- **Error Details**: getTransactionStatus method only exists in MidtransRecurringService, not in MidtransSnapService
+-- **Payment Flow Impact**: Prevented completion of 3DS authenticated payments, leaving transactions in pending state without proper subscription setup
+
+**✅ SERVICE TYPE MISMATCH CORRECTION**: Updated 3DS callback to use the correct MidtransRecurringService instance
+-- **Factory Call Fixed**: Changed from `createMidtransService('snap', config)` to `createMidtransService('recurring', config)`
+-- **TypeScript Type Safety**: Added proper type assertion to ensure compiler recognizes MidtransRecurringService methods
+-- **Method Calls Updated**: 
+  - Fixed `getTransactionStatus()` calls to use correct service instance
+  - Updated `createSubscription()` to use `createSubscriptionWithAmount()` method matching the new service signature
+-- **3DS Authentication Flow**: Now properly retrieves transaction status and saved token after 3D secure authentication
+
+**Files Modified:**
+-- `app/api/v1/billing/midtrans-3ds-callback/route.ts` - Updated service factory call and method signatures
+
+**Technical Implementation Details:**
+-- **Service Factory Update**: Changed service type parameter from 'snap' to 'recurring' in PaymentServiceFactory
+-- **Type Assertion Added**: Added TypeScript type assertion to ensure proper method access: `as MidtransRecurringService`
+-- **Method Signature Alignment**: Updated `createSubscription()` call to use `createSubscriptionWithAmount()` for consistency
+-- **Error Handling**: Maintained comprehensive try-catch blocks with proper error logging for debugging
+-- **3DS Flow Integrity**: Preserved all 3D secure authentication flow logic while fixing the underlying service type issue
+
+**Payment Processing Flow After Fix:**
+1. Initial charge transaction creates pending transaction with 3DS redirect
+2. User completes 3DS authentication on bank page
+3. 3DS callback properly retrieves transaction status using correct service
+4. Saved token ID extracted from successful transaction status
+5. Subscription created using permanent saved token (not temporary token)
+6. Database records updated with completed transaction and subscription details
+7. User profile updated with package subscription and billing information
+
+**Status**: ✅ **COMPLETE** - Midtrans 3DS callback processing fully functional with correct service type usage
+
 ### September 4, 2025: CMS Page Editor Duplicate Toast Notification Fix ✅
 
 **✅ DUPLICATE TOAST NOTIFICATION ISSUE RESOLVED**: Fixed multiple duplicate toast notifications appearing when editing and saving CMS pages
