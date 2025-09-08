@@ -74,6 +74,15 @@ export default function BillingPeriodSelector({
               const discount = calculateDiscount(option.regular_price, option.promo_price)
               const finalPrice = option.promo_price || option.regular_price
               const isSelected = selectedPeriod === option.period
+              
+              // Debug: log pricing data
+              console.log('Debug option:', {
+                period: option.period,
+                promo_price: option.promo_price,
+                regular_price: option.regular_price,
+                finalPrice,
+                shouldShowCrossed: option.promo_price && option.regular_price > 0 && option.regular_price !== option.promo_price
+              })
 
               return (
                 <div
