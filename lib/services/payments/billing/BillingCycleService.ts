@@ -11,7 +11,7 @@ export interface BillingCycle {
   current_period_start: Date
   current_period_end: Date
   next_billing_date: Date
-  billing_period: 'monthly' | 'yearly'
+  billing_period: 'monthly' | 'annual'
   amount: number
   currency: string
   is_active: boolean
@@ -22,7 +22,7 @@ export class BillingCycleService {
   /**
    * Calculate next billing date based on current period and billing period
    */
-  calculateNextBillingDate(currentDate: Date, billingPeriod: 'monthly' | 'yearly'): Date {
+  calculateNextBillingDate(currentDate: Date, billingPeriod: 'monthly' | 'annual'): Date {
     const nextDate = new Date(currentDate)
     
     if (billingPeriod === 'monthly') {
@@ -37,7 +37,7 @@ export class BillingCycleService {
   /**
    * Calculate billing amount from pricing tiers
    */
-  calculateBillingAmountFromTiers(pricingTiers: any, billingPeriod: 'monthly' | 'yearly'): number {
+  calculateBillingAmountFromTiers(pricingTiers: any, billingPeriod: 'monthly' | 'annual'): number {
     const currency = 'IDR' // Should be determined from user location
     
     if (pricingTiers?.[billingPeriod]?.[currency]) {
@@ -101,7 +101,7 @@ export class BillingCycleService {
   async updateBillingCycle(
     userId: string, 
     packageId: string, 
-    billingPeriod: 'monthly' | 'yearly'
+    billingPeriod: 'monthly' | 'annual'
   ): Promise<boolean> {
     try {
       const currentDate = new Date()

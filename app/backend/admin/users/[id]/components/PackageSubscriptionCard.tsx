@@ -118,7 +118,7 @@ export function PackageSubscriptionCard({ user }: PackageSubscriptionCardProps) 
                     })()}
                   </span>
                   <span className="text-sm text-[#6C757D]">
-                    per {user.package.billing_period}
+                    per {user.package.billing_period === 'yearly' ? 'annual' : user.package.billing_period}
                   </span>
                 </div>
               </div>

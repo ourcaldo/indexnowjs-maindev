@@ -218,10 +218,10 @@ export async function POST(request: NextRequest) {
             break
           }
           
-          // Check yearly pricing
+          // Check annual pricing
           if (yearlyUSD && (yearlyUSD.regular_price === transactionAmountUSD || yearlyUSD.promo_price === transactionAmountUSD)) {
             matchedPackage = pkg
-            billing_period = 'yearly'
+            billing_period = 'annual'
             break
           }
           
