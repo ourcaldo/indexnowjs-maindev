@@ -6548,6 +6548,22 @@ ON public.indb_cms_posts(category, status);
 
 ## Recent Changes
 
+### September 08, 2025 - Terms of Service Refund Policy Enhancement ✅
+
+📄 **COMPREHENSIVE REFUND POLICY RESTRUCTURING**: Enhanced terms-of-service.md with comprehensive refund policy rules to prevent abuse and clarify customer expectations
+- **Problem**: Original refund policy lacked specific anti-abuse measures and clear eligibility requirements, potentially allowing exploitation through multiple accounts
+- **Enhancement**: Restructured entire refund policy section with detailed rules, eligibility requirements, and anti-abuse measures
+- **Key Rules Added**:
+  - **First Invoice Only**: Refunds apply only to first subscription payment (not renewals) - prevents recurring refund abuse
+  - **One Refund per Customer**: Each customer eligible for only one refund to prevent account creation abuse
+  - **Trial Period Exclusion**: Users who used free trial cannot get refunds - prevents trial + refund stacking
+  - **Anti-Abuse Detection**: Reserve right to refuse refunds for users detected with multiple accounts or same payment details
+  - **Annual Plan Clarification**: 30-day refund window for annual plans with no prorated refunds after period
+  - **Verification Requirements**: Must contact from account email with subscription ID/invoice number for ownership verification
+- **Legal Protection**: Added comprehensive abuse clauses covering multiple email accounts, payment method reuse, and account circumvention attempts
+- **Business Impact**: Protects revenue while maintaining fair refund policy for legitimate first-time customers
+- **Files Modified**: `terms-of-service.md` - Enhanced section 6 "Refund Policy" with structured subsections for clarity
+
 ### September 08, 2025 - UI/UX Mobile Responsiveness & Pricing Display Fixes ✅
 
 - 📱 **MOBILE RESPONSIVE PERIOD SELECTOR BUTTONS**: Fixed responsive layout issues for billing period selectors across all pricing components
