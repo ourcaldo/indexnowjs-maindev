@@ -247,7 +247,7 @@ export default function PlansTab() {
   }
 
   const billingPeriods = [
-    { key: 'monthly', label: 'Monthly', suffix: '/month' },
+    { key: 'monthly', label: 'Monthly' },
     { key: 'annual', label: 'Annual', suffix: '/year' }
   ]
 
