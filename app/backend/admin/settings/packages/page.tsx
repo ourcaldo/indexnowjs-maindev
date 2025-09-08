@@ -142,7 +142,7 @@ export default function PackageManagement() {
       ...packageData,
       features: packageData.features || [],
       quota_limits: packageData.quota_limits || {},
-      pricing_tiers: packageData.pricing_tiers || []
+      pricing_tiers: packageData.pricing_tiers || {}
     })
 
     const updateField = (field: keyof PaymentPackage, value: any) => {
@@ -157,7 +157,7 @@ export default function PackageManagement() {
     }
 
     const updatePricingTierField = (period: string, currency: 'IDR' | 'USD', field: keyof CurrencyPricing, value: any) => {
-      const currentTiers = formData.pricing_tiers || {}
+      const currentTiers = (formData.pricing_tiers as any) || {}
       
       // Ensure period object exists
       if (!currentTiers[period]) {
@@ -207,14 +207,6 @@ export default function PackageManagement() {
         monthly: {
           IDR: { period_label: 'Monthly', regular_price: 0, promo_price: 0 },
           USD: { period_label: 'Monthly', regular_price: 0, promo_price: 0 }
-        },
-        quarterly: {
-          IDR: { period_label: '3 Months', regular_price: 0, promo_price: 0 },
-          USD: { period_label: '3 Months', regular_price: 0, promo_price: 0 }
-        },
-        biannual: {
-          IDR: { period_label: '6 Months', regular_price: 0, promo_price: 0 },
-          USD: { period_label: '6 Months', regular_price: 0, promo_price: 0 }
         },
         annual: {
           IDR: { period_label: '12 Months', regular_price: 0, promo_price: 0 },
@@ -359,11 +351,9 @@ export default function PackageManagement() {
               <div className="space-y-6">
                 {[
                   { period: 'monthly', label: 'Monthly', defaultLabel: 'Monthly' },
-                  { period: 'quarterly', label: '3 Months', defaultLabel: '3 Months' },
-                  { period: 'biannual', label: '6 Months', defaultLabel: '6 Months' },
                   { period: 'annual', label: '12 Months', defaultLabel: '12 Months' }
                 ].map((periodInfo, index) => {
-                  const tierData = formData.pricing_tiers?.[periodInfo.period] || {}
+                  const tierData = (formData.pricing_tiers as any)?.[periodInfo.period] || {}
                   
                   return (
                     <div key={periodInfo.period} className="p-6 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
