@@ -209,8 +209,8 @@ export default function PackageManagement() {
           USD: { period_label: 'Monthly', regular_price: 0, promo_price: 0 }
         },
         annual: {
-          IDR: { period_label: '12 Months', regular_price: 0, promo_price: 0 },
-          USD: { period_label: '12 Months', regular_price: 0, promo_price: 0 }
+          IDR: { period_label: 'Annual', regular_price: 0, promo_price: 0 },
+          USD: { period_label: 'Annual', regular_price: 0, promo_price: 0 }
         }
       }
       setFormData(prev => ({ ...prev, pricing_tiers: defaultTiers }))
@@ -351,7 +351,7 @@ export default function PackageManagement() {
               <div className="space-y-6">
                 {[
                   { period: 'monthly', label: 'Monthly', defaultLabel: 'Monthly' },
-                  { period: 'annual', label: '12 Months', defaultLabel: '12 Months' }
+                  { period: 'annual', label: 'Annual', defaultLabel: 'Annual' }
                 ].map((periodInfo, index) => {
                   const tierData = (formData.pricing_tiers as any)?.[periodInfo.period] || {}
                   
