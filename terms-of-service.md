@@ -80,12 +80,25 @@ We may offer free trial periods for new users. Trial subscriptions will automati
 **6. Refund Policy**
 
 We offer refunds according to the following policy:
+
+**Eligibility Requirements:**
+- **First Invoice Only**: Refunds apply only to the first subscription payment (not renewals). Subsequent renewals are non-refundable.
 - **New Subscriptions**: Full refund within 30 days of initial purchase
-- **Renewals**: Refunds may be provided at our discretion based on circumstances
+- **One Refund per Customer**: Each customer is eligible for a refund once. Accounts created to circumvent this policy will not be refunded.
+- **Trial Period Exclusion**: Refunds are not available for users who have already used a free trial.
+
+**Refund Categories:**
+- **New Subscriptions**: Full refund within 30 days of initial purchase for first-time customers
+- **Renewals**: Non-refundable - refunds do not apply to subscription renewals
 - **Usage-based charges**: Non-refundable as they reflect actual service consumption
 - **Partial periods**: No refunds for partial billing periods
+- **Annual Subscriptions**: Refunds for annual subscriptions are only available if requested within 30 days of purchase. No prorated refunds are provided after this period.
 
-To request a refund, contact our support team with your account details and reason for the request.
+**Refund Request Process:**
+To process a refund request, you must contact our support team from the email address associated with your account and provide your subscription ID or recent invoice number. We may require additional details to verify ownership of the account.
+
+**Anti-Abuse Policy:**
+We provide refunds only once per customer. Creating multiple accounts, using the same payment details, or otherwise attempting to circumvent this policy constitutes abuse, and we reserve the right to deny refunds in such cases. We reserve the right to refuse a refund if we determine the account has been misused or abused, including but not limited to users detected signing up multiple times with the same or different email addresses.
 
 **7. Account Suspension for Non-Payment**
 
