@@ -66,7 +66,6 @@ export default function BillingPeriodSelector({
         <RadioGroup 
           value={selectedPeriod} 
           onValueChange={(value) => {
-            console.log('BillingPeriodSelector: Changing period from', selectedPeriod, 'to', value)
             onPeriodChange(value)
           }}
         >
@@ -86,7 +85,6 @@ export default function BillingPeriodSelector({
                   }`}
                   onClick={(e) => {
                     e.preventDefault()
-                    console.log('Clicked on period option:', option.period)
                     onPeriodChange(option.period)
                   }}
                 >
@@ -105,7 +103,6 @@ export default function BillingPeriodSelector({
                         className="cursor-pointer flex items-center space-x-2"
                         onClick={(e) => {
                           e.preventDefault()
-                          console.log('Label clicked for period:', option.period)
                           onPeriodChange(option.period)
                         }}
                       >
@@ -122,7 +119,7 @@ export default function BillingPeriodSelector({
                     
                     <div className="text-right">
                       <div className="flex items-center space-x-2">
-                        {option.promo_price && (
+                        {option.promo_price && option.regular_price > 0 && option.regular_price !== option.promo_price && (
                           <span className="text-sm text-[#6C757D] line-through">
                             {formatCurrency(option.regular_price, userCurrency)}
                           </span>
