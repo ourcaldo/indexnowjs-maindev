@@ -6548,6 +6548,61 @@ ON public.indb_cms_posts(category, status);
 
 ## Recent Changes
 
+### September 08, 2025 - UI/UX Mobile Responsiveness & Pricing Display Fixes ✅
+
+- 📱 **MOBILE RESPONSIVE PERIOD SELECTOR BUTTONS**: Fixed responsive layout issues for billing period selectors across all pricing components
+  - **Problem**: Ajax period buttons (Monthly, 3 Month, 6 Month, Yearly) were not responsive on mobile devices, causing poor user experience on phones and tablets
+  - **Root Cause**: Period selector components used `inline-flex` layouts that didn't wrap properly on mobile screens with limited width
+  - **Components Fixed**:
+    - `app/(public)/pricing/components/PricingPageContent.tsx` - Main pricing page period tabs
+    - `components/landing/PricingTeaserSection.tsx` - Landing page pricing section period selector
+    - `app/dashboard/settings/plans-billing/components/PricingCards.tsx` - Dashboard billing period selector
+  - **Solution Implemented**:
+    - **Responsive Grid Layout**: Changed from `inline-flex` to `grid grid-cols-2 sm:grid-cols-4` for mobile-first responsive design
+    - **Mobile Optimization**: Reduced padding from `px-6 py-3` to `px-3 py-2 sm:px-6 sm:py-3` for better mobile tap targets
+    - **Text Scaling**: Added responsive text sizing with `text-sm sm:text-base` for optimal readability
+    - **Responsive Container**: Added `max-w-md sm:max-w-none` to ensure proper mobile container sizing
+    - **Stacking Control**: Used `block sm:inline` for savings labels to stack properly on mobile
+  - **Results**: Perfect responsive behavior with 2x2 grid on mobile expanding to 1x4 on larger screens, improved mobile user experience
+
+- 💰 **PRICING DISPLAY BUG FIXED**: Resolved "0 $10" crossed-out pricing display when regular price is empty or zero
+  - **Problem**: When packages had empty/null regular_price and valid promo_price, system displayed "0 $10" with crossed-out zero instead of just "$10"
+  - **Root Cause**: Pricing logic didn't properly validate regular_price before setting it as originalPrice for crossed-out display
+  - **Impact**: Confusing pricing display for users, making promotions appear incorrect and unprofessional
+  - **Files Fixed**:
+    - `hooks/business/usePricingData.ts` - Core pricing calculation logic
+    - `components/trial/TrialOptions.tsx` - Trial pricing display and calculation
+    - `app/dashboard/settings/plans-billing/components/PricingCards.tsx` - Dashboard pricing display
+  - **Solution Implemented**:
+    - **Enhanced Validation**: Added `tierData.regular_price > 0` check before setting originalPrice
+    - **Proper Comparison**: Only show crossed-out price when `regular_price !== promo_price` AND `regular_price > 0`
+    - **Display Logic Fix**: Added condition `originalPrice > 0 && originalPrice > price` for crossed-out display
+    - **Consistent Logic**: Applied same validation pattern across all pricing components
+  - **Results**: Clean pricing display showing only actual discounts, eliminated confusing "0" crossed-out prices
+
+- 🗑️ **QUOTA CARD COMPONENT REMOVAL**: Completely removed QuotaCard component from user dashboard as requested
+  - **Component Deleted**: `components/QuotaCard.tsx` - 361-line component handling quota display and management
+  - **References Cleaned**: Removed import and usage from `app/dashboard/page.tsx`
+  - **Files Modified**:
+    - Removed: `import QuotaCard from '@/components/QuotaCard'` (line 23)
+    - Removed: `{hasActivePackage && <QuotaCard userProfile={userProfile} />}` (line 351)
+  - **Results**: Cleaner dashboard interface without quota display card, maintained all other dashboard functionality
+
+**Technical Implementation Details**:
+- **Mobile-First Responsive Design**: Used Tailwind CSS responsive prefixes (`sm:`, `md:`) for optimal mobile experience
+- **CSS Grid System**: Leveraged CSS Grid for better mobile period selector layout control compared to flexbox
+- **Conditional Rendering Logic**: Enhanced pricing logic with proper null/zero validation before displaying crossed-out prices
+- **Component Cleanup**: Complete removal of QuotaCard component without affecting other dashboard functionality
+- **Cross-Component Consistency**: Applied same responsive patterns across all pricing-related components
+
+**User Experience Improvements**:
+- **Better Mobile Navigation**: Period selectors now work perfectly on all mobile devices with proper touch targets
+- **Cleaner Pricing Display**: Eliminated confusing "0" crossed-out prices, showing only genuine discounts
+- **Simplified Dashboard**: Removed quota card clutter as requested while maintaining essential functionality
+- **Consistent UI/UX**: All pricing components now follow same responsive design patterns
+
+**Status**: ✅ **COMPLETE** - All three requested UI/UX fixes implemented successfully with improved mobile responsiveness, clean pricing display, and simplified dashboard interface
+
 ### September 06, 2025 - Performance Issues 2 & 3 Security Fixes Complete ⚡
 
 - ⚡ **PERFORMANCE ISSUE 2 RESOLVED: Large Payment Payloads Optimization**: Significantly reduced bandwidth usage and improved payment history load times
