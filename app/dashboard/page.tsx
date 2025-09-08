@@ -282,73 +282,9 @@ export default function Dashboard() {
   }
 
   // Skeleton loading for user profile card
-  const UserProfileSkeleton = () => (
-    <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-[#E0E6ED] rounded-full animate-pulse"></div>
-          <div>
-            <div className="h-5 bg-[#E0E6ED] rounded w-48 mb-2 animate-pulse"></div>
-            <div className="h-4 bg-[#E0E6ED] rounded w-64 animate-pulse"></div>
-          </div>
-        </div>
-        <div className="w-20 h-8 bg-[#E0E6ED] rounded-full animate-pulse"></div>
-      </div>
-      <div className="grid md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-[#F7F9FC] rounded-lg p-4 border border-[#E0E6ED]">
-            <div className="h-3 bg-[#E0E6ED] rounded w-20 mb-2 animate-pulse"></div>
-            <div className="h-6 bg-[#E0E6ED] rounded w-12 animate-pulse"></div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
 
   return (
     <div className="space-y-8">
-      {/* User Profile Card */}
-      {isDataLoading ? (
-        <UserProfileSkeleton />
-      ) : userProfile && hasActivePackage ? (
-        <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#3D8BFF] to-[#1C2331] rounded-full flex items-center justify-center">
-                <span className="text-lg font-bold text-white">
-                  {userProfile.full_name?.charAt(0) || userProfile.email?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-[#1A1A1A]">
-                  Welcome back, {userProfile.full_name || 'User'}!
-                </h2>
-                <p className="text-[#6C757D]">
-                  Track your keyword rankings and monitor your SEO performance
-                </p>
-              </div>
-            </div>
-            
-            {userProfile.package && (
-              <div className="text-right">
-                <div className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${
-                  userProfile.package.slug === 'free' ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20' :
-                  userProfile.package.slug === 'premium' ? 'bg-[#3D8BFF]/10 text-[#3D8BFF] border-[#3D8BFF]/20' :
-                  userProfile.package.slug === 'pro' ? 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20' :
-                  'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
-                }`}>
-                  {userProfile.package.name}
-                </div>
-                <p className="text-xs text-[#6C757D] mt-1">
-                  {userProfile.package.slug === 'free' ? 'Free Plan' : 
-                   `Subscribed • ${userProfile.package.billing_period}`}
-                </p>
-              </div>
-            )}
-          </div>
-
-        </div>
-      ) : null}
 
       {/* No Active Package State */}
       {isDataLoading ? (
