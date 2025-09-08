@@ -122,7 +122,7 @@ export const PricingCards = ({
 
               <div className="mb-4">
                 <div className="flex items-baseline gap-1">
-                  {pricing.originalPrice && (
+                  {pricing.originalPrice && pricing.originalPrice > 0 && pricing.originalPrice > pricing.price && (
                     <span className={`text-sm line-through ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
                       {formatCurrency(pricing.originalPrice, userCurrency)}
                     </span>

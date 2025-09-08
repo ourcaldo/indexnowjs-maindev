@@ -178,7 +178,7 @@ export const usePricingData = (options: UsePricingDataOptions = {}) => {
     
     const tierData = periodData[currency]
     const price = tierData.promo_price || tierData.regular_price
-    const originalPrice = tierData.regular_price !== tierData.promo_price ? tierData.regular_price : undefined
+    const originalPrice = (tierData.regular_price && tierData.regular_price > 0 && tierData.regular_price !== tierData.promo_price) ? tierData.regular_price : undefined
     const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : undefined
     
     return { 

@@ -79,7 +79,7 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
       const tier = pkg.pricing_tiers[period][userCurrency]
       return {
         price: tier.promo_price || tier.regular_price,
-        originalPrice: tier.regular_price
+        originalPrice: (tier.regular_price && tier.regular_price > 0 && tier.regular_price !== (tier.promo_price || tier.regular_price)) ? tier.regular_price : 0
       }
     }
 
@@ -188,7 +188,7 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
                         {formatCurrency(pricing.price)}
                       </span>
                       <span className="text-sm text-gray-500">/month</span>
-                      {pricing.originalPrice > pricing.price && (
+                      {pricing.originalPrice > 0 && pricing.originalPrice > pricing.price && (
                         <span className="text-sm text-gray-400 line-through">
                           {formatCurrency(pricing.originalPrice)}
                         </span>
