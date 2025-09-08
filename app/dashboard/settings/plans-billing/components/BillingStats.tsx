@@ -157,10 +157,6 @@ export const BillingStats = ({
               </div>
               <p className="text-sm text-[#6C757D]">per {currentSubscription.billing_period}</p>
             </div>
-            <div className="flex justify-end gap-2">
-              <button className="text-sm text-[#6C757D] hover:text-[#1A1A1A]">Cancel subscription</button>
-              <button className="text-sm text-[#3D8BFF] hover:text-[#3D8BFF]/80">Upgrade</button>
-            </div>
           </div>
 
           {/* Usage Stats - Inline 3 Column Layout */}

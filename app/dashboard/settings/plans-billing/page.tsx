@@ -469,10 +469,6 @@ export default function BillingPage() {
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Billing</h1>
           <p className="text-[#6C757D] mt-1">Manage your plan and billing history here.</p>
         </div>
-        <Button onClick={loadAllData} variant="outline">
-          <TrendingUp className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
       </div>
 
       {/* Billing Stats */}
@@ -491,10 +487,6 @@ export default function BillingPage() {
             <h2 className="text-lg font-semibold text-[#1A1A1A]">Billing settings</h2>
             <p className="text-sm text-[#6C757D]">Manage your plan and billing history here.</p>
           </div>
-          <Button variant="outline" onClick={toggleComparePlans}>
-            <Package className="h-4 w-4 mr-2" />
-            {showComparePlans ? 'Hide comparison' : 'Compare plans'}
-          </Button>
         </div>
 
         <PricingTable
