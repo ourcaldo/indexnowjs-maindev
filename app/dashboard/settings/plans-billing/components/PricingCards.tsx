@@ -67,12 +67,12 @@ export const PricingCards = ({
   return (
     <div className="space-y-6">
       {/* Billing Period Selector */}
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {billingPeriods.map((period) => (
           <button
             key={period.key}
             onClick={() => setSelectedBillingPeriod(period.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm font-medium transition-colors text-center ${
               selectedBillingPeriod === period.key
                 ? 'bg-[#1A1A1A] text-white'
                 : 'bg-[#F7F9FC] text-[#6C757D] border border-[#E0E6ED] hover:bg-[#E0E6ED]'

@@ -56,22 +56,22 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
 
         {/* Period Tabs */}
         <div className="flex justify-center mb-12">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 inline-flex items-center">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 grid grid-cols-2 sm:grid-cols-4 gap-1 w-full max-w-md sm:max-w-none sm:inline-flex sm:w-auto">
             {periodOptions.map((option) => {
               const savings = getSavingsPercentage(option.key)
               return (
                 <button
                   key={option.key}
                   onClick={() => setSelectedPeriod(option.key)}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                  className={`px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-medium transition-all duration-300 text-sm sm:text-base text-center ${
                     selectedPeriod === option.key
                       ? 'bg-white text-black shadow-lg'
                       : 'text-gray-300 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <span>{option.label}</span>
+                  <span className="block sm:inline">{option.label}</span>
                   {selectedPeriod === option.key && savings && (
-                    <span className="ml-2 text-xs text-green-600 font-semibold">
+                    <span className="ml-1 sm:ml-2 text-xs text-green-600 font-semibold block sm:inline">
                       Save {savings}%
                     </span>
                   )}
