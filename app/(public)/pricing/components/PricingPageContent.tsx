@@ -39,8 +39,6 @@ export default function PricingPageContent() {
 
   const periodOptions = [
     { key: 'monthly' as const, label: 'Monthly' },
-    { key: 'quarterly' as const, label: 'Quarterly' },
-    { key: 'biannual' as const, label: 'Biannual' },
     { key: 'annual' as const, label: 'Annual' }
   ]
 
@@ -161,30 +159,34 @@ export default function PricingPageContent() {
         {/* 2) Pricing Table */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
-            {/* Period Tabs */}
+            {/* Period Toggle */}
             <div className="flex justify-center mb-12">
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 grid grid-cols-2 sm:grid-cols-4 gap-1 w-full max-w-md sm:max-w-none sm:inline-flex sm:w-auto">
-                {periodOptions.map((option) => {
-                  const savings = getSavingsPercentage(option.key)
-                  return (
-                    <button
-                      key={option.key}
-                      onClick={() => setSelectedPeriod(option.key)}
-                      className={`px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-medium transition-all duration-300 text-sm sm:text-base text-center ${
-                        selectedPeriod === option.key
-                          ? 'bg-white text-black shadow-lg'
-                          : 'text-gray-300 hover:text-white hover:bg-white/10'
-                      }`}
-                    >
-                      <span className="block sm:inline">{option.label}</span>
-                      {selectedPeriod === option.key && savings && (
-                        <span className="ml-1 sm:ml-2 text-xs text-green-600 font-semibold block sm:inline">
-                          Save {savings}%
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 inline-flex">
+                <button
+                  onClick={() => setSelectedPeriod('monthly')}
+                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 text-base ${
+                    selectedPeriod === 'monthly'
+                      ? 'bg-white text-black shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setSelectedPeriod('annual')}
+                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 text-base ${
+                    selectedPeriod === 'annual'
+                      ? 'bg-white text-black shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span>Annual</span>
+                  {selectedPeriod === 'annual' && getSavingsPercentage('annual') && (
+                    <span className="ml-2 text-xs text-green-600 font-semibold">
+                      Save {getSavingsPercentage('annual')}%
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -245,9 +247,7 @@ export default function PricingPageContent() {
                           </div>
                           <div>
                             <span className="text-gray-400 text-sm">
-                              per {selectedPeriod === 'monthly' ? 'month' : 
-                                   selectedPeriod === 'quarterly' ? '3 months' :
-                                   selectedPeriod === 'biannual' ? '6 months' : 'year'}
+                              per {selectedPeriod === 'monthly' ? 'month' : 'year'}
                             </span>
                           </div>
                         </div>

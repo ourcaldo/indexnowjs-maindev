@@ -32,8 +32,6 @@ export interface PackageData {
   pricing_tiers: {
     annual: PricingTierData
     monthly: PricingTierData
-    biannual: PricingTierData
-    quarterly: PricingTierData
   }
   is_popular?: boolean
   is_active?: boolean
@@ -48,7 +46,7 @@ export interface PriceInfo {
   periodLabel?: string
 }
 
-export type BillingPeriod = 'monthly' | 'quarterly' | 'biannual' | 'annual'
+export type BillingPeriod = 'monthly' | 'annual'
 export type Currency = 'USD' | 'IDR'
 
 export interface UsePricingDataOptions {
@@ -243,13 +241,13 @@ export const usePricingData = (options: UsePricingDataOptions = {}) => {
 
   // Get available billing periods
   const getAvailablePeriods = (): BillingPeriod[] => {
-    if (packages.length === 0) return ['monthly', 'quarterly', 'biannual', 'annual']
+    if (packages.length === 0) return ['monthly', 'annual']
     
     const firstPackage = packages[0]
     const periods = Object.keys(firstPackage.pricing_tiers) as BillingPeriod[]
     
-    // Define the order: monthly → quarterly → biannual → annual
-    const periodOrder: BillingPeriod[] = ['monthly', 'quarterly', 'biannual', 'annual']
+    // Define the order: monthly → annual
+    const periodOrder: BillingPeriod[] = ['monthly', 'annual']
     
     return periodOrder.filter(period => periods.includes(period))
   }
@@ -275,7 +273,7 @@ export const usePricingData = (options: UsePricingDataOptions = {}) => {
     if (monthlyPrice === 0 || periodPrice === 0) return null
     
     // Calculate monthly equivalent for period price
-    const periodMultiplier = period === 'quarterly' ? 3 : period === 'biannual' ? 6 : 12
+    const periodMultiplier = period === 'annual' ? 12 : 1
     const monthlyEquivalent = periodPrice / periodMultiplier
     
     if (monthlyEquivalent >= monthlyPrice) return null

@@ -59,28 +59,35 @@ export const PricingCards = ({
 }: PricingCardsProps) => {
   const billingPeriods = [
     { key: 'monthly', label: 'Monthly', suffix: '/month' },
-    { key: 'quarterly', label: '3 Months', suffix: '/3 months' },
-    { key: 'biannual', label: '6 Months', suffix: '/6 months' },
     { key: 'annual', label: '12 Months', suffix: '/year' }
   ]
 
   return (
     <div className="space-y-6">
-      {/* Billing Period Selector */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {billingPeriods.map((period) => (
+      {/* Billing Period Toggle */}
+      <div className="flex justify-center">
+        <div className="bg-[#F7F9FC] rounded-lg p-1 inline-flex border border-[#E0E6ED]">
           <button
-            key={period.key}
-            onClick={() => setSelectedBillingPeriod(period.key)}
-            className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-sm font-medium transition-colors text-center ${
-              selectedBillingPeriod === period.key
-                ? 'bg-[#1A1A1A] text-white'
-                : 'bg-[#F7F9FC] text-[#6C757D] border border-[#E0E6ED] hover:bg-[#E0E6ED]'
+            onClick={() => setSelectedBillingPeriod('monthly')}
+            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+              selectedBillingPeriod === 'monthly'
+                ? 'bg-[#1A1A1A] text-white shadow-sm'
+                : 'text-[#6C757D] hover:text-[#1A1A1A]'
             }`}
           >
-            {period.label}
+            Monthly
           </button>
-        ))}
+          <button
+            onClick={() => setSelectedBillingPeriod('annual')}
+            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+              selectedBillingPeriod === 'annual'
+                ? 'bg-[#1A1A1A] text-white shadow-sm'
+                : 'text-[#6C757D] hover:text-[#1A1A1A]'
+            }`}
+          >
+            Annual
+          </button>
+        </div>
       </div>
 
       {/* Package Cards */}

@@ -5,7 +5,7 @@
 // Basic payment types
 export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'refunded';
 export type PaymentMethod = 'midtrans-snap' | 'midtrans-recurring' | 'bank-transfer' | 'credit-card' | 'paypal';
-export type BillingPeriod = 'monthly' | 'quarterly' | 'biannual' | 'annual';
+export type BillingPeriod = 'monthly' | 'annual';
 export type Currency = 'USD' | 'IDR' | 'EUR' | 'GBP' | 'SGD' | 'MYR';
 
 // Package and pricing
@@ -16,8 +16,6 @@ export interface Package {
   features: string[];
   pricing: {
     monthly: number;
-    quarterly?: number;
-    biannual?: number;
     annual?: number;
     currency: Currency;
   };
