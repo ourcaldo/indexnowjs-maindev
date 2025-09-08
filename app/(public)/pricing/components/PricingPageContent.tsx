@@ -161,32 +161,34 @@ export default function PricingPageContent() {
           <div className="max-w-6xl mx-auto">
             {/* Period Toggle */}
             <div className="flex justify-center mb-12">
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-2 inline-flex">
-                <button
-                  onClick={() => setSelectedPeriod('monthly')}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 text-base ${
-                    selectedPeriod === 'monthly'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
+              <div className="flex items-center space-x-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-4">
+                <span className={`text-base font-medium ${selectedPeriod === 'monthly' ? 'text-white' : 'text-gray-300'}`}>
                   Monthly
-                </button>
+                </span>
                 <button
-                  onClick={() => setSelectedPeriod('annual')}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 text-base ${
-                    selectedPeriod === 'annual'
-                      ? 'bg-white text-black shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  onClick={() => setSelectedPeriod(selectedPeriod === 'monthly' ? 'annual' : 'monthly')}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                    selectedPeriod === 'annual' ? 'bg-white' : 'bg-white/20'
                   }`}
                 >
-                  <span>Annual</span>
-                  {selectedPeriod === 'annual' && getSavingsPercentage('annual') && (
-                    <span className="ml-2 text-xs text-green-600 font-semibold">
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full transition-transform ${
+                      selectedPeriod === 'annual' 
+                        ? 'translate-x-6 bg-black' 
+                        : 'translate-x-1 bg-white'
+                    }`}
+                  />
+                </button>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-base font-medium ${selectedPeriod === 'annual' ? 'text-white' : 'text-gray-300'}`}>
+                    Annual
+                  </span>
+                  {getSavingsPercentage('annual') && (
+                    <span className="text-xs text-green-400 font-semibold bg-green-400/10 px-2 py-1 rounded-full">
                       Save {getSavingsPercentage('annual')}%
                     </span>
                   )}
-                </button>
+                </div>
               </div>
             </div>
 

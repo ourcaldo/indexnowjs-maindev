@@ -66,27 +66,25 @@ export const PricingCards = ({
     <div className="space-y-6">
       {/* Billing Period Toggle */}
       <div className="flex justify-center">
-        <div className="bg-[#F7F9FC] rounded-lg p-1 inline-flex border border-[#E0E6ED]">
-          <button
-            onClick={() => setSelectedBillingPeriod('monthly')}
-            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-              selectedBillingPeriod === 'monthly'
-                ? 'bg-[#1A1A1A] text-white shadow-sm'
-                : 'text-[#6C757D] hover:text-[#1A1A1A]'
-            }`}
-          >
+        <div className="flex items-center space-x-4">
+          <span className={`text-sm font-medium ${selectedBillingPeriod === 'monthly' ? 'text-[#1A1A1A]' : 'text-[#6C757D]'}`}>
             Monthly
-          </button>
+          </span>
           <button
-            onClick={() => setSelectedBillingPeriod('annual')}
-            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-              selectedBillingPeriod === 'annual'
-                ? 'bg-[#1A1A1A] text-white shadow-sm'
-                : 'text-[#6C757D] hover:text-[#1A1A1A]'
+            onClick={() => setSelectedBillingPeriod(selectedBillingPeriod === 'monthly' ? 'annual' : 'monthly')}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              selectedBillingPeriod === 'annual' ? 'bg-[#1A1A1A]' : 'bg-[#E0E6ED]'
             }`}
           >
-            Annual
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                selectedBillingPeriod === 'annual' ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
           </button>
+          <span className={`text-sm font-medium ${selectedBillingPeriod === 'annual' ? 'text-[#1A1A1A]' : 'text-[#6C757D]'}`}>
+            Annual
+          </span>
         </div>
       </div>
 

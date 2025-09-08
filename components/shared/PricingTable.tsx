@@ -58,23 +58,48 @@ const PricingTable: React.FC<PricingTableProps> = ({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Period Selector */}
-      <div className="flex flex-wrap gap-2 justify-center">
-        {availablePeriods.map((period) => {
-          const periodLabel = getPeriodLabel(period)
-          return (
+      <div className="flex justify-center">
+        {availablePeriods.length === 2 ? (
+          <div className="flex items-center space-x-4">
+            <span className={`text-sm font-medium ${selectedPeriod === availablePeriods[0] ? 'text-[#1A1A1A]' : 'text-[#6C757D]'}`}>
+              {getPeriodLabel(availablePeriods[0])}
+            </span>
             <button
-              key={period}
-              onClick={() => setSelectedPeriod(period)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedPeriod === period
-                  ? 'bg-[#1A1A1A] text-white'
-                  : 'bg-[#F7F9FC] text-[#6C757D] border border-[#E0E6ED] hover:bg-[#E0E6ED]'
+              onClick={() => setSelectedPeriod(selectedPeriod === availablePeriods[0] ? availablePeriods[1] : availablePeriods[0])}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                selectedPeriod === availablePeriods[1] ? 'bg-[#1A1A1A]' : 'bg-[#E0E6ED]'
               }`}
             >
-              {periodLabel}
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  selectedPeriod === availablePeriods[1] ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
             </button>
-          )
-        })}
+            <span className={`text-sm font-medium ${selectedPeriod === availablePeriods[1] ? 'text-[#1A1A1A]' : 'text-[#6C757D]'}`}>
+              {getPeriodLabel(availablePeriods[1])}
+            </span>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2 justify-center">
+            {availablePeriods.map((period) => {
+              const periodLabel = getPeriodLabel(period)
+              return (
+                <button
+                  key={period}
+                  onClick={() => setSelectedPeriod(period)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedPeriod === period
+                      ? 'bg-[#1A1A1A] text-white'
+                      : 'bg-[#F7F9FC] text-[#6C757D] border border-[#E0E6ED] hover:bg-[#E0E6ED]'
+                  }`}
+                >
+                  {periodLabel}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Package Cards */}
