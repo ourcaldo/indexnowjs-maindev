@@ -161,7 +161,7 @@ export default function PricingPageContent() {
           <div className="max-w-6xl mx-auto">
             {/* Period Toggle */}
             <div className="flex justify-center mb-12">
-              <div className="flex items-center space-x-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-4">
+              <div className="flex items-center space-x-6 rounded-2xl border border-white/10 p-4">
                 <span className={`text-base font-medium ${selectedPeriod === 'monthly' ? 'text-white' : 'text-gray-300'}`}>
                   Monthly
                 </span>

@@ -188,11 +188,11 @@ export default function PlansTab() {
   const handleSubscribe = async (packageId: string) => {
     try {
       setSubscribing(packageId)
-      
+
       // Redirect to checkout page with package and billing period
       const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
       window.location.href = checkoutUrl
-      
+
     } catch (error) {
       console.error('Error subscribing:', error)
       alert(error instanceof Error ? error.message : 'Failed to redirect to checkout')
@@ -204,11 +204,11 @@ export default function PlansTab() {
   const handleStartTrial = async (packageId: string) => {
     try {
       setStartingTrial(packageId)
-      
+
       // Redirect to checkout page with trial parameter
       const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=monthly&trial=true`
       window.location.href = checkoutUrl
-      
+
     } catch (error) {
       console.error('Error starting trial:', error)
       alert(error instanceof Error ? error.message : 'Failed to start trial')
@@ -248,9 +248,7 @@ export default function PlansTab() {
 
   const billingPeriods = [
     { key: 'monthly', label: 'Monthly', suffix: '/month' },
-    { key: 'quarterly', label: '3 Months', suffix: '/3 months' },
-    { key: 'biannual', label: '6 Months', suffix: '/6 months' },
-    { key: 'annual', label: '12 Months', suffix: '/year' }
+    { key: 'annual', label: 'Annual', suffix: '/year' }
   ]
 
   // Get features directly from database - ONLY from database, no hardcoded features
@@ -262,7 +260,7 @@ export default function PlansTab() {
   const toggleComparePlans = () => {
     const newShowComparePlans = !showComparePlans
     setShowComparePlans(newShowComparePlans)
-    
+
     if (newShowComparePlans) {
       // Show all plan details when comparing
       const allExpanded: Record<string, boolean> = {}
@@ -279,7 +277,7 @@ export default function PlansTab() {
   const togglePlanDetails = (planId: string) => {
     // Don't allow individual toggle when compare mode is active
     if (showComparePlans) return
-    
+
     // Only toggle the specific plan, clear all others
     setExpandedPlans({
       [planId]: !expandedPlans[planId]
@@ -311,7 +309,7 @@ export default function PlansTab() {
       <div className="text-center">
         <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">Choose Your Plan</h2>
         <p className="text-[#6C757D]">Select the perfect plan for your URL indexing needs</p>
-        
+
         {/* Compare Plans Button */}
         <div className="mt-4">
           <button 
@@ -332,7 +330,7 @@ export default function PlansTab() {
               onClick={() => setSelectedBillingPeriod(period.key)}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 selectedBillingPeriod === period.key
-                  ? 'bg-white text-[#1A1A1A] shadow-sm'
+                  ? 'bg-white text-[#1A1A1A] shadow-sm backdrop-blur-sm'
                   : 'text-[#6C757D] hover:text-[#1A1A1A]'
               }`}
             >
@@ -352,7 +350,7 @@ export default function PlansTab() {
         {packagesData?.packages.map((pkg) => {
           const pricingInfo = getBillingPeriodPrice(pkg, selectedBillingPeriod)
           const currentPeriod = billingPeriods.find(p => p.key === selectedBillingPeriod)
-          
+
           return (
             <div
               key={`plan-${pkg.id}-${selectedBillingPeriod}`}
@@ -388,7 +386,7 @@ export default function PlansTab() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">{pkg.name}</h3>
                 <p className="text-[#6C757D] mb-6">{pkg.description}</p>
-                
+
                 <div className="mb-6">
                   {pricingInfo.originalPrice && (
                     <div className="text-[#6C757D] line-through text-lg mb-1">

@@ -21,7 +21,7 @@ interface PackageFeature {
 }
 
 interface PricingTier {
-  period: string
+  name: string
   regular_price: number
   promo_price?: number
   discount_percentage?: number
@@ -131,7 +131,7 @@ export default function PlansPage() {
       // This prevents duplicate transaction creation by using only the checkout API
       const checkoutUrl = `/dashboard/settings/plans-billing/checkout?package=${packageId}&period=${selectedBillingPeriod}`
       window.location.href = checkoutUrl
-      
+
     } catch (error) {
       console.error('Error redirecting to checkout:', error)
       alert(error instanceof Error ? error.message : 'Failed to proceed to checkout')
@@ -167,7 +167,7 @@ export default function PlansPage() {
     { key: 'monthly', label: 'Monthly', suffix: '/month' },
     { key: '3-month', label: '3 Months', suffix: '/3 months' },
     { key: '6-month', label: '6 Months', suffix: '/6 months' },
-    { key: '12-month', label: '12 Months', suffix: '/year' }
+    { key: 'annual', label: 'Annual', suffix: '/year' }
   ]
 
   return (
@@ -194,7 +194,7 @@ export default function PlansPage() {
               }`}
             >
               {period.label}
-              {period.key === '12-month' && (
+              {period.key === 'annual' && (
                 <span className="ml-1 text-xs bg-[#4BB543] text-white px-1.5 py-0.5 rounded-full">
                   Save 20%
                 </span>
@@ -209,7 +209,7 @@ export default function PlansPage() {
         {packagesData?.packages.map((pkg) => {
           const pricingInfo = getBillingPeriodPrice(pkg, selectedBillingPeriod)
           const currentPeriod = billingPeriods.find(p => p.key === selectedBillingPeriod)
-          
+
           return (
             <div
               key={pkg.id}
@@ -245,7 +245,7 @@ export default function PlansPage() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">{pkg.name}</h3>
                 <p className="text-[#6C757D] mb-6">{pkg.description}</p>
-                
+
                 <div className="mb-6">
                   {pricingInfo.originalPrice && (
                     <div className="text-[#6C757D] line-through text-lg mb-1">
@@ -276,7 +276,7 @@ export default function PlansPage() {
                     <span className="text-[#6C757D]">{feature}</span>
                   </div>
                 ))}
-                
+
                 {/* Quota Limits */}
                 <div className="pt-4 border-t border-[#E0E6ED]">
                   <div className="space-y-2 text-sm">

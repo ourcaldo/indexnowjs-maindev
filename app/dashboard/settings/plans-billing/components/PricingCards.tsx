@@ -59,7 +59,7 @@ export const PricingCards = ({
 }: PricingCardsProps) => {
   const billingPeriods = [
     { key: 'monthly', label: 'Monthly', suffix: '/month' },
-    { key: 'annual', label: '12 Months', suffix: '/year' }
+    { key: 'annual', label: 'Annual', suffix: '/year' }
   ]
 
   return (
