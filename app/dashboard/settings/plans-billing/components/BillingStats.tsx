@@ -220,8 +220,8 @@ export const BillingStats = ({
                       className="bg-[#F0A202] h-2 rounded-full transition-all duration-300"
                       style={{ 
                         width: `${getUsagePercentage(
-                          keywordUsage?.keywords_used || 147, 
-                          keywordUsage?.keywords_limit || 250, 
+                          keywordUsage?.keywords_used || 0, 
+                          keywordUsage?.keywords_limit || 50, 
                           keywordUsage?.is_unlimited || false
                         )}%` 
                       }}
@@ -231,12 +231,12 @@ export const BillingStats = ({
                     <div className="flex items-center gap-1">
                       <Server className="h-4 w-4 text-[#6C757D]" />
                       <span className="font-semibold text-[#1A1A1A]">
-                        {keywordUsage?.keywords_used || 147}
+                        {keywordUsage?.keywords_used || 0}
                         {!keywordUsage?.is_unlimited && (
                           <span className="text-sm text-[#6C757D] ml-1">
                             ({Math.round(getUsagePercentage(
-                              keywordUsage?.keywords_used || 147, 
-                              keywordUsage?.keywords_limit || 250, 
+                              keywordUsage?.keywords_used || 0, 
+                              keywordUsage?.keywords_limit || 50, 
                               keywordUsage?.is_unlimited || false
                             ))}%)
                           </span>
@@ -244,7 +244,7 @@ export const BillingStats = ({
                       </span>
                     </div>
                     <span className="text-[#6C757D]">
-                      {keywordUsage?.is_unlimited ? 'Unlimited' : (keywordUsage?.keywords_limit || 250)}
+                      {keywordUsage?.is_unlimited ? 'Unlimited' : (keywordUsage?.keywords_limit || 50)}
                     </span>
                   </div>
                 </div>
@@ -264,7 +264,7 @@ export const BillingStats = ({
                     <div className="flex items-center gap-1">
                       <Package className="h-4 w-4 text-[#6C757D]" />
                       <span className="font-semibold text-[#1A1A1A]">
-                        {usageData?.service_account_count || 2}
+                        {usageData?.service_account_count || 0}
                       </span>
                     </div>
                     <span className="text-[#6C757D]">connected</span>

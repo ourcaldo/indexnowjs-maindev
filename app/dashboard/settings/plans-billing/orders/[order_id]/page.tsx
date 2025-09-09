@@ -69,6 +69,7 @@ export default function OrderSuccessPage() {
   const { addToast } = useToast()
   const [orderData, setOrderData] = useState<OrderData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [countdown, setCountdown] = useState(5)
 
   const order_id = params.order_id as string
 
@@ -124,6 +125,20 @@ export default function OrderSuccessPage() {
       fetchOrderData()
     }
   }, [order_id, router, addToast])
+
+  // Auto redirect countdown
+  useEffect(() => {
+    if (!loading && orderData && countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+    
+    if (countdown === 0) {
+      router.push('/dashboard/settings/plans-billing')
+    }
+  }, [countdown, loading, orderData, router])
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
@@ -218,11 +233,16 @@ export default function OrderSuccessPage() {
 
                   {/* Right column */}
                   <div className="text-gray-300 text-sm">
-                    <p>{orderData.customer_info.address}</p>
-                    <p>
-                      {orderData.customer_info.city}, {orderData.customer_info.state}{' '}
-                      {orderData.customer_info.zip_code}
-                    </p>
+                    {orderData.customer_info.address && (
+                      <p>{orderData.customer_info.address}</p>
+                    )}
+                    {(orderData.customer_info.city || orderData.customer_info.state || orderData.customer_info.zip_code) && (
+                      <p>
+                        {[orderData.customer_info.city, orderData.customer_info.state, orderData.customer_info.zip_code]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </p>
+                    )}
                     <p>{orderData.customer_info.country}</p>
                   </div>
                 </div>
@@ -325,10 +345,13 @@ export default function OrderSuccessPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
               Order has saved!
             </h2>
-            <p className="text-gray-500 mb-10 text-sm">
+            <p className="text-gray-500 mb-6 text-sm">
               {orderData.payment_status === 'paid'
                 ? 'Your payment has been confirmed and ready to use.'
                 : 'Click return home to go to back homepage.'}
+            </p>
+            <p className="text-gray-400 mb-10 text-xs">
+              Redirecting in {countdown} seconds...
             </p>
             <Button
               onClick={() =>

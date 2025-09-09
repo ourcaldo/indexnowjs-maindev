@@ -467,12 +467,12 @@ export async function POST(request: NextRequest) {
       let userUpdateData;
       if (isTrialTransaction) {
         const now = new Date();
-        const trialEndDate = new Date(Date.now() + 8 * 60 * 1000); // 8 minutes from now (testing purposes)
+        const trialEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
         
         userUpdateData = {
           package_id: realPackageForMatching.id,
           subscribed_at: now.toISOString(),
-          expires_at: trialEndDate.toISOString(), // Trial expires in 8 minutes (testing purposes)
+          expires_at: trialEndDate.toISOString(), // Trial expires in 3 days
           trial_started_at: now.toISOString(),
           trial_status: 'active',
           auto_billing_enabled: true,

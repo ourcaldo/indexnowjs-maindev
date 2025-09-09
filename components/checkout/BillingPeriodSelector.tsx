@@ -75,14 +75,6 @@ export default function BillingPeriodSelector({
               const finalPrice = option.promo_price || option.regular_price
               const isSelected = selectedPeriod === option.period
               
-              // Debug: log pricing data
-              console.log('Debug option:', {
-                period: option.period,
-                promo_price: option.promo_price,
-                regular_price: option.regular_price,
-                finalPrice,
-                shouldShowCrossed: option.promo_price && option.regular_price > 0 && option.regular_price !== option.promo_price
-              })
 
               return (
                 <div
@@ -92,10 +84,6 @@ export default function BillingPeriodSelector({
                       ? 'border-[#3D8BFF] bg-[#3D8BFF]/5' 
                       : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
                   }`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onPeriodChange(option.period)
-                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -103,17 +91,10 @@ export default function BillingPeriodSelector({
                         value={option.period} 
                         id={`period-${option.period}-${index}`}
                         className={isSelected ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED] text-[#6C757D]'}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                        }}
                       />
                       <Label 
                         htmlFor={`period-${option.period}-${index}`}
                         className="cursor-pointer flex items-center space-x-2"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          onPeriodChange(option.period)
-                        }}
                       >
                         <span className="font-medium text-[#1A1A1A]">
                           {option.period_label}
