@@ -1047,6 +1047,53 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 9, 2025: Critical Duplicate Subscription Creation Fix ✅
+
+**✅ DUPLICATE SUBSCRIPTION CREATION ELIMINATION**: Removed critical duplicate subscription creation logic that caused race conditions and potential double billing
+-- **Issue**: Two separate code paths were creating Midtrans subscriptions for the same payment transaction:
+  - Path 1: MidtransRecurringHandler.processPayment() (lines 164-287) - Created subscription immediately if charge completed without 3DS
+  - Path 2: Midtrans 3DS callback endpoint - Created subscription after 3DS authentication completion
+-- **Root Cause**: Both paths checked for `transaction_status === 'capture' || transaction_status === 'settlement'` and created subscriptions
+-- **Critical Risk**: Potential duplicate subscriptions, double billing, database inconsistency, and conflicting trial logic
+
+**✅ DEAD CODE REMOVAL - RECURRING PAYMENTS ALWAYS USE 3DS**: Eliminated Path 1 subscription creation since recurring card payments ONLY use 3DS authentication
+-- **Architecture Decision**: Confirmed that all Midtrans recurring payments require 3DS authentication, making immediate subscription creation impossible
+-- **Code Removal**: Deleted 123 lines of dead subscription creation code (lines 164-287) from MidtransRecurringHandler
+-- **Eliminated Logic**:
+  - Immediate subscription creation after charge completion
+  - `updateUserTrialSubscription()` and `updateUserSubscription()` method calls
+  - Email sending logic for completed payments
+  - Transaction completion updates in Path 1
+  - User profile updates for subscription activation
+
+**✅ SINGLE SOURCE OF TRUTH ESTABLISHED**: All subscription creation now flows through 3DS callback endpoint exclusively
+-- **Correct Flow**: 
+  1. Frontend → MidtransRecurringHandler creates charge → Always returns 3DS redirect
+  2. User completes 3DS authentication
+  3. 3DS callback endpoint → Creates subscription → Updates user profile → Sends emails
+-- **Safety Mechanism**: Added explicit error handling for unexpected immediate charge completion to catch future edge cases
+-- **Error Logging**: Comprehensive logging for debugging if unexpected flow occurs
+
+**Files Modified:**
+-- `app/api/v1/billing/channels/midtrans-recurring/handler.ts` - Removed duplicate subscription creation logic (lines 164-287)
+
+**Technical Implementation Details:**
+-- **Code Removal**: Eliminated entire subscription creation block including trial handling, user profile updates, and email notifications
+-- **Error Handler Added**: Explicit error thrown if charge completes immediately without 3DS (which should never happen for recurring payments)
+-- **Transaction Tracking**: Failed transactions marked with `error_reason: 'unexpected_immediate_completion_without_3ds'` for monitoring
+-- **Flow Integrity**: Preserved essential charge creation and 3DS redirect handling while eliminating duplication risk
+
+**Payment Processing Flow After Fix:**
+1. Frontend submits recurring payment → MidtransRecurringHandler.processPayment()
+2. Handler creates pending transaction record in database
+3. Handler creates Midtrans charge transaction (always requires 3DS for recurring)
+4. Handler updates transaction status to 'pending_3ds' and returns 3DS redirect URL
+5. User completes 3DS authentication on bank page
+6. 3DS callback endpoint (ONLY path) creates subscription and completes payment
+7. Database records updated with subscription details and user profile activated
+
+**Status**: ✅ **COMPLETE** - Eliminated duplicate subscription creation risk, established single source of truth for recurring payment completion
+
 ### September 7, 2025: 3D Secure Payment Popup UI Enhancement ✅
 
 **✅ 3D SECURE POPUP TITLE REMOVAL**: Removed unnecessary title from the 3D secure authentication popup to create a cleaner, more focused user interface
