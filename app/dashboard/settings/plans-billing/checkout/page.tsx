@@ -483,7 +483,6 @@ export default function CheckoutPage() {
                 selectedPackage={selectedPackage}
                 userCurrency={userCurrency}
                 billingPeriod={billing_period}
-                isTrialFlow={isTrialFlow}
               />
             </div>
           </div>

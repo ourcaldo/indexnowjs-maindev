@@ -9,33 +9,15 @@ interface OrderSummaryProps {
   selectedPackage: any
   billingPeriod: string
   userCurrency: 'USD' | 'IDR'
-  isTrialFlow?: boolean
 }
 
-export default function OrderSummary({ selectedPackage, billingPeriod, userCurrency, isTrialFlow = false }: OrderSummaryProps) {
+export default function OrderSummary({ selectedPackage, billingPeriod, userCurrency }: OrderSummaryProps) {
   const [idrAmount, setIdrAmount] = useState<number | null>(null)
   const [conversionRate, setConversionRate] = useState<number | null>(null)
 
-  // Calculate future billing date for trials (trial period + first billing cycle)
-  const calculateFutureBillingDate = () => {
-    const now = new Date()
-    // Trial period is 3 days, then the billing cycle starts
-    const trialEndDate = new Date(now.getTime() + (3 * 24 * 60 * 60 * 1000)) // 3 days from now
-    
-    // Add billing period to trial end date
-    if (billingPeriod === 'monthly') {
-      trialEndDate.setMonth(trialEndDate.getMonth() + 1)
-    } else if (billingPeriod === 'yearly' || billingPeriod === 'annual') {
-      trialEndDate.setFullYear(trialEndDate.getFullYear() + 1)
-    }
-    
-    return trialEndDate
-  }
-
   useEffect(() => {
     const fetchConversionRate = async () => {
-      // Always fetch conversion rate for IDR users or when trial flow needs USD to IDR conversion
-      if (userCurrency === 'IDR' || isTrialFlow) {
+      if (userCurrency === 'USD') {
         try {
           const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD')
           if (response.ok) {
@@ -43,7 +25,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
             const rate = data.rates?.IDR
             if (rate && typeof rate === 'number') {
               setConversionRate(rate)
-              const usdPrice = isTrialFlow ? 1 : calculatePrice().price
+              const usdPrice = calculatePrice().price
               setIdrAmount(Math.round(usdPrice * rate))
             }
           }
@@ -51,40 +33,34 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
           // Use fallback rate
           const fallbackRate = 15800
           setConversionRate(fallbackRate)
-          const usdPrice = isTrialFlow ? 1 : calculatePrice().price
+          const usdPrice = calculatePrice().price
           setIdrAmount(Math.round(usdPrice * fallbackRate))
         }
       }
     }
 
     fetchConversionRate()
-  }, [selectedPackage, billingPeriod, userCurrency, isTrialFlow])
+  }, [selectedPackage, billingPeriod, userCurrency])
 
   if (!selectedPackage) return null
 
   const calculatePrice = () => {
     if (selectedPackage.pricing_tiers?.[billingPeriod]?.[userCurrency]) {
       const currencyTier = selectedPackage.pricing_tiers[billingPeriod][userCurrency]
-      const regularPrice = currencyTier.regular_price
-      const promoPrice = currencyTier.promo_price
-      const originalPrice = regularPrice
-      
-      // For trial flow, show $1 for now but keep track of the real price
-      const price = isTrialFlow ? 1 : (promoPrice || regularPrice)
-      const discount = promoPrice && !isTrialFlow
-        ? Math.round(((originalPrice - promoPrice) / originalPrice) * 100) 
+      const price = currencyTier.promo_price || currencyTier.regular_price
+      const originalPrice = currencyTier.regular_price
+      const discount = currencyTier.promo_price 
+        ? Math.round(((originalPrice - currencyTier.promo_price) / originalPrice) * 100) 
         : 0
       const periodLabel = currencyTier.period_label || billingPeriod
 
-      return { price, discount, originalPrice, periodLabel, regularPrice, promoPrice }
+      return { price, discount, originalPrice, periodLabel }
     }
 
-    return { price: 0, discount: 0, originalPrice: 0, periodLabel: billingPeriod, regularPrice: 0, promoPrice: 0 }
+    return { price: 0, discount: 0, originalPrice: 0, periodLabel: billingPeriod }
   }
 
-  const { price, discount, originalPrice, periodLabel, regularPrice, promoPrice } = calculatePrice()
-  const futureBillingDate = isTrialFlow ? calculateFutureBillingDate() : null
-  const actualFuturePrice = promoPrice || regularPrice
+  const { price, discount, originalPrice, periodLabel } = calculatePrice()
 
   return (
     <Card className="sticky top-8 border-[#E0E6ED] bg-[#FFFFFF]">
@@ -124,101 +100,35 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
 
         {/* Pricing Breakdown */}
         <div className="space-y-3">
-          {isTrialFlow ? (
-            // Trial Pricing Display
-            <>
-              <div className="flex justify-between items-center">
-                <span className="text-[#6C757D]">Trial Charge:</span>
-                <span className="font-medium text-[#1A1A1A]">
-                  {userCurrency === 'IDR' && conversionRate ? 
-                    formatCurrency(Math.round(1 * conversionRate), 'IDR') : 
-                    formatCurrency(1, 'USD')
-                  }
-                </span>
-              </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[#6C757D]">Subtotal:</span>
+            <span className="font-medium text-[#1A1A1A]">
+              {formatCurrency(originalPrice, userCurrency)}
+            </span>
+          </div>
 
-              <div className="flex justify-between items-center">
-                <span className="text-[#6C757D]">Tax:</span>
-                <span className="font-medium text-[#1A1A1A]">{formatCurrency(0, userCurrency)}</span>
-              </div>
-
-              <hr className="border-[#E0E6ED]" />
-
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
-                <span className="text-lg font-bold text-[#1A1A1A]">
-                  {userCurrency === 'IDR' && conversionRate ? 
-                    formatCurrency(Math.round(1 * conversionRate), 'IDR') : 
-                    formatCurrency(1, 'USD')
-                  }
-                </span>
-              </div>
-
-              {/* Future Billing Information */}
-              {futureBillingDate && (
-                <div className="mt-4 p-3 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
-                  <div className="flex items-start space-x-2">
-                    <Info className="h-4 w-4 text-[#3D8BFF] mt-0.5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <div className="font-medium text-[#1A1A1A] mb-1">
-                        Future Billing Information
-                      </div>
-                      <div className="text-[#6C757D] space-y-1">
-                        <div>
-                          On <strong>{futureBillingDate.toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                          })}</strong> you'll be charged:
-                        </div>
-                        <div className="font-medium text-[#1A1A1A]">
-                          {formatCurrency(actualFuturePrice, userCurrency)} for your {periodLabel} subscription
-                        </div>
-                        {promoPrice && (
-                          <div className="text-xs text-[#4BB543]">
-                            ✓ Promotional pricing included
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            // Regular Pricing Display
-            <>
-              <div className="flex justify-between items-center">
-                <span className="text-[#6C757D]">Subtotal:</span>
-                <span className="font-medium text-[#1A1A1A]">
-                  {formatCurrency(originalPrice, userCurrency)}
-                </span>
-              </div>
-
-              {discount > 0 && (
-                <div className="flex justify-between items-center">
-                  <span className="text-[#6C757D]">Discount ({discount}%):</span>
-                  <span className="font-medium text-[#F0A202]">
-                    -{formatCurrency(originalPrice - price, userCurrency)}
-                  </span>
-                </div>
-              )}
-
-              <div className="flex justify-between items-center">
-                <span className="text-[#6C757D]">Tax:</span>
-                <span className="font-medium text-[#1A1A1A]">{formatCurrency(0, userCurrency)}</span>
-              </div>
-
-              <hr className="border-[#E0E6ED]" />
-
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
-                <span className="text-lg font-bold text-[#1A1A1A]">
-                  {formatCurrency(price, userCurrency)}
-                </span>
-              </div>
-            </>
+          {discount > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-[#6C757D]">Discount ({discount}%):</span>
+              <span className="font-medium text-[#F0A202]">
+                -{formatCurrency(originalPrice - price, userCurrency)}
+              </span>
+            </div>
           )}
+
+          <div className="flex justify-between items-center">
+            <span className="text-[#6C757D]">Tax:</span>
+            <span className="font-medium text-[#1A1A1A]">{formatCurrency(0, userCurrency)}</span>
+          </div>
+
+          <hr className="border-[#E0E6ED]" />
+
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
+            <span className="text-lg font-bold text-[#1A1A1A]">
+              {formatCurrency(price, userCurrency)}
+            </span>
+          </div>
 
           {/* Currency Conversion Display for USD users */}
           {userCurrency === 'USD' && idrAmount && conversionRate && (
