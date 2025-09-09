@@ -28,9 +28,9 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
     const trialMetadata = this.paymentData.is_trial ? {
       is_trial: true,
       trial_start_date: new Date().toISOString(),
-      trial_end_date: new Date(Date.now() + 8 * 60 * 1000).toISOString(), // 8 minutes from now
-      trial_duration_days: 3, // Keep for reference but actual duration is 8 minutes for testing
-      auto_billing_start: new Date(Date.now() + 8 * 60 * 1000 + 1000).toISOString(), // 1 second after trial ends
+      trial_end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+      trial_duration_days: 3, // 3 days trial period
+      auto_billing_start: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 1000).toISOString(), // 1 second after trial ends
       trial_package_slug: this.packageData?.slug,
       original_amount_usd: amount.originalAmount,
       converted_amount_idr: amount.finalAmount
@@ -193,7 +193,7 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       
       // For trials, start billing 8 minutes later (for testing). For regular subscriptions, use normal interval
       const startTime = this.paymentData.is_trial ? 
-        new Date(Date.now() + 8 * 60 * 1000) : // 8 minutes for trial (testing purposes)
+        new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) : // 3 days for trial
         new Date(Date.now() + (this.paymentData.billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000);
       
       const subscription = await this.midtransService.createSubscriptionWithAmount(subscriptionAmount, {
@@ -329,14 +329,14 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
 
   private async updateUserTrialSubscription(subscription: any, amount: number): Promise<void> {
     const now = new Date()
-    const trialEndDate = new Date(Date.now() + 8 * 60 * 1000) // 8 minutes from now (testing purposes)
+    const trialEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // 3 days from now
 
     await supabaseAdmin
       .from('indb_auth_user_profiles')
       .update({
         package_id: this.paymentData.package_id,
         subscribed_at: now.toISOString(),
-        expires_at: trialEndDate.toISOString(), // Trial expires in 8 minutes (testing purposes)
+        expires_at: trialEndDate.toISOString(), // Trial expires in 3 days
         trial_started_at: now.toISOString(),
         trial_status: 'active',
         auto_billing_enabled: true,
