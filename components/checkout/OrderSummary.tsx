@@ -130,38 +130,36 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
           {isTrialFlow && trialInfo ? (
             <>
               {/* Trial Pricing Section */}
-              <div className="p-3 bg-[#F0F8FF] border border-[#3D8BFF] rounded-lg">
-                <div className="text-sm text-[#3D8BFF] font-medium mb-2">3-Day Free Trial</div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[#6C757D]">Today's charge:</span>
-                  <span className="font-medium text-[#1A1A1A]">
-                    {formatCurrency(trialInfo.trialAmount, userCurrency)}
-                  </span>
-                </div>
-                <div className="text-xs text-[#6C757D] mt-1">
-                  Card verification charge only
-                </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[#6C757D]">Today's charge:</span>
+                <span className="font-medium text-[#1A1A1A]">
+                  {formatCurrency(trialInfo.trialAmount, userCurrency)}
+                </span>
+              </div>
+              
+              <div className="text-xs text-[#6C757D] text-right">
+                Card verification charge only
               </div>
 
+              <hr className="border-[#E0E6ED]" />
+
               {/* Future Billing Info */}
-              <div className="p-3 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
-                <div className="text-sm font-medium text-[#1A1A1A] mb-1">
-                  After trial ends
-                </div>
-                <div className="text-sm text-[#6C757D]">
-                  On {trialInfo.futureBillingDate} you'll be charged{' '}
-                  <span className="font-medium text-[#1A1A1A]">
-                    {formatCurrency(trialInfo.futureAmount, userCurrency)}
-                  </span>
-                  {' '}for your {periodLabel} subscription.
-                </div>
+              <div className="text-sm text-[#6C757D]">
+                After trial ends
+              </div>
+              <div className="text-sm text-[#6C757D]">
+                On {trialInfo.futureBillingDate} you'll be charged{' '}
+                <span className="font-medium text-[#1A1A1A]">
+                  {formatCurrency(trialInfo.futureAmount, userCurrency)}
+                </span>
+                {' '}for your {periodLabel} subscription.
               </div>
 
               <hr className="border-[#E0E6ED]" />
 
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-[#1A1A1A]">Total today:</span>
-                <span className="text-lg font-bold text-[#3D8BFF]">
+                <span className="text-lg font-bold text-[#1A1A1A]">
                   {formatCurrency(trialInfo.trialAmount, userCurrency)}
                 </span>
               </div>
@@ -203,23 +201,16 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
 
           {/* Currency Conversion Display for USD users */}
           {userCurrency === 'USD' && conversionRate && (
-            <div className="mt-4 p-3 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
-              <div className="flex items-start space-x-2">
-                <Info className="h-4 w-4 text-[#3D8BFF] mt-0.5 flex-shrink-0" />
-                <div className="text-sm">
-                  <div className="font-medium text-[#1A1A1A] mb-1">Payment will be processed in IDR</div>
-                  <div className="text-[#6C757D] space-y-1">
-                    <div>Conversion rate: 1 USD = {conversionRate.toLocaleString()} IDR</div>
-                    <div className="font-medium text-[#1A1A1A]">
-                      You will pay: {formatCurrency(
-                        isTrialFlow && trialInfo 
-                          ? Math.round(trialInfo.trialAmount * conversionRate)
-                          : (idrAmount || Math.round((calculatePrice().price) * conversionRate)), 
-                        'IDR'
-                      )}
-                    </div>
-                  </div>
-                </div>
+            <div className="text-sm text-[#6C757D] space-y-1">
+              <div>Payment will be processed in IDR</div>
+              <div>Conversion rate: 1 USD = {conversionRate.toLocaleString()} IDR</div>
+              <div className="font-medium text-[#1A1A1A]">
+                You will pay: {formatCurrency(
+                  isTrialFlow && trialInfo 
+                    ? Math.round(trialInfo.trialAmount * conversionRate)
+                    : (idrAmount || Math.round((calculatePrice().price) * conversionRate)), 
+                  'IDR'
+                )}
               </div>
             </div>
           )}
