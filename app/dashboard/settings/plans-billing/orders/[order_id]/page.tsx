@@ -218,10 +218,15 @@ export default function OrderSuccessPage() {
 
                   {/* Right column */}
                   <div className="text-gray-300 text-sm">
-                    <p>{orderData.customer_info.address}</p>
+                    {orderData.customer_info.address && (
+                      <p>{orderData.customer_info.address}</p>
+                    )}
                     <p>
-                      {orderData.customer_info.city}, {orderData.customer_info.state}{' '}
-                      {orderData.customer_info.zip_code}
+                      {[
+                        orderData.customer_info.city,
+                        orderData.customer_info.state,
+                        orderData.customer_info.zip_code
+                      ].filter(Boolean).join(', ')}
                     </p>
                     <p>{orderData.customer_info.country}</p>
                   </div>
