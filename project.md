@@ -7469,3 +7469,44 @@ ON public.indb_cms_posts(category, status);
   ```
 
 **Status**: ✅ **PRICING STRUCTURE SIMPLIFICATION COMPLETE** - Successfully streamlined pricing from 4 periods to 2 (monthly/annual) with modern toggle UI and comprehensive code updates
+
+### September 09, 2025 - Trial Checkout Order Summary & Email Verification Route Enhancements ✅
+
+- 🎯 **ENHANCED TRIAL CHECKOUT ORDER SUMMARY**: Fixed order summary display for trial flows to show proper pricing and billing information
+  - **Trial Pricing Display**: OrderSummary now correctly shows $1 USD trial charge (or IDR equivalent) instead of full package price when `trial=true` parameter is present
+  - **Future Billing Information**: Added clear notification showing "On [date] you'll be charged [full price]" for 3-day trial period
+  - **Currency Handling**: Proper support for both USD and IDR users with correct conversion rates
+    - Indonesian users: See IDR trial amount directly (no conversion needed)
+    - International users: See $1 USD trial amount with IDR conversion note for payment processing
+  - **Visual Enhancement**: Added distinct blue-bordered section for trial information and future billing details
+  - **Billing Date Calculation**: Automatic calculation of trial end date (3 days from signup) with proper date formatting
+
+- 📧 **EMAIL VERIFICATION ROUTE RESTRUCTURE**: Moved email verification flow from `/register` to dedicated `/verify` route
+  - **New Route Creation**: Created `/app/(public)/auth/verify/page.tsx` with dedicated email verification page
+  - **Clean URL Structure**: Email verification now properly appears at `/verify` route instead of remaining on `/register`
+  - **Email Parameter Passing**: Verification page receives email via URL parameter for personalized messaging
+  - **Seamless Redirect**: Register page now redirects to `/verify?email=user@email.com` on successful signup
+  - **Consistent Styling**: Maintained exact same design and user experience as previous implementation
+  - **Improved User Flow**: Users now see clear URL progression: `/register` → `/verify` → `/login`
+
+- ✅ **FILES MODIFIED**:
+  - `components/checkout/OrderSummary.tsx` - Enhanced with trial pricing logic, currency conversion, and future billing date display
+  - `app/dashboard/settings/plans-billing/checkout/page.tsx` - Updated to pass `isTrialFlow` parameter to OrderSummary component
+  - `app/(public)/auth/verify/page.tsx` - **NEW FILE** - Dedicated email verification page with email parameter support
+  - `app/(public)/auth/register/page.tsx` - Modified to redirect to `/verify` route on successful registration instead of showing inline success state
+
+- 🔧 **TECHNICAL IMPLEMENTATION DETAILS**:
+  - **Trial Amount Calculation**: $1 USD for card verification (meets Midtrans minimum requirement)
+  - **Currency Conversion**: Real-time USD to IDR conversion using exchange rate API with 15,800 IDR fallback
+  - **Future Date Logic**: JavaScript Date manipulation to calculate trial end date (current date + 3 days)
+  - **Conditional Rendering**: OrderSummary dynamically switches between trial and regular pricing display based on `isTrialFlow` prop
+  - **URL Parameter Handling**: Client-side URL search params parsing for email parameter in verification page
+
+- 🎨 **USER EXPERIENCE IMPROVEMENTS**:
+  - **Clear Trial Communication**: Users now see exactly what they're paying today vs. future charges
+  - **Billing Transparency**: Future billing date and amount prominently displayed in order summary
+  - **Consistent Flow**: Proper page routing creates logical user journey through registration process
+  - **Currency Clarity**: Indonesian users see native IDR pricing while international users see USD with conversion notes
+  - **Visual Hierarchy**: Trial information highlighted with blue accent color to draw attention
+
+**Status**: ✅ **TRIAL CHECKOUT & EMAIL VERIFICATION ENHANCEMENTS COMPLETE** - Successfully improved trial pricing transparency and streamlined email verification user flow
