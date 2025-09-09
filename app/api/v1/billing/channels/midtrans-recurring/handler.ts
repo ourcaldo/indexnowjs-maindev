@@ -159,132 +159,30 @@ export default class MidtransRecurringHandler extends BasePaymentHandler {
       }
     }
 
-    // CRITICAL FIX: Only create subscription if charge was completed immediately (no 3DS)
-    // If 3DS was required, subscription creation will be handled by 3DS callback
-    if (chargeTransaction.transaction_status === 'capture' || chargeTransaction.transaction_status === 'settlement') {
-      // ALWAYS get the saved_token_id from transaction status, not from charge response
-      // The charge response may not include saved_token_id, so we always check transaction status
-      console.log('🔍 Getting saved_token_id from transaction status (not charge response)...')
-      const transactionStatus = await this.midtransService.getTransactionStatus(chargeTransaction.transaction_id)
-      const savedTokenId = transactionStatus.saved_token_id
-      
-      console.log('🔍 saved_token_id from transaction status:', savedTokenId?.substring(0, 20) + '...')
-
-      if (!savedTokenId) {
-        throw new Error('Card token was not saved from transaction - save_token_id may have failed')
-      }
-
-      // Create subscription with trial-specific logic
-      console.log('💳 Creating subscription with saved token:', savedTokenId)
-      
-      // CRITICAL FIX: For trials, subscription amount MUST be the real package price, not the $1 charge amount
-      const subscriptionAmount = this.paymentData.is_trial ? amount.originalAmount : amount.finalAmount; // Use ORIGINAL amount for trials, final for regular
-      const subscriptionName = this.paymentData.is_trial ? 
-        `${this.packageData.name.toUpperCase()}_TRIAL_AUTO_BILLING` : 
-        `${this.packageData.name}_${this.paymentData.billing_period}`.toUpperCase();
-      
-      console.log('💰 [SUBSCRIPTION AMOUNT DEBUG]:', {
-        is_trial: this.paymentData.is_trial,
-        charge_amount: this.paymentData.is_trial ? 1 : amount.finalAmount,
-        subscription_amount: subscriptionAmount,
-        original_amount: amount.originalAmount,
-        final_amount: amount.finalAmount
-      });
-      
-      // For trials, start billing 3 days later. For regular subscriptions, use normal interval
-      const startTime = this.paymentData.is_trial ? 
-        new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) : // 3 days for trial
-        new Date(Date.now() + (this.paymentData.billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000);
-      
-      const subscription = await this.midtransService.createSubscriptionWithAmount(subscriptionAmount, {
-        name: subscriptionName,
-        token: savedTokenId,
-        schedule: {
-          interval: 1,
-          interval_unit: this.paymentData.billing_period === 'monthly' ? 'month' : 'month',
-          max_interval: this.paymentData.billing_period === 'monthly' ? 12 : 1,
-          start_time: startTime,
-        },
-        customer_details: {
-          first_name: this.paymentData.customer_info.first_name,
-          last_name: this.paymentData.customer_info.last_name,
-          email: this.paymentData.customer_info.email,
-          phone: this.paymentData.customer_info.phone,
-        },
+    // CRITICAL FIX: For recurring payments, 3DS authentication is ALWAYS required
+    // Subscription creation will ONLY be handled by the 3DS callback endpoint
+    // This code path should never execute for recurring payments since they always require 3DS
+    console.log('⚠️ [CRITICAL] Unexpected immediate charge completion without 3DS for recurring payment:', {
+      transaction_status: chargeTransaction.transaction_status,
+      order_id: transactionId,
+      transaction_id: chargeTransaction.transaction_id
+    })
+    
+    // Mark transaction as failed since this shouldn't happen for recurring payments
+    await supabaseAdmin
+      .from('indb_payment_transactions')
+      .update({
+        transaction_status: 'failed',
+        gateway_response: chargeTransaction,
         metadata: {
-          user_id: this.paymentData.user.id,
-          user_email: this.paymentData.customer_info.email,
-          package_id: this.paymentData.package_id,
-          package_name: this.packageData.name,
-          billing_period: this.paymentData.billing_period,
-          order_id: transactionId,
-          trial_type: this.paymentData.is_trial ? 'free_trial_auto_billing' : null,
-          original_trial_start: this.paymentData.is_trial ? new Date().toISOString() : null,
-          subscription_type: 'recurring_payment'
-        },
-      })
-      console.log('✅ Subscription created successfully:', subscription.id)
-
-      // Update transaction to completed
-      await supabaseAdmin
-        .from('indb_payment_transactions')
-        .update({
-          transaction_status: 'completed',
-          gateway_transaction_id: chargeTransaction.transaction_id,
-          gateway_response: {
-            charge: chargeTransaction,
-            subscription: subscription
-          },
-          metadata: {
-            ...this.getTransactionMetadata(),
-            subscription_id: subscription.id,
-            saved_token_id: savedTokenId, // This is now the correct permanent saved_token_id from transaction status
-            masked_card: transactionStatus.masked_card || chargeTransaction.masked_card
-          }
-        })
-        .eq('id', transactionId)
-
-      // Update user subscription with trial-specific logic
-      if (this.paymentData.is_trial) {
-        await this.updateUserTrialSubscription(subscription, amount.finalAmount)
-      } else {
-        await this.updateUserSubscription(subscription, amount.finalAmount)
-      }
-
-      // Send order confirmation email
-      try {
-        await emailService.sendBillingConfirmation(this.paymentData.customer_info.email, {
-          customerName: `${this.paymentData.customer_info.first_name} ${this.paymentData.customer_info.last_name}`.trim(),
-          orderId: transactionId,
-          packageName: this.packageData.name,
-          billingPeriod: this.paymentData.billing_period,
-          amount: `IDR ${amount.finalAmount.toLocaleString('id-ID')}`,
-          paymentMethod: 'Midtrans Recurring (Credit Card)',
-          orderDate: new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })
-        })
-        console.log('✅ [Midtrans Recurring] Order confirmation email sent successfully')
-      } catch (emailError) {
-        console.error('⚠️ [Midtrans Recurring] Failed to send order confirmation email:', emailError)
-      }
-
-      return {
-        success: true,
-        data: {
-          order_id: transactionId,
-          transaction_id: chargeTransaction.transaction_id,
-          subscription_id: subscription.id,
-          redirect_url: `/dashboard/settings/plans-billing/order/${transactionId}`
+          ...this.getTransactionMetadata(),
+          error_reason: 'unexpected_immediate_completion_without_3ds',
+          processing_method: 'recurring'
         }
-      }
-    }
-
-    // CRITICAL FIX: If we get here and status is not capture/settlement, it means the charge failed
-    // Don't create subscription for failed charges
-    throw new Error(`Charge transaction failed: ${chargeTransaction.status_message}`)
+      })
+      .eq('id', transactionId)
+    
+    throw new Error('Recurring payments must use 3DS authentication. Immediate completion is not supported.')
   }
 
   private async loadGatewayConfig(): Promise<void> {
