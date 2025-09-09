@@ -19,8 +19,8 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
   // Calculate future billing date for trials (trial period + first billing cycle)
   const calculateFutureBillingDate = () => {
     const now = new Date()
-    // Trial period is typically 7 days, then the billing cycle starts
-    const trialEndDate = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)) // 7 days from now
+    // Trial period is 3 days, then the billing cycle starts
+    const trialEndDate = new Date(now.getTime() + (3 * 24 * 60 * 60 * 1000)) // 3 days from now
     
     // Add billing period to trial end date
     if (billingPeriod === 'monthly') {
@@ -129,7 +129,10 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
               <div className="flex justify-between items-center">
                 <span className="text-[#6C757D]">Trial Charge:</span>
                 <span className="font-medium text-[#1A1A1A]">
-                  {formatCurrency(1, 'USD')}
+                  {userCurrency === 'IDR' && conversionRate ? 
+                    formatCurrency(Math.round(1 * conversionRate), 'IDR') : 
+                    formatCurrency(1, 'USD')
+                  }
                 </span>
               </div>
 
@@ -143,7 +146,10 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
                 <span className="text-lg font-bold text-[#1A1A1A]">
-                  {formatCurrency(1, 'USD')}
+                  {userCurrency === 'IDR' && conversionRate ? 
+                    formatCurrency(Math.round(1 * conversionRate), 'IDR') : 
+                    formatCurrency(1, 'USD')
+                  }
                 </span>
               </div>
 
