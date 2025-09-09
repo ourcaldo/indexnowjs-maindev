@@ -9,9 +9,10 @@ interface OrderSummaryProps {
   selectedPackage: any
   billingPeriod: string
   userCurrency: 'USD' | 'IDR'
+  isTrialFlow?: boolean
 }
 
-export default function OrderSummary({ selectedPackage, billingPeriod, userCurrency }: OrderSummaryProps) {
+export default function OrderSummary({ selectedPackage, billingPeriod, userCurrency, isTrialFlow = false }: OrderSummaryProps) {
   const [idrAmount, setIdrAmount] = useState<number | null>(null)
   const [conversionRate, setConversionRate] = useState<number | null>(null)
 
@@ -62,6 +63,32 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
 
   const { price, discount, originalPrice, periodLabel } = calculatePrice()
 
+  // Calculate trial pricing and billing date
+  const getTrialPricing = () => {
+    if (!isTrialFlow) return null
+
+    // Trial charge is always $1 USD equivalent
+    const trialChargeUSD = 1
+    const trialChargeIDR = Math.round(trialChargeUSD * (conversionRate || 15800)) // Use current rate or fallback
+
+    // Future billing date (3 days from now)
+    const futureDate = new Date()
+    futureDate.setDate(futureDate.getDate() + 3)
+    const futureDateStr = futureDate.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+
+    return {
+      trialAmount: userCurrency === 'USD' ? trialChargeUSD : trialChargeIDR,
+      futureBillingDate: futureDateStr,
+      futureAmount: price
+    }
+  }
+
+  const trialInfo = getTrialPricing()
+
   return (
     <Card className="sticky top-8 border-[#E0E6ED] bg-[#FFFFFF]">
       <CardHeader>
@@ -100,38 +127,82 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
 
         {/* Pricing Breakdown */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-[#6C757D]">Subtotal:</span>
-            <span className="font-medium text-[#1A1A1A]">
-              {formatCurrency(originalPrice, userCurrency)}
-            </span>
-          </div>
+          {isTrialFlow && trialInfo ? (
+            <>
+              {/* Trial Pricing Section */}
+              <div className="p-3 bg-[#F0F8FF] border border-[#3D8BFF] rounded-lg">
+                <div className="text-sm text-[#3D8BFF] font-medium mb-2">3-Day Free Trial</div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#6C757D]">Today's charge:</span>
+                  <span className="font-medium text-[#1A1A1A]">
+                    {formatCurrency(trialInfo.trialAmount, userCurrency)}
+                  </span>
+                </div>
+                <div className="text-xs text-[#6C757D] mt-1">
+                  Card verification charge only
+                </div>
+              </div>
 
-          {discount > 0 && (
-            <div className="flex justify-between items-center">
-              <span className="text-[#6C757D]">Discount ({discount}%):</span>
-              <span className="font-medium text-[#F0A202]">
-                -{formatCurrency(originalPrice - price, userCurrency)}
-              </span>
-            </div>
+              {/* Future Billing Info */}
+              <div className="p-3 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
+                <div className="text-sm font-medium text-[#1A1A1A] mb-1">
+                  After trial ends
+                </div>
+                <div className="text-sm text-[#6C757D]">
+                  On {trialInfo.futureBillingDate} you'll be charged{' '}
+                  <span className="font-medium text-[#1A1A1A]">
+                    {formatCurrency(trialInfo.futureAmount, userCurrency)}
+                  </span>
+                  {' '}for your {periodLabel} subscription.
+                </div>
+              </div>
+
+              <hr className="border-[#E0E6ED]" />
+
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-semibold text-[#1A1A1A]">Total today:</span>
+                <span className="text-lg font-bold text-[#3D8BFF]">
+                  {formatCurrency(trialInfo.trialAmount, userCurrency)}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Regular Pricing Section */}
+              <div className="flex justify-between items-center">
+                <span className="text-[#6C757D]">Subtotal:</span>
+                <span className="font-medium text-[#1A1A1A]">
+                  {formatCurrency(originalPrice, userCurrency)}
+                </span>
+              </div>
+
+              {discount > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-[#6C757D]">Discount ({discount}%):</span>
+                  <span className="font-medium text-[#F0A202]">
+                    -{formatCurrency(originalPrice - price, userCurrency)}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center">
+                <span className="text-[#6C757D]">Tax:</span>
+                <span className="font-medium text-[#1A1A1A]">{formatCurrency(0, userCurrency)}</span>
+              </div>
+
+              <hr className="border-[#E0E6ED]" />
+
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
+                <span className="text-lg font-bold text-[#1A1A1A]">
+                  {formatCurrency(price, userCurrency)}
+                </span>
+              </div>
+            </>
           )}
 
-          <div className="flex justify-between items-center">
-            <span className="text-[#6C757D]">Tax:</span>
-            <span className="font-medium text-[#1A1A1A]">{formatCurrency(0, userCurrency)}</span>
-          </div>
-
-          <hr className="border-[#E0E6ED]" />
-
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-semibold text-[#1A1A1A]">Total:</span>
-            <span className="text-lg font-bold text-[#1A1A1A]">
-              {formatCurrency(price, userCurrency)}
-            </span>
-          </div>
-
           {/* Currency Conversion Display for USD users */}
-          {userCurrency === 'USD' && idrAmount && conversionRate && (
+          {userCurrency === 'USD' && conversionRate && (
             <div className="mt-4 p-3 bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg">
               <div className="flex items-start space-x-2">
                 <Info className="h-4 w-4 text-[#3D8BFF] mt-0.5 flex-shrink-0" />
@@ -140,7 +211,12 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
                   <div className="text-[#6C757D] space-y-1">
                     <div>Conversion rate: 1 USD = {conversionRate.toLocaleString()} IDR</div>
                     <div className="font-medium text-[#1A1A1A]">
-                      You will pay: {formatCurrency(idrAmount, 'IDR')}
+                      You will pay: {formatCurrency(
+                        isTrialFlow && trialInfo 
+                          ? Math.round(trialInfo.trialAmount * conversionRate)
+                          : (idrAmount || Math.round((calculatePrice().price) * conversionRate)), 
+                        'IDR'
+                      )}
                     </div>
                   </div>
                 </div>
