@@ -136,10 +136,6 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
                   {formatCurrency(trialInfo.trialAmount, userCurrency)}
                 </span>
               </div>
-              
-              <div className="text-xs text-[#6C757D] text-right">
-                Card verification charge only
-              </div>
 
               <hr className="border-[#E0E6ED]" />
 
