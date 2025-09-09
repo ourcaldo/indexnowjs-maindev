@@ -1047,6 +1047,43 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 9, 2025: Critical Bug Fixes - Trial Duration, Billing Period Selector, Order Success Page & Quota Display ✅
+
+**✅ TRIAL DURATION FIXED**: Corrected trial period from 8 minutes back to 3 days as intended
+- **Issue**: Trial subscriptions were expiring after 8 minutes instead of the intended 3-day period
+- **Root Cause**: Found hardcoded test duration in `app/api/v1/billing/midtrans-3ds-callback/route.ts` line 470
+- **Fix**: Changed `new Date(Date.now() + 8 * 60 * 1000)` to `new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)`
+- **Impact**: All new trial subscriptions now correctly expire after 3 days
+
+**✅ BILLING PERIOD SELECTOR BUG RESOLVED**: Fixed monthly option becoming unselectable after choosing annual
+- **Issue**: Users couldn't select monthly option after selecting annual in checkout process
+- **Root Cause**: Multiple conflicting event handlers on RadioGroup, div wrapper, and Label elements causing event interference
+- **Fix**: Removed duplicate onClick handlers from div wrapper and Label elements, keeping only RadioGroup's native handler
+- **Files Modified**: `components/checkout/BillingPeriodSelector.tsx`
+- **Additional**: Removed debugging console.log statements that were visible in browser console
+
+**✅ ORDER SUCCESS PAGE ENHANCEMENTS**: Fixed billing address display and added auto-redirect
+- **Issue 1**: Empty billing address fields showed awkward commas (", Country")  
+- **Fix 1**: Added conditional rendering for empty address fields using `filter(Boolean).join(', ')`
+- **Issue 2**: No automatic redirect back to billing settings
+- **Fix 2**: Added 5-second countdown timer with automatic redirect to `/dashboard/settings/plans-billing`
+- **Files Modified**: `app/dashboard/settings/plans-billing/orders/[order_id]/page.tsx`
+
+**✅ QUOTA USAGE DISPLAY CORRECTED**: Fixed incorrect fallback values for new accounts
+- **Issue**: New accounts showed wrong keyword usage (147/50) and service account count (2) instead of zeros
+- **Root Cause**: Hard-coded fallback values in BillingStats component for testing purposes
+- **Fixes Applied**:
+  - Keyword usage: `|| 147` → `|| 0` (displays 0/50 for new accounts)
+  - Keyword limit: `|| 250` → `|| 50` (basic plan limit)  
+  - Service accounts: `|| 2` → `|| 0` (shows 0 connected for new accounts)
+- **Files Modified**: `app/dashboard/settings/plans-billing/components/BillingStats.tsx`
+
+**Files Modified:**
+- `app/api/v1/billing/midtrans-3ds-callback/route.ts` - Fixed trial duration calculation
+- `components/checkout/BillingPeriodSelector.tsx` - Removed conflicting event handlers and debug logs
+- `app/dashboard/settings/plans-billing/orders/[order_id]/page.tsx` - Fixed billing address display and added auto-redirect
+- `app/dashboard/settings/plans-billing/components/BillingStats.tsx` - Corrected quota usage fallback values
+
 ### September 9, 2025: Critical Duplicate Subscription Creation Fix ✅
 
 **✅ DUPLICATE SUBSCRIPTION CREATION ELIMINATION**: Removed critical duplicate subscription creation logic that caused race conditions and potential double billing
