@@ -34,7 +34,8 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
 
   useEffect(() => {
     const fetchConversionRate = async () => {
-      if (userCurrency === 'USD') {
+      // Always fetch conversion rate for IDR users or when trial flow needs USD to IDR conversion
+      if (userCurrency === 'IDR' || isTrialFlow) {
         try {
           const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD')
           if (response.ok) {
@@ -42,7 +43,7 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
             const rate = data.rates?.IDR
             if (rate && typeof rate === 'number') {
               setConversionRate(rate)
-              const usdPrice = calculatePrice().price
+              const usdPrice = isTrialFlow ? 1 : calculatePrice().price
               setIdrAmount(Math.round(usdPrice * rate))
             }
           }
@@ -50,14 +51,14 @@ export default function OrderSummary({ selectedPackage, billingPeriod, userCurre
           // Use fallback rate
           const fallbackRate = 15800
           setConversionRate(fallbackRate)
-          const usdPrice = calculatePrice().price
+          const usdPrice = isTrialFlow ? 1 : calculatePrice().price
           setIdrAmount(Math.round(usdPrice * fallbackRate))
         }
       }
     }
 
     fetchConversionRate()
-  }, [selectedPackage, billingPeriod, userCurrency])
+  }, [selectedPackage, billingPeriod, userCurrency, isTrialFlow])
 
   if (!selectedPackage) return null
 
