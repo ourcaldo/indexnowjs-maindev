@@ -221,7 +221,7 @@ export const BillingStats = ({
                       style={{ 
                         width: `${getUsagePercentage(
                           keywordUsage?.keywords_used || 0, 
-                          keywordUsage?.keywords_limit || 50, 
+                          keywordUsage?.keywords_limit || 0, 
                           keywordUsage?.is_unlimited || false
                         )}%` 
                       }}
@@ -232,11 +232,11 @@ export const BillingStats = ({
                       <Server className="h-4 w-4 text-[#6C757D]" />
                       <span className="font-semibold text-[#1A1A1A]">
                         {keywordUsage?.keywords_used || 0}
-                        {!keywordUsage?.is_unlimited && (
+                        {!keywordUsage?.is_unlimited && keywordUsage?.keywords_limit > 0 && (
                           <span className="text-sm text-[#6C757D] ml-1">
                             ({Math.round(getUsagePercentage(
                               keywordUsage?.keywords_used || 0, 
-                              keywordUsage?.keywords_limit || 50, 
+                              keywordUsage?.keywords_limit || 0, 
                               keywordUsage?.is_unlimited || false
                             ))}%)
                           </span>
@@ -244,7 +244,7 @@ export const BillingStats = ({
                       </span>
                     </div>
                     <span className="text-[#6C757D]">
-                      {keywordUsage?.is_unlimited ? 'Unlimited' : (keywordUsage?.keywords_limit || 50)}
+                      {keywordUsage?.is_unlimited ? 'Unlimited' : (keywordUsage?.keywords_limit > 0 ? keywordUsage.keywords_limit : 'Loading...')}
                     </span>
                   </div>
                 </div>
