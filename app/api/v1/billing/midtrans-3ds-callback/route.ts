@@ -312,7 +312,7 @@ export async function POST(request: NextRequest) {
           interval_unit: billing_period === 'monthly' ? 'month' : 'month',
           max_interval: billing_period === 'monthly' ? 12 : 1,
           start_time: isTrialTransaction ? 
-            new Date(Date.now() + 8 * 60 * 1000) : // 8 minutes for trial (testing purposes)
+            new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) : // 3 days for trial
             new Date(Date.now() + (billing_period === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
         },
         customer_details: {

@@ -167,8 +167,8 @@ export class MidtransRecurringService extends PaymentGateway {
 
       // Calculate start time
       const startTime = options.schedule?.start_time || new Date(Date.now() + 2 * 60 * 1000)
-      const minStartTime = new Date(Date.now() + 60 * 1000)
-      const actualStartTime = startTime < minStartTime ? minStartTime : startTime
+      // Only apply minimum if no explicit start_time was provided
+      const actualStartTime = options.schedule?.start_time ? startTime : new Date(Date.now() + 60 * 1000)
 
       const subscriptionRequest = {
         name: options.name,
