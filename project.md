@@ -1047,6 +1047,44 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 9, 2025: Trial Pricing Enhancement & Email Verification Flow Improvement ✅
+
+**✅ TRIAL CHECKOUT PRICING ENHANCEMENT**: Enhanced Order Summary component to properly display trial pricing with future billing information
+-- **Problem**: When users selected a trial (trial=true parameter), the Order Summary still showed the full subscription price instead of the $1 trial charge, causing confusion about what they would be charged immediately
+-- **Solution**: Enhanced OrderSummary component to detect trial flow and display appropriate pricing information
+-- **Key Improvements**:
+  - **Trial Price Display**: Shows $1.00 USD trial charge instead of full subscription price when `isTrialFlow=true`
+  - **Future Billing Information**: Added dedicated section showing when the real price will be charged with date calculation
+  - **Smart Date Calculation**: Calculates future billing date as trial period (7 days) + billing cycle (monthly/yearly) 
+  - **Enhanced User Experience**: Clear messaging about "On [date] you'll be charged [real price] for your [period] subscription"
+  - **Promo Price Recognition**: Displays promotional pricing information when applicable in future billing details
+
+**✅ EMAIL VERIFICATION ROUTE RESTRUCTURING**: Created dedicated `/verify` route for email verification instead of inline display on registration page
+-- **Problem**: After successful registration, the email verification message was displayed inline on the `/register` route, which was confusing and didn't provide a clean URL structure
+-- **Solution**: Implemented dedicated verification page with proper URL routing and state management
+-- **Implementation Details**:
+  - **New Route**: Created `app/verify/page.tsx` with dedicated email verification UI
+  - **URL Parameters**: Supports email parameter in URL for clean sharing: `/verify?email=user@example.com`
+  - **Fallback Mechanism**: Uses localStorage as backup if email parameter is missing
+  - **Clean Redirect**: Registration success now redirects to `/verify` instead of showing inline message
+  - **Consistent UI**: Maintains same styling and branding as other auth pages
+  - **State Management**: Proper cleanup of localStorage after email is displayed
+
+**Files Modified:**
+-- `components/checkout/OrderSummary.tsx` - Enhanced pricing display logic for trial flows
+-- `app/dashboard/settings/plans-billing/checkout/page.tsx` - Added isTrialFlow prop to OrderSummary component  
+-- `app/verify/page.tsx` - New dedicated email verification page
+-- `app/register/page.tsx` - Modified to redirect to `/verify` route instead of inline success display
+
+**Technical Details:**
+- **Trial Detection**: Uses `isTrialFlow` prop from URL parameter `trial=true`
+- **Price Calculation**: Trial shows $1.00 USD, regular flow shows package pricing with discounts
+- **Date Logic**: Trial end = current date + 7 days, then adds billing period (monthly/yearly)
+- **URL Structure**: `/verify?email=encoded_email` with localStorage fallback
+- **State Cleanup**: Removes pending verification email from localStorage after display
+
+**Status**: ✅ **COMPLETE** - Trial pricing now clearly shows $1 charge with future billing date, and email verification has dedicated clean URL route
+
 ### September 7, 2025: 3D Secure Payment Popup UI Enhancement ✅
 
 **✅ 3D SECURE POPUP TITLE REMOVAL**: Removed unnecessary title from the 3D secure authentication popup to create a cleaner, more focused user interface
