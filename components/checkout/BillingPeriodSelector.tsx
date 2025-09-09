@@ -63,69 +63,71 @@ export default function BillingPeriodSelector({
         <p className="text-sm text-[#6C757D]">Choose your preferred billing cycle</p>
       </CardHeader>
       <CardContent>
-        <RadioGroup 
-          value={selectedPeriod} 
-          onValueChange={(value) => {
-            onPeriodChange(value)
-          }}
-        >
-          <div className="space-y-3">
-            {periodOptions.map((option, index) => {
-              const discount = calculateDiscount(option.regular_price, option.promo_price)
-              const finalPrice = option.promo_price || option.regular_price
-              const isSelected = selectedPeriod === option.period
-              
+        <div className="space-y-3">
+          {periodOptions.map((option, index) => {
+            const discount = calculateDiscount(option.regular_price, option.promo_price)
+            const finalPrice = option.promo_price || option.regular_price
+            const isSelected = selectedPeriod === option.period
+            
 
-              return (
-                <div
-                  key={`${option.period}-${index}`}
-                  className={`relative border rounded-lg p-3 cursor-pointer transition-all ${
-                    isSelected 
-                      ? 'border-[#3D8BFF] bg-[#3D8BFF]/5' 
-                      : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
-                  }`}
-                  onClick={() => onPeriodChange(option.period)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem 
-                        value={option.period} 
-                        id={`period-${option.period}-${index}`}
-                        className={isSelected ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED] text-[#6C757D]'}
-                      />
-                      <Label 
-                        htmlFor={`period-${option.period}-${index}`}
-                        className="cursor-pointer flex items-center space-x-2"
-                      >
-                        <span className="font-medium text-[#1A1A1A]">
-                          {option.period_label}
-                        </span>
-                        {discount > 0 && (
-                          <span className="bg-[#F0A202] text-[#FFFFFF] text-xs px-2 py-0.5 rounded-full font-medium">
-                            {discount}% OFF
-                          </span>
-                        )}
-                      </Label>
+            return (
+              <div
+                key={`${option.period}-${index}`}
+                className={`relative border rounded-lg p-3 cursor-pointer transition-all ${
+                  isSelected 
+                    ? 'border-[#3D8BFF] bg-[#3D8BFF]/5' 
+                    : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
+                }`}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  if (selectedPeriod !== option.period) {
+                    onPeriodChange(option.period)
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div 
+                      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected 
+                          ? 'border-[#3D8BFF] bg-[#3D8BFF]' 
+                          : 'border-[#E0E6ED] bg-white'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
                     </div>
-                    
-                    <div className="text-right">
-                      <div className="flex items-center space-x-2">
-                        {option.promo_price && option.regular_price > 0 && option.regular_price !== option.promo_price && (
-                          <span className="text-sm text-[#6C757D] line-through">
-                            {formatCurrency(option.regular_price, userCurrency)}
-                          </span>
-                        )}
-                        <span className="text-lg font-bold text-[#1A1A1A]">
-                          {formatCurrency(finalPrice, userCurrency)}
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium text-[#1A1A1A]">
+                        {option.period_label}
+                      </span>
+                      {discount > 0 && (
+                        <span className="bg-[#F0A202] text-[#FFFFFF] text-xs px-2 py-0.5 rounded-full font-medium">
+                          {discount}% OFF
                         </span>
-                      </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="flex items-center space-x-2">
+                      {option.promo_price && option.regular_price > 0 && option.regular_price !== option.promo_price && (
+                        <span className="text-sm text-[#6C757D] line-through">
+                          {formatCurrency(option.regular_price, userCurrency)}
+                        </span>
+                      )}
+                      <span className="text-lg font-bold text-[#1A1A1A]">
+                        {formatCurrency(finalPrice, userCurrency)}
+                      </span>
                     </div>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        </RadioGroup>
+              </div>
+            )
+          })}
+        </div>
       </CardContent>
     </Card>
   )
