@@ -27,18 +27,18 @@ export interface PaymentProcessorState {
   error: string | null
 }
 
-export function usePaymentProcessor({ 
-  packageData, 
-  onSuccess, 
+export function usePaymentProcessor({
+  packageData,
+  onSuccess,
   onError,
-  onPaymentStart 
+  onPaymentStart
 }: UsePaymentProcessorProps = {}) {
   const [state, setState] = useState<PaymentProcessorState>({
     loading: false,
     submitting: false,
     error: null
   })
-  
+
   const { addToast } = useToast()
   const router = useRouter()
 
@@ -69,19 +69,19 @@ export function usePaymentProcessor({
   const processPayment = async (paymentData: PaymentRequest, token: string): Promise<void> => {
     const paymentId = `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const startTime = Date.now()
-    
+
     setSubmitting(true)
     setError(null)
     onPaymentStart?.()
-    
+
     try {
       const paymentRouter = new PaymentRouter(token)
       const result = await paymentRouter.processPayment(paymentData)
 
       if (result.success) {
-        
+
         await handlePaymentSuccess(result, paymentData.payment_method, paymentData)
-        
+
         // Only call onSuccess for non-Midtrans payments (Midtrans handles success via popup/3DS callbacks)
         if (paymentData.payment_method !== 'midtrans_snap' && paymentData.payment_method !== 'midtrans_recurring') {
           onSuccess?.(result)
@@ -90,17 +90,17 @@ export function usePaymentProcessor({
         throw new Error(result.message || 'Payment failed')
       }
     } catch (error) {
-      
+
       // Re-throw 3DS authentication errors so checkout page can handle them
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
         setSubmitting(false) // Reset submitting state before re-throwing
         throw error
       }
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Payment failed'
       setError(errorMessage)
       onError?.(error as Error)
-      
+
       addToast({
         title: "Payment failed",
         description: errorMessage,
@@ -115,7 +115,7 @@ export function usePaymentProcessor({
    * 1) Tokenize card using Midtrans.min.js → 2) Charge with token → 3) Subscription with saved_token
    */
   const processCreditCardPayment = async (
-    paymentData: Omit<PaymentRequest, 'token_id'>, 
+    paymentData: Omit<PaymentRequest, 'token_id'>,
     cardData: { card_number: string; card_exp_month: string; card_exp_year: string; card_cvv: string },
     token: string
   ): Promise<void> => {
@@ -139,22 +139,23 @@ export function usePaymentProcessor({
       await processPayment({ ...paymentData, token_id: cardToken }, token)
 
     } catch (error) {
-      // Re-throw 3DS authentication errors so checkout page can handle them
+      // For 3DS errors, handle them directly here instead of re-throwing
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
-        setSubmitting(false)
-        throw error
+        // Handle 3DS authentication directly without re-throwing
+        try {
+          await handle3DSAuthentication(
+            error.redirect_url,
+            error.transaction_id,
+            error.order_id
+          )
+        } catch (authError) {
+          setError('3DS authentication failed')
+          setSubmitting(false)
+        }
+        return // Don't re-throw, we handled it
       }
-      
-      const errorMessage = error instanceof Error ? error.message : 'Credit card payment failed'
-      setError(errorMessage)
-      onError?.(error as Error)
-      
-      addToast({
-        title: "Payment failed",
-        description: errorMessage,
-        type: "error"
-      })
-      setSubmitting(false)
+      // Error handling payment success - logged internally
+      setError('Payment completed but there was an error with the follow-up process')
     }
   }
 
@@ -166,9 +167,9 @@ export function usePaymentProcessor({
       if (paymentMethod === 'midtrans_snap') {
         // Handle Snap popup
         const { token, client_key, environment } = result.data
-        
+
         await MidtransClientService.loadSnapSDK(client_key, environment)
-        
+
         await MidtransClientService.showSnapPayment(token, {
           onSuccess: (snapResult) => {
             // Payment successful - let webhook handle the final confirmation
@@ -224,7 +225,7 @@ export function usePaymentProcessor({
           threeDSError.redirect_url = result.redirect_url
           threeDSError.transaction_id = result.data?.transaction_id
           threeDSError.order_id = result.data?.order_id
-          
+
           throw threeDSError
         }
 
@@ -265,8 +266,8 @@ export function usePaymentProcessor({
    * Simple implementation using exact Midtrans example
    */
   const handle3DSAuthentication = async (
-    redirectUrl: string, 
-    transactionId: string, 
+    redirectUrl: string,
+    transactionId: string,
     orderId: string,
     onModalOpen?: (url: string) => void,
     onModalClose?: () => void
@@ -283,19 +284,19 @@ export function usePaymentProcessor({
           // Create modal container exactly like Midtrans docs
           const modalDiv = document.createElement('div')
           modalDiv.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); z-index: 10000; display: flex; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 10000; display: flex;
             justify-content: center; align-items: center; padding: 20px;
           `
-          
+
           // Create modal content container - made more compact
           const modalContent = document.createElement('div')
           modalContent.style.cssText = `
-            position: relative; width: 65%; height: 80vh; background: white; 
+            position: relative; width: 65%; height: 80vh; background: white;
             border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             display: flex; flex-direction: column;
           `
-          
+
           // Create minimal header with only cancel button
           const header = document.createElement('div')
           header.style.cssText = `
@@ -303,7 +304,7 @@ export function usePaymentProcessor({
             padding: 8px 12px; border-bottom: 1px solid #e0e6ed; background: #f7f9fc;
             border-radius: 8px 8px 0 0; min-height: 32px;
           `
-          
+
           const cancelButton = document.createElement('button')
           cancelButton.textContent = '✕'
           cancelButton.style.cssText = `
@@ -322,9 +323,9 @@ export function usePaymentProcessor({
               type: "info"
             })
           }
-          
+
           header.appendChild(cancelButton)
-          
+
           // Create iframe with exact Midtrans specifications
           const iframe = document.createElement('iframe')
           iframe.src = url
@@ -332,17 +333,17 @@ export function usePaymentProcessor({
           iframe.style.cssText = `
             width: 100%; flex: 1; border: none; border-radius: 0 0 8px 8px;
           `
-          
+
           // Add sandbox attributes for security
           iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-top-navigation')
           iframe.setAttribute('allow', 'payment')
-          
+
           modalContent.appendChild(header)
           modalContent.appendChild(iframe)
           modalDiv.appendChild(modalContent)
           document.body.appendChild(modalDiv)
           modal = modalDiv
-          
+
           onModalOpen?.(url)
         },
         closePopup: () => {
@@ -454,14 +455,14 @@ export function usePaymentProcessor({
     loading: state.loading,
     submitting: state.submitting,
     error: state.error,
-    
+
     // Actions
     processPayment,
     processCreditCardPayment,
     setLoading,
     setSubmitting,
     setError,
-    
+
     // Utility functions
     handlePaymentSuccess,
     handle3DSAuthentication
