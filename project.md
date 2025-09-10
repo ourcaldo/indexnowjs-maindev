@@ -1047,6 +1047,36 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 10, 2025: Billing History & 3DS Authentication UX Improvements ✅
+
+**✅ BILLING HISTORY SUMMARY FIX**: Corrected billing history statistics display showing incorrect zeros for all transaction counts
+- **Issue**: Billing history summary stats (total, completed, pending, failed) were showing 0 values even when transactions existed
+- **Root Cause**: API logic in `/app/api/v1/billing/history/route.ts` was using `.length` on undefined data instead of Supabase's `count` property
+- **Technical Problem**: Using `{ count: 'exact', head: true }` returns only count metadata, not data rows, but code tried to access `data.length`
+- **Fix**: Changed from destructuring `{ data: totalStats }` to `{ count: totalCount }` and updated summary calculation logic
+- **Impact**: Billing history now correctly displays actual transaction counts and statistics for all users
+- **Files Modified**: `app/api/v1/billing/history/route.ts` - Fixed summary statistics calculation logic
+
+**✅ 3DS AUTHENTICATION POPUP COMPACTNESS**: Made 3DS authentication modal more compact and user-friendly
+- **Issue**: 3DS authentication popup was too wide (65% width) making it unwieldy on larger screens
+- **Improvements Applied**:
+  - **Width Reduction**: Changed from 65% to 45% width with 500px max-width constraint
+  - **Height Optimization**: Reduced from 80vh to 70vh for better screen utilization
+  - **Mobile Responsiveness**: Added responsive design - 90% width and 80vh height on mobile devices (≤768px)
+  - **Minimum Width**: Added 320px min-width to prevent excessive compression on small screens
+  - **Autofill Prevention**: Disabled autocomplete, autocapitalize, autocorrect, and spellcheck attributes on iframe
+- **User Experience**: Popup now appears more proportional and professional across all device sizes
+- **Files Modified**: `hooks/usePaymentProcessor.ts` - Enhanced modal styling and disabled autofill features
+
+**✅ ENHANCED SECURITY & UX**: Added comprehensive autofill prevention and improved mobile experience
+- **Security**: Disabled browser autofill features that could interfere with 3DS authentication process
+- **Responsive Design**: Improved mobile experience with optimized dimensions for smaller screens
+- **Professional Appearance**: Modal now maintains better proportions across different screen sizes
+
+**Files Modified:**
+- `app/api/v1/billing/history/route.ts` - Fixed billing history summary statistics calculation
+- `hooks/usePaymentProcessor.ts` - Enhanced 3DS popup compactness and disabled autofill features
+
 ### September 9, 2025: Critical Bug Fixes - Trial Duration, Billing Period Selector, Order Success Page & Quota Display ✅
 
 **✅ TRIAL DURATION FIXED**: Corrected trial period from 8 minutes back to 3 days as intended
