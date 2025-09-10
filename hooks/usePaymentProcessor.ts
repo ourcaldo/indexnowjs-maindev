@@ -340,9 +340,13 @@ export function usePaymentProcessor({
             width: 100%; flex: 1; border: none; border-radius: 0 0 8px 8px;
           `
 
-          // Add sandbox attributes for security
+          // Add sandbox attributes for security and disable autofill
           iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-top-navigation')
           iframe.setAttribute('allow', 'payment')
+          iframe.setAttribute('autocomplete', 'off')
+          iframe.setAttribute('autocapitalize', 'off')
+          iframe.setAttribute('autocorrect', 'off')
+          iframe.setAttribute('spellcheck', 'false')
 
           modalContent.appendChild(header)
           modalContent.appendChild(iframe)
