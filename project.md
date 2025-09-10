@@ -6697,6 +6697,34 @@ ON public.indb_cms_posts(category, status);
 
 ## Recent Changes
 
+### September 10, 2025 - CRITICAL Security Issue #5 Fixed: Information Disclosure in Error Responses 🔒
+
+🛡️ **CRITICAL SECURITY VULNERABILITY FIXED**: Systematically eliminated information disclosure through detailed error messages across 40+ API endpoints
+- **Security Risk**: API endpoints returned specific error messages that exposed database schema, system architecture, and resource existence information
+- **Impact**: Enabled enumeration attacks, exposed internal system details, facilitated reconnaissance for further attacks
+- **Vulnerability Scope**: 95+ instances of detailed error messages across authentication, billing, admin, CMS, and indexing endpoints
+- **Security Enhancements Implemented**:
+  - **Generic Error Messages**: All user-facing error messages replaced with generic alternatives ("Access denied", "Invalid request", "Processing failed")
+  - **Detailed Server Logging**: Enhanced server-side logging preserves debugging information while hiding sensitive details from users
+  - **Proper Status Codes**: Fixed incorrect 404 responses for server errors - now properly differentiate between client errors (404) and server errors (500)
+  - **Anti-Enumeration Protection**: Resource-specific errors replaced with generic access denied messages to prevent resource discovery
+- **Files Modified (40+ endpoints)**:
+  - `app/api/v1/billing/transactions/[id]/route.ts` - Fixed critical status code handling for server vs client errors
+  - `app/api/v1/billing/orders/[id]/route.ts` - Replaced "Order not found" with "Access denied"
+  - `app/api/v1/auth/user/profile/route.ts` - Generic authentication error responses
+  - `app/api/midtrans/webhook/route.ts` - Payment webhook errors now generic with detailed server-side logging
+  - `app/api/v1/admin/users/[id]/route.ts` - Admin user access errors generalized
+  - `app/api/v1/indexing/jobs/[id]/route.ts` - Indexing job access errors standardized
+  - `app/api/v1/admin/cms/posts/[id]/route.ts` - CMS content access errors unified
+  - `app/api/v1/rank-tracking/keywords/route.ts` - Domain access checks generalized
+  - `app/api/v1/billing/upload-proof/route.ts` - Payment proof upload errors standardized
+  - Plus 30+ additional endpoints with similar security hardening
+- **Backward Compatibility**: Maintained response structure and functionality while securing error responses
+- **Testing**: Application functionality verified after security changes implementation
+- **Status**: ✅ **COMPLETE** - Critical information disclosure vulnerability eliminated across entire application
+
+**Security Impact**: This fix prevents system information leakage, blocks enumeration attacks, and significantly improves overall security posture while maintaining full application functionality.
+
 ### September 10, 2025 - CRITICAL Security Issue #1 Fixed: Hardcoded Admin Credentials Removed 🔒
 
 🚨 **CRITICAL SECURITY VULNERABILITY FIXED**: Completely removed hardcoded super admin credentials and implemented proper authentication 
