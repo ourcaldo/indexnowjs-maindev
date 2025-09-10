@@ -17,8 +17,8 @@ export async function GET(
       .single()
 
     if (error) {
-      console.error('Failed to fetch post:', error)
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+      console.error('Failed to fetch CMS post:', id, 'error:', error)
+      return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
     }
 
     // Get author information

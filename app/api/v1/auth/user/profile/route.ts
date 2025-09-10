@@ -49,9 +49,9 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (profileError || !profile) {
-      console.error('Profile fetch error:', profileError)
+      console.error('User profile not found for user:', userId, 'error:', profileError)
       return NextResponse.json(
-        { error: 'User profile not found' },
+        { error: 'Access denied' },
         { status: 404 }
       )
     }

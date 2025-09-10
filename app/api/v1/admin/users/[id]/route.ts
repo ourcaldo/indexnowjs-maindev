@@ -42,9 +42,9 @@ export async function GET(
       .single()
 
     if (profileError || !profile) {
-      console.error('Profile fetch error:', profileError)
+      console.error('Admin user lookup - Profile not found for user:', userId, 'error:', profileError)
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: 'Access denied' },
         { status: 404 }
       )
     }

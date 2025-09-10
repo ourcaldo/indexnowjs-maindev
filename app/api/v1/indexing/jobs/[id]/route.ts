@@ -42,9 +42,9 @@ export async function GET(
       .single();
 
     if (error) {
-      console.error('Error fetching job:', error);
+      console.error('Error fetching job for user:', user.id, 'job_id:', jobId, 'error:', error);
       if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Access denied' }, { status: 404 });
       }
       return NextResponse.json({ error: 'Failed to fetch job' }, { status: 500 });
     }

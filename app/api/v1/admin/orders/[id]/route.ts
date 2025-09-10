@@ -46,9 +46,9 @@ export async function GET(
       .single()
 
     if (orderError || !order) {
-      console.error('Error fetching order:', orderError)
+      console.error('Admin order lookup - Order not found:', orderId, 'error:', orderError)
       return NextResponse.json(
-        { error: 'Order not found' },
+        { error: 'Access denied' },
         { status: 404 }
       )
     }

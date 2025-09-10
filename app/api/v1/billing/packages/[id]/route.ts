@@ -32,8 +32,9 @@ export async function GET(
     }
 
     if (!packageData) {
+      console.error('Package not found or inactive:', packageId)
       return NextResponse.json(
-        { error: 'Package not found' },
+        { error: 'Resource not available' },
         { status: 404 }
       )
     }

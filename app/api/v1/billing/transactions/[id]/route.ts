@@ -42,16 +42,25 @@ export async function GET(
       .single()
 
     if (error) {
-      console.error('Database error:', error)
+      console.error('Database error fetching transaction:', error)
+      // Check if this is a "not found" error vs actual database error
+      if (error.code === 'PGRST116' || error.message?.includes('no rows returned')) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied' },
+          { status: 404 }
+        )
+      }
+      // Actual database/server error
       return NextResponse.json(
-        { success: false, message: 'Transaction not found' },
-        { status: 404 }
+        { success: false, message: 'Unable to process request' },
+        { status: 500 }
       )
     }
 
     if (!transaction) {
+      console.error('Transaction not found for user:', user.id, 'transaction_id:', (await params).id)
       return NextResponse.json(
-        { success: false, message: 'Transaction not found' },
+        { success: false, message: 'Access denied' },
         { status: 404 }
       )
     }

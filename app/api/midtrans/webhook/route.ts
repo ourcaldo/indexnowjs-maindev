@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     if (!orderId) {
       console.error('❌ [Unified Webhook] No order_id found in notification')
-      return NextResponse.json({ error: 'Order ID not found' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
 
     // Find transaction to determine payment method
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
           }
           
           console.error('❌ [Unified Webhook] Transaction not found for order_id:', orderId)
-          return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
+          return NextResponse.json({ error: 'Invalid request' }, { status: 404 })
         }
       }
     }
@@ -877,7 +877,7 @@ async function handleSubscriptionRenewal(body: any, orderId: string, supabaseAdm
       
     if (!packageData) {
       console.error('❌ [Subscription Renewal] Package not found:', packageId)
-      return NextResponse.json({ error: 'Package not found' }, { status: 400 })
+      return NextResponse.json({ error: 'Processing failed' }, { status: 400 })
     }
     
     // Get Midtrans gateway ID

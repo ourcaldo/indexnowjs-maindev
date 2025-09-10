@@ -260,8 +260,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (domainError || !domain) {
+      console.error('Domain access check - Domain not found for user:', user.id, 'domain_id:', domain_id, 'error:', domainError)
       return NextResponse.json(
-        { success: false, error: 'Domain not found or access denied' },
+        { success: false, error: 'Access denied' },
         { status: 404 }
       )
     }

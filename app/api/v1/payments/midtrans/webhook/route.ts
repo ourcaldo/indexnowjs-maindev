@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (findError || !transaction) {
-      console.error('Transaction not found for order:', orderId)
-      return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
+      console.error('Transaction not found for order:', orderId, 'error:', findError)
+      return NextResponse.json({ error: 'Invalid request' }, { status: 404 })
     }
 
     // Process different transaction statuses

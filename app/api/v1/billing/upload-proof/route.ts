@@ -64,8 +64,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (transactionError || !transaction) {
+      console.error('Payment proof upload - Transaction not found for user:', user.id, 'transaction_id:', transactionId, 'error:', transactionError)
       return NextResponse.json(
-        { success: false, message: 'Transaction not found' },
+        { success: false, message: 'Access denied' },
         { status: 404 }
       )
     }

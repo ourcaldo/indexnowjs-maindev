@@ -18,9 +18,9 @@ export async function GET(
       .single()
 
     if (error) {
-      console.error('Failed to fetch page:', error)
+      console.error('Failed to fetch CMS page:', id, 'error:', error)
       if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Page not found' }, { status: 404 })
+        return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
       }
       return NextResponse.json({ error: 'Failed to fetch page' }, { status: 500 })
     }
