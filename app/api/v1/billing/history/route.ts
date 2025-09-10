@@ -87,10 +87,10 @@ export async function GET(request: NextRequest) {
 
     // Get optimized summary statistics using aggregation functions
     const [
-      { data: totalStats },
-      { data: completedStats },
-      { data: pendingStats },
-      { data: failedStats },
+      { count: totalCount },
+      { count: completedCount },
+      { count: pendingCount },
+      { count: failedCount },
       { data: amountStats }
     ] = await Promise.all([
       supabaseAdmin
@@ -121,10 +121,10 @@ export async function GET(request: NextRequest) {
 
     // Calculate summary using aggregated data (much more efficient)
     const summary = {
-      total_transactions: totalStats?.length || 0,
-      completed_transactions: completedStats?.length || 0,
-      pending_transactions: pendingStats?.length || 0,
-      failed_transactions: failedStats?.length || 0,
+      total_transactions: totalCount || 0,
+      completed_transactions: completedCount || 0,
+      pending_transactions: pendingCount || 0,
+      failed_transactions: failedCount || 0,
       total_amount_spent: amountStats?.reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0) || 0
     }
 
