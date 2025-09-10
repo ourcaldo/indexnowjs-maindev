@@ -290,18 +290,20 @@ export function usePaymentProcessor({
             justify-content: center; align-items: center; padding: 20px;
           `
 
-          // Create modal content container - made more compact and responsive
+          // Create modal content container - very compact like reference image
           const modalContent = document.createElement('div')
           modalContent.style.cssText = `
-            position: relative; width: 45%; max-width: 500px; min-width: 320px;
-            height: 70vh; background: white; border-radius: 8px; 
+            position: relative; width: 400px; max-width: 90vw; min-width: 320px;
+            height: 450px; max-height: 85vh; background: white; border-radius: 8px; 
             box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; flex-direction: column;
+            overflow: hidden;
           `
           
           // Make it responsive for mobile devices
           if (window.innerWidth <= 768) {
-            modalContent.style.width = '90%'
-            modalContent.style.height = '80vh'
+            modalContent.style.width = '95vw'
+            modalContent.style.height = '500px'
+            modalContent.style.maxHeight = '90vh'
           }
 
           // Create minimal header with only cancel button
@@ -333,21 +335,61 @@ export function usePaymentProcessor({
 
           header.appendChild(cancelButton)
 
-          // Create iframe with exact Midtrans specifications
+          // Create iframe with exact Midtrans specifications - no scrolling and autofill disabled
           const iframe = document.createElement('iframe')
           iframe.src = url
           iframe.frameBorder = '0'
           iframe.style.cssText = `
             width: 100%; flex: 1; border: none; border-radius: 0 0 8px 8px;
+            overflow: hidden;
           `
 
-          // Add sandbox attributes for security and disable autofill
+          // Add sandbox attributes for security and comprehensive autofill prevention
           iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-top-navigation')
           iframe.setAttribute('allow', 'payment')
+          iframe.setAttribute('scrolling', 'no')
           iframe.setAttribute('autocomplete', 'off')
           iframe.setAttribute('autocapitalize', 'off')
           iframe.setAttribute('autocorrect', 'off')
           iframe.setAttribute('spellcheck', 'false')
+          iframe.setAttribute('data-form-type', 'payment')
+          
+          // Add comprehensive autofill prevention via CSS injection
+          iframe.onload = () => {
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+              if (iframeDoc) {
+                const style = iframeDoc.createElement('style')
+                style.textContent = `
+                  * { 
+                    -webkit-user-select: none !important;
+                    -moz-user-select: none !important;
+                    -ms-user-select: none !important;
+                    user-select: none !important;
+                  }
+                  input, select, textarea {
+                    -webkit-user-select: text !important;
+                    -moz-user-select: text !important;
+                    -ms-user-select: text !important;
+                    user-select: text !important;
+                    autocomplete: off !important;
+                    -webkit-text-security: none !important;
+                  }
+                  input[type="password"] {
+                    -webkit-text-security: disc !important;
+                  }
+                  body { 
+                    overflow: hidden !important; 
+                    margin: 0 !important; 
+                    padding: 10px !important;
+                  }
+                `
+                iframeDoc.head.appendChild(style)
+              }
+            } catch (e) {
+              // Cross-origin restrictions may prevent this, ignore silently
+            }
+          }
 
           modalContent.appendChild(header)
           modalContent.appendChild(iframe)
