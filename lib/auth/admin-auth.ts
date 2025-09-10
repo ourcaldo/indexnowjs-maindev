@@ -26,18 +26,6 @@ export class AdminAuthService {
 
       console.log('Admin auth: Current user:', { id: currentUser.id, email: currentUser.email })
 
-      // For the known super_admin user, return directly to bypass RLS issues
-      if (currentUser.id === '915f50e5-0902-466a-b1af-bdf19d789722') {
-        console.log('Admin auth: Known super_admin user detected')
-        return {
-          id: currentUser.id,
-          email: currentUser.email,
-          name: 'aldodkris',
-          role: 'super_admin',
-          isAdmin: true,
-          isSuperAdmin: true
-        }
-      }
 
       // Try to get user profile with role information using direct API call
       try {
@@ -65,16 +53,9 @@ export class AdminAuthService {
         console.error('Supabase query failed:', apiError)
       }
 
-      // Fallback: create super_admin profile for authenticated users
-      console.log('Admin auth: Creating super_admin profile as fallback')
-      return {
-        id: currentUser.id,
-        email: currentUser.email,
-        name: currentUser.name || currentUser.email?.split('@')[0] || 'Admin User',
-        role: 'super_admin',
-        isAdmin: true,
-        isSuperAdmin: true
-      }
+      // No profile found and no fallback - return null for security
+      console.log('Admin auth: No profile found, access denied')
+      return null
 
     } catch (error) {
       console.error('Get admin user error:', error)
@@ -194,18 +175,6 @@ async function getServerAdminUser(request?: NextRequest): Promise<AdminUser | nu
 
     console.log('Server auth: User found:', { id: user.id, email: user.email })
 
-    // For the known super_admin user, return directly to bypass RLS issues
-    if (user.id === '915f50e5-0902-466a-b1af-bdf19d789722') {
-      console.log('Server auth: Known super_admin user detected')
-      return {
-        id: user.id,
-        email: user.email,
-        name: 'aldodkris',
-        role: 'super_admin',
-        isAdmin: true,
-        isSuperAdmin: true
-      }
-    }
 
     // Get user profile with role information using admin client
     const { data: profile, error } = await supabaseAdmin
