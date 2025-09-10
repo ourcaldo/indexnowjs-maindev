@@ -94,7 +94,7 @@ export default function Footer({ siteSettings, onScrollToPricing }: FooterProps)
             <div className="space-y-4">
               <h3 className="text-white font-medium text-sm">Connect</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href={`mailto:${siteSettings?.contact_email || 'hello@indexnow.studio'}`} className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Contact ↗</a></li>
+                <li><a href={`mailto:${siteSettings?.contact_email}`} className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Contact ↗</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-gray-300 transition-colors duration-200">Forum</a></li>
               </ul>
             </div>
