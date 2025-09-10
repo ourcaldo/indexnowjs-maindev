@@ -13,9 +13,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get the current authenticated user (if any) to validate authorization
-    let currentUser = null
-    try {
+    // Authentication is now mandatory - try Bearer token first, then cookies
+    let user = null
+    let authError = null
+
+    // Try Bearer token authentication first (for login flow)
+    const authHeader = request.headers.get('authorization')
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+      
+      const { data: userData, error: tokenError } = await supabaseAdmin.auth.getUser(token)
+      user = userData.user
+      authError = tokenError
+    }
+
+    // Fallback to cookie-based authentication if no valid user found yet
+    if (!user) {
       const supabaseServer = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -31,28 +44,29 @@ export async function POST(request: NextRequest) {
         }
       )
       
-      const { data: { user } } = await supabaseServer.auth.getUser()
-      if (user) {
-        // Get their role from database to check admin status
-        const { data: profile } = await supabaseAdmin
-          .from('indb_auth_user_profiles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single()
-        
-        currentUser = { 
-          id: user.id, 
-          email: user.email,
-          isSuperAdmin: profile?.role === 'super_admin'
-        }
-      }
-    } catch (authError) {
-      // Authentication failed - allow checking but restrict to basic validation
-      console.log('Authentication check failed, allowing limited role verification')
+      const { data: { user: cookieUser }, error: cookieError } = await supabaseServer.auth.getUser()
+      user = cookieUser
+      authError = cookieError
+    }
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      )
     }
 
-    // If user is authenticated, only allow checking their own role (unless they're super admin)
-    if (currentUser && userId !== currentUser.id && !currentUser.isSuperAdmin) {
+    // Get authenticated user's role to check authorization
+    const { data: authProfile } = await supabaseAdmin
+      .from('indb_auth_user_profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single()
+    
+    const isRequestingSuperAdmin = authProfile?.role === 'super_admin'
+
+    // Authorization: Users can only check their own role (unless they're super admin)
+    if (userId !== user.id && !isRequestingSuperAdmin) {
       return NextResponse.json(
         { success: false, error: 'Access denied - can only check your own role' },
         { status: 403 }

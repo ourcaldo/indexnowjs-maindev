@@ -44,11 +44,12 @@ export default function AdminLoginPage() {
         throw new Error('Authentication failed')
       }
 
-      // Step 2: Verify admin role using direct API call
+      // Step 2: Verify admin role using direct API call with Bearer token
       const response = await fetch('/api/v1/admin/verify-role', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authData.session.access_token}`
         },
         body: JSON.stringify({
           userId: authData.user.id
