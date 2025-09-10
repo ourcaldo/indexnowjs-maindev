@@ -1068,14 +1068,22 @@ JWT_SECRET=[jwt-secret-key]
 - **User Experience**: Popup now appears more proportional and professional across all device sizes
 - **Files Modified**: `hooks/usePaymentProcessor.ts` - Enhanced modal styling and disabled autofill features
 
-**✅ ENHANCED SECURITY & UX**: Added comprehensive autofill prevention and improved mobile experience
-- **Security**: Disabled browser autofill features that could interfere with 3DS authentication process
-- **Responsive Design**: Improved mobile experience with optimized dimensions for smaller screens
-- **Professional Appearance**: Modal now maintains better proportions across different screen sizes
+**✅ ADDITIONAL FIXES (Round 2)**: Addressed remaining issues with billing history and 3DS popup
+- **Billing History PENDING 3DS Fix**: Updated API to include "pending_3ds" status in pending transaction count 
+  - Root Cause: API was only counting exact "pending" status, missing "pending_3ds" transactions
+  - Fix: Changed `.eq('transaction_status', 'pending')` to `.in('transaction_status', ['pending', 'pending_3ds'])`
+  - Impact: Pending counter now correctly shows all incomplete transactions including 3DS authentication pending
+- **Ultra-Compact 3DS Popup**: Made popup significantly more compact and scroll-free like reference design
+  - Fixed Dimensions: Changed to 400px width × 450px height (from 45% × 70vh) for consistent compact size
+  - Scroll Prevention: Added `overflow: hidden` and `scrolling="no"` to completely eliminate scrolling
+  - Enhanced Autofill Prevention: Added comprehensive CSS injection to disable all browser autofill features
+  - Mobile Optimized: 95vw width and 500px height on mobile devices for better usability
+- **Enhanced Security**: Added multiple layers of autofill prevention including iframe attributes and CSS injection
+- **TypeScript Fixes**: Resolved 3DS authentication error type issues for better code stability
 
 **Files Modified:**
-- `app/api/v1/billing/history/route.ts` - Fixed billing history summary statistics calculation
-- `hooks/usePaymentProcessor.ts` - Enhanced 3DS popup compactness and disabled autofill features
+- `app/api/v1/billing/history/route.ts` - Fixed billing history summary statistics calculation and added pending_3ds status support
+- `hooks/usePaymentProcessor.ts` - Enhanced 3DS popup compactness, disabled autofill features, and fixed TypeScript errors
 
 ### September 9, 2025: Critical Bug Fixes - Trial Duration, Billing Period Selector, Order Success Page & Quota Display ✅
 
