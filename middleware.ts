@@ -70,17 +70,19 @@ async function checkUserAuthentication(request: NextRequest): Promise<{ user: an
       return null
     }
 
-    // For admin routes, check admin role using service client
+    // For admin routes, check admin role using centralized service client
     if (request.nextUrl.pathname.startsWith('/api/system/') || 
         request.nextUrl.pathname.startsWith('/api/debug/') ||
         request.nextUrl.pathname === '/api/revalidate') {
       
-      const { createClient } = require('@supabase/supabase-js')
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      )
+      // Use centralized service role client instead of ad-hoc creation
+      const { supabaseAdmin } = await import('./lib/database/supabase')
       
+      // Security validation: Only query profile for the authenticated user
+      if (!user?.id) {
+        return null
+      }
+
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('indb_auth_user_profiles')
         .select('role')
@@ -89,6 +91,28 @@ async function checkUserAuthentication(request: NextRequest): Promise<{ user: an
 
       if (profileError || !profile) {
         return null
+      }
+
+      // Log service role operation for audit trail
+      console.log(`AUDIT: Service role admin check for user ${user.id} on route ${request.nextUrl.pathname}`)
+
+      // Insert audit log for service role admin check (non-blocking)
+      try {
+        await supabaseAdmin
+          .from('indb_security_audit_logs')
+          .insert({
+            user_id: user.id,
+            event_type: 'service_role_admin_check',
+            description: `Service role checked admin permissions for protected route: ${request.nextUrl.pathname}`,
+            success: true,
+            metadata: {
+              operation: 'admin_role_verification',
+              route: request.nextUrl.pathname,
+              user_role: profile?.role
+            }
+          })
+      } catch (auditError) {
+        console.error('Failed to log service role audit entry:', auditError)
       }
 
       return { user, role: profile.role }

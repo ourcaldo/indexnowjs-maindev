@@ -94,17 +94,13 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
           name 
         }, 'Starting profile update process...')
         
-        // Use service role client to bypass RLS policies for profile update
-        const serviceSupabase = createClient(
-          process.env.SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          {
-            auth: {
-              autoRefreshToken: false,
-              persistSession: false
-            }
-          }
-        )
+        // Use centralized service role client with security validation
+        const { supabaseAdmin } = await import('@/lib/database')
+        
+        // Security validation: Only allow updating profile for the user who just registered
+        if (!data.user?.id) {
+          throw new Error('Invalid user data - cannot update profile')
+        }
 
         // Wait for triggers to create the profile
         await new Promise(resolve => setTimeout(resolve, 3000)) // Increased to 3 seconds
@@ -115,7 +111,7 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
         }, 'Updating profile with service role client...')
         
         // First check if profile exists with service role
-        const { data: existingProfile, error: checkError } = await serviceSupabase
+        const { data: existingProfile, error: checkError } = await supabaseAdmin
           .from('indb_auth_user_profiles')
           .select('*')
           .eq('user_id', data.user.id)
@@ -136,14 +132,45 @@ export const POST = publicApiRouteWrapper(async (request: NextRequest, endpoint:
             }
           }, 'Service role found profile, updating...')
 
+          // Security validation: Sanitize input data before service role operation
+          const sanitizedData = {
+            phone_number: phoneNumber?.toString().replace(/[^\d+\-\s\(\)]/g, '') || null,
+            country: country?.toString().substring(0, 100) || null,
+            full_name: name?.toString().substring(0, 255) || null
+          }
+          
+          // Log service role operation for audit trail
+          logger.info({ 
+            userId: data.user.id,
+            operation: 'service_role_profile_update',
+            sanitizedData,
+            reason: 'registration_profile_completion'
+          }, 'AUDIT: Service role profile update operation')
+
+          // Insert audit log into security table for compliance
+          try {
+            await supabaseAdmin
+              .from('indb_security_audit_logs')
+              .insert({
+                user_id: data.user.id,
+                event_type: 'service_role_operation',
+                description: 'Service role bypassed RLS to update user profile during registration',
+                success: true,
+                metadata: {
+                  operation: 'profile_update',
+                  reason: 'registration_completion',
+                  sanitized_data: sanitizedData,
+                  endpoint: endpoint
+                }
+              })
+          } catch (auditError) {
+            logger.error({ error: auditError, userId: data.user.id }, 'Failed to log service role audit entry')
+          }
+          
           // Update the profile directly with service role (bypasses RLS)
-          const { data: updateResult, error: updateError } = await serviceSupabase
+          const { data: updateResult, error: updateError } = await supabaseAdmin
             .from('indb_auth_user_profiles')
-            .update({
-              phone_number: phoneNumber,
-              country: country,
-              full_name: name
-            })
+            .update(sanitizedData)
             .eq('user_id', data.user.id)
             .select()
 
