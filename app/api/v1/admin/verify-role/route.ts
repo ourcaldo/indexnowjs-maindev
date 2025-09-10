@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
+import { requireAdminAuth } from '@/lib/auth/admin-auth'
 
 export async function POST(request: NextRequest) {
   try {
+    // First, verify the requesting user is authenticated and has admin access
+    const requestingUser = await requireAdminAuth(request)
+    if (!requestingUser) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
     const { userId } = await request.json()
 
     if (!userId) {
@@ -12,15 +22,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // For the known super_admin user, return directly
-    if (userId === '915f50e5-0902-466a-b1af-bdf19d789722') {
-      return NextResponse.json({
-        success: true,
-        isAdmin: true,
-        isSuperAdmin: true,
-        role: 'super_admin',
-        name: 'aldodkris'
-      })
+    // Users can only check their own role, unless they are super admin
+    if (userId !== requestingUser.id && !requestingUser.isSuperAdmin) {
+      return NextResponse.json(
+        { success: false, error: 'Access denied - can only check your own role' },
+        { status: 403 }
+      )
     }
 
     // Get user profile with role information using admin client
@@ -31,7 +38,6 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error || !profile) {
-      console.log('Admin role verification: Failed to get user profile', error?.message)
       return NextResponse.json(
         { success: false, error: 'User profile not found or access denied' },
         { status: 403 }
@@ -41,19 +47,12 @@ export async function POST(request: NextRequest) {
     const isAdmin = profile.role === 'admin' || profile.role === 'super_admin'
     const isSuperAdmin = profile.role === 'super_admin'
 
-    if (!isAdmin) {
-      return NextResponse.json(
-        { success: false, error: 'Admin privileges required' },
-        { status: 403 }
-      )
-    }
-
     return NextResponse.json({
       success: true,
       isAdmin,
       isSuperAdmin,
       role: profile.role,
-      name: profile.full_name
+      name: profile.full_name || 'Unknown'
     })
 
   } catch (error: any) {
