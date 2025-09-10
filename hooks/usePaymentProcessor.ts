@@ -143,10 +143,11 @@ export function usePaymentProcessor({
       if (error && typeof error === 'object' && 'requires_3ds' in error) {
         // Handle 3DS authentication directly without re-throwing
         try {
+          const threeDSError = error as any
           await handle3DSAuthentication(
-            error.redirect_url,
-            error.transaction_id,
-            error.order_id
+            threeDSError.redirect_url,
+            threeDSError.transaction_id,
+            threeDSError.order_id
           )
         } catch (authError) {
           setError('3DS authentication failed')

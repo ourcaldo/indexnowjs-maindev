@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
         .from('indb_payment_transactions')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('transaction_status', 'pending'),
+        .in('transaction_status', ['pending', 'pending_3ds']),
       supabaseAdmin
         .from('indb_payment_transactions')
         .select('*', { count: 'exact', head: true })
