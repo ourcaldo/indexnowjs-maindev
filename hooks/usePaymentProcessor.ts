@@ -289,13 +289,19 @@ export function usePaymentProcessor({
             justify-content: center; align-items: center; padding: 20px;
           `
 
-          // Create modal content container - made more compact
+          // Create modal content container - made more compact and responsive
           const modalContent = document.createElement('div')
           modalContent.style.cssText = `
-            position: relative; width: 65%; height: 80vh; background: white;
-            border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column;
+            position: relative; width: 45%; max-width: 500px; min-width: 320px;
+            height: 70vh; background: white; border-radius: 8px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3); display: flex; flex-direction: column;
           `
+          
+          // Make it responsive for mobile devices
+          if (window.innerWidth <= 768) {
+            modalContent.style.width = '90%'
+            modalContent.style.height = '80vh'
+          }
 
           // Create minimal header with only cancel button
           const header = document.createElement('div')
