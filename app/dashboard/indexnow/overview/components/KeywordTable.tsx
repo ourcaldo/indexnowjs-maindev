@@ -43,8 +43,7 @@ export const KeywordTable = ({
       <Card>
         <div className="flex items-center justify-center py-12">
           <div
-            className="animate-spin rounded-full h-8 w-8 border-b-2"
-            style={{ borderColor: '#3D8BFF' }}
+            className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
           ></div>
         </div>
       </Card>
@@ -55,11 +54,11 @@ export const KeywordTable = ({
     return (
       <Card>
         <div className="text-center py-12">
-          <Globe className="w-16 h-16 mx-auto mb-4" style={{ color: '#6C757D' }} />
-          <h3 className="text-lg font-semibold mb-2" style={{ color: '#1A1A1A' }}>
+          <Globe className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-lg font-semibold mb-2 text-foreground">
             {searchTerm ? 'No keywords found' : 'No keywords added'}
           </h3>
-          <p style={{ color: '#6C757D' }}>
+          <p className="text-muted-foreground">
             {searchTerm
               ? `No keywords match "${searchTerm}" in this domain.`
               : 'Add keywords to start tracking their search positions.'}
@@ -124,23 +123,23 @@ export const KeywordTable = ({
                   />
                 </td>
                 <td className="p-3">
-                  <div className="font-medium text-sm" style={{ color: '#1A1A1A' }}>
+                  <div className="font-medium text-sm text-foreground">
                     {keyword.keyword}
                   </div>
                 </td>
                 <td className="p-3 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-lg font-semibold" style={{ color: '#1A1A1A' }}>
+                    <span className="text-lg font-semibold text-foreground">
                       {keyword.current_position || '-'}
                     </span>
                     {keyword.position_1d !== null && keyword.position_1d !== undefined && (
                       <div className="flex items-center">
                         {keyword.position_1d > 0 ? (
-                          <TrendingUp className="w-3 h-3" style={{ color: '#4BB543' }} />
+                          <TrendingUp className="w-3 h-3 text-green-500" />
                         ) : keyword.position_1d < 0 ? (
-                          <TrendingDown className="w-3 h-3" style={{ color: '#E63946' }} />
+                          <TrendingDown className="w-3 h-3 text-red-500" />
                         ) : (
-                          <Minus className="w-3 h-3" style={{ color: '#6C757D' }} />
+                          <Minus className="w-3 h-3 text-muted-foreground" />
                         )}
                       </div>
                     )}
@@ -152,11 +151,11 @@ export const KeywordTable = ({
                 <td className="p-3 text-center">
                   <div className="flex items-center justify-center">
                     {keyword.device_type === 'mobile' ? (
-                      <Smartphone className="w-4 h-4 mr-2" style={{ color: '#6C757D' }} />
+                      <Smartphone className="w-4 h-4 mr-2 text-muted-foreground" />
                     ) : (
-                      <Monitor className="w-4 h-4 mr-2" style={{ color: '#6C757D' }} />
+                      <Monitor className="w-4 h-4 mr-2 text-muted-foreground" />
                     )}
-                    <span className="text-sm capitalize" style={{ color: '#1A1A1A' }}>
+                    <span className="text-sm capitalize text-foreground">
                       {keyword.device_type}
                     </span>
                   </div>
@@ -170,7 +169,7 @@ export const KeywordTable = ({
                         </Badge>
                       ))
                     ) : (
-                      <span style={{ color: '#6C757D' }}>-</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </div>
                 </td>
@@ -200,16 +199,16 @@ export const KeywordTable = ({
                 </td>
                 <td className="p-3 text-center">
                   <div className="flex items-center gap-2 justify-center">
-                    <span className="text-xs font-mono" style={{ color: '#6C757D' }}>
+                    <span className="text-xs font-mono text-muted-foreground">
                       {keyword.country?.iso2_code}
                     </span>
-                    <span className="text-sm" style={{ color: '#1A1A1A' }}>
+                    <span className="text-sm text-foreground">
                       {keyword.country?.name}
                     </span>
                   </div>
                 </td>
                 <td className="p-3 text-center">
-                  <span className="text-sm" style={{ color: '#6C757D' }}>
+                  <span className="text-sm text-muted-foreground">
                     {keyword.last_updated
                       ? new Date(keyword.last_updated).toLocaleDateString()
                       : '-'}

@@ -15,6 +15,7 @@ import {
   BulkActions, 
   Pagination 
 } from './components'
+import { UsageChart, RankingDistribution } from '@/components/dashboard/enhanced'
 
 export default function IndexNowOverview() {
   const router = useRouter()
@@ -287,11 +288,11 @@ export default function IndexNowOverview() {
       {domains.length === 0 ? (
         <Card>
           <div className="text-center py-12">
-            <Globe className="w-16 h-16 mx-auto mb-4" style={{color: '#6C757D'}} />
-            <h3 className="text-lg font-semibold mb-2" style={{color: '#1A1A1A'}}>
+            <Globe className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2 text-foreground">
               No Domains Added
             </h3>
-            <p style={{color: '#6C757D'}} className="mb-6">
+            <p className="text-muted-foreground mb-6">
               Add your first domain to start tracking keywords and monitoring your search rankings.
             </p>
             <Button onClick={() => router.push('/dashboard/indexnow/add')}>
@@ -316,7 +317,7 @@ export default function IndexNowOverview() {
             {/* Add Keyword Button */}
             <Button 
               onClick={() => router.push('/dashboard/indexnow/add')}
-              style={{ backgroundColor: '#22333b', color: '#FFFFFF' }}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Keyword
@@ -330,6 +331,24 @@ export default function IndexNowOverview() {
             topTenCount={topTenCount}
             improvingCount={improvingCount}
           />
+
+          {/* Analytics Widgets */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <UsageChart 
+              data={[]}
+              currentQuota={totalKeywords}
+              totalQuota={1000}
+            />
+            <RankingDistribution 
+              data={{
+                total: statsKeywords.length,
+                topTen: topTenCount,
+                topTwenty: statsKeywords.filter((k: any) => k.current_position && k.current_position <= 20).length,
+                topFifty: statsKeywords.filter((k: any) => k.current_position && k.current_position <= 50).length,
+                beyond: statsKeywords.filter((k: any) => !k.current_position || k.current_position > 50).length
+              }}
+            />
+          </div>
 
           {/* Filter and Keywords Section */}
           <div className="space-y-4">

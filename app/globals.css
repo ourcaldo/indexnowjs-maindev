@@ -55,14 +55,14 @@
   --accent-foreground: var(--pure-white);
   
   /* Semantic colors */
-  --success: var(--mint-green);
-  --success-foreground: var(--pure-white);
-  --warning: var(--amber);
-  --warning-foreground: var(--graphite);
-  --error: var(--rose-red);
-  --error-foreground: var(--pure-white);
-  --info: var(--soft-blue);
-  --info-foreground: var(--pure-white);
+  --success: 142 70% 49%; /* #4BB543 converted to HSL */
+  --success-foreground: 0 0% 100%;
+  --warning: 39 92% 47%; /* #F0A202 converted to HSL */
+  --warning-foreground: 0 0% 7%;
+  --error: 354 70% 54%; /* #E63946 converted to HSL */
+  --error-foreground: 0 0% 100%;
+  --info: 218 49% 56%; /* #5B7BBF converted to HSL */
+  --info-foreground: 0 0% 100%;
   
   /* UI Elements */
   --border: var(--cool-gray);
