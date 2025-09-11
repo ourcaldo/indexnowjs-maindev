@@ -155,15 +155,24 @@ export default function IndexNowOverview() {
     }
   })
 
-  // Fetch ALL keywords for the selected domain for statistics calculation (independent of pagination)
+  // Fetch ALL keywords for the selected domain for statistics calculation - FILTERED by device/country
   const { data: allDomainKeywordsData } = useQuery({
-    queryKey: ['/api/v1/rank-tracking/keywords-stats', selectedDomainId],
+    queryKey: ['/api/v1/rank-tracking/keywords-stats', {
+      domain_id: selectedDomainId,
+      device_type: selectedDevice || undefined,
+      country_id: selectedCountry || undefined
+    }],
     queryFn: async () => {
       if (!selectedDomainId) return { data: [] }
       
       const { data: { session } } = await supabase.auth.getSession()
       const params = new URLSearchParams()
       params.append('domain_id', selectedDomainId)
+      
+      // Apply same filters as main keyword query for consistent stats
+      if (selectedDevice) params.append('device_type', selectedDevice)
+      if (selectedCountry) params.append('country_id', selectedCountry)
+      
       params.append('limit', '100') // Use smaller limit to avoid 400 errors
       
       const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
