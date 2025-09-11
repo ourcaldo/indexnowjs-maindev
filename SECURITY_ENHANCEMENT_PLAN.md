@@ -171,12 +171,135 @@ if (error) {
 - Use Redis for distributed rate limiting
 
 ### 🔐 Enhancement #2: Strengthen Input Validation
-**Current State:** Basic Zod validation
-**Recommendation:**
-- Add SQL injection protection
-- Implement XSS prevention
-- Add file upload validation
-- Sanitize all user inputs
+**Current State:** Basic Zod validation in some areas, but significant gaps exist
+**Current Vulnerabilities:**
+- Missing query parameter validation (95+ instances)
+- Weak file upload security (MIME type only)
+- No HTML content sanitization (XSS vulnerability)
+- Database input injection risks
+- Missing business logic validation
+
+## 📦 **Recommended Module Stack Analysis**
+
+### **1. Core Input Validation - Continue with Zod (Recommended)**
+**Why:** Already implemented, excellent TypeScript integration
+**Current Usage:** `shared/schema.ts` with basic auth schemas
+**Enhancement Needed:** Expand coverage to all API endpoints
+```typescript
+// Strengths: Zero dependencies, TypeScript-first, 41.5M weekly downloads
+// Current: loginSchema, registerSchema (basic coverage)
+// Needed: Comprehensive API request/response schemas
+```
+
+### **2. HTML Sanitization - Add DOMPurify (OWASP Recommended)**
+**Install:** `npm install dompurify jsdom`
+**Why DOMPurify over sanitize-html:**
+- ✅ OWASP officially recommends DOMPurify
+- ✅ Built by security experts (Cure53)
+- ✅ Works in browser + Node.js
+- ✅ Superior XSS protection
+- ✅ Regular security updates
+
+```typescript
+// Implementation for CMS content sanitization
+const createDOMPurify = require('dompurify');
+const { JSDOM } = require('jsdom');
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window);
+
+// Secure configuration for IndexNow Studio
+const cleanHTML = DOMPurify.sanitize(userContent, {
+  ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'ul', 'li'],
+  ALLOWED_ATTR: ['href'],
+  ALLOWED_URI_REGEXP: /^https?:\/\//
+});
+```
+
+### **3. File Upload Security - Upgrade to Multer (Recommended)**
+**Install:** `npm install multer file-type`
+**Why Multer over current basic validation:**
+- ✅ 6.8M weekly downloads vs 384K for express-fileupload
+- ✅ Advanced security features (magic number validation)
+- ✅ Better performance (built on busboy)
+- ✅ More granular control
+
+```typescript
+// Replace current basic file type checking with:
+const multer = require('multer');
+const { fileTypeFromBuffer } = require('file-type');
+
+// Magic number validation (prevents spoofed file types)
+const fileFilter = async (req, file, cb) => {
+  const fileType = await fileTypeFromBuffer(file.buffer);
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  
+  if (!fileType || !allowedTypes.includes(fileType.mime)) {
+    return cb(new Error('Invalid file content'), false);
+  }
+  cb(null, true);
+};
+```
+
+### **4. Rate Limiting - Add express-rate-limit**
+**Install:** `npm install express-rate-limit`
+**Current Gap:** No rate limiting on API endpoints
+```typescript
+// Prevent brute force attacks and DoS
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+```
+
+### **5. Additional Security Modules**
+**Helmet.js:** `npm install helmet` (HTTP security headers)
+**validator.js:** `npm install validator` (Additional validation utilities)
+
+## 🎯 **Implementation Priority & Strategy**
+
+### **Phase 1: Foundation (Week 1)**
+1. **Expand Zod schemas** for all API endpoints
+2. **Install & configure DOMPurify** for CMS content
+3. **Upgrade file uploads** to Multer with magic number validation
+
+### **Phase 2: Advanced Security (Week 2)**  
+4. **Add rate limiting** to all endpoints
+5. **Implement input sanitization** middleware
+6. **Add Helmet.js** for security headers
+
+### **Phase 3: Business Logic (Week 3)**
+7. **Add business rule validation** (quotas, limits)
+8. **Implement comprehensive error handling**
+9. **Add security monitoring**
+
+## 📊 **Current Gap Analysis**
+
+**API Endpoints Missing Validation:**
+- `app/api/v1/admin/orders/route.ts` (query parameters)
+- `app/api/v1/rank-tracking/keywords/route.ts` (filters)
+- `app/api/midtrans/webhook/route.ts` (payment data)
+- 40+ additional endpoints need enhancement
+
+**File Upload Security Issues:**
+- `app/api/v1/admin/cms/upload/route.ts` needs Multer upgrade
+- Payment proof uploads need server-side validation
+- Missing virus scanning and content verification
+
+**XSS Vulnerabilities:**
+- CMS post/page content (rich text editor output)
+- Custom CSS/JS fields in admin pages
+- User profile descriptions and comments
+
+## 💡 **Why These Modules vs Building from Scratch**
+
+**Time to Market:** Using proven modules reduces development time by 80%
+**Security Expertise:** These modules are maintained by security experts
+**Community Support:** Large user bases mean faster bug fixes
+**Battle-Tested:** Millions of applications use these in production
+**Cost-Effective:** No need to reinvent secure validation logic
+
+**Recommendation:** Leverage existing modules and customize configuration for IndexNow Studio's specific needs rather than building from scratch.
 
 ### 🛡️ Enhancement #3: Enhanced Security Headers
 **Current State:** Basic Next.js defaults
