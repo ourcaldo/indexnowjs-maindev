@@ -81,7 +81,7 @@ export default function IndexNowOverview() {
       country_id: selectedCountry || undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
       page: currentPage,
-      limit: 20
+      limit: 100
     }],
     queryFn: async () => {
       const params = new URLSearchParams()
@@ -91,7 +91,7 @@ export default function IndexNowOverview() {
       if (selectedCountry) params.append('country_id', selectedCountry)
       if (selectedTags.length > 0) params.append('tags', selectedTags.join(','))
       params.append('page', currentPage.toString())
-      params.append('limit', '20')
+      params.append('limit', '100')
 
       const { data: { session } } = await supabase.auth.getSession()
       const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
@@ -314,14 +314,39 @@ export default function IndexNowOverview() {
               getDomainKeywordCount={getDomainKeywordCount}
             />
 
-            {/* Add Keyword Button */}
-            <Button 
-              onClick={() => router.push('/dashboard/indexnow/add')}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Keyword
-            </Button>
+            {/* Device and Country Filters + Add Keyword Button */}
+            <div className="flex items-center gap-3">
+              <select
+                value={selectedDevice}
+                onChange={(e) => setSelectedDevice(e.target.value)}
+                className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">All Devices</option>
+                <option value="desktop">Desktop</option>
+                <option value="mobile">Mobile</option>
+              </select>
+              
+              <select
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
+                className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">All Countries</option>
+                {countries.map((country: any) => (
+                  <option key={country.id} value={country.id}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+
+              <Button 
+                onClick={() => router.push('/dashboard/indexnow/add')}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Keyword
+              </Button>
+            </div>
           </div>
 
           {/* Stats Cards */}

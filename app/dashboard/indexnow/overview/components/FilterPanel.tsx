@@ -57,30 +57,6 @@ export const FilterPanel = ({
           </div>
         </div>
         <div className="flex gap-2 sm:gap-3">
-          <Select 
-            value={selectedDevice} 
-            onValueChange={setSelectedDevice}
-            placeholder="All Devices"
-            className="w-[140px]"
-          >
-            <option value="">All Devices</option>
-            <option value="desktop">Desktop</option>
-            <option value="mobile">Mobile</option>
-          </Select>
-          
-          <Select 
-            value={selectedCountry} 
-            onValueChange={setSelectedCountry}
-            placeholder="All Countries"
-            className="w-[140px]"
-          >
-            <option value="">All Countries</option>
-            {countries.map((country) => (
-              <option key={country.id} value={country.id}>
-                {country.name}
-              </option>
-            ))}
-          </Select>
 
           <Button variant="outline" size="icon">
             <Filter className="w-4 h-4" />
