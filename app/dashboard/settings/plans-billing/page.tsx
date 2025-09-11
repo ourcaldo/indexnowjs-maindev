@@ -8,7 +8,7 @@ import { authService } from '@/lib/auth'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { Button } from '@/components/dashboard/ui'
+import { Button } from '@/components/ui/button'
 import { 
   BillingStats, 
   BillingHistory, 
@@ -427,17 +427,17 @@ export default function BillingPage() {
       case 'active':
       case 'completed':
       case 'confirmed': 
-        return { bg: 'bg-[#4BB543]/10', text: 'text-[#4BB543]', border: 'border-[#4BB543]/20' }
+        return { bg: 'bg-green-50 dark:bg-green-950', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-800' }
       case 'expired':
       case 'failed':
       case 'cancelled': 
-        return { bg: 'bg-[#E63946]/10', text: 'text-[#E63946]', border: 'border-[#E63946]/20' }
+        return { bg: 'bg-destructive/10', text: 'text-destructive', border: 'border-destructive/20' }
       case 'expiring_soon':
       case 'pending':
       case 'proof_uploaded': 
-        return { bg: 'bg-[#F0A202]/10', text: 'text-[#F0A202]', border: 'border-[#F0A202]/20' }
+        return { bg: 'bg-yellow-50 dark:bg-yellow-950', text: 'text-yellow-700 dark:text-yellow-300', border: 'border-yellow-200 dark:border-yellow-800' }
       default: 
-        return { bg: 'bg-[#6C757D]/10', text: 'text-[#6C757D]', border: 'border-[#6C757D]/20' }
+        return { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-border' }
     }
   }
 
@@ -453,9 +453,9 @@ export default function BillingPage() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Billing Data</h3>
-        <p className="text-[#6C757D] mb-4">{error}</p>
+        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Billing Data</h3>
+        <p className="text-muted-foreground mb-4">{error}</p>
         <Button onClick={loadAllData}>Try Again</Button>
       </div>
     )
@@ -466,8 +466,8 @@ export default function BillingPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Billing</h1>
-          <p className="text-[#6C757D] mt-1">Manage your plan and billing history here.</p>
+          <h1 className="text-2xl font-bold text-foreground">Billing</h1>
+          <p className="text-muted-foreground mt-1">Manage your plan and billing history here.</p>
         </div>
       </div>
 
@@ -481,11 +481,11 @@ export default function BillingPage() {
 
 
       {/* Billing Settings Section */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-semibold text-[#1A1A1A]">Billing settings</h2>
-            <p className="text-sm text-[#6C757D]">Manage your plan and billing history here.</p>
+            <h2 className="text-lg font-semibold text-foreground">Billing settings</h2>
+            <p className="text-sm text-muted-foreground">Manage your plan and billing history here.</p>
           </div>
         </div>
 
