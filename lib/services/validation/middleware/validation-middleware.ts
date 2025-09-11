@@ -372,8 +372,8 @@ export class ValidationMiddleware {
         if (typeof value === 'string') {
           const sanitizedValue = inputSanitizer.sanitizeText(value, { 
             maxLength: 100,
-            allowHtml: false,
-            preventXss: true 
+            removeHtml: true,
+            allowSpecialChars: false 
           });
           if (sanitizedValue) {
             sanitizedParams[key] = sanitizedValue;

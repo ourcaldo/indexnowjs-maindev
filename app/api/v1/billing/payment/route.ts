@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { BasePaymentHandler, PaymentData } from '../channels/shared/base-handler'
+import { SecurityMiddlewares } from '@/lib/services/security/middleware/unified-security-middleware'
 
 // Import handlers directly
 import MidtransSnapHandler from '../channels/midtrans-snap/handler'
@@ -12,30 +13,20 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🚀 [Payment Router] Starting payment processing')
     
-    // Authentication
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              )
-            } catch {}
-          },
-        },
-      }
-    )
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // ENHANCEMENT #6: Apply unified security middleware for payment endpoints
+    const securityResult = await SecurityMiddlewares.PAYMENT(request)
     
-    if (authError || !user) {
+    if (!securityResult.shouldContinue) {
+      return securityResult.response || NextResponse.json(
+        { success: false, message: 'Security validation failed' },
+        { status: 400 }
+      )
+    }
+
+    // Get authenticated user from security middleware result
+    const user = securityResult.validationResult?.user
+    
+    if (!user) {
       return NextResponse.json({ 
         success: false, 
         message: 'Authentication required' 
@@ -125,6 +116,12 @@ export async function POST(request: NextRequest) {
 
     // Execute payment processing
     const result = await handler.execute()
+    
+    // ENHANCEMENT #6: Apply response encryption if configured
+    if (securityResult.responseProcessor) {
+      return await securityResult.responseProcessor(result)
+    }
+    
     return result
 
   } catch (error: any) {
