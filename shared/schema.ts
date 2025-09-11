@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { VALIDATION_PATTERNS, FIELD_LIMITS, NUMERIC_LIMITS } from "../lib/core/constants/ValidationRules";
 
 // Auth schemas for Supabase integration
 export const loginSchema = z.object({
@@ -150,6 +151,126 @@ export interface DashboardStats {
   success_rate: number;
   quota_usage: number;
 }
+
+// Enhanced API Request Validation Schemas (Enhancement #2)
+export const apiRequestSchemas = {
+  // Admin user management schemas
+  adminUserAction: z.object({
+    userId: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid user ID format'),
+    action: z.enum(['suspend', 'activate', 'reset-password', 'reset-quota', 'extend-subscription', 'change-package']),
+    reason: z.string().min(10).max(FIELD_LIMITS.MESSAGE.max),
+    additionalData: z.record(z.any()).optional(),
+  }),
+
+  // Query parameter schemas
+  paginationQuery: z.object({
+    page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
+    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default('10'),
+  }),
+
+  ordersQuery: z.object({
+    page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
+    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default('10'),
+    status: z.enum(['pending', 'processing', 'completed', 'failed', 'cancelled']).optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
+    minAmount: z.string().transform(val => parseFloat(val)).pipe(z.number().min(0)).optional(),
+    maxAmount: z.string().transform(val => parseFloat(val)).pipe(z.number().min(0)).optional(),
+  }),
+
+  keywordsQuery: z.object({
+    domain_id: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid domain ID').optional(),
+    device_type: z.enum(['desktop', 'mobile', 'tablet']).optional(),
+    country: z.string().length(2).optional(),
+    tags: z.string().optional(),
+    search: z.string().max(100).optional(),
+    sort: z.enum(['keyword', 'position', 'created_at', 'updated_at']).optional(),
+    order: z.enum(['asc', 'desc']).optional(),
+  }),
+
+  // URL parameter schemas
+  idParam: z.object({
+    id: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid ID format'),
+  }),
+
+  slugParam: z.object({
+    slug: z.string().regex(VALIDATION_PATTERNS.SLUG, 'Invalid slug format'),
+  }),
+
+  // CMS content schemas
+  cmsPageCreate: z.object({
+    title: z.string().min(FIELD_LIMITS.TITLE.min).max(FIELD_LIMITS.TITLE.max),
+    slug: z.string().regex(VALIDATION_PATTERNS.SLUG, 'Invalid slug format'),
+    content: z.string().max(50000), // Will be HTML sanitized
+    meta_description: z.string().max(FIELD_LIMITS.DESCRIPTION.max).optional(),
+    meta_keywords: z.string().max(500).optional(),
+    featured_image: z.string().url().optional(),
+    status: z.enum(['draft', 'published', 'archived']).default('draft'),
+    custom_css: z.string().max(10000).optional(), // Admin only, will be sanitized
+    custom_js: z.string().max(10000).optional(), // Admin only, will be sanitized
+  }),
+
+  cmsPostCreate: z.object({
+    title: z.string().min(FIELD_LIMITS.TITLE.min).max(FIELD_LIMITS.TITLE.max),
+    slug: z.string().regex(VALIDATION_PATTERNS.SLUG, 'Invalid slug format'),
+    content: z.string().max(50000), // Will be HTML sanitized
+    excerpt: z.string().max(FIELD_LIMITS.DESCRIPTION.max).optional(),
+    featured_image: z.string().url().optional(),
+    category_id: z.string().regex(VALIDATION_PATTERNS.UUID).optional(),
+    tags: z.array(z.string().max(FIELD_LIMITS.TAG.max)).max(20).optional(),
+    status: z.enum(['draft', 'published', 'archived']).default('draft'),
+    meta_description: z.string().max(FIELD_LIMITS.DESCRIPTION.max).optional(),
+    publish_date: z.string().datetime().optional(),
+  }),
+
+  // Bulk operation schemas
+  bulkKeywordDelete: z.object({
+    keyword_ids: z.array(z.string().regex(VALIDATION_PATTERNS.UUID)).min(1).max(NUMERIC_LIMITS.BULK_OPERATIONS.max),
+    confirm: z.boolean().refine(val => val === true, 'Confirmation required for bulk delete'),
+  }),
+
+  bulkUrlSubmission: z.object({
+    urls: z.array(z.string().url()).min(1).max(NUMERIC_LIMITS.BULK_OPERATIONS.max),
+    type: z.enum(['URL_UPDATED', 'URL_DELETED']).default('URL_UPDATED'),
+    job_name: z.string().min(FIELD_LIMITS.JOB_NAME.min).max(FIELD_LIMITS.JOB_NAME.max),
+  }),
+
+  // Service account management
+  serviceAccountCreate: z.object({
+    name: z.string().min(FIELD_LIMITS.SERVICE_ACCOUNT_NAME.min).max(FIELD_LIMITS.SERVICE_ACCOUNT_NAME.max),
+    email: z.string().regex(VALIDATION_PATTERNS.EMAIL),
+    credentials: z.string().min(100), // JSON string, will be validated separately
+    daily_quota_limit: z.number().min(1).max(NUMERIC_LIMITS.QUOTA.max).default(200),
+    minute_quota_limit: z.number().min(1).max(NUMERIC_LIMITS.QUOTA.max).default(60),
+  }),
+
+  // Rank tracking schemas
+  keywordCreate: z.object({
+    keyword: z.string().min(FIELD_LIMITS.KEYWORD.min).max(FIELD_LIMITS.KEYWORD.max),
+    domain: z.string().regex(VALIDATION_PATTERNS.DOMAIN),
+    country: z.string().length(2),
+    device: z.enum(['desktop', 'mobile', 'tablet']).default('desktop'),
+    search_engine: z.enum(['google', 'bing', 'yahoo']).default('google'),
+    target_url: z.string().url().optional(),
+    tags: z.array(z.string().max(FIELD_LIMITS.TAG.max)).max(10).optional(),
+  }),
+
+  rankCheckTrigger: z.object({
+    keyword_ids: z.array(z.string().regex(VALIDATION_PATTERNS.UUID)).min(1).max(100),
+    force_refresh: z.boolean().default(false),
+    priority: z.enum(['low', 'normal', 'high']).default('normal'),
+  }),
+
+  // Settings and configuration
+  siteSettingsUpdate: z.object({
+    site_name: z.string().min(1).max(100).optional(),
+    site_description: z.string().max(500).optional(),
+    contact_email: z.string().regex(VALIDATION_PATTERNS.EMAIL).optional(),
+    maintenance_mode: z.boolean().optional(),
+    registration_enabled: z.boolean().optional(),
+    max_file_upload_size: z.number().min(1024).max(50 * 1024 * 1024).optional(), // 1KB to 50MB
+  }),
+};
 
 // API Response types
 export interface ApiResponse<T = any> {
