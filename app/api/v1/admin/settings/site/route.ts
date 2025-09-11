@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import { requireSuperAdminAuth } from '@/lib/auth'
 import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,11 +67,41 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    // Verify super admin authentication
-    const adminUser = await requireSuperAdminAuth(request)
+    // Apply validation middleware
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      requireAdmin: true,
+      validateBody: apiRequestSchemas.siteSettingsUpdate,
+      sanitizeHtml: true,
+      sanitizeUrls: true,
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 5 // 5 settings updates per minute for admin
+      }
+    });
 
-    const body = await request.json()
+    // Return error response if validation failed
+    if (response) {
+      return response;
+    }
+
+    // Get validated request body and admin user
+    const adminUser = validationResult.user;
+    const validatedBody = validationResult.sanitizedData?.body || {};
+    
+    // Additional super admin check (stricter than middleware admin check)
+    try {
+      const authResult = await requireSuperAdminAuth(request);
+      // authResult is AdminUser if successful, function throws error if unauthorized
+    } catch (authError: any) {
+      return NextResponse.json(
+        { error: authError.message || 'Super admin access required' },
+        { status: 403 }
+      );
+    }
+
     const {
+      id,
       site_name,
       site_tagline,
       site_description,
@@ -89,9 +121,9 @@ export async function PATCH(request: NextRequest) {
       sitemap_tags_enabled,
       sitemap_max_urls_per_file,
       sitemap_change_frequency
-    } = body
+    } = validatedBody;
 
-    // Update site settings
+    // Update site settings (singleton record)
     const { data: settings, error } = await supabaseAdmin
       .from('indb_site_settings')
       .update({
@@ -116,7 +148,6 @@ export async function PATCH(request: NextRequest) {
         sitemap_change_frequency,
         updated_at: new Date().toISOString()
       })
-      .eq('id', body.id)
       .select()
       .single()
 
@@ -139,7 +170,7 @@ export async function PATCH(request: NextRequest) {
 
     // Trigger sitemap revalidation if sitemap settings were updated
     const sitemapFields = ['sitemap_enabled', 'sitemap_posts_enabled', 'sitemap_pages_enabled', 'sitemap_categories_enabled', 'sitemap_tags_enabled', 'sitemap_max_urls_per_file', 'sitemap_change_frequency']
-    const sitemapUpdated = sitemapFields.some(field => body[field] !== undefined)
+    const sitemapUpdated = sitemapFields.some(field => validatedBody[field] !== undefined)
     
     if (sitemapUpdated) {
       try {
@@ -166,7 +197,7 @@ export async function PATCH(request: NextRequest) {
             section: 'site_settings',
             action: 'update_settings',
             adminEmail: adminUser.email,
-            updatedFields: Object.keys(body).filter(key => key !== 'id').join(', '),
+            updatedFields: Object.keys(validatedBody).filter(key => key !== 'id').join(', '),
             siteName: site_name
           }
         )

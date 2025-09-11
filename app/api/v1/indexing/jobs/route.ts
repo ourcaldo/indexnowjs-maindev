@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
-import { createClient } from '@supabase/supabase-js'
 import { JobLoggingService } from '@/lib/job-management/job-logging-service'
 import { validationMiddleware } from '@/lib/services/validation'
 import { apiRequestSchemas } from '@/shared/schema'
@@ -33,12 +32,6 @@ export async function GET(request: NextRequest) {
     } = queryParams;
     
     const user = validationResult.user;
-
-    // Create client with the user's token for database queries
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
 
     const offset = (page - 1) * limit
 
@@ -90,119 +83,36 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get auth token from header
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Apply validation middleware with proper body validation
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      validateBody: apiRequestSchemas.indexingJobCreate,
+      sanitizeHtml: true,
+      sanitizeUrls: true,
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 30 // 30 job creations per minute
+      }
+    });
+
+    // Return error response if validation failed
+    if (response) {
+      return response;
     }
 
-    const token = authHeader.substring(7)
-    
-    // Create client with the user's token
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const user = validationResult.user;
+    const validatedBody = validationResult.sanitizedData?.body || {};
+    const { name, type, urls, sitemapUrl, scheduleType, startTime } = validatedBody;
 
-    // Get the user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { name, type, urls, sitemapUrl, scheduleType, startTime } = body
-
-    // Import QuotaService for quota enforcement at the top
+    // Import QuotaService for quota enforcement
     const { QuotaService } = await import('@/lib/monitoring/quota-service')
 
-    // Security: Sanitize inputs
-    const sanitizeInput = (input: string): string => {
-      if (typeof input !== 'string') return ''
-      return input
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/<[^>]*>/g, '')
-        .replace(/javascript:/gi, '')
-        .replace(/vbscript:/gi, '')
-        .replace(/on\w+\s*=/gi, '')
-        .trim()
-    }
-
-    const validateUrl = (url: string): boolean => {
-      try {
-        const urlObj = new URL(url)
-        return ['http:', 'https:'].includes(urlObj.protocol) && 
-               urlObj.hostname.length >= 3 && 
-               urlObj.hostname.includes('.')
-      } catch {
-        return false
-      }
-    }
-
-    const validateJobName = (name: string): boolean => {
-      const validPattern = /^[a-zA-Z0-9\s\-_#]+$/
-      return validPattern.test(name) && name.length <= 100
-    }
-
-    // Validate and sanitize inputs
-    const sanitizedName = sanitizeInput(name)
-    
-    if (!sanitizedName || !type) {
-      return NextResponse.json({ error: 'Job name and type are required' }, { status: 400 })
-    }
-
-    if (!validateJobName(sanitizedName)) {
-      return NextResponse.json({ error: 'Invalid job name format' }, { status: 400 })
-    }
-
-    if (!['manual', 'sitemap'].includes(type)) {
-      return NextResponse.json({ error: 'Invalid job type' }, { status: 400 })
-    }
-
-    if (type === 'manual') {
-      if (!urls || !Array.isArray(urls) || urls.length === 0) {
-        return NextResponse.json({ error: 'URLs are required for manual jobs' }, { status: 400 })
-      }
-
-      // Validate and sanitize URLs
-      const sanitizedUrls = urls.map(url => sanitizeInput(url)).filter(url => url.trim())
-      const invalidUrls = sanitizedUrls.filter(url => !validateUrl(url))
-      
-      if (invalidUrls.length > 0) {
-        return NextResponse.json({ error: 'Invalid URLs detected' }, { status: 400 })
-      }
-
-      // Check for duplicates 
-      const uniqueUrls = Array.from(new Set(sanitizedUrls))
-
-      // CHECK USER QUOTA BEFORE ALLOWING JOB CREATION
-      const quotaCheck = await QuotaService.canSubmitUrls(user.id, uniqueUrls.length)
-      if (!quotaCheck.canSubmit) {
-        return NextResponse.json({ 
-          error: quotaCheck.message || 'Quota exceeded. Unable to submit this many URLs.',
-          quota_exhausted: quotaCheck.quotaExhausted,
-          remaining_quota: quotaCheck.remainingQuota
-        }, { status: 400 })
-      }
-    }
-
-    if (type === 'sitemap') {
-      const sanitizedSitemapUrl = sanitizeInput(sitemapUrl)
-      if (!sanitizedSitemapUrl || !validateUrl(sanitizedSitemapUrl)) {
-        return NextResponse.json({ error: 'Valid sitemap URL is required' }, { status: 400 })
-      }
-    }
-
-    if (scheduleType && !['one-time', 'hourly', 'daily', 'weekly', 'monthly'].includes(scheduleType)) {
-      return NextResponse.json({ error: 'Invalid schedule type' }, { status: 400 })
-    }
-
-    // Check quota before creating job
+    // Process URLs for manual jobs (already validated by schema)
     const processedUrls = type === 'manual' 
-      ? Array.from(new Set(urls.map((url: string) => sanitizeInput(url)).filter((url: string) => url.trim())))
+      ? Array.from(new Set(urls || [])) // Remove duplicates, URLs already validated
       : []
     
-    // Check user's quota using already imported service
+    // Check user's quota before creating job
     const urlCount = processedUrls.length
     
     if (urlCount > 0) {
@@ -210,21 +120,21 @@ export async function POST(request: NextRequest) {
       if (!quotaCheck.canSubmit) {
         return NextResponse.json({ 
           error: quotaCheck.message || 'Quota exceeded. Upgrade your package to submit more URLs.',
-          quotaExhausted: true,
-          remainingQuota: quotaCheck.remainingQuota
+          quota_exhausted: quotaCheck.quotaExhausted,
+          remaining_quota: quotaCheck.remainingQuota
         }, { status: 403 })
       }
     }
       
     const jobData = {
       user_id: user.id,
-      name: sanitizedName,
+      name, // Already validated and sanitized by middleware
       type,
       status: 'pending',
       schedule_type: scheduleType || 'one-time',
       source_data: type === 'manual' 
         ? { urls: processedUrls } 
-        : { sitemap_url: sanitizeInput(sitemapUrl) },
+        : { sitemap_url: sitemapUrl }, // Already validated and sanitized by middleware
       total_urls: type === 'manual' ? processedUrls.length : 0,
       processed_urls: 0,
       successful_urls: 0,

@@ -6,23 +6,7 @@ import { z } from 'zod'
 import { validationMiddleware } from '@/lib/services/validation'
 import { apiRequestSchemas } from '@/shared/schema'
 
-// Validation schemas
-const addKeywordsSchema = z.object({
-  domain_id: z.string().uuid('Invalid domain ID'),
-  keywords: z.array(z.string().min(1)).min(1, 'At least one keyword is required'),
-  device_type: z.enum(['desktop', 'mobile']).default('desktop'),
-  country_id: z.string().uuid('Invalid country ID'),
-  tags: z.array(z.string()).optional().default([])
-})
-
-const getKeywordsSchema = z.object({
-  domain_id: z.string().uuid().optional(),
-  device_type: z.enum(['desktop', 'mobile']).nullable().optional(),
-  country_id: z.string().uuid().optional(),
-  tags: z.array(z.string()).optional(),
-  page: z.number().min(1).default(1),
-  limit: z.number().min(1).default(20)
-})
+// Using validation schemas from shared/schema.ts
 
 export async function GET(request: NextRequest) {
   try {
@@ -86,12 +70,25 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get total count
-    const { count } = await supabaseAdmin
+    // Build count query with same filters as main query
+    let countQuery = supabaseAdmin
       .from('indb_keyword_keywords')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('is_active', true)
+
+    // Apply same filters to count query
+    if (domain_id) countQuery = countQuery.eq('domain_id', domain_id)
+    if (device_type) countQuery = countQuery.eq('device_type', device_type)
+    if (country_id) countQuery = countQuery.eq('country_id', country_id)
+    if (tags) {
+      const tagArray = tags.split(',').filter(Boolean);
+      if (tagArray.length > 0) {
+        countQuery = countQuery.overlaps('tags', tagArray);
+      }
+    }
+
+    const { count } = await countQuery
 
     // Get paginated results
     const { data: keywords, error } = await query
@@ -214,9 +211,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Parse request body
+    // Parse and validate request body using shared schema
     const body = await request.json()
-    const validation = addKeywordsSchema.safeParse(body)
+    const validation = apiRequestSchemas.keywordCreate.extend({
+      domain_id: z.string().uuid('Invalid domain ID'),
+      keywords: z.array(z.string().min(1)).min(1, 'At least one keyword is required'),
+      device_type: z.enum(['desktop', 'mobile']).default('desktop'),
+      country_id: z.string().uuid('Invalid country ID'),
+      tags: z.array(z.string()).optional().default([])
+    }).safeParse(body)
 
     if (!validation.success) {
       return NextResponse.json(

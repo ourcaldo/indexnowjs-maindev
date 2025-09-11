@@ -284,13 +284,67 @@ export const apiRequestSchemas = {
 
   // Settings and configuration
   siteSettingsUpdate: z.object({
+    id: z.string().regex(VALIDATION_PATTERNS.UUID).optional(), // For updates
     site_name: z.string().min(1).max(100).optional(),
+    site_tagline: z.string().max(200).optional(),
     site_description: z.string().max(500).optional(),
+    site_logo_url: z.string().url().optional(),
+    white_logo: z.string().url().optional(),
+    site_icon_url: z.string().url().optional(),
+    site_favicon_url: z.string().url().optional(),
     contact_email: z.string().regex(VALIDATION_PATTERNS.EMAIL).optional(),
+    support_email: z.string().regex(VALIDATION_PATTERNS.EMAIL).optional(),
     maintenance_mode: z.boolean().optional(),
     registration_enabled: z.boolean().optional(),
-    max_file_upload_size: z.number().min(1024).max(50 * 1024 * 1024).optional(), // 1KB to 50MB
+    robots_txt_content: z.string().max(10000).optional(),
+    sitemap_enabled: z.boolean().optional(),
+    sitemap_posts_enabled: z.boolean().optional(),
+    sitemap_pages_enabled: z.boolean().optional(),
+    sitemap_categories_enabled: z.boolean().optional(),
+    sitemap_tags_enabled: z.boolean().optional(),
+    sitemap_max_urls_per_file: z.number().min(1).max(50000).optional(),
+    sitemap_change_frequency: z.enum(['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never']).optional(),
   }),
+
+  // Admin user management request bodies
+  adminChangePackage: z.object({
+    packageId: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid package ID'),
+    reason: z.string().min(10).max(FIELD_LIMITS.MESSAGE.max),
+    effectiveDate: z.string().datetime().optional(),
+    notifyUser: z.boolean().default(true),
+  }),
+
+  adminResetPassword: z.object({
+    newPassword: z.string().min(8).max(128),
+    reason: z.string().min(10).max(FIELD_LIMITS.MESSAGE.max),
+    forcePasswordChange: z.boolean().default(true),
+    notifyUser: z.boolean().default(true),
+  }),
+
+  adminExtendSubscription: z.object({
+    extensionPeriod: z.number().min(1).max(365), // Days
+    reason: z.string().min(10).max(FIELD_LIMITS.MESSAGE.max),
+    addToExisting: z.boolean().default(true),
+  }),
+
+  // Indexing job creation request body
+  indexingJobCreate: z.object({
+    name: z.string().min(FIELD_LIMITS.JOB_NAME.min).max(FIELD_LIMITS.JOB_NAME.max),
+    type: z.enum(['manual', 'sitemap']),
+    urls: z.array(z.string().url()).min(1).max(NUMERIC_LIMITS.BULK_OPERATIONS.max).optional(),
+    sitemapUrl: z.string().url().optional(),
+    scheduleType: z.enum(['one-time', 'hourly', 'daily', 'weekly', 'monthly']).default('one-time'),
+    startTime: z.string().datetime().optional(),
+    tags: z.array(z.string().max(FIELD_LIMITS.TAG.max)).max(10).optional(),
+  }).refine(data => {
+    if (data.type === 'manual') {
+      return data.urls && data.urls.length > 0;
+    }
+    if (data.type === 'sitemap') {
+      return !!data.sitemapUrl;
+    }
+    return true;
+  }, { message: 'Manual jobs require URLs, sitemap jobs require sitemap URL' }),
 };
 
 // API Response types

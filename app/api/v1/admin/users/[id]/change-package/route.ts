@@ -2,30 +2,45 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import { requireSuperAdminAuth } from '@/lib/auth'
 import { ActivityLogger } from '@/lib/monitoring'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
-    const authResult = await requireSuperAdminAuth(request)
-    if (authResult.error) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      )
+    // Apply validation middleware
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      requireAdmin: true,
+      validateBody: apiRequestSchemas.adminChangePackage,
+      sanitizeHtml: true,
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 10 // 10 package changes per minute for admin
+      }
+    });
+
+    // Return error response if validation failed
+    if (response) {
+      return response;
     }
 
-    const { id: userId } = await params
-    const body = await request.json()
-    const { packageId } = body
+    // Get validated request body and admin user
+    const adminUser = validationResult.user;
+    const { packageId, reason, effectiveDate, notifyUser } = validationResult.sanitizedData?.body || {};
+    const { id: userId } = await params;
 
-    if (!packageId) {
+    // Additional super admin check (stricter than middleware admin check)
+    let authResult;
+    try {
+      authResult = await requireSuperAdminAuth(request);
+    } catch (authError: any) {
       return NextResponse.json(
-        { error: 'Package ID is required' },
-        { status: 400 }
-      )
+        { error: authError.message || 'Super admin access required' },
+        { status: 403 }
+      );
     }
 
     // Verify package exists
