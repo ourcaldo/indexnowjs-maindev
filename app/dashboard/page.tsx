@@ -604,50 +604,66 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="space-y-3">
+                    {/* Header */}
+                    <div className="grid grid-cols-12 gap-3 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
+                      <div className="col-span-4">Keyword</div>
+                      <div className="col-span-2 text-center">Position</div>
+                      <div className="col-span-2 text-center">Country</div>
+                      <div className="col-span-2 text-center">Device</div>
+                      <div className="col-span-2 text-center">Tags</div>
+                    </div>
+                    
+                    {/* Keywords */}
                     {domainKeywords.slice(0, 5).map((keyword: KeywordData, index) => {
                       const currentPos = keyword.recent_ranking?.position || keyword.current_position
                       const positionChange = calculatePositionChange(keyword)
                       
                       return (
-                        <div key={keyword.id || index} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center space-x-3 flex-1 min-w-0">
-                            {/* Keyword */}
-                            <div className="font-medium text-foreground truncate">
-                              {keyword.keyword}
-                            </div>
-                            
-                            {/* Position */}
-                            <div className="flex items-center space-x-1">
-                              <Badge variant="outline" className="text-xs">
-                                {currentPos ? `#${currentPos}` : 'NR'}
-                              </Badge>
-                              <PositionChange change={positionChange} className="text-xs" />
-                            </div>
-                            
-                            {/* Country */}
+                        <div key={keyword.id || index} className="grid grid-cols-12 gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors items-center">
+                          {/* Keyword */}
+                          <div className="col-span-4 font-medium text-foreground truncate">
+                            {keyword.keyword}
+                          </div>
+                          
+                          {/* Position */}
+                          <div className="col-span-2 flex items-center justify-center space-x-1">
+                            <Badge variant="outline" className="text-xs">
+                              {currentPos ? `#${currentPos}` : 'NR'}
+                            </Badge>
+                            <PositionChange change={positionChange} className="text-xs" />
+                          </div>
+                          
+                          {/* Country */}
+                          <div className="col-span-2 flex justify-center">
                             <Badge variant="secondary" className="text-xs">
                               {keyword.country?.iso2_code?.toUpperCase() || 'N/A'}
                             </Badge>
-                            
-                            {/* Device */}
+                          </div>
+                          
+                          {/* Device */}
+                          <div className="col-span-2 flex justify-center">
                             <Badge variant="outline" className="text-xs capitalize">
                               {keyword.device_type}
                             </Badge>
-                            
-                            {/* Tags */}
-                            {keyword.tags && keyword.tags.length > 0 && (
+                          </div>
+                          
+                          {/* Tags */}
+                          <div className="col-span-2 flex justify-center">
+                            {keyword.tags && keyword.tags.length > 0 ? (
                               <div className="flex items-center space-x-1">
-                                {keyword.tags.slice(0, 2).map((tag, tagIndex) => (
+                                {keyword.tags.slice(0, 1).map((tag, tagIndex) => (
                                   <Badge key={tagIndex} variant="default" className="text-xs">
                                     {tag}
                                   </Badge>
                                 ))}
-                                {keyword.tags.length > 2 && (
+                                {keyword.tags.length > 1 && (
                                   <Badge variant="default" className="text-xs">
-                                    +{keyword.tags.length - 2}
+                                    +{keyword.tags.length - 1}
                                   </Badge>
                                 )}
                               </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">-</span>
                             )}
                           </div>
                         </div>
