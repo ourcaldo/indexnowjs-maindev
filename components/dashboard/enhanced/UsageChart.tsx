@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -28,6 +28,7 @@ export const UsageChart = ({
   description = "Keyword checks and API usage patterns",
   className = '' 
 }: UsageChartProps) => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   
   const chartData = useMemo(() => {
     if (!data || data.length === 0) {
@@ -122,24 +123,43 @@ export const UsageChart = ({
           {/* Usage Chart */}
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-foreground">7-Day Activity</h4>
-            <div className="flex items-end justify-between h-24 gap-2">
+            <div className="flex items-end justify-between h-24 gap-2 relative">
               {chartData.map((point, index) => (
-                <div key={index} className="flex flex-col items-center flex-1 min-w-0">
-                  <div className="relative w-full max-w-6 bg-muted rounded-sm overflow-hidden" style={{ height: '60px' }}>
+                <div 
+                  key={index} 
+                  className="flex flex-col items-center flex-1 min-w-0 relative"
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <div className="relative w-full max-w-6 bg-muted rounded-sm overflow-hidden cursor-pointer" style={{ height: '60px' }}>
                     <div 
-                      className="absolute bottom-0 w-full bg-primary rounded-sm transition-all duration-300"
+                      className={`absolute bottom-0 w-full bg-primary rounded-sm transition-all duration-300 ${
+                        hoveredIndex === index ? 'bg-primary/80 shadow-lg' : ''
+                      }`}
                       style={{ 
                         height: maxValue > 0 ? `${(point.value / maxValue) * 100}%` : '0%' 
                       }}
                     />
                     <div 
-                      className="absolute bottom-0 w-full bg-accent/50 rounded-sm transition-all duration-300"
+                      className={`absolute bottom-0 w-full bg-accent/50 rounded-sm transition-all duration-300 ${
+                        hoveredIndex === index ? 'bg-accent/70' : ''
+                      }`}
                       style={{ 
                         height: maxValue > 0 ? `${(point.quota / maxValue) * 100}%` : '0%' 
                       }}
                     />
                   </div>
                   <span className="text-xs text-muted-foreground mt-1 truncate">{point.date}</span>
+                  
+                  {/* Tooltip */}
+                  {hoveredIndex === index && (
+                    <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-popover border border-border rounded-md px-3 py-2 shadow-md z-10 whitespace-nowrap">
+                      <div className="text-sm font-medium text-popover-foreground">{point.date}</div>
+                      <div className="text-xs text-muted-foreground">Keywords: {point.value}</div>
+                      <div className="text-xs text-muted-foreground">Quota: {point.quota}</div>
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-popover"></div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
