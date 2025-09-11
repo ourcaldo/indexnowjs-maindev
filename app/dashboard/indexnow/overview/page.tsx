@@ -42,7 +42,7 @@ export default function IndexNowOverview() {
   const { logActivity } = useActivityLogger()
 
   // Generate real usage data based on keyword tracking activity
-  const generateUsageData = useMemo(() => (keywordData: any[], deviceFilter?: string, countryFilter?: string) => {
+  const generateUsageData = useMemo(() => (keywordData: any[]) => {
     if (!keywordData || keywordData.length === 0) return []
     
     const now = new Date()
@@ -50,17 +50,8 @@ export default function IndexNowOverview() {
       const date = new Date(now)
       date.setDate(date.getDate() - (6 - i))
       
-      // Filter keywords based on current filters
-      let filteredKeywords = keywordData
-      if (deviceFilter) {
-        filteredKeywords = filteredKeywords.filter((k: any) => k.device_type === deviceFilter)
-      }
-      if (countryFilter) {
-        filteredKeywords = filteredKeywords.filter((k: any) => k.country_id === countryFilter)
-      }
-      
-      // Calculate realistic usage based on filtered keyword count and day
-      const baseUsage = filteredKeywords.length
+      // Use ALL keywords for usage calculation (no filters) - usage is account-wide
+      const baseUsage = keywordData.length
       const dayVariation = 0.7 + (Math.sin((i / 7) * Math.PI * 2) * 0.3) // Realistic weekly pattern
       const keywords_checked = Math.floor(baseUsage * dayVariation)
       const api_calls = keywords_checked * 2 // Assume 2 API calls per keyword check
@@ -403,8 +394,8 @@ export default function IndexNowOverview() {
           {/* Analytics Widgets */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <UsageChart 
-              data={generateUsageData(statsKeywords, selectedDevice, selectedCountry)}
-              currentQuota={totalKeywords}
+              data={generateUsageData(allKeywords)}
+              currentQuota={allKeywords.length}
               totalQuota={1000}
             />
             <RankingDistribution 

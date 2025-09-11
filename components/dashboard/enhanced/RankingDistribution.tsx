@@ -63,7 +63,7 @@ export const RankingDistribution = ({
         percentage: Math.round((data.beyond / total) * 100),
         color: 'hsl(var(--muted-foreground))'
       }
-    ].filter(item => item.count > 0)
+    ]
   }, [data])
 
   const performanceScore = useMemo(() => {
