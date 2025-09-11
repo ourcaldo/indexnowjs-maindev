@@ -76,17 +76,17 @@ export const ActivityTimeline = ({
   const getActivityColor = (type: ActivityType) => {
     switch (type) {
       case 'keyword_added':
-        return 'text-[hsl(var(--info-foreground))] bg-[hsl(var(--info))] bg-opacity-10'
+        return 'text-[hsl(var(--info-foreground))] bg-[hsl(var(--info)/0.1)]'
       case 'rank_improved':
-        return 'text-[hsl(var(--success-foreground))] bg-[hsl(var(--success))] bg-opacity-10'
+        return 'text-[hsl(var(--success-foreground))] bg-[hsl(var(--success)/0.1)]'
       case 'rank_declined':
-        return 'text-[hsl(var(--error-foreground))] bg-[hsl(var(--error))] bg-opacity-10'
+        return 'text-[hsl(var(--error-foreground))] bg-[hsl(var(--error)/0.1)]'
       case 'domain_added':
-        return 'text-[hsl(var(--accent-foreground))] bg-[hsl(var(--accent))] bg-opacity-10'
+        return 'text-[hsl(var(--accent-foreground))] bg-[hsl(var(--accent)/0.1)]'
       case 'indexing_request':
-        return 'text-[hsl(var(--warning-foreground))] bg-[hsl(var(--warning))] bg-opacity-10'
+        return 'text-[hsl(var(--warning-foreground))] bg-[hsl(var(--warning)/0.1)]'
       case 'target_achieved':
-        return 'text-[hsl(var(--success-foreground))] bg-[hsl(var(--success))] bg-opacity-10'
+        return 'text-[hsl(var(--success-foreground))] bg-[hsl(var(--success)/0.1)]'
       default:
         return 'text-muted-foreground bg-muted'
     }

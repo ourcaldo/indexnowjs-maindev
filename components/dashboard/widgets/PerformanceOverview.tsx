@@ -135,8 +135,8 @@ export const PerformanceOverview = ({
                     <Badge 
                       variant="outline" 
                       className={`flex items-center space-x-1 text-xs w-fit ${
-                        trend.direction === 'up' ? 'border-[hsl(var(--success))] bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] border-opacity-20 bg-opacity-10' :
-                        trend.direction === 'down' ? 'border-[hsl(var(--error))] bg-[hsl(var(--error))] text-[hsl(var(--error-foreground))] border-opacity-20 bg-opacity-10' :
+                        trend.direction === 'up' ? 'border-[hsl(var(--success)/0.2)] bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success-foreground))]' :
+                        trend.direction === 'down' ? 'border-[hsl(var(--error)/0.2)] bg-[hsl(var(--error)/0.1)] text-[hsl(var(--error-foreground))]' :
                         'border-muted bg-muted/50 text-muted-foreground'
                       }`}
                     >
