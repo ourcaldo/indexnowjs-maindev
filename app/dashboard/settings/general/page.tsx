@@ -5,11 +5,18 @@ import { authService } from '@/lib/auth'
 import { supabase } from '@/lib/database'
 import { useToast } from '@/hooks/use-toast'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
+import { Button } from '@/components/ui/button'
 import { 
-  Settings as SettingsIcon, 
+  SettingCard, 
+  SettingToggle, 
+  SettingInput, 
+  SettingSelect 
+} from '@/components/settings'
+import { 
   Bell,
   Clock,
-  RefreshCw
+  RefreshCw,
+  Save
 } from 'lucide-react'
 
 export default function GeneralSettingsPage() {
@@ -131,153 +138,124 @@ export default function GeneralSettingsPage() {
     }
   }
 
+  const scheduleOptions = [
+    { value: 'one-time', label: 'One-time' },
+    { value: 'hourly', label: 'Hourly' },
+    { value: 'daily', label: 'Daily' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'monthly', label: 'Monthly' }
+  ]
+
   if (loading) {
     return (
-      <div className="p-6 max-w-6xl mx-auto">
-        <div className="flex items-center justify-center h-64">
-          <RefreshCw className="w-8 h-8 animate-spin" />
-          <span className="ml-2">Loading settings...</span>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-muted-foreground">Loading settings...</span>
       </div>
     )
   }
 
   return (
-    <div className="p-6 rounded-lg" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* General Settings Column */}
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>Default Schedule</label>
-            <select 
-              className="w-full p-3 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: '#FFFFFF',
-                borderColor: '#E0E6ED',
-                color: '#1A1A1A'
-              }}
-              value={generalSettings.defaultSchedule}
-              onChange={(e) => setGeneralSettings(prev => ({...prev, defaultSchedule: e.target.value}))}
-            >
-              <option value="one-time">One-time</option>
-              <option value="hourly">Hourly</option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>Request Timeout (seconds)</label>
-            <input 
-              type="number"
-              min="10"
-              max="300"
-              className="w-full p-3 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: '#FFFFFF',
-                borderColor: '#E0E6ED',
-                color: '#1A1A1A'
-              }}
-              placeholder="30"
-              value={generalSettings.requestTimeout / 1000}
-              onChange={(e) => setGeneralSettings(prev => ({...prev, requestTimeout: parseInt(e.target.value) * 1000 || 30000}))}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>Retry Attempts</label>
-            <input 
-              type="number"
-              min="1"
-              max="10"
-              className="w-full p-3 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: '#FFFFFF',
-                borderColor: '#E0E6ED',
-                color: '#1A1A1A'
-              }}
-              placeholder="3"
-              value={generalSettings.retryAttempts}
-              onChange={(e) => setGeneralSettings(prev => ({...prev, retryAttempts: parseInt(e.target.value) || 3}))}
-            />
-          </div>
+    <div className="space-y-6">
+      {/* General Configuration */}
+      <SettingCard 
+        title="General Configuration" 
+        description="Configure default schedule, timeouts, and retry behavior for indexing jobs"
+      >
+        <div className="grid sm:grid-cols-2 gap-4">
+          <SettingSelect
+            id="default-schedule"
+            label="Default Schedule"
+            placeholder="Select schedule frequency"
+            value={generalSettings.defaultSchedule}
+            onChange={(value) => setGeneralSettings(prev => ({...prev, defaultSchedule: value}))}
+            options={scheduleOptions}
+            description="Default scheduling frequency for new indexing jobs"
+          />
+          
+          <SettingInput
+            id="request-timeout"
+            label="Request Timeout"
+            type="number"
+            placeholder="30"
+            value={String(generalSettings.requestTimeout / 1000)}
+            onChange={(value) => setGeneralSettings(prev => ({...prev, requestTimeout: parseInt(value) * 1000 || 30000}))}
+            description="Timeout in seconds (10-300)"
+          />
         </div>
+        
+        <SettingInput
+          id="retry-attempts"
+          label="Retry Attempts"
+          type="number"
+          placeholder="3"
+          value={String(generalSettings.retryAttempts)}
+          onChange={(value) => setGeneralSettings(prev => ({...prev, retryAttempts: parseInt(value) || 3}))}
+          description="Number of retry attempts for failed requests (1-10)"
+          className="sm:max-w-sm"
+        />
+      </SettingCard>
 
-        {/* Notification Settings Column */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-6 h-6 rounded flex items-center justify-center" style={{backgroundColor: '#1C2331'}}>
-              <Bell className="w-4 h-4 text-white" />
-            </div>
-            <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>Notification Settings</h3>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Email notifications for job completion</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer" 
-                  checked={notifications.jobCompletion}
-                  onChange={(e) => setNotifications(prev => ({...prev, jobCompletion: e.target.checked}))}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Email notifications for failures</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer" 
-                  checked={notifications.failures}
-                  onChange={(e) => setNotifications(prev => ({...prev, failures: e.target.checked}))}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Daily quota reports</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer" 
-                  checked={notifications.dailyReports}
-                  onChange={(e) => setNotifications(prev => ({...prev, dailyReports: e.target.checked}))}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>Critical quota alerts</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer" 
-                  checked={notifications.criticalAlerts}
-                  onChange={(e) => setNotifications(prev => ({...prev, criticalAlerts: e.target.checked}))}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
+      {/* Email Notifications */}
+      <SettingCard 
+        title="Email Notifications" 
+        description="Control when you receive email notifications about your indexing activities"
+      >
+        <div className="space-y-4">
+          <SettingToggle
+            id="job-completion"
+            label="Job completion notifications"
+            description="Get notified when indexing jobs complete successfully"
+            checked={notifications.jobCompletion}
+            onCheckedChange={(checked) => setNotifications(prev => ({...prev, jobCompletion: checked}))}
+          />
+          
+          <SettingToggle
+            id="job-failures"
+            label="Failure notifications"
+            description="Get notified when indexing jobs fail or encounter errors"
+            checked={notifications.failures}
+            onCheckedChange={(checked) => setNotifications(prev => ({...prev, failures: checked}))}
+          />
+          
+          <SettingToggle
+            id="daily-reports"
+            label="Daily quota reports"
+            description="Receive daily summaries of your quota usage and activities"
+            checked={notifications.dailyReports}
+            onCheckedChange={(checked) => setNotifications(prev => ({...prev, dailyReports: checked}))}
+          />
+          
+          <SettingToggle
+            id="critical-alerts"
+            label="Critical quota alerts"
+            description="Get notified when you're approaching quota limits"
+            checked={notifications.criticalAlerts}
+            onCheckedChange={(checked) => setNotifications(prev => ({...prev, criticalAlerts: checked}))}
+          />
         </div>
-      </div>
+      </SettingCard>
 
-      <div className="mt-8 flex justify-end">
-        <button 
-          className="px-6 py-3 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50"
-          style={{backgroundColor: '#1C2331'}}
+      {/* Save Button */}
+      <div className="flex justify-end pt-4">
+        <Button 
           onClick={handleSaveSettings}
           disabled={savingSettings}
+          size="lg"
+          className="min-w-32"
         >
-          {savingSettings ? 'Saving...' : 'Save Settings'}
-        </button>
+          {savingSettings ? (
+            <>
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Save Settings
+            </>
+          )}
+        </Button>
       </div>
     </div>
   )

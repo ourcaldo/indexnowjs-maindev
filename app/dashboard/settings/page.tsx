@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { usePageViewLogger } from '@/hooks/useActivityLogger'
+import { Button } from '@/components/ui/button'
 import { 
   Settings as SettingsIcon, 
   User, 
@@ -56,6 +57,7 @@ export default function SettingsPage() {
     }
   ]
 
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'general':
@@ -72,36 +74,57 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2" style={{color: '#1A1A1A'}}>Settings</h1>
-        <p className="text-sm" style={{color: '#6C757D'}}>
+    <div className="container mx-auto p-4 sm:p-6 max-w-6xl">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl font-bold text-foreground mb-2">Settings</h1>
+        <p className="text-sm text-muted-foreground">
           Manage your account settings, service accounts, and billing preferences.
         </p>
       </div>
 
-      {/* Top Tab Navigation */}
+      {/* Mobile-First Tab Navigation */}
       <div className="mb-6">
-        <nav className="flex space-x-1 border-b" style={{borderColor: '#E0E6ED'}}>
+        {/* Desktop Navigation */}
+        <nav className="hidden sm:flex space-x-1 border-b border-border bg-muted/30 rounded-t-lg p-1">
           {tabs.map((tab) => (
-            <button
+            <Button
               key={tab.id}
+              variant={activeTab === tab.id ? "default" : "ghost"}
+              size="sm"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200"
+              data-testid={`tab-${tab.id}`}
             >
               <tab.icon className="w-4 h-4" />
               <span>{tab.label}</span>
-            </button>
+            </Button>
           ))}
         </nav>
+
+        {/* Mobile Navigation */}
+        <div className="sm:hidden">
+          <div className="grid grid-cols-2 gap-2 p-2 bg-muted/30 rounded-lg">
+            {tabs.map((tab) => (
+              <Button
+                key={tab.id}
+                variant={activeTab === tab.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveTab(tab.id)}
+                className="flex flex-col items-center gap-1 p-3 h-auto text-xs font-medium"
+                data-testid={`tab-mobile-${tab.id}`}
+              >
+                <tab.icon className="w-4 h-4" />
+                <span className="text-center leading-tight">
+                  {tab.label.includes(' ') ? tab.label.split(' ')[0] : tab.label}
+                </span>
+              </Button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Content Area */}
-      <div>
+      <div className="min-h-[400px]">
         {renderTabContent()}
       </div>
     </div>

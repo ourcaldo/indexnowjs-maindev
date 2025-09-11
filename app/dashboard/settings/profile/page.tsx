@@ -6,11 +6,17 @@ import { supabase } from '@/lib/database'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/contexts/AuthContext'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { SettingCard, SettingInput } from '@/components/settings'
 import { 
   User, 
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
+  Save,
+  KeyRound
 } from 'lucide-react'
 
 export default function ProfileSettingsPage() {
@@ -70,7 +76,7 @@ export default function ProfileSettingsPage() {
       } else if (profileResponse.status === 404) {
         // Profile doesn't exist, create default values
         setProfileForm({
-          full_name: user.email?.split('@')[0] || '',
+          full_name: user?.email?.split('@')[0] || '',
           phone_number: '',
           email_notifications: false
         })
@@ -222,209 +228,165 @@ export default function ProfileSettingsPage() {
 
   if (loading) {
     return (
-      <div className="grid lg:grid-cols-2 gap-8 items-stretch">
-        {/* Profile Information Skeleton */}
-        <div className="p-6 rounded-lg flex flex-col" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-          <div className="h-6 w-48 mb-6 bg-[#E0E6ED] rounded animate-pulse" />
-          
-          <div className="flex-1 space-y-6">
-            <div>
-              <div className="h-4 w-20 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
-              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
-            </div>
-            
-            <div>
-              <div className="h-4 w-24 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
-              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
-              <div className="h-3 w-64 mt-1 bg-[#E0E6ED] rounded animate-pulse" />
-            </div>
-            
-            <div>
-              <div className="h-4 w-28 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
-              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <div className="h-4 w-4 bg-[#E0E6ED] rounded animate-pulse" />
-              <div className="h-4 w-40 bg-[#E0E6ED] rounded animate-pulse" />
-            </div>
+      <div className="space-y-6">
+        <div className="h-6 w-48 bg-muted rounded animate-pulse" />
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Profile Information Skeleton */}
+          <div className="space-y-4 p-6 bg-card border rounded-lg">
+            <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+            <div className="h-10 w-full bg-muted rounded animate-pulse" />
+            <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+            <div className="h-10 w-full bg-muted rounded animate-pulse" />
+            <div className="h-4 w-28 bg-muted rounded animate-pulse" />
+            <div className="h-10 w-full bg-muted rounded animate-pulse" />
           </div>
           
-          <div className="h-10 w-32 mt-6 bg-[#E0E6ED] rounded animate-pulse" />
-        </div>
-
-        {/* Password Change Skeleton */}
-        <div className="p-6 rounded-lg flex flex-col" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-          <div className="h-6 w-40 mb-6 bg-[#E0E6ED] rounded animate-pulse" />
-          
-          <div className="flex-1 space-y-6">
-            <div>
-              <div className="h-4 w-32 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
-              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
-            </div>
-            
-            <div>
-              <div className="h-4 w-28 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
-              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
-            </div>
-            
-            <div>
-              <div className="h-4 w-36 mb-2 bg-[#E0E6ED] rounded animate-pulse" />
-              <div className="h-12 w-full bg-[#E0E6ED] rounded animate-pulse" />
-            </div>
+          {/* Password Change Skeleton */}
+          <div className="space-y-4 p-6 bg-card border rounded-lg">
+            <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+            <div className="h-10 w-full bg-muted rounded animate-pulse" />
+            <div className="h-4 w-28 bg-muted rounded animate-pulse" />
+            <div className="h-10 w-full bg-muted rounded animate-pulse" />
+            <div className="h-4 w-36 bg-muted rounded animate-pulse" />
+            <div className="h-10 w-full bg-muted rounded animate-pulse" />
           </div>
-          
-          <div className="h-10 w-36 mt-6 bg-[#E0E6ED] rounded animate-pulse" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-8 items-stretch">
-      {/* Profile Information */}
-      <div className="p-6 rounded-lg flex flex-col" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-        <h3 className="font-semibold mb-6" style={{color: '#1A1A1A'}}>Profile Information</h3>
-        
-        <div className="flex-1 space-y-6">
-        
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>Full Name</label>
-          <input 
-            type="text"
-            className="w-full p-3 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderColor: '#E0E6ED',
-              color: '#1A1A1A'
-            }}
-            placeholder="Enter your full name"
-            value={profileForm.full_name}
-            onChange={(e) => setProfileForm(prev => ({...prev, full_name: e.target.value}))}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>Email Address</label>
-          <input 
-            type="email"
-            className="w-full p-3 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: '#F7F9FC',
-              borderColor: '#E0E6ED',
-              color: '#6C757D'
-            }}
-            value={user?.email || ''}
-            readOnly
-          />
-          <p className="text-xs mt-1" style={{color: '#6C757D'}}>Email cannot be changed directly. Contact support if needed.</p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>Phone Number</label>
-          <input 
-            type="tel"
-            className="w-full p-3 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderColor: '#E0E6ED',
-              color: '#1A1A1A'
-            }}
-            placeholder="Enter your phone number"
-            value={profileForm.phone_number}
-            onChange={(e) => setProfileForm(prev => ({...prev, phone_number: e.target.value}))}
-          />
-          </div>
-        </div>
-
-        <button 
-          type="button"
-          className="w-full py-3 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50 mt-auto"
-          style={{backgroundColor: '#1C2331'}}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleSaveProfile();
-          }}
-          disabled={savingProfile}
+    <div className="space-y-6">
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Profile Information */}
+        <SettingCard 
+          title="Profile Information" 
+          description="Update your personal details and contact information"
         >
-          {savingProfile ? 'Updating...' : 'Update Profile'}
-        </button>
-      </div>
-
-      {/* Change Password */}
-      <div className="p-6 rounded-lg flex flex-col" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-        <h3 className="font-semibold mb-6" style={{color: '#1A1A1A'}}>Change Password</h3>
-        
-        <div className="flex-1 space-y-6">
-        
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>Current Password</label>
-          <div className="relative">
-            <input 
-              type={showPassword ? "text" : "password"}
-              className="w-full p-3 pr-10 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: '#FFFFFF',
-                borderColor: '#E0E6ED',
-                color: '#1A1A1A'
-              }}
-              placeholder="Enter current password"
-              value={passwordForm.currentPassword}
-              onChange={(e) => setPasswordForm(prev => ({...prev, currentPassword: e.target.value}))}
+          <div className="space-y-4">
+            <SettingInput
+              id="full-name"
+              label="Full Name"
+              placeholder="Enter your full name"
+              value={profileForm.full_name}
+              onChange={(value) => setProfileForm(prev => ({...prev, full_name: value}))}
             />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{color: '#6C757D'}}
+
+            <SettingInput
+              id="email"
+              label="Email Address"
+              type="email"
+              value={user?.email || ''}
+              readOnly
+              description="Email cannot be changed directly. Contact support if needed."
+              className="bg-muted"
+            />
+
+            <SettingInput
+              id="phone"
+              label="Phone Number"
+              type="tel"
+              placeholder="Enter your phone number"
+              value={profileForm.phone_number}
+              onChange={(value) => setProfileForm(prev => ({...prev, phone_number: value}))}
+              description="Optional - used for account recovery and notifications"
+            />
+          </div>
+
+          <div className="pt-4">
+            <Button 
+              onClick={handleSaveProfile}
+              disabled={savingProfile}
+              className="w-full sm:w-auto"
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
+              {savingProfile ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Update Profile
+                </>
+              )}
+            </Button>
           </div>
-        </div>
+        </SettingCard>
 
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>New Password</label>
-          <input 
-            type="password"
-            className="w-full p-3 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderColor: '#E0E6ED',
-              color: '#1A1A1A'
-            }}
-            placeholder="Enter new password"
-            value={passwordForm.newPassword}
-            onChange={(e) => setPasswordForm(prev => ({...prev, newPassword: e.target.value}))}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{color: '#1A1A1A'}}>Confirm New Password</label>
-          <input 
-            type="password"
-            className="w-full p-3 rounded-lg text-sm border transition-colors focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderColor: '#E0E6ED',
-              color: '#1A1A1A'
-            }}
-            placeholder="Confirm new password"
-            value={passwordForm.confirmPassword}
-            onChange={(e) => setPasswordForm(prev => ({...prev, confirmPassword: e.target.value}))}
-          />
-          </div>
-        </div>
-
-        <button 
-          className="w-full py-3 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50 mt-auto"
-          style={{backgroundColor: '#1C2331'}}
-          onClick={handleChangePassword}
-          disabled={savingPassword}
+        {/* Change Password */}
+        <SettingCard 
+          title="Security" 
+          description="Update your password to keep your account secure"
         >
-          {savingPassword ? 'Changing...' : 'Change Password'}
-        </button>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-password" className="text-sm font-medium">
+                Current Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="current-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter current password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm(prev => ({...prev, currentPassword: e.target.value}))}
+                  className="pr-10"
+                  data-testid="input-current-password"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <SettingInput
+              id="new-password"
+              label="New Password"
+              type="password"
+              placeholder="Enter new password"
+              value={passwordForm.newPassword}
+              onChange={(value) => setPasswordForm(prev => ({...prev, newPassword: value}))}
+              description="Must be at least 6 characters long"
+            />
+
+            <SettingInput
+              id="confirm-password"
+              label="Confirm New Password"
+              type="password"
+              placeholder="Confirm new password"
+              value={passwordForm.confirmPassword}
+              onChange={(value) => setPasswordForm(prev => ({...prev, confirmPassword: value}))}
+            />
+          </div>
+
+          <div className="pt-4">
+            <Button 
+              onClick={handleChangePassword}
+              disabled={savingPassword}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              {savingPassword ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Changing...
+                </>
+              ) : (
+                <>
+                  <KeyRound className="w-4 h-4 mr-2" />
+                  Change Password
+                </>
+              )}
+            </Button>
+          </div>
+        </SettingCard>
       </div>
     </div>
   )
