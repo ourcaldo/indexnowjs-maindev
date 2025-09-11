@@ -345,6 +345,27 @@ export const apiRequestSchemas = {
     }
     return true;
   }, { message: 'Manual jobs require URLs, sitemap jobs require sitemap URL' }),
+
+  // URL Parameter validation schemas for dynamic routes
+  uuidParam: z.object({
+    id: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid ID format - must be a valid UUID'),
+  }),
+
+  slugParam: z.object({
+    slug: z.string().regex(VALIDATION_PATTERNS.SLUG, 'Invalid slug format - must contain only lowercase letters, numbers, and dashes'),
+  }),
+
+  keywordIdParam: z.object({
+    keywordId: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid keyword ID format'),
+  }),
+
+  domainIdParam: z.object({
+    domainId: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid domain ID format'),
+  }),
+
+  serviceAccountIdParam: z.object({
+    id: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid service account ID format'),
+  }),
 };
 
 // API Response types

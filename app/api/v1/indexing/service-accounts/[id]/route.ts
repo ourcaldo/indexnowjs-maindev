@@ -1,33 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase, supabaseAdmin } from '@/lib/database'
 import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const params = await context.params
-    const authorization = request.headers.get('authorization')
-    if (!authorization) {
-      return NextResponse.json(
-        { error: 'Authorization header required' },
-        { status: 401 }
-      )
+    const resolvedParams = await context.params;
+    
+    // Apply validation middleware with URL parameter validation
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      validateParams: apiRequestSchemas.serviceAccountIdParam,
+      pathParams: { id: resolvedParams.id },
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 20 // 20 service account deletions per minute
+      }
+    });
+
+    // Return error response if validation failed
+    if (response) {
+      return response;
     }
 
-    const token = authorization.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      )
-    }
+    const user = validationResult.user;
+    const { id: serviceAccountId } = validationResult.sanitizedData?.params || resolvedParams;
 
     // Check if service account exists and belongs to user
     const { data: serviceAccount, error: fetchError } = await supabaseAdmin!
       .from('indb_google_service_accounts')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', serviceAccountId)
       .eq('user_id', user.id)
       .single()
 
@@ -42,7 +46,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     const { error: deleteError } = await supabaseAdmin!
       .from('indb_google_service_accounts')
       .delete()
-      .eq('id', params.id)
+      .eq('id', serviceAccountId)
       .eq('user_id', user.id)
 
     if (deleteError) {
@@ -58,7 +62,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
       await ActivityLogger.logServiceAccountActivity(
         user.id,
         ActivityEventTypes.SERVICE_ACCOUNT_DELETE,
-        params.id,
+        serviceAccountId,
         `Deleted Google service account: ${serviceAccount.name} (${serviceAccount.email})`,
         request,
         {

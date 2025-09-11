@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireServerAdminAuth } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { ActivityLogger } from '@/lib/monitoring'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,10 +15,28 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verify admin authentication
-    const adminUser = await requireServerAdminAuth(request)
-    const resolvedParams = await params
-    const orderId = resolvedParams.id
+    const resolvedParams = await params;
+    
+    // Apply validation middleware with URL parameter validation
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      requireAdmin: true,
+      validateParams: apiRequestSchemas.uuidParam,
+      pathParams: { id: resolvedParams.id },
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 50 // 50 order lookups per minute for admin
+      }
+    });
+
+    // Return error response if validation failed
+    if (response) {
+      return response;
+    }
+
+    // Get user from validation result (already authenticated and verified as admin)
+    const adminUser = validationResult.user;
+    const { id: orderId } = validationResult.sanitizedData?.params || resolvedParams;
 
     // Fetch order with all related data
     const { data: order, error: orderError } = await supabaseAdmin

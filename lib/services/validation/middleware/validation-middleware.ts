@@ -23,6 +23,7 @@ export interface ValidationOptions {
   validateBody?: z.ZodSchema<any>;
   validateQuery?: z.ZodSchema<any>;
   validateParams?: z.ZodSchema<any>;
+  pathParams?: Record<string, string>; // Next.js dynamic route params
   sanitizeHtml?: boolean;
   sanitizeUrls?: boolean;
   maxBodySize?: number;
@@ -145,7 +146,11 @@ export class ValidationMiddleware {
 
       // 7. URL Parameters Validation
       if (options.validateParams) {
-        const paramsValidation = this.validateUrlParams(request, options.validateParams);
+        const paramsValidation = this.validateUrlParams(
+          request, 
+          options.validateParams,
+          options.pathParams
+        );
         if (!paramsValidation.isValid) {
           errors.push(...paramsValidation.errors);
         } else {
@@ -309,45 +314,99 @@ export class ValidationMiddleware {
   }
 
   /**
-   * Validate URL parameters (path parameters)
+   * Validate URL parameters (path parameters) - Enhanced for Next.js dynamic routes
    */
   private validateUrlParams(
     request: NextRequest,
-    schema: z.ZodSchema<any>
+    schema: z.ZodSchema<any>,
+    pathParams?: Record<string, string>
   ): { isValid: boolean; errors: string[]; warnings: string[]; data?: any } {
     const errors: string[] = [];
     const warnings: string[] = [];
 
     try {
-      // Extract path parameters from URL
-      const url = new URL(request.url);
-      const pathSegments = url.pathname.split('/').filter(segment => segment.length > 0);
+      let params: Record<string, string> = {};
       
-      // This is a simplified implementation - in practice, you'd need to match against route patterns
-      const params: Record<string, string> = {};
-      
-      // For now, assume common patterns like /api/v1/resource/[id]
-      if (pathSegments.length >= 4) {
-        const lastSegment = pathSegments[pathSegments.length - 1];
-        if (VALIDATION_PATTERNS.UUID.test(lastSegment)) {
-          params.id = lastSegment;
+      // If pathParams provided (from Next.js params), use those
+      if (pathParams) {
+        params = { ...pathParams };
+      } else {
+        // Fallback: Extract from URL pattern (improved detection)
+        const url = new URL(request.url);
+        const pathSegments = url.pathname.split('/').filter(segment => segment.length > 0);
+        
+        // Enhanced pattern matching for common Next.js dynamic routes
+        if (pathSegments.length >= 4) {
+          const lastSegment = pathSegments[pathSegments.length - 1];
+          
+          // Check for UUID pattern (most common for [id] routes)
+          if (VALIDATION_PATTERNS.UUID.test(lastSegment)) {
+            params.id = lastSegment;
+          }
+          
+          // Check for slug pattern
+          else if (VALIDATION_PATTERNS.SLUG.test(lastSegment)) {
+            params.slug = lastSegment;
+          }
+          
+          // Handle specific route patterns
+          if (pathSegments.includes('keywords') && pathSegments.length >= 5) {
+            const keywordId = pathSegments[pathSegments.indexOf('keywords') + 1];
+            if (VALIDATION_PATTERNS.UUID.test(keywordId)) {
+              params.keywordId = keywordId;
+            }
+          }
+          
+          if (pathSegments.includes('service-accounts') && pathSegments.length >= 5) {
+            const accountId = pathSegments[pathSegments.indexOf('service-accounts') + 1];
+            if (VALIDATION_PATTERNS.UUID.test(accountId)) {
+              params.id = accountId;
+            }
+          }
+        }
+      }
+
+      // Sanitize parameter values before validation
+      const sanitizedParams: Record<string, string> = {};
+      for (const [key, value] of Object.entries(params)) {
+        if (typeof value === 'string') {
+          const sanitizedValue = inputSanitizer.sanitizeText(value, { 
+            maxLength: 100,
+            allowHtml: false,
+            preventXss: true 
+          });
+          if (sanitizedValue) {
+            sanitizedParams[key] = sanitizedValue;
+          }
         }
       }
 
       // Validate with Zod schema
-      const validation = schema.safeParse(params);
+      const validation = schema.safeParse(sanitizedParams);
       if (!validation.success) {
         const zodErrors = validation.error.errors.map(err => 
-          `${err.path.join('.')}: ${err.message}`
+          `URL parameter ${err.path.join('.')}: ${err.message}`
         );
         errors.push(...zodErrors);
+        
+        // Add security warning for potential injection attempts
+        Object.values(params).forEach(value => {
+          if (typeof value === 'string' && (
+            value.includes('<script') || 
+            value.includes('javascript:') || 
+            value.includes('vbscript:') ||
+            value.includes('../')
+          )) {
+            warnings.push(`Potential security risk detected in URL parameter: ${value.substring(0, 50)}`);
+          }
+        });
       }
 
       return {
         isValid: errors.length === 0,
         errors,
         warnings,
-        data: validation.success ? validation.data : undefined
+        data: validation.success ? validation.data : sanitizedParams
       };
 
     } catch (error) {
@@ -360,30 +419,31 @@ export class ValidationMiddleware {
   }
 
   /**
-   * Validate authentication (placeholder - integrate with your auth system)
+   * Validate authentication using Supabase integration
    */
   private async validateAuthentication(request: NextRequest): Promise<{ isValid: boolean; errors: string[]; user?: any }> {
     try {
-      const authHeader = request.headers.get('authorization');
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return { isValid: false, errors: ['Missing or invalid authorization header'] };
-      }
-
-      const token = authHeader.substring(7);
-      if (!token) {
-        return { isValid: false, errors: ['Missing authentication token'] };
-      }
-
-      // TODO: Integrate with actual auth system (Supabase, JWT, etc.)
-      // For now, return a placeholder validation
+      // Import the existing Supabase auth function
+      const { getServerAuthUser } = await import('../../../auth/server-auth');
       
+      // Use the existing authentication logic
+      const authUser = await getServerAuthUser(request);
+      
+      if (!authUser) {
+        return { 
+          isValid: false, 
+          errors: ['Authentication failed - invalid or missing token'] 
+        };
+      }
+
       return {
         isValid: true,
         errors: [],
-        user: { id: 'user-id', isAdmin: false } // Placeholder user
+        user: authUser
       };
 
     } catch (error) {
+      console.error('Validation middleware auth error:', error);
       return {
         isValid: false,
         errors: [`Authentication validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`]

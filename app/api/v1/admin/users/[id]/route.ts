@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireSuperAdminAuth } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/database'
 import { ActivityLogger } from '@/lib/monitoring'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 // GET /api/admin/users/[id] - Get individual user details
 export async function GET(
@@ -9,16 +11,35 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Require super admin authentication
-    const adminUser = await requireSuperAdminAuth(request)
+    const resolvedParams = await params;
+    
+    // Apply validation middleware with URL parameter validation
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      requireAdmin: true,
+      validateParams: apiRequestSchemas.uuidParam,
+      pathParams: { id: resolvedParams.id },
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 30 // 30 user lookups per minute for admin
+      }
+    });
+
+    // Return error response if validation failed
+    if (response) {
+      return response;
+    }
+
+    // Additional super admin check (stricter than middleware admin check)
+    const adminUser = await requireSuperAdminAuth(request);
     if (!adminUser) {
       return NextResponse.json(
         { error: 'Super admin access required' },
         { status: 403 }
-      )
+      );
     }
 
-    const { id: userId } = await params
+    const { id: userId } = validationResult.sanitizedData?.params || resolvedParams;
 
     // Get user profile from our custom table with package information
     const { data: profile, error: profileError } = await supabaseAdmin
