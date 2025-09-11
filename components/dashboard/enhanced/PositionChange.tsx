@@ -7,25 +7,25 @@ interface PositionChangeProps {
 }
 
 export const PositionChange = ({ change, className = '' }: PositionChangeProps) => {
-  if (change === null) return <span style={{color: '#6C757D'}} className={className}>-</span>
+  if (change === null) return <span className={`text-muted-foreground ${className}`}>-</span>
   
   if (change > 0) {
     return (
-      <span className={`inline-flex items-center ${className}`} style={{color: '#4BB543'}}>
+      <span className={`inline-flex items-center text-emerald-600 ${className}`}>
         <TrendingUp className="w-4 h-4 mr-1" />
         +{change}
       </span>
     )
   } else if (change < 0) {
     return (
-      <span className={`inline-flex items-center ${className}`} style={{color: '#E63946'}}>
+      <span className={`inline-flex items-center text-red-600 ${className}`}>
         <TrendingDown className="w-4 h-4 mr-1" />
         {change}
       </span>
     )
   } else {
     return (
-      <span className={`inline-flex items-center ${className}`} style={{color: '#6C757D'}}>
+      <span className={`inline-flex items-center text-muted-foreground ${className}`}>
         <Minus className="w-4 h-4 mr-1" />
         0
       </span>

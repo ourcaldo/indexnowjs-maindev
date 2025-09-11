@@ -1,5 +1,6 @@
 import React from 'react'
-import { Card } from '../ui'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Column {
@@ -34,9 +35,9 @@ export const DataTable = ({
   if (loading) {
     return (
       <Card className={className}>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{borderColor: '#3D8BFF'}}></div>
-        </div>
+        <CardContent className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+        </CardContent>
       </Card>
     )
   }
@@ -44,9 +45,9 @@ export const DataTable = ({
   if (data.length === 0) {
     return (
       <Card className={className}>
-        <div className="flex items-center justify-center py-12">
-          <p style={{color: '#6C757D'}}>{emptyMessage}</p>
-        </div>
+        <CardContent className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">{emptyMessage}</p>
+        </CardContent>
       </Card>
     )
   }
@@ -56,30 +57,29 @@ export const DataTable = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr style={{backgroundColor: '#F7F9FC', borderBottom: '1px solid #E0E6ED'}}>
+            <tr className="bg-muted border-b border-border">
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-6 py-3 text-left text-xs font-medium tracking-wider ${
+                  className={`px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground ${
                     column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left'
                   }`}
-                  style={{color: '#6C757D', width: column.width}}
+                  style={{width: column.width}}
                 >
                   {column.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody style={{backgroundColor: '#FFFFFF'}}>
+          <tbody className="bg-card">
             {data.map((row, index) => (
-              <tr key={index} style={{borderBottom: '1px solid #E0E6ED'}}>
+              <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className={`px-6 py-4 whitespace-nowrap text-sm ${
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-foreground ${
                       column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left'
                     }`}
-                    style={{color: '#1A1A1A'}}
                   >
                     {column.render ? column.render(row[column.key], row) : row[column.key]}
                   </td>
@@ -91,47 +91,49 @@ export const DataTable = ({
       </div>
       
       {pagination && (
-        <div className="px-6 py-3 flex items-center justify-between" style={{borderTop: '1px solid #E0E6ED', backgroundColor: '#F7F9FC'}}>
+        <div className="px-6 py-3 flex items-center justify-between border-t border-border bg-muted/30">
           <div className="flex-1 flex justify-between sm:hidden">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => pagination.onPageChange(Math.max(pagination.currentPage - 1, 1))}
               disabled={pagination.currentPage === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               Previous
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => pagination.onPageChange(Math.min(pagination.currentPage + 1, pagination.totalPages))}
               disabled={pagination.currentPage === pagination.totalPages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               Next
-            </button>
+            </Button>
           </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm" style={{color: '#6C757D'}}>
+              <p className="text-sm text-muted-foreground">
                 Page <span className="font-medium">{pagination.currentPage}</span> of{' '}
                 <span className="font-medium">{pagination.totalPages}</span>
               </p>
             </div>
-            <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                <button
-                  onClick={() => pagination.onPageChange(Math.max(pagination.currentPage - 1, 1))}
-                  disabled={pagination.currentPage === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => pagination.onPageChange(Math.min(pagination.currentPage + 1, pagination.totalPages))}
-                  disabled={pagination.currentPage === pagination.totalPages}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </nav>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => pagination.onPageChange(Math.max(pagination.currentPage - 1, 1))}
+                disabled={pagination.currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => pagination.onPageChange(Math.min(pagination.currentPage + 1, pagination.totalPages))}
+                disabled={pagination.currentPage === pagination.totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
