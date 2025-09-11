@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireServerAdminAuth } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { ActivityLogger, ActivityEventTypes } from '@/lib/monitoring'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,8 +12,38 @@ const supabaseAdmin = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify admin authentication
-    const adminUser = await requireServerAdminAuth(request)
+    // Apply validation middleware
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      requireAdmin: true,
+      validateQuery: apiRequestSchemas.ordersQuery,
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 30 // 30 requests per minute for admin
+      }
+    });
+
+    // Return error response if validation failed
+    if (response) {
+      return response;
+    }
+
+    // Get validated query parameters
+    const queryParams = validationResult.sanitizedData?.query || {};
+    const { 
+      page = 1, 
+      limit = 25, 
+      status, 
+      customer, 
+      package_id: packageId, 
+      date_from: dateFrom, 
+      date_to: dateTo, 
+      amount_min: amountMin, 
+      amount_max: amountMax 
+    } = queryParams;
+
+    // Get admin user from validation result
+    const adminUser = validationResult.user;
     
     // Log admin order management access
     try {
@@ -29,18 +61,6 @@ export async function GET(request: NextRequest) {
     } catch (logError) {
       console.error('Failed to log admin order activity:', logError)
     }
-
-    // Parse query parameters
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '25')
-    const status = searchParams.get('status')
-    const customer = searchParams.get('customer')
-    const packageId = searchParams.get('package_id')
-    const dateFrom = searchParams.get('date_from')
-    const dateTo = searchParams.get('date_to')
-    const amountMin = searchParams.get('amount_min')
-    const amountMax = searchParams.get('amount_max')
 
     const offset = (page - 1) * limit
 
@@ -88,10 +108,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('transaction_status', status)
     }
 
-    if (customer) {
-      // Search by customer name or email - need to use user profile join
-      query = query.ilike('user.full_name', `%${customer}%`)
-    }
+    // Note: Customer filtering will be handled during enrichment phase to avoid join issues
 
     if (packageId) {
       query = query.eq('package_id', packageId)
@@ -151,7 +168,7 @@ export async function GET(request: NextRequest) {
           verifierProfile = verifier
         }
 
-        enrichedOrders.push({
+        const enrichedOrder = {
           ...order,
           user: {
             user_id: order.user_id,
@@ -161,7 +178,20 @@ export async function GET(request: NextRequest) {
             created_at: userProfile?.created_at || order.created_at
           },
           verifier: verifierProfile
-        })
+        };
+
+        // Apply customer filtering during enrichment phase
+        if (customer) {
+          const customerLower = customer.toLowerCase();
+          const fullName = enrichedOrder.user.full_name.toLowerCase();
+          const email = enrichedOrder.user.email.toLowerCase();
+          
+          if (fullName.includes(customerLower) || email.includes(customerLower)) {
+            enrichedOrders.push(enrichedOrder);
+          }
+        } else {
+          enrichedOrders.push(enrichedOrder);
+        }
       }
     }
 

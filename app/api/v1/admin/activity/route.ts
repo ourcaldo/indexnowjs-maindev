@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import { requireSuperAdminAuth, getServerAuthUser } from '@/lib/auth'
 import { ActivityLogger } from '@/lib/monitoring'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,17 +63,37 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify super admin authentication
-    await requireSuperAdminAuth(request)
+    // Apply validation middleware
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      requireAdmin: true,
+      validateQuery: apiRequestSchemas.adminActivityQuery,
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 20 // 20 requests per minute for admin activity logs
+      }
+    });
 
-    const searchParams = request.nextUrl.searchParams
-    const days = parseInt(searchParams.get('days') || '7')
-    const limit = parseInt(searchParams.get('limit') || '100')
-    const page = parseInt(searchParams.get('page') || '1')
-    const offset = (page - 1) * limit
-    const userId = searchParams.get('user') || null
-    const searchTerm = searchParams.get('search') || ''
-    const eventType = searchParams.get('event_type') || 'all'
+    // Return error response if validation failed
+    if (response) {
+      return response;
+    }
+
+    // Get validated query parameters
+    const queryParams = validationResult.sanitizedData?.query || {};
+    const { 
+      days = 7, 
+      limit = 100, 
+      page = 1, 
+      user: userId = null, 
+      search: searchTerm = '', 
+      event_type: eventType = 'all' 
+    } = queryParams;
+
+    const offset = (page - 1) * limit;
+
+    // Additional super admin check
+    await requireSuperAdminAuth(request)
 
     // Calculate date filter
     const dateFilter = new Date()

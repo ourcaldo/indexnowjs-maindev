@@ -3,6 +3,8 @@ import { getServerAuthUser } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/database'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 // Validation schemas
 const addKeywordsSchema = z.object({
@@ -24,64 +26,35 @@ const getKeywordsSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Create Supabase client with proper cookie handling
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            const cookieHeader = request.headers.get('cookie')
-            if (!cookieHeader) return undefined
-            
-            const cookies = Object.fromEntries(
-              cookieHeader.split(';').map(cookie => {
-                const [key, value] = cookie.trim().split('=')
-                return [key, decodeURIComponent(value || '')]
-              })
-            )
-            return cookies[name]
-          },
-          set() {},
-          remove() {},
-        },
+    // Apply validation middleware
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      validateQuery: apiRequestSchemas.keywordsQuery,
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 120 // 120 requests per minute for keyword queries
       }
-    )
+    });
 
-    // Get user from session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      console.error('Keywords GET: Authentication failed:', authError?.message || 'No user')
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // Return error response if validation failed
+    if (response) {
+      return response;
     }
+
+    // Get validated query parameters and user from validation result
+    const queryParams = validationResult.sanitizedData?.query || {};
+    const { 
+      domain_id, 
+      device_type, 
+      country_id, 
+      tags, 
+      page = 1, 
+      limit = 20
+    } = queryParams;
+    
+    const user = validationResult.user;
 
     console.log('Keywords GET: Authenticated user:', user.id)
-
-    // Parse query parameters
-    const url = new URL(request.url)
-    const queryParams = {
-      domain_id: url.searchParams.get('domain_id') || undefined,
-      device_type: url.searchParams.get('device_type') as 'desktop' | 'mobile' | undefined,
-      country_id: url.searchParams.get('country_id') || undefined,
-      tags: url.searchParams.get('tags')?.split(',').filter(Boolean) || undefined,
-      page: parseInt(url.searchParams.get('page') || '1'),
-      limit: parseInt(url.searchParams.get('limit') || '20')
-    }
-
-    const validation = getKeywordsSchema.safeParse(queryParams)
-    if (!validation.success) {
-      console.error('Keywords GET: Validation failed:', validation.error.issues)
-      return NextResponse.json(
-        { success: false, error: validation.error.issues[0].message },
-        { status: 400 }
-      )
-    }
-
-    const { domain_id, device_type, country_id, tags, page, limit } = validation.data
     const offset = (page - 1) * limit
 
     // Build query
@@ -106,8 +79,11 @@ export async function GET(request: NextRequest) {
     if (domain_id) query = query.eq('domain_id', domain_id)
     if (device_type) query = query.eq('device_type', device_type)
     if (country_id) query = query.eq('country_id', country_id)
-    if (tags && tags.length > 0) {
-      query = query.overlaps('tags', tags)
+    if (tags) {
+      const tagArray = tags.split(',').filter(Boolean);
+      if (tagArray.length > 0) {
+        query = query.overlaps('tags', tagArray);
+      }
     }
 
     // Get total count

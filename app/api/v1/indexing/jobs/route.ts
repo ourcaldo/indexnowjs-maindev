@@ -2,39 +2,43 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/database'
 import { createClient } from '@supabase/supabase-js'
 import { JobLoggingService } from '@/lib/job-management/job-logging-service'
+import { validationMiddleware } from '@/lib/services/validation'
+import { apiRequestSchemas } from '@/shared/schema'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get auth token from header
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Apply validation middleware
+    const { response, validationResult } = await validationMiddleware.validateRequest(request, {
+      requireAuth: true,
+      validateQuery: apiRequestSchemas.indexingJobsQuery,
+      rateLimitConfig: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 60 // 60 requests per minute for indexing jobs
+      }
+    });
+
+    // Return error response if validation failed
+    if (response) {
+      return response;
     }
 
-    const token = authHeader.substring(7)
+    // Get validated query parameters and user from validation result
+    const queryParams = validationResult.sanitizedData?.query || {};
+    const { 
+      page = 1, 
+      limit = 10, 
+      search = '', 
+      status = '', 
+      schedule = '' 
+    } = queryParams;
     
-    // Create client with the user's token
+    const user = validationResult.user;
+
+    // Create client with the user's token for database queries
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-
-    // Set the auth token
-    await supabase.auth.setSession({ access_token: token, refresh_token: '' })
-    
-    // Get the user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Parse query parameters for pagination and filtering
-    const url = new URL(request.url)
-    const page = parseInt(url.searchParams.get('page') || '1')
-    const limit = parseInt(url.searchParams.get('limit') || '10')
-    const search = url.searchParams.get('search') || ''
-    const status = url.searchParams.get('status') || ''
-    const schedule = url.searchParams.get('schedule') || ''
 
     const offset = (page - 1) * limit
 

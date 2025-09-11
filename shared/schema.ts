@@ -171,21 +171,42 @@ export const apiRequestSchemas = {
   ordersQuery: z.object({
     page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
     limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default('10'),
-    status: z.enum(['pending', 'processing', 'completed', 'failed', 'cancelled']).optional(),
-    startDate: z.string().datetime().optional(),
-    endDate: z.string().datetime().optional(),
-    minAmount: z.string().transform(val => parseFloat(val)).pipe(z.number().min(0)).optional(),
-    maxAmount: z.string().transform(val => parseFloat(val)).pipe(z.number().min(0)).optional(),
+    status: z.enum(['pending', 'proof_uploaded', 'completed', 'failed', 'cancelled']).optional(),
+    customer: z.string().max(100).optional(),
+    package_id: z.string().regex(VALIDATION_PATTERNS.UUID).optional(),
+    date_from: z.string().datetime().optional(),
+    date_to: z.string().datetime().optional(),
+    amount_min: z.string().transform(val => parseFloat(val)).pipe(z.number().min(0)).optional(),
+    amount_max: z.string().transform(val => parseFloat(val)).pipe(z.number().min(0)).optional(),
+  }),
+
+  adminActivityQuery: z.object({
+    days: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(365)).optional().default('7'),
+    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(500)).optional().default('100'),
+    page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
+    user: z.string().regex(VALIDATION_PATTERNS.UUID).optional(),
+    search: z.string().max(100).optional(),
+    event_type: z.enum(['all', 'login', 'logout', 'admin_action', 'order_management', 'user_management', 'system_action']).optional().default('all'),
+  }),
+
+  indexingJobsQuery: z.object({
+    page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
+    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default('10'),
+    search: z.string().max(100).optional(),
+    status: z.enum(['All Status', 'pending', 'running', 'completed', 'failed', 'cancelled']).optional(),
+    schedule: z.enum(['All Schedules', 'one-time', 'hourly', 'daily', 'weekly', 'monthly']).optional(),
   }),
 
   keywordsQuery: z.object({
     domain_id: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid domain ID').optional(),
     device_type: z.enum(['desktop', 'mobile', 'tablet']).optional(),
-    country: z.string().length(2).optional(),
+    country_id: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid country ID').optional(),
     tags: z.string().optional(),
     search: z.string().max(100).optional(),
     sort: z.enum(['keyword', 'position', 'created_at', 'updated_at']).optional(),
     order: z.enum(['asc', 'desc']).optional(),
+    page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
+    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default('20'),
   }),
 
   // URL parameter schemas
