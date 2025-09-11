@@ -42,15 +42,15 @@ export const StatCard = ({
   const getVariantClasses = () => {
     switch (variant) {
       case 'success':
-        return 'border-l-4 border-l-success bg-success/5'
+        return 'bg-success/5'
       case 'warning':
-        return 'border-l-4 border-l-warning bg-warning/5'
+        return 'bg-warning/5'
       case 'info':
-        return 'border-l-4 border-l-info bg-info/5'
+        return 'bg-info/5'
       case 'error':
-        return 'border-l-4 border-l-destructive bg-destructive/5'
+        return 'bg-destructive/5'
       default:
-        return 'border-l-4 border-l-primary bg-primary/5'
+        return 'bg-primary/5'
     }
   }
 

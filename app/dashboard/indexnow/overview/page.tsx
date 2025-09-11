@@ -139,12 +139,12 @@ export default function IndexNowOverview() {
     }
   })
 
-  // Fetch total keyword counts for each domain
+  // Fetch total keyword counts for each domain - using smaller limit to avoid 400 errors
   const { data: keywordCountsData } = useQuery({
     queryKey: ['/api/v1/rank-tracking/keywords-counts'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/v1/rank-tracking/keywords?page=1&limit=1000', {
+      const response = await fetch('/api/v1/rank-tracking/keywords?page=1&limit=100', {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -164,7 +164,7 @@ export default function IndexNowOverview() {
       const { data: { session } } = await supabase.auth.getSession()
       const params = new URLSearchParams()
       params.append('domain_id', selectedDomainId)
-      params.append('limit', '1000') // Get all keywords for stats
+      params.append('limit', '100') // Use smaller limit to avoid 400 errors
       
       const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
         headers: {
@@ -414,13 +414,8 @@ export default function IndexNowOverview() {
             <FilterPanel
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
-              selectedDevice={selectedDevice}
-              setSelectedDevice={setSelectedDevice}
-              selectedCountry={selectedCountry}
-              setSelectedCountry={setSelectedCountry}
               selectedTags={selectedTags}
               setSelectedTags={setSelectedTags}
-              countries={countries}
               selectedKeywords={selectedKeywords}
               setShowActionsMenu={setShowActionsMenu}
               setShowDeleteConfirm={setShowDeleteConfirm}

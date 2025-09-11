@@ -11,13 +11,8 @@ interface Country {
 interface FilterPanelProps {
   searchTerm: string
   setSearchTerm: (term: string) => void
-  selectedDevice: string
-  setSelectedDevice: (device: string) => void
-  selectedCountry: string
-  setSelectedCountry: (country: string) => void
   selectedTags: string[]
   setSelectedTags: (tags: string[]) => void
-  countries: Country[]
   selectedKeywords: string[]
   setShowActionsMenu: (show: boolean) => void
   setShowDeleteConfirm: (show: boolean) => void
@@ -28,13 +23,8 @@ interface FilterPanelProps {
 export const FilterPanel = ({
   searchTerm,
   setSearchTerm,
-  selectedDevice,
-  setSelectedDevice,
-  selectedCountry,
-  setSelectedCountry,
   selectedTags,
   setSelectedTags,
-  countries,
   selectedKeywords,
   setShowActionsMenu,
   setShowDeleteConfirm,
