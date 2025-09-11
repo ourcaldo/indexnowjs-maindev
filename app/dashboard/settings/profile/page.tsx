@@ -20,7 +20,7 @@ export default function ProfileSettingsPage() {
   
   // Log page view and settings activities
   usePageViewLogger('/dashboard/settings/profile', 'Profile Settings', { section: 'profile_settings' })
-  const { logDashboardActivity, logProfileActivity } = useActivityLogger()
+  const { logDashboardActivity } = useActivityLogger()
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -157,8 +157,17 @@ export default function ProfileSettingsPage() {
       setSavingPassword(true)
       
       // First verify current password by attempting to sign in
+      if (!user?.email) {
+        addToast({
+          title: 'Error',
+          description: 'User email not found',
+          type: 'error'
+        })
+        return
+      }
+      
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: currentUser.email,
+        email: user.email,
         password: passwordForm.currentPassword
       })
 
@@ -191,7 +200,7 @@ export default function ProfileSettingsPage() {
         type: 'success'
       })
 
-      await logProfileActivity('password_change', 'Password updated successfully')
+      await logDashboardActivity('password_change', 'Password updated successfully')
       
       // Clear password form
       setPasswordForm({
@@ -305,7 +314,7 @@ export default function ProfileSettingsPage() {
               borderColor: '#E0E6ED',
               color: '#6C757D'
             }}
-            value={currentUser?.email || ''}
+            value={user?.email || ''}
             readOnly
           />
           <p className="text-xs mt-1" style={{color: '#6C757D'}}>Email cannot be changed directly. Contact support if needed.</p>
