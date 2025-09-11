@@ -70,7 +70,7 @@ export const StatCard = ({
   }
 
   return (
-    <Card className={`${getVariantClasses()} ${className}`}>
+    <Card className={`${getVariantClasses()} border border-border ${className}`}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
