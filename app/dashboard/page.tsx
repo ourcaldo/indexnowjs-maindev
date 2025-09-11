@@ -89,6 +89,7 @@ interface KeywordData {
   recent_ranking?: {
     position: number | null;
   };
+  tags?: string[];
 }
 
 interface PaymentPackage {
@@ -602,45 +603,57 @@ export default function Dashboard() {
                     <p className="text-sm text-muted-foreground">No keywords found for this domain</p>
                   </div>
                 ) : (
-                  <DataTable
-                    data={domainKeywords.slice(0, 5)}
-                    columns={[
-                      {
-                        key: 'keyword',
-                        header: 'Keyword',
-                        render: (value, row) => (
-                          <div>
-                            <div className="font-medium">{value}</div>
-                            <div className="text-xs text-muted-foreground flex items-center space-x-2">
-                              <Badge variant="outline" className="text-xs">
-                                {row.device_type}
-                              </Badge>
-                              <Badge variant="secondary" className="text-xs">
-                                {row.country?.iso2_code?.toUpperCase() || 'N/A'}
-                              </Badge>
+                  <div className="space-y-3">
+                    {domainKeywords.slice(0, 5).map((keyword: KeywordData, index) => {
+                      const currentPos = keyword.recent_ranking?.position || keyword.current_position
+                      const positionChange = calculatePositionChange(keyword)
+                      
+                      return (
+                        <div key={keyword.id || index} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            {/* Keyword */}
+                            <div className="font-medium text-foreground truncate">
+                              {keyword.keyword}
                             </div>
-                          </div>
-                        )
-                      },
-                      {
-                        key: 'position',
-                        header: 'Position',
-                        align: 'center',
-                        render: (value, row) => {
-                          const currentPos = row.recent_ranking?.position || row.current_position
-                          const positionChange = calculatePositionChange(row)
-                          return (
-                            <div className="text-center">
-                              <div className="font-bold">
+                            
+                            {/* Position */}
+                            <div className="flex items-center space-x-1">
+                              <Badge variant="outline" className="text-xs">
                                 {currentPos ? `#${currentPos}` : 'NR'}
-                              </div>
+                              </Badge>
                               <PositionChange change={positionChange} className="text-xs" />
                             </div>
-                          )
-                        }
-                      }
-                    ]}
-                  />
+                            
+                            {/* Country */}
+                            <Badge variant="secondary" className="text-xs">
+                              {keyword.country?.iso2_code?.toUpperCase() || 'N/A'}
+                            </Badge>
+                            
+                            {/* Device */}
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {keyword.device_type}
+                            </Badge>
+                            
+                            {/* Tags */}
+                            {keyword.tags && keyword.tags.length > 0 && (
+                              <div className="flex items-center space-x-1">
+                                {keyword.tags.slice(0, 2).map((tag, tagIndex) => (
+                                  <Badge key={tagIndex} variant="default" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {keyword.tags.length > 2 && (
+                                  <Badge variant="default" className="text-xs">
+                                    +{keyword.tags.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 )}
               </CardContent>
             </Card>
