@@ -74,7 +74,7 @@ export const KeywordTable = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr style={{ backgroundColor: '#F7F9FC', borderBottom: '1px solid #E0E6ED' }}>
+            <tr className="bg-muted/50 border-b">
               <th className="px-4 py-3 text-center w-10">
                 <input
                   type="checkbox"
@@ -86,59 +86,35 @@ export const KeywordTable = ({
                   className="w-4 h-4"
                 />
               </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium tracking-wider"
-                style={{ color: '#6C757D' }}
-              >
+              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground">
                 KEYWORD
               </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium tracking-wider"
-                style={{ color: '#6C757D' }}
-              >
+              <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground">
                 POSITION
               </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium tracking-wider"
-                style={{ color: '#6C757D' }}
-              >
+              <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground">
                 CHANGE (1D)
               </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium tracking-wider"
-                style={{ color: '#6C757D' }}
-              >
+              <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground">
                 DEVICE
               </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium tracking-wider"
-                style={{ color: '#6C757D' }}
-              >
+              <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground">
                 TAGS
               </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium tracking-wider"
-                style={{ color: '#6C757D' }}
-              >
+              <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground">
                 URL
               </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium tracking-wider"
-                style={{ color: '#6C757D' }}
-              >
+              <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground">
                 COUNTRY
               </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium tracking-wider"
-                style={{ color: '#6C757D' }}
-              >
+              <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground">
                 UPDATED
               </th>
             </tr>
           </thead>
-          <tbody style={{ backgroundColor: '#FFFFFF' }}>
+          <tbody className="bg-card">
             {filteredKeywords.map((keyword) => (
-              <tr key={keyword.id} style={{ borderBottom: '1px solid #E0E6ED' }}>
+              <tr key={keyword.id} className="border-b">
                 <td className="p-3 text-center w-10">
                   <input
                     type="checkbox"
@@ -204,14 +180,22 @@ export const KeywordTable = ({
                       href={keyword.current_url || keyword.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm hover:underline justify-center"
-                      style={{ color: '#3D8BFF' }}
+                      className="inline-flex items-center gap-1 text-sm hover:underline justify-center text-primary"
                     >
-                      View
+                      {(() => {
+                        const url = keyword.current_url || keyword.url;
+                        if (!url) return '-';
+                        try {
+                          const urlObj = new URL(url);
+                          return urlObj.pathname + urlObj.search;
+                        } catch {
+                          return url;
+                        }
+                      })()}
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   ) : (
-                    <span style={{ color: '#6C757D' }}>-</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </td>
                 <td className="p-3 text-center">

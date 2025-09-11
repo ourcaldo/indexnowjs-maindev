@@ -1,82 +1,108 @@
 import React from 'react'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+
+export type StatCardVariant = 'primary' | 'success' | 'warning' | 'info' | 'error'
 
 interface StatCardProps {
   title: string
   value: string | number
-  description?: string
+  change?: number
+  changeLabel?: string
   icon?: React.ReactNode
-  trend?: 'up' | 'down' | 'neutral'
-  trendValue?: string
+  variant?: StatCardVariant
+  description?: string
   className?: string
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'info'
+  showTrend?: boolean
 }
 
-export const StatCard = ({ 
-  title, 
-  value, 
-  description, 
-  icon, 
-  trend, 
-  trendValue,
-  variant = 'default',
-  className = '' 
+export const StatCard = ({
+  title,
+  value,
+  change,
+  changeLabel,
+  icon,
+  variant = 'primary',
+  description,
+  className = '',
+  showTrend = true
 }: StatCardProps) => {
-  const getVariantStyles = () => {
+  
+  const getTrendIcon = () => {
+    if (!change || change === 0) return <Minus className="w-3 h-3" />
+    return change > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />
+  }
+
+  const getTrendColor = () => {
+    if (!change || change === 0) return 'text-muted-foreground'
+    return change > 0 ? 'text-success' : 'text-destructive'
+  }
+
+  const getVariantClasses = () => {
     switch (variant) {
-      case 'primary':
-        return 'border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5'
       case 'success':
-        return 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-25'
+        return 'border-l-4 border-l-success bg-success/5'
       case 'warning':
-        return 'border-amber-200 bg-gradient-to-br from-amber-50 to-amber-25'
+        return 'border-l-4 border-l-warning bg-warning/5'
       case 'info':
-        return 'border-blue-200 bg-gradient-to-br from-blue-50 to-blue-25'
+        return 'border-l-4 border-l-info bg-info/5'
+      case 'error':
+        return 'border-l-4 border-l-destructive bg-destructive/5'
       default:
-        return 'border-border bg-card'
+        return 'border-l-4 border-l-primary bg-primary/5'
     }
   }
 
-  const getIconStyles = () => {
+  const getIconColor = () => {
     switch (variant) {
-      case 'primary':
-        return 'bg-accent/10 text-accent'
       case 'success':
-        return 'bg-emerald-100 text-emerald-600'
+        return 'text-success'
       case 'warning':
-        return 'bg-amber-100 text-amber-600'
+        return 'text-warning'
       case 'info':
-        return 'bg-blue-100 text-blue-600'
+        return 'text-info'
+      case 'error':
+        return 'text-destructive'
       default:
-        return 'bg-muted text-accent'
+        return 'text-primary'
     }
   }
 
   return (
-    <Card className={`relative overflow-hidden p-6 ${getVariantStyles()} ${className}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold mt-2 text-foreground">{value}</p>
-          {description && (
-            <p className="text-xs mt-1 text-muted-foreground">{description}</p>
-          )}
-          {trend && trendValue && (
-            <p className={`text-xs mt-2 ${
-              trend === 'up' ? 'text-emerald-600' : 
-              trend === 'down' ? 'text-red-600' : 
-              'text-muted-foreground'
-            }`}>
-              {trendValue}
+    <Card className={`${getVariantClasses()} ${className}`}>
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              {title}
             </p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-foreground">
+                {typeof value === 'number' ? value.toLocaleString() : value}
+              </p>
+              {showTrend && change !== undefined && (
+                <Badge variant="outline" className={`flex items-center gap-1 ${getTrendColor()}`}>
+                  {getTrendIcon()}
+                  <span className="text-xs">
+                    {Math.abs(change)}{changeLabel || ''}
+                  </span>
+                </Badge>
+              )}
+            </div>
+            {description && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {description}
+              </p>
+            )}
+          </div>
+          {icon && (
+            <div className={`flex-shrink-0 ml-4 ${getIconColor()}`}>
+              {icon}
+            </div>
           )}
         </div>
-        {icon && (
-          <div className={`p-3 rounded-lg ${getIconStyles()}`}>
-            {icon}
-          </div>
-        )}
-      </div>
+      </CardContent>
     </Card>
   )
 }

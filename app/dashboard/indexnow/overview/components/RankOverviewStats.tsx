@@ -1,5 +1,5 @@
 import React from 'react'
-import { Search, TrendingUp } from 'lucide-react'
+import { Search, TrendingUp, Target, Award } from 'lucide-react'
 import { StatCard } from '@/components/dashboard/enhanced'
 
 interface RankOverviewStatsProps {
@@ -20,29 +20,33 @@ export const RankOverviewStats = ({
       <StatCard
         title="Total Keywords"
         value={totalKeywords.toLocaleString()}
+        variant="primary"
         icon={<Search className="w-6 h-6" />}
+        description="Keywords being tracked"
       />
       
       <StatCard
         title="Average Position"
         value={avgPosition}
-        icon={<TrendingUp className="w-6 h-6" style={{color: '#F0A202'}} />}
+        variant="warning"
+        icon={<Target className="w-6 h-6" />}
+        description="Average ranking position"
       />
       
       <StatCard
         title="Top 10 Rankings"
         value={topTenCount}
-        icon={
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{backgroundColor: '#4BB543'}}>
-            10
-          </div>
-        }
+        variant="success"
+        icon={<Award className="w-6 h-6" />}
+        description="Keywords in top 10"
       />
       
       <StatCard
         title="Improving (1D)"
         value={improvingCount}
-        icon={<TrendingUp className="w-6 h-6" style={{color: '#4BB543'}} />}
+        variant="info"
+        icon={<TrendingUp className="w-6 h-6" />}
+        description="Keywords moving up"
       />
     </div>
   )
