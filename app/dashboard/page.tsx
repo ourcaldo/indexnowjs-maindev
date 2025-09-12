@@ -688,7 +688,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Button 
-                    className="w-full justify-start h-11 bg-primary text-primary-foreground btn-primary-hover"
+                    className="w-full justify-start h-11 bg-primary text-primary-foreground hover:bg-[#3D8BFF]/10 hover:text-[#3D8BFF] transition-colors"
                     onClick={() => router.push('/dashboard/indexnow/add')}
                     data-testid="action-add-keywords"
                   >
@@ -701,7 +701,7 @@ export default function Dashboard() {
                   
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 btn-outline-hover"
+                    className="w-full justify-start h-11 hover:bg-[#3D8BFF]/10 hover:text-[#3D8BFF] transition-colors"
                     onClick={() => router.push('/dashboard/indexnow/overview')}
                     data-testid="action-view-keywords"
                   >
@@ -714,7 +714,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 btn-outline-hover"
+                    className="w-full justify-start h-11 hover:bg-[#3D8BFF]/10 hover:text-[#3D8BFF] transition-colors"
                     onClick={() => router.push('/dashboard/indexnow/rank-history')}
                     data-testid="action-rank-history"
                   >
@@ -727,7 +727,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 btn-outline-hover"
+                    className="w-full justify-start h-11 hover:bg-[#3D8BFF]/10 hover:text-[#3D8BFF] transition-colors"
                     onClick={() => router.push('/dashboard/settings/plans-billing')}
                     data-testid="action-manage-billing"
                   >
