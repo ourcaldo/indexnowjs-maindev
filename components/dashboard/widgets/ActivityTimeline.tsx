@@ -38,6 +38,7 @@ interface ActivityTimelineProps {
   description?: string
   maxItems?: number
   showViewAll?: boolean
+  showUpdateBadge?: boolean
   onViewAll?: () => void
   className?: string
 }
@@ -48,6 +49,7 @@ export const ActivityTimeline = ({
   description = "Latest updates and changes",
   maxItems = 5,
   showViewAll = true,
+  showUpdateBadge = true,
   onViewAll,
   className = '' 
 }: ActivityTimelineProps) => {
@@ -147,10 +149,12 @@ export const ActivityTimeline = ({
             <CardTitle className="text-lg font-semibold">{title}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">{description}</p>
           </div>
-          <Badge variant="outline" className="flex items-center space-x-1 w-fit">
-            <Clock className="w-3 h-3" />
-            <span>{activities.length} updates</span>
-          </Badge>
+          {showUpdateBadge && (
+            <Badge variant="outline" className="flex items-center space-x-1 w-fit">
+              <Clock className="w-3 h-3" />
+              <span>{activities.length} updates</span>
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent>

@@ -581,7 +581,7 @@ export default function Dashboard() {
                           const positionChange = calculatePositionChange(keyword)
                           
                           return (
-                            <div key={keyword.id || index} className="md:grid md:grid-cols-12 gap-3 p-4 md:px-6 md:py-3 hover:bg-muted/30 transition-colors">
+                            <div key={keyword.id || index} className="md:grid md:grid-cols-12 gap-3 p-4 md:px-6 md:py-3 hover:bg-muted/10 transition-colors">
                               {/* Mobile Layout */}
                               <div className="md:hidden space-y-2">
                                 <div className="flex items-center justify-between">
@@ -701,7 +701,7 @@ export default function Dashboard() {
                   
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11"
+                    className="w-full justify-start h-11 hover:bg-muted/5"
                     onClick={() => router.push('/dashboard/indexnow/overview')}
                     data-testid="action-view-keywords"
                   >
@@ -714,7 +714,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11"
+                    className="w-full justify-start h-11 hover:bg-muted/5"
                     onClick={() => router.push('/dashboard/indexnow/rank-history')}
                     data-testid="action-rank-history"
                   >
@@ -727,7 +727,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11"
+                    className="w-full justify-start h-11 hover:bg-muted/5"
                     onClick={() => router.push('/dashboard/settings/plans-billing')}
                     data-testid="action-manage-billing"
                   >
@@ -745,8 +745,9 @@ export default function Dashboard() {
                 activities={activityData}
                 title="Recent Activity"
                 description="Latest updates and changes"
-                maxItems={4}
+                maxItems={3}
                 showViewAll={true}
+                showUpdateBadge={false}
                 onViewAll={() => router.push('/dashboard/indexnow/rank-history')}
               />
 
@@ -774,7 +775,7 @@ export default function Dashboard() {
                   </p>
                   <Button 
                     variant="outline"
-                    className="w-full border-amber-300 hover:bg-amber-100 dark:border-amber-700 dark:hover:bg-amber-900/30"
+                    className="w-full border-amber-300 hover:bg-amber-50/50 dark:border-amber-700 dark:hover:bg-amber-900/10"
                     onClick={() => router.push('/dashboard/tools/fastindexing')}
                     data-testid="action-fast-indexing"
                   >
