@@ -63,7 +63,7 @@ export class EmailService {
    */
   async initialize(): Promise<boolean> {
     try {
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: this.config.host,
         port: this.config.port,
         secure: this.config.secure,
@@ -77,7 +77,9 @@ export class EmailService {
       });
 
       // Verify connection
-      await this.transporter.verify();
+      if (this.transporter) {
+        await this.transporter.verify();
+      }
       this.isInitialized = true;
       
       console.log('✅ SMTP transporter initialized and verified successfully');
@@ -260,24 +262,6 @@ export class EmailService {
     });
   }
 
-  /**
-   * Send trial ending notification
-   */
-  async sendTrialEndingEmail(
-    recipient: EmailRecipient,
-    trialData: {
-      daysRemaining: number;
-      packageName: string;
-      upgradeUrl: string;
-    }
-  ): Promise<EmailResult> {
-    return this.sendEmail({
-      to: recipient,
-      subject: `Trial Ending Soon - ${trialData.daysRemaining} Days Left`,
-      template: EMAIL_TEMPLATES.TRIAL_ENDING,
-      templateData: trialData,
-    });
-  }
 
   /**
    * Send payment received confirmation
@@ -353,7 +337,6 @@ export class EmailService {
         port: this.config.port,
         secure: this.config.secure,
         user: this.config.user,
-        pass: '[HIDDEN]',
         fromName: this.config.fromName,
         fromEmail: this.config.fromEmail,
       },
