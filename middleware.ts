@@ -153,6 +153,18 @@ function hasRequiredAccess(userRole: string, requiredLevel: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
+  
+  // BLOCK Sentry monitoring HEAD requests to /api endpoint
+  if (request.method === 'HEAD' && pathname === '/api') {
+    const userAgent = request.headers.get('user-agent')
+    const hasSentryHeaders = request.headers.get('sentry-trace') || 
+                             request.headers.get('baggage')?.includes('sentry-')
+    
+    // Block Sentry monitoring requests to prevent 404 spam
+    if (userAgent === 'node' && hasSentryHeaders) {
+      return new NextResponse(null, { status: 204 }) // No Content - stops the noise
+    }
+  }
 
   // Handle admin routes with dedicated middleware, except login page
   if (pathname.startsWith('/backend/admin') && pathname !== '/backend/admin/login') {
