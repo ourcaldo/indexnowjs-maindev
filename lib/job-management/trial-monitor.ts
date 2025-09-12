@@ -80,10 +80,7 @@ export class TrialMonitorService {
     console.log('🚀 [Trial Monitor] Starting trial monitor job...')
     
     try {
-      await Promise.all([
-        this.checkTrialsEndingSoon(),
-        this.processExpiredTrials()
-      ])
+      await this.processExpiredTrials()
       
       console.log('✅ [Trial Monitor] Trial monitor job completed successfully')
     } catch (error) {
