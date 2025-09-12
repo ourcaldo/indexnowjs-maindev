@@ -32,13 +32,9 @@ import { useDashboardData } from '@/hooks/useDashboardData'
 
 // Import our new analytics widgets
 import { 
-  UsageChart, 
   RankingDistribution, 
-  PerformanceOverview, 
   ActivityTimeline,
-  type UsageData,
   type RankingData,
-  type PerformanceMetric,
   type ActivityItem
 } from '@/components/dashboard/widgets'
 
@@ -222,36 +218,6 @@ export default function Dashboard() {
     }
   }, [dashboardError])
 
-  // Prepare analytics data (memoized for stability)
-  const usageData = useMemo((): UsageData[] => {
-    if (!userProfile?.package) return []
-    
-    // Generate stable mock usage data for the last 7 days
-    const days = 7
-    const data: UsageData[] = []
-    const limit = userProfile.package.quota_limits.daily_urls
-    const seed = userProfile.package.slug.charCodeAt(0) // Use package slug as seed for stability
-    
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date()
-      date.setDate(date.getDate() - i)
-      
-      // Generate realistic but stable usage patterns
-      const baseUsage = Math.floor(limit * 0.3) // 30% base usage
-      // Use deterministic "random" based on day and seed for stability
-      const pseudoRandom = ((seed + i) * 7879) % 100 / 100
-      const variation = Math.floor(pseudoRandom * (limit * 0.4)) // Up to 40% variation
-      const usage = Math.min(baseUsage + variation, limit)
-      
-      data.push({
-        date: date.toISOString(),
-        usage,
-        limit
-      })
-    }
-    
-    return data
-  }, [userProfile?.package?.quota_limits.daily_urls, userProfile?.package?.slug])
 
   const rankingData = useMemo((): RankingData[] => {
     return domainKeywords.map((keyword: KeywordData) => ({
@@ -261,52 +227,6 @@ export default function Dashboard() {
     }))
   }, [domainKeywords])
 
-  const performanceMetrics = useMemo((): PerformanceMetric[] => {
-    const metrics: PerformanceMetric[] = []
-    
-    if (domainKeywords.length > 0) {
-      // Average position
-      const rankedKeywords = domainKeywords.filter((k: KeywordData) => k.recent_ranking?.position)
-      const avgPosition = rankedKeywords.length > 0 
-        ? Math.round(rankedKeywords.reduce((sum: number, k: KeywordData) => sum + (k.recent_ranking?.position || 100), 0) / rankedKeywords.length)
-        : 0
-
-      metrics.push({
-        label: 'Average Position',
-        current: avgPosition,
-        previous: avgPosition + 2, // Stable previous value
-        target: 10,
-        format: 'position'
-      })
-
-      // Top 10 keywords
-      const top10Count = domainKeywords.filter((k: KeywordData) => k.recent_ranking?.position && k.recent_ranking.position <= 10).length
-      metrics.push({
-        label: 'Top 10 Keywords',
-        current: top10Count,
-        previous: Math.max(0, top10Count - 1), // Stable previous value
-        target: Math.ceil(domainKeywords.length * 0.3),
-        format: 'number'
-      })
-    }
-
-    if (userProfile?.package) {
-      // Usage percentage
-      const usagePercent = userProfile.daily_quota_used && userProfile.package.quota_limits.daily_urls 
-        ? Math.round((userProfile.daily_quota_used / userProfile.package.quota_limits.daily_urls) * 100)
-        : 0
-
-      metrics.push({
-        label: 'Daily Usage',
-        current: usagePercent,
-        previous: Math.max(0, usagePercent - 5), // Stable previous value
-        target: 80,
-        format: 'percentage'
-      })
-    }
-
-    return metrics
-  }, [domainKeywords, userProfile?.daily_quota_used, userProfile?.package?.quota_limits.daily_urls])
 
   const activityData = useMemo((): ActivityItem[] => {
     const activities: ActivityItem[] = []
@@ -594,25 +514,13 @@ export default function Dashboard() {
             {/* Main Content Area */}
             <div className="lg:col-span-2 space-y-6">
               {/* Analytics Widgets Row */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                <UsageChart 
-                  data={usageData}
-                  title="Daily Usage Trends"
-                  description="Track your API usage patterns"
-                />
-                <RankingDistribution 
-                  data={rankingData}
-                  title="Position Distribution"
-                  description="See where your keywords rank"
-                />
-              </div>
-
-              {/* Performance Overview */}
-              <PerformanceOverview 
-                metrics={performanceMetrics}
-                title="Key Performance Metrics"
-                description="Track your SEO progress over time"
+              <RankingDistribution 
+                data={rankingData}
+                title="Position Distribution"
+                description="See where your keywords rank"
+                className="w-full"
               />
+
 
               {/* Keywords Table */}
               <Card>
