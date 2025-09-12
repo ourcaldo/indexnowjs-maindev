@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Google Fonts - must come before other rules */
+@import url("https://fonts.googleapis.com/css?family=Roboto:100");
+
 /* Continuous scrolling animation for company logos */
 @keyframes scroll {
   0% {
@@ -177,8 +180,6 @@
   }
 
   /* Cool Beans hover effect */
-  @import url("https://fonts.googleapis.com/css?family=Roboto:100");
-  
   .coolBeans {
     border: 2px solid currentColor;
     border-radius: 3rem;
