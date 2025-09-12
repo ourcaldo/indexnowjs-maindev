@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -5,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 interface DashboardPreviewProps {
   title: string
   subtitle: string
-  variant?: 'login' | 'register' | 'forgot'
+  variant?: 'login' | 'register'
 }
 
 export default function DashboardPreview({ title, subtitle, variant = 'login' }: DashboardPreviewProps) {
@@ -13,15 +14,19 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Mock dashboard data for preview
-  const dashboardData = {
-    keywords: [
-      { keyword: 'seo tools', position: 3, change: '+2' },
-      { keyword: 'rank tracking', position: 7, change: '-1' },
-      { keyword: 'website indexing', position: 12, change: '+5' },
-      { keyword: 'google indexing', position: 8, change: '0' },
-      { keyword: 'seo optimization', position: 15, change: '+3' }
-    ]
-  }
+  const mockStats = [
+    { label: 'URLs Indexed', value: '12,847', change: '+18%', positive: true },
+    { label: 'Success Rate', value: '94.2%', change: '+2.1%', positive: true },
+    { label: 'Keywords Tracked', value: '248', change: '+5', positive: true },
+    { label: 'Avg. Position', value: '8.3', change: '-1.2', positive: true }
+  ]
+
+  const mockRecentActivity = [
+    { action: 'Batch indexed', count: '156 URLs', time: '2 minutes ago', status: 'success' },
+    { action: 'Keyword check', count: '48 keywords', time: '5 minutes ago', status: 'success' },
+    { action: 'Sitemap parsed', count: '2,341 URLs', time: '12 minutes ago', status: 'success' },
+    { action: 'Rank update', count: '127 positions', time: '18 minutes ago', status: 'success' }
+  ]
 
   useEffect(() => {
     setMounted(true)
@@ -29,401 +34,282 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
 
   if (!mounted) {
     return (
-      <div className="w-full h-full bg-white rounded-lg flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading dashboard...</div>
+      <div style={{ 
+        width: '100%', 
+        height: '100%', 
+        backgroundColor: '#1a1a1a', 
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ color: '#666', fontSize: '14px' }}>Loading preview...</div>
       </div>
     )
   }
 
   return (
-    <div 
-      ref={containerRef}
-      className="w-full h-full overflow-hidden"
-      style={{ 
-        minHeight: '100%',
-        boxSizing: 'border-box'
-      }}
-    >
-      {/* Dashboard Container - Full size, light theme matching reference */}
-      <div style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#ffffff',
-        color: '#000000',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        overflow: 'hidden',
-        display: 'flex',
-        boxSizing: 'border-box',
-        position: 'relative'
-      }}>
-        
-        {/* Sidebar */}
-        <div style={{
-          width: '240px',
-          backgroundColor: '#f8fafc',
-          borderRight: '1px solid #e2e8f0',
-          display: 'flex',
-          flexDirection: 'column',
-          flexShrink: 0,
-          overflow: 'hidden'
+    <div ref={containerRef} style={{
+      width: '100%',
+      height: '100%',
+      minHeight: '500px',
+      backgroundColor: '#0a0a0a',
+      borderRadius: '16px',
+      padding: '32px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      border: '1px solid #2a2a2a',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Header Text */}
+      <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+        <h2 style={{
+          fontSize: '24px',
+          fontWeight: '700',
+          color: '#ffffff',
+          marginBottom: '12px',
+          lineHeight: '1.2'
         }}>
-          {/* Search bar */}
-          <div style={{
-            padding: '16px',
-            borderBottom: '1px solid #e2e8f0'
-          }}>
-            <div style={{
-              backgroundColor: '#f1f5f9',
-              borderRadius: '8px',
-              padding: '8px 12px',
-              fontSize: '14px',
-              color: '#64748b',
-              border: '1px solid #e2e8f0'
+          {title}
+        </h2>
+        <p style={{
+          fontSize: '16px',
+          color: '#888888',
+          lineHeight: '1.5',
+          maxWidth: '400px',
+          margin: '0 auto'
+        }}>
+          {subtitle}
+        </p>
+      </div>
+
+      {/* Dashboard Content */}
+      <div style={{ width: '100%' }}>
+        {/* Top Stats Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '16px',
+          marginBottom: '32px'
+        }}>
+          {mockStats.map((stat, index) => (
+            <div key={index} style={{
+              backgroundColor: '#111111',
+              border: '1px solid #2a2a2a',
+              borderRadius: '12px',
+              padding: '20px',
+              transition: 'transform 0.2s ease, border-color 0.2s ease',
+              cursor: 'default'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.borderColor = '#444444'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.borderColor = '#2a2a2a'
             }}>
-              🔍 Search
+              <div style={{
+                fontSize: '12px',
+                color: '#888888',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                {stat.label}
+              </div>
+              <div style={{
+                fontSize: '28px',
+                fontWeight: '700',
+                color: '#ffffff',
+                marginBottom: '4px'
+              }}>
+                {stat.value}
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: stat.positive ? '#22c55e' : '#ef4444',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <span style={{ marginRight: '4px' }}>
+                  {stat.positive ? '↗' : '↘'}
+                </span>
+                {stat.change}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Content Area */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr',
+          gap: '24px'
+        }}>
+          {/* Performance Chart Area */}
+          <div style={{
+            backgroundColor: '#111111',
+            border: '1px solid #2a2a2a',
+            borderRadius: '12px',
+            padding: '24px'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#ffffff',
+              marginBottom: '20px'
+            }}>
+              Indexing Performance
+            </h3>
+            
+            {/* Mock Chart */}
+            <div style={{
+              height: '180px',
+              position: 'relative',
+              background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'flex-end',
+              padding: '20px',
+              gap: '8px'
+            }}>
+              {[65, 78, 45, 89, 92, 67, 84, 76, 95, 88, 71, 93].map((height, index) => (
+                <div key={index} style={{
+                  flex: '1',
+                  backgroundColor: `hsl(${140 + (height * 0.5)}, 70%, 50%)`,
+                  height: `${height}%`,
+                  borderRadius: '4px 4px 0 0',
+                  minHeight: '20px',
+                  opacity: '0.8',
+                  transition: 'opacity 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                />
+              ))}
             </div>
           </div>
 
-          {/* Navigation */}
-          <div style={{ padding: '16px 0', flex: 1 }}>
-            {[
-              { name: 'Home', active: false },
-              { name: 'Dashboard', active: true },
-              { name: 'Projects', active: false },
-              { name: 'Tasks', active: false },
-              { name: 'Reporting', active: false },
-              { name: 'Users', active: false }
-            ].map((item, idx) => (
-              <div key={item.name} style={{
-                fontSize: '14px',
-                color: item.active ? '#0f172a' : '#64748b',
-                fontWeight: item.active ? '500' : '400',
-                backgroundColor: item.active ? '#f1f5f9' : 'transparent',
-                padding: '8px 24px',
-                margin: '2px 8px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                borderLeft: item.active ? '3px solid #3b82f6' : '3px solid transparent'
-              }}>
-                {item.name}
-              </div>
-            ))}
-          </div>
-
-          {/* Settings at bottom */}
-          <div style={{ 
-            padding: '16px',
-            borderTop: '1px solid #e2e8f0'
+          {/* Recent Activity */}
+          <div style={{
+            backgroundColor: '#111111',
+            border: '1px solid #2a2a2a',
+            borderRadius: '12px',
+            padding: '24px'
           }}>
-            <div style={{
-              fontSize: '14px',
-              color: '#64748b',
-              padding: '8px 24px',
-              borderRadius: '6px',
-              cursor: 'pointer'
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#ffffff',
+              marginBottom: '20px'
             }}>
-              ⚙️ Settings
+              Recent Activity
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {mockRecentActivity.map((activity, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '12px',
+                  backgroundColor: '#0a0a0a',
+                  borderRadius: '8px',
+                  border: '1px solid #1a1a1a'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '50%',
+                    marginRight: '12px'
+                  }} />
+                  <div style={{ flex: '1' }}>
+                    <div style={{
+                      fontSize: '14px',
+                      color: '#ffffff',
+                      marginBottom: '2px'
+                    }}>
+                      {activity.action}
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#666666'
+                    }}>
+                      {activity.count} • {activity.time}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* Bottom Action Bar */}
         <div style={{
-          flex: 1,
-          backgroundColor: '#ffffff',
-          overflow: 'hidden',
-          position: 'relative'
+          marginTop: '32px',
+          padding: '20px',
+          backgroundColor: '#111111',
+          border: '1px solid #2a2a2a',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}>
-          
-          {/* Header */}
-          <div style={{
-            padding: '24px 32px',
-            borderBottom: '1px solid #e2e8f0',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: '#ffffff'
-          }}>
-            <h1 style={{
-              fontSize: '28px',
+          <div>
+            <div style={{
+              fontSize: '16px',
               fontWeight: '600',
-              color: '#0f172a',
-              margin: 0
+              color: '#ffffff',
+              marginBottom: '4px'
             }}>
-              My dashboard
-            </h1>
+              Ready to get started?
+            </div>
             <div style={{
               fontSize: '14px',
-              color: '#3b82f6',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontWeight: '500'
+              color: '#888888'
             }}>
-              💬 What's new? ●
+              Join thousands of users already indexing their content faster
             </div>
           </div>
-
-          {/* Metrics Grid */}
           <div style={{
-            padding: '32px',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '24px'
-          }}>
-            {[
-              { value: '$8,746.22', label: 'All revenue', trend: '+2.4%', up: true },
-              { value: '12,440', label: 'Page Views', trend: '+6.2%', up: true },
-              { value: '96', label: 'Active', trend: '', up: null }
-            ].map((metric, idx) => (
-              <div key={idx} style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '24px',
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
-              }}>
-                <div style={{
-                  fontSize: '13px',
-                  color: '#64748b',
-                  marginBottom: '8px',
-                  fontWeight: '500'
-                }}>
-                  {metric.label}
-                </div>
-                <div style={{
-                  fontSize: '32px',
-                  fontWeight: '700',
-                  color: '#0f172a',
-                  marginBottom: '8px',
-                  lineHeight: '1.2'
-                }}>
-                  {metric.value}
-                </div>
-                {metric.trend && (
-                  <div style={{
-                    fontSize: '14px',
-                    color: metric.up ? '#059669' : '#dc2626',
-                    fontWeight: '500',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    <span>{metric.up ? '↗' : '↘'}</span>
-                    {metric.trend}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Net Revenue Section */}
-          <div style={{
-            padding: '0 32px 24px',
-            position: 'relative'
-          }}>
-            <div style={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '24px',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
-            }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px'
-              }}>
-                <span style={{
-                  fontSize: '13px',
-                  color: '#64748b',
-                  fontWeight: '500'
-                }}>
-                  Net revenue
-                </span>
-                <div style={{
-                  display: 'flex',
-                  gap: '16px',
-                  fontSize: '13px',
-                  color: '#64748b'
-                }}>
-                  <span style={{ color: '#0f172a', fontWeight: '500' }}>12 months</span>
-                  <span>30 days</span>
-                  <span>7 da...</span>
-                </div>
-              </div>
-              <div style={{
-                fontSize: '32px',
-                fontWeight: '700',
-                color: '#0f172a',
-                marginBottom: '8px'
-              }}>
-                $7,804.16
-              </div>
-              <div style={{
-                fontSize: '14px',
-                color: '#059669',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <span>↗</span>
-                +2.4%
-              </div>
-            </div>
-          </div>
-
-          {/* Chart Section */}
-          <div style={{
-            padding: '0 32px 24px'
-          }}>
-            <div style={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '24px',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-              height: '200px',
-              position: 'relative'
-            }}>
-              {/* Chart placeholder with smooth curve */}
-              <svg width="100%" height="100%" viewBox="0 0 400 160" style={{ overflow: 'visible' }}>
-                <defs>
-                  <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style={{stopColor: '#3b82f6', stopOpacity: 0.2}} />
-                    <stop offset="100%" style={{stopColor: '#3b82f6', stopOpacity: 0}} />
-                  </linearGradient>
-                </defs>
-                <path 
-                  d="M 0 120 Q 50 100 100 90 T 200 70 T 300 60 Q 350 55 400 50" 
-                  stroke="#3b82f6" 
-                  strokeWidth="2" 
-                  fill="none"
-                />
-                <path 
-                  d="M 0 120 Q 50 100 100 90 T 200 70 T 300 60 Q 350 55 400 50 L 400 160 L 0 160 Z" 
-                  fill="url(#gradient)"
-                />
-                {/* Month labels */}
-                {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'].map((month, i) => (
-                  <text 
-                    key={month}
-                    x={i * 45 + 20} 
-                    y={150} 
-                    fontSize="12" 
-                    fill="#64748b" 
-                    textAnchor="middle"
-                  >
-                    {month}
-                  </text>
-                ))}
-              </svg>
-            </div>
-          </div>
-
-          {/* Customers Section - Partially cut off to show it continues */}
-          <div style={{
-            padding: '0 32px',
-            height: '120px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '24px',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
-            }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px'
-              }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#0f172a',
-                  margin: 0
-                }}>
-                  Customers
-                </h3>
-                <div style={{
-                  backgroundColor: '#f1f5f9',
-                  borderRadius: '8px',
-                  padding: '6px 12px',
-                  fontSize: '13px',
-                  color: '#64748b',
-                  border: '1px solid #e2e8f0'
-                }}>
-                  🔍 Search
-                </div>
-              </div>
-              
-              {/* Table header */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 2fr 1fr 1fr',
-                gap: '16px',
-                padding: '8px 0',
-                borderBottom: '1px solid #e2e8f0',
-                fontSize: '13px',
-                color: '#64748b',
-                fontWeight: '500'
-              }}>
-                <div>Customer</div>
-                <div>Email</div>
-                <div>Date</div>
-                <div>Status</div>
-              </div>
-              
-              {/* Customer row */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 2fr 1fr 1fr',
-                gap: '16px',
-                padding: '12px 0',
-                fontSize: '14px',
-                color: '#0f172a',
-                alignItems: 'center'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    backgroundColor: '#e2e8f0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: '500'
-                  }}>
-                    LR
-                  </div>
-                  Lily Ross Coulson
-                </div>
-                <div style={{ color: '#64748b' }}>lilyrosscoulson@gmail.com</div>
-                <div style={{ color: '#64748b' }}>Jan 18, 2025</div>
-                <div>
-                  <span style={{
-                    backgroundColor: '#dcfce7',
-                    color: '#059669',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: '500'
-                  }}>
-                    Paid
-                  </span>
-                </div>
-              </div>
-            </div>
+            padding: '12px 24px',
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}>
+            Start Free Trial
           </div>
         </div>
       </div>
+
+      {/* Decorative Elements */}
+      <div style={{
+        position: 'absolute',
+        top: '-100px',
+        right: '-100px',
+        width: '200px',
+        height: '200px',
+        background: 'radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%)',
+        borderRadius: '50%',
+        pointerEvents: 'none'
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '-50px',
+        left: '-50px',
+        width: '150px',
+        height: '150px',
+        background: 'radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%)',
+        borderRadius: '50%',
+        pointerEvents: 'none'
+      }} />
     </div>
   )
 }
