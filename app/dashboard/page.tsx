@@ -327,6 +327,7 @@ export default function Dashboard() {
               size="sm"
               onClick={() => router.push('/dashboard/indexnow/add')}
               data-testid="button-add-keyword"
+              className="btn-hover"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Keywords
@@ -543,7 +544,7 @@ export default function Dashboard() {
                       size="sm"
                       onClick={() => router.push('/dashboard/indexnow/overview')}
                       data-testid="button-view-all-keywords"
-                      className="shrink-0"
+                      className="shrink-0 btn-hover"
                     >
                       View All ({domainKeywords.length})
                       <ChevronRightIcon className="w-4 h-4 ml-1" />
@@ -558,7 +559,7 @@ export default function Dashboard() {
                       </div>
                       <h3 className="text-lg font-semibold mb-2">No Keywords Yet</h3>
                       <p className="text-sm text-muted-foreground mb-6">Start tracking keywords for this domain to see performance data here.</p>
-                      <Button onClick={() => router.push('/dashboard/indexnow/add')} size="sm">
+                      <Button onClick={() => router.push('/dashboard/indexnow/add')} size="sm" className="btn-hover">
                         <Plus className="w-4 h-4 mr-2" />
                         Add Keywords
                       </Button>
