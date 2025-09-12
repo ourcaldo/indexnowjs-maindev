@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -13,19 +12,20 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Mock dashboard data for preview
+  // Mock rank tracking data for preview
   const mockStats = [
-    { label: 'URLs Indexed', value: '12,847', change: '+18%', positive: true },
-    { label: 'Success Rate', value: '94.2%', change: '+2.1%', positive: true },
-    { label: 'Keywords Tracked', value: '248', change: '+5', positive: true },
-    { label: 'Avg. Position', value: '8.3', change: '-1.2', positive: true }
+    { label: 'Keywords Tracked', value: '2,847', change: '+12%', positive: true },
+    { label: 'Top 10 Positions', value: '342', change: '+8.2%', positive: true },
+    { label: 'Avg Position', value: '8.4', change: '-1.3', positive: true },
+    { label: 'Improving', value: '156', change: '+24', positive: true }
   ]
 
-  const mockRecentActivity = [
-    { action: 'Batch indexed', count: '156 URLs', time: '2 minutes ago', status: 'success' },
-    { action: 'Keyword check', count: '48 keywords', time: '5 minutes ago', status: 'success' },
-    { action: 'Sitemap parsed', count: '2,341 URLs', time: '12 minutes ago', status: 'success' },
-    { action: 'Rank update', count: '127 positions', time: '18 minutes ago', status: 'success' }
+  const mockKeywords = [
+    { keyword: 'seo tools online', position: 3, change: 2, url: '/seo-tools', country: 'US' },
+    { keyword: 'rank tracker free', position: 7, change: -1, url: '/rank-tracker', country: 'UK' },
+    { keyword: 'keyword research', position: 12, change: 3, url: '/keywords', country: 'CA' },
+    { keyword: 'serp analysis', position: 5, change: 0, url: '/serp-checker', country: 'AU' },
+    { keyword: 'local seo tools', position: 15, change: -2, url: '/local-seo', country: 'DE' }
   ]
 
   useEffect(() => {
@@ -37,13 +37,13 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
       <div style={{ 
         width: '100%', 
         height: '100%', 
-        backgroundColor: '#1a1a1a', 
+        backgroundColor: '#f8fafc', 
         borderRadius: '12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <div style={{ color: '#666', fontSize: '14px' }}>Loading preview...</div>
+        <div style={{ color: '#64748b', fontSize: '14px' }}>Loading preview...</div>
       </div>
     )
   }
@@ -52,87 +52,58 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
     <div ref={containerRef} style={{
       width: '100%',
       height: '100%',
-      minHeight: '500px',
-      backgroundColor: '#0a0a0a',
+      minHeight: '320px',
+      maxHeight: '400px',
+      backgroundColor: '#ffffff',
       borderRadius: '16px',
-      padding: '32px',
+      padding: '16px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      border: '1px solid #2a2a2a',
+      border: '1px solid #e2e8f0',
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Header Text */}
-      <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-        <h2 style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: '#ffffff',
-          marginBottom: '12px',
-          lineHeight: '1.2'
-        }}>
-          {title}
-        </h2>
-        <p style={{
-          fontSize: '16px',
-          color: '#888888',
-          lineHeight: '1.5',
-          maxWidth: '400px',
-          margin: '0 auto'
-        }}>
-          {subtitle}
-        </p>
-      </div>
-
       {/* Dashboard Content */}
       <div style={{ width: '100%' }}>
         {/* Top Stats Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '16px',
-          marginBottom: '32px'
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '12px',
+          marginBottom: '16px'
         }}>
           {mockStats.map((stat, index) => (
             <div key={index} style={{
-              backgroundColor: '#111111',
-              border: '1px solid #2a2a2a',
-              borderRadius: '12px',
-              padding: '20px',
-              transition: 'transform 0.2s ease, border-color 0.2s ease',
-              cursor: 'default'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.borderColor = '#444444'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.borderColor = '#2a2a2a'
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              padding: '12px',
+              textAlign: 'center'
             }}>
               <div style={{
-                fontSize: '12px',
-                color: '#888888',
-                marginBottom: '8px',
+                fontSize: '10px',
+                color: '#64748b',
+                marginBottom: '4px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
               }}>
                 {stat.label}
               </div>
               <div style={{
-                fontSize: '28px',
+                fontSize: '18px',
                 fontWeight: '700',
-                color: '#ffffff',
-                marginBottom: '4px'
+                color: '#1e293b',
+                marginBottom: '2px'
               }}>
                 {stat.value}
               </div>
               <div style={{
-                fontSize: '14px',
-                color: stat.positive ? '#22c55e' : '#ef4444',
+                fontSize: '11px',
+                color: stat.positive ? '#16a34a' : '#dc2626',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                <span style={{ marginRight: '4px' }}>
+                <span style={{ marginRight: '2px' }}>
                   {stat.positive ? '↗' : '↘'}
                 </span>
                 {stat.change}
@@ -144,172 +115,116 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
         {/* Main Content Area */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '24px'
+          gridTemplateColumns: '1.5fr 1fr',
+          gap: '16px'
         }}>
-          {/* Performance Chart Area */}
+          {/* Rank Chart Area */}
           <div style={{
-            backgroundColor: '#111111',
-            border: '1px solid #2a2a2a',
-            borderRadius: '12px',
-            padding: '24px'
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            padding: '16px'
           }}>
             <h3 style={{
-              fontSize: '18px',
+              fontSize: '14px',
               fontWeight: '600',
-              color: '#ffffff',
-              marginBottom: '20px'
+              color: '#1e293b',
+              marginBottom: '12px'
             }}>
-              Indexing Performance
+              Position Trends
             </h3>
-            
+
             {/* Mock Chart */}
             <div style={{
-              height: '180px',
+              height: '100px',
               position: 'relative',
-              background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)',
-              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+              borderRadius: '6px',
               display: 'flex',
               alignItems: 'flex-end',
-              padding: '20px',
-              gap: '8px'
+              padding: '12px',
+              gap: '4px'
             }}>
-              {[65, 78, 45, 89, 92, 67, 84, 76, 95, 88, 71, 93].map((height, index) => (
+              {[45, 38, 52, 29, 35, 48, 41, 56, 33, 42, 38, 44].map((height, index) => (
                 <div key={index} style={{
                   flex: '1',
-                  backgroundColor: `hsl(${140 + (height * 0.5)}, 70%, 50%)`,
-                  height: `${height}%`,
-                  borderRadius: '4px 4px 0 0',
-                  minHeight: '20px',
-                  opacity: '0.8',
-                  transition: 'opacity 0.3s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
-                />
+                  backgroundColor: `hsl(${200 + (height * 0.8)}, 70%, 50%)`,
+                  height: `${height + 20}%`,
+                  borderRadius: '2px 2px 0 0',
+                  minHeight: '8px',
+                  opacity: '0.8'
+                }} />
               ))}
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* Top Keywords */}
           <div style={{
-            backgroundColor: '#111111',
-            border: '1px solid #2a2a2a',
-            borderRadius: '12px',
-            padding: '24px'
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            padding: '16px'
           }}>
             <h3 style={{
-              fontSize: '18px',
+              fontSize: '14px',
               fontWeight: '600',
-              color: '#ffffff',
-              marginBottom: '20px'
+              color: '#1e293b',
+              marginBottom: '12px'
             }}>
-              Recent Activity
+              Top Keywords
             </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {mockRecentActivity.map((activity, index) => (
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {mockKeywords.slice(0, 4).map((keyword, index) => (
                 <div key={index} style={{
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '12px',
-                  backgroundColor: '#0a0a0a',
-                  borderRadius: '8px',
-                  border: '1px solid #1a1a1a'
+                  justifyContent: 'space-between',
+                  padding: '8px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '6px',
+                  border: '1px solid #f1f5f9'
                 }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '50%',
-                    marginRight: '12px'
-                  }} />
-                  <div style={{ flex: '1' }}>
-                    <div style={{
-                      fontSize: '14px',
-                      color: '#ffffff',
-                      marginBottom: '2px'
-                    }}>
-                      {activity.action}
-                    </div>
+                  <div style={{ flex: '1', minWidth: '0' }}>
                     <div style={{
                       fontSize: '12px',
-                      color: '#666666'
+                      color: '#1e293b',
+                      fontWeight: '500',
+                      marginBottom: '2px',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
                     }}>
-                      {activity.count} • {activity.time}
+                      {keyword.keyword}
                     </div>
+                    <div style={{
+                      fontSize: '10px',
+                      color: '#64748b'
+                    }}>
+                      {keyword.url} • {keyword.country}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      color: '#1e293b'
+                    }}>
+                      #{keyword.position}
+                    </span>
+                    <span style={{
+                      fontSize: '10px',
+                      color: keyword.change >= 0 ? '#16a34a' : '#dc2626'
+                    }}>
+                      {keyword.change > 0 ? '+' : ''}{keyword.change}
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        {/* Bottom Action Bar */}
-        <div style={{
-          marginTop: '32px',
-          padding: '20px',
-          backgroundColor: '#111111',
-          border: '1px solid #2a2a2a',
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <div style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: '#ffffff',
-              marginBottom: '4px'
-            }}>
-              Ready to get started?
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#888888'
-            }}>
-              Join thousands of users already indexing their content faster
-            </div>
-          </div>
-          <div style={{
-            padding: '12px 24px',
-            backgroundColor: '#2563eb',
-            color: '#ffffff',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}>
-            Start Free Trial
-          </div>
-        </div>
       </div>
-
-      {/* Decorative Elements */}
-      <div style={{
-        position: 'absolute',
-        top: '-100px',
-        right: '-100px',
-        width: '200px',
-        height: '200px',
-        background: 'radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%)',
-        borderRadius: '50%',
-        pointerEvents: 'none'
-      }} />
-      <div style={{
-        position: 'absolute',
-        bottom: '-50px',
-        left: '-50px',
-        width: '150px',
-        height: '150px',
-        background: 'radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%)',
-        borderRadius: '50%',
-        pointerEvents: 'none'
-      }} />
     </div>
   )
 }
