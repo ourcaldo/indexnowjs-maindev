@@ -1049,6 +1049,30 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 12, 2025: Mobile Authentication Pages Enhancement - Right Column Hidden on Mobile ✅
+
+**✅ MOBILE RESPONSIVENESS ENHANCEMENT COMPLETED**: Successfully enhanced login and sign-up pages to hide the right column completely when accessed from mobile devices as requested
+
+**🔧 Changes Made:**
+- **Login Page Enhancement**: Removed mobile DashboardPreview section that was previously shown above the form on mobile devices
+- **Register Page Enhancement**: Removed mobile DashboardPreview section that was previously shown above the registration form on mobile devices
+- **Desktop Behavior Preserved**: Right column with DashboardPreview remains visible on desktop (screen width > 768px)
+- **Mobile Logo Integration**: Updated both pages to show logo properly on both mobile and desktop with responsive sizing
+- **TypeScript Fixes**: Updated DashboardPreview component calls to remove deprecated props (title, subtitle, variant)
+
+**🎯 Mobile Experience Improvement:**
+- **Before**: Mobile users saw DashboardPreview above the form, creating longer scrollable content
+- **After**: Mobile users see only the authentication form with proper logo, creating a cleaner, more focused experience
+- **Desktop Unchanged**: Desktop users still see the two-column layout with form on left and DashboardPreview on right
+
+**📁 Files Modified:**
+- `app/login/page.tsx` - Removed mobile DashboardPreview section, enhanced logo responsiveness
+- `app/register/page.tsx` - Removed mobile DashboardPreview section, enhanced logo responsiveness
+
+**✅ Enhancement Status**: Mobile authentication pages now provide focused, streamlined experience without right column content
+
+---
+
 ### September 12, 2025: DashboardPreview Component Cleanup - Title and Subtitle Removal ✅
 
 **✅ COMPONENT SIMPLIFICATION COMPLETED**: Successfully removed title and subtitle elements from DashboardPreview.tsx component as requested

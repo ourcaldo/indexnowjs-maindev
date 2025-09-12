@@ -174,47 +174,6 @@ export default function Register() {
       flexDirection: isMobile ? 'column' : 'row',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
-      {/* Mobile: Show dashboard preview first */}
-      {isMobile && (
-        <div style={{
-          backgroundColor: '#1a1a1a',
-          padding: '80px 20px 40px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          color: '#ffffff',
-          position: 'relative'
-        }}>
-          {/* Mobile Logo on left side */}
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            left: '20px',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            <span style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#ffffff'
-            }}>
-              IndexNow
-            </span>
-          </div>
-          
-          <div style={{ 
-            overflow: 'hidden', 
-            width: '100%',
-            position: 'relative'
-          }}>
-            <DashboardPreview 
-              title="Join thousands of developers getting results."
-              subtitle="Create your account and start indexing your URLs instantly with powerful analytics."
-              variant="register"
-            />
-          </div>
-        </div>
-      )}
 
       {/* Left Side - Register Form */}
       <div style={{
@@ -227,27 +186,25 @@ export default function Register() {
         alignItems: isMobile ? 'center' : 'flex-start',
         position: 'relative'
       }}>
-        {/* Desktop Logo on left side */}
-        {!isMobile && (
+        {/* Logo for both mobile and desktop */}
+        {logoUrl && (
           <div style={{
             position: 'absolute',
-            top: '32px',
-            left: '60px',
+            top: isMobile ? '20px' : '32px',
+            left: isMobile ? '20px' : '60px',
             display: 'flex',
             alignItems: 'center',
             zIndex: 10
           }}>
-            {logoUrl && (
-              <img 
-                src={logoUrl} 
-                alt="Logo"
-                style={{
-                  height: '48px',
-                  width: 'auto',
-                  maxWidth: '280px'
-                }}
-              />
-            )}
+            <img 
+              src={logoUrl} 
+              alt="Logo"
+              style={{
+                height: isMobile ? '36px' : '48px',
+                width: 'auto',
+                maxWidth: isMobile ? '180px' : '280px'
+              }}
+            />
           </div>
         )}
 
@@ -615,11 +572,7 @@ export default function Register() {
             width: '100%',
             position: 'relative'
           }}>
-            <DashboardPreview 
-              title="Join thousands of developers getting results."
-              subtitle="Create your account and start indexing your URLs instantly with powerful analytics."
-              variant="register"
-            />
+            <DashboardPreview />
           </div>
         </div>
       )}

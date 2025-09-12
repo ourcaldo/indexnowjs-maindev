@@ -75,49 +75,6 @@ export default function Login() {
       flexDirection: isMobile ? 'column' : 'row',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
-      {/* Mobile: Show dashboard preview first */}
-      {isMobile && (
-        <div style={{
-          backgroundColor: '#1a1a1a',
-          padding: '80px 20px 40px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          color: '#ffffff',
-          position: 'relative'
-        }}>
-          {/* Mobile Logo on left side */}
-          {logoUrl && (
-            <div style={{
-              position: 'absolute',
-              top: '20px',
-              left: '20px',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              <img 
-                src={logoUrl} 
-                alt="Logo"
-                style={{
-                  height: '36px',
-                  width: 'auto',
-                  maxWidth: '180px'
-                }}
-              />
-            </div>
-          )}
-          
-          <div style={{ 
-            overflow: 'hidden', 
-            width: '100%',
-            position: 'relative'
-          }}>
-            <DashboardPreview 
-              variant="login"
-            />
-          </div>
-        </div>
-      )}
 
       {/* Left Side - Login Form */}
       <div style={{
@@ -130,12 +87,12 @@ export default function Login() {
         alignItems: isMobile ? 'center' : 'flex-start',
         position: 'relative'
       }}>
-        {/* Desktop Logo on left side */}
-        {!isMobile && logoUrl && (
+        {/* Logo for both mobile and desktop */}
+        {logoUrl && (
           <div style={{
             position: 'absolute',
-            top: '40px',
-            left: '60px',
+            top: isMobile ? '20px' : '40px',
+            left: isMobile ? '20px' : '60px',
             display: 'flex',
             alignItems: 'center'
           }}>
@@ -143,9 +100,9 @@ export default function Login() {
               src={logoUrl} 
               alt="Logo"
               style={{
-                height: '72px',
+                height: isMobile ? '36px' : '72px',
                 width: 'auto',
-                maxWidth: '360px'
+                maxWidth: isMobile ? '180px' : '360px'
               }}
             />
           </div>
@@ -533,9 +490,7 @@ export default function Login() {
             height: '100%',
             position: 'relative'
           }}>
-            <DashboardPreview 
-              variant="login"
-            />
+            <DashboardPreview />
           </div>
         </div>
       )}
