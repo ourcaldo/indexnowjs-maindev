@@ -701,7 +701,7 @@ export default function Dashboard() {
                   
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-muted/50 border-border text-foreground"
+                    className="w-full justify-start h-11 hover:bg-secondary/80 border-border text-foreground transition-colors duration-200"
                     onClick={() => router.push('/dashboard/indexnow/overview')}
                     data-testid="action-view-keywords"
                   >
@@ -714,7 +714,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-muted/50 border-border text-foreground"
+                    className="w-full justify-start h-11 hover:bg-secondary/80 border-border text-foreground transition-colors duration-200"
                     onClick={() => router.push('/dashboard/indexnow/rank-history')}
                     data-testid="action-rank-history"
                   >
@@ -727,7 +727,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-muted/50 border-border text-foreground"
+                    className="w-full justify-start h-11 hover:bg-secondary/80 border-border text-foreground transition-colors duration-200"
                     onClick={() => router.push('/dashboard/settings/plans-billing')}
                     data-testid="action-manage-billing"
                   >
