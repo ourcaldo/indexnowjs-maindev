@@ -9,142 +9,39 @@ interface DashboardPreviewProps {
   variant?: 'login' | 'register' | 'forgot'
 }
 
-const slides = [
-  {
-    title: "Real-time Analytics Dashboard",
-    description: "Monitor your indexing performance with live charts and metrics",
-    stats: [
-      { value: "189K", label: "URLs Indexed", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "97.8%", label: "Success Rate", color: "#0284c7", bg: "#f0f9ff", border: "#e0f2fe" },
-      { value: "2.4s", label: "Avg Response", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" }
-    ],
-    chartData: [
-      { height: '45%', value: '1.2K' },
-      { height: '60%', value: '1.8K' },
-      { height: '35%', value: '890' },
-      { height: '75%', value: '2.1K' },
-      { height: '55%', value: '1.5K' },
-      { height: '85%', value: '2.4K' },
-      { height: '95%', value: '2.8K' }
-    ],
-    bottomMetrics: [
-      { value: "12", label: "Active Accounts", color: "#ea580c", bg: "#fff7ed", border: "#fed7aa" },
-      { value: "47", label: "Scheduled Jobs", color: "#4b5563", bg: "#f3f4f6", border: "#e5e7eb" }
-    ],
-    status: { color: "#22c55e", label: "LIVE" }
-  },
-  {
-    title: "Multi-Account Management",
-    description: "Load balance across multiple Google service accounts efficiently",
-    stats: [
-      { value: "8", label: "Service Accounts", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "99.9%", label: "Uptime", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" },
-      { value: "45K", label: "Daily Quota", color: "#7c3aed", bg: "#faf5ff", border: "#e9d5ff" }
-    ],
-    chartData: [
-      { height: '85%', value: '5.2K' },
-      { height: '70%', value: '4.1K' },
-      { height: '90%', value: '5.8K' },
-      { height: '65%', value: '3.9K' },
-      { height: '95%', value: '6.1K' },
-      { height: '75%', value: '4.5K' },
-      { height: '80%', value: '4.8K' }
-    ],
-    bottomMetrics: [
-      { value: "8", label: "Connected APIs", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" },
-      { value: "156", label: "Requests/min", color: "#0284c7", bg: "#f0f9ff", border: "#e0f2fe" }
-    ],
-    status: { color: "#059669", label: "ACTIVE" }
-  },
-  {
-    title: "Advanced Scheduling System",
-    description: "Set up automated indexing with flexible scheduling options",
-    stats: [
-      { value: "24", label: "Active Jobs", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "5.2K", label: "Scheduled Today", color: "#f59e0b", bg: "#fffbeb", border: "#fde68a" },
-      { value: "98.5%", label: "Completion Rate", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" }
-    ],
-    chartData: [
-      { height: '60%', value: '2.8K' },
-      { height: '45%', value: '2.1K' },
-      { height: '75%', value: '3.5K' },
-      { height: '55%', value: '2.6K' },
-      { height: '80%', value: '3.8K' },
-      { height: '65%', value: '3.1K' },
-      { height: '70%', value: '3.3K' }
-    ],
-    bottomMetrics: [
-      { value: "6", label: "Job Types", color: "#7c3aed", bg: "#faf5ff", border: "#e9d5ff" },
-      { value: "2.1K", label: "Queue Size", color: "#f59e0b", bg: "#fffbeb", border: "#fde68a" }
-    ],
-    status: { color: "#f59e0b", label: "SCHEDULED" }
-  },
-  {
-    title: "Performance Insights",
-    description: "Deep analytics and insights to optimize your indexing strategy",
-    stats: [
-      { value: "2.1M", label: "Total Processed", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "94.2%", label: "Index Success", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" },
-      { value: "1.8s", label: "Avg Latency", color: "#0284c7", bg: "#f0f9ff", border: "#e0f2fe" }
-    ],
-    chartData: [
-      { height: '70%', value: '14K' },
-      { height: '85%', value: '17K' },
-      { height: '65%', value: '13K' },
-      { height: '90%', value: '18K' },
-      { height: '75%', value: '15K' },
-      { height: '95%', value: '19K' },
-      { height: '80%', value: '16K' }
-    ],
-    bottomMetrics: [
-      { value: "15", label: "Error Types", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
-      { value: "3.2K", label: "Retries/day", color: "#f59e0b", bg: "#fffbeb", border: "#fde68a" }
-    ],
-    status: { color: "#0284c7", label: "ANALYZING" }
-  },
-  {
-    title: "API Integration Hub",
-    description: "Connect with Google Search Console and other SEO tools seamlessly",
-    stats: [
-      { value: "5", label: "Integrations", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "99.8%", label: "API Reliability", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" },
-      { value: "127", label: "Endpoints", color: "#7c3aed", bg: "#faf5ff", border: "#e9d5ff" }
-    ],
-    chartData: [
-      { height: '55%', value: '8.2K' },
-      { height: '75%', value: '11K' },
-      { height: '85%', value: '12K' },
-      { height: '65%', value: '9.5K' },
-      { height: '90%', value: '13K' },
-      { height: '70%', value: '10K' },
-      { height: '80%', value: '12K' }
-    ],
-    bottomMetrics: [
-      { value: "98", label: "Webhooks", color: "#ec4899", bg: "#fdf2f8", border: "#fce7f3" },
-      { value: "45", label: "Rate Limits", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb" }
-    ],
-    status: { color: "#7c3aed", label: "CONNECTED" }
-  }
-]
+// Single dashboard data for IndexNow Rank Tracker
+const dashboardData = {
+  title: "IndexNow Rank Tracker Dashboard",
+  description: "Track your keyword rankings and SEO performance in real-time",
+  topMetrics: [
+    { value: "8,746", label: "Tracked Keywords", color: "#6366f1", bg: "#f0f0ff" },
+    { value: "12,440", label: "Avg Position", color: "#10b981", bg: "#f0fff4" },
+    { value: "96", label: "Domains", color: "#f59e0b", bg: "#fffbeb" }
+  ],
+  chartData: [
+    { height: '65%', day: 'Jan' },
+    { height: '72%', day: 'Feb' },
+    { height: '58%', day: 'Mar' },
+    { height: '81%', day: 'Apr' },
+    { height: '69%', day: 'May' },
+    { height: '85%', day: 'Jun' },
+    { height: '77%', day: 'Jul' }
+  ],
+  keywords: [
+    { keyword: "seo tools online", position: 3, trend: "up", change: "+2" },
+    { keyword: "rank tracker free", position: 7, trend: "up", change: "+1" },
+    { keyword: "keyword monitoring", position: 12, trend: "down", change: "-3" },
+    { keyword: "serp analysis", position: 5, trend: "up", change: "+4" }
+  ]
+}
 
 export default function DashboardPreview({ title, subtitle, variant = 'login' }: DashboardPreviewProps) {
-  const [currentSlide, setCurrentSlide] = useState(0)
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  useEffect(() => {
-    if (!mounted) return
-    
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 4000) // 4 seconds per slide
-
-    return () => clearInterval(interval)
-  }, [mounted])
 
   useEffect(() => {
     if (!mounted || typeof window === 'undefined') return
@@ -158,8 +55,6 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
     
     return () => window.removeEventListener('resize', checkIfMobile)
   }, [mounted])
-
-  const currentData = slides[currentSlide]
 
   const getVariantStyles = () => {
     switch (variant) {
@@ -199,7 +94,8 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
         fontSize: isMobile ? '28px' : '36px',
         fontWeight: '700',
         lineHeight: '1.2',
-        marginBottom: '24px'
+        marginBottom: '24px',
+        color: '#ffffff'
       }}>
         {styles.title}
       </h2>
@@ -212,46 +108,88 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
         {styles.subtitle}
       </p>
 
-      {/* Dashboard Mock */}
+      {/* Dark Dashboard Interface */}
       <div style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: '#1f2937',
         borderRadius: '16px',
-        padding: isMobile ? '20px' : '32px',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
+        padding: isMobile ? '20px' : '24px',
+        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
         position: 'relative',
-        opacity: styles.opacity,
         width: '100%',
-        maxWidth: isMobile ? '350px' : '500px'
+        maxWidth: isMobile ? '350px' : '500px',
+        border: '1px solid #374151'
       }}>
-        {/* Header Stats */}
+        {/* Header with Navigation */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '24px',
+          paddingBottom: '16px',
+          borderBottom: '1px solid #374151'
+        }}>
+          <h3 style={{
+            fontSize: isMobile ? '16px' : '18px',
+            fontWeight: '600',
+            color: '#ffffff',
+            margin: 0
+          }}>
+            My dashboard
+          </h3>
+          <div style={{
+            fontSize: '12px',
+            color: '#10b981',
+            fontWeight: '500',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            <div style={{
+              width: '6px',
+              height: '6px',
+              backgroundColor: '#10b981',
+              borderRadius: '50%'
+            }} />
+            LIVE
+          </div>
+        </div>
+
+        {/* Top Metrics Cards */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: isMobile ? 'repeat(1, 1fr)' : 'repeat(3, 1fr)',
           gap: isMobile ? '12px' : '16px',
-          marginBottom: isMobile ? '24px' : '32px'
+          marginBottom: '24px'
         }}>
-          {currentData.stats.map((stat, idx) => (
+          {dashboardData.topMetrics.map((metric, idx) => (
             <div key={idx} style={{
-              backgroundColor: stat.bg,
-              borderRadius: '12px',
-              padding: isMobile ? '16px' : '20px',
-              textAlign: 'center',
-              border: stat.border ? `1px solid ${stat.border}` : 'none'
+              backgroundColor: '#374151',
+              borderRadius: '8px',
+              padding: isMobile ? '16px' : '18px',
+              border: '1px solid #4b5563'
             }}>
               <div style={{
-                fontSize: isMobile ? '24px' : '28px',
-                fontWeight: '800',
-                color: stat.color,
+                fontSize: isMobile ? '20px' : '24px',
+                fontWeight: '700',
+                color: '#ffffff',
                 marginBottom: '4px'
               }}>
-                {stat.value}
+                {metric.value}
               </div>
               <div style={{
                 fontSize: isMobile ? '11px' : '12px',
-                color: stat.color === '#1a1a1a' ? '#6b7280' : stat.color,
+                color: '#9ca3af',
                 fontWeight: '500'
               }}>
-                {stat.label}
+                {metric.label}
+              </div>
+              <div style={{
+                marginTop: '8px',
+                fontSize: '10px',
+                color: metric.color,
+                fontWeight: '500'
+              }}>
+                {idx === 0 ? '+2.4%' : idx === 1 ? '+9.2%' : '+5.8%'}
               </div>
             </div>
           ))}
@@ -259,31 +197,32 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
 
         {/* Chart Area */}
         <div style={{
-          backgroundColor: '#fafafa',
-          borderRadius: '12px',
-          padding: isMobile ? '16px' : '24px',
-          marginBottom: isMobile ? '16px' : '24px'
+          backgroundColor: '#374151',
+          borderRadius: '8px',
+          padding: isMobile ? '16px' : '20px',
+          marginBottom: '20px',
+          border: '1px solid #4b5563'
         }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '20px'
+            marginBottom: '16px'
           }}>
-            <h3 style={{
-              fontSize: isMobile ? '14px' : '16px',
+            <h4 style={{
+              fontSize: isMobile ? '14px' : '15px',
               fontWeight: '600',
-              color: '#1a1a1a',
+              color: '#ffffff',
               margin: 0
             }}>
-              {currentData.title}
-            </h3>
+              Ranking Trends
+            </h4>
             <div style={{
               fontSize: '12px',
-              color: currentData.status.color,
+              color: '#10b981',
               fontWeight: '500'
             }}>
-              ↗
+              ↗ +12%
             </div>
           </div>
           
@@ -292,24 +231,16 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
             display: 'flex',
             alignItems: 'end',
             justifyContent: 'space-between',
-            height: isMobile ? '60px' : '80px',
-            gap: isMobile ? '6px' : '8px'
+            height: isMobile ? '50px' : '60px',
+            gap: isMobile ? '4px' : '6px'
           }}>
-            {currentData.chartData.map((bar, idx) => (
+            {dashboardData.chartData.map((bar, idx) => (
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                 <div style={{
-                  fontSize: '9px',
-                  color: '#6b7280',
-                  marginBottom: '4px',
-                  fontWeight: '500'
-                }}>
-                  {bar.value}
-                </div>
-                <div style={{
-                  backgroundColor: idx === 6 ? currentData.status.color : '#d1d5db',
+                  backgroundColor: idx === 6 ? '#10b981' : '#6b7280',
                   height: bar.height,
                   width: '100%',
-                  borderRadius: '3px',
+                  borderRadius: '2px',
                   transition: 'all 0.3s ease'
                 }} />
               </div>
@@ -319,92 +250,76 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            marginTop: '12px',
-            fontSize: '10px',
-            color: '#9ca3af',
+            marginTop: '8px',
+            fontSize: '9px',
+            color: '#6b7280',
             fontWeight: '500'
           }}>
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'].map((day, idx) => (
+            {dashboardData.chartData.map((item, idx) => (
               <span key={idx} style={{ 
                 flex: 1, 
-                textAlign: 'center',
-                color: idx === 6 ? currentData.status.color : '#9ca3af'
+                textAlign: 'center'
               }}>
-                {day}
+                {item.day}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Bottom Metrics */}
+        {/* Keywords List */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? 'repeat(1, 1fr)' : 'repeat(2, 1fr)',
-          gap: isMobile ? '12px' : '16px'
+          backgroundColor: '#374151',
+          borderRadius: '8px',
+          padding: isMobile ? '16px' : '20px',
+          border: '1px solid #4b5563'
         }}>
-          {currentData.bottomMetrics.map((metric, idx) => (
-            <div key={idx} style={{
-              backgroundColor: metric.bg,
-              borderRadius: '10px',
-              padding: isMobile ? '12px' : '16px',
-              border: `1px solid ${metric.border}`
-            }}>
-              <div style={{
+          <h4 style={{
+            fontSize: isMobile ? '14px' : '15px',
+            fontWeight: '600',
+            color: '#ffffff',
+            margin: '0 0 16px 0'
+          }}>
+            Top Keywords
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {dashboardData.keywords.map((keyword, idx) => (
+              <div key={idx} style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                padding: '8px 0',
+                borderBottom: idx < dashboardData.keywords.length - 1 ? '1px solid #4b5563' : 'none'
               }}>
-                <div>
-                  <div style={{
-                    fontSize: isMobile ? '18px' : '20px',
-                    fontWeight: '700',
-                    color: metric.color,
-                    marginBottom: '2px'
-                  }}>
-                    {metric.value}
-                  </div>
-                  <div style={{
-                    fontSize: isMobile ? '10px' : '11px',
-                    color: metric.color,
-                    fontWeight: '500'
-                  }}>
-                    {metric.label}
-                  </div>
+                <div style={{
+                  fontSize: isMobile ? '12px' : '13px',
+                  color: '#ffffff',
+                  fontWeight: '500',
+                  flex: 1
+                }}>
+                  {keyword.keyword}
                 </div>
                 <div style={{
-                  width: '8px',
-                  height: '8px',
-                  backgroundColor: metric.color,
-                  borderRadius: '50%'
-                }} />
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{
+                    fontSize: '12px',
+                    color: '#9ca3af'
+                  }}>
+                    #{keyword.position}
+                  </span>
+                  <span style={{
+                    fontSize: '11px',
+                    color: keyword.trend === 'up' ? '#10b981' : '#ef4444',
+                    fontWeight: '600'
+                  }}>
+                    {keyword.change}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        
-
-        {/* Slide indicators */}
-        <div style={{
-          position: 'absolute',
-          bottom: '16px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '8px'
-        }}>
-          {slides.map((_, idx) => (
-            <div
-              key={idx}
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: idx === currentSlide ? currentData.status.color : '#d1d5db',
-                transition: 'all 0.3s ease'
-              }}
-            />
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
