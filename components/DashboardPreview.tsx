@@ -4,8 +4,8 @@
 import { useState, useEffect } from 'react'
 
 interface DashboardPreviewProps {
-  title: string
-  subtitle: string
+  title?: string
+  subtitle?: string
   variant?: 'login' | 'register' | 'forgot'
 }
 

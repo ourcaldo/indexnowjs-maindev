@@ -113,8 +113,6 @@ export default function Login() {
             position: 'relative'
           }}>
             <DashboardPreview 
-              title="Real-time indexing analytics at your fingertips."
-              subtitle="Monitor performance, track success rates, and manage your URL indexing operations."
               variant="login"
             />
           </div>
@@ -536,8 +534,6 @@ export default function Login() {
             position: 'relative'
           }}>
             <DashboardPreview 
-              title="Real-time indexing analytics at your fingertips."
-              subtitle="Monitor performance, track success rates, and manage your URL indexing operations."
               variant="login"
             />
           </div>
