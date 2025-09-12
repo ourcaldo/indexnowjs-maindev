@@ -60,52 +60,14 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
     return () => window.removeEventListener('resize', checkIfMobile)
   }, [mounted])
 
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'register':
-        return {
-          title: title || "Professional Rank Tracking Made Simple",
-          subtitle: subtitle || "Monitor your keyword rankings across search engines with comprehensive analytics and insights.",
-          opacity: 1
-        }
-      case 'forgot':
-        return {
-          title: title || "Return to Your SEO Dashboard",
-          subtitle: subtitle || "Your keyword rankings and SEO performance data are waiting for you.",
-          opacity: 0.8
-        }
-      default:
-        return {
-          title: title || "IndexNow Rank Tracker Dashboard",
-          subtitle: subtitle || "Professional keyword ranking monitoring with real-time analytics and comprehensive SEO insights.",
-          opacity: 1
-        }
-    }
+  const styles = {
+    title: title || "IndexNow Rank Tracker Dashboard",
+    subtitle: subtitle || "Professional keyword ranking monitoring with real-time analytics and comprehensive SEO insights.",
+    opacity: 1
   }
 
-  const styles = getVariantStyles()
-
   if (!mounted) {
-    return (
-      <div style={{ 
-        maxWidth: isMobile ? '100%' : '500px', 
-        width: '100%',
-        height: '400px',
-        backgroundColor: '#2a2a2a',
-        borderRadius: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{
-          fontSize: '16px',
-          color: '#ffffff',
-          opacity: 0.7
-        }}>
-          Loading dashboard...
-        </div>
-      </div>
-    )
+    return null
   }
 
   return (
