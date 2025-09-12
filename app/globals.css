@@ -36,23 +36,23 @@
   --button-tertiary: #22333b;
   --button-dark: #1E1E1E;
   
-  /* CSS Variables using new palette */
-  --background: var(--pure-white);
-  --foreground: var(--graphite);
-  --card: var(--pure-white);
-  --card-foreground: var(--graphite);
-  --popover: var(--pure-white);
-  --popover-foreground: var(--graphite);
+  /* CSS Variables using new palette - HSL format for Tailwind opacity support */
+  --background: 0 0% 100%; /* #FFFFFF */
+  --foreground: 0 0% 10%; /* #1A1A1A */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 0 0% 10%; /* #1A1A1A */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 0 0% 10%; /* #1A1A1A */
   
-  /* Primary elements using button colors */
-  --primary: var(--button-primary);
-  --primary-foreground: var(--pure-white);
-  --secondary: var(--light-gray);
-  --secondary-foreground: var(--charcoal);
-  --muted: var(--light-gray);
-  --muted-foreground: var(--slate-gray);
-  --accent: var(--soft-blue);
-  --accent-foreground: var(--pure-white);
+  /* Primary elements using button colors - HSL format */
+  --primary: 215 28% 17%; /* #1C2331 */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --secondary: 220 14% 96%; /* #F7F9FC */
+  --secondary-foreground: 214 20% 18%; /* #2C2C2E */
+  --muted: 220 14% 96%; /* #F7F9FC */
+  --muted-foreground: 210 11% 48%; /* #6C757D */
+  --accent: 218 49% 56%; /* #5B7BBF */
+  --accent-foreground: 0 0% 100%; /* #FFFFFF */
   
   /* Semantic colors */
   --success: 142 70% 49%; /* #4BB543 converted to HSL */
@@ -64,12 +64,12 @@
   --info: 218 49% 56%; /* #5B7BBF converted to HSL */
   --info-foreground: 0 0% 100%;
   
-  /* UI Elements */
-  --border: var(--cool-gray);
-  --input: var(--cool-gray);
-  --ring: var(--soft-blue);
-  --destructive: var(--rose-red);
-  --destructive-foreground: var(--pure-white);
+  /* UI Elements - HSL format */
+  --border: 210 20% 90%; /* #E0E6ED */
+  --input: 210 20% 90%; /* #E0E6ED */
+  --ring: 218 49% 56%; /* #5B7BBF */
+  --destructive: 354 70% 54%; /* #E63946 */
+  --destructive-foreground: 0 0% 100%; /* #FFFFFF */
   --radius: 0.5rem;
 }
 
