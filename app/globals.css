@@ -167,8 +167,7 @@
   }
   
   .btn-hover:hover {
-    background-color: #FEF3C7 !important;
-    color: hsl(218 49% 56%) !important; /* #3D8BFF */
+    background-color: rgba(0, 0, 0, 0.04) !important;
   }
 
   /* Radial gradient utility */
