@@ -531,9 +531,8 @@ export default function Dashboard() {
                 <CardHeader className="pb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                     <div>
-                      <CardTitle className="flex items-center space-x-2">
-                        <Search className="w-5 h-5" />
-                        <span>Top Keywords</span>
+                      <CardTitle>
+                        Top Keywords
                       </CardTitle>
                       <p className="text-sm text-muted-foreground mt-1">
                         Latest performance • {selectedDomain?.display_name || selectedDomain?.domain_name}
@@ -590,30 +589,30 @@ export default function Dashboard() {
                                     {keyword.keyword}
                                   </div>
                                   <div className="flex items-center space-x-1 shrink-0">
-                                    <Badge variant={currentPos && currentPos <= 10 ? "default" : "outline"} className="text-xs">
+                                    <span className="text-xs font-medium text-foreground">
                                       {currentPos ? `#${currentPos}` : 'NR'}
-                                    </Badge>
+                                    </span>
                                     <PositionChange change={positionChange} className="text-xs" />
                                   </div>
                                 </div>
                                 <div className="flex items-center justify-between text-xs">
                                   <div className="flex items-center space-x-2">
-                                    <Badge variant="secondary" className="text-xs">
+                                    <span className="text-xs text-muted-foreground">
                                       {keyword.country?.iso2_code?.toUpperCase() || 'N/A'}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs capitalize">
+                                    </span>
+                                    <span className="text-xs text-muted-foreground capitalize">
                                       {keyword.device_type}
-                                    </Badge>
+                                    </span>
                                   </div>
                                   {keyword.tags && keyword.tags.length > 0 && (
                                     <div className="flex items-center space-x-1">
-                                      <Badge variant="default" className="text-xs">
+                                      <span className="text-xs text-muted-foreground">
                                         {keyword.tags[0]}
-                                      </Badge>
+                                      </span>
                                       {keyword.tags.length > 1 && (
-                                        <Badge variant="default" className="text-xs">
+                                        <span className="text-xs text-muted-foreground">
                                           +{keyword.tags.length - 1}
-                                        </Badge>
+                                        </span>
                                       )}
                                     </div>
                                   )}
@@ -629,41 +628,41 @@ export default function Dashboard() {
                                 
                                 {/* Position */}
                                 <div className="col-span-2 flex items-center justify-center space-x-1">
-                                  <Badge variant={currentPos && currentPos <= 10 ? "default" : "outline"} className="text-xs">
+                                  <span className="text-sm font-medium text-foreground">
                                     {currentPos ? `#${currentPos}` : 'NR'}
-                                  </Badge>
+                                  </span>
                                   <PositionChange change={positionChange} className="text-xs" />
                                 </div>
                                 
                                 {/* Country */}
                                 <div className="col-span-2 flex justify-center">
-                                  <Badge variant="secondary" className="text-xs">
+                                  <span className="text-sm text-muted-foreground">
                                     {keyword.country?.iso2_code?.toUpperCase() || 'N/A'}
-                                  </Badge>
+                                  </span>
                                 </div>
                                 
                                 {/* Device */}
                                 <div className="col-span-2 flex justify-center">
-                                  <Badge variant="outline" className="text-xs capitalize">
+                                  <span className="text-sm text-muted-foreground capitalize">
                                     {keyword.device_type}
-                                  </Badge>
+                                  </span>
                                 </div>
                                 
                                 {/* Tags */}
                                 <div className="col-span-2 flex justify-center">
                                   {keyword.tags && keyword.tags.length > 0 ? (
                                     <div className="flex items-center space-x-1">
-                                      <Badge variant="default" className="text-xs">
+                                      <span className="text-sm text-muted-foreground">
                                         {keyword.tags[0]}
-                                      </Badge>
+                                      </span>
                                       {keyword.tags.length > 1 && (
-                                        <Badge variant="default" className="text-xs">
+                                        <span className="text-sm text-muted-foreground">
                                           +{keyword.tags.length - 1}
-                                        </Badge>
+                                        </span>
                                       )}
                                     </div>
                                   ) : (
-                                    <span className="text-xs text-muted-foreground">-</span>
+                                    <span className="text-sm text-muted-foreground">-</span>
                                   )}
                                 </div>
                               </div>
