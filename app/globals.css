@@ -167,7 +167,8 @@
   }
   
   .btn-hover:hover {
-    background-color: rgba(0, 0, 0, 0.04) !important;
+    background-color: #100E09 !important;
+    color: white !important;
   }
 
   /* Radial gradient utility */
