@@ -349,7 +349,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               <Button 
                 onClick={() => window.location.reload()}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 text-white btn-hover"
                 data-testid="button-retry-dashboard"
               >
                 <Settings className="w-4 h-4 mr-2" />
@@ -581,7 +581,7 @@ export default function Dashboard() {
                           const positionChange = calculatePositionChange(keyword)
                           
                           return (
-                            <div key={keyword.id || index} className="md:grid md:grid-cols-12 gap-3 p-4 md:px-6 md:py-3 hover:bg-muted/10 transition-colors">
+                            <div key={keyword.id || index} className="md:grid md:grid-cols-12 gap-3 p-4 md:px-6 md:py-3 btn-hover">
                               {/* Mobile Layout */}
                               <div className="md:hidden space-y-2">
                                 <div className="flex items-center justify-between">
@@ -775,7 +775,7 @@ export default function Dashboard() {
                   </p>
                   <Button 
                     variant="outline"
-                    className="w-full border-amber-300 text-amber-800 hover:bg-amber-100 hover:text-amber-900 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20 dark:hover:text-amber-100"
+                    className="w-full border-amber-300 text-amber-800 dark:border-amber-700 dark:text-amber-200 btn-hover"
                     onClick={() => router.push('/dashboard/tools/fastindexing')}
                     data-testid="action-fast-indexing"
                   >
