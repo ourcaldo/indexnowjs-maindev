@@ -213,7 +213,7 @@ export default function Register() {
           maxWidth: '400px', 
           width: '100%',
           textAlign: isMobile ? 'center' : 'left',
-          marginTop: isMobile ? '0' : '80px'
+          marginTop: isMobile ? '90px' : '80px'
         }}>
           <h1 style={{
             fontSize: isMobile ? '24px' : '32px',

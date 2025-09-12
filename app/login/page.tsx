@@ -112,7 +112,8 @@ export default function Login() {
         <div style={{ 
           maxWidth: '400px', 
           width: '100%',
-          textAlign: isMobile ? 'center' : 'left'
+          textAlign: isMobile ? 'center' : 'left',
+          marginTop: isMobile ? '90px' : '0'
         }}>
           <h1 style={{
             fontSize: isMobile ? '24px' : '32px',
