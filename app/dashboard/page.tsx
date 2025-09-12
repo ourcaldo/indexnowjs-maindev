@@ -701,39 +701,39 @@ export default function Dashboard() {
                   
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-secondary/80 border-border text-foreground transition-colors duration-200"
+                    className="w-full justify-start h-11 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => router.push('/dashboard/indexnow/overview')}
                     data-testid="action-view-keywords"
                   >
-                    <Search className="w-4 h-4 mr-3 text-foreground" />
+                    <Search className="w-4 h-4 mr-3" />
                     <div className="text-left">
-                      <div className="font-medium text-foreground">View All Keywords</div>
+                      <div className="font-medium">View All Keywords</div>
                       <div className="text-xs text-muted-foreground">{domainKeywords.length} tracked</div>
                     </div>
                   </Button>
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-secondary/80 border-border text-foreground transition-colors duration-200"
+                    className="w-full justify-start h-11 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => router.push('/dashboard/indexnow/rank-history')}
                     data-testid="action-rank-history"
                   >
-                    <BarChart3 className="w-4 h-4 mr-3 text-foreground" />
+                    <BarChart3 className="w-4 h-4 mr-3" />
                     <div className="text-left">
-                      <div className="font-medium text-foreground">Rank History</div>
+                      <div className="font-medium">Rank History</div>
                       <div className="text-xs text-muted-foreground">Historical data</div>
                     </div>
                   </Button>
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-secondary/80 border-border text-foreground transition-colors duration-200"
+                    className="w-full justify-start h-11 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => router.push('/dashboard/settings/plans-billing')}
                     data-testid="action-manage-billing"
                   >
-                    <Settings className="w-4 h-4 mr-3 text-foreground" />
+                    <Settings className="w-4 h-4 mr-3" />
                     <div className="text-left">
-                      <div className="font-medium text-foreground">Manage Billing</div>
+                      <div className="font-medium">Manage Billing</div>
                       <div className="text-xs text-muted-foreground">Plans & usage</div>
                     </div>
                   </Button>

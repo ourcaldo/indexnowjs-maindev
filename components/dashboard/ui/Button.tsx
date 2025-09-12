@@ -1,4 +1,3 @@
-
 import React from 'react'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,11 +18,11 @@ export const Button = ({
 }: ButtonProps) => {
   const baseStyles = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none'
   
-  const variants: { [key: string]: string } = {
-    default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border',
-    outline: 'border border-input bg-background hover:bg-secondary/80 hover:text-accent-foreground',
-    ghost: 'hover:bg-accent hover:text-accent-foreground'
+  const variants: { [key: string]: any } = {
+    default: { backgroundColor: '#1C2331', color: '#FFFFFF' },
+    secondary: { backgroundColor: '#F7F9FC', color: '#1A1A1A', border: '1px solid #E0E6ED' },
+    outline: { backgroundColor: 'transparent', color: '#6C757D', border: '1px solid #E0E6ED' },
+    ghost: { backgroundColor: 'transparent', color: '#6C757D' }
   }
   
   const sizes: { [key: string]: string } = {
@@ -35,7 +34,8 @@ export const Button = ({
   
   return (
     <button 
-      className={`${baseStyles} ${sizes[size]} ${variants[variant]} ${className}`}
+      className={`${baseStyles} ${sizes[size]} ${className}`}
+      style={variants[variant]}
       onClick={onClick}
       disabled={disabled}
       {...props}
