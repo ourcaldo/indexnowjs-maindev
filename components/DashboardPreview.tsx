@@ -1,7 +1,6 @@
-
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface DashboardPreviewProps {
   title: string
@@ -9,316 +8,408 @@ interface DashboardPreviewProps {
   variant?: 'login' | 'register' | 'forgot'
 }
 
-// Single dashboard data for IndexNow Rank Tracker
-const dashboardData = {
-  title: "IndexNow Rank Tracker Dashboard",
-  description: "Track your keyword rankings and SEO performance in real-time",
-  topMetrics: [
-    { value: "8,746", label: "Tracked Keywords", color: "#6366f1", bg: "#f0f0ff" },
-    { value: "12,440", label: "Avg Position", color: "#10b981", bg: "#f0fff4" },
-    { value: "96", label: "Domains", color: "#f59e0b", bg: "#fffbeb" }
-  ],
-  chartData: [
-    { height: '65%', day: 'Jan' },
-    { height: '72%', day: 'Feb' },
-    { height: '58%', day: 'Mar' },
-    { height: '81%', day: 'Apr' },
-    { height: '69%', day: 'May' },
-    { height: '85%', day: 'Jun' },
-    { height: '77%', day: 'Jul' }
-  ],
-  keywords: [
-    { keyword: "seo tools online", position: 3, trend: "up", change: "+2" },
-    { keyword: "rank tracker free", position: 7, trend: "up", change: "+1" },
-    { keyword: "keyword monitoring", position: 12, trend: "down", change: "-3" },
-    { keyword: "serp analysis", position: 5, trend: "up", change: "+4" }
-  ]
-}
-
 export default function DashboardPreview({ title, subtitle, variant = 'login' }: DashboardPreviewProps) {
   const [mounted, setMounted] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    if (!mounted || typeof window === 'undefined') return
-    
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    
-    checkIfMobile()
-    window.addEventListener('resize', checkIfMobile)
-    
-    return () => window.removeEventListener('resize', checkIfMobile)
-  }, [mounted])
-
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'register':
-        return {
-          title: title || "Join thousands of developers getting results.",
-          subtitle: subtitle || "Create your account and start indexing your URLs instantly with powerful analytics.",
-          opacity: 1
-        }
-      case 'forgot':
-        return {
-          title: title || "Get back to your indexing dashboard.",
-          subtitle: subtitle || "Your analytics and performance data are waiting for you to return.",
-          opacity: 0.8
-        }
-      default:
-        return {
-          title: title || "Real-time indexing analytics at your fingertips.",
-          subtitle: subtitle || "Monitor performance, track success rates, and manage your URL indexing operations.",
-          opacity: 1
-        }
-    }
+  if (!mounted) {
+    return (
+      <div className="w-full h-full bg-white rounded-lg flex items-center justify-center">
+        <div className="animate-pulse text-gray-400">Loading dashboard...</div>
+      </div>
+    )
   }
 
-  const styles = getVariantStyles()
-
   return (
-    <div style={{ 
-      maxWidth: isMobile ? '100%' : '500px', 
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: isMobile ? 'center' : 'flex-start',
-      textAlign: isMobile ? 'center' : 'left'
-    }}>
-      <h2 style={{
-        fontSize: isMobile ? '28px' : '36px',
-        fontWeight: '700',
-        lineHeight: '1.2',
-        marginBottom: '24px',
-        color: '#ffffff'
-      }}>
-        {styles.title}
-      </h2>
-      <p style={{
-        fontSize: isMobile ? '16px' : '18px',
-        color: '#d1d5db',
-        marginBottom: '40px',
-        lineHeight: '1.6'
-      }}>
-        {styles.subtitle}
-      </p>
-
-      {/* Dark Dashboard Interface */}
+    <div 
+      ref={containerRef}
+      className="w-full h-full overflow-hidden"
+      style={{ 
+        minHeight: '100%',
+        boxSizing: 'border-box'
+      }}
+    >
+      {/* Dashboard Container - Full size, light theme matching reference */}
       <div style={{
-        backgroundColor: '#1f2937',
-        borderRadius: '16px',
-        padding: isMobile ? '20px' : '24px',
-        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
-        position: 'relative',
         width: '100%',
-        maxWidth: isMobile ? '350px' : '500px',
-        border: '1px solid #374151'
+        height: '100%',
+        backgroundColor: '#ffffff',
+        color: '#000000',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        overflow: 'hidden',
+        display: 'flex',
+        boxSizing: 'border-box',
+        position: 'relative'
       }}>
-        {/* Header with Navigation */}
+        
+        {/* Sidebar */}
         <div style={{
+          width: '240px',
+          backgroundColor: '#f8fafc',
+          borderRight: '1px solid #e2e8f0',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '24px',
-          paddingBottom: '16px',
-          borderBottom: '1px solid #374151'
+          flexDirection: 'column',
+          flexShrink: 0,
+          overflow: 'hidden'
         }}>
-          <h3 style={{
-            fontSize: isMobile ? '16px' : '18px',
-            fontWeight: '600',
-            color: '#ffffff',
-            margin: 0
-          }}>
-            My dashboard
-          </h3>
+          {/* Search bar */}
           <div style={{
-            fontSize: '12px',
-            color: '#10b981',
-            fontWeight: '500',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
+            padding: '16px',
+            borderBottom: '1px solid #e2e8f0'
           }}>
             <div style={{
-              width: '6px',
-              height: '6px',
-              backgroundColor: '#10b981',
-              borderRadius: '50%'
-            }} />
-            LIVE
+              backgroundColor: '#f1f5f9',
+              borderRadius: '8px',
+              padding: '8px 12px',
+              fontSize: '14px',
+              color: '#64748b',
+              border: '1px solid #e2e8f0'
+            }}>
+              🔍 Search
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div style={{ padding: '16px 0', flex: 1 }}>
+            {[
+              { name: 'Home', active: false },
+              { name: 'Dashboard', active: true },
+              { name: 'Projects', active: false },
+              { name: 'Tasks', active: false },
+              { name: 'Reporting', active: false },
+              { name: 'Users', active: false }
+            ].map((item, idx) => (
+              <div key={item.name} style={{
+                fontSize: '14px',
+                color: item.active ? '#0f172a' : '#64748b',
+                fontWeight: item.active ? '500' : '400',
+                backgroundColor: item.active ? '#f1f5f9' : 'transparent',
+                padding: '8px 24px',
+                margin: '2px 8px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                borderLeft: item.active ? '3px solid #3b82f6' : '3px solid transparent'
+              }}>
+                {item.name}
+              </div>
+            ))}
+          </div>
+
+          {/* Settings at bottom */}
+          <div style={{ 
+            padding: '16px',
+            borderTop: '1px solid #e2e8f0'
+          }}>
+            <div style={{
+              fontSize: '14px',
+              color: '#64748b',
+              padding: '8px 24px',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}>
+              ⚙️ Settings
+            </div>
           </div>
         </div>
 
-        {/* Top Metrics Cards */}
+        {/* Main Content */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? 'repeat(1, 1fr)' : 'repeat(3, 1fr)',
-          gap: isMobile ? '12px' : '16px',
-          marginBottom: '24px'
+          flex: 1,
+          backgroundColor: '#ffffff',
+          overflow: 'hidden',
+          position: 'relative'
         }}>
-          {dashboardData.topMetrics.map((metric, idx) => (
-            <div key={idx} style={{
-              backgroundColor: '#374151',
-              borderRadius: '8px',
-              padding: isMobile ? '16px' : '18px',
-              border: '1px solid #4b5563'
-            }}>
-              <div style={{
-                fontSize: isMobile ? '20px' : '24px',
-                fontWeight: '700',
-                color: '#ffffff',
-                marginBottom: '4px'
-              }}>
-                {metric.value}
-              </div>
-              <div style={{
-                fontSize: isMobile ? '11px' : '12px',
-                color: '#9ca3af',
-                fontWeight: '500'
-              }}>
-                {metric.label}
-              </div>
-              <div style={{
-                marginTop: '8px',
-                fontSize: '10px',
-                color: metric.color,
-                fontWeight: '500'
-              }}>
-                {idx === 0 ? '+2.4%' : idx === 1 ? '+9.2%' : '+5.8%'}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Chart Area */}
-        <div style={{
-          backgroundColor: '#374151',
-          borderRadius: '8px',
-          padding: isMobile ? '16px' : '20px',
-          marginBottom: '20px',
-          border: '1px solid #4b5563'
-        }}>
+          
+          {/* Header */}
           <div style={{
+            padding: '24px 32px',
+            borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px'
+            backgroundColor: '#ffffff'
           }}>
-            <h4 style={{
-              fontSize: isMobile ? '14px' : '15px',
+            <h1 style={{
+              fontSize: '28px',
               fontWeight: '600',
-              color: '#ffffff',
+              color: '#0f172a',
               margin: 0
             }}>
-              Ranking Trends
-            </h4>
+              My dashboard
+            </h1>
             <div style={{
-              fontSize: '12px',
-              color: '#10b981',
+              fontSize: '14px',
+              color: '#3b82f6',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
               fontWeight: '500'
             }}>
-              ↗ +12%
+              💬 What's new? ●
             </div>
           </div>
-          
-          {/* Chart Bars */}
+
+          {/* Metrics Grid */}
           <div style={{
-            display: 'flex',
-            alignItems: 'end',
-            justifyContent: 'space-between',
-            height: isMobile ? '50px' : '60px',
-            gap: isMobile ? '4px' : '6px'
+            padding: '32px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '24px'
           }}>
-            {dashboardData.chartData.map((bar, idx) => (
-              <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+            {[
+              { value: '$8,746.22', label: 'All revenue', trend: '+2.4%', up: true },
+              { value: '12,440', label: 'Page Views', trend: '+6.2%', up: true },
+              { value: '96', label: 'Active', trend: '', up: null }
+            ].map((metric, idx) => (
+              <div key={idx} style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+              }}>
                 <div style={{
-                  backgroundColor: idx === 6 ? '#10b981' : '#6b7280',
-                  height: bar.height,
-                  width: '100%',
-                  borderRadius: '2px',
-                  transition: 'all 0.3s ease'
-                }} />
+                  fontSize: '13px',
+                  color: '#64748b',
+                  marginBottom: '8px',
+                  fontWeight: '500'
+                }}>
+                  {metric.label}
+                </div>
+                <div style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  color: '#0f172a',
+                  marginBottom: '8px',
+                  lineHeight: '1.2'
+                }}>
+                  {metric.value}
+                </div>
+                {metric.trend && (
+                  <div style={{
+                    fontSize: '14px',
+                    color: metric.up ? '#059669' : '#dc2626',
+                    fontWeight: '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <span>{metric.up ? '↗' : '↘'}</span>
+                    {metric.trend}
+                  </div>
+                )}
               </div>
             ))}
           </div>
-          
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: '8px',
-            fontSize: '9px',
-            color: '#6b7280',
-            fontWeight: '500'
-          }}>
-            {dashboardData.chartData.map((item, idx) => (
-              <span key={idx} style={{ 
-                flex: 1, 
-                textAlign: 'center'
-              }}>
-                {item.day}
-              </span>
-            ))}
-          </div>
-        </div>
 
-        {/* Keywords List */}
-        <div style={{
-          backgroundColor: '#374151',
-          borderRadius: '8px',
-          padding: isMobile ? '16px' : '20px',
-          border: '1px solid #4b5563'
-        }}>
-          <h4 style={{
-            fontSize: isMobile ? '14px' : '15px',
-            fontWeight: '600',
-            color: '#ffffff',
-            margin: '0 0 16px 0'
+          {/* Net Revenue Section */}
+          <div style={{
+            padding: '0 32px 24px',
+            position: 'relative'
           }}>
-            Top Keywords
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {dashboardData.keywords.map((keyword, idx) => (
-              <div key={idx} style={{
+            <div style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '24px',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '8px 0',
-                borderBottom: idx < dashboardData.keywords.length - 1 ? '1px solid #4b5563' : 'none'
+                marginBottom: '16px'
               }}>
-                <div style={{
-                  fontSize: isMobile ? '12px' : '13px',
-                  color: '#ffffff',
-                  fontWeight: '500',
-                  flex: 1
+                <span style={{
+                  fontSize: '13px',
+                  color: '#64748b',
+                  fontWeight: '500'
                 }}>
-                  {keyword.keyword}
-                </div>
+                  Net revenue
+                </span>
                 <div style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
+                  gap: '16px',
+                  fontSize: '13px',
+                  color: '#64748b'
                 }}>
-                  <span style={{
+                  <span style={{ color: '#0f172a', fontWeight: '500' }}>12 months</span>
+                  <span>30 days</span>
+                  <span>7 da...</span>
+                </div>
+              </div>
+              <div style={{
+                fontSize: '32px',
+                fontWeight: '700',
+                color: '#0f172a',
+                marginBottom: '8px'
+              }}>
+                $7,804.16
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#059669',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <span>↗</span>
+                +2.4%
+              </div>
+            </div>
+          </div>
+
+          {/* Chart Section */}
+          <div style={{
+            padding: '0 32px 24px'
+          }}>
+            <div style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '24px',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+              height: '200px',
+              position: 'relative'
+            }}>
+              {/* Chart placeholder with smooth curve */}
+              <svg width="100%" height="100%" viewBox="0 0 400 160" style={{ overflow: 'visible' }}>
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{stopColor: '#3b82f6', stopOpacity: 0.2}} />
+                    <stop offset="100%" style={{stopColor: '#3b82f6', stopOpacity: 0}} />
+                  </linearGradient>
+                </defs>
+                <path 
+                  d="M 0 120 Q 50 100 100 90 T 200 70 T 300 60 Q 350 55 400 50" 
+                  stroke="#3b82f6" 
+                  strokeWidth="2" 
+                  fill="none"
+                />
+                <path 
+                  d="M 0 120 Q 50 100 100 90 T 200 70 T 300 60 Q 350 55 400 50 L 400 160 L 0 160 Z" 
+                  fill="url(#gradient)"
+                />
+                {/* Month labels */}
+                {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'].map((month, i) => (
+                  <text 
+                    key={month}
+                    x={i * 45 + 20} 
+                    y={150} 
+                    fontSize="12" 
+                    fill="#64748b" 
+                    textAnchor="middle"
+                  >
+                    {month}
+                  </text>
+                ))}
+              </svg>
+            </div>
+          </div>
+
+          {/* Customers Section - Partially cut off to show it continues */}
+          <div style={{
+            padding: '0 32px',
+            height: '120px',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '24px',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px'
+              }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#0f172a',
+                  margin: 0
+                }}>
+                  Customers
+                </h3>
+                <div style={{
+                  backgroundColor: '#f1f5f9',
+                  borderRadius: '8px',
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  color: '#64748b',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  🔍 Search
+                </div>
+              </div>
+              
+              {/* Table header */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '2fr 2fr 1fr 1fr',
+                gap: '16px',
+                padding: '8px 0',
+                borderBottom: '1px solid #e2e8f0',
+                fontSize: '13px',
+                color: '#64748b',
+                fontWeight: '500'
+              }}>
+                <div>Customer</div>
+                <div>Email</div>
+                <div>Date</div>
+                <div>Status</div>
+              </div>
+              
+              {/* Customer row */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '2fr 2fr 1fr 1fr',
+                gap: '16px',
+                padding: '12px 0',
+                fontSize: '14px',
+                color: '#0f172a',
+                alignItems: 'center'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     fontSize: '12px',
-                    color: '#9ca3af'
+                    fontWeight: '500'
                   }}>
-                    #{keyword.position}
-                  </span>
+                    LR
+                  </div>
+                  Lily Ross Coulson
+                </div>
+                <div style={{ color: '#64748b' }}>lilyrosscoulson@gmail.com</div>
+                <div style={{ color: '#64748b' }}>Jan 18, 2025</div>
+                <div>
                   <span style={{
-                    fontSize: '11px',
-                    color: keyword.trend === 'up' ? '#10b981' : '#ef4444',
-                    fontWeight: '600'
+                    backgroundColor: '#dcfce7',
+                    color: '#059669',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '500'
                   }}>
-                    {keyword.change}
+                    Paid
                   </span>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
