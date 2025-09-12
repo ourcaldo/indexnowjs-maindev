@@ -18,11 +18,11 @@ export const Button = ({
 }: ButtonProps) => {
   const baseStyles = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none'
   
-  const variants: { [key: string]: any } = {
-    default: { backgroundColor: '#1C2331', color: '#FFFFFF' },
-    secondary: { backgroundColor: '#F7F9FC', color: '#1A1A1A', border: '1px solid #E0E6ED' },
-    outline: { backgroundColor: 'transparent', color: '#6C757D', border: '1px solid #E0E6ED' },
-    ghost: { backgroundColor: 'transparent', color: '#6C757D' }
+  const variants: { [key: string]: string } = {
+    default: 'bg-primary text-primary-foreground hover:bg-secondary/80',
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-muted/60 border border-border',
+    outline: 'bg-transparent text-muted-foreground border border-border hover:bg-muted/50',
+    ghost: 'bg-transparent text-muted-foreground hover:bg-muted/40'
   }
   
   const sizes: { [key: string]: string } = {
@@ -34,8 +34,7 @@ export const Button = ({
   
   return (
     <button 
-      className={`${baseStyles} ${sizes[size]} ${className}`}
-      style={variants[variant]}
+      className={`${baseStyles} ${sizes[size]} ${variants[variant]} ${className}`}
       onClick={onClick}
       disabled={disabled}
       {...props}

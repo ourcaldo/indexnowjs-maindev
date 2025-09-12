@@ -688,7 +688,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Button 
-                    className="w-full justify-start h-11 bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="w-full justify-start h-11 bg-primary text-primary-foreground hover:bg-primary/90 hover:bg-secondary/80"
                     onClick={() => router.push('/dashboard/indexnow/add')}
                     data-testid="action-add-keywords"
                   >
@@ -701,7 +701,7 @@ export default function Dashboard() {
                   
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-muted/50 border-border text-foreground"
+                    className="w-full justify-start h-11 hover:bg-muted/60 border-border text-foreground"
                     onClick={() => router.push('/dashboard/indexnow/overview')}
                     data-testid="action-view-keywords"
                   >
