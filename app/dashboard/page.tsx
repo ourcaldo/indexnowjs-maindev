@@ -581,7 +581,7 @@ export default function Dashboard() {
                           const positionChange = calculatePositionChange(keyword)
                           
                           return (
-                            <div key={keyword.id || index} className="md:grid md:grid-cols-12 gap-3 p-4 md:p-3 hover:bg-muted/30 transition-colors">
+                            <div key={keyword.id || index} className="md:grid md:grid-cols-12 gap-3 p-4 md:px-6 md:py-3 hover:bg-muted/30 transition-colors">
                               {/* Mobile Layout */}
                               <div className="md:hidden space-y-2">
                                 <div className="flex items-center justify-between">
