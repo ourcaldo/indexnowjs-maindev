@@ -173,7 +173,6 @@ export const EMAIL_TEMPLATES = {
   JOB_FAILURE: 'job-failure',
   QUOTA_ALERT: 'quota-alert',
   DAILY_REPORT: 'daily-report',
-  TRIAL_ENDING: 'trial-ending',
   PAYMENT_RECEIVED: 'payment-received',
   LOGIN_NOTIFICATION: 'login-notification',
   PACKAGE_ACTIVATED: 'package-activated',

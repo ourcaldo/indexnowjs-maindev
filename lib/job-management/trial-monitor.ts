@@ -1,5 +1,4 @@
 import { supabaseAdmin } from '@/lib/database'
-import { emailService } from '@/lib/email/emailService'
 
 export class TrialMonitorService {
   
