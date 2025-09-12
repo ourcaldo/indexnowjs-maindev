@@ -167,7 +167,7 @@
   }
   
   .btn-hover:hover {
-    background-color: hsl(218 49% 56% / 0.1) !important; /* #3D8BFF/10 */
+    background-color: #FEF3C7 !important;
     color: hsl(218 49% 56%) !important; /* #3D8BFF */
   }
 
