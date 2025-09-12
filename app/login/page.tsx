@@ -100,9 +100,9 @@ export default function Login() {
               src={logoUrl} 
               alt="Logo"
               style={{
-                height: isMobile ? '36px' : '72px',
+                height: isMobile ? '48px' : '72px',
                 width: 'auto',
-                maxWidth: isMobile ? '180px' : '360px'
+                maxWidth: isMobile ? '240px' : '360px'
               }}
             />
           </div>
@@ -115,7 +115,7 @@ export default function Login() {
           textAlign: isMobile ? 'center' : 'left'
         }}>
           <h1 style={{
-            fontSize: '32px',
+            fontSize: isMobile ? '24px' : '32px',
             fontWeight: '700',
             color: '#1a1a1a',
             marginBottom: '8px',
@@ -124,7 +124,7 @@ export default function Login() {
             Welcome Back
           </h1>
           <p style={{
-            fontSize: '16px',
+            fontSize: isMobile ? '14px' : '16px',
             color: '#6b7280',
             marginBottom: '40px',
             lineHeight: '1.5'

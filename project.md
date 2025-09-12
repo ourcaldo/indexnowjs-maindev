@@ -1049,27 +1049,31 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
-### September 12, 2025: Mobile Authentication Pages Enhancement - Right Column Hidden on Mobile ✅
+### September 12, 2025: Mobile Authentication Pages Enhancement - Proportional Logo and Text Sizing ✅
 
-**✅ MOBILE RESPONSIVENESS ENHANCEMENT COMPLETED**: Successfully enhanced login and sign-up pages to hide the right column completely when accessed from mobile devices as requested
+**✅ MOBILE PROPORTIONS ENHANCEMENT COMPLETED**: Successfully improved logo and text proportions on mobile authentication pages to create better visual balance as requested
 
-**🔧 Changes Made:**
-- **Login Page Enhancement**: Removed mobile DashboardPreview section that was previously shown above the form on mobile devices
-- **Register Page Enhancement**: Removed mobile DashboardPreview section that was previously shown above the registration form on mobile devices
-- **Desktop Behavior Preserved**: Right column with DashboardPreview remains visible on desktop (screen width > 768px)
-- **Mobile Logo Integration**: Updated both pages to show logo properly on both mobile and desktop with responsive sizing
-- **TypeScript Fixes**: Updated DashboardPreview component calls to remove deprecated props (title, subtitle, variant)
+**🔧 Visual Proportion Improvements:**
+- **Logo Size Enhancement**: Increased mobile logo height from 36px to 48px (33% larger) for better visibility and brand presence
+- **Logo Width Enhancement**: Increased mobile logo max-width from 180px to 240px for better proportional scaling
+- **Heading Text Optimization**: Reduced mobile heading font-size from 32px to 24px (25% smaller) for better balance with larger logo
+- **Subtitle Text Optimization**: Reduced mobile subtitle font-size from 16px to 14px (12.5% smaller) for improved hierarchy
+- **Desktop Unchanged**: Maintained existing desktop proportions (logo: 72px/48px, heading: 32px, subtitle: 16px)
+
+**📱 Before vs After Mobile Experience:**
+- **Before**: Small logo (36px) with oversized text (32px heading, 16px subtitle) creating visual imbalance
+- **After**: Properly sized logo (48px) with proportional text (24px heading, 14px subtitle) creating better visual hierarchy
 
 **🎯 Mobile Experience Improvement:**
-- **Before**: Mobile users saw DashboardPreview above the form, creating longer scrollable content
-- **After**: Mobile users see only the authentication form with proper logo, creating a cleaner, more focused experience
-- **Desktop Unchanged**: Desktop users still see the two-column layout with form on left and DashboardPreview on right
+- **Right Column Removal**: Removed mobile DashboardPreview section that was previously shown above the form on mobile devices
+- **Desktop Behavior Preserved**: Right column with DashboardPreview remains visible on desktop (screen width > 768px)
+- **TypeScript Fixes**: Updated DashboardPreview component calls to remove deprecated props (title, subtitle, variant)
 
 **📁 Files Modified:**
-- `app/login/page.tsx` - Removed mobile DashboardPreview section, enhanced logo responsiveness
-- `app/register/page.tsx` - Removed mobile DashboardPreview section, enhanced logo responsiveness
+- `app/login/page.tsx` - Enhanced mobile logo size and reduced text proportions for better balance
+- `app/register/page.tsx` - Enhanced mobile logo size and reduced text proportions for better balance
 
-**✅ Enhancement Status**: Mobile authentication pages now provide focused, streamlined experience without right column content
+**✅ Enhancement Status**: Mobile authentication pages now feature properly proportioned logo and text for optimal visual hierarchy
 
 ---
 
