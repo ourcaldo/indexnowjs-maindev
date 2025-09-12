@@ -9,142 +9,43 @@ interface DashboardPreviewProps {
   variant?: 'login' | 'register' | 'forgot'
 }
 
-const slides = [
-  {
-    title: "Real-time Analytics Dashboard",
-    description: "Monitor your indexing performance with live charts and metrics",
-    stats: [
-      { value: "189K", label: "URLs Indexed", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "97.8%", label: "Success Rate", color: "#0284c7", bg: "#f0f9ff", border: "#e0f2fe" },
-      { value: "2.4s", label: "Avg Response", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" }
-    ],
-    chartData: [
-      { height: '45%', value: '1.2K' },
-      { height: '60%', value: '1.8K' },
-      { height: '35%', value: '890' },
-      { height: '75%', value: '2.1K' },
-      { height: '55%', value: '1.5K' },
-      { height: '85%', value: '2.4K' },
-      { height: '95%', value: '2.8K' }
-    ],
-    bottomMetrics: [
-      { value: "12", label: "Active Accounts", color: "#ea580c", bg: "#fff7ed", border: "#fed7aa" },
-      { value: "47", label: "Scheduled Jobs", color: "#4b5563", bg: "#f3f4f6", border: "#e5e7eb" }
-    ],
-    status: { color: "#22c55e", label: "LIVE" }
-  },
-  {
-    title: "Multi-Account Management",
-    description: "Load balance across multiple Google service accounts efficiently",
-    stats: [
-      { value: "8", label: "Service Accounts", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "99.9%", label: "Uptime", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" },
-      { value: "45K", label: "Daily Quota", color: "#7c3aed", bg: "#faf5ff", border: "#e9d5ff" }
-    ],
-    chartData: [
-      { height: '85%', value: '5.2K' },
-      { height: '70%', value: '4.1K' },
-      { height: '90%', value: '5.8K' },
-      { height: '65%', value: '3.9K' },
-      { height: '95%', value: '6.1K' },
-      { height: '75%', value: '4.5K' },
-      { height: '80%', value: '4.8K' }
-    ],
-    bottomMetrics: [
-      { value: "8", label: "Connected APIs", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" },
-      { value: "156", label: "Requests/min", color: "#0284c7", bg: "#f0f9ff", border: "#e0f2fe" }
-    ],
-    status: { color: "#059669", label: "ACTIVE" }
-  },
-  {
-    title: "Advanced Scheduling System",
-    description: "Set up automated indexing with flexible scheduling options",
-    stats: [
-      { value: "24", label: "Active Jobs", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "5.2K", label: "Scheduled Today", color: "#f59e0b", bg: "#fffbeb", border: "#fde68a" },
-      { value: "98.5%", label: "Completion Rate", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" }
-    ],
-    chartData: [
-      { height: '60%', value: '2.8K' },
-      { height: '45%', value: '2.1K' },
-      { height: '75%', value: '3.5K' },
-      { height: '55%', value: '2.6K' },
-      { height: '80%', value: '3.8K' },
-      { height: '65%', value: '3.1K' },
-      { height: '70%', value: '3.3K' }
-    ],
-    bottomMetrics: [
-      { value: "6", label: "Job Types", color: "#7c3aed", bg: "#faf5ff", border: "#e9d5ff" },
-      { value: "2.1K", label: "Queue Size", color: "#f59e0b", bg: "#fffbeb", border: "#fde68a" }
-    ],
-    status: { color: "#f59e0b", label: "SCHEDULED" }
-  },
-  {
-    title: "Performance Insights",
-    description: "Deep analytics and insights to optimize your indexing strategy",
-    stats: [
-      { value: "2.1M", label: "Total Processed", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "94.2%", label: "Index Success", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" },
-      { value: "1.8s", label: "Avg Latency", color: "#0284c7", bg: "#f0f9ff", border: "#e0f2fe" }
-    ],
-    chartData: [
-      { height: '70%', value: '14K' },
-      { height: '85%', value: '17K' },
-      { height: '65%', value: '13K' },
-      { height: '90%', value: '18K' },
-      { height: '75%', value: '15K' },
-      { height: '95%', value: '19K' },
-      { height: '80%', value: '16K' }
-    ],
-    bottomMetrics: [
-      { value: "15", label: "Error Types", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
-      { value: "3.2K", label: "Retries/day", color: "#f59e0b", bg: "#fffbeb", border: "#fde68a" }
-    ],
-    status: { color: "#0284c7", label: "ANALYZING" }
-  },
-  {
-    title: "API Integration Hub",
-    description: "Connect with Google Search Console and other SEO tools seamlessly",
-    stats: [
-      { value: "5", label: "Integrations", color: "#1a1a1a", bg: "#f8f9fa" },
-      { value: "99.8%", label: "API Reliability", color: "#059669", bg: "#f0fdf4", border: "#dcfce7" },
-      { value: "127", label: "Endpoints", color: "#7c3aed", bg: "#faf5ff", border: "#e9d5ff" }
-    ],
-    chartData: [
-      { height: '55%', value: '8.2K' },
-      { height: '75%', value: '11K' },
-      { height: '85%', value: '12K' },
-      { height: '65%', value: '9.5K' },
-      { height: '90%', value: '13K' },
-      { height: '70%', value: '10K' },
-      { height: '80%', value: '12K' }
-    ],
-    bottomMetrics: [
-      { value: "98", label: "Webhooks", color: "#ec4899", bg: "#fdf2f8", border: "#fce7f3" },
-      { value: "45", label: "Rate Limits", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb" }
-    ],
-    status: { color: "#7c3aed", label: "CONNECTED" }
-  }
-]
+// Single comprehensive IndexNow Rank Tracker dashboard preview
+const dashboardData = {
+  title: "IndexNow Rank Tracker",
+  description: "Professional keyword ranking monitoring with real-time SEO insights",
+  stats: [
+    { value: "1,247", label: "Keywords Tracked", color: "#1a1a1a", bg: "#f8f9fa" },
+    { value: "89", label: "Top 10 Positions", color: "#4BB543", bg: "#f0fdf4", border: "#dcfce7" },
+    { value: "12.4", label: "Average Position", color: "#5B7BBF", bg: "#f0f4ff", border: "#e0e8ff" }
+  ],
+  rankingChart: [
+    { height: '45%', value: '156', change: '+12' },
+    { height: '60%', value: '203', change: '+8' },
+    { height: '35%', value: '124', change: '-5' },
+    { height: '75%', value: '287', change: '+23' },
+    { height: '55%', value: '198', change: '+2' },
+    { height: '85%', value: '324', change: '+18' },
+    { height: '95%', value: '389', change: '+27' }
+  ],
+  domains: [
+    { name: "example.com", keywords: 324, avgPos: 8.5, trend: "up" },
+    { name: "mysite.org", keywords: 198, avgPos: 12.1, trend: "stable" },
+    { name: "business.net", keywords: 287, avgPos: 15.3, trend: "down" }
+  ],
+  bottomMetrics: [
+    { value: "15", label: "Active Domains", color: "#5B7BBF", bg: "#f0f4ff", border: "#e0e8ff" },
+    { value: "24", label: "Countries", color: "#F0A202", bg: "#fffbeb", border: "#fde68a" }
+  ],
+  status: { color: "#4BB543", label: "LIVE TRACKING" }
+}
 
 export default function DashboardPreview({ title, subtitle, variant = 'login' }: DashboardPreviewProps) {
-  const [currentSlide, setCurrentSlide] = useState(0)
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  useEffect(() => {
-    if (!mounted) return
-    
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 4000) // 4 seconds per slide
-
-    return () => clearInterval(interval)
-  }, [mounted])
 
   useEffect(() => {
     if (!mounted || typeof window === 'undefined') return
@@ -159,32 +60,53 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
     return () => window.removeEventListener('resize', checkIfMobile)
   }, [mounted])
 
-  const currentData = slides[currentSlide]
-
   const getVariantStyles = () => {
     switch (variant) {
       case 'register':
         return {
-          title: title || "Join thousands of developers getting results.",
-          subtitle: subtitle || "Create your account and start indexing your URLs instantly with powerful analytics.",
+          title: title || "Professional Rank Tracking Made Simple",
+          subtitle: subtitle || "Monitor your keyword rankings across search engines with comprehensive analytics and insights.",
           opacity: 1
         }
       case 'forgot':
         return {
-          title: title || "Get back to your indexing dashboard.",
-          subtitle: subtitle || "Your analytics and performance data are waiting for you to return.",
+          title: title || "Return to Your SEO Dashboard",
+          subtitle: subtitle || "Your keyword rankings and SEO performance data are waiting for you.",
           opacity: 0.8
         }
       default:
         return {
-          title: title || "Real-time indexing analytics at your fingertips.",
-          subtitle: subtitle || "Monitor performance, track success rates, and manage your URL indexing operations.",
+          title: title || "IndexNow Rank Tracker Dashboard",
+          subtitle: subtitle || "Professional keyword ranking monitoring with real-time analytics and comprehensive SEO insights.",
           opacity: 1
         }
     }
   }
 
   const styles = getVariantStyles()
+
+  if (!mounted) {
+    return (
+      <div style={{ 
+        maxWidth: isMobile ? '100%' : '500px', 
+        width: '100%',
+        height: '400px',
+        backgroundColor: '#2a2a2a',
+        borderRadius: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          fontSize: '16px',
+          color: '#ffffff',
+          opacity: 0.7
+        }}>
+          Loading dashboard...
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ 
@@ -199,20 +121,20 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
         fontSize: isMobile ? '28px' : '36px',
         fontWeight: '700',
         lineHeight: '1.2',
-        marginBottom: '24px'
+        marginBottom: '16px'
       }}>
         {styles.title}
       </h2>
       <p style={{
         fontSize: isMobile ? '16px' : '18px',
         color: '#d1d5db',
-        marginBottom: '40px',
+        marginBottom: '32px',
         lineHeight: '1.6'
       }}>
         {styles.subtitle}
       </p>
 
-      {/* Dashboard Mock */}
+      {/* Dashboard Mock Slideshow */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '16px',
@@ -230,7 +152,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
           gap: isMobile ? '12px' : '16px',
           marginBottom: isMobile ? '24px' : '32px'
         }}>
-          {currentData.stats.map((stat, idx) => (
+          {dashboardData.stats.map((stat, idx) => (
             <div key={idx} style={{
               backgroundColor: stat.bg,
               borderRadius: '12px',
@@ -239,7 +161,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
               border: stat.border ? `1px solid ${stat.border}` : 'none'
             }}>
               <div style={{
-                fontSize: isMobile ? '24px' : '28px',
+                fontSize: isMobile ? '20px' : '24px',
                 fontWeight: '800',
                 color: stat.color,
                 marginBottom: '4px'
@@ -276,27 +198,38 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
               color: '#1a1a1a',
               margin: 0
             }}>
-              {currentData.title}
+              {dashboardData.title}
             </h3>
             <div style={{
               fontSize: '12px',
-              color: currentData.status.color,
-              fontWeight: '500'
+              color: dashboardData.status.color,
+              fontWeight: '600',
+              backgroundColor: `${dashboardData.status.color}15`,
+              padding: '4px 8px',
+              borderRadius: '6px'
             }}>
-              ↗
+              {dashboardData.status.label}
             </div>
           </div>
           
-          {/* Chart Bars */}
+          {/* Ranking Chart */}
           <div style={{
             display: 'flex',
             alignItems: 'end',
             justifyContent: 'space-between',
             height: isMobile ? '60px' : '80px',
-            gap: isMobile ? '6px' : '8px'
+            gap: isMobile ? '4px' : '8px'
           }}>
-            {currentData.chartData.map((bar, idx) => (
+            {dashboardData.rankingChart.map((bar, idx) => (
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                <div style={{
+                  fontSize: '8px',
+                  color: bar.change.startsWith('+') ? '#4BB543' : '#E63946',
+                  marginBottom: '2px',
+                  fontWeight: '600'
+                }}>
+                  {bar.change}
+                </div>
                 <div style={{
                   fontSize: '9px',
                   color: '#6b7280',
@@ -306,7 +239,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
                   {bar.value}
                 </div>
                 <div style={{
-                  backgroundColor: idx === 6 ? currentData.status.color : '#d1d5db',
+                  backgroundColor: idx === dashboardData.rankingChart.length - 1 ? dashboardData.status.color : (bar.change.startsWith('+') ? '#4BB543' : '#d1d5db'),
                   height: bar.height,
                   width: '100%',
                   borderRadius: '3px',
@@ -317,21 +250,69 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
           </div>
           
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
             marginTop: '12px',
             fontSize: '10px',
             color: '#9ca3af',
-            fontWeight: '500'
+            fontWeight: '500',
+            textAlign: 'center'
           }}>
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'].map((day, idx) => (
-              <span key={idx} style={{ 
-                flex: 1, 
-                textAlign: 'center',
-                color: idx === 6 ? currentData.status.color : '#9ca3af'
+            {dashboardData.description}
+          </div>
+        </div>
+
+        {/* Domain List */}
+        <div style={{
+          marginBottom: isMobile ? '16px' : '24px'
+        }}>
+          <div style={{
+            fontSize: isMobile ? '12px' : '14px',
+            color: '#1a1a1a',
+            fontWeight: '600',
+            marginBottom: '12px'
+          }}>
+            Top Domains
+          </div>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            {dashboardData.domains.slice(0, 3).map((domain, idx) => (
+              <div key={idx} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: '#fafafa',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb'
               }}>
-                {day}
-              </span>
+                <div style={{
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  color: '#1a1a1a'
+                }}>
+                  {domain.name}
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <span style={{
+                    fontSize: '10px',
+                    color: '#6b7280'
+                  }}>
+                    {domain.keywords} keywords
+                  </span>
+                  <span style={{
+                    fontSize: '10px',
+                    color: domain.trend === 'up' ? '#4BB543' : domain.trend === 'down' ? '#E63946' : '#6b7280'
+                  }}>
+                    {domain.trend === 'up' ? '↗' : domain.trend === 'down' ? '↘' : '→'}
+                  </span>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -342,7 +323,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
           gridTemplateColumns: isMobile ? 'repeat(1, 1fr)' : 'repeat(2, 1fr)',
           gap: isMobile ? '12px' : '16px'
         }}>
-          {currentData.bottomMetrics.map((metric, idx) => (
+          {dashboardData.bottomMetrics.map((metric, idx) => (
             <div key={idx} style={{
               backgroundColor: metric.bg,
               borderRadius: '10px',
@@ -356,7 +337,7 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
               }}>
                 <div>
                   <div style={{
-                    fontSize: isMobile ? '18px' : '20px',
+                    fontSize: isMobile ? '16px' : '18px',
                     fontWeight: '700',
                     color: metric.color,
                     marginBottom: '2px'
@@ -382,30 +363,6 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
           ))}
         </div>
 
-        
-
-        {/* Slide indicators */}
-        <div style={{
-          position: 'absolute',
-          bottom: '16px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '8px'
-        }}>
-          {slides.map((_, idx) => (
-            <div
-              key={idx}
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: idx === currentSlide ? currentData.status.color : '#d1d5db',
-                transition: 'all 0.3s ease'
-              }}
-            />
-          ))}
-        </div>
       </div>
     </div>
   )

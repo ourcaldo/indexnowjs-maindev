@@ -512,253 +512,371 @@ export default function Dashboard() {
 
       {/* Main Dashboard Content */}
       {hasActivePackage && domains.length > 0 && (
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Key Metrics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard
-                title="Total Keywords"
-                value={domainKeywords.length}
-                description="Being tracked"
-                icon={<Search className="w-5 h-5" />}
-                variant="primary"
-                data-testid="stat-total-keywords"
-              />
-              <StatCard
-                title="Top 10 Positions"
-                value={domainKeywords.filter((k: KeywordData) => k.recent_ranking?.position && k.recent_ranking.position <= 10).length}
-                description="In top rankings"
-                icon={<Target className="w-5 h-5" />}
-                variant="success"
-                data-testid="stat-top-10"
-              />
-              <StatCard
-                title="Average Position"
-                value={(() => {
-                  const ranked = domainKeywords.filter((k: KeywordData) => k.recent_ranking?.position)
-                  return ranked.length > 0 
-                    ? Math.round(ranked.reduce((sum: number, k: KeywordData) => sum + (k.recent_ranking?.position || 100), 0) / ranked.length)
-                    : 'N/A'
-                })()}
-                description="Overall ranking"
-                icon={<BarChart3 className="w-5 h-5" />}
-                variant="info"
-                data-testid="stat-avg-position"
-              />
-              <StatCard
-                title="Daily Usage"
-                value={userProfile?.daily_quota_used || 0}
-                description={`of ${userProfile?.package?.quota_limits.daily_urls || 0} limit`}
-                icon={<Activity className="w-5 h-5" />}
-                variant="warning"
-                data-testid="stat-daily-usage"
-              />
-            </div>
-
-            {/* Analytics Widgets Row */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              <UsageChart 
-                data={usageData}
-                title="Daily Usage Trends"
-                description="Track your API usage patterns"
-              />
-              <RankingDistribution 
-                data={rankingData}
-                title="Position Distribution"
-                description="See where your keywords rank"
-              />
-            </div>
-
-            {/* Performance Overview */}
-            <PerformanceOverview 
-              metrics={performanceMetrics}
-              title="Key Performance Metrics"
-              description="Track your SEO progress over time"
-            />
-
-            {/* Keywords Table */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+        <>
+          {/* Enhanced Key Metrics Overview */}
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Recent Keywords</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Latest keyword performance for {selectedDomain?.display_name || selectedDomain?.domain_name}
+                  <CardTitle className="text-lg font-semibold">Performance Overview</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {selectedDomain?.display_name || selectedDomain?.domain_name} • Real-time insights
                   </p>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => router.push('/dashboard/indexnow/overview')}
-                  data-testid="button-view-all-keywords"
-                >
-                  View All
-                  <ChevronRightIcon className="w-4 h-4 ml-1" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {domainKeywords.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Search className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">No keywords found for this domain</p>
+                <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20">
+                  Live Tracking
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Total Keywords */}
+                <div className="text-center p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-lg mx-auto mb-2">
+                    <Search className="w-5 h-5 text-primary" />
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {/* Header */}
-                    <div className="grid grid-cols-12 gap-3 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
-                      <div className="col-span-4">Keyword</div>
-                      <div className="col-span-2 text-center">Position</div>
-                      <div className="col-span-2 text-center">Country</div>
-                      <div className="col-span-2 text-center">Device</div>
-                      <div className="col-span-2 text-center">Tags</div>
-                    </div>
-                    
-                    {/* Keywords */}
-                    {domainKeywords.slice(0, 5).map((keyword: KeywordData, index) => {
-                      const currentPos = keyword.recent_ranking?.position || keyword.current_position
-                      const positionChange = calculatePositionChange(keyword)
-                      
-                      return (
-                        <div key={keyword.id || index} className="grid grid-cols-12 gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors items-center">
-                          {/* Keyword */}
-                          <div className="col-span-4 font-medium text-foreground truncate">
-                            {keyword.keyword}
-                          </div>
-                          
-                          {/* Position */}
-                          <div className="col-span-2 flex items-center justify-center space-x-1">
-                            <Badge variant="outline" className="text-xs">
-                              {currentPos ? `#${currentPos}` : 'NR'}
-                            </Badge>
-                            <PositionChange change={positionChange} className="text-xs" />
-                          </div>
-                          
-                          {/* Country */}
-                          <div className="col-span-2 flex justify-center">
-                            <Badge variant="secondary" className="text-xs">
-                              {keyword.country?.iso2_code?.toUpperCase() || 'N/A'}
-                            </Badge>
-                          </div>
-                          
-                          {/* Device */}
-                          <div className="col-span-2 flex justify-center">
-                            <Badge variant="outline" className="text-xs capitalize">
-                              {keyword.device_type}
-                            </Badge>
-                          </div>
-                          
-                          {/* Tags */}
-                          <div className="col-span-2 flex justify-center">
-                            {keyword.tags && keyword.tags.length > 0 ? (
-                              <div className="flex items-center space-x-1">
-                                {keyword.tags.slice(0, 1).map((tag, tagIndex) => (
-                                  <Badge key={tagIndex} variant="default" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                                {keyword.tags.length > 1 && (
-                                  <Badge variant="default" className="text-xs">
-                                    +{keyword.tags.length - 1}
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">-</span>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
+                  <div className="text-2xl font-bold text-foreground" data-testid="stat-total-keywords">
+                    {domainKeywords.length.toLocaleString()}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  className="w-full justify-start"
-                  onClick={() => router.push('/dashboard/indexnow/add')}
-                  data-testid="action-add-keywords"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Keywords
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => router.push('/dashboard/indexnow/overview')}
-                  data-testid="action-view-keywords"
-                >
-                  <Search className="w-4 h-4 mr-2" />
-                  View All Keywords
-                </Button>
-
-                <Button 
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => router.push('/dashboard/indexnow/rank-history')}
-                  data-testid="action-rank-history"
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Rank History
-                </Button>
-
-                <Button 
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => router.push('/dashboard/settings/plans-billing')}
-                  data-testid="action-manage-billing"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Manage Billing
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Activity Timeline */}
-            <ActivityTimeline 
-              activities={activityData}
-              title="Recent Activity"
-              description="Latest updates and changes"
-              maxItems={5}
-              showViewAll={true}
-              onViewAll={() => router.push('/dashboard/indexnow/rank-history')}
-            />
-
-            {/* FastIndexing Tool */}
-            <Card className="border-muted">
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-2">
-                  <Zap className="w-5 h-5 text-amber-600" />
-                  <CardTitle className="text-base">FastIndexing Tool</CardTitle>
+                  <div className="text-xs text-muted-foreground font-medium">
+                    Total Keywords
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Quickly index your URLs with Google for faster discovery.
-                </p>
-                <Button 
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => router.push('/dashboard/tools/fastindexing')}
-                  data-testid="action-fast-indexing"
-                >
-                  Open FastIndexing
-                  <ExternalLink className="w-4 h-4 ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
+                
+                {/* Top 10 Positions */}
+                <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center justify-center w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg mx-auto mb-2">
+                    <Target className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-400" data-testid="stat-top-10">
+                    {domainKeywords.filter((k: KeywordData) => k.recent_ranking?.position && k.recent_ranking.position <= 10).length}
+                  </div>
+                  <div className="text-xs text-green-600 dark:text-green-500 font-medium">
+                    Top 10 Rankings
+                  </div>
+                </div>
+                
+                {/* Average Position */}
+                <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-2">
+                    <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-400" data-testid="stat-avg-position">
+                    {(() => {
+                      const ranked = domainKeywords.filter((k: KeywordData) => k.recent_ranking?.position)
+                      return ranked.length > 0 
+                        ? Math.round(ranked.reduce((sum: number, k: KeywordData) => sum + (k.recent_ranking?.position || 100), 0) / ranked.length)
+                        : 'N/A'
+                    })()}
+                  </div>
+                  <div className="text-xs text-blue-600 dark:text-blue-500 font-medium">
+                    Avg Position
+                  </div>
+                </div>
+                
+                {/* Daily Usage */}
+                <div className="text-center p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <div className="flex items-center justify-center w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg mx-auto mb-2">
+                    <Activity className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400" data-testid="stat-daily-usage">
+                    {userProfile?.daily_quota_used || 0}
+                  </div>
+                  <div className="text-xs text-amber-600 dark:text-amber-500 font-medium">
+                    Daily Usage
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Main Content Area */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Analytics Widgets Row */}
+              <div className="grid lg:grid-cols-2 gap-6">
+                <UsageChart 
+                  data={usageData}
+                  title="Daily Usage Trends"
+                  description="Track your API usage patterns"
+                />
+                <RankingDistribution 
+                  data={rankingData}
+                  title="Position Distribution"
+                  description="See where your keywords rank"
+                />
+              </div>
+
+              {/* Performance Overview */}
+              <PerformanceOverview 
+                metrics={performanceMetrics}
+                title="Key Performance Metrics"
+                description="Track your SEO progress over time"
+              />
+
+              {/* Keywords Table */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                    <div>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Search className="w-5 h-5" />
+                        <span>Top Keywords</span>
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Latest performance • {selectedDomain?.display_name || selectedDomain?.domain_name}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => router.push('/dashboard/indexnow/overview')}
+                      data-testid="button-view-all-keywords"
+                      className="shrink-0"
+                    >
+                      View All ({domainKeywords.length})
+                      <ChevronRightIcon className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-0">
+                  {domainKeywords.length === 0 ? (
+                    <div className="text-center py-12 px-6">
+                      <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Search className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">No Keywords Yet</h3>
+                      <p className="text-sm text-muted-foreground mb-6">Start tracking keywords for this domain to see performance data here.</p>
+                      <Button onClick={() => router.push('/dashboard/indexnow/add')} size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Keywords
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden">
+                      {/* Mobile-friendly header */}
+                      <div className="hidden md:grid md:grid-cols-12 gap-3 px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30 border-b">
+                        <div className="col-span-4">Keyword</div>
+                        <div className="col-span-2 text-center">Position</div>
+                        <div className="col-span-2 text-center">Country</div>
+                        <div className="col-span-2 text-center">Device</div>
+                        <div className="col-span-2 text-center">Tags</div>
+                      </div>
+                      
+                      {/* Keywords List */}
+                      <div className="divide-y">
+                        {domainKeywords.slice(0, 8).map((keyword: KeywordData, index) => {
+                          const currentPos = keyword.recent_ranking?.position || keyword.current_position
+                          const positionChange = calculatePositionChange(keyword)
+                          
+                          return (
+                            <div key={keyword.id || index} className="md:grid md:grid-cols-12 gap-3 p-4 md:p-3 hover:bg-muted/30 transition-colors">
+                              {/* Mobile Layout */}
+                              <div className="md:hidden space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="font-medium text-foreground truncate flex-1 mr-2">
+                                    {keyword.keyword}
+                                  </div>
+                                  <div className="flex items-center space-x-1 shrink-0">
+                                    <Badge variant={currentPos && currentPos <= 10 ? "default" : "outline"} className="text-xs">
+                                      {currentPos ? `#${currentPos}` : 'NR'}
+                                    </Badge>
+                                    <PositionChange change={positionChange} className="text-xs" />
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <div className="flex items-center space-x-2">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {keyword.country?.iso2_code?.toUpperCase() || 'N/A'}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs capitalize">
+                                      {keyword.device_type}
+                                    </Badge>
+                                  </div>
+                                  {keyword.tags && keyword.tags.length > 0 && (
+                                    <div className="flex items-center space-x-1">
+                                      <Badge variant="default" className="text-xs">
+                                        {keyword.tags[0]}
+                                      </Badge>
+                                      {keyword.tags.length > 1 && (
+                                        <Badge variant="default" className="text-xs">
+                                          +{keyword.tags.length - 1}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              {/* Desktop Layout */}
+                              <div className="hidden md:contents">
+                                {/* Keyword */}
+                                <div className="col-span-4 font-medium text-foreground truncate">
+                                  {keyword.keyword}
+                                </div>
+                                
+                                {/* Position */}
+                                <div className="col-span-2 flex items-center justify-center space-x-1">
+                                  <Badge variant={currentPos && currentPos <= 10 ? "default" : "outline"} className="text-xs">
+                                    {currentPos ? `#${currentPos}` : 'NR'}
+                                  </Badge>
+                                  <PositionChange change={positionChange} className="text-xs" />
+                                </div>
+                                
+                                {/* Country */}
+                                <div className="col-span-2 flex justify-center">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {keyword.country?.iso2_code?.toUpperCase() || 'N/A'}
+                                  </Badge>
+                                </div>
+                                
+                                {/* Device */}
+                                <div className="col-span-2 flex justify-center">
+                                  <Badge variant="outline" className="text-xs capitalize">
+                                    {keyword.device_type}
+                                  </Badge>
+                                </div>
+                                
+                                {/* Tags */}
+                                <div className="col-span-2 flex justify-center">
+                                  {keyword.tags && keyword.tags.length > 0 ? (
+                                    <div className="flex items-center space-x-1">
+                                      <Badge variant="default" className="text-xs">
+                                        {keyword.tags[0]}
+                                      </Badge>
+                                      {keyword.tags.length > 1 && (
+                                        <Badge variant="default" className="text-xs">
+                                          +{keyword.tags.length - 1}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Enhanced Sidebar */}
+            <div className="space-y-6">
+              {/* Enhanced Quick Actions */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg flex items-center">
+                    <Zap className="w-5 h-5 mr-2" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button 
+                    className="w-full justify-start h-11 bg-primary text-primary-foreground hover:bg-primary/90"
+                    onClick={() => router.push('/dashboard/indexnow/add')}
+                    data-testid="action-add-keywords"
+                  >
+                    <Plus className="w-4 h-4 mr-3" />
+                    <div className="text-left">
+                      <div className="font-medium">Add Keywords</div>
+                      <div className="text-xs opacity-90">Track new terms</div>
+                    </div>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start h-11"
+                    onClick={() => router.push('/dashboard/indexnow/overview')}
+                    data-testid="action-view-keywords"
+                  >
+                    <Search className="w-4 h-4 mr-3" />
+                    <div className="text-left">
+                      <div className="font-medium">View All Keywords</div>
+                      <div className="text-xs text-muted-foreground">{domainKeywords.length} tracked</div>
+                    </div>
+                  </Button>
+
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start h-11"
+                    onClick={() => router.push('/dashboard/indexnow/rank-history')}
+                    data-testid="action-rank-history"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-3" />
+                    <div className="text-left">
+                      <div className="font-medium">Rank History</div>
+                      <div className="text-xs text-muted-foreground">Historical data</div>
+                    </div>
+                  </Button>
+
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start h-11"
+                    onClick={() => router.push('/dashboard/settings/plans-billing')}
+                    data-testid="action-manage-billing"
+                  >
+                    <Settings className="w-4 h-4 mr-3" />
+                    <div className="text-left">
+                      <div className="font-medium">Manage Billing</div>
+                      <div className="text-xs text-muted-foreground">Plans & usage</div>
+                    </div>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Activity Timeline */}
+              <ActivityTimeline 
+                activities={activityData}
+                title="Recent Activity"
+                description="Latest updates and changes"
+                maxItems={4}
+                showViewAll={true}
+                onViewAll={() => router.push('/dashboard/indexnow/rank-history')}
+              />
+
+              {/* Enhanced FastIndexing Tool */}
+              <Card className="border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                        <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">FastIndexing</CardTitle>
+                        <p className="text-xs text-amber-700 dark:text-amber-300">Google URL submission</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                      Pro Tool
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                    Accelerate Google discovery of your new content.
+                  </p>
+                  <Button 
+                    variant="outline"
+                    className="w-full border-amber-300 hover:bg-amber-100 dark:border-amber-700 dark:hover:bg-amber-900/30"
+                    onClick={() => router.push('/dashboard/tools/fastindexing')}
+                    data-testid="action-fast-indexing"
+                  >
+                    <span className="flex items-center">
+                      Open Tool
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </span>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
