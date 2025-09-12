@@ -3,10 +3,7 @@
 
 import { useState, useEffect } from 'react'
 
-interface DashboardPreviewProps {
-  title?: string
-  subtitle?: string
-}
+interface DashboardPreviewProps {}
 
 // Single comprehensive IndexNow Rank Tracker dashboard preview
 const dashboardData = {
@@ -38,7 +35,7 @@ const dashboardData = {
   status: { color: "#4BB543", label: "LIVE TRACKING" }
 }
 
-export default function DashboardPreview({ title, subtitle }: DashboardPreviewProps) {
+export default function DashboardPreview({}: DashboardPreviewProps) {
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -60,8 +57,6 @@ export default function DashboardPreview({ title, subtitle }: DashboardPreviewPr
   }, [mounted])
 
   const styles = {
-    title: title || "Scale Your SEO With Real-Time Rank Intelligence",
-    subtitle: subtitle || "Track every keyword position change, monitor competitor movements, and accelerate your search rankings with advanced analytics that deliver results.",
     opacity: 1
   }
 
@@ -78,22 +73,6 @@ export default function DashboardPreview({ title, subtitle }: DashboardPreviewPr
       alignItems: isMobile ? 'center' : 'flex-start',
       textAlign: isMobile ? 'center' : 'left'
     }}>
-      <h2 style={{
-        fontSize: isMobile ? '28px' : '36px',
-        fontWeight: '700',
-        lineHeight: '1.2',
-        marginBottom: '16px'
-      }}>
-        {styles.title}
-      </h2>
-      <p style={{
-        fontSize: isMobile ? '16px' : '18px',
-        color: '#d1d5db',
-        marginBottom: '32px',
-        lineHeight: '1.6'
-      }}>
-        {styles.subtitle}
-      </p>
 
       {/* Dashboard Mock Slideshow */}
       <div style={{
