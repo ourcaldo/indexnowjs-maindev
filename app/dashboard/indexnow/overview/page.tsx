@@ -9,12 +9,12 @@ import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { Card, Button } from '@/components/dashboard/ui'
 import { 
   RankOverviewStats, 
-  DomainSelector, 
   FilterPanel, 
   KeywordTable, 
   BulkActions, 
   Pagination 
 } from './components'
+import { SharedDomainSelector } from '@/components/shared/DomainSelector'
 import { UsageChart, RankingDistribution } from '@/components/dashboard/enhanced'
 
 export default function IndexNowOverview() {
@@ -338,14 +338,17 @@ export default function IndexNowOverview() {
         <>
           {/* Domain Section and Add Keyword Button - Same Row */}
           <div className="flex items-center justify-between mb-6">
-            <DomainSelector
+            <SharedDomainSelector
               domains={domains}
               selectedDomainId={selectedDomainId}
               selectedDomainInfo={selectedDomainInfo}
-              showDomainsManager={showDomainsManager}
-              setShowDomainsManager={setShowDomainsManager}
-              setSelectedDomainId={setSelectedDomainId}
+              isOpen={showDomainsManager}
+              onToggle={() => setShowDomainsManager(!showDomainsManager)}
+              onDomainSelect={setSelectedDomainId}
               getDomainKeywordCount={getDomainKeywordCount}
+              showKeywordCount={true}
+              addDomainRoute="/dashboard/indexnow/add"
+              placeholder="Select Domain"
             />
 
             {/* Device and Country Filters + Add Keyword Button */}

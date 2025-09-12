@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { 
   TrendingUpIcon, 
@@ -40,6 +39,7 @@ import {
 
 // Import enhanced components
 import { StatCard, DataTable, PositionChange } from '@/components/dashboard/enhanced'
+import { SharedDomainSelector } from '@/components/shared/DomainSelector'
 
 interface UserProfile {
   full_name: string | null;
@@ -113,6 +113,7 @@ export default function Dashboard() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
+  const [isDomainSelectorOpen, setIsDomainSelectorOpen] = useState(false);
   const [packagesData, setPackagesData] = useState<{ packages: PaymentPackage[], current_package_id: string | null } | null>(null);
   const [subscribing, setSubscribing] = useState<string | null>(null);
   const [startingTrial, setStartingTrial] = useState<string | null>(null);
@@ -271,6 +272,11 @@ export default function Dashboard() {
   }, [domainKeywords, selectedDomainId, domains])
 
   const selectedDomain = domains.find((d: any) => d.id === selectedDomainId)
+  
+  // Get keyword count for each domain
+  const getDomainKeywordCount = (domainId: string) => {
+    return recentKeywords.filter((k: any) => k.domain?.id === domainId).length
+  }
   const hasActivePackage = userProfile?.package || packagesData?.current_package_id
   const isDataLoading = loading || dashboardLoading
 
@@ -301,20 +307,21 @@ export default function Dashboard() {
           </p>
         </div>
         
-        {hasActivePackage && selectedDomain && (
+        {hasActivePackage && domains.length > 0 && (
           <div className="flex items-center space-x-3">
-            <Select value={selectedDomainId || ''} onValueChange={setSelectedDomainId}>
-              <SelectTrigger className="w-[200px]" data-testid="select-domain">
-                <SelectValue placeholder="Select domain" />
-              </SelectTrigger>
-              <SelectContent>
-                {domains.map((domain: any) => (
-                  <SelectItem key={domain.id} value={domain.id}>
-                    {domain.display_name || domain.domain_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SharedDomainSelector
+              domains={domains}
+              selectedDomainId={selectedDomainId}
+              selectedDomainInfo={selectedDomain}
+              isOpen={isDomainSelectorOpen}
+              onToggle={() => setIsDomainSelectorOpen(!isDomainSelectorOpen)}
+              onDomainSelect={setSelectedDomainId}
+              getDomainKeywordCount={getDomainKeywordCount}
+              showKeywordCount={true}
+              className="w-[320px]"
+              addDomainRoute="/dashboard/indexnow/add"
+              placeholder="Select domain"
+            />
             <Button 
               variant="outline" 
               size="sm"
