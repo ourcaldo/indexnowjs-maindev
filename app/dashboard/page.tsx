@@ -568,10 +568,10 @@ export default function Dashboard() {
                       {/* Mobile-friendly header */}
                       <div className="hidden md:grid md:grid-cols-12 gap-3 px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30 border-b">
                         <div className="col-span-4">Keyword</div>
-                        <div className="col-span-2">Position</div>
-                        <div className="col-span-2">Country</div>
-                        <div className="col-span-2">Device</div>
-                        <div className="col-span-2">Tags</div>
+                        <div className="col-span-2 text-center">Position</div>
+                        <div className="col-span-2 text-center">Country</div>
+                        <div className="col-span-2 text-center">Device</div>
+                        <div className="col-span-2 text-center">Tags</div>
                       </div>
                       
                       {/* Keywords List */}
@@ -627,7 +627,7 @@ export default function Dashboard() {
                                 </div>
                                 
                                 {/* Position */}
-                                <div className="col-span-2 flex items-center space-x-1">
+                                <div className="col-span-2 flex items-center justify-center space-x-1">
                                   <span className="text-sm font-medium text-foreground">
                                     {currentPos ? `#${currentPos}` : 'NR'}
                                   </span>
@@ -635,21 +635,21 @@ export default function Dashboard() {
                                 </div>
                                 
                                 {/* Country */}
-                                <div className="col-span-2">
+                                <div className="col-span-2 flex justify-center">
                                   <span className="text-sm text-muted-foreground">
                                     {keyword.country?.iso2_code?.toUpperCase() || 'N/A'}
                                   </span>
                                 </div>
                                 
                                 {/* Device */}
-                                <div className="col-span-2">
+                                <div className="col-span-2 flex justify-center">
                                   <span className="text-sm text-muted-foreground capitalize">
                                     {keyword.device_type}
                                   </span>
                                 </div>
                                 
                                 {/* Tags */}
-                                <div className="col-span-2">
+                                <div className="col-span-2 flex justify-center">
                                   {keyword.tags && keyword.tags.length > 0 ? (
                                     <div className="flex items-center space-x-1">
                                       <span className="text-sm text-muted-foreground">
