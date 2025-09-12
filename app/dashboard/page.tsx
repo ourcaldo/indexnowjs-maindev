@@ -323,11 +323,10 @@ export default function Dashboard() {
               placeholder="Select domain"
             />
             <Button 
-              variant="outline" 
               size="sm"
               onClick={() => router.push('/dashboard/indexnow/add')}
               data-testid="button-add-keyword"
-              className="bg-slate-700 text-white hover:bg-slate-800 border-slate-700"
+              className="bg-slate-800 text-white border-slate-800 hover:bg-slate-800 hover:text-white hover:border-slate-800 transition-none"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Keywords
