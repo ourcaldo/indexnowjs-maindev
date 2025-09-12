@@ -157,60 +157,6 @@ export class EmailService {
     }
   }
 
-  async sendTrialEndingNotification(email: string, data: TrialEndingData): Promise<void> {
-    try {
-      console.log(`📤 Preparing to send trial ending notification to: ${email}`)
-      console.log('📊 Email data:', {
-        customerName: data.customerName,
-        packageName: data.packageName,
-        timeRemaining: data.timeRemaining
-      })
-
-      await this.ensureInitialized()
-      
-      if (!this.transporter) {
-        throw new Error('SMTP transporter not available')
-      }
-
-      // Load and render template
-      const templateHtml = this.loadTemplate('trial-ending')
-      const renderedHtml = this.renderTemplate(templateHtml, data)
-
-      const mailOptions = {
-        from: `${process.env.SMTP_FROM_NAME || 'IndexNow Studio'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
-        to: email,
-        subject: `⏰ Your ${data.packageName} Trial Ends Soon - Action Required`,
-        html: renderedHtml
-      }
-
-      console.log('📬 Sending email with options:', {
-        from: mailOptions.from,
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        htmlLength: renderedHtml.length
-      })
-
-      const result = await this.transporter.sendMail(mailOptions)
-      
-      console.log('✅ Trial ending notification sent successfully!')
-      console.log('📨 Email result:', {
-        messageId: result.messageId,
-        response: result.response
-      })
-
-    } catch (error) {
-      console.error('❌ Failed to send trial ending notification:', error)
-      
-      // Log detailed error information
-      if (error instanceof Error) {
-        console.error('Error name:', error.name)
-        console.error('Error message:', error.message)
-        console.error('Error stack:', error.stack)
-      }
-      
-      throw error
-    }
-  }
 
   async sendBillingConfirmation(email: string, data: BillingConfirmationData): Promise<void> {
     try {
