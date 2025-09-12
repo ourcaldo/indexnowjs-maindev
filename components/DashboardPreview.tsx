@@ -12,6 +12,17 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Mock dashboard data for preview
+  const dashboardData = {
+    keywords: [
+      { keyword: 'seo tools', position: 3, change: '+2' },
+      { keyword: 'rank tracking', position: 7, change: '-1' },
+      { keyword: 'website indexing', position: 12, change: '+5' },
+      { keyword: 'google indexing', position: 8, change: '0' },
+      { keyword: 'seo optimization', position: 15, change: '+3' }
+    ]
+  }
+
   useEffect(() => {
     setMounted(true)
   }, [])
