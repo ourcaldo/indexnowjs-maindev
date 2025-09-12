@@ -179,17 +179,9 @@ export const ActivityTimeline = ({
                   {/* Activity Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
-                        <h4 className="text-sm font-medium text-foreground truncate">
-                          {activity.title}
-                        </h4>
-                        <Badge 
-                          variant={badge.variant} 
-                          className={`text-xs w-fit ${badge.className || ''}`}
-                        >
-                          {badge.label}
-                        </Badge>
-                      </div>
+                      <h4 className="text-sm font-medium text-foreground truncate">
+                        {activity.title}
+                      </h4>
                       <span className="text-xs text-muted-foreground flex-shrink-0">
                         {formatTimestamp(activity.timestamp)}
                       </span>

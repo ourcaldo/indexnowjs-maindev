@@ -701,7 +701,7 @@ export default function Dashboard() {
                   
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-muted/5"
+                    className="w-full justify-start h-11 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => router.push('/dashboard/indexnow/overview')}
                     data-testid="action-view-keywords"
                   >
@@ -714,7 +714,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-muted/5"
+                    className="w-full justify-start h-11 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => router.push('/dashboard/indexnow/rank-history')}
                     data-testid="action-rank-history"
                   >
@@ -727,7 +727,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-muted/5"
+                    className="w-full justify-start h-11 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => router.push('/dashboard/settings/plans-billing')}
                     data-testid="action-manage-billing"
                   >
@@ -775,7 +775,7 @@ export default function Dashboard() {
                   </p>
                   <Button 
                     variant="outline"
-                    className="w-full border-amber-300 hover:bg-amber-50/50 dark:border-amber-700 dark:hover:bg-amber-900/10"
+                    className="w-full border-amber-300 text-amber-800 hover:bg-amber-100 hover:text-amber-900 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20 dark:hover:text-amber-100"
                     onClick={() => router.push('/dashboard/tools/fastindexing')}
                     data-testid="action-fast-indexing"
                   >
