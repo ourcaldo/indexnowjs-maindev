@@ -32,7 +32,7 @@ const dashboardData = {
     { value: "15", label: "Active Domains", color: "#5B7BBF", bg: "#f0f4ff", border: "#e0e8ff" },
     { value: "24", label: "Countries", color: "#F0A202", bg: "#fffbeb", border: "#fde68a" }
   ],
-  status: { color: "#4BB543", label: "LIVE TRACKING" }
+  status: { color: "#4BB543", label: "" }
 }
 
 export default function DashboardPreview({}: DashboardPreviewProps) {
