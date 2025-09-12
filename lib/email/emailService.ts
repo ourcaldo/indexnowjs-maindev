@@ -54,15 +54,6 @@ interface OrderExpiredData {
   subscribeUrl: string
 }
 
-interface TrialEndingData {
-  customerName: string
-  packageName: string
-  timeRemaining: string
-  autoBillingStatus: string
-  autoBillingEnabled: boolean
-  dashboardUrl: string
-  notificationDate: string
-}
 
 export class EmailService {
   private transporter: nodemailer.Transporter | null = null
