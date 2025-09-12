@@ -72,29 +72,6 @@ export class TrialMonitorService {
     }
   }
 
-  /**
-   * Send trial welcome email when trial is activated
-   */
-  static async sendTrialWelcomeEmail(userEmail: string, customerName: string, planName: string, trialEndDate: string): Promise<void> {
-    try {
-      // Generate unified ORDER ID format
-      const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-      
-      await emailService.sendBillingConfirmation(userEmail, {
-        customerName,
-        orderId: orderId,
-        packageName: planName,
-        billingPeriod: 'trial',
-        amount: 'Free for 3 days',
-        paymentMethod: 'Trial Activation',
-        orderDate: new Date().toLocaleDateString()
-      })
-      
-      console.log(`✅ [Trial Monitor] Sent welcome email to ${userEmail}`)
-    } catch (error) {
-      console.error(`❌ [Trial Monitor] Failed to send welcome email to ${userEmail}:`, error)
-    }
-  }
 
   /**
    * Main monitoring job - runs all checks
