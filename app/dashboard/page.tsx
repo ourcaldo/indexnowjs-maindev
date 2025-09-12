@@ -775,7 +775,7 @@ export default function Dashboard() {
                   </p>
                   <Button 
                     variant="outline"
-                    className="w-full border-amber-300 text-amber-800 dark:border-amber-700 dark:text-amber-200 coolBeans"
+                    className="w-full border-amber-300 text-amber-800 dark:border-amber-700 dark:text-amber-200 btn-hover"
                     onClick={() => router.push('/dashboard/tools/fastindexing')}
                     data-testid="action-fast-indexing"
                   >
