@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react'
 interface DashboardPreviewProps {
   title?: string
   subtitle?: string
-  variant?: 'login' | 'register' | 'forgot'
 }
 
 // Single comprehensive IndexNow Rank Tracker dashboard preview
@@ -39,7 +38,7 @@ const dashboardData = {
   status: { color: "#4BB543", label: "LIVE TRACKING" }
 }
 
-export default function DashboardPreview({ title, subtitle, variant = 'login' }: DashboardPreviewProps) {
+export default function DashboardPreview({ title, subtitle }: DashboardPreviewProps) {
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -61,8 +60,8 @@ export default function DashboardPreview({ title, subtitle, variant = 'login' }:
   }, [mounted])
 
   const styles = {
-    title: title || "IndexNow Rank Tracker Dashboard",
-    subtitle: subtitle || "Professional keyword ranking monitoring with real-time analytics and comprehensive SEO insights.",
+    title: title || "Scale Your SEO With Real-Time Rank Intelligence",
+    subtitle: subtitle || "Track every keyword position change, monitor competitor movements, and accelerate your search rankings with advanced analytics that deliver results.",
     opacity: 1
   }
 
