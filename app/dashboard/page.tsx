@@ -450,9 +450,6 @@ export default function Dashboard() {
                     {selectedDomain?.display_name || selectedDomain?.domain_name} • Real-time insights
                   </p>
                 </div>
-                <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20">
-                  Live Tracking
-                </Badge>
               </div>
             </CardHeader>
             <CardContent>
