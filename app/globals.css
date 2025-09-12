@@ -170,6 +170,10 @@
     background-color: #100E09 !important;
     color: white !important;
   }
+  
+  .btn-hover:hover * {
+    color: white !important;
+  }
 
   /* Radial gradient utility */
   .bg-gradient-radial {
