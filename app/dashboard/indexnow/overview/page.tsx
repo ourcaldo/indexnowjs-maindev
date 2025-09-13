@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Globe, Plus } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/database'
+import { useDashboardData } from '@/hooks/useDashboardData'
 import { usePageViewLogger, useActivityLogger } from '@/hooks/useActivityLogger'
 import { Card, Button } from '@/components/dashboard/ui'
 import { 
@@ -15,6 +16,7 @@ import {
   Pagination 
 } from './components'
 import { SharedDomainSelector } from '@/components/shared/DomainSelector'
+import { NoDomainState } from '@/components/shared/NoDomainState'
 import { UsageChart, RankingDistribution } from '@/components/dashboard/enhanced'
 
 export default function IndexNowOverview() {
@@ -66,21 +68,8 @@ export default function IndexNowOverview() {
     })
   }, []);
 
-  // Fetch domains
-  const { data: domainsData } = useQuery({
-    queryKey: ['/api/v1/rank-tracking/domains'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      const response = await fetch('/api/v1/rank-tracking/domains', {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) throw new Error('Failed to fetch domains')
-      return response.json()
-    }
-  })
+  // Use merged dashboard API for better performance and to prevent loading glitches
+  const { data: dashboardData, isLoading: dashboardLoading } = useDashboardData()
 
   // Fetch countries
   const { data: countriesData } = useQuery({
@@ -178,7 +167,7 @@ export default function IndexNowOverview() {
     enabled: !!selectedDomainId
   })
 
-  const domains = domainsData?.data || []
+  const domains = dashboardData?.rankTracking?.domains || []
   const countries = countriesData?.data || []
   const keywords = keywordsData?.data || []
   const allKeywords = keywordCountsData?.data || []
@@ -319,21 +308,14 @@ export default function IndexNowOverview() {
   return (
     <div className="space-y-6">
       {/* Check if user has domains */}
-      {domains.length === 0 ? (
+      {dashboardLoading ? (
         <Card>
-          <div className="text-center py-12">
-            <Globe className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2 text-foreground">
-              No Domains Added
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Add your first domain to start tracking keywords and monitoring your search rankings.
-            </p>
-            <Button onClick={() => router.push('/dashboard/indexnow/add')}>
-              Add Your First Domain
-            </Button>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </Card>
+      ) : domains.length === 0 ? (
+        <NoDomainState />
       ) : (
         <>
           {/* Domain Section and Add Keyword Button - Same Row */}
@@ -434,7 +416,7 @@ export default function IndexNowOverview() {
                 handleKeywordSelect={handleKeywordSelect}
                 handleSelectAll={handleSelectAll}
                 searchTerm={searchTerm}
-                keywordsLoading={keywordsLoading}
+                keywordsLoading={keywordsLoading || dashboardLoading}
               />
 
               <Pagination
