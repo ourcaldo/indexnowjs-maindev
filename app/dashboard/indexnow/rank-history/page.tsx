@@ -124,6 +124,23 @@ export default function RankHistoryPage() {
   // Use merged dashboard API for better performance and to prevent loading glitches
   const { data: dashboardData, isLoading: dashboardLoading } = useDashboardData()
 
+  // Fetch domains with keyword counts (better than dashboard API for accurate counts)
+  const { data: domainsWithCounts = [], isLoading: domainsLoading } = useQuery({
+    queryKey: ['/api/v1/rank-tracking/domains'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/v1/rank-tracking/domains', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) throw new Error('Failed to fetch domains')
+      const data = await response.json()
+      return data.success ? data.data : []
+    }
+  })
+
   // Fetch countries
   const { data: countriesData } = useQuery({
     queryKey: ['/api/v1/rank-tracking/countries'],
@@ -138,27 +155,6 @@ export default function RankHistoryPage() {
       if (!response.ok) throw new Error('Failed to fetch countries')
       return response.json()
     }
-  })
-
-  // Get all keywords for domain (for keyword count - not affected by filters)
-  const { data: allDomainKeywords = [] } = useQuery({
-    queryKey: ['/api/v1/rank-tracking/keywords', selectedDomainId],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      const params = new URLSearchParams()
-      if (selectedDomainId) params.append('domain_id', selectedDomainId)
-      params.append('limit', '1000') // Get all keywords for count
-      
-      const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      const data = await response.json()
-      return data.success ? data.data : []
-    },
-    enabled: !!selectedDomainId
   })
 
   // Fetch rank history data
@@ -186,7 +182,7 @@ export default function RankHistoryPage() {
     enabled: !!startDate && !!endDate && !!selectedDomainId
   })
 
-  const domains = dashboardData?.rankTracking?.domains || []
+  const domains = domainsWithCounts || []
   const countries = countriesData?.data || []
 
   // Set default selected domain
@@ -199,13 +195,10 @@ export default function RankHistoryPage() {
   // Get selected domain info
   const selectedDomainInfo = domains.find((d: any) => d.id === selectedDomainId)
 
-  // Get keyword count for each domain (from all keywords, not affected by filters)
+  // Get keyword count for each domain (now using domains API with keyword counts)
   const getDomainKeywordCount = (domainId: string) => {
-    if (domainId === selectedDomainId && allDomainKeywords) {
-      return allDomainKeywords.length
-    }
-    // For non-selected domains, we'll show 0 since we don't have their data
-    return 0
+    const domain = domains.find((d: any) => d.id === domainId)
+    return domain?.keywordCount || 0
   }
 
   // Filter and search logic
@@ -275,7 +268,7 @@ export default function RankHistoryPage() {
   return (
     <div className="space-y-6">
       {/* Check if user has domains */}
-      {dashboardLoading ? (
+      {(dashboardLoading || domainsLoading) ? (
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -343,8 +336,8 @@ export default function RankHistoryPage() {
                 </div>
               </div>
 
-              {/* Rank Overview Stats Widget */}
-              {selectedDomainId && rankHistory.length > 0 && (
+              {/* Rank Overview Stats Widget - Always show when domain is selected */}
+              {selectedDomainId && (
                 <RankOverviewStats 
                   totalKeywords={statsData.totalKeywords}
                   avgPosition={statsData.avgPosition}
@@ -353,11 +346,25 @@ export default function RankHistoryPage() {
                 />
               )}
 
-              {/* Filters Section */}
+              {/* Filters Section - Reordered: Search (60-70%) → Date → Tags */}
               <Card>
                 <CardContent className="p-4">
                   <div className="flex flex-wrap items-center gap-3">
-                    {/* Date Range */}
+                    {/* Search Bar - 60-70% width */}
+                    <div className="flex-1 min-w-[250px] max-w-[70%]">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search keywords..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10 text-sm"
+                          data-testid="input-search"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Date Range Filter */}
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1">
                         {['7d', '30d', '60d'].map((range) => (
@@ -456,82 +463,69 @@ export default function RankHistoryPage() {
                       </div>
                     </div>
 
-                    {/* Tags Multi-Select Dropdown */}
+                    {/* Tags Filter Icon */}
                     <div className="relative">
-                      <div className="relative">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setShowTagsDropdown(!showTagsDropdown)}
-                          className="flex items-center gap-1 min-w-[100px] justify-between"
-                          data-testid="filter-tags-dropdown"
-                        >
-                          <div className="flex items-center gap-1">
-                            <Tag className="w-3 h-3" />
-                            <span>Tags {selectedTags.length > 0 && `(${selectedTags.length})`}</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowTagsDropdown(!showTagsDropdown)}
+                        className="flex items-center gap-1 min-w-[100px] justify-between"
+                        data-testid="filter-tags-dropdown"
+                      >
+                        <div className="flex items-center gap-1">
+                          <Tag className="w-3 h-3" />
+                          <span>Tags {selectedTags.length > 0 && `(${selectedTags.length})`}</span>
+                        </div>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </Button>
+                      
+                      {showTagsDropdown && (
+                        <div className="absolute top-full right-0 mt-1 bg-background border rounded-lg shadow-lg z-50 min-w-[200px] max-h-[200px] overflow-y-auto">
+                          <div className="p-2">
+                            {availableTags.length === 0 ? (
+                              <div className="text-xs text-muted-foreground py-2">No tags available</div>
+                            ) : (
+                              availableTags.map((tag: string) => (
+                                <label 
+                                  key={tag} 
+                                  className="flex items-center gap-2 py-1 px-2 text-xs hover:bg-accent cursor-pointer rounded"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedTags.includes(tag)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedTags([...selectedTags, tag])
+                                      } else {
+                                        setSelectedTags(selectedTags.filter(t => t !== tag))
+                                      }
+                                    }}
+                                    className="rounded border-input"
+                                    data-testid={`tag-${tag}`}
+                                  />
+                                  <span className="text-foreground">{tag}</span>
+                                </label>
+                              ))
+                            )}
+                            
+                            {selectedTags.length > 0 && (
+                              <div className="border-t pt-2 mt-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setSelectedTags([])}
+                                  className="text-xs w-full"
+                                  data-testid="button-clear-tags"
+                                >
+                                  Clear All
+                                </Button>
+                              </div>
+                            )}
                           </div>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </Button>
-                        
-                        {showTagsDropdown && (
-                          <div className="absolute top-full left-0 mt-1 bg-background border rounded-lg shadow-lg z-50 min-w-[200px] max-h-[200px] overflow-y-auto">
-                            <div className="p-2">
-                              {availableTags.length === 0 ? (
-                                <div className="text-xs text-muted-foreground py-2">No tags available</div>
-                              ) : (
-                                availableTags.map((tag: string) => (
-                                  <label 
-                                    key={tag} 
-                                    className="flex items-center gap-2 py-1 px-2 text-xs hover:bg-accent cursor-pointer rounded"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedTags.includes(tag)}
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setSelectedTags([...selectedTags, tag])
-                                        } else {
-                                          setSelectedTags(selectedTags.filter(t => t !== tag))
-                                        }
-                                      }}
-                                      className="rounded border-input"
-                                      data-testid={`tag-${tag}`}
-                                    />
-                                    <span className="text-foreground">{tag}</span>
-                                  </label>
-                                ))
-                              )}
-                              
-                              {selectedTags.length > 0 && (
-                                <div className="border-t pt-2 mt-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setSelectedTags([])}
-                                    className="text-xs w-full"
-                                    data-testid="button-clear-tags"
-                                  >
-                                    Clear All
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Search */}
-                    <div className="flex items-center gap-1">
-                      <Input
-                        placeholder="Search keywords..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-40 text-sm"
-                        data-testid="input-search"
-                      />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
