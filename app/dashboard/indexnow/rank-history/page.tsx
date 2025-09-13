@@ -274,9 +274,9 @@ export default function RankHistoryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4">
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Check if user has domains */}
           {dashboardLoading ? (
             <Card>
@@ -294,7 +294,7 @@ export default function RankHistoryPage() {
           ) : (
             <>
               {/* Domain Section and Add Keyword Button - Same Row */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <SharedDomainSelector 
                   domains={domains}
                   selectedDomainId={selectedDomainId}
@@ -358,8 +358,8 @@ export default function RankHistoryPage() {
 
               {/* Filters Section */}
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-wrap items-center gap-4">
+                <CardContent className="p-4">
+                  <div className="flex flex-wrap items-center gap-3">
                     {/* Date Range */}
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1">
