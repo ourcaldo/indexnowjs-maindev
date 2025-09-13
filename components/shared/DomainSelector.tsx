@@ -84,7 +84,7 @@ export const SharedDomainSelector = ({
              data-testid="domain-selector-dropdown">
           <div className="p-2">
             {domains.length === 0 ? (
-              <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-center py-4 text-sm text-muted-foreground">
                 No domains available
               </div>
             ) : (
