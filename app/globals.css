@@ -73,7 +73,7 @@
   --radius: 0.5rem;
   
   /* Table specific */
-  --table-frozen-column: #F8F9FA;
+  --table-frozen-column: #E8F4F8;
   --table-frozen-column-foreground: var(--charcoal);
 }
 
@@ -99,7 +99,7 @@
   --ring: hsl(0, 0%, 98%);
   
   /* Table specific - dark mode */
-  --table-frozen-column: hsl(215, 27%, 12%);
+  --table-frozen-column: hsl(215, 35%, 18%);
   --table-frozen-column-foreground: hsl(0, 0%, 95%);
 }
 

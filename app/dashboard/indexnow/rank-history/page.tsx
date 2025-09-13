@@ -570,11 +570,11 @@ export default function RankHistoryPage() {
 
               {/* Rank History Table */}
               <Card>
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">Rank History</CardTitle>
-                  <div className="border-t border-border/60 mt-3"></div>
                 </CardHeader>
-                <CardContent className="pt-3">
+                <div className="border-t border-border"></div>
+                <CardContent className="pt-2">
                   {isLoading ? (
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -590,11 +590,11 @@ export default function RankHistoryPage() {
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-border/40">
-                              <th className="text-left py-2 px-2 sticky left-0 z-10 text-xs font-medium uppercase tracking-wider" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)', color: 'var(--table-frozen-column-foreground)'}}>
+                              <th className="text-left py-1.5 px-2 sticky left-0 z-10 text-xs font-medium uppercase tracking-wider" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)', color: 'var(--table-frozen-column-foreground)'}}>
                                 Keyword
                               </th>
                               {dateColumns.map((date) => (
-                                <th key={date} className="text-center py-2 px-1 text-xs text-muted-foreground font-medium uppercase tracking-wider" style={{minWidth: '50px'}}>
+                                <th key={date} className="text-center py-1.5 px-1 text-xs text-muted-foreground font-medium uppercase tracking-wider" style={{minWidth: '50px'}}>
                                   {formatDateHeader(date)}
                                 </th>
                               ))}
@@ -603,7 +603,7 @@ export default function RankHistoryPage() {
                           <tbody>
                             {paginatedData.map((item: RankHistoryData) => (
                               <tr key={item.keyword_id} className="border-b border-border/30 hover:bg-muted/30" data-testid={`row-keyword-${item.keyword_id}`}>
-                                <td className="py-2 px-2 sticky left-0 z-10" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)'}}>
+                                <td className="py-1.5 px-2 sticky left-0 z-10" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)'}}>
                                   <div className="font-medium text-sm truncate" style={{color: 'var(--table-frozen-column-foreground)'}}>
                                     {item.keyword}
                                   </div>
@@ -622,7 +622,7 @@ export default function RankHistoryPage() {
                                     previousPosition - position : null
                                   
                                   return (
-                                    <td key={date} className="text-center py-2 px-1 text-xs" data-testid={`cell-${item.keyword_id}-${date}`}>
+                                    <td key={date} className="text-center py-1.5 px-1 text-xs" data-testid={`cell-${item.keyword_id}-${date}`}>
                                       {position ? (
                                         <div className="flex items-center justify-center gap-0.5">
                                           <span className={`font-semibold text-xs inline-flex items-center justify-center w-6 h-5 rounded ${
