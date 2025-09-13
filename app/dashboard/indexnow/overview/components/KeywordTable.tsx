@@ -85,7 +85,7 @@ export const KeywordTable = ({
                   className="w-4 h-4"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground">
+              <th className="px-3 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground">
                 KEYWORD
               </th>
               <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground">
