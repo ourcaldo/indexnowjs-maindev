@@ -55,10 +55,12 @@ const generateDateRange = (startDate: string, endDate: string): string[] => {
   return dates.reverse() // Most recent first
 }
 
-// Format date for display (e.g., "Jan 15")
+// Format date for display (e.g., "13/09")
 const formatDateHeader = (dateStr: string): string => {
   const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const day = date.getDate().toString().padStart(2, '0')
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  return `${day}/${month}`
 }
 
 export default function RankHistoryPage() {
@@ -567,7 +569,7 @@ export default function RankHistoryPage() {
 
               {/* Rank History Table */}
               <Card>
-                <CardHeader className="pb-1 pt-3">
+                <CardHeader className="py-2">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Rank History</CardTitle>
                     <span className="text-xs text-muted-foreground" data-testid="text-results-info">
@@ -591,12 +593,12 @@ export default function RankHistoryPage() {
                       <div className="relative">
                         <table className="w-full">
                           <thead>
-                            <tr className="border-b border-border/40">
+                            <tr className="border-b border-border/40" style={{backgroundColor: 'var(--muted)'}}>
                               <th className="text-left py-1 px-2 sticky left-0 z-10 text-xs font-bold uppercase tracking-wider" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)', color: 'var(--table-frozen-column-foreground)'}}>
                                 Keyword
                               </th>
                               {dateColumns.map((date) => (
-                                <th key={date} className="text-center py-1 px-1 text-xs text-muted-foreground font-bold uppercase tracking-wider" style={{minWidth: '50px'}}>
+                                <th key={date} className="text-center py-1 px-1 text-xs font-bold uppercase tracking-wider" style={{minWidth: '50px', color: 'var(--foreground)'}}>
                                   {formatDateHeader(date)}
                                 </th>
                               ))}
