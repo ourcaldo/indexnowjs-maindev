@@ -572,8 +572,9 @@ export default function RankHistoryPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-muted-foreground">Rank History</CardTitle>
+                  <div className="border-t border-border/60 mt-3"></div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-3">
                   {isLoading ? (
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -589,7 +590,7 @@ export default function RankHistoryPage() {
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-border/40">
-                              <th className="text-left py-2 px-2 sticky left-0 z-10 bg-background text-foreground text-xs font-medium uppercase tracking-wider" style={{width: '200px', minWidth: '200px'}}>
+                              <th className="text-left py-2 px-2 sticky left-0 z-10 text-xs font-medium uppercase tracking-wider" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)', color: 'var(--table-frozen-column-foreground)'}}>
                                 Keyword
                               </th>
                               {dateColumns.map((date) => (
@@ -602,8 +603,8 @@ export default function RankHistoryPage() {
                           <tbody>
                             {paginatedData.map((item: RankHistoryData) => (
                               <tr key={item.keyword_id} className="border-b border-border/30 hover:bg-muted/30" data-testid={`row-keyword-${item.keyword_id}`}>
-                                <td className="py-2 px-2 sticky left-0 z-10 bg-background" style={{width: '200px', minWidth: '200px'}}>
-                                  <div className="font-medium text-sm text-foreground truncate">
+                                <td className="py-2 px-2 sticky left-0 z-10" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)'}}>
+                                  <div className="font-medium text-sm truncate" style={{color: 'var(--table-frozen-column-foreground)'}}>
                                     {item.keyword}
                                   </div>
                                 </td>

@@ -71,6 +71,10 @@
   --destructive: var(--rose-red);
   --destructive-foreground: var(--pure-white);
   --radius: 0.5rem;
+  
+  /* Table specific */
+  --table-frozen-column: #F8F9FA;
+  --table-frozen-column-foreground: var(--charcoal);
 }
 
 .dark {
@@ -93,6 +97,10 @@
   --border: hsl(215, 25%, 15%);
   --input: hsl(215, 25%, 15%);
   --ring: hsl(0, 0%, 98%);
+  
+  /* Table specific - dark mode */
+  --table-frozen-column: hsl(215, 27%, 12%);
+  --table-frozen-column-foreground: hsl(0, 0%, 95%);
 }
 
 @layer base {
