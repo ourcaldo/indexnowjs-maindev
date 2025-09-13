@@ -95,13 +95,13 @@ export default function RankHistoryPage() {
     
     switch (dateRange) {
       case '7d':
-        startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         break
       case '30d':
-        startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         break
       case '60d':
-        startDate = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        startDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         break
       case 'custom':
         if (appliedCustomDates) {
@@ -570,8 +570,8 @@ export default function RankHistoryPage() {
 
               {/* Rank History Table */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Rank History</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Rank History</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {isLoading ? (
@@ -588,12 +588,12 @@ export default function RankHistoryPage() {
                       <div className="relative">
                         <table className="w-full">
                           <thead>
-                            <tr className="border-b">
-                              <th className="text-left py-3 px-2 sticky left-0 z-10 bg-muted text-foreground font-medium" style={{width: '200px', minWidth: '200px'}}>
+                            <tr className="border-b border-border/40">
+                              <th className="text-left py-2 px-2 sticky left-0 z-10 bg-background text-foreground text-xs font-medium uppercase tracking-wider" style={{width: '200px', minWidth: '200px'}}>
                                 Keyword
                               </th>
                               {dateColumns.map((date) => (
-                                <th key={date} className="text-center py-3 px-2 text-xs text-muted-foreground font-medium" style={{minWidth: '60px'}}>
+                                <th key={date} className="text-center py-2 px-1 text-xs text-muted-foreground font-medium uppercase tracking-wider" style={{minWidth: '50px'}}>
                                   {formatDateHeader(date)}
                                 </th>
                               ))}
@@ -601,9 +601,9 @@ export default function RankHistoryPage() {
                           </thead>
                           <tbody>
                             {paginatedData.map((item: RankHistoryData) => (
-                              <tr key={item.keyword_id} className="border-b border-border/50" data-testid={`row-keyword-${item.keyword_id}`}>
-                                <td className="py-3 px-2 sticky left-0 z-10 bg-muted/50" style={{width: '200px', minWidth: '200px'}}>
-                                  <div className="font-medium text-sm text-foreground">
+                              <tr key={item.keyword_id} className="border-b border-border/30 hover:bg-muted/30" data-testid={`row-keyword-${item.keyword_id}`}>
+                                <td className="py-2 px-2 sticky left-0 z-10 bg-background" style={{width: '200px', minWidth: '200px'}}>
+                                  <div className="font-medium text-sm text-foreground truncate">
                                     {item.keyword}
                                   </div>
                                 </td>
@@ -621,29 +621,29 @@ export default function RankHistoryPage() {
                                     previousPosition - position : null
                                   
                                   return (
-                                    <td key={date} className="text-center py-3 px-2 text-sm" data-testid={`cell-${item.keyword_id}-${date}`}>
+                                    <td key={date} className="text-center py-2 px-1 text-xs" data-testid={`cell-${item.keyword_id}-${date}`}>
                                       {position ? (
-                                        <div className="flex items-center justify-center gap-1">
-                                          <span className={`font-medium ${
-                                            position <= 3 ? 'text-green-600 dark:text-green-400' :
-                                            position <= 10 ? 'text-blue-600 dark:text-blue-400' :
-                                            position <= 50 ? 'text-orange-600 dark:text-orange-400' :
-                                            'text-red-600 dark:text-red-400'
+                                        <div className="flex items-center justify-center gap-0.5">
+                                          <span className={`font-semibold text-xs inline-flex items-center justify-center w-6 h-5 rounded ${
+                                            position <= 3 ? 'text-white bg-green-500' :
+                                            position <= 10 ? 'text-white bg-blue-500' :
+                                            position <= 50 ? 'text-white bg-orange-500' :
+                                            'text-white bg-red-500'
                                           }`}>
                                             {position}
                                           </span>
                                           {trend !== null && trend !== 0 && (
-                                            <div className="ml-1">
+                                            <div className="ml-0.5">
                                               {trend > 0 ? (
-                                                <TrendingUp className="w-3 h-3 text-green-600 dark:text-green-400" data-testid="trend-up" />
+                                                <TrendingUp className="w-2.5 h-2.5 text-green-600 dark:text-green-400" data-testid="trend-up" />
                                               ) : (
-                                                <TrendingDown className="w-3 h-3 text-red-600 dark:text-red-400" data-testid="trend-down" />
+                                                <TrendingDown className="w-2.5 h-2.5 text-red-600 dark:text-red-400" data-testid="trend-down" />
                                               )}
                                             </div>
                                           )}
                                         </div>
                                       ) : (
-                                        <span className="text-muted-foreground">-</span>
+                                        <span className="text-muted-foreground text-xs">-</span>
                                       )}
                                     </td>
                                   )
