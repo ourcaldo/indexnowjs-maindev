@@ -1049,6 +1049,22 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 13, 2025: Rank History Page Bug Fixes ✅
+
+🔧 **RANK HISTORY CRITICAL FIXES**: Resolved three major issues in the Rank History page affecting domain selector, stats visibility, and filter layout
+- **Domain Keyword Count Issue**: Fixed domain selector showing "0 keywords" for non-selected domains by switching from dashboard API to domains API with built-in keywordCount field
+- **Stats Card Visibility**: Fixed stats cards disappearing when filters return zero results - cards now always show when domain is selected regardless of filter results  
+- **Filter Layout Reordering**: Improved user experience by reordering filters to: Search Bar (60-70% width) → Date filter → Tags filter icon
+
+**🎯 Technical Implementation:**
+- **Domain Data Source**: Changed from `dashboardData?.rankTracking?.domains` to `domainsWithCounts` using dedicated `/api/v1/rank-tracking/domains` endpoint
+- **Keyword Count Logic**: Updated `getDomainKeywordCount()` function to use `domain?.keywordCount || 0` from domains API instead of manually calculating from filtered data
+- **Stats Display Condition**: Modified RankOverviewStats visibility from `selectedDomainId && rankHistory.length > 0` to just `selectedDomainId` to always show when domain is selected
+- **Filter Layout Enhancement**: Restructured filters section with responsive search bar, improved spacing, and proper visual hierarchy
+
+**📂 Files Modified:**
+- `app/dashboard/indexnow/rank-history/page.tsx` - Domain data fetching, stats visibility, and filter layout improvements
+
 ### September 13, 2025: Professional Rank History Page Revamp ✅
 
 **✅ COMPLETE RANK HISTORY OVERHAUL**: Fully revamped the Rank History page (`app/dashboard/indexnow/rank-history/page.tsx`) to achieve professional appearance and improved user experience
