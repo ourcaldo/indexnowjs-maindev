@@ -28,10 +28,13 @@ export async function GET(request: NextRequest) {
     
     console.log('✅ Authenticated user:', user.id, user.email)
 
-    // Get user's domains
+    // Get user's domains with keyword counts
     const { data: domains, error } = await supabaseAdmin
       .from('indb_keyword_domains')
-      .select('*')
+      .select(`
+        *,
+        keyword_count:indb_keyword_keywords(count)
+      `)
       .eq('user_id', user.id)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
@@ -43,6 +46,7 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       )
     }
+
 
     return NextResponse.json({
       success: true,

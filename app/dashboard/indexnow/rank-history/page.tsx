@@ -198,7 +198,8 @@ export default function RankHistoryPage() {
   // Get keyword count for each domain (now using domains API with keyword counts)
   const getDomainKeywordCount = (domainId: string) => {
     const domain = domains.find((d: any) => d.id === domainId)
-    return domain?.keywordCount || 0
+    // Supabase returns count as [{ count: number }] array structure
+    return domain?.keyword_count?.[0]?.count || 0
   }
 
   // Filter and search logic
