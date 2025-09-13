@@ -1049,6 +1049,28 @@ JWT_SECRET=[jwt-secret-key]
 
 ## Recent Changes
 
+### September 13, 2025: Enhanced Domain Empty States & Merged API Implementation ✅
+
+**✅ SHARED DOMAIN EMPTY STATE COMPONENT**: Created reusable NoDomainState component to replace hardcoded empty states across the application
+- **Component Location**: `components/shared/NoDomainState.tsx` - Professional empty state with Globe icon, customizable title/description, and action button
+- **Props Interface**: Supports `title`, `description`, `buttonText`, `redirectRoute`, and `className` for complete customization
+- **Design Consistency**: Uses project color scheme with proper dark mode support and responsive design
+
+**✅ MERGED API INTEGRATION & PREFETCHING**: Updated IndexNow Overview to use merged dashboard API for better performance and reduced loading glitches  
+- **API Enhancement**: Replaced separate domain API calls with `useDashboardData()` hook using `/api/v1/dashboard` endpoint
+- **Performance Optimization**: Implemented proper React Query prefetching with `staleTime` configuration to prevent UI glitches
+- **Loading States**: Added dashboard loading state integration with KeywordTable to ensure smooth user experience
+
+**✅ CONSISTENT STYLING UPDATES**: Updated DomainSelector component to use project's design system
+- **Theme Consistency**: Replaced hardcoded `text-gray-500 dark:text-gray-400` with `text-muted-foreground` for consistent theming
+- **Empty State**: Updated empty state styling to match shared component patterns
+
+**📈 Technical Benefits**:
+- **Reduced API Calls**: Fewer requests to backend by leveraging merged dashboard endpoint
+- **Better Caching**: Proper React Query implementation with strategic cache invalidation
+- **Code Reusability**: Centralized empty state component eliminates code duplication
+- **Performance**: Prevented loading glitches through proper prefetching strategies
+
 ### September 12, 2025: Trial Email System Complete Removal ✅
 
 **✅ TRIAL EMAIL SYSTEM COMPLETELY REMOVED**: Successfully removed all email functionality related to trial ending notifications and welcome emails as requested
