@@ -6,6 +6,11 @@ import { supabase } from '@/lib/database'
 import { usePageViewLogger } from '@/hooks/useActivityLogger'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { NoDomainState } from '@/components/shared/NoDomainState'
+import { SharedDomainSelector } from '@/components/shared/DomainSelector'
+import { RankOverviewStats } from '@/app/dashboard/indexnow/overview/components/RankOverviewStats'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { 
   Calendar, 
   Search,
@@ -21,60 +26,6 @@ import {
   TrendingDown,
   Minus
 } from 'lucide-react'
-
-// Simple UI Components using project color scheme
-const Card = ({ children, className = '' }: any) => (
-  <div className={`p-6 rounded-lg ${className}`} style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
-    {children}
-  </div>
-)
-
-const Button = ({ children, variant = 'default', size = 'default', className = '', onClick, disabled, ...props }: any) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none'
-  
-  const variants: { [key: string]: any } = {
-    default: { backgroundColor: '#1C2331', color: '#FFFFFF' },
-    secondary: { backgroundColor: '#F7F9FC', color: '#1A1A1A', border: '1px solid #E0E6ED' },
-    outline: { backgroundColor: 'transparent', color: '#6C757D', border: '1px solid #E0E6ED' },
-    ghost: { backgroundColor: 'transparent', color: '#6C757D' }
-  }
-  
-  const sizes: { [key: string]: string } = {
-    default: 'h-9 px-4 py-2',
-    sm: 'h-8 px-3 text-xs',
-    lg: 'h-11 rounded-md px-8',
-    icon: 'h-9 w-9'
-  }
-  
-  return (
-    <button 
-      className={`${baseStyles} ${sizes[size]} ${className}`}
-      style={variants[variant]}
-      onClick={onClick}
-      disabled={disabled}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-
-const Input = ({ placeholder, className = '', value, onChange, type = 'text', ...props }: any) => (
-  <input
-    type={type}
-    className={`flex h-9 w-full rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-    style={{
-      backgroundColor: '#FFFFFF',
-      border: '1px solid #E0E6ED',
-      color: '#1A1A1A',
-      ['--tw-ring-color' as any]: '#3D8BFF'
-    }}
-    placeholder={placeholder}
-    value={value}
-    onChange={onChange}
-    {...props}
-  />
-)
 
 interface Domain {
   id: string
@@ -288,17 +239,49 @@ export default function RankHistoryPage() {
 
   const dateColumns = startDate && endDate ? generateDateRange(startDate, endDate) : []
 
+  // Calculate stats for RankOverviewStats
+  const statsData = {
+    totalKeywords: filteredData.length,
+    avgPosition: (() => {
+      if (filteredData.length === 0) return 0
+      const itemsWithPosition = filteredData.filter((item: RankHistoryData) => {
+        const latestDate = dateColumns[0]
+        return latestDate && item.history[latestDate]?.position
+      })
+      if (itemsWithPosition.length === 0) return 0
+      const totalPositions = filteredData.reduce((acc: number, item: RankHistoryData) => {
+        const latestDate = dateColumns[0]
+        const position = latestDate ? item.history[latestDate]?.position : null
+        return position ? acc + position : acc
+      }, 0)
+      return Math.round(totalPositions / itemsWithPosition.length)
+    })(),
+    topTenCount: filteredData.filter((item: RankHistoryData) => {
+      const latestDate = dateColumns[0]
+      const position = latestDate ? item.history[latestDate]?.position : null
+      return position && position <= 10
+    }).length,
+    improvingCount: filteredData.filter((item: RankHistoryData) => {
+      const latestDate = dateColumns[0]
+      const previousDate = dateColumns[1]
+      if (!latestDate || !previousDate) return false
+      const currentPos = item.history[latestDate]?.position
+      const previousPos = item.history[previousDate]?.position
+      return currentPos && previousPos && currentPos < previousPos
+    }).length
+  }
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F7F9FC' }}>
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         
         <div className="space-y-6">
           {/* Check if user has domains */}
           {dashboardLoading ? (
             <Card>
-              <div className="flex items-center justify-center py-12">
+              <CardContent className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
+              </CardContent>
             </Card>
           ) : domains.length === 0 ? (
             <NoDomainState 
@@ -309,197 +292,30 @@ export default function RankHistoryPage() {
             />
           ) : (
             <>
-              {/* Domain Section and Add Keyword Button - Same Row */}
-              <div className="flex items-center justify-between mb-6">
-                {/* Selected Domain Card - Shows active domain */}
-                <div className="inline-block">
-                <div 
-                  className="bg-white rounded-lg border cursor-pointer px-3 py-2 shadow-sm hover:shadow-md transition-shadow min-w-[280px] max-w-[320px]"
-                  style={{borderColor: '#E0E6ED'}}
-                  onClick={() => setShowDomainsManager(!showDomainsManager)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Globe className="w-4 h-4" style={{color: '#6C757D'}} />
-                      <span className="text-sm font-medium" style={{color: '#1A1A1A'}}>
-                        {selectedDomainInfo ? (selectedDomainInfo.display_name || selectedDomainInfo.domain_name) : 'Select Domain'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {selectedDomainInfo && (
-                        <>
-                          <span className="text-xs" style={{color: '#6C757D'}}>Keywords</span>
-                          <span className="font-bold text-sm" style={{color: '#1A1A1A'}}>
-                            {getDomainKeywordCount(selectedDomainInfo.id)}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Domain Selection List */}
-                  {showDomainsManager && (
-                    <div className="border-t mt-2 pt-2" style={{borderColor: '#E0E6ED'}}>
-                      <div className="space-y-1">
-                        {domains.map((domain: any) => (
-                          <div 
-                            key={domain.id} 
-                            className={`flex items-center justify-between py-1 px-2 text-xs rounded cursor-pointer hover:bg-gray-50 ${
-                              selectedDomainId === domain.id ? 'bg-blue-50' : ''
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setSelectedDomainId(domain.id)
-                              setShowDomainsManager(false)
-                            }}
-                          >
-                            <span className="font-medium truncate" style={{color: '#1A1A1A'}}>
-                              {domain.display_name || domain.domain_name}
-                            </span>
-                            <div className="flex items-center gap-1 ml-2">
-                              <span style={{color: '#6C757D'}}>Keywords</span>
-                              <span className="font-bold px-1 py-0.5 rounded text-xs" style={{color: '#1A1A1A', backgroundColor: '#F7F9FC'}}>
-                                {getDomainKeywordCount(domain.id)}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                        
-                        {/* Add Domain Button */}
-                        <div className="pt-1 border-t" style={{borderColor: '#E0E6ED'}}>
-                          <button 
-                            className="text-xs px-2 py-1 rounded hover:bg-gray-50 flex items-center gap-1"
-                            style={{color: '#6C757D'}}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              window.location.href = '/dashboard/indexnow/add'
-                            }}
-                          >
-                            <Plus className="w-3 h-3" />
-                            Add Domain
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                </div>
+              {/* Header Section */}
+              <div className="flex items-center justify-between">
+                <SharedDomainSelector 
+                  domains={domains}
+                  selectedDomainId={selectedDomainId}
+                  selectedDomainInfo={selectedDomainInfo}
+                  isOpen={showDomainsManager}
+                  onToggle={() => setShowDomainsManager(!showDomainsManager)}
+                  onDomainSelect={setSelectedDomainId}
+                  getDomainKeywordCount={getDomainKeywordCount}
+                  showKeywordCount={true}
+                  addDomainRoute="/dashboard/indexnow/add"
+                  data-testid="rank-history-domain-selector"
+                />
 
-                {/* Add Keyword Button */}
-                <Button 
-                  onClick={() => window.location.href = '/dashboard/indexnow/add'}
-                  style={{ backgroundColor: '#22333b', color: '#FFFFFF' }}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Keyword
-                </Button>
-              </div>
-
-              {/* Compact Filters Section - One Line */}
-              <Card>
-                <div className="flex flex-wrap items-center gap-4">
-                  {/* Date Range */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      {['7d', '30d', '60d'].map((range) => (
-                        <Button
-                          key={range}
-                          size="sm"
-                          variant={dateRange === range ? 'default' : 'outline'}
-                          onClick={() => {
-                            setDateRange(range as any)
-                            setShowDatePicker(false)
-                          }}
-                        >
-                          {range.toUpperCase()}
-                        </Button>
-                      ))}
-                    </div>
-                    
-                    {/* Single Date Range Picker */}
-                    <div className="relative">
-                      <Button
-                        size="sm"
-                        variant={dateRange === 'custom' ? 'default' : 'outline'}
-                        onClick={() => {
-                          setDateRange('custom')
-                          setShowDatePicker(!showDatePicker)
-                        }}
-                        className="flex items-center gap-1"
-                      >
-                        <Calendar className="w-3 h-3" />
-                        {dateRange === 'custom' && appliedCustomDates 
-                          ? `${new Date(appliedCustomDates.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(appliedCustomDates.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                          : 'Custom'
-                        }
-                      </Button>
-                      
-                      {showDatePicker && (
-                        <div 
-                          className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg p-4 z-50 min-w-[300px]"
-                          style={{border: '1px solid #E0E6ED'}}
-                        >
-                          <div className="space-y-3">
-                            <div className="text-sm font-medium" style={{color: '#1A1A1A'}}>
-                              Select Date Range
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="text-xs" style={{color: '#6C757D'}}>From</label>
-                                <Input
-                                  type="date"
-                                  value={customStartDate}
-                                  onChange={(e: any) => setCustomStartDate(e.target.value)}
-                                  className="text-xs"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-xs" style={{color: '#6C757D'}}>To</label>
-                                <Input
-                                  type="date"
-                                  value={customEndDate}
-                                  onChange={(e: any) => setCustomEndDate(e.target.value)}
-                                  className="text-xs"
-                                />
-                              </div>
-                            </div>
-                            <div className="flex justify-end gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                onClick={() => {
-                                  setShowDatePicker(false)
-                                  setCustomStartDate('')
-                                  setCustomEndDate('')
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                onClick={() => {
-                                  if (customStartDate && customEndDate) {
-                                    setAppliedCustomDates({ start: customStartDate, end: customEndDate })
-                                  }
-                                  setShowDatePicker(false)
-                                }}
-                                disabled={!customStartDate || !customEndDate}
-                              >
-                                Apply
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
+                {/* Controls Row - Device, Country, Add Keyword */}
+                <div className="flex items-center gap-3">
                   {/* Device Filter */}
                   <div className="flex items-center gap-1">
                     <Button
                       size="sm"
                       variant={selectedDevice === '' ? 'default' : 'outline'}
                       onClick={() => setSelectedDevice('')}
+                      data-testid="filter-device-all"
                     >
                       <Monitor className="w-3 h-3 mr-1" />
                       All
@@ -508,6 +324,7 @@ export default function RankHistoryPage() {
                       size="sm"
                       variant={selectedDevice === 'desktop' ? 'default' : 'outline'}
                       onClick={() => setSelectedDevice('desktop')}
+                      data-testid="filter-device-desktop"
                     >
                       <Monitor className="w-3 h-3 mr-1" />
                       Desktop
@@ -516,93 +333,239 @@ export default function RankHistoryPage() {
                       size="sm"
                       variant={selectedDevice === 'mobile' ? 'default' : 'outline'}
                       onClick={() => setSelectedDevice('mobile')}
+                      data-testid="filter-device-mobile"
                     >
                       <Smartphone className="w-3 h-3 mr-1" />
                       Mobile
                     </Button>
                   </div>
 
-                  {/* Tags Multi-Select Dropdown */}
+                  {/* Country Filter */}
                   <div className="relative">
-                    <div className="relative">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowTagsDropdown(!showTagsDropdown)}
-                        className="flex items-center gap-1 min-w-[100px] justify-between"
-                      >
-                        <div className="flex items-center gap-1">
-                          <Tag className="w-3 h-3" />
-                          <span>Tags {selectedTags.length > 0 && `(${selectedTags.length})`}</span>
-                        </div>
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </Button>
-                      
-                      {showTagsDropdown && (
-                        <div 
-                          className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 min-w-[200px] max-h-[200px] overflow-y-auto"
-                          style={{border: '1px solid #E0E6ED'}}
-                        >
-                          <div className="p-2">
-                            {availableTags.length === 0 ? (
-                              <div className="text-xs text-gray-500 py-2">No tags available</div>
-                            ) : (
-                              availableTags.map((tag: string) => (
-                                <label 
-                                  key={tag} 
-                                  className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 cursor-pointer rounded text-xs"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedTags.includes(tag)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        setSelectedTags([...selectedTags, tag])
-                                      } else {
-                                        setSelectedTags(selectedTags.filter(t => t !== tag))
-                                      }
-                                    }}
-                                    className="w-3 h-3"
-                                  />
-                                  <span style={{color: '#1A1A1A'}}>{tag}</span>
-                                </label>
-                              ))
-                            )}
-                          </div>
-                          {selectedTags.length > 0 && (
-                            <div className="border-t p-2" style={{borderColor: '#E0E6ED'}}>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setSelectedTags([])}
-                                className="text-xs w-full"
-                              >
-                                Clear All
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <select
+                      value={selectedCountry}
+                      onChange={(e) => setSelectedCountry(e.target.value)}
+                      className="flex h-9 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      data-testid="filter-country"
+                    >
+                      <option value="">All Countries</option>
+                      {countries.map((country: any) => (
+                        <option key={country.id} value={country.id}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
-                  {/* Search */}
-                  <div className="flex items-center gap-1">
-                    <Input
-                      placeholder="Search keywords..."
-                      value={searchQuery}
-                      onChange={(e: any) => setSearchQuery(e.target.value)}
-                      className="w-40 text-sm"
-                    />
-                  </div>
+                  {/* Add Keyword Button */}
+                  <Button 
+                    onClick={() => window.location.href = '/dashboard/indexnow/add'}
+                    className="bg-primary hover:bg-primary/90"
+                    data-testid="button-add-keyword"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Keyword
+                  </Button>
                 </div>
+              </div>
+
+              {/* Rank Overview Stats Widget */}
+              {selectedDomainId && rankHistory.length > 0 && (
+                <RankOverviewStats 
+                  totalKeywords={statsData.totalKeywords}
+                  avgPosition={statsData.avgPosition}
+                  topTenCount={statsData.topTenCount}
+                  improvingCount={statsData.improvingCount}
+                />
+              )}
+
+              {/* Filters Section */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex flex-wrap items-center gap-4">
+                    {/* Date Range */}
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        {['7d', '30d', '60d'].map((range) => (
+                          <Button
+                            key={range}
+                            size="sm"
+                            variant={dateRange === range ? 'default' : 'outline'}
+                            onClick={() => {
+                              setDateRange(range as any)
+                              setShowDatePicker(false)
+                            }}
+                            data-testid={`filter-date-${range}`}
+                          >
+                            {range.toUpperCase()}
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      {/* Custom Date Range Picker */}
+                      <div className="relative">
+                        <Button
+                          size="sm"
+                          variant={dateRange === 'custom' ? 'default' : 'outline'}
+                          onClick={() => {
+                            setDateRange('custom')
+                            setShowDatePicker(!showDatePicker)
+                          }}
+                          className="flex items-center gap-1"
+                          data-testid="filter-date-custom"
+                        >
+                          <Calendar className="w-3 h-3" />
+                          {dateRange === 'custom' && appliedCustomDates 
+                            ? `${new Date(appliedCustomDates.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(appliedCustomDates.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                            : 'Custom'
+                          }
+                        </Button>
+                        
+                        {showDatePicker && (
+                          <div className="absolute top-full left-0 mt-1 bg-background border rounded-lg shadow-lg p-4 z-50 min-w-[300px]">
+                            <div className="space-y-3">
+                              <div className="text-sm font-medium text-foreground">
+                                Select Date Range
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="text-xs text-muted-foreground">From</label>
+                                  <Input
+                                    type="date"
+                                    value={customStartDate}
+                                    onChange={(e) => setCustomStartDate(e.target.value)}
+                                    className="text-xs"
+                                    data-testid="date-from"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs text-muted-foreground">To</label>
+                                  <Input
+                                    type="date"
+                                    value={customEndDate}
+                                    onChange={(e) => setCustomEndDate(e.target.value)}
+                                    className="text-xs"
+                                    data-testid="date-to"
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => {
+                                    setShowDatePicker(false)
+                                    setCustomStartDate('')
+                                    setCustomEndDate('')
+                                  }}
+                                  data-testid="button-date-cancel"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => {
+                                    if (customStartDate && customEndDate) {
+                                      setAppliedCustomDates({ start: customStartDate, end: customEndDate })
+                                    }
+                                    setShowDatePicker(false)
+                                  }}
+                                  disabled={!customStartDate || !customEndDate}
+                                  data-testid="button-date-apply"
+                                >
+                                  Apply
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tags Multi-Select Dropdown */}
+                    <div className="relative">
+                      <div className="relative">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowTagsDropdown(!showTagsDropdown)}
+                          className="flex items-center gap-1 min-w-[100px] justify-between"
+                          data-testid="filter-tags-dropdown"
+                        >
+                          <div className="flex items-center gap-1">
+                            <Tag className="w-3 h-3" />
+                            <span>Tags {selectedTags.length > 0 && `(${selectedTags.length})`}</span>
+                          </div>
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </Button>
+                        
+                        {showTagsDropdown && (
+                          <div className="absolute top-full left-0 mt-1 bg-background border rounded-lg shadow-lg z-50 min-w-[200px] max-h-[200px] overflow-y-auto">
+                            <div className="p-2">
+                              {availableTags.length === 0 ? (
+                                <div className="text-xs text-muted-foreground py-2">No tags available</div>
+                              ) : (
+                                availableTags.map((tag: string) => (
+                                  <label 
+                                    key={tag} 
+                                    className="flex items-center gap-2 py-1 px-2 text-xs hover:bg-accent cursor-pointer rounded"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedTags.includes(tag)}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setSelectedTags([...selectedTags, tag])
+                                        } else {
+                                          setSelectedTags(selectedTags.filter(t => t !== tag))
+                                        }
+                                      }}
+                                      className="rounded border-input"
+                                      data-testid={`tag-${tag}`}
+                                    />
+                                    <span className="text-foreground">{tag}</span>
+                                  </label>
+                                ))
+                              )}
+                              
+                              {selectedTags.length > 0 && (
+                                <div className="border-t pt-2 mt-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setSelectedTags([])}
+                                    className="text-xs w-full"
+                                    data-testid="button-clear-tags"
+                                  >
+                                    Clear All
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Search */}
+                    <div className="flex items-center gap-1">
+                      <Input
+                        placeholder="Search keywords..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-40 text-sm"
+                        data-testid="input-search"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
               </Card>
 
               {/* Results and Pagination Info */}
               <div className="flex justify-between items-center">
-                <span className="text-sm" style={{color: '#6C757D'}}>
+                <span className="text-sm text-muted-foreground" data-testid="text-results-info">
                   Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
                 </span>
                 
@@ -614,11 +577,12 @@ export default function RankHistoryPage() {
                       variant="outline"
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
+                      data-testid="button-prev-page"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
                     
-                    <span className="text-sm" style={{color: '#1A1A1A'}}>
+                    <span className="text-sm text-foreground">
                       Page {currentPage} of {totalPages}
                     </span>
                     
@@ -627,6 +591,7 @@ export default function RankHistoryPage() {
                       variant="outline"
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
+                      data-testid="button-next-page"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </Button>
@@ -636,108 +601,92 @@ export default function RankHistoryPage() {
 
               {/* Rank History Table */}
               <Card>
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>
-                    Rank History
-                  </h3>
-                </div>
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{borderColor: '#3D8BFF'}}></div>
-                    <p className="mt-2" style={{color: '#6C757D'}}>Loading rank history...</p>
-                  </div>
-                ) : paginatedData.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p style={{color: '#6C757D'}}>No rank history data found for the selected filters.</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <div className="relative">
-                      <table className="w-full">
-                        <thead>
-                          <tr style={{borderBottom: '1px solid #E0E6ED'}}>
-                            <th 
-                              className="text-left py-3 px-2 sticky left-0 z-10" 
-                              style={{
-                                color: '#1A1A1A', 
-                                backgroundColor: '#F0F4F8', 
-                                width: '200px',
-                                minWidth: '200px'
-                              }}
-                            >
-                              Keyword
-                            </th>
-                            {dateColumns.map((date) => (
-                              <th key={date} className="text-center py-3 px-2 text-xs" style={{color: '#6C757D', minWidth: '60px'}}>
-                                {formatDateHeader(date)}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {paginatedData.map((item: RankHistoryData, index: number) => (
-                            <tr key={item.keyword_id} style={{borderBottom: '1px solid #F0F4F8'}}>
-                              <td 
-                                className="py-3 px-2 sticky left-0 z-10" 
-                                style={{
-                                  backgroundColor: '#F8FAFC', 
-                                  borderRight: '1px solid #E0E6ED',
-                                  width: '200px',
-                                  minWidth: '200px'
-                                }}
-                              >
-                                <div className="font-medium text-sm" style={{color: '#1A1A1A'}}>
-                                  {item.keyword}
-                                </div>
-                              </td>
-                              {dateColumns.map((date, dateIndex) => {
-                                const dayData = item.history[date]
-                                const position = dayData?.position
-                                
-                                // Get previous day's position for trend comparison
-                                const previousDate = dateColumns[dateIndex + 1] // Next index since dates are reversed
-                                const previousDayData = previousDate ? item.history[previousDate] : null
-                                const previousPosition = previousDayData?.position
-                                
-                                // Calculate trend (positive means improved - lower number)
-                                const trend = position && previousPosition ? 
-                                  previousPosition - position : null
-                                
-                                return (
-                                  <td key={date} className="text-center py-3 px-2 text-sm">
-                                    {position ? (
-                                      <div className="flex items-center justify-center gap-1">
-                                        <span className={`font-medium ${
-                                          position <= 3 ? 'text-green-600' :
-                                          position <= 10 ? 'text-blue-600' :
-                                          position <= 50 ? 'text-orange-600' :
-                                          'text-red-600'
-                                        }`}>
-                                          {position}
-                                        </span>
-                                        {trend !== null && trend !== 0 && (
-                                          <div className="ml-1">
-                                            {trend > 0 ? (
-                                              <TrendingUp className="w-3 h-3" style={{ color: '#4BB543' }} />
-                                            ) : (
-                                              <TrendingDown className="w-3 h-3" style={{ color: '#E63946' }} />
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <span style={{color: '#E0E6ED'}}>-</span>
-                                    )}
-                                  </td>
-                                )
-                              })}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                <CardHeader>
+                  <CardTitle className="text-lg">Rank History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                      <p className="mt-2 text-muted-foreground">Loading rank history...</p>
                     </div>
-                  </div>
-                )}
+                  ) : paginatedData.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No rank history data found for the selected filters.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <div className="relative">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-3 px-2 sticky left-0 z-10 bg-muted text-foreground font-medium" style={{width: '200px', minWidth: '200px'}}>
+                                Keyword
+                              </th>
+                              {dateColumns.map((date) => (
+                                <th key={date} className="text-center py-3 px-2 text-xs text-muted-foreground font-medium" style={{minWidth: '60px'}}>
+                                  {formatDateHeader(date)}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {paginatedData.map((item: RankHistoryData) => (
+                              <tr key={item.keyword_id} className="border-b border-border/50" data-testid={`row-keyword-${item.keyword_id}`}>
+                                <td className="py-3 px-2 sticky left-0 z-10 bg-muted/50" style={{width: '200px', minWidth: '200px'}}>
+                                  <div className="font-medium text-sm text-foreground">
+                                    {item.keyword}
+                                  </div>
+                                </td>
+                                {dateColumns.map((date, dateIndex) => {
+                                  const dayData = item.history[date]
+                                  const position = dayData?.position
+                                  
+                                  // Get previous day's position for trend comparison
+                                  const previousDate = dateColumns[dateIndex + 1] // Next index since dates are reversed
+                                  const previousDayData = previousDate ? item.history[previousDate] : null
+                                  const previousPosition = previousDayData?.position
+                                  
+                                  // Calculate trend (positive means improved - lower number)
+                                  const trend = position && previousPosition ? 
+                                    previousPosition - position : null
+                                  
+                                  return (
+                                    <td key={date} className="text-center py-3 px-2 text-sm" data-testid={`cell-${item.keyword_id}-${date}`}>
+                                      {position ? (
+                                        <div className="flex items-center justify-center gap-1">
+                                          <span className={`font-medium ${
+                                            position <= 3 ? 'text-green-600 dark:text-green-400' :
+                                            position <= 10 ? 'text-blue-600 dark:text-blue-400' :
+                                            position <= 50 ? 'text-orange-600 dark:text-orange-400' :
+                                            'text-red-600 dark:text-red-400'
+                                          }`}>
+                                            {position}
+                                          </span>
+                                          {trend !== null && trend !== 0 && (
+                                            <div className="ml-1">
+                                              {trend > 0 ? (
+                                                <TrendingUp className="w-3 h-3 text-green-600 dark:text-green-400" data-testid="trend-up" />
+                                              ) : (
+                                                <TrendingDown className="w-3 h-3 text-red-600 dark:text-red-400" data-testid="trend-down" />
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <span className="text-muted-foreground">-</span>
+                                      )}
+                                    </td>
+                                  )
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
               </Card>
 
               {/* Bottom Pagination */}
@@ -749,6 +698,7 @@ export default function RankHistoryPage() {
                       variant="outline"
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
+                      data-testid="button-pagination-prev"
                     >
                       <ChevronLeft className="w-4 h-4" />
                       Previous
@@ -763,6 +713,7 @@ export default function RankHistoryPage() {
                             size="sm"
                             variant={currentPage === pageNum ? 'default' : 'outline'}
                             onClick={() => setCurrentPage(pageNum)}
+                            data-testid={`button-page-${pageNum}`}
                           >
                             {pageNum}
                           </Button>
@@ -775,6 +726,7 @@ export default function RankHistoryPage() {
                       variant="outline"
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
+                      data-testid="button-pagination-next"
                     >
                       Next
                       <ChevronRight className="w-4 h-4" />
