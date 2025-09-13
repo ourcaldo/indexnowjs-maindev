@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/database'
 import { usePageViewLogger } from '@/hooks/useActivityLogger'
@@ -17,8 +18,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Globe,
-  Smartphone,
-  Monitor,
   Tag,
   X,
   Plus,
@@ -63,6 +62,8 @@ const formatDateHeader = (dateStr: string): string => {
 }
 
 export default function RankHistoryPage() {
+  const router = useRouter()
+  
   // Activity logging
   usePageViewLogger('/dashboard/indexnow/rank-history', 'Rank History', { section: 'keyword_tracker' })
 
@@ -292,8 +293,8 @@ export default function RankHistoryPage() {
             />
           ) : (
             <>
-              {/* Header Section */}
-              <div className="flex items-center justify-between">
+              {/* Domain Section and Add Keyword Button - Same Row */}
+              <div className="flex items-center justify-between mb-6">
                 <SharedDomainSelector 
                   domains={domains}
                   selectedDomainId={selectedDomainId}
@@ -307,60 +308,36 @@ export default function RankHistoryPage() {
                   data-testid="rank-history-domain-selector"
                 />
 
-                {/* Controls Row - Device, Country, Add Keyword */}
+                {/* Device and Country Filters + Add Keyword Button */}
                 <div className="flex items-center gap-3">
-                  {/* Device Filter */}
-                  <div className="flex items-center gap-1">
-                    <Button
-                      size="sm"
-                      variant={selectedDevice === '' ? 'default' : 'outline'}
-                      onClick={() => setSelectedDevice('')}
-                      data-testid="filter-device-all"
-                    >
-                      <Monitor className="w-3 h-3 mr-1" />
-                      All
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={selectedDevice === 'desktop' ? 'default' : 'outline'}
-                      onClick={() => setSelectedDevice('desktop')}
-                      data-testid="filter-device-desktop"
-                    >
-                      <Monitor className="w-3 h-3 mr-1" />
-                      Desktop
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={selectedDevice === 'mobile' ? 'default' : 'outline'}
-                      onClick={() => setSelectedDevice('mobile')}
-                      data-testid="filter-device-mobile"
-                    >
-                      <Smartphone className="w-3 h-3 mr-1" />
-                      Mobile
-                    </Button>
-                  </div>
+                  <select
+                    value={selectedDevice}
+                    onChange={(e) => setSelectedDevice(e.target.value)}
+                    className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    data-testid="select-device"
+                  >
+                    <option value="">All Devices</option>
+                    <option value="desktop">Desktop</option>
+                    <option value="mobile">Mobile</option>
+                  </select>
+                  
+                  <select
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                    className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    data-testid="select-country"
+                  >
+                    <option value="">All Countries</option>
+                    {countries.map((country: any) => (
+                      <option key={country.id} value={country.id}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
 
-                  {/* Country Filter */}
-                  <div className="relative">
-                    <select
-                      value={selectedCountry}
-                      onChange={(e) => setSelectedCountry(e.target.value)}
-                      className="flex h-9 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      data-testid="filter-country"
-                    >
-                      <option value="">All Countries</option>
-                      {countries.map((country: any) => (
-                        <option key={country.id} value={country.id}>
-                          {country.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Add Keyword Button */}
                   <Button 
-                    onClick={() => window.location.href = '/dashboard/indexnow/add'}
-                    className="bg-primary hover:bg-primary/90"
+                    onClick={() => router.push('/dashboard/indexnow/add')}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
                     data-testid="button-add-keyword"
                   >
                     <Plus className="w-4 h-4 mr-2" />
