@@ -85,6 +85,25 @@ Complete transformation of the main dashboard (/dashboard/) achieving profession
 - Professional empty states for onboarding new users
 - Quick action buttons for common tasks and workflows
 
+### Rank History Table Fixes (September 13, 2025)
+Complete resolution of table design and functionality issues in the rank history page:
+
+#### ✅ Table Title Fix
+- Reduced "Rank History" title from text-lg to text-sm with muted foreground color
+- Added compact header styling with reduced padding for professional appearance
+
+#### ✅ Date Filter Bug Fix
+- Fixed off-by-one error where 7 days showed 8 days, 30 days showed 31 days
+- Corrected getDateRange calculation to subtract N-1 days instead of N days
+- Verified with generateDateRange inclusive loop to show exactly N days
+
+#### ✅ Professional Table Redesign
+- Compact Semrush-style design with smaller headers (text-xs, uppercase, tracking-wider)
+- Colored ranking badges for position values (green ≤3, blue ≤10, orange ≤50, red >50)
+- Tighter padding and spacing for more data-dense presentation
+- Responsive design with proper sticky column and hover states
+- Maintained trend indicators and accessibility features
+
 ### Previous Setup (September 2025)
 - ✅ Dependencies installed and verified
 - ✅ Next.js configuration optimized for Replit
