@@ -273,29 +273,26 @@ export default function RankHistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto p-4">
-        
-        <div className="space-y-4">
-          {/* Check if user has domains */}
-          {dashboardLoading ? (
-            <Card>
-              <CardContent className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </CardContent>
-            </Card>
-          ) : domains.length === 0 ? (
-            <NoDomainState 
-              title="No Domains Added"
-              description="Add your first domain to start tracking keywords and view rank history."
-              buttonText="Add Your First Domain"
-              redirectRoute="/dashboard/indexnow/add"
-            />
-          ) : (
-            <>
-              {/* Domain Section and Add Keyword Button - Same Row */}
-              <div className="flex items-center justify-between mb-4">
-                <SharedDomainSelector 
+    <div className="space-y-6">
+      {/* Check if user has domains */}
+      {dashboardLoading ? (
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </CardContent>
+        </Card>
+      ) : domains.length === 0 ? (
+        <NoDomainState 
+          title="No Domains Added"
+          description="Add your first domain to start tracking keywords and view rank history."
+          buttonText="Add Your First Domain"
+          redirectRoute="/dashboard/indexnow/add"
+        />
+      ) : (
+        <>
+          {/* Domain Section and Add Keyword Button - Same Row */}
+          <div className="flex items-center justify-between mb-6">
+            <SharedDomainSelector 
                   domains={domains}
                   selectedDomainId={selectedDomainId}
                   selectedDomainInfo={selectedDomainInfo}
@@ -713,8 +710,6 @@ export default function RankHistoryPage() {
               )}
             </>
           )}
-        </div>
-      </div>
     </div>
   )
 }
