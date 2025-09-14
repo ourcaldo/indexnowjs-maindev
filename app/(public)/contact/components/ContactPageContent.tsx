@@ -122,12 +122,12 @@ export default function ContactPageContent() {
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <div className="mb-6">
-              <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">SUPPORT</span>
+              <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">SUPPORT</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
               Hello, how can we help?
             </h1>
-            <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
               Get in touch with our support team. We're here to help you get the most out of IndexNow Studio.
             </p>
 
@@ -137,10 +137,10 @@ export default function ContactPageContent() {
                 <input
                   type="text"
                   placeholder="How do I track keyword rankings?"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-muted-foreground placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                   readOnly
                 />
-                <div className="absolute right-3 top-3 text-gray-500 text-sm">
+                <div className="absolute right-3 top-3 text-muted-foreground/70 text-sm">
                   ⌘K
                 </div>
               </div>
@@ -160,8 +160,8 @@ export default function ContactPageContent() {
                 onClick={() => handleBoxClick('Issues')}
               >
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Bug className="w-6 h-6 text-red-400" />
+                  <div className="w-12 h-12 bg-destructive/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Bug className="w-6 h-6 text-destructive" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-3">Issues</h3>
                   <p className="text-gray-300 text-sm mb-6">
@@ -170,8 +170,8 @@ export default function ContactPageContent() {
                   <button 
                     className={`inline-flex items-center space-x-2 font-medium transition-colors duration-200 ${
                       selectedType === 'Issues' 
-                        ? 'text-red-400' 
-                        : 'text-gray-300 hover:text-white'
+                        ? 'text-destructive' 
+                        : 'text-muted-foreground hover:text-white'
                     }`}
                   >
                     <span>Open GitHub Issue</span>
@@ -183,15 +183,15 @@ export default function ContactPageContent() {
               {/* Feature Request Box */}
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 opacity-60">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Lightbulb className="w-6 h-6 text-blue-400" />
+                  <div className="w-12 h-12 bg-info/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Lightbulb className="w-6 h-6 text-info" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-3">Feature requests</h3>
-                  <p className="text-gray-300 text-sm mb-6">
+                  <p className="text-muted-foreground text-sm mb-6">
                     Want to suggest a new feature? Share it with our community.
                   </p>
                   <button 
-                    className="inline-flex items-center space-x-2 font-medium text-gray-500 cursor-not-allowed"
+                    className="inline-flex items-center space-x-2 font-medium text-muted-foreground/70 cursor-not-allowed"
                     disabled
                   >
                     <span>Coming Soon</span>
@@ -202,15 +202,15 @@ export default function ContactPageContent() {
               {/* Ask the Community Box */}
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 opacity-60">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-6 h-6 text-green-400" />
+                  <div className="w-12 h-12 bg-success/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-6 h-6 text-success" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-3">Ask the Community</h3>
-                  <p className="text-gray-300 text-sm mb-6">
+                  <p className="text-muted-foreground text-sm mb-6">
                     Join our GitHub discussions or our Discord server to browse for help and best practices.
                   </p>
                   <button 
-                    className="inline-flex items-center space-x-2 font-medium text-gray-500 cursor-not-allowed"
+                    className="inline-flex items-center space-x-2 font-medium text-muted-foreground/70 cursor-not-allowed"
                     disabled
                   >
                     <span>Coming Soon</span>
@@ -227,11 +227,11 @@ export default function ContactPageContent() {
             {/* Can't find what you're looking for section */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 mb-8">
               <h2 className="text-2xl font-bold text-white mb-4">Can't find what you're looking for?</h2>
-              <p className="text-gray-300 mb-6">
+              <p className="text-muted-foreground mb-6">
                 The IndexNow Studio Support Team is ready to help. Response time for support tickets will vary depending on plan type and severity of the issue.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 flex items-center justify-center space-x-2">
+                <button className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center space-x-2">
                   <MessageCircle className="w-5 h-5" />
                   <span>Contact Enterprise Sales</span>
                 </button>
@@ -247,14 +247,14 @@ export default function ContactPageContent() {
               <h3 className="text-xl font-semibold text-white mb-6">Send us a message</h3>
               
               {submitStatus === 'success' && (
-                <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
-                  <p className="text-green-400">Thank you! Your message has been sent successfully. We'll get back to you soon.</p>
+                <div className="mb-6 p-4 bg-success/20 border border-success/30 rounded-lg">
+                  <p className="text-success">Thank you! Your message has been sent successfully. We'll get back to you soon.</p>
                 </div>
               )}
               
               {submitStatus === 'error' && (
-                <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-                  <p className="text-red-400">Sorry, there was an error sending your message. Please try again.</p>
+                <div className="mb-6 p-4 bg-destructive/20 border border-destructive/30 rounded-lg">
+                  <p className="text-destructive">Sorry, there was an error sending your message. Please try again.</p>
                 </div>
               )}
 
@@ -262,7 +262,7 @@ export default function ContactPageContent() {
                 {/* Name and Email Row */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
                       Name *
                     </label>
                     <input
@@ -270,12 +270,12 @@ export default function ContactPageContent() {
                       required
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                       placeholder="Your full name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
                       Email *
                     </label>
                     <input
@@ -283,7 +283,7 @@ export default function ContactPageContent() {
                       required
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -299,10 +299,10 @@ export default function ContactPageContent() {
                     onChange={(e) => handleInputChange('type', e.target.value as ContactType)}
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                   >
-                    <option value="Support" className="bg-gray-800 text-white">Support</option>
-                    <option value="Sales" className="bg-gray-800 text-white">Sales</option>
-                    <option value="Partnership" className="bg-gray-800 text-white">Partnership</option>
-                    <option value="Issues" className="bg-gray-800 text-white">Issues</option>
+                    <option value="Support" className="bg-background text-foreground">Support</option>
+                    <option value="Sales" className="bg-background text-foreground">Sales</option>
+                    <option value="Partnership" className="bg-background text-foreground">Partnership</option>
+                    <option value="Issues" className="bg-background text-foreground">Issues</option>
                   </select>
                 </div>
 
@@ -324,7 +324,7 @@ export default function ContactPageContent() {
                 {/* Order ID */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Order ID <span className="text-gray-500">(if any, optional)</span>
+                    Order ID <span className="text-muted-foreground/70">(if any, optional)</span>
                   </label>
                   <input
                     type="text"

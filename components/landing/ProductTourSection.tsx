@@ -17,15 +17,15 @@ export default function ProductTourSection() {
           <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
             <span className="text-sm">seo tools</span>
             <div className="flex items-center space-x-2">
-              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">#3</span>
-              <span className="text-green-400 text-xs">+2</span>
+              <span className="bg-success/20 text-success px-2 py-1 rounded text-xs">#3</span>
+              <span className="text-success text-xs">+2</span>
             </div>
           </div>
           <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
             <span className="text-sm">rank tracker</span>
             <div className="flex items-center space-x-2">
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">#1</span>
-              <span className="text-gray-400 text-xs">-</span>
+              <span className="bg-info/20 text-info px-2 py-1 rounded text-xs">#1</span>
+              <span className="text-muted-foreground text-xs">-</span>
             </div>
           </div>
         </div>
@@ -39,17 +39,17 @@ export default function ProductTourSection() {
         <div className="space-y-3">
           <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <Monitor className="w-4 h-4 text-gray-400" />
+              <Monitor className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm">Desktop • New York</span>
             </div>
-            <span className="text-green-400 font-medium">#3</span>
+            <span className="text-success font-medium">#3</span>
           </div>
           <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <Phone className="w-4 h-4 text-gray-400" />
+              <Phone className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm">Mobile • London</span>
             </div>
-            <span className="text-yellow-400 font-medium">#7</span>
+            <span className="text-warning font-medium">#7</span>
           </div>
         </div>
       )
@@ -60,17 +60,17 @@ export default function ProductTourSection() {
       description: "Submit thousands of URLs to Google's Indexing API automatically with service account management.",
       preview: (
         <div className="space-y-3">
-          <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg">
+          <div className="bg-info/10 border border-info/20 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className="text-blue-400 text-xs font-medium">INDEXING</span>
+              <div className="w-2 h-2 bg-info rounded-full"></div>
+              <span className="text-info text-xs font-medium">INDEXING</span>
             </div>
             <div className="text-sm text-white mt-1">1,247 URLs submitted</div>
           </div>
-          <div className="bg-green-500/10 border border-green-500/20 p-3 rounded-lg">
+          <div className="bg-success/10 border border-success/20 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-green-400 text-xs font-medium">INDEXED</span>
+              <div className="w-2 h-2 bg-success rounded-full"></div>
+              <span className="text-success text-xs font-medium">INDEXED</span>
             </div>
             <div className="text-sm text-white mt-1">892 URLs successfully indexed</div>
           </div>
@@ -86,16 +86,16 @@ export default function ProductTourSection() {
           <div className="bg-white/5 p-4 rounded-lg border border-white/10">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Position History</span>
-              <span className="text-xs text-green-400">Updated</span>
+              <span className="text-xs text-success">Updated</span>
             </div>
-            <div className="text-xs text-gray-400">147 keywords • Daily tracking • Historical data</div>
+            <div className="text-xs text-muted-foreground">147 keywords • Daily tracking • Historical data</div>
           </div>
           <div className="bg-white/5 p-4 rounded-lg border border-white/10">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Domain Statistics</span>
-              <span className="text-xs text-blue-400">Real-time</span>
+              <span className="text-xs text-info">Real-time</span>
             </div>
-            <div className="text-xs text-gray-400">Filtered views • Tag management • Progress tracking</div>
+            <div className="text-xs text-muted-foreground">Filtered views • Tag management • Progress tracking</div>
           </div>
         </div>
       )
@@ -108,17 +108,17 @@ export default function ProductTourSection() {
         <div className="space-y-3">
           <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-gray-400" />
+              <Clock className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm">Daily Sitemap Job</span>
             </div>
-            <span className="text-green-400 font-medium">Active</span>
+            <span className="text-success font-medium">Active</span>
           </div>
           <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
             <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-gray-400" />
+              <Clock className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm">Weekly Batch Job</span>
             </div>
-            <span className="text-blue-400 font-medium">Scheduled</span>
+            <span className="text-info font-medium">Scheduled</span>
           </div>
         </div>
       )
@@ -132,7 +132,7 @@ export default function ProductTourSection() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
             See IndexNow in action
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Every feature designed to save you time and deliver clear insights.
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function ProductTourSection() {
               >
                 <div className="flex items-start space-x-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    activeTab === index ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-gray-400'
+                    activeTab === index ? 'bg-info/20 text-info' : 'bg-white/10 text-muted-foreground'
                   }`}>
                     <feature.icon className="w-6 h-6" />
                   </div>
@@ -160,7 +160,7 @@ export default function ProductTourSection() {
                     <h3 className="text-lg font-semibold text-white mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-gray-300 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       {feature.description}
                     </p>
                   </div>
@@ -177,20 +177,20 @@ export default function ProductTourSection() {
                   <h3 className="text-xl font-semibold text-white mb-2">
                     {features[activeTab].title}
                   </h3>
-                  <p className="text-gray-400 mb-4">
+                  <p className="text-muted-foreground mb-4">
                     {features[activeTab].description}
                   </p>
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <div className="flex items-center space-x-4 text-sm text-muted-foreground/70">
                     <span className="flex items-center space-x-1">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                      <div className="w-1.5 h-1.5 bg-success rounded-full animate-pulse"></div>
                       <span>Live Data</span>
                     </span>
                     <span className="flex items-center space-x-1">
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      <div className="w-1.5 h-1.5 bg-info rounded-full"></div>
                       <span>Real-time Updates</span>
                     </span>
                     <span className="flex items-center space-x-1">
-                      <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
+                      <div className="w-1.5 h-1.5 bg-warning rounded-full"></div>
                       <span>Interactive</span>
                     </span>
                   </div>
@@ -200,12 +200,12 @@ export default function ProductTourSection() {
                 <div className="h-[400px] bg-black/50 rounded-2xl border border-white/10 overflow-hidden">
                   <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-destructive rounded-full"></div>
+                      <div className="w-3 h-3 bg-warning rounded-full"></div>
+                      <div className="w-3 h-3 bg-success rounded-full"></div>
                     </div>
-                    <div className="text-xs text-gray-400">IndexNow Studio - {features[activeTab].title}</div>
-                    <div className="text-xs text-gray-500">Live Demo</div>
+                    <div className="text-xs text-muted-foreground">IndexNow Studio - {features[activeTab].title}</div>
+                    <div className="text-xs text-muted-foreground/70">Live Demo</div>
                   </div>
                   
                   <div className="p-4 h-full">
@@ -214,26 +214,26 @@ export default function ProductTourSection() {
                       
                       {/* Additional Interactive Elements */}
                       <div className="mt-4 pt-4 border-t border-white/10">
-                        <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                           <span>Last updated: 2 mins ago</span>
                           <span className="flex items-center space-x-1">
-                            <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                            <div className="w-1 h-1 bg-success rounded-full animate-pulse"></div>
                             <span>Monitoring active</span>
                           </span>
                         </div>
                         
                         <div className="grid grid-cols-3 gap-2">
                           <div className="bg-white/5 rounded p-2 text-center">
-                            <div className="text-xs text-gray-400">Today</div>
-                            <div className="text-sm font-medium text-green-400">+12</div>
+                            <div className="text-xs text-muted-foreground">Today</div>
+                            <div className="text-sm font-medium text-success">+12</div>
                           </div>
                           <div className="bg-white/5 rounded p-2 text-center">
-                            <div className="text-xs text-gray-400">Week</div>
-                            <div className="text-sm font-medium text-blue-400">+47</div>
+                            <div className="text-xs text-muted-foreground">Week</div>
+                            <div className="text-sm font-medium text-info">+47</div>
                           </div>
                           <div className="bg-white/5 rounded p-2 text-center">
-                            <div className="text-xs text-gray-400">Month</div>
-                            <div className="text-sm font-medium text-yellow-400">+156</div>
+                            <div className="text-xs text-muted-foreground">Month</div>
+                            <div className="text-sm font-medium text-warning">+156</div>
                           </div>
                         </div>
                       </div>
@@ -244,14 +244,14 @@ export default function ProductTourSection() {
                 {/* Interactive Controls */}
                 <div className="mt-4 flex items-center justify-between">
                   <div className="flex space-x-2">
-                    <button className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded hover:bg-blue-500/30 transition-colors">
+                    <button className="text-xs bg-info/20 text-info px-2 py-1 rounded hover:bg-info/30 transition-colors">
                       Export Data
                     </button>
                     <button className="text-xs bg-white/10 text-white px-2 py-1 rounded hover:bg-white/20 transition-colors">
                       Set Alert
                     </button>
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-muted-foreground">
                     Try clicking elements above ↑
                   </div>
                 </div>
