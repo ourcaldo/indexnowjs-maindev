@@ -110,18 +110,18 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
 
   const getEventTypeBadge = (eventType: string, success: boolean) => {
     const colors = {
-      login: success ? 'bg-[#4BB543]/10 text-[#4BB543]' : 'bg-[#E63946]/10 text-[#E63946]',
-      logout: 'bg-[#6C757D]/10 text-[#6C757D]',
-      job_create: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
-      job_update: 'bg-[#F0A202]/10 text-[#F0A202]',
-      job_delete: 'bg-[#E63946]/10 text-[#E63946]',
-      service_account_add: 'bg-[#4BB543]/10 text-[#4BB543]',
-      service_account_delete: 'bg-[#E63946]/10 text-[#E63946]',
-      profile_update: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
-      api_call: 'bg-[#6C757D]/10 text-[#6C757D]'
+      login: success ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive',
+      logout: 'bg-muted/10 text-muted-foreground',
+      job_create: 'bg-primary/10 text-primary',
+      job_update: 'bg-warning/10 text-warning',
+      job_delete: 'bg-destructive/10 text-destructive',
+      service_account_add: 'bg-success/10 text-success',
+      service_account_delete: 'bg-destructive/10 text-destructive',
+      profile_update: 'bg-primary/10 text-primary',
+      api_call: 'bg-muted/10 text-muted-foreground'
     }
     
-    return colors[eventType as keyof typeof colors] || 'bg-[#6C757D]/10 text-[#6C757D]'
+    return colors[eventType as keyof typeof colors] || 'bg-muted/10 text-muted-foreground'
   }
 
   const getDeviceIcon = (userAgent?: string) => {
@@ -136,7 +136,7 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
@@ -147,8 +147,8 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
                 </Button>
               </Link>
             </div>
-            <h1 className="text-2xl font-semibold text-[#1A1A1A]">User Activity History</h1>
-            <p className="text-[#6C757D] mt-2">Loading user activity...</p>
+            <h1 className="text-2xl font-semibold text-foreground">User Activity History</h1>
+            <p className="text-muted-foreground mt-2">Loading user activity...</p>
           </div>
         </div>
       </div>
@@ -157,7 +157,7 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
@@ -168,13 +168,13 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
                 </Button>
               </Link>
             </div>
-            <h1 className="text-2xl font-semibold text-[#1A1A1A]">User Activity History</h1>
+            <h1 className="text-2xl font-semibold text-foreground">User Activity History</h1>
             <Card className="mt-4">
               <CardContent className="p-6">
-                <p className="text-[#E63946]">Error: {error}</p>
+                <p className="text-destructive">Error: {error}</p>
                 <Button 
                   onClick={fetchUserActivity}
-                  className="mt-4 bg-[#1C2331] hover:bg-[#0d1b2a] text-white"
+                  className="mt-4 bg-primary hover:bg-primary/90 text-white"
                 >
                   Retry
                 </Button>
@@ -187,7 +187,7 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -207,10 +207,10 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
               </Link>
             )}
           </div>
-          <h1 className="text-2xl font-semibold text-[#1A1A1A]">
+          <h1 className="text-2xl font-semibold text-foreground">
             Activity History: {user?.name || 'Loading...'}
           </h1>
-          <p className="text-[#6C757D] mt-2">
+          <p className="text-muted-foreground mt-2">
             Complete activity timeline for this user including logins, actions, and system interactions
           </p>
         </div>
@@ -220,12 +220,12 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
-                  <Activity className="h-5 w-5 text-[#3D8BFF]" />
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Activity className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">{logs.length}</p>
-                  <p className="text-xs text-[#6C757D]">Total Activities</p>
+                  <p className="text-lg font-bold text-foreground">{logs.length}</p>
+                  <p className="text-xs text-muted-foreground">Total Activities</p>
                 </div>
               </div>
             </CardContent>
@@ -233,14 +233,14 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#4BB543]/10">
-                  <CheckCircle className="h-5 w-5 text-[#4BB543]" />
+                <div className="p-2 rounded-lg bg-success/10">
+                  <CheckCircle className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">
+                  <p className="text-lg font-bold text-foreground">
                     {logs.filter(l => l.success).length}
                   </p>
-                  <p className="text-xs text-[#6C757D]">Successful</p>
+                  <p className="text-xs text-muted-foreground">Successful</p>
                 </div>
               </div>
             </CardContent>
@@ -248,14 +248,14 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#E63946]/10">
-                  <AlertTriangle className="h-5 w-5 text-[#E63946]" />
+                <div className="p-2 rounded-lg bg-destructive/10">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">
+                  <p className="text-lg font-bold text-foreground">
                     {logs.filter(l => !l.success).length}
                   </p>
-                  <p className="text-xs text-[#6C757D]">Failed</p>
+                  <p className="text-xs text-muted-foreground">Failed</p>
                 </div>
               </div>
             </CardContent>
@@ -263,14 +263,14 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#F0A202]/10">
-                  <Activity className="h-5 w-5 text-[#F0A202]" />
+                <div className="p-2 rounded-lg bg-warning/10">
+                  <Activity className="h-5 w-5 text-warning" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">
+                  <p className="text-lg font-bold text-foreground">
                     {new Set(logs.map(l => l.event_type)).size}
                   </p>
-                  <p className="text-xs text-[#6C757D]">Event Types</p>
+                  <p className="text-xs text-muted-foreground">Event Types</p>
                 </div>
               </div>
             </CardContent>
@@ -288,22 +288,22 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
           <CardContent>
             {logs.length === 0 ? (
               <div className="text-center py-8">
-                <Activity className="h-12 w-12 text-[#6C757D] mx-auto mb-4 opacity-50" />
-                <p className="text-[#6C757D]">No activity found for this user</p>
+                <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <p className="text-muted-foreground">No activity found for this user</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {logs.map((log) => (
                   <div 
                     key={log.id} 
-                    className="border border-[#E0E6ED] rounded-lg p-4 hover:bg-[#FFFFFF] transition-colors"
+                    className="border border-border rounded-lg p-4 hover:bg-background transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4 flex-1">
                         {/* Timestamp */}
                         <div className="flex items-center gap-2 min-w-[140px]">
-                          <Clock className="h-4 w-4 text-[#6C757D]" />
-                          <span className="text-[#1A1A1A] text-sm font-medium">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-foreground text-sm font-medium">
                             {formatDate(log.created_at)}
                           </span>
                         </div>
@@ -315,23 +315,23 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
                               {log.event_type.replace('_', ' ').toUpperCase()}
                             </Badge>
                             {!log.success && (
-                              <Badge className="bg-[#E63946]/10 text-[#E63946] border-0 text-xs">
+                              <Badge className="bg-destructive/10 text-destructive border-0 text-xs">
                                 FAILED
                               </Badge>
                             )}
                           </div>
-                          <p className="text-[#1A1A1A] text-sm mb-1">
+                          <p className="text-foreground text-sm mb-1">
                             {log.action_description}
                           </p>
                           {log.error_message && (
-                            <p className="text-[#E63946] text-xs">
+                            <p className="text-destructive text-xs">
                               Error: {log.error_message}
                             </p>
                           )}
                         </div>
 
                         {/* IP and Device */}
-                        <div className="flex items-center gap-4 min-w-[180px] text-[#6C757D] text-xs">
+                        <div className="flex items-center gap-4 min-w-[180px] text-muted-foreground text-xs">
                           {log.ip_address && (
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
@@ -349,7 +349,7 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          className="h-8 w-8 p-0 hover:bg-[#F7F9FC]"
+                          className="h-8 w-8 p-0 hover:bg-background"
                         >
                           <Activity className="h-4 w-4" />
                         </Button>
@@ -363,7 +363,7 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
             {/* Pagination */}
             {pagination.totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
-                <p className="text-sm text-[#6C757D]">
+                <p className="text-sm text-muted-foreground">
                   Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
                   {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
                   {pagination.total} entries
@@ -378,7 +378,7 @@ export default function UserActivityPage({ params }: { params: Promise<{ id: str
                     <ChevronLeft className="h-4 w-4" />
                     Previous
                   </Button>
-                  <span className="text-sm text-[#6C757D]">
+                  <span className="text-sm text-muted-foreground">
                     Page {pagination.page} of {pagination.totalPages}
                   </span>
                   <Button
