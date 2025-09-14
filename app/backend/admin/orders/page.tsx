@@ -155,15 +155,15 @@ export default function AdminOrdersPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="secondary" className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20"><Clock className="w-3 h-3 mr-1" />Pending</Badge>
+        return <Badge variant="secondary" className="bg-muted/10 text-muted-foreground border-muted/20"><Clock className="w-3 h-3 mr-1" />Pending</Badge>
       case 'proof_uploaded':
-        return <Badge variant="secondary" className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20"><AlertCircle className="w-3 h-3 mr-1" />Waiting for Confirmation</Badge>
+        return <Badge variant="secondary" className="bg-muted/10 text-muted-foreground border-muted/20"><AlertCircle className="w-3 h-3 mr-1" />Waiting for Confirmation</Badge>
       case 'completed':
-        return <Badge variant="secondary" className="bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>
+        return <Badge variant="secondary" className="bg-success/10 text-success border-success/20"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>
       case 'failed':
-        return <Badge variant="secondary" className="bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>
+        return <Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>
       default:
-        return <Badge variant="secondary" className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20">{status}</Badge>
+        return <Badge variant="secondary" className="bg-muted/10 text-muted-foreground border-muted/20">{status}</Badge>
     }
   }
 
@@ -191,8 +191,8 @@ export default function AdminOrdersPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A] mx-auto mb-4"></div>
-          <p className="text-[#6C757D]">Loading orders...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading orders...</p>
         </div>
       </div>
     )
@@ -202,10 +202,10 @@ export default function AdminOrdersPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <XCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Orders</h3>
-          <p className="text-[#6C757D] mb-4">{error}</p>
-          <Button onClick={loadOrders} className="bg-[#1C2331] hover:bg-[#0d1b2a] text-white">
+          <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Orders</h3>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={loadOrders} className="bg-primary hover:bg-primary/90 text-white">
             Try Again
           </Button>
         </div>
@@ -218,11 +218,11 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Orders Management</h1>
-          <p className="text-[#6C757D]">Manage and process payment orders</p>
+          <h1 className="text-2xl font-bold text-foreground">Orders Management</h1>
+          <p className="text-muted-foreground">Manage and process payment orders</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" className="border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]">
+          <Button variant="outline" className="border-border text-muted-foreground hover:bg-secondary">
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
@@ -234,37 +234,37 @@ export default function AdminOrdersPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#6C757D]">Total Orders</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-[#1A1A1A]">{ordersData.summary.total_orders}</div>
+              <div className="text-2xl font-bold text-foreground">{ordersData.summary.total_orders}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#6C757D]">Pending Review</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Review</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-[#F0A202]">{ordersData.summary.proof_uploaded_orders}</div>
+              <div className="text-2xl font-bold text-warning">{ordersData.summary.proof_uploaded_orders}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#6C757D]">Completed</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-[#4BB543]">{ordersData.summary.completed_orders}</div>
+              <div className="text-2xl font-bold text-success">{ordersData.summary.completed_orders}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#6C757D]">Total Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-[#1A1A1A]">{formatCurrency(ordersData.summary.total_revenue, 'IDR')}</div>
+              <div className="text-2xl font-bold text-foreground">{formatCurrency(ordersData.summary.total_revenue, 'IDR')}</div>
             </CardContent>
           </Card>
         </div>
@@ -278,7 +278,7 @@ export default function AdminOrdersPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">Status</label>
+              <label className="text-sm font-medium text-foreground mb-2 block">Status</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="All statuses" />
@@ -294,17 +294,17 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">Customer Search</label>
+              <label className="text-sm font-medium text-foreground mb-2 block">Customer Search</label>
               <Input
                 placeholder="Search by name or email"
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
-                className="border-[#E0E6ED]"
+                className="border-border"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">Package</label>
+              <label className="text-sm font-medium text-foreground mb-2 block">Package</label>
               <Select value={packageFilter} onValueChange={setPackageFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="All packages" />
@@ -325,7 +325,7 @@ export default function AdminOrdersPage() {
                   setCurrentPage(1)
                 }}
                 variant="outline"
-                className="border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]"
+                className="border-border text-muted-foreground hover:bg-secondary"
               >
                 Clear Filters
               </Button>
@@ -340,7 +340,7 @@ export default function AdminOrdersPage() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Orders</CardTitle>
             {selectedOrders.length > 0 && (
-              <div className="text-sm text-[#6C757D]">
+              <div className="text-sm text-muted-foreground">
                 {selectedOrders.length} order{selectedOrders.length > 1 ? 's' : ''} selected
               </div>
             )}
@@ -367,7 +367,7 @@ export default function AdminOrdersPage() {
             </TableHeader>
             <TableBody>
               {ordersData?.orders.map((order) => (
-                <TableRow key={order.id} className="hover:bg-[#F7F9FC]">
+                <TableRow key={order.id} className="hover:bg-secondary">
                   <TableCell>
                     <Checkbox
                       checked={selectedOrders.includes(order.id)}
@@ -377,26 +377,26 @@ export default function AdminOrdersPage() {
                   <TableCell className="text-left">
                     <button
                       onClick={() => handleViewOrder(order.id)}
-                      className="text-[#1A1A1A] hover:text-[#1C2331] hover:underline font-medium transition-colors text-left block"
+                      className="text-foreground hover:text-primary hover:underline font-medium transition-colors text-left block"
                     >
                       #{order.id}
                     </button>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium text-[#1A1A1A]">{order.user.full_name}</div>
-                      <div className="text-sm text-[#6C757D]">{order.metadata?.customer_info?.email || 'N/A'}</div>
+                      <div className="font-medium text-foreground">{order.user.full_name}</div>
+                      <div className="text-sm text-muted-foreground">{order.metadata?.customer_info?.email || 'N/A'}</div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium text-[#1A1A1A]">{order.package.name}</div>
-                      <div className="text-sm text-[#6C757D]">{order.metadata?.billing_period || order.package.billing_period}</div>
+                      <div className="font-medium text-foreground">{order.package.name}</div>
+                      <div className="text-sm text-muted-foreground">{order.metadata?.billing_period || order.package.billing_period}</div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-[#1A1A1A]">
-                      {formatCurrency(order.amount, order.currency)}
+                    <div className="font-medium text-foreground">
+                      {formatCurrency(order.amount, order.currency as 'IDR' | 'USD')}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -404,19 +404,19 @@ export default function AdminOrdersPage() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="text-sm text-[#1A1A1A]">{formatRelativeTime(order.created_at)}</div>
-                      <div className="text-xs text-[#6C757D]">{formatDate(order.created_at)}</div>
+                      <div className="text-sm text-foreground">{formatRelativeTime(order.created_at)}</div>
+                      <div className="text-xs text-muted-foreground">{formatDate(order.created_at)}</div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]">
+                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-secondary">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">
+                        <DropdownMenuItem onClick={() => handleViewOrder(order.id)} className="text-foreground hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground">
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
@@ -431,7 +431,7 @@ export default function AdminOrdersPage() {
           {/* Pagination */}
           {ordersData?.pagination && ordersData.pagination.total_pages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-[#6C757D]">
+              <div className="text-sm text-muted-foreground">
                 Showing {((ordersData.pagination.current_page - 1) * ordersData.pagination.items_per_page) + 1} to{' '}
                 {Math.min(ordersData.pagination.current_page * ordersData.pagination.items_per_page, ordersData.pagination.total_items)}{' '}
                 of {ordersData.pagination.total_items} orders
@@ -442,12 +442,12 @@ export default function AdminOrdersPage() {
                   size="sm"
                   onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={!ordersData.pagination.has_prev}
-                  className="border-[#E0E6ED]"
+                  className="border-border"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Previous
                 </Button>
-                <span className="text-sm text-[#6C757D]">
+                <span className="text-sm text-muted-foreground">
                   Page {ordersData.pagination.current_page} of {ordersData.pagination.total_pages}
                 </span>
                 <Button
@@ -455,7 +455,7 @@ export default function AdminOrdersPage() {
                   size="sm"
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={!ordersData.pagination.has_next}
-                  className="border-[#E0E6ED]"
+                  className="border-border"
                 >
                   Next
                   <ChevronRight className="w-4 h-4" />
