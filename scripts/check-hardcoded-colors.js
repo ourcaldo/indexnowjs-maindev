@@ -17,6 +17,8 @@ const COLOR_PATTERNS = {
   hsl: /hsl\s*\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\)/g,
   hsla: /hsla\s*\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*,\s*[\d.]+\s*\)/g,
   tailwindHex: /(?:bg|text|border)-\[#[0-9A-Fa-f]{3,6}\]/g,
+  tailwindHardcodedColors: /(?:bg|text|border|from|to|via)-(?:red|green|blue|yellow|indigo|purple|pink|gray|slate|zinc|neutral|stone|orange|amber|lime|emerald|teal|cyan|sky|violet|fuchsia|rose)-(?:[1-9]00?|50)\b/g,
+  tailwindMixedBrackets: /(?:bg|text|border)-\[#[0-9A-Fa-f]{3,6}\](?:\/\d+)?/g,
   inlineStyle: /style\s*=\s*\{\s*\{[^}]*(?:color|background|border)[^}]*#[0-9A-Fa-f]{3,6}[^}]*\}\s*\}/g
 };
 
@@ -32,6 +34,50 @@ const COLOR_MAPPINGS = {
   '#FFFFFF': 'bg-background / var(--background)',
   '#F7F9FC': 'bg-secondary / var(--secondary)',
   '#E0E6ED': 'border-border / var(--border)'
+};
+
+// Tailwind hardcoded color mappings to semantic alternatives
+const TAILWIND_SEMANTIC_MAPPINGS = {
+  // Success colors (green)
+  'bg-green-100': 'bg-success/10',
+  'bg-green-500': 'bg-success',
+  'bg-green-600': 'bg-success',
+  'text-green-800': 'text-success',
+  'text-green-600': 'text-success',
+  'border-green-500': 'border-success',
+  
+  // Error colors (red)
+  'bg-red-100': 'bg-destructive/10',
+  'bg-red-500': 'bg-destructive',
+  'bg-red-600': 'bg-destructive',
+  'text-red-800': 'text-destructive',
+  'text-red-600': 'text-destructive',
+  'border-red-500': 'border-destructive',
+  
+  // Warning colors (yellow/amber)
+  'bg-yellow-100': 'bg-warning/10',
+  'bg-yellow-500': 'bg-warning',
+  'bg-amber-500': 'bg-warning',
+  'text-yellow-800': 'text-warning',
+  'text-amber-800': 'text-warning',
+  'border-yellow-500': 'border-warning',
+  
+  // Info colors (blue)
+  'bg-blue-100': 'bg-info/10',
+  'bg-blue-500': 'bg-info',
+  'bg-blue-600': 'bg-accent',
+  'text-blue-800': 'text-info',
+  'text-blue-600': 'text-accent',
+  'text-blue-900': 'text-accent',
+  'border-blue-500': 'border-accent',
+  
+  // Neutral colors (gray)
+  'bg-gray-100': 'bg-muted',
+  'bg-gray-500': 'bg-muted-foreground',
+  'text-gray-800': 'text-muted-foreground',
+  'text-gray-600': 'text-muted-foreground',
+  'text-gray-900': 'text-foreground',
+  'border-gray-300': 'border-border'
 };
 
 // Files to exclude from scanning
@@ -123,18 +169,26 @@ class ColorChecker {
   }
 
   getSuggestion(color, type) {
-    // Check if we have a direct mapping
+    // Check if we have a direct mapping for hex colors
     const normalized = color.toUpperCase();
     if (COLOR_MAPPINGS[normalized]) {
       return COLOR_MAPPINGS[normalized];
     }
 
-    // Provide generic suggestions based on color type
+    // Check for Tailwind hardcoded color mappings
+    if (TAILWIND_SEMANTIC_MAPPINGS[color]) {
+      return TAILWIND_SEMANTIC_MAPPINGS[color];
+    }
+
+    // Provide specific suggestions based on color type
     switch (type) {
       case 'hex':
         return 'Use CSS variables from globals.css or Tailwind semantic colors';
       case 'tailwindHex':
-        return 'Replace with semantic Tailwind class (e.g., bg-brand-primary)';
+      case 'tailwindMixedBrackets':
+        return 'Replace with semantic Tailwind class (e.g., bg-success, text-muted-foreground)';
+      case 'tailwindHardcodedColors':
+        return 'Use semantic colors: bg-success, bg-destructive, bg-warning, bg-info, bg-muted, text-foreground, text-muted-foreground';
       case 'inlineStyle':
         return 'Use className with Tailwind classes instead of inline styles';
       default:
