@@ -53,7 +53,7 @@ export default function GlobalQuotaWarning() {
   }
 
   return (
-    <div className="bg-[#E63946] text-white rounded-lg p-4 mb-6">
+    <div className="bg-error text-white rounded-lg p-4 mb-6">
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3">
           <div className="mt-0.5">
@@ -71,16 +71,16 @@ export default function GlobalQuotaWarning() {
                 <span>Daily Usage</span>
                 <span>{quotaInfo.daily_quota_used.toLocaleString()}/{quotaInfo.daily_quota_limit.toLocaleString()}</span>
               </div>
-              <div className="w-full bg-white/20 rounded-full h-2">
+              <div className="w-full bg-background/20 rounded-full h-2">
                 <div 
-                  className="bg-white rounded-full h-2 transition-all duration-300"
+                  className="bg-foreground rounded-full h-2 transition-all duration-300"
                   style={{ width: '100%' }}
                 />
               </div>
             </div>
 
             {/* Upgrade CTA */}
-            <div className="mt-3 pt-3 border-t border-white/20">
+            <div className="mt-3 pt-3 border-t border-foreground/20">
               <div className="flex items-center space-x-2 text-xs">
                 <Package className="h-4 w-4" />
                 <span>Upgrade for higher daily limits and continuous processing</span>

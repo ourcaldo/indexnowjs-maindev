@@ -155,25 +155,25 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
             item.active
               ? isCollapsed 
-                ? 'bg-[#3D8BFF]/10 text-[#3D8BFF]' 
-                : 'bg-[#3D8BFF] text-white shadow-sm'
-              : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F8FAFC]'
+                ? 'bg-brand-accent/10 text-brand-accent' 
+                : 'bg-brand-accent text-white shadow-sm'
+              : 'text-brand-text hover:text-brand-primary hover:bg-secondary'
           }`}
         >
           <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0 ${
             item.active 
               ? isCollapsed 
-                ? 'text-[#3D8BFF]' 
+                ? 'text-brand-accent' 
                 : 'text-white' 
-              : 'text-[#6C757D] group-hover:text-[#3D8BFF]'
+              : 'text-brand-text group-hover:text-brand-accent'
           }`} />
           {!isCollapsed && <span className="truncate">{item.label}</span>}
         </a>
         {/* Tooltip for collapsed state */}
         {isCollapsed && (
-          <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-[#1A1A1A] text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl" style={{ zIndex: 99999 }}>
+          <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-brand-primary text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-xl" style={{ zIndex: 99999 }}>
             {item.label}
-            <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-[#1A1A1A]"></div>
+            <div className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-brand-primary"></div>
           </div>
         )}
       </div>
@@ -188,7 +188,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
     return (
       <div key={section.title} className="mb-6">
         <div className="px-3 mb-3">
-          <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             {section.title}
           </p>
         </div>
@@ -202,7 +202,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-[#E5E7EB] transition-all duration-300 ease-in-out ${
+      <div className={`fixed left-0 top-0 z-50 h-full bg-background border-r border-border transition-all duration-300 ease-in-out ${
         isCollapsed ? 'w-20' : 'w-64'
       } hidden md:block`} style={isCollapsed ? { touchAction: 'none', userSelect: 'none' } : {}}>
         <div className="flex flex-col h-full">
@@ -222,7 +222,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             </div>
             <button 
               onClick={onCollapse}
-              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+              className="p-1.5 rounded-lg hover:bg-muted text-brand-text transition-colors"
               title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <Menu className="h-5 w-5" />
@@ -233,16 +233,16 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           {!isCollapsed && (
             <div className="px-4 mb-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent transition-colors"
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <kbd className="px-2 py-0.5 text-xs bg-[#E5E7EB] text-[#6B7280] rounded border">⌘K</kbd>
+                  <kbd className="px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded border">⌘K</kbd>
                 </div>
               </div>
             </div>
@@ -255,10 +255,10 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
 
 
           {/* Bottom Section */}
-          <div className="border-t border-[#E5E7EB] p-4">
+          <div className="border-t border-border p-4">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-[#DC2626] rounded-lg hover:bg-[#FEF2F2] transition-colors"
+              className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-destructive rounded-lg hover:bg-destructive/10 transition-colors"
             >
               <LogOut className={`${isCollapsed ? 'mr-0' : 'mr-2'} h-4 w-4 flex-shrink-0`} />
               {!isCollapsed && <span>Sign out</span>}
@@ -268,7 +268,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
       </div>
 
       {/* Mobile Sidebar */}
-      <div className={`fixed left-0 top-0 z-50 h-full w-64 bg-white border-r border-[#E5E7EB] transform transition-transform duration-300 ease-in-out md:hidden ${
+      <div className={`fixed left-0 top-0 z-50 h-full w-64 bg-background border-r border-border transform transition-transform duration-300 ease-in-out md:hidden ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
@@ -285,7 +285,7 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             </div>
             <button 
               onClick={onToggle}
-              className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+              className="p-1.5 rounded-lg hover:bg-muted text-brand-text transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -294,13 +294,13 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
           {/* Search Bar */}
           <div className="px-4 mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9CA3AF]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent transition-colors"
               />
             </div>
           </div>
@@ -312,18 +312,18 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
 
 
           {/* Bottom Section */}
-          <div className="border-t border-[#E5E7EB] p-4">
+          <div className="border-t border-border p-4">
             {/* Theme Toggle & Settings */}
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="flex items-center space-x-2 text-sm text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+                className="flex items-center space-x-2 text-sm text-brand-text hover:text-brand-primary transition-colors"
               >
                 {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 <span>{isDarkMode ? 'Light mode' : 'Dark mode'}</span>
               </button>
               <button 
-                className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] transition-colors"
+                className="p-1.5 rounded-lg hover:bg-muted text-brand-text transition-colors"
                 title="Settings"
               >
                 <Settings className="h-4 w-4" />
@@ -333,14 +333,14 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
             {/* User Info & Logout */}
             {user && (
               <div className="mb-3">
-                <p className="text-sm font-medium text-[#1A1A1A] truncate">{user.name}</p>
-                <p className="text-xs text-[#6C757D] truncate">{user.email}</p>
-                <p className="text-xs text-[#3D8BFF] font-medium">{user.role}</p>
+                <p className="text-sm font-medium text-brand-primary truncate">{user.name}</p>
+                <p className="text-xs text-brand-text truncate">{user.email}</p>
+                <p className="text-xs text-brand-accent font-medium">{user.role}</p>
               </div>
             )}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-[#DC2626] rounded-lg hover:bg-[#FEF2F2] transition-colors"
+              className="w-full flex items-center justify-center p-2.5 text-sm font-medium text-destructive rounded-lg hover:bg-destructive/10 transition-colors"
             >
               <LogOut className="mr-2 h-4 w-4 flex-shrink-0" />
               <span>Sign out</span>
@@ -350,12 +350,12 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
       </div>
 
       {/* Mobile Header - Show when sidebar is closed */}
-      <div className="md:hidden bg-white border-b border-[#E5E7EB] p-4">
+      <div className="md:hidden bg-background border-b border-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <button
               onClick={onToggle}
-              className="p-2 rounded-lg hover:bg-[#F3F4F6] text-[#6C757D] mr-3 transition-colors"
+              className="p-2 rounded-lg hover:bg-muted text-brand-text mr-3 transition-colors"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -366,14 +366,14 @@ export const AdminSidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed =
                 className="h-6 w-6"
               />
             ) : (
-              <div className="h-6 w-6 bg-[#3D8BFF] rounded flex items-center justify-center">
+              <div className="h-6 w-6 bg-brand-accent rounded flex items-center justify-center">
                 <Shield className="h-4 w-4 text-white" />
               </div>
             )}
-            <h1 className="ml-2 text-lg font-bold text-[#1A1A1A]">IndexNow</h1>
+            <h1 className="ml-2 text-lg font-bold text-brand-primary">IndexNow</h1>
           </div>
           {user && (
-            <p className="text-sm text-[#6C757D] truncate max-w-32">{user.email}</p>
+            <p className="text-sm text-brand-text truncate max-w-32">{user.email}</p>
           )}
         </div>
       </div>
