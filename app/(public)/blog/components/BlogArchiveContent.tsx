@@ -177,7 +177,7 @@ export default function BlogArchiveContent() {
   }
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden bg-background">
+    <div className="min-h-screen text-foreground relative overflow-hidden bg-background">
       <Background />
       <Header 
         user={user}
@@ -193,27 +193,27 @@ export default function BlogArchiveContent() {
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <div className="mb-6">
-              <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">INSIGHTS</span>
+              <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">INSIGHTS</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white" data-testid="blog-hero-title">
               SEO Insights & Strategies
             </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed" data-testid="blog-hero-description">
+            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed" data-testid="blog-hero-description">
               Discover expert insights on rank tracking, search engine optimization, and digital marketing strategies to boost your website's performance.
             </p>
             
             {/* Feature highlights */}
             <div className="flex flex-wrap justify-center gap-6 mt-12">
-              <div className="flex items-center gap-2 text-gray-400">
-                <TrendingUp className="w-5 h-5 text-blue-400" />
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <TrendingUp className="w-5 h-5 text-info" />
                 <span>SEO Strategies</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-400">
-                <Zap className="w-5 h-5 text-blue-400" />
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Zap className="w-5 h-5 text-info" />
                 <span>Rank Tracking Tips</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-400">
-                <BookOpen className="w-5 h-5 text-blue-400" />
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <BookOpen className="w-5 h-5 text-info" />
                 <span>Expert Insights</span>
               </div>
             </div>
@@ -240,13 +240,13 @@ export default function BlogArchiveContent() {
             {loading && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" data-testid="blog-loading">
                 {[...Array(12)].map((_, index) => (
-                  <div key={index} className="bg-gray-900/50 border border-gray-800/50 rounded-xl overflow-hidden animate-pulse">
-                    <div className="aspect-[16/10] bg-gray-800/50"></div>
+                  <div key={index} className="bg-muted/10 border border-border rounded-xl overflow-hidden animate-pulse">
+                    <div className="aspect-[16/10] bg-muted/20"></div>
                     <div className="p-6">
-                      <div className="h-4 bg-gray-800/50 rounded mb-3"></div>
-                      <div className="h-6 bg-gray-800/50 rounded mb-3"></div>
-                      <div className="h-4 bg-gray-800/50 rounded mb-2"></div>
-                      <div className="h-4 bg-gray-800/50 rounded w-2/3"></div>
+                      <div className="h-4 bg-muted/20 rounded mb-3"></div>
+                      <div className="h-6 bg-muted/20 rounded mb-3"></div>
+                      <div className="h-4 bg-muted/20 rounded mb-2"></div>
+                      <div className="h-4 bg-muted/20 rounded w-2/3"></div>
                     </div>
                   </div>
                 ))}
@@ -256,12 +256,12 @@ export default function BlogArchiveContent() {
             {/* Error State */}
             {error && !loading && (
               <div className="text-center py-20" data-testid="blog-error">
-                <div className="bg-red-900/20 border border-red-800/50 rounded-xl p-8 max-w-md mx-auto">
+                <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-8 max-w-md mx-auto">
                   <h3 className="text-xl font-semibold text-white mb-2">Failed to Load Posts</h3>
-                  <p className="text-gray-300 mb-4">{error}</p>
+                  <p className="text-muted-foreground mb-4">{error}</p>
                   <button
                     onClick={() => fetchPosts(currentPage, searchQuery, selectedTag)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    className="bg-destructive hover:bg-destructive/90 text-white px-6 py-2 rounded-lg font-medium transition-colors"
                   >
                     Try Again
                   </button>
@@ -272,9 +272,9 @@ export default function BlogArchiveContent() {
             {/* No Posts State */}
             {!loading && !error && posts.length === 0 && (
               <div className="text-center py-20" data-testid="blog-no-posts">
-                <BookOpen className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                <BookOpen className="w-16 h-16 text-muted-foreground/70 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">No Posts Found</h3>
-                <p className="text-gray-400 mb-6">
+                <p className="text-muted-foreground mb-6">
                   {searchQuery || selectedTag 
                     ? "No posts match your current filters. Try adjusting your search criteria."
                     : "No blog posts have been published yet. Check back soon for exciting content!"
@@ -287,7 +287,7 @@ export default function BlogArchiveContent() {
                       setSelectedTag(null)
                       setCurrentPage(1)
                     }}
-                    className="text-blue-400 hover:text-blue-300 font-medium"
+                    className="text-info hover:text-info/90 font-medium">
                   >
                     Clear Filters
                   </button>
