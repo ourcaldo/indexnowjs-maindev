@@ -126,12 +126,12 @@ export const BillingStats = ({
       {/* No Active Package Alert */}
       {!currentPackageId && (
         <Card>
-          <div className="p-4 border border-[#F0A202] bg-[#F0A202]/5 rounded-lg">
+          <div className="p-4 border border-warning bg-warning/5 rounded-lg">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-[#F0A202] flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-medium text-[#1A1A1A] mb-1">No Active Package</h3>
-                <p className="text-sm text-[#6C757D]">
+                <h3 className="font-medium text-foreground mb-1">No Active Package</h3>
+                <p className="text-sm text-muted-foreground">
                   You don't have an active package. Subscribe to a plan below to start tracking your keywords and accessing all features.
                 </p>
               </div>
@@ -142,20 +142,20 @@ export const BillingStats = ({
 
       {/* Unified Plan & Usage Section - Like Reference Design */}
       {currentSubscription && (
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="bg-background rounded-lg border border-border p-6">
           {/* Plan Header */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
             <div>
-              <h2 className="text-sm font-medium text-[#6C757D] mb-2">Plan</h2>
-              <h3 className="text-xl font-bold text-[#1A1A1A] mb-1">{currentSubscription.package_name}</h3>
-              <p className="text-sm text-[#6C757D]">{getExpirationText()}</p>
+              <h2 className="text-sm font-medium text-muted-foreground mb-2">Plan</h2>
+              <h3 className="text-xl font-bold text-foreground mb-1">{currentSubscription.package_name}</h3>
+              <p className="text-sm text-muted-foreground">{getExpirationText()}</p>
             </div>
             <div>
-              <h2 className="text-sm font-medium text-[#6C757D] mb-2">Payment</h2>
-              <div className="text-xl font-bold text-[#1A1A1A] mb-1">
+              <h2 className="text-sm font-medium text-muted-foreground mb-2">Payment</h2>
+              <div className="text-xl font-bold text-foreground mb-1">
                 {formatCurrency(currentSubscription.amount_paid, userCurrency)}
               </div>
-              <p className="text-sm text-[#6C757D]">per {currentSubscription.billing_period}</p>
+              <p className="text-sm text-muted-foreground">per {currentSubscription.billing_period}</p>
             </div>
           </div>
 
@@ -165,17 +165,17 @@ export const BillingStats = ({
               <LoadingSpinner size="lg" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-[#E0E6ED]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-border">
               {/* Daily URLs */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Globe className="h-4 w-4 text-[#6C757D]" />
-                  <span className="text-sm font-medium text-[#6C757D]">Daily URLs</span>
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">Daily URLs</span>
                 </div>
                 <div className="space-y-3">
-                  <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                  <div className="w-full bg-border rounded-full h-2">
                     <div 
-                      className="bg-[#3D8BFF] h-2 rounded-full transition-all duration-300"
+                      className="bg-info h-2 rounded-full transition-all duration-300"
                       style={{ 
                         width: `${getUsagePercentage(
                           usageData?.daily_quota_used || 0, 
@@ -187,11 +187,11 @@ export const BillingStats = ({
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4 text-[#6C757D]" />
-                      <span className="font-semibold text-[#1A1A1A]">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-semibold text-foreground">
                         {usageData?.daily_quota_used || 0} 
                         {!usageData?.is_unlimited && (
-                          <span className="text-sm text-[#6C757D] ml-1">
+                          <span className="text-sm text-muted-foreground ml-1">
                             ({Math.round(getUsagePercentage(
                               usageData?.daily_quota_used || 0, 
                               usageData?.daily_quota_limit || 500, 
@@ -201,7 +201,7 @@ export const BillingStats = ({
                         )}
                       </span>
                     </div>
-                    <span className="text-[#6C757D]">
+                    <span className="text-muted-foreground">
                       {usageData?.is_unlimited ? 'Unlimited' : (usageData?.daily_quota_limit || 500)}
                     </span>
                   </div>
@@ -211,13 +211,13 @@ export const BillingStats = ({
               {/* Keywords tracked */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Server className="h-4 w-4 text-[#6C757D]" />
-                  <span className="text-sm font-medium text-[#6C757D]">Keywords tracked</span>
+                  <Server className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">Keywords tracked</span>
                 </div>
                 <div className="space-y-3">
-                  <div className="w-full bg-[#E0E6ED] rounded-full h-2">
+                  <div className="w-full bg-border rounded-full h-2">
                     <div 
-                      className="bg-[#F0A202] h-2 rounded-full transition-all duration-300"
+                      className="bg-warning h-2 rounded-full transition-all duration-300"
                       style={{ 
                         width: `${getUsagePercentage(
                           keywordUsage?.keywords_used || 0, 
@@ -229,11 +229,11 @@ export const BillingStats = ({
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-1">
-                      <Server className="h-4 w-4 text-[#6C757D]" />
-                      <span className="font-semibold text-[#1A1A1A]">
+                      <Server className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-semibold text-foreground">
                         {keywordUsage?.keywords_used || 0}
                         {!keywordUsage?.is_unlimited && keywordUsage?.keywords_limit > 0 && (
-                          <span className="text-sm text-[#6C757D] ml-1">
+                          <span className="text-sm text-muted-foreground ml-1">
                             ({Math.round(getUsagePercentage(
                               keywordUsage?.keywords_used || 0, 
                               keywordUsage?.keywords_limit || 0, 
@@ -243,7 +243,7 @@ export const BillingStats = ({
                         )}
                       </span>
                     </div>
-                    <span className="text-[#6C757D]">
+                    <span className="text-muted-foreground">
                       {keywordUsage?.is_unlimited ? 'Unlimited' : (keywordUsage?.keywords_limit > 0 ? keywordUsage.keywords_limit : 'Loading...')}
                     </span>
                   </div>
@@ -253,21 +253,21 @@ export const BillingStats = ({
               {/* Service accounts */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <Package className="h-4 w-4 text-[#6C757D]" />
-                  <span className="text-sm font-medium text-[#6C757D]">Service accounts</span>
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">Service accounts</span>
                 </div>
                 <div className="space-y-3">
-                  <div className="w-full bg-[#E0E6ED] rounded-full h-2">
-                    <div className="bg-[#6C757D] h-2 rounded-full w-0" />
+                  <div className="w-full bg-border rounded-full h-2">
+                    <div className="bg-muted-foreground h-2 rounded-full w-0" />
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-1">
-                      <Package className="h-4 w-4 text-[#6C757D]" />
-                      <span className="font-semibold text-[#1A1A1A]">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-semibold text-foreground">
                         {usageData?.service_account_count || 0}
                       </span>
                     </div>
-                    <span className="text-[#6C757D]">connected</span>
+                    <span className="text-muted-foreground">connected</span>
                   </div>
                 </div>
               </div>

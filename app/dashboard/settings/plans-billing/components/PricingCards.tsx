@@ -67,22 +67,22 @@ export const PricingCards = ({
       {/* Billing Period Toggle */}
       <div className="flex justify-center">
         <div className="flex items-center space-x-4">
-          <span className={`text-sm font-medium ${selectedBillingPeriod === 'monthly' ? 'text-[#1A1A1A]' : 'text-[#6C757D]'}`}>
+          <span className={`text-sm font-medium ${selectedBillingPeriod === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
             Monthly
           </span>
           <button
             onClick={() => setSelectedBillingPeriod(selectedBillingPeriod === 'monthly' ? 'annual' : 'monthly')}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              selectedBillingPeriod === 'annual' ? 'bg-[#1A1A1A]' : 'bg-[#E0E6ED]'
+              selectedBillingPeriod === 'annual' ? 'bg-primary' : 'bg-border'
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
                 selectedBillingPeriod === 'annual' ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>
-          <span className={`text-sm font-medium ${selectedBillingPeriod === 'annual' ? 'text-[#1A1A1A]' : 'text-[#6C757D]'}`}>
+          <span className={`text-sm font-medium ${selectedBillingPeriod === 'annual' ? 'text-foreground' : 'text-muted-foreground'}`}>
             Annual
           </span>
         </div>
@@ -98,29 +98,29 @@ export const PricingCards = ({
             <div key={pkg.id} 
               className={`rounded-lg border p-4 relative flex flex-col h-full transition-colors cursor-pointer ${
                 isCurrentPlan 
-                  ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white' 
-                  : 'border-[#E0E6ED] bg-white hover:border-[#1A1A1A]'
+                  ? 'border-primary bg-primary text-primary-foreground' 
+                  : 'border-border bg-background hover:border-primary'
               }`} 
               onClick={() => togglePlanDetails(pkg.id)}
             >
               {pkg.is_popular && !isCurrentPlan && (
-                <div className="absolute -top-3 left-4 bg-[#1A1A1A] text-white px-3 py-1 rounded-full text-xs font-medium">
+                <div className="absolute -top-3 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium">
                   Most Popular
                 </div>
               )}
 
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className={`font-semibold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                  <h3 className={`font-semibold ${isCurrentPlan ? 'text-primary-foreground' : 'text-foreground'}`}>
                     {pkg.name}
                   </h3>
                   {isCurrentPlan && (
-                    <span className="bg-white text-[#1A1A1A] px-2 py-0.5 rounded text-xs font-medium">
+                    <span className="bg-primary-foreground text-primary px-2 py-0.5 rounded text-xs font-medium">
                       Current plan
                     </span>
                   )}
                 </div>
-                <p className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                <p className={`text-sm ${isCurrentPlan ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                   {pkg.description}
                 </p>
               </div>
@@ -128,19 +128,19 @@ export const PricingCards = ({
               <div className="mb-4">
                 <div className="flex items-baseline gap-1">
                   {pricing.originalPrice && pricing.originalPrice > 0 && pricing.originalPrice > pricing.price && (
-                    <span className={`text-sm line-through ${isCurrentPlan ? 'text-gray-400' : 'text-[#6C757D]'}`}>
+                    <span className={`text-sm line-through ${isCurrentPlan ? 'text-primary-foreground/50' : 'text-muted-foreground'}`}>
                       {formatCurrency(pricing.originalPrice, userCurrency)}
                     </span>
                   )}
-                  <span className={`text-2xl font-bold ${isCurrentPlan ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                  <span className={`text-2xl font-bold ${isCurrentPlan ? 'text-primary-foreground' : 'text-foreground'}`}>
                     {formatCurrency(pricing.price, userCurrency)}
                   </span>
-                  <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                  <span className={`text-sm ${isCurrentPlan ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     per month
                   </span>
                 </div>
                 {pricing.discount && (
-                  <span className="text-xs text-[#4BB543] font-medium">
+                  <span className="text-xs text-success font-medium">
                     Save {pricing.discount}%
                   </span>
                 )}
@@ -148,14 +148,14 @@ export const PricingCards = ({
 
               {/* Features List */}
               {(showComparePlans || showDetails[pkg.id]) && (
-                <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-gray-600' : 'border-[#E0E6ED]'}`}>
+                <div className={`mb-4 pb-4 border-b ${isCurrentPlan ? 'border-primary-foreground/30' : 'border-border'}`}>
                   <div className="space-y-3">
                     {pkg.features.map((feature, index) => (
                       <div key={index} className="flex items-start gap-2">
                         <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                          isCurrentPlan ? 'text-white' : 'text-[#4BB543]'
+                          isCurrentPlan ? 'text-primary-foreground' : 'text-success'
                         }`} />
-                        <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-[#6C757D]'}`}>
+                        <span className={`text-sm ${isCurrentPlan ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                           {feature}
                         </span>
                       </div>
@@ -168,8 +168,8 @@ export const PricingCards = ({
               <div className="mt-auto">
                 {isCurrentPlan ? (
                   <div className="flex items-center justify-center gap-2 py-2">
-                    <CheckCircle className="w-4 h-4 text-white" />
-                    <span className="text-white text-sm font-medium">Active Plan</span>
+                    <CheckCircle className="w-4 h-4 text-primary-foreground" />
+                    <span className="text-primary-foreground text-sm font-medium">Active Plan</span>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -181,7 +181,7 @@ export const PricingCards = ({
                           handleStartTrial(pkg.id)
                         }}
                         disabled={startingTrial === pkg.id}
-                        className="w-full bg-[#4BB543] hover:bg-[#4BB543]/90 text-white"
+                        className="w-full bg-success hover:bg-success/90 text-success-foreground"
                       >
                         {startingTrial === pkg.id ? (
                           <>

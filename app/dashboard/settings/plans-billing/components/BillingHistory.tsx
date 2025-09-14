@@ -106,7 +106,7 @@ export const BillingHistory = ({
       key: 'order_id',
       header: 'ORDER ID',
       render: (value: any, transaction: Transaction) => (
-        <div className="font-medium text-[#1A1A1A] font-mono text-xs">
+        <div className="font-medium text-foreground font-mono text-xs">
           {transaction.id}
         </div>
       )
@@ -116,10 +116,10 @@ export const BillingHistory = ({
       header: 'PACKAGE / TYPE',
       render: (value: any, transaction: Transaction) => (
         <div>
-          <div className="font-medium text-[#1A1A1A]">
+          <div className="font-medium text-foreground">
             {transaction.package?.name || transaction.package_name || 'Unknown Package'}
           </div>
-          <div className="text-sm text-[#6C757D] capitalize">
+          <div className="text-sm text-muted-foreground capitalize">
             {transaction.transaction_type.replace('_', ' ')}
           </div>
         </div>
@@ -129,7 +129,7 @@ export const BillingHistory = ({
       key: 'amount',
       header: 'AMOUNT',
       render: (value: any, transaction: Transaction) => (
-        <div className="font-medium text-[#1A1A1A]">
+        <div className="font-medium text-foreground">
           {formatCurrency(transaction.amount, transaction.currency)}
         </div>
       ),
@@ -154,7 +154,7 @@ export const BillingHistory = ({
       key: 'created_at',
       header: 'DATE',
       render: (value: any, transaction: Transaction) => (
-        <div className="text-sm text-[#6C757D]">
+        <div className="text-sm text-muted-foreground">
           {formatDate(transaction.created_at)}
         </div>
       )
@@ -181,8 +181,8 @@ export const BillingHistory = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-[#1A1A1A]">Billing History</h2>
-          <p className="text-sm text-[#6C757D]">
+          <h2 className="text-lg font-semibold text-foreground">Billing History</h2>
+          <p className="text-sm text-muted-foreground">
             {historyData?.summary.total_transactions || 0} transactions • {formatCurrency(historyData?.summary.total_amount_spent || 0, 'USD')} total spent
           </p>
         </div>
@@ -196,7 +196,7 @@ export const BillingHistory = ({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#6C757D]" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search transactions..."
               value={searchTerm}
@@ -236,38 +236,38 @@ export const BillingHistory = ({
 
       {/* Summary Stats */}
       {historyData?.summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-secondary rounded-lg border border-border">
           <div className="text-center">
-            <div className="text-2xl font-bold text-[#1A1A1A]">{historyData.summary.total_transactions}</div>
-            <div className="text-sm text-[#6C757D]">Total</div>
+            <div className="text-2xl font-bold text-foreground">{historyData.summary.total_transactions}</div>
+            <div className="text-sm text-muted-foreground">Total</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-[#4BB543]">{historyData.summary.completed_transactions}</div>
-            <div className="text-sm text-[#6C757D]">Completed</div>
+            <div className="text-2xl font-bold text-success">{historyData.summary.completed_transactions}</div>
+            <div className="text-sm text-muted-foreground">Completed</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-[#F0A202]">{historyData.summary.pending_transactions}</div>
-            <div className="text-sm text-[#6C757D]">Pending</div>
+            <div className="text-2xl font-bold text-warning">{historyData.summary.pending_transactions}</div>
+            <div className="text-sm text-muted-foreground">Pending</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-[#E63946]">{historyData.summary.failed_transactions}</div>
-            <div className="text-sm text-[#6C757D]">Failed</div>
+            <div className="text-2xl font-bold text-error">{historyData.summary.failed_transactions}</div>
+            <div className="text-sm text-muted-foreground">Failed</div>
           </div>
         </div>
       )}
 
       {/* Transactions Table */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] overflow-hidden">
+      <div className="bg-background rounded-lg border border-border overflow-hidden">
         {historyData?.transactions && historyData.transactions.length > 0 ? (
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
+                <thead className="bg-secondary border-b border-border">
                   <tr>
                     {columns.map((column) => (
                       <th
                         key={column.key}
-                        className={`px-6 py-3 text-xs font-medium tracking-wider text-[#6C757D] ${
+                        className={`px-6 py-3 text-xs font-medium tracking-wider text-muted-foreground ${
                           column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left'
                         }`}
                       >
@@ -276,11 +276,11 @@ export const BillingHistory = ({
                     ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-[#E0E6ED]">
+                <tbody className="bg-background divide-y divide-border">
                   {historyData.transactions.map((transaction) => (
                     <tr 
                       key={transaction.id}
-                      className="hover:bg-[#F7F9FC]/50 transition-colors cursor-pointer"
+                      className="hover:bg-secondary/50 transition-colors cursor-pointer"
                       onClick={() => handleRowClick(transaction.id)}
                     >
                       {columns.map((column) => (
@@ -301,26 +301,26 @@ export const BillingHistory = ({
             
             {/* Pagination */}
             {historyData.pagination && (
-              <div className="px-6 py-3 flex items-center justify-between border-t border-[#E0E6ED] bg-[#F7F9FC]">
+              <div className="px-6 py-3 flex items-center justify-between border-t border-border bg-secondary">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <button
                     onClick={() => handlePageChange(Math.max(historyData.pagination.current_page - 1, 1))}
                     disabled={historyData.pagination.current_page === 1}
-                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    className="relative inline-flex items-center px-4 py-2 border border-border text-sm font-medium rounded-md text-muted-foreground bg-background hover:bg-secondary"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => handlePageChange(Math.min(historyData.pagination.current_page + 1, historyData.pagination.total_pages))}
                     disabled={historyData.pagination.current_page === historyData.pagination.total_pages}
-                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-border text-sm font-medium rounded-md text-muted-foreground bg-background hover:bg-secondary"
                   >
                     Next
                   </button>
                 </div>
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-sm text-[#6C757D]">
+                    <p className="text-sm text-muted-foreground">
                       Page <span className="font-medium">{historyData.pagination.current_page}</span> of{' '}
                       <span className="font-medium">{historyData.pagination.total_pages}</span>
                     </p>
@@ -330,14 +330,14 @@ export const BillingHistory = ({
                       <button
                         onClick={() => handlePageChange(Math.max(historyData.pagination.current_page - 1, 1))}
                         disabled={historyData.pagination.current_page === 1}
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-border bg-background text-sm font-medium text-muted-foreground hover:bg-secondary"
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handlePageChange(Math.min(historyData.pagination.current_page + 1, historyData.pagination.total_pages))}
                         disabled={historyData.pagination.current_page === historyData.pagination.total_pages}
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-border bg-background text-sm font-medium text-muted-foreground hover:bg-secondary"
                       >
                         <ChevronRight className="h-5 w-5" />
                       </button>
@@ -349,7 +349,7 @@ export const BillingHistory = ({
           </>
         ) : (
           <div className="flex items-center justify-center py-12">
-            <p className="text-[#6C757D]">No transactions found</p>
+            <p className="text-muted-foreground">No transactions found</p>
           </div>
         )}
       </div>
