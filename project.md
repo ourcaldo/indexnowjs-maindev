@@ -1083,13 +1083,22 @@ JWT_SECRET=[jwt-secret-key]
   - Enables npm run color-check for violation scanning
   - Supports automated CI/CD integration
 
-**🟡 PHASE 3 - CRITICAL FILE REMEDIATION IN PROGRESS**:
-- **Authentication Pages**: Started systematic conversion of app/login/page.tsx
-  - Converted inline styles to semantic CSS classes
-  - Replaced hardcoded colors with semantic tokens (bg-info/10, text-foreground, etc.)
+**✅ PHASE 3 - CRITICAL FILE REMEDIATION COMPLETED**:
+- **Authentication Pages (15+ hardcoded colors each)**: ✅ **COMPLETED**
+  - ✅ `app/login/page.tsx` - Converted all inline styles to semantic CSS classes
+  - ✅ `app/register/page.tsx` - Replaced hardcoded colors with semantic tokens
   - Fixed invalid Tailwind classes (p-15 → p-[60px], left-15 → left-[60px])
   - Eliminated non-semantic colors (text-gray-700 → text-foreground)
-  - **Status**: Partially complete, some inline styles and non-semantic colors remain
+- **Core UI Components (10+ hardcoded colors each)**: ✅ **COMPLETED**
+  - ✅ `components/ui/skeleton.tsx` - All hardcoded colors eliminated, converted to semantic classes
+  - ✅ `components/ui/toast.tsx` - Status borders implemented with semantic utilities
+  - ✅ `components/ui/select.tsx` - Focus ring converted to semantic token
+  - Added semantic border utilities (.border-success, .border-warning, etc.) to globals.css
+- **Dashboard Components (5+ hardcoded colors each)**: ✅ **COMPLETED**  
+  - ✅ `components/DashboardPreview.tsx` - Extensive hardcoded colors converted to semantic CSS variables
+  - ✅ Dashboard widget files already using semantic tokens (UsageChart, RankingDistribution, PerformanceOverview)
+  - Fixed critical HSL alpha syntax bug (${color}15 → hsl(var(--success) / 0.15))
+- **Result**: All critical priority files now use semantic color system - 0 hardcoded colors in authentication, core UI, and dashboard components
 
 **🔧 TECHNICAL IMPROVEMENTS**:
 - **CSS Focus Fix**: Corrected .form-field-focus utility to use proper Tailwind ring classes

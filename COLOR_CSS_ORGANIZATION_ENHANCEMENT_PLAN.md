@@ -158,21 +158,22 @@ npm run color-check  # Custom script to check for hardcoded colors
 ### 3.1 Priority File Classification
 
 #### **Critical Priority Files** (Immediate Fix Required):
-1. **Authentication Pages** (15+ hardcoded colors each):
-   - `app/login/page.tsx`
-   - `app/register/page.tsx`
+1. **Authentication Pages** (15+ hardcoded colors each): ✅ **COMPLETED**
+   - ✅ `app/login/page.tsx` - Converted to semantic classes
+   - ✅ `app/register/page.tsx` - Converted to semantic classes
 
-2. **Core UI Components** (10+ hardcoded colors each):
-   - `components/ui/skeleton.tsx` 
-   - `components/ui/toast.tsx`
-   - `components/ui/select.tsx`
-   - `components/MidtransCreditCardForm.tsx`
+2. **Core UI Components** (10+ hardcoded colors each): ✅ **COMPLETED**
+   - ✅ `components/ui/skeleton.tsx` - All hardcoded colors eliminated
+   - ✅ `components/ui/toast.tsx` - Status borders and semantic tokens implemented
+   - ✅ `components/ui/select.tsx` - Focus ring converted to semantic token
+   - ❌ `components/MidtransCreditCardForm.tsx` - Not found/already clean
 
-3. **Dashboard Components** (5+ hardcoded colors each):
-   - `components/dashboard/widgets/UsageChart.tsx`
-   - `components/dashboard/widgets/RankingDistribution.tsx`
-   - `components/dashboard/widgets/PerformanceOverview.tsx`
-   - `components/dashboard/widgets/ActivityTimeline.tsx`
+3. **Dashboard Components** (5+ hardcoded colors each): ✅ **COMPLETED**
+   - ✅ `components/DashboardPreview.tsx` - Converted to semantic CSS variables
+   - ✅ `components/dashboard/widgets/UsageChart.tsx` - Already using semantic tokens
+   - ✅ `components/dashboard/widgets/RankingDistribution.tsx` - Already using semantic tokens
+   - ✅ `components/dashboard/widgets/PerformanceOverview.tsx` - Already using semantic tokens
+   - ✅ `components/dashboard/widgets/ActivityTimeline.tsx` - Already using semantic tokens
 
 #### **High Priority Files** (3-5 hardcoded colors each):
 4. **Settings Components**:
