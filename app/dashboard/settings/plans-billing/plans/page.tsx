@@ -150,12 +150,12 @@ export default function PlansPage() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Plans</h3>
-        <p className="text-[#6C757D] mb-4">{error}</p>
+        <AlertCircle className="h-12 w-12 text-error mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Plans</h3>
+        <p className="text-muted-foreground mb-4">{error}</p>
         <button
           onClick={loadPackages}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Try Again
         </button>
@@ -174,28 +174,28 @@ export default function PlansPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-[#1A1A1A] mb-4">Choose Your Plan</h1>
-        <p className="text-[#6C757D] text-lg max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold text-foreground mb-4">Choose Your Plan</h1>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
           Select the perfect plan for your URL indexing needs. All plans include access to Google Indexing API and premium features.
         </p>
       </div>
 
       {/* Billing Period Toggle */}
       <div className="flex justify-center">
-        <div className="flex bg-[#F7F9FC] p-1 rounded-lg">
+        <div className="flex bg-secondary p-1 rounded-lg">
           {billingPeriods.map((period) => (
             <button
               key={period.key}
               onClick={() => setSelectedBillingPeriod(period.key)}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 selectedBillingPeriod === period.key
-                  ? 'bg-white text-[#1A1A1A] shadow-sm'
-                  : 'text-[#6C757D] hover:text-[#1A1A1A]'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {period.label}
               {period.key === 'annual' && (
-                <span className="ml-1 text-xs bg-[#4BB543] text-white px-1.5 py-0.5 rounded-full">
+                <span className="ml-1 text-xs bg-success text-success-foreground px-1.5 py-0.5 rounded-full">
                   Save 20%
                 </span>
               )}
@@ -213,18 +213,18 @@ export default function PlansPage() {
           return (
             <div
               key={pkg.id}
-              className={`relative bg-white rounded-xl border-2 p-8 transition-all hover:shadow-lg ${
+              className={`relative bg-card rounded-xl border-2 p-8 transition-all hover:shadow-lg ${
                 pkg.is_popular 
-                  ? 'border-[#3D8BFF] shadow-md' 
+                  ? 'border-accent shadow-md' 
                   : pkg.is_current
-                  ? 'border-[#4BB543]'
-                  : 'border-[#E0E6ED] hover:border-[#3D8BFF]'
+                  ? 'border-success'
+                  : 'border-border hover:border-accent'
               }`}
             >
               {/* Popular Badge */}
               {pkg.is_popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="flex items-center bg-[#3D8BFF] text-white px-4 py-2 rounded-full text-sm font-medium">
+                  <div className="flex items-center bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-medium">
                     <Star className="h-4 w-4 mr-1" />
                     Most Popular
                   </div>
@@ -234,7 +234,7 @@ export default function PlansPage() {
               {/* Current Plan Badge */}
               {pkg.is_current && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="flex items-center bg-[#4BB543] text-white px-4 py-2 rounded-full text-sm font-medium">
+                  <div className="flex items-center bg-success text-success-foreground px-4 py-2 rounded-full text-sm font-medium">
                     <Crown className="h-4 w-4 mr-1" />
                     Current Plan
                   </div>
@@ -243,25 +243,25 @@ export default function PlansPage() {
 
               {/* Plan Header */}
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">{pkg.name}</h3>
-                <p className="text-[#6C757D] mb-6">{pkg.description}</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">{pkg.name}</h3>
+                <p className="text-muted-foreground mb-6">{pkg.description}</p>
 
                 <div className="mb-6">
                   {pricingInfo.originalPrice && (
-                    <div className="text-[#6C757D] line-through text-lg mb-1">
+                    <div className="text-muted-foreground line-through text-lg mb-1">
                       {formatCurrency(pricingInfo.originalPrice, pkg.currency)}
                     </div>
                   )}
                   <div className="flex items-baseline justify-center">
-                    <span className="text-4xl font-bold text-[#1A1A1A]">
+                    <span className="text-4xl font-bold text-foreground">
                       {formatCurrency(pricingInfo.price, pkg.currency)}
                     </span>
-                    <span className="text-[#6C757D] ml-1">
+                    <span className="text-muted-foreground ml-1">
                       {currentPeriod?.suffix}
                     </span>
                   </div>
                   {pricingInfo.discount && (
-                    <div className="text-[#4BB543] text-sm font-medium mt-1">
+                    <div className="text-success text-sm font-medium mt-1">
                       Save {pricingInfo.discount}%
                     </div>
                   )}
@@ -272,29 +272,29 @@ export default function PlansPage() {
               <div className="space-y-4 mb-8">
                 {(pkg.features || []).map((feature, index) => (
                   <div key={index} className="flex items-start">
-                    <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-[#6C757D]">{feature}</span>
+                    <Check className="h-5 w-5 text-success mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground">{feature}</span>
                   </div>
                 ))}
 
                 {/* Quota Limits */}
-                <div className="pt-4 border-t border-[#E0E6ED]">
+                <div className="pt-4 border-t border-border">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-[#6C757D]">Daily Quota:</span>
-                      <span className="font-medium text-[#1A1A1A]">
+                      <span className="text-muted-foreground">Daily Quota:</span>
+                      <span className="font-medium text-foreground">
                         {pkg.quota_limits?.daily_quota_limit === -1 ? 'Unlimited' : pkg.quota_limits?.daily_quota_limit?.toLocaleString() || 0} URLs
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#6C757D]">Service Accounts:</span>
-                      <span className="font-medium text-[#1A1A1A]">
+                      <span className="text-muted-foreground">Service Accounts:</span>
+                      <span className="font-medium text-foreground">
                         {pkg.quota_limits?.service_accounts_limit === -1 ? 'Unlimited' : pkg.quota_limits?.service_accounts_limit || 0}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#6C757D]">Concurrent Jobs:</span>
-                      <span className="font-medium text-[#1A1A1A]">
+                      <span className="text-muted-foreground">Concurrent Jobs:</span>
+                      <span className="font-medium text-foreground">
                         {pkg.quota_limits?.concurrent_jobs_limit === -1 ? 'Unlimited' : pkg.quota_limits?.concurrent_jobs_limit || 0}
                       </span>
                     </div>
@@ -308,10 +308,10 @@ export default function PlansPage() {
                 disabled={pkg.is_current || subscribing === pkg.id}
                 className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center ${
                   pkg.is_current
-                    ? 'bg-[#4BB543]/10 text-[#4BB543] cursor-not-allowed'
+                    ? 'bg-success/10 text-success cursor-not-allowed'
                     : pkg.is_popular
-                    ? 'bg-[#3D8BFF] text-white hover:bg-[#2563eb] hover:shadow-md'
-                    : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
+                    ? 'bg-accent text-accent-foreground hover:bg-accent/90 hover:shadow-md'
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md'
                 } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {subscribing === pkg.id ? (
@@ -335,22 +335,22 @@ export default function PlansPage() {
 
       {/* Additional Info */}
       <div className="text-center py-8">
-        <div className="bg-[#F7F9FC] rounded-lg p-6 max-w-4xl mx-auto">
-          <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Need Help Choosing?</h3>
-          <p className="text-[#6C757D] mb-4">
+        <div className="bg-secondary rounded-lg p-6 max-w-4xl mx-auto">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Need Help Choosing?</h3>
+          <p className="text-muted-foreground mb-4">
             All plans include 24/7 support, real-time indexing monitoring, and access to our premium dashboard features.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-[#6C757D]">
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center">
-              <Check className="h-4 w-4 text-[#4BB543] mr-1" />
+              <Check className="h-4 w-4 text-success mr-1" />
               <span>Cancel anytime</span>
             </div>
             <div className="flex items-center">
-              <Check className="h-4 w-4 text-[#4BB543] mr-1" />
+              <Check className="h-4 w-4 text-success mr-1" />
               <span>Secure payments</span>
             </div>
             <div className="flex items-center">
-              <Check className="h-4 w-4 text-[#4BB543] mr-1" />
+              <Check className="h-4 w-4 text-success mr-1" />
               <span>Instant activation</span>
             </div>
           </div>

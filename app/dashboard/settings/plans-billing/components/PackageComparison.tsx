@@ -47,11 +47,11 @@ export const PackageComparison = ({
   if (!showComparePlans) return null
 
   return (
-    <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+    <div className="bg-card rounded-lg border border-border p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-[#1A1A1A]">Compare Plans</h2>
-          <p className="text-sm text-[#6C757D]">Compare features across all available plans</p>
+          <h2 className="text-lg font-semibold text-foreground">Compare Plans</h2>
+          <p className="text-sm text-muted-foreground">Compare features across all available plans</p>
         </div>
         <Button variant="outline" onClick={toggleComparePlans}>
           <Package className="w-4 h-4 mr-2" />
@@ -63,28 +63,28 @@ export const PackageComparison = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#E0E6ED]">
-              <th className="text-left py-4 pr-4 font-medium text-[#1A1A1A]">Features</th>
+            <tr className="border-b border-border">
+              <th className="text-left py-4 pr-4 font-medium text-foreground">Features</th>
               {packages.map((pkg) => (
                 <th key={pkg.id} className="text-center py-4 px-4 min-w-[200px]">
                   <div className="space-y-2">
                     <div className="flex flex-col items-center">
-                      <div className="font-semibold text-[#1A1A1A]">{pkg.name}</div>
+                      <div className="font-semibold text-foreground">{pkg.name}</div>
                       {pkg.is_current && (
-                        <span className="bg-[#1A1A1A] text-white px-2 py-0.5 rounded text-xs">
+                        <span className="bg-foreground text-background px-2 py-0.5 rounded text-xs">
                           Current
                         </span>
                       )}
                       {pkg.is_popular && !pkg.is_current && (
-                        <span className="bg-[#3D8BFF] text-white px-2 py-0.5 rounded text-xs">
+                        <span className="bg-accent text-accent-foreground px-2 py-0.5 rounded text-xs">
                           Popular
                         </span>
                       )}
                     </div>
-                    <div className="text-2xl font-bold text-[#1A1A1A]">
+                    <div className="text-2xl font-bold text-foreground">
                       {formatCurrency(getBillingPeriodPrice(pkg, selectedBillingPeriod).price, userCurrency)}
                     </div>
-                    <div className="text-sm text-[#6C757D]">per month</div>
+                    <div className="text-sm text-muted-foreground">per month</div>
                   </div>
                 </th>
               ))}
@@ -93,15 +93,15 @@ export const PackageComparison = ({
           <tbody>
             {/* Extract all unique features */}
             {Array.from(new Set(packages.flatMap(pkg => pkg.features))).map((feature, index) => (
-              <tr key={index} className="border-b border-[#E0E6ED]">
-                <td className="py-3 pr-4 text-[#6C757D]">{feature}</td>
+              <tr key={index} className="border-b border-border">
+                <td className="py-3 pr-4 text-muted-foreground">{feature}</td>
                 {packages.map((pkg) => (
                   <td key={pkg.id} className="text-center py-3 px-4">
                     {pkg.features.includes(feature) ? (
-                      <CheckCircle className="w-5 h-5 text-[#4BB543] mx-auto" />
+                      <CheckCircle className="w-5 h-5 text-success mx-auto" />
                     ) : (
                       <div className="w-5 h-5 mx-auto opacity-20">
-                        <div className="w-full h-full rounded-full border border-[#E0E6ED]"></div>
+                        <div className="w-full h-full rounded-full border border-border"></div>
                       </div>
                     )}
                   </td>
@@ -116,8 +116,8 @@ export const PackageComparison = ({
                 <td key={pkg.id} className="text-center py-6 px-4">
                   {pkg.is_current ? (
                     <div className="flex items-center justify-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-[#4BB543]" />
-                      <span className="text-sm font-medium text-[#4BB543]">Active Plan</span>
+                      <CheckCircle className="w-4 h-4 text-success" />
+                      <span className="text-sm font-medium text-success">Active Plan</span>
                     </div>
                   ) : (
                     <Button

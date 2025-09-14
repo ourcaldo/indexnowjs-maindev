@@ -17,8 +17,8 @@ export const Pagination = ({ pagination, currentPage, setCurrentPage }: Paginati
   }
 
   return (
-    <div className="flex items-center justify-between pt-4" style={{borderTop: '1px solid #E0E6ED'}}>
-      <div className="text-sm" style={{color: '#6C757D'}}>
+    <div className="flex items-center justify-between pt-4 border-t border-border">
+      <div className="text-sm text-muted-foreground">
         Showing {((pagination.page - 1) * 20) + 1} to {Math.min(pagination.page * 20, pagination.total)} of {pagination.total} keywords
       </div>
       <div className="flex gap-2">

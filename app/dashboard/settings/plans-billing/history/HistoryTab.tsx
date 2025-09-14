@@ -120,21 +120,21 @@ export default function HistoryTab() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-[#4BB543]" />
-      case 'pending': return <Clock className="h-4 w-4 text-[#F0A202]" />
-      case 'failed': return <XCircle className="h-4 w-4 text-[#E63946]" />
-      case 'cancelled': return <XCircle className="h-4 w-4 text-[#6C757D]" />
-      default: return <AlertCircle className="h-4 w-4 text-[#6C757D]" />
+      case 'completed': return <CheckCircle className="h-4 w-4 text-success" />
+      case 'pending': return <Clock className="h-4 w-4 text-warning" />
+      case 'failed': return <XCircle className="h-4 w-4 text-error" />
+      case 'cancelled': return <XCircle className="h-4 w-4 text-muted-foreground" />
+      default: return <AlertCircle className="h-4 w-4 text-muted-foreground" />
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return { bg: 'bg-[#4BB543]/10', text: 'text-[#4BB543]', border: 'border-[#4BB543]/20' }
-      case 'pending': return { bg: 'bg-[#F0A202]/10', text: 'text-[#F0A202]', border: 'border-[#F0A202]/20' }
-      case 'failed': return { bg: 'bg-[#E63946]/10', text: 'text-[#E63946]', border: 'border-[#E63946]/20' }
-      case 'cancelled': return { bg: 'bg-[#6C757D]/10', text: 'text-[#6C757D]', border: 'border-[#6C757D]/20' }
-      default: return { bg: 'bg-[#6C757D]/10', text: 'text-[#6C757D]', border: 'border-[#6C757D]/20' }
+      case 'completed': return { bg: 'bg-success/10', text: 'text-success', border: 'border-success/20' }
+      case 'pending': return { bg: 'bg-warning/10', text: 'text-warning', border: 'border-warning/20' }
+      case 'failed': return { bg: 'bg-error/10', text: 'text-error', border: 'border-error/20' }
+      case 'cancelled': return { bg: 'bg-muted-foreground/10', text: 'text-muted-foreground', border: 'border-muted-foreground/20' }
+      default: return { bg: 'bg-muted-foreground/10', text: 'text-muted-foreground', border: 'border-muted-foreground/20' }
     }
   }
 
@@ -187,12 +187,12 @@ export default function HistoryTab() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading History</h3>
-        <p className="text-[#6C757D] mb-4">{error}</p>
+        <AlertCircle className="h-12 w-12 text-error mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading History</h3>
+        <p className="text-muted-foreground mb-4">{error}</p>
         <button
           onClick={loadBillingHistory}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Try Again
         </button>
@@ -205,46 +205,46 @@ export default function HistoryTab() {
       {/* Summary Stats */}
       {historyData?.summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-            <div className="text-2xl font-bold text-[#1A1A1A]">
+          <div className="bg-card p-4 rounded-lg border border-border">
+            <div className="text-2xl font-bold text-foreground">
               {historyData.summary.total_transactions}
             </div>
-            <div className="text-sm text-[#6C757D]">Total Transactions</div>
+            <div className="text-sm text-muted-foreground">Total Transactions</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-            <div className="text-2xl font-bold text-[#4BB543]">
+          <div className="bg-card p-4 rounded-lg border border-border">
+            <div className="text-2xl font-bold text-success">
               {historyData.summary.completed_transactions}
             </div>
-            <div className="text-sm text-[#6C757D]">Completed</div>
+            <div className="text-sm text-muted-foreground">Completed</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-            <div className="text-2xl font-bold text-[#F0A202]">
+          <div className="bg-card p-4 rounded-lg border border-border">
+            <div className="text-2xl font-bold text-warning">
               {historyData.summary.pending_transactions}
             </div>
-            <div className="text-sm text-[#6C757D]">Pending</div>
+            <div className="text-sm text-muted-foreground">Pending</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-            <div className="text-2xl font-bold text-[#1A1A1A]">
+          <div className="bg-card p-4 rounded-lg border border-border">
+            <div className="text-2xl font-bold text-foreground">
               {formatCurrency(historyData.summary.total_amount_spent)}
             </div>
-            <div className="text-sm text-[#6C757D]">Total Spent</div>
+            <div className="text-sm text-muted-foreground">Total Spent</div>
           </div>
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-white p-6 rounded-lg border border-[#E0E6ED]">
+      <div className="bg-card p-6 rounded-lg border border-border">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search by package, order ID, or transaction ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function HistoryTab() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             >
               <option value="">All Status</option>
               <option value="completed">Completed</option>
@@ -269,7 +269,7 @@ export default function HistoryTab() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             >
               <option value="">All Types</option>
               <option value="subscription">New Subscription</option>
@@ -282,14 +282,14 @@ export default function HistoryTab() {
       </div>
 
       {/* Transactions List */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED]">
+      <div className="bg-card rounded-lg border border-border">
         {filteredTransactions.length > 0 ? (
           <>
-            <div className="divide-y divide-[#E0E6ED]">
+            <div className="divide-y divide-border">
               {filteredTransactions.map((transaction) => (
                 <div 
                   key={transaction.id} 
-                  className="p-6 hover:bg-[#F7F9FC]/50 transition-colors cursor-pointer"
+                  className="p-6 hover:bg-secondary/50 transition-colors cursor-pointer"
                   onClick={() => window.location.href = `/dashboard/settings/plans-billing/order/${transaction.id}`}
                 >
                   <div className="flex items-start justify-between">
@@ -297,10 +297,10 @@ export default function HistoryTab() {
                       <div className="flex items-center space-x-3 mb-2">
                         {getStatusIcon(transaction.transaction_status)}
                         <div>
-                          <h3 className="font-semibold text-[#1A1A1A]">
+                          <h3 className="font-semibold text-foreground">
                             {formatTransactionType(transaction.transaction_type)}
                           </h3>
-                          <p className="text-sm text-[#6C757D]">
+                          <p className="text-sm text-muted-foreground">
                             {transaction.package?.name || transaction.package_name || 'N/A'}
                           </p>
                         </div>
@@ -308,25 +308,25 @@ export default function HistoryTab() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-[#6C757D]">Date: </span>
-                          <span className="text-[#1A1A1A]">{formatDate(transaction.created_at)}</span>
+                          <span className="text-muted-foreground">Date: </span>
+                          <span className="text-foreground">{formatDate(transaction.created_at)}</span>
                         </div>
                         <div>
-                          <span className="text-[#6C757D]">Order ID: </span>
-                          <span className="text-[#1A1A1A] font-mono text-xs">
+                          <span className="text-muted-foreground">Order ID: </span>
+                          <span className="text-foreground font-mono text-xs">
                             {transaction.id}
                           </span>
                         </div>
                         <div>
-                          <span className="text-[#6C757D]">Method: </span>
-                          <span className="text-[#1A1A1A]">
+                          <span className="text-muted-foreground">Method: </span>
+                          <span className="text-foreground">
                             {transaction.gateway?.name || 'Unknown Gateway'} - {transaction.payment_method || 'N/A'}
                           </span>
                         </div>
                         {transaction.subscription && (
                           <div>
-                            <span className="text-[#6C757D]">Period: </span>
-                            <span className="text-[#1A1A1A]">
+                            <span className="text-muted-foreground">Period: </span>
+                            <span className="text-foreground">
                               {transaction.subscription.billing_period}
                             </span>
                           </div>
@@ -335,7 +335,7 @@ export default function HistoryTab() {
                     </div>
                     
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-[#1A1A1A] mb-2">
+                      <div className="text-2xl font-bold text-foreground mb-2">
                         {formatCurrency(transaction.amount, transaction.currency)}
                       </div>
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
@@ -349,8 +349,8 @@ export default function HistoryTab() {
                   </div>
                   
                   {transaction.verified_at && (
-                    <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
-                      <div className="text-xs text-[#6C757D]">
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="text-xs text-muted-foreground">
                         Verified: {formatDate(transaction.verified_at)}
                       </div>
                     </div>
@@ -361,8 +361,8 @@ export default function HistoryTab() {
 
             {/* Pagination */}
             {historyData?.pagination && historyData.pagination.total_pages > 1 && (
-              <div className="px-6 py-4 border-t border-[#E0E6ED] flex items-center justify-between">
-                <div className="text-sm text-[#6C757D]">
+              <div className="px-6 py-4 border-t border-border flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
                   Showing {((historyData.pagination.current_page - 1) * historyData.pagination.items_per_page) + 1} to{' '}
                   {Math.min(historyData.pagination.current_page * historyData.pagination.items_per_page, historyData.pagination.total_items)} of{' '}
                   {historyData.pagination.total_items} transactions
@@ -373,13 +373,13 @@ export default function HistoryTab() {
                     disabled={!historyData.pagination.has_prev}
                     className={`p-2 rounded-lg transition-colors ${
                       historyData.pagination.has_prev
-                        ? 'hover:bg-[#F7F9FC] text-[#1A1A1A]'
-                        : 'text-[#6C757D] cursor-not-allowed'
+                        ? 'hover:bg-secondary text-foreground'
+                        : 'text-muted-foreground cursor-not-allowed'
                     }`}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <span className="text-sm text-[#1A1A1A] px-3 py-1">
+                  <span className="text-sm text-foreground px-3 py-1">
                     Page {historyData.pagination.current_page} of {historyData.pagination.total_pages}
                   </span>
                   <button
@@ -387,8 +387,8 @@ export default function HistoryTab() {
                     disabled={!historyData.pagination.has_next}
                     className={`p-2 rounded-lg transition-colors ${
                       historyData.pagination.has_next
-                        ? 'hover:bg-[#F7F9FC] text-[#1A1A1A]'
-                        : 'text-[#6C757D] cursor-not-allowed'
+                        ? 'hover:bg-secondary text-foreground'
+                        : 'text-muted-foreground cursor-not-allowed'
                     }`}
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -399,9 +399,9 @@ export default function HistoryTab() {
           </>
         ) : (
           <div className="text-center py-12">
-            <Receipt className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">No Transactions Found</h3>
-            <p className="text-[#6C757D]">
+            <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No Transactions Found</h3>
+            <p className="text-muted-foreground">
               {searchTerm || statusFilter || typeFilter
                 ? 'No transactions match your current filters.'
                 : 'You haven\'t made any transactions yet.'

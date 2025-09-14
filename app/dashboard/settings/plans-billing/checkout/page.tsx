@@ -440,7 +440,7 @@ export default function CheckoutPage() {
 
   return (
     <PaymentErrorBoundary>
-      <div className="min-h-screen bg-[#F7F9FC]">
+      <div className="min-h-screen bg-secondary">
         <div className="container mx-auto px-4 py-8">
           <CheckoutHeader selectedPackage={selectedPackage} />
 

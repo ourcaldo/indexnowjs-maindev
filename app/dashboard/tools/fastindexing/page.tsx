@@ -439,7 +439,7 @@ export default function IndexNowPage() {
                   style={{
                     backgroundColor: activeTab === 'manual' ? 'white' : 'transparent',
                     color: activeTab === 'manual' ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
-                    boxShadow: activeTab === 'manual' ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none'
+                    boxShadow: activeTab === 'manual' ? '0 1px 2px 0 hsl(0 0% 0% / 0.05)' : 'none'
                   }}
                 >
                   <div className="flex items-center justify-center gap-2">
@@ -453,7 +453,7 @@ export default function IndexNowPage() {
                   style={{
                     backgroundColor: activeTab === 'sitemap' ? 'white' : 'transparent',
                     color: activeTab === 'sitemap' ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
-                    boxShadow: activeTab === 'sitemap' ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none'
+                    boxShadow: activeTab === 'sitemap' ? '0 1px 2px 0 hsl(0 0% 0% / 0.05)' : 'none'
                   }}
                 >
                   <div className="flex items-center justify-center gap-2">

@@ -34,10 +34,10 @@ export const BulkActions = ({
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4" style={{color: '#1A1A1A'}}>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">
               Delete Keywords
             </h3>
-            <p className="mb-6" style={{color: '#6C757D'}}>
+            <p className="mb-6 text-muted-foreground">
               Are you sure you want to delete {selectedKeywords.length} keyword{selectedKeywords.length > 1 ? 's' : ''}? 
               This action cannot be undone.
             </p>
@@ -52,7 +52,7 @@ export const BulkActions = ({
               <Button 
                 onClick={handleBulkDelete}
                 disabled={isDeleting}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               >
                 {isDeleting ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -68,10 +68,10 @@ export const BulkActions = ({
       {showTagModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4" style={{color: '#1A1A1A'}}>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">
               Add Tag to Keywords
             </h3>
-            <p className="mb-4" style={{color: '#6C757D'}}>
+            <p className="mb-4 text-muted-foreground">
               Add a tag to {selectedKeywords.length} selected keyword{selectedKeywords.length > 1 ? 's' : ''}:
             </p>
             <Input
@@ -99,7 +99,7 @@ export const BulkActions = ({
               <Button 
                 onClick={handleAddTag}
                 disabled={isAddingTag || !newTag.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {isAddingTag ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
