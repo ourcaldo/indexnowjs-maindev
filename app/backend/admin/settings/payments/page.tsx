@@ -242,7 +242,7 @@ export default function PaymentGateways() {
                 <h3 className="text-lg font-medium text-foreground mb-4 border-b border-border pb-2">
                   Midtrans Recurring API Configuration
                 </h3>
-                <p className="text-sm text-[#6C757D] mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   Configure your Midtrans credentials for recurring subscription payments. Note: Midtrans only accepts IDR currency.
                 </p>
               </div>
@@ -308,7 +308,7 @@ export default function PaymentGateways() {
                   className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="SB-Mid-server-..."
                 />
-                <p className="text-xs text-[#6C757D] mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Server key will be encrypted before storing in database
                 </p>
               </div>
@@ -323,7 +323,7 @@ export default function PaymentGateways() {
                   placeholder="https://yourdomain.com/api/midtrans/webhook"
                   readOnly
                 />
-                <p className="text-xs text-[#6C757D] mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   This webhook URL should be configured in your Midtrans dashboard
                 </p>
               </div>
@@ -337,7 +337,7 @@ export default function PaymentGateways() {
                 <h3 className="text-lg font-medium text-foreground mb-4 border-b border-border pb-2">
                   Midtrans Snap API Configuration
                 </h3>
-                <p className="text-sm text-[#6C757D] mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   Configure your Midtrans Snap credentials for one-time payments with popup interface. Supports credit cards, bank transfers, e-wallets, and more payment methods.
                 </p>
               </div>
@@ -403,7 +403,7 @@ export default function PaymentGateways() {
                   className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="SB-Mid-server-..."
                 />
-                <p className="text-xs text-[#6C757D] mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Server key will be encrypted before storing in database
                 </p>
               </div>
@@ -418,7 +418,7 @@ export default function PaymentGateways() {
                   placeholder="https://yourdomain.com/api/midtrans/webhook"
                   readOnly
                 />
-                <p className="text-xs text-[#6C757D] mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   This webhook URL should be configured in your Midtrans dashboard for payment notifications
                 </p>
               </div>
@@ -431,7 +431,7 @@ export default function PaymentGateways() {
                 type="checkbox"
                 checked={formData.is_active || false}
                 onChange={(e) => updateField('is_active', e.target.checked)}
-                className="rounded border-border text-[#3D8BFF] focus:ring-accent"
+                className="rounded border-border text-accent focus:ring-accent"
               />
               <span className="ml-2 text-sm text-foreground">Active</span>
             </label>
@@ -441,7 +441,7 @@ export default function PaymentGateways() {
                 type="checkbox"
                 checked={formData.is_default || false}
                 onChange={(e) => updateField('is_default', e.target.checked)}
-                className="rounded border-border text-[#3D8BFF] focus:border-transparent"
+                className="rounded border-border text-accent focus:border-transparent"
               />
               <span className="ml-2 text-sm text-foreground">Default</span>
             </label>
@@ -451,13 +451,13 @@ export default function PaymentGateways() {
         <div className="flex justify-end space-x-3 mt-6">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-[#6C757D] hover:text-foreground transition-colors"
+            className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(formData)}
-            className="flex items-center space-x-2 px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
           >
             <Save className="h-4 w-4" />
             <span>Save</span>
@@ -470,7 +470,7 @@ export default function PaymentGateways() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-[#1C2331]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-primary"></div>
       </div>
     )
   }
@@ -481,11 +481,11 @@ export default function PaymentGateways() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Payment Gateways</h1>
-          <p className="text-[#6C757D] mt-1">Manage payment methods and processing options</p>
+          <p className="text-muted-foreground mt-1">Manage payment methods and processing options</p>
         </div>
         <button
           onClick={() => setIsCreating(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-4 w-4" />
           <span>Add Gateway</span>
@@ -496,8 +496,8 @@ export default function PaymentGateways() {
       {message && (
         <div className={`flex items-center space-x-2 p-4 rounded-lg border ${
           message.type === 'success' 
-            ? 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20' 
-            : 'bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20'
+            ? 'bg-success/10 text-success border-success/20' 
+            : 'bg-error/10 text-error border-error/20'
         }`}>
           {message.type === 'success' ? (
             <CheckCircle className="h-5 w-5" />
@@ -531,29 +531,29 @@ export default function PaymentGateways() {
               <div className="bg-white rounded-lg border border-border p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-[#3D8BFF]/10 rounded-lg flex items-center justify-center">
-                      <CreditCard className="h-6 w-6 text-[#3D8BFF]" />
+                    <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-accent" />
                     </div>
                     <div>
                       <div className="flex items-center space-x-3">
                         <h3 className="text-lg font-semibold text-foreground">{gateway.name}</h3>
                         {gateway.is_default && (
-                          <span className="px-2 py-1 text-xs font-medium bg-[#4BB543]/10 text-[#4BB543] rounded-full border border-[#4BB543]/20">
+                          <span className="px-2 py-1 text-xs font-medium bg-success/10 text-success rounded-full border border-success/20">
                             Default
                           </span>
                         )}
                         <span className={`px-2 py-1 text-xs font-medium rounded-full border ${
                           gateway.is_active 
-                            ? 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20'
-                            : 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                            ? 'bg-success/10 text-success border-success/20'
+                            : 'bg-muted/10 text-muted-foreground border-muted/20'
                         }`}>
                           {gateway.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
-                      <p className="text-sm text-[#6C757D] mt-1">{gateway.description}</p>
-                      <p className="text-xs text-[#6C757D] mt-1">Slug: {gateway.slug}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{gateway.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Slug: {gateway.slug}</p>
                       {gateway.slug === 'bank_transfer' && gateway.configuration && (
-                        <div className="mt-2 text-xs text-[#6C757D] space-y-1">
+                        <div className="mt-2 text-xs text-muted-foreground space-y-1">
                           {gateway.configuration.bank_name && (
                             <p><strong>Bank:</strong> {gateway.configuration.bank_name}</p>
                           )}
@@ -571,20 +571,20 @@ export default function PaymentGateways() {
                     {!gateway.is_default && (
                       <button
                         onClick={() => handleSetDefault(gateway.id)}
-                        className="px-3 py-1 text-sm text-[#3D8BFF] hover:bg-[#3D8BFF]/10 rounded-lg transition-colors"
+                        className="px-3 py-1 text-sm text-accent hover:bg-accent/10 rounded-lg transition-colors"
                       >
                         Set Default
                       </button>
                     )}
                     <button
                       onClick={() => setEditingGateway(gateway)}
-                      className="p-2 text-[#6C757D] hover:text-foreground hover:bg-[#F7F9FC] rounded-lg transition-colors"
+                      className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(gateway.id)}
-                      className="p-2 text-[#6C757D] hover:text-[#E63946] hover:bg-[#E63946]/10 rounded-lg transition-colors"
+                      className="p-2 text-muted-foreground hover:text-error hover:bg-error/10 rounded-lg transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -598,11 +598,11 @@ export default function PaymentGateways() {
 
       {gateways.length === 0 && (
         <div className="text-center py-12">
-          <CreditCard className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-          <p className="text-[#6C757D]">No payment gateways configured</p>
+          <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">No payment gateways configured</p>
           <button
             onClick={() => setIsCreating(true)}
-            className="mt-4 text-[#3D8BFF] hover:underline"
+            className="mt-4 text-accent hover:underline"
           >
             Add your first payment gateway
           </button>
