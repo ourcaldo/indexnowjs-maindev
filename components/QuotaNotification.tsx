@@ -48,17 +48,17 @@ export default function QuotaNotification() {
 
   return (
     <div className="fixed top-4 right-4 z-50 max-w-sm">
-      <div className="bg-white border border-[#E0E6ED] rounded-lg shadow-lg p-4">
+      <div className="bg-white border border-border rounded-lg shadow-lg p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3">
             <div className="mt-0.5">
-              <AlertTriangle className="h-5 w-5 text-[#E63946]" />
+              <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-[#1A1A1A]">
+              <h3 className="text-sm font-semibold text-foreground">
                 {isQuotaExhausted ? 'Quota Exhausted' : 'Daily Limit Reached'}
               </h3>
-              <p className="text-xs text-[#6C757D] mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {isQuotaExhausted 
                   ? `You've used ${quotaInfo.daily_quota_used} of your ${quotaInfo.daily_quota_limit} daily quota.`
                   : `Daily limit of ${quotaInfo.daily_quota_limit} URLs has been reached. Jobs will resume tomorrow.`
@@ -68,7 +68,7 @@ export default function QuotaNotification() {
           </div>
           <button
             onClick={dismissNotification}
-            className="text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="h-4 w-4" />
           </button>

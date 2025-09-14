@@ -173,7 +173,7 @@ export default function MidtransCreditCardForm({
     <div className="space-y-4">
       {/* Card Number */}
       <div className="space-y-2">
-        <Label htmlFor="card_number" className="text-[#1A1A1A] font-medium">
+        <Label htmlFor="card_number" className="text-foreground font-medium">
           Card Number
         </Label>
         <Input
@@ -182,21 +182,21 @@ export default function MidtransCreditCardForm({
           placeholder="1234 5678 9012 3456"
           value={cardData.card_number}
           onChange={(e) => handleInputChange('card_number', e.target.value)}
-          className={`border-[#E0E6ED] focus:border-[#3D8BFF] ${
-            errors.card_number ? 'border-[#E63946]' : ''
+          className={`border-border focus:border-accent ${
+            errors.card_number ? 'border-destructive' : ''
           }`}
           disabled={disabled}
           maxLength={19}
         />
         {errors.card_number && (
-          <p className="text-sm text-[#E63946]">{errors.card_number}</p>
+          <p className="text-sm text-destructive">{errors.card_number}</p>
         )}
       </div>
 
       {/* Expiry Date and CVV */}
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="expiry_month" className="text-[#1A1A1A] font-medium">
+          <Label htmlFor="expiry_month" className="text-foreground font-medium">
             Month
           </Label>
           <Input
@@ -205,19 +205,19 @@ export default function MidtransCreditCardForm({
             placeholder="MM"
             value={cardData.expiry_month}
             onChange={(e) => handleInputChange('expiry_month', e.target.value)}
-            className={`border-[#E0E6ED] focus:border-[#3D8BFF] ${
-              errors.expiry_month ? 'border-[#E63946]' : ''
+            className={`border-border focus:border-accent ${
+              errors.expiry_month ? 'border-destructive' : ''
             }`}
             disabled={disabled}
             maxLength={2}
           />
           {errors.expiry_month && (
-            <p className="text-sm text-[#E63946]">{errors.expiry_month}</p>
+            <p className="text-sm text-destructive">{errors.expiry_month}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="expiry_year" className="text-[#1A1A1A] font-medium">
+          <Label htmlFor="expiry_year" className="text-foreground font-medium">
             Year
           </Label>
           <Input
@@ -226,19 +226,19 @@ export default function MidtransCreditCardForm({
             placeholder="YYYY"
             value={cardData.expiry_year}
             onChange={(e) => handleInputChange('expiry_year', e.target.value)}
-            className={`border-[#E0E6ED] focus:border-[#3D8BFF] ${
-              errors.expiry_year ? 'border-[#E63946]' : ''
+            className={`border-border focus:border-accent ${
+              errors.expiry_year ? 'border-destructive' : ''
             }`}
             disabled={disabled}
             maxLength={4}
           />
           {errors.expiry_year && (
-            <p className="text-sm text-[#E63946]">{errors.expiry_year}</p>
+            <p className="text-sm text-destructive">{errors.expiry_year}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="cvv" className="text-[#1A1A1A] font-medium">
+          <Label htmlFor="cvv" className="text-foreground font-medium">
             CVV
           </Label>
           <Input
@@ -247,21 +247,21 @@ export default function MidtransCreditCardForm({
             placeholder="123"
             value={cardData.cvv}
             onChange={(e) => handleInputChange('cvv', e.target.value)}
-            className={`border-[#E0E6ED] focus:border-[#3D8BFF] ${
-              errors.cvv ? 'border-[#E63946]' : ''
+            className={`border-border focus:border-accent ${
+              errors.cvv ? 'border-destructive' : ''
             }`}
             disabled={disabled}
             maxLength={4}
           />
           {errors.cvv && (
-            <p className="text-sm text-[#E63946]">{errors.cvv}</p>
+            <p className="text-sm text-destructive">{errors.cvv}</p>
           )}
         </div>
       </div>
 
       {/* Cardholder Name */}
       <div className="space-y-2">
-        <Label htmlFor="cardholder_name" className="text-[#1A1A1A] font-medium">
+        <Label htmlFor="cardholder_name" className="text-foreground font-medium">
           Cardholder Name
         </Label>
         <Input
@@ -270,13 +270,13 @@ export default function MidtransCreditCardForm({
           placeholder="Enter name as shown on card"
           value={cardData.cardholder_name}
           onChange={(e) => handleInputChange('cardholder_name', e.target.value)}
-          className={`border-[#E0E6ED] focus:border-[#3D8BFF] ${
-            errors.cardholder_name ? 'border-[#E63946]' : ''
+          className={`border-border focus:border-accent ${
+            errors.cardholder_name ? 'border-destructive' : ''
           }`}
           disabled={disabled}
         />
         {errors.cardholder_name && (
-          <p className="text-sm text-[#E63946]">{errors.cardholder_name}</p>
+          <p className="text-sm text-destructive">{errors.cardholder_name}</p>
         )}
       </div>
 

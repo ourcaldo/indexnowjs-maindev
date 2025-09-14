@@ -122,7 +122,7 @@ export default function PostForm({
         <div className="lg:col-span-2 space-y-6">
           {/* Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
               Post Title *
             </label>
             <input
@@ -130,20 +130,20 @@ export default function PostForm({
               type="text"
               {...form.register('title')}
               placeholder="Enter your post title..."
-              className="w-full px-4 py-3 text-lg border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-4 py-3 text-lg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             />
             {errors.title && (
-              <p className="mt-1 text-sm text-[#E63946]">{errors.title.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
             )}
           </div>
 
           {/* Slug */}
           <div>
-            <label htmlFor="slug" className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label htmlFor="slug" className="block text-sm font-medium text-foreground mb-2">
               URL Slug *
             </label>
             <div className="flex items-center">
-              <span className="text-sm text-[#6C757D] bg-[#F7F9FC] border border-r-0 border-[#E0E6ED] px-3 py-2 rounded-l-lg">
+              <span className="text-sm text-muted-foreground bg-secondary border border-r-0 border-border px-3 py-2 rounded-l-lg">
                 /blog/
               </span>
               <input
@@ -152,17 +152,17 @@ export default function PostForm({
                 value={watchedSlug}
                 onChange={(e) => handleSlugChange(e.target.value)}
                 placeholder="url-slug"
-                className="flex-1 px-3 py-2 border border-[#E0E6ED] rounded-r-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="flex-1 px-3 py-2 border border-border rounded-r-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               />
             </div>
             {errors.slug && (
-              <p className="mt-1 text-sm text-[#E63946]">{errors.slug.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>
             )}
           </div>
 
           {/* Content Editor */}
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Content
             </label>
             <TiptapEditor
@@ -171,13 +171,13 @@ export default function PostForm({
               placeholder="Start writing your post content..."
             />
             {errors.content && (
-              <p className="mt-1 text-sm text-[#E63946]">{errors.content.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.content.message}</p>
             )}
           </div>
 
           {/* Excerpt */}
           <div>
-            <label htmlFor="excerpt" className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label htmlFor="excerpt" className="block text-sm font-medium text-foreground mb-2">
               Excerpt (Optional)
             </label>
             <textarea
@@ -185,13 +185,13 @@ export default function PostForm({
               {...form.register('excerpt')}
               placeholder="Brief description of your post..."
               rows={3}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent resize-vertical"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent resize-vertical"
             />
-            <p className="mt-1 text-xs text-[#6C757D]">
+            <p className="mt-1 text-xs text-muted-foreground">
               Auto-generated from content if left empty. Used in post previews and meta descriptions.
             </p>
             {errors.excerpt && (
-              <p className="mt-1 text-sm text-[#E63946]">{errors.excerpt.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.excerpt.message}</p>
             )}
           </div>
 
@@ -221,20 +221,20 @@ export default function PostForm({
           />
 
           {/* Featured Image */}
-          <div className="bg-white border border-[#E0E6ED] rounded-lg p-4">
-            <h3 className="text-sm font-medium text-[#1A1A1A] mb-3">Featured Image</h3>
+          <div className="bg-white border border-border rounded-lg p-4">
+            <h3 className="text-sm font-medium text-foreground mb-3">Featured Image</h3>
             <ImageUploader
               value={form.getValues('featured_image_url') || ''}
               onChange={(url) => setValue('featured_image_url', url)}
               onRemove={() => setValue('featured_image_url', '')}
             />
             {errors.featured_image_url && (
-              <p className="mt-1 text-sm text-[#E63946]">{errors.featured_image_url.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.featured_image_url.message}</p>
             )}
           </div>
 
           {/* Category */}
-          <div className="bg-white border border-[#E0E6ED] rounded-lg p-4">
+          <div className="bg-white border border-border rounded-lg p-4">
             <CategorySelector
               selectedCategories={watchedSelectedCategories || []}
               mainCategory={watchedMainCategory}
@@ -246,31 +246,31 @@ export default function PostForm({
           </div>
 
           {/* Tags */}
-          <div className="bg-white border border-[#E0E6ED] rounded-lg p-4">
-            <h3 className="text-sm font-medium text-[#1A1A1A] mb-3">Tags</h3>
+          <div className="bg-white border border-border rounded-lg p-4">
+            <h3 className="text-sm font-medium text-foreground mb-3">Tags</h3>
             <TagManager
               tags={watchedTags}
               onChange={(tags) => setValue('tags', tags)}
               placeholder="Add tags for better organization..."
             />
             {errors.tags && (
-              <p className="mt-1 text-sm text-[#E63946]">{errors.tags.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.tags.message}</p>
             )}
           </div>
 
           {/* Action Buttons */}
-          <div className="bg-white border border-[#E0E6ED] rounded-lg p-4">
+          <div className="bg-white border border-border rounded-lg p-4">
             <div className="space-y-2">
               {onCancel && (
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="w-full px-4 py-2 border border-[#E0E6ED] rounded-lg text-[#6C757D] hover:bg-[#F7F9FC] transition-colors"
+                  className="w-full px-4 py-2 border border-border rounded-lg text-muted-foreground hover:bg-secondary transition-colors"
                 >
                   Cancel
                 </button>
               )}
-              <p className="text-xs text-[#6C757D] text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 {mode === 'create' ? 'Creating new post' : 'Editing existing post'}
               </p>
             </div>

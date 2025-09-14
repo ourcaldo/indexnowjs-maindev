@@ -151,10 +151,10 @@ export default function OrderSuccessPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mx-auto mb-4"></div>
-          <p className="text-[#6C757D]">Loading order details...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading order details...</p>
         </div>
       </div>
     )
@@ -162,14 +162,14 @@ export default function OrderSuccessPage() {
 
   if (!orderData) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[#6C757D]">Order not found</p>
+          <p className="text-muted-foreground">Order not found</p>
           <Button
             onClick={() =>
               router.push('/dashboard/settings/plans-billing')
             }
-            className="mt-4 bg-[#3D8BFF] hover:bg-[#2563eb] text-white"
+            className="mt-4 bg-accent hover:bg-accent/90 text-white"
           >
             Return to Billing
           </Button>
@@ -183,7 +183,7 @@ export default function OrderSuccessPage() {
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen rounded-2xl overflow-hidden shadow border border-gray-200">
           {/* Left Column - Dark Summary */}
-          <div className="bg-[#1D1D1F] text-white p-8 flex flex-col justify-between">
+          <div className="bg-card dark:bg-slate-900 text-foreground dark:text-white p-8 flex flex-col justify-between">
             <div>
               {/* Header */}
               <div className="mb-8">
@@ -282,7 +282,7 @@ export default function OrderSuccessPage() {
                                 `${va.bank.toUpperCase()} VA Number`
                               )
                             }
-                            className="text-[#3D8BFF] hover:bg-[#3D8BFF] hover:text-white h-8 w-8 p-0"
+                            className="text-accent hover:bg-accent hover:text-white h-8 w-8 p-0"
                           >
                             <Copy className="w-4 h-4" />
                           </Button>
@@ -310,7 +310,7 @@ export default function OrderSuccessPage() {
                               'Payment Code'
                             )
                           }
-                          className="text-[#3D8BFF] hover:bg-[#3D8BFF] hover:text-white h-8 w-8 p-0"
+                          className="text-accent hover:bg-accent hover:text-white h-8 w-8 p-0"
                         >
                           <Copy className="w-4 h-4" />
                         </Button>
@@ -339,7 +339,7 @@ export default function OrderSuccessPage() {
 
           {/* Right Column - Success */}
           <div className="bg-white flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-[#00C853] flex items-center justify-center mb-6">
+            <div className="w-20 h-20 rounded-full bg-success flex items-center justify-center mb-6">
               <Check className="text-white w-10 h-10" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
@@ -357,7 +357,7 @@ export default function OrderSuccessPage() {
               onClick={() =>
                 router.push('/dashboard/settings/plans-billing')
               }
-              className="bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-bold rounded-lg px-6 py-2"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg px-6 py-2"
             >
               RETURN HOME →
             </Button>

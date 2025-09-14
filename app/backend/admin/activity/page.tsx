@@ -141,7 +141,7 @@ export default function ActivityLogsPage() {
         label: 'Sign In'
       },
       logout: { 
-        color: 'bg-[#6C757D]/10 text-muted-foreground',
+        color: 'bg-muted/10 text-muted-foreground',
         icon: LogOut,
         label: 'Sign Out'
       },
@@ -196,7 +196,7 @@ export default function ActivityLogsPage() {
         label: 'User Management'
       },
       api_call: { 
-        color: 'bg-[#6C757D]/10 text-muted-foreground',
+        color: 'bg-muted/10 text-muted-foreground',
         icon: Server,
         label: 'API Call'
       },
@@ -221,12 +221,12 @@ export default function ActivityLogsPage() {
         label: 'Role Changed'
       },
       user_security_view: {
-        color: 'bg-[#6C757D]/10 text-muted-foreground',
+        color: 'bg-muted/10 text-muted-foreground',
         icon: Shield,
         label: 'Security Analysis'
       },
       user_activity_view: {
-        color: 'bg-[#6C757D]/10 text-muted-foreground',
+        color: 'bg-muted/10 text-muted-foreground',
         icon: Activity,
         label: 'Activity Review'
       },
@@ -243,7 +243,7 @@ export default function ActivityLogsPage() {
     }
     
     return eventConfig[eventType as keyof typeof eventConfig] || {
-      color: 'bg-[#6C757D]/10 text-muted-foreground',
+      color: 'bg-muted/10 text-muted-foreground',
       icon: Activity,
       label: eventType.replace('_', ' ').toUpperCase()
     }
@@ -319,7 +319,7 @@ export default function ActivityLogsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
+                <div className="p-2 rounded-lg bg-accent/10">
                   <Activity className="h-5 w-5 text-accent" />
                 </div>
                 <div>
@@ -332,7 +332,7 @@ export default function ActivityLogsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#4BB543]/10">
+                <div className="p-2 rounded-lg bg-success/10">
                   <User className="h-5 w-5 text-success" />
                 </div>
                 <div>
@@ -347,7 +347,7 @@ export default function ActivityLogsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#4BB543]/10">
+                <div className="p-2 rounded-lg bg-success/10">
                   <Activity className="h-5 w-5 text-success" />
                 </div>
                 <div>
@@ -362,7 +362,7 @@ export default function ActivityLogsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-[#E63946]/10">
+                <div className="p-2 rounded-lg bg-destructive/10">
                   <Activity className="h-5 w-5 text-destructive" />
                 </div>
                 <div>
@@ -501,7 +501,7 @@ export default function ActivityLogsPage() {
                               {log.action_description}
                             </div>
                             {log.error_message && (
-                              <div className="text-destructive text-xs mt-1 bg-[#E63946]/5 px-2 py-1 rounded">
+                              <div className="text-destructive text-xs mt-1 bg-destructive/5 px-2 py-1 rounded">
                                 <strong>Error:</strong> {log.error_message}
                               </div>
                             )}
@@ -545,7 +545,7 @@ export default function ActivityLogsPage() {
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-[#3D8BFF]/10 hover:text-accent"
+                                className="h-8 w-8 p-0 hover:bg-accent/10 hover:text-accent"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>

@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
             </ul>
           </div>
           
-          <div style="margin-top: 20px; padding: 15px; background: #E8F4FD; border-radius: 8px; border-left: 4px solid #3D8BFF;">
+          <div style="margin-top: 20px; padding: 15px; background: #F0F9FF; border-radius: 8px; border-left: 4px solid #3D8BFF;">
             <p style="margin: 0; color: #1A1A1A; font-size: 14px;">
               <strong>Test completed at:</strong> ${new Date().toLocaleString()}<br>
               <strong>Tested by:</strong> ${adminUser?.email || 'Admin'}

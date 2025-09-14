@@ -47,17 +47,17 @@ export default function TagManager({
 
   return (
     <div className={className}>
-      <div className="border border-[#E0E6ED] rounded-lg p-3 min-h-[42px] focus-within:ring-2 focus-within:ring-[#3D8BFF] focus-within:border-transparent">
+      <div className="border border-border rounded-lg p-3 min-h-[42px] focus-within:ring-2 focus-within:ring-accent focus-within:border-transparent">
         <div className="flex flex-wrap items-center gap-2">
           {tags.map((tag, index) => (
             <span
               key={index}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-[#3D8BFF]/10 text-[#3D8BFF] text-sm rounded-md"
+              className="inline-flex items-center gap-1 px-2 py-1 bg-accent/10 text-accent text-sm rounded-md"
             >
               {tag}
               <button
                 onClick={() => removeTag(tag)}
-                className="hover:bg-[#3D8BFF]/20 rounded-full p-0.5 transition-colors"
+                className="hover:bg-accent/20 rounded-full p-0.5 transition-colors"
                 type="button"
               >
                 <X className="h-3 w-3" />
@@ -71,7 +71,7 @@ export default function TagManager({
             onKeyDown={handleKeyDown}
             onBlur={handleInputBlur}
             placeholder={tags.length === 0 ? placeholder : ''}
-            className="flex-1 min-w-[120px] outline-none bg-transparent placeholder-[#6C757D] text-sm"
+            className="flex-1 min-w-[120px] outline-none bg-transparent placeholder-muted-foreground text-sm"
           />
         </div>
       </div>
@@ -80,7 +80,7 @@ export default function TagManager({
         <div className="mt-2">
           <button
             onClick={() => addTag(inputValue)}
-            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-accent hover:bg-accent/5 rounded transition-colors"
             type="button"
           >
             <Plus className="h-3 w-3" />
@@ -89,7 +89,7 @@ export default function TagManager({
         </div>
       )}
 
-      <div className="mt-2 text-xs text-[#6C757D]">
+      <div className="mt-2 text-xs text-muted-foreground">
         Press Enter to add tags. Use backspace to remove the last tag.
       </div>
     </div>

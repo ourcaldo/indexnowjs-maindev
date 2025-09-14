@@ -93,7 +93,7 @@ export default function UserDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-[#1C2331]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-primary"></div>
       </div>
     )
   }
@@ -102,12 +102,12 @@ export default function UserDetail() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-96">
-        <XCircle className="h-12 w-12 text-[#E63946] mb-4" />
-        <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">User Not Found</h2>
-        <p className="text-[#6C757D] mb-4">The user you're looking for doesn't exist.</p>
+        <XCircle className="h-12 w-12 text-destructive mb-4" />
+        <h2 className="text-xl font-bold text-foreground mb-2">User Not Found</h2>
+        <p className="text-muted-foreground mb-4">The user you're looking for doesn't exist.</p>
         <button
           onClick={() => router.back()}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Go Back
         </button>
@@ -122,13 +122,13 @@ export default function UserDetail() {
         <div className="flex items-center space-x-4">
           <button
             onClick={() => router.back()}
-            className="p-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-[#1A1A1A]">User Details</h1>
-            <p className="text-[#6C757D] mt-1">Manage user account and permissions</p>
+            <h1 className="text-2xl font-bold text-foreground">User Details</h1>
+            <p className="text-muted-foreground mt-1">Manage user account and permissions</p>
           </div>
         </div>
         
@@ -136,7 +136,7 @@ export default function UserDetail() {
           {!editMode ? (
             <button
               onClick={() => setEditMode(true)}
-              className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors flex items-center space-x-2"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center space-x-2"
             >
               <Edit3 className="h-4 w-4" />
               <span>Edit User</span>
@@ -145,7 +145,7 @@ export default function UserDetail() {
             <>
               <button
                 onClick={() => setEditMode(false)}
-                className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors flex items-center space-x-2"
+                className="px-4 py-2 border border-border text-muted-foreground rounded-lg hover:bg-secondary transition-colors flex items-center space-x-2"
               >
                 <X className="h-4 w-4" />
                 <span>Cancel</span>
@@ -153,7 +153,7 @@ export default function UserDetail() {
               <button
                 onClick={handleSaveEditWithRefresh}
                 disabled={actionLoading.editData}
-                className="px-4 py-2 bg-[#4BB543] text-white rounded-lg hover:bg-[#4BB543]/90 transition-colors flex items-center space-x-2 disabled:opacity-50"
+                className="px-4 py-2 bg-success text-success-foreground rounded-lg hover:bg-success/90 transition-colors flex items-center space-x-2 disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
                 <span>{actionLoading.editData ? 'Saving...' : 'Save Changes'}</span>

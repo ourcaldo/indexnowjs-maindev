@@ -492,7 +492,7 @@ export default function OrderCompletedPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(transaction.payment_proof_url!, '_blank')}
-                      className="border-[#E0E6ED] text-muted-foreground hover:bg-[#F7F9FC]"
+                      className="border-border text-muted-foreground hover:bg-secondary"
                     >
                       View Uploaded Proof
                     </Button>
@@ -506,14 +506,14 @@ export default function OrderCompletedPage() {
                     <Button
                       onClick={() => setShowUploadForm(!showUploadForm)}
                       disabled={transaction.transaction_status === 'completed'}
-                      className="w-full bg-[#4BB543] hover:bg-[#45a83a] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-success hover:bg-success/90 text-success-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {showUploadForm ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
                       {transaction.transaction_status === 'completed' ? 'Payment Completed' : (showUploadForm ? 'Hide Upload Form' : 'Upload Payment Proof')}
                     </Button>
 
                     {showUploadForm && (
-                      <div className="space-y-4 pt-4 border-t border-[#E0E6ED]">
+                      <div className="space-y-4 pt-4 border-t border-border">
                         <div>
                           <Label htmlFor="proof_file" className="text-sm font-medium text-foreground">
                             Select Payment Proof *
@@ -531,7 +531,7 @@ export default function OrderCompletedPage() {
                         </div>
 
                         {proofFile && (
-                          <div className="bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg p-3">
+                          <div className="bg-secondary border border-border rounded-lg p-3">
                             <p className="text-sm font-medium text-foreground">Selected File:</p>
                             <p className="text-sm text-muted-foreground">{proofFile.name}</p>
                             <p className="text-xs text-muted-foreground">
@@ -543,7 +543,7 @@ export default function OrderCompletedPage() {
                         <Button
                           onClick={handleUploadProof}
                           disabled={!proofFile || uploading}
-                          className="w-full bg-[#1A1A1A] hover:bg-[#2C2C2E] text-white disabled:opacity-50"
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
                         >
                           {uploading ? (
                             <>

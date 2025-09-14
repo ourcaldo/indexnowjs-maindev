@@ -64,22 +64,22 @@ export default function PostContent({ content, className = '' }: PostContentProp
       className={`prose prose-invert prose-lg max-w-none ${className}`}
       style={{
         // Custom CSS for the prose content using project colors
-        '--tw-prose-body': '#d1d5db',
-        '--tw-prose-headings': '#ffffff',
-        '--tw-prose-lead': '#9ca3af',
-        '--tw-prose-links': '#3D8BFF',
-        '--tw-prose-bold': '#ffffff',
-        '--tw-prose-counters': '#9ca3af',
-        '--tw-prose-bullets': '#6b7280',
-        '--tw-prose-hr': '#374151',
-        '--tw-prose-quotes': '#f9fafb',
-        '--tw-prose-quote-borders': '#374151',
-        '--tw-prose-captions': '#9ca3af',
-        '--tw-prose-code': '#f9fafb',
-        '--tw-prose-pre-code': '#d1d5db',
-        '--tw-prose-pre-bg': '#1f2937',
-        '--tw-prose-th-borders': '#374151',
-        '--tw-prose-td-borders': '#4b5563'
+        '--tw-prose-body': 'hsl(var(--muted-foreground))',
+        '--tw-prose-headings': 'hsl(var(--foreground))',
+        '--tw-prose-lead': 'hsl(var(--muted-foreground))',
+        '--tw-prose-links': 'hsl(var(--accent))',
+        '--tw-prose-bold': 'hsl(var(--foreground))','
+        '--tw-prose-counters': 'hsl(var(--muted-foreground))',
+        '--tw-prose-bullets': 'hsl(var(--muted-foreground))',
+        '--tw-prose-hr': 'hsl(var(--border))',
+        '--tw-prose-quotes': 'hsl(var(--muted))',
+        '--tw-prose-quote-borders': 'hsl(var(--border))','
+        '--tw-prose-captions': 'hsl(var(--muted-foreground))',
+        '--tw-prose-code': 'hsl(var(--muted))',
+        '--tw-prose-pre-code': 'hsl(var(--muted-foreground))',
+        '--tw-prose-pre-bg': 'hsl(var(--background))',
+        '--tw-prose-th-borders': 'hsl(var(--border))','
+        '--tw-prose-td-borders': 'hsl(var(--border))'
       } as React.CSSProperties}
       data-testid="post-content"
     >
@@ -162,7 +162,7 @@ export default function PostContent({ content, className = '' }: PostContentProp
           margin: 2rem 0;
           font-style: italic;
           color: var(--tw-prose-quotes);
-          background: rgba(55, 65, 81, 0.2);
+          background: hsl(var(--muted) / 0.2);
           padding: 1.5rem;
           border-radius: 0.5rem;
         }

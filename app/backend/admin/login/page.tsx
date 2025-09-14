@@ -96,10 +96,10 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+          <div className="mx-auto w-16 h-16 bg-foreground rounded-full flex items-center justify-center">
             {logoUrl && (
               <img 
                 src={logoUrl} 
@@ -109,10 +109,10 @@ export default function AdminLoginPage() {
             )}
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-[#1A1A1A]">
+            <CardTitle className="text-2xl font-bold text-foreground">
               Admin Access
             </CardTitle>
-            <CardDescription className="text-[#6C757D]">
+            <CardDescription className="text-muted-foreground">
               Sign in with admin credentials to access the dashboard
             </CardDescription>
           </div>
@@ -121,14 +121,14 @@ export default function AdminLoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="flex items-center space-x-2 p-3 bg-[#E63946]/10 border border-[#E63946] rounded-md">
-                <AlertCircle className="h-4 w-4 text-[#E63946]" />
-                <p className="text-sm text-[#E63946]">{error}</p>
+              <div className="flex items-center space-x-2 p-3 bg-destructive/10 border border-destructive rounded-md">
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#1A1A1A] font-medium">
+              <Label htmlFor="email" className="text-foreground font-medium">
                 Email Address
               </Label>
               <Input
@@ -137,14 +137,14 @@ export default function AdminLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@example.com"
-                className="border-[#E0E6ED] focus:border-[#3D8BFF] focus:ring-[#3D8BFF]"
+                className="border-border focus:border-accent focus:ring-accent"
                 required
                 disabled={isLoading}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-[#1A1A1A] font-medium">
+              <Label htmlFor="password" className="text-foreground font-medium">
                 Password
               </Label>
               <div className="relative">
@@ -154,14 +154,14 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="border-[#E0E6ED] focus:border-[#3D8BFF] focus:ring-[#3D8BFF] pr-10"
+                  className="border-border focus:border-accent focus:ring-accent pr-10"
                   required
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6C757D] hover:text-[#1A1A1A]"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
                   disabled={isLoading}
                 >
                   {showPassword ? (
@@ -175,7 +175,7 @@ export default function AdminLoginPage() {
             
             <Button
               type="submit"
-              className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white font-medium py-2.5"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -190,7 +190,7 @@ export default function AdminLoginPage() {
           </form>
           
           <div className="mt-6 text-center">
-            <p className="text-sm text-[#6C757D]">
+            <p className="text-sm text-muted-foreground">
               Only users with admin privileges can access this area
             </p>
           </div>

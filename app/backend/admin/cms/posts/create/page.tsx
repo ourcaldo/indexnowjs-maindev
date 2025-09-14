@@ -47,36 +47,36 @@ export default function CreatePostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC]">
+    <div className="min-h-screen bg-secondary">
       {/* Header */}
-      <div className="bg-white border-b border-[#E0E6ED] sticky top-0 z-10">
+      <div className="bg-white border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.push('/backend/admin/cms/posts')}
-                className="flex items-center space-x-2 text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+                className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span>Back to Posts</span>
               </button>
-              <div className="h-6 w-px bg-[#E0E6ED]"></div>
+              <div className="h-6 w-px bg-border"></div>
               <div>
-                <h1 className="text-xl font-bold text-[#1A1A1A] flex items-center gap-2">
+                <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
                   <Plus className="h-5 w-5" />
                   Create New Post
                 </h1>
-                <p className="text-sm text-[#6C757D]">
+                <p className="text-sm text-muted-foreground">
                   Create and publish new blog content
                 </p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs text-[#6C757D] bg-[#F7F9FC] px-2 py-1 rounded">
+              <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
                 Auto-save: Enabled
               </span>
               {isLoading && (
-                <span className="text-xs text-[#3D8BFF] bg-[#3D8BFF]/10 px-2 py-1 rounded">
+                <span className="text-xs text-accent bg-accent/10 px-2 py-1 rounded">
                   Saving...
                 </span>
               )}
@@ -97,9 +97,9 @@ export default function CreatePostPage() {
 
       {/* Help Text */}
       <div className="max-w-7xl mx-auto px-6 pb-8">
-        <div className="bg-[#3D8BFF]/5 border border-[#3D8BFF]/20 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-[#1A1A1A] mb-2">Quick Tips</h3>
-          <ul className="text-xs text-[#6C757D] space-y-1">
+        <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-foreground mb-2">Quick Tips</h3>
+          <ul className="text-xs text-muted-foreground space-y-1">
             <li>• Use descriptive titles with target keywords</li>
             <li>• Add relevant tags for better organization</li>
             <li>• Include a featured image for better engagement</li>
