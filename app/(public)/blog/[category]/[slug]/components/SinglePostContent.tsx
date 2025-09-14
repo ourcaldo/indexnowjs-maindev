@@ -134,7 +134,7 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
             />
 
             {/* Author Bio Section */}
-            <div className="border-t border-gray-800/50 pt-8 mb-16" data-testid="author-bio">
+            <div className="border-t border-border/50 pt-8 mb-16" data-testid="author-bio">
               <div className="flex items-start gap-4">
                 {post.author.avatar_url ? (
                   <img
@@ -151,7 +151,7 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
                   </div>
                 )}
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-1" data-testid="author-name">
+                  <h3 className="text-lg font-semibold text-foreground mb-1" data-testid="author-name">
                     {post.author.name}
                   </h3>
                   <p className="text-muted-foreground" data-testid="author-description">
@@ -163,8 +163,8 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
 
             {/* Tags Section */}
             {post.tags.length > 0 && (
-              <div className="border-t border-gray-800/50 pt-8 mb-16" data-testid="post-tags-section">
-                <h3 className="text-lg font-semibold text-white mb-4">Tags</h3>
+              <div className="border-t border-border/50 pt-8 mb-16" data-testid="post-tags-section">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Tags</h3>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <span
@@ -190,9 +190,9 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
         </article>
 
         {/* Newsletter/CTA Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800/50" data-testid="newsletter-section">
+        <section className="py-16 px-4 sm:px-6 lg:px-8 border-t border-border/50" data-testid="newsletter-section">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               Stay Updated with SEO Insights
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -206,7 +206,7 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
                 data-testid="newsletter-email-input"
               />
               <button
-                className="bg-info hover:bg-info/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                className="bg-info hover:bg-info/90 text-info-foreground px-6 py-3 rounded-lg font-semibold transition-colors"
                 data-testid="newsletter-subscribe-button"
               >
                 Subscribe

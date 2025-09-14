@@ -135,9 +135,9 @@ export const KeywordTable = ({
                     {keyword.position_1d !== null && keyword.position_1d !== undefined && (
                       <div className="flex items-center">
                         {keyword.position_1d > 0 ? (
-                          <TrendingUp className="w-3 h-3 text-green-500" />
+                          <TrendingUp className="w-3 h-3 text-success" />
                         ) : keyword.position_1d < 0 ? (
-                          <TrendingDown className="w-3 h-3 text-red-500" />
+                          <TrendingDown className="w-3 h-3 text-destructive" />
                         ) : (
                           <Minus className="w-3 h-3 text-muted-foreground" />
                         )}
