@@ -27,13 +27,13 @@ export const CheckoutHeader = ({ selectedPackage }: CheckoutHeaderProps) => {
       <Button
         variant="ghost"
         onClick={() => router.push('/dashboard/settings/plans-billing')}
-        className="mb-4 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] border-0"
+        className="mb-4 text-muted-foreground hover:text-foreground hover:bg-secondary border-0"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to Plans
       </Button>
-      <h1 className="text-2xl font-bold text-[#1A1A1A]">Complete Your Order</h1>
-      <p className="text-[#6C757D] mt-1">
+      <h1 className="text-2xl font-bold text-foreground">Complete Your Order</h1>
+      <p className="text-muted-foreground mt-1">
         Fill in your details to upgrade to {selectedPackage?.name || 'selected plan'}
       </p>
     </div>

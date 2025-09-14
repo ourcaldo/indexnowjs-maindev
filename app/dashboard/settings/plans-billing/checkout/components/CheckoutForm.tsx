@@ -25,21 +25,21 @@ interface CheckoutFormProps {
 
 export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
   return (
-    <Card className="border-[#E0E6ED] bg-[#FFFFFF]">
+    <Card className="border-border bg-card">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-[#1A1A1A]">
+        <CardTitle className="text-lg font-semibold text-foreground">
           Personal & Billing Information
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Personal Information */}
         <div className="space-y-4">
-          <h3 className="text-base font-medium text-[#1A1A1A] border-b border-[#E0E6ED] pb-2">
+          <h3 className="text-base font-medium text-foreground border-b border-border pb-2">
             Personal Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="first_name" className="text-sm font-medium text-[#1A1A1A]">
+              <Label htmlFor="first_name" className="text-sm font-medium text-foreground">
                 First Name *
               </Label>
               <Input
@@ -53,7 +53,7 @@ export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="last_name" className="text-sm font-medium text-[#1A1A1A]">
+              <Label htmlFor="last_name" className="text-sm font-medium text-foreground">
                 Last Name
               </Label>
               <Input
@@ -69,7 +69,7 @@ export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-[#1A1A1A]">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
                 Email Address *
               </Label>
               <Input
@@ -83,7 +83,7 @@ export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="phone" className="text-sm font-medium text-[#1A1A1A]">
+              <Label htmlFor="phone" className="text-sm font-medium text-foreground">
                 Phone Number *
               </Label>
               <Input
@@ -101,11 +101,11 @@ export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
 
         {/* Billing Address */}
         <div className="space-y-4">
-          <h3 className="text-base font-medium text-[#1A1A1A] border-b border-[#E0E6ED] pb-2">
+          <h3 className="text-base font-medium text-foreground border-b border-border pb-2">
             Billing Address
           </h3>
           <div>
-            <Label htmlFor="address" className="text-sm font-medium text-[#1A1A1A]">
+            <Label htmlFor="address" className="text-sm font-medium text-foreground">
               Street Address
             </Label>
             <Input
@@ -120,7 +120,7 @@ export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A]">
+              <Label htmlFor="city" className="text-sm font-medium text-foreground">
                 City
               </Label>
               <Input
@@ -133,7 +133,7 @@ export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="state" className="text-sm font-medium text-[#1A1A1A]">
+              <Label htmlFor="state" className="text-sm font-medium text-foreground">
                 State/Province
               </Label>
               <Input
@@ -146,7 +146,7 @@ export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="zip_code" className="text-sm font-medium text-[#1A1A1A]">
+              <Label htmlFor="zip_code" className="text-sm font-medium text-foreground">
                 ZIP Code
               </Label>
               <Input
@@ -161,7 +161,7 @@ export const CheckoutFormComponent = ({ form, setForm }: CheckoutFormProps) => {
           </div>
 
           <div>
-            <Label htmlFor="country" className="text-sm font-medium text-[#1A1A1A]">
+            <Label htmlFor="country" className="text-sm font-medium text-foreground">
               Country
             </Label>
             <Select 
