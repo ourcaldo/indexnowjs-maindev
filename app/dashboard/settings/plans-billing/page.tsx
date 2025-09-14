@@ -401,15 +401,15 @@ export default function BillingPage() {
     switch (status.toLowerCase()) {
       case 'completed':
       case 'confirmed':
-        return <CheckCircle className="h-4 w-4 text-[#4BB543]" />
+        return <CheckCircle className="h-4 w-4 text-success" />
       case 'pending':
       case 'proof_uploaded':
-        return <Clock className="h-4 w-4 text-[#F0A202]" />
+        return <Clock className="h-4 w-4 text-warning" />
       case 'failed':
       case 'cancelled':
-        return <AlertCircle className="h-4 w-4 text-[#E63946]" />
+        return <AlertCircle className="h-4 w-4 text-destructive" />
       default:
-        return <Clock className="h-4 w-4 text-[#6C757D]" />
+        return <Clock className="h-4 w-4 text-muted-foreground" />
     }
   }
 

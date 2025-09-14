@@ -233,12 +233,12 @@ export default function PlansTab() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Plans</h3>
-        <p className="text-[#6C757D] mb-4">{error}</p>
+        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Plans</h3>
+        <p className="text-muted-foreground mb-4">{error}</p>
         <button
           onClick={loadPackages}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Try Again
         </button>
@@ -288,17 +288,17 @@ export default function PlansTab() {
     <div className="space-y-8">
       {/* Success Notification */}
       {showSuccessNotification && (
-        <div className="bg-[#4BB543]/10 border border-[#4BB543]/20 rounded-lg p-4 flex items-center justify-between">
+        <div className="bg-success/10 border border-success/20 rounded-lg p-4 flex items-center justify-between">
           <div className="flex items-center">
-            <CheckCircle className="h-5 w-5 text-[#4BB543] mr-3" />
+            <CheckCircle className="h-5 w-5 text-success mr-3" />
             <div>
-              <h3 className="font-semibold text-[#1A1A1A]">Order submitted successfully!</h3>
-              <p className="text-sm text-[#6C757D]">Payment instructions have been sent to your email. We'll activate your subscription once payment is confirmed.</p>
+              <h3 className="font-semibold text-foreground">Order submitted successfully!</h3>
+              <p className="text-sm text-muted-foreground">Payment instructions have been sent to your email. We'll activate your subscription once payment is confirmed.</p>
             </div>
           </div>
           <button
             onClick={() => setShowSuccessNotification(false)}
-            className="text-[#6C757D] hover:text-[#1A1A1A] p-1"
+            className="text-muted-foreground hover:text-foreground p-1"
           >
             <X className="h-4 w-4" />
           </button>
@@ -307,14 +307,14 @@ export default function PlansTab() {
 
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">Choose Your Plan</h2>
-        <p className="text-[#6C757D]">Select the perfect plan for your URL indexing needs</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">Choose Your Plan</h2>
+        <p className="text-muted-foreground">Select the perfect plan for your URL indexing needs</p>
 
         {/* Compare Plans Button */}
         <div className="mt-4">
           <button 
             onClick={toggleComparePlans}
-            className="text-[#6C757D] hover:text-[#1A1A1A] text-sm font-medium transition-colors"
+            className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
           >
             {showComparePlans ? 'Hide comparison' : 'Compare plans'}
           </button>
@@ -323,20 +323,20 @@ export default function PlansTab() {
 
       {/* Billing Period Toggle */}
       <div className="flex justify-center">
-        <div className="flex bg-[#F7F9FC] p-1 rounded-lg">
+        <div className="flex bg-secondary p-1 rounded-lg">
           {billingPeriods.map((period) => (
             <button
               key={period.key}
               onClick={() => setSelectedBillingPeriod(period.key)}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 selectedBillingPeriod === period.key
-                  ? 'bg-white text-[#1A1A1A] shadow-sm backdrop-blur-sm'
-                  : 'text-[#6C757D] hover:text-[#1A1A1A]'
+                  ? 'bg-background text-foreground shadow-sm backdrop-blur-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {period.label}
               {period.key === 'annual' && (
-                <span className="ml-1 text-xs bg-[#4BB543] text-white px-1.5 py-0.5 rounded-full">
+                <span className="ml-1 text-xs bg-success text-success-foreground px-1.5 py-0.5 rounded-full">
                   Save 80%
                 </span>
               )}
@@ -354,18 +354,18 @@ export default function PlansTab() {
           return (
             <div
               key={`plan-${pkg.id}-${selectedBillingPeriod}`}
-              className={`relative bg-white rounded-xl border-2 p-8 transition-all hover:shadow-lg flex flex-col h-full ${
+              className={`relative bg-card rounded-xl border-2 p-8 transition-all hover:shadow-lg flex flex-col h-full ${
                 pkg.is_popular 
-                  ? 'border-[#1A1A1A] shadow-md' 
+                  ? 'border-foreground shadow-md' 
                   : pkg.is_current
-                  ? 'border-[#4BB543]'
-                  : 'border-[#E0E6ED] hover:border-[#1A1A1A]'
+                  ? 'border-success'
+                  : 'border-border hover:border-foreground'
               }`}
             >
               {/* Popular Badge */}
               {pkg.is_popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="flex items-center bg-[#1A1A1A] text-white px-4 py-2 rounded-full text-sm font-medium">
+                  <div className="flex items-center bg-foreground text-background px-4 py-2 rounded-full text-sm font-medium">
                     <Star className="h-4 w-4 mr-1" />
                     Most Popular
                   </div>
@@ -375,7 +375,7 @@ export default function PlansTab() {
               {/* Current Plan Badge */}
               {pkg.is_current && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="flex items-center bg-[#4BB543] text-white px-4 py-2 rounded-full text-sm font-medium">
+                  <div className="flex items-center bg-success text-success-foreground px-4 py-2 rounded-full text-sm font-medium">
                     <Crown className="h-4 w-4 mr-1" />
                     Current Plan
                   </div>
@@ -384,25 +384,25 @@ export default function PlansTab() {
 
               {/* Plan Header */}
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">{pkg.name}</h3>
-                <p className="text-[#6C757D] mb-6">{pkg.description}</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">{pkg.name}</h3>
+                <p className="text-muted-foreground mb-6">{pkg.description}</p>
 
                 <div className="mb-6">
                   {pricingInfo.originalPrice && (
-                    <div className="text-[#6C757D] line-through text-lg mb-1">
+                    <div className="text-muted-foreground line-through text-lg mb-1">
                       {formatCurrency(pricingInfo.originalPrice, pkg.currency)}
                     </div>
                   )}
                   <div className="flex items-baseline justify-center">
-                    <span className="text-4xl font-bold text-[#1A1A1A]">
+                    <span className="text-4xl font-bold text-foreground">
                       {formatCurrency(pricingInfo.price, pkg.currency)}
                     </span>
-                    <span className="text-[#6C757D] ml-1">
+                    <span className="text-muted-foreground ml-1">
                       {currentPeriod?.suffix}
                     </span>
                   </div>
                   {pricingInfo.discount && (
-                    <div className="text-[#4BB543] text-sm font-medium mt-1">
+                    <div className="text-success text-sm font-medium mt-1">
                       Save {pricingInfo.discount}%
                     </div>
                   )}
@@ -413,8 +413,8 @@ export default function PlansTab() {
               <div className="space-y-3 mb-8 flex-grow">
                 {getFeaturesForPlan(pkg).map((feature, index) => (
                   <div key={index} className="flex items-start">
-                    <Check className="h-5 w-5 text-[#4BB543] mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[#6C757D]">
+                    <Check className="h-5 w-5 text-success mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-muted-foreground">
                       {feature}
                     </span>
                   </div>
@@ -425,28 +425,28 @@ export default function PlansTab() {
 
               {/* Expanded Details */}
               {expandedPlans[pkg.id] && (
-                <div className="mb-6 p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                <div className="mb-6 p-4 bg-secondary rounded-lg border border-border">
                   <div className="space-y-3">
                     {pkg.quota_limits?.daily_quota_limit && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-[#6C757D]">Daily URLs:</span>
-                        <span className="text-[#1A1A1A] font-medium">
+                        <span className="text-muted-foreground">Daily URLs:</span>
+                        <span className="text-foreground font-medium">
                           {pkg.quota_limits.daily_quota_limit === -1 ? 'Unlimited' : pkg.quota_limits.daily_quota_limit.toLocaleString()}
                         </span>
                       </div>
                     )}
                     {pkg.quota_limits?.service_accounts_limit && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-[#6C757D]">Service Accounts:</span>
-                        <span className="text-[#1A1A1A] font-medium">
+                        <span className="text-muted-foreground">Service Accounts:</span>
+                        <span className="text-foreground font-medium">
                           {pkg.quota_limits.service_accounts_limit === -1 ? 'Unlimited' : pkg.quota_limits.service_accounts_limit}
                         </span>
                       </div>
                     )}
                     {pkg.quota_limits?.concurrent_jobs_limit && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-[#6C757D]">Concurrent Jobs:</span>
-                        <span className="text-[#1A1A1A] font-medium">
+                        <span className="text-muted-foreground">Concurrent Jobs:</span>
+                        <span className="text-foreground font-medium">
                           {pkg.quota_limits.concurrent_jobs_limit === -1 ? 'Unlimited' : pkg.quota_limits.concurrent_jobs_limit}
                         </span>
                       </div>
@@ -464,8 +464,8 @@ export default function PlansTab() {
                     disabled={subscribing === pkg.id}
                     className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 ${
                       pkg.is_popular
-                        ? 'bg-[#1A1A1A] text-white hover:bg-[#2C2C2E] hover:shadow-md'
-                        : 'bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:shadow-md'
+                        ? 'bg-foreground text-background hover:bg-foreground/90 hover:shadow-md'
+                        : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md'
                     } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {subscribing === pkg.id ? (
@@ -485,8 +485,8 @@ export default function PlansTab() {
                       disabled={startingTrial === pkg.id}
                       className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 border-2 ${
                         pkg.is_popular
-                          ? 'border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white'
-                          : 'border-[#1C2331] text-[#1C2331] hover:bg-[#1C2331] hover:text-white'
+                          ? 'border-foreground text-foreground hover:bg-foreground hover:text-background'
+                          : 'border-primary text-primary hover:bg-primary hover:text-primary-foreground'
                       } ${startingTrial === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {startingTrial === pkg.id ? (
@@ -511,22 +511,22 @@ export default function PlansTab() {
 
       {/* Additional Info */}
       <div className="text-center py-8">
-        <div className="bg-[#F7F9FC] rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Need Help Choosing?</h3>
-          <p className="text-[#6C757D] mb-4">
+        <div className="bg-secondary rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Need Help Choosing?</h3>
+          <p className="text-muted-foreground mb-4">
             All plans include 24/7 support, real-time indexing monitoring, and access to our premium dashboard features.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-[#6C757D]">
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center">
-              <Check className="h-4 w-4 text-[#4BB543] mr-1" />
+              <Check className="h-4 w-4 text-success mr-1" />
               <span>Cancel anytime</span>
             </div>
             <div className="flex items-center">
-              <Check className="h-4 w-4 text-[#4BB543] mr-1" />
+              <Check className="h-4 w-4 text-success mr-1" />
               <span>Secure payments</span>
             </div>
             <div className="flex items-center">
-              <Check className="h-4 w-4 text-[#4BB543] mr-1" />
+              <Check className="h-4 w-4 text-success mr-1" />
               <span>Instant activation</span>
             </div>
           </div>
