@@ -169,7 +169,7 @@ export default function OrderSuccessPage() {
             onClick={() =>
               router.push('/dashboard/settings/plans-billing')
             }
-            className="mt-4 bg-accent hover:bg-accent/90 text-white"
+            className="mt-4 bg-accent hover:bg-accent/90 text-accent-foreground"
           >
             Return to Billing
           </Button>
@@ -179,16 +179,16 @@ export default function OrderSuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen rounded-2xl overflow-hidden shadow border border-gray-200">
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen rounded-2xl overflow-hidden shadow border border-border">
           {/* Left Column - Dark Summary */}
-          <div className="bg-card dark:bg-slate-900 text-foreground dark:text-white p-8 flex flex-col justify-between">
+          <div className="bg-card dark:bg-card text-foreground dark:text-foreground p-8 flex flex-col justify-between">
             <div>
               {/* Header */}
               <div className="mb-8">
                 <h1 className="text-xl font-semibold">Summary</h1>
-                <p className="text-gray-400 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Order #{orderData.order_id}
                 </p>
               </div>
@@ -196,14 +196,14 @@ export default function OrderSuccessPage() {
               {/* Package Information */}
               <div className="mb-8">
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-white">{orderData.package.name} - {orderData.billing_period}</h3>
-                  <p className="text-gray-400 text-sm">{orderData.package.description}</p>
+                  <h3 className="text-lg font-semibold text-foreground">{orderData.package.name} - {orderData.billing_period}</h3>
+                  <p className="text-muted-foreground text-sm">{orderData.package.description}</p>
                 </div>
                 <div className="space-y-2">
                   {orderData.package.features?.map((feature, i) => (
                     <p
                       key={i}
-                      className="flex items-center text-sm text-gray-200"
+                      className="flex items-center text-sm text-muted-foreground"
                     >
                       <span className="mr-2">→</span> {feature}
                     </p>
@@ -212,27 +212,27 @@ export default function OrderSuccessPage() {
               </div>
 
               {/* Customer Information */}
-              <div className="border-t border-gray-600 pt-6 mt-6">
+              <div className="border-t border-border pt-6 mt-6">
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-white bg-opacity-10 rounded-full flex items-center justify-center mr-3">
-                    <User className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 bg-foreground/10 rounded-full flex items-center justify-center mr-3">
+                    <User className="w-4 h-4 text-foreground" />
                   </div>
-                  <h4 className="font-semibold text-white">Customer</h4>
+                  <h4 className="font-semibold text-foreground">Customer</h4>
                 </div>
 
-                <div className="border border-gray-500 rounded-xl p-4 grid grid-cols-2 gap-4">
+                <div className="border border-border rounded-xl p-4 grid grid-cols-2 gap-4">
                   {/* Left column */}
                   <div>
-                    <p className="text-white font-medium">
+                    <p className="text-foreground font-medium">
                       {orderData.customer_info.first_name} {orderData.customer_info.last_name}
                     </p>
-                    <p className="text-gray-300 text-sm mt-1">
+                    <p className="text-muted-foreground text-sm mt-1">
                       {orderData.customer_info.phone || orderData.customer_info.email}
                     </p>
                   </div>
 
                   {/* Right column */}
-                  <div className="text-gray-300 text-sm">
+                  <div className="text-muted-foreground text-sm">
                     {orderData.customer_info.address && (
                       <p>{orderData.customer_info.address}</p>
                     )}
@@ -254,7 +254,7 @@ export default function OrderSuccessPage() {
                 orderData.midtrans_response?.webhook_data?.va_numbers ||
                 orderData.midtrans_response?.webhook_data?.payment_code) && (
                 <div className="mt-8">
-                  <h4 className="font-semibold text-white mb-4 flex items-center">
+                  <h4 className="font-semibold text-foreground mb-4 flex items-center">
                     <CreditCard className="w-4 h-4 mr-2" />
                     Payment Details
                   </h4>
@@ -264,13 +264,13 @@ export default function OrderSuccessPage() {
                     (va, index) => (
                       <div
                         key={index}
-                        className="bg-black bg-opacity-30 rounded-lg p-4 mb-3"
+                        className="bg-background/30 rounded-lg p-4 mb-3"
                       >
-                        <p className="text-gray-300 text-xs uppercase tracking-wide mb-1">
+                        <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">
                           {va.bank.toUpperCase()} Virtual Account
                         </p>
                         <div className="flex items-center justify-between">
-                          <p className="text-white font-mono text-lg font-bold tracking-wider">
+                          <p className="text-foreground font-mono text-lg font-bold tracking-wider">
                             {va.va_number}
                           </p>
                           <Button
@@ -282,7 +282,7 @@ export default function OrderSuccessPage() {
                                 `${va.bank.toUpperCase()} VA Number`
                               )
                             }
-                            className="text-accent hover:bg-accent hover:text-white h-8 w-8 p-0"
+                            className="text-accent hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0"
                           >
                             <Copy className="w-4 h-4" />
                           </Button>
@@ -293,12 +293,12 @@ export default function OrderSuccessPage() {
 
                   {/* Display payment code from payment_details or midtrans_response */}
                   {(orderData.payment_details?.payment_code || orderData.midtrans_response?.webhook_data?.payment_code) && (
-                    <div className="bg-black bg-opacity-30 rounded-lg p-4 mb-3">
-                      <p className="text-gray-300 text-xs uppercase tracking-wide mb-1">
+                    <div className="bg-background/30 rounded-lg p-4 mb-3">
+                      <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">
                         {(orderData.payment_details?.store || orderData.midtrans_response?.webhook_data?.store || 'Payment')} Code
                       </p>
                       <div className="flex items-center justify-between">
-                        <p className="text-white font-mono text-lg font-bold tracking-wider">
+                        <p className="text-foreground font-mono text-lg font-bold tracking-wider">
                           {orderData.payment_details?.payment_code || orderData.midtrans_response?.webhook_data?.payment_code}
                         </p>
                         <Button
@@ -310,7 +310,7 @@ export default function OrderSuccessPage() {
                               'Payment Code'
                             )
                           }
-                          className="text-accent hover:bg-accent hover:text-white h-8 w-8 p-0"
+                          className="text-accent hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0"
                         >
                           <Copy className="w-4 h-4" />
                         </Button>
@@ -322,15 +322,15 @@ export default function OrderSuccessPage() {
             </div>
 
             {/* Contact Support */}
-            <div className="mt-6 border border-gray-500/70 bg-black/20 rounded-lg px-4 py-3 flex items-center justify-between text-sm">
-              <p className="text-gray-400">
+            <div className="mt-6 border border-border bg-background/20 rounded-lg px-4 py-3 flex items-center justify-between text-sm">
+              <p className="text-muted-foreground">
                 Do you have problems about your order?
               </p>
               <button
                 onClick={() =>
                   window.open('mailto:support@indexnow.studio', '_blank')
                 }
-                className="text-yellow-400 font-medium flex items-center hover:underline"
+                className="text-warning font-medium flex items-center hover:underline"
               >
                 CONTACT US →
               </button>
@@ -338,19 +338,19 @@ export default function OrderSuccessPage() {
           </div>
 
           {/* Right Column - Success */}
-          <div className="bg-white flex flex-col items-center justify-center p-8 text-center">
+          <div className="bg-background flex flex-col items-center justify-center p-8 text-center">
             <div className="w-20 h-20 rounded-full bg-success flex items-center justify-center mb-6">
-              <Check className="text-white w-10 h-10" />
+              <Check className="text-success-foreground w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            <h2 className="text-2xl font-bold text-foreground mb-3">
               Order has saved!
             </h2>
-            <p className="text-gray-500 mb-6 text-sm">
+            <p className="text-muted-foreground mb-6 text-sm">
               {orderData.payment_status === 'paid'
                 ? 'Your payment has been confirmed and ready to use.'
                 : 'Click return home to go to back homepage.'}
             </p>
-            <p className="text-gray-400 mb-10 text-xs">
+            <p className="text-muted-foreground mb-10 text-xs">
               Redirecting in {countdown} seconds...
             </p>
             <Button
@@ -362,7 +362,7 @@ export default function OrderSuccessPage() {
               RETURN HOME →
             </Button>
 
-            <div className="mt-20 pt-6 border-t border-gray-200 w-full text-xs text-gray-400 flex justify-between">
+            <div className="mt-20 pt-6 border-t border-border w-full text-xs text-muted-foreground flex justify-between">
               <p>ALL RIGHTS RESERVED © 2025</p>
               <p>INDEXNOW STUDIO</p>
             </div>
