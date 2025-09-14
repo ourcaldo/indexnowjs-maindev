@@ -19,7 +19,7 @@ import {
 
 // Simple UI Components using project color scheme
 const Card = ({ children, className = '' }: any) => (
-  <div className={`p-6 rounded-lg ${className}`} style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
+  <div className={`p-6 rounded-lg bg-background border border-border ${className}`}>
     {children}
   </div>
 )
@@ -27,12 +27,12 @@ const Card = ({ children, className = '' }: any) => (
 const Button = ({ children, variant = 'default', size = 'default', className = '', onClick, disabled, loading, ...props }: any) => {
   const baseStyles = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none'
   
-  const variants: { [key: string]: any } = {
-    default: { backgroundColor: '#1C2331', color: '#FFFFFF' },
-    secondary: { backgroundColor: '#F7F9FC', color: '#1A1A1A', border: '1px solid #E0E6ED' },
-    outline: { backgroundColor: 'transparent', color: '#6C757D', border: '1px solid #E0E6ED' },
-    ghost: { backgroundColor: 'transparent', color: '#6C757D' },
-    destructive: { backgroundColor: '#E63946', color: '#FFFFFF' }
+  const variantClasses: { [key: string]: string } = {
+    default: 'bg-primary text-primary-foreground',
+    secondary: 'bg-secondary text-foreground border border-border',
+    outline: 'bg-transparent text-muted-foreground border border-border',
+    ghost: 'bg-transparent text-muted-foreground',
+    destructive: 'bg-destructive text-destructive-foreground'
   }
   
   const sizes: { [key: string]: string } = {
@@ -44,8 +44,7 @@ const Button = ({ children, variant = 'default', size = 'default', className = '
   
   return (
     <button 
-      className={`${baseStyles} ${sizes[size]} ${className}`}
-      style={variants[variant]}
+      className={`${baseStyles} ${sizes[size]} ${variantClasses[variant]} ${className}`}
       onClick={onClick}
       disabled={disabled || loading}
       {...props}
@@ -58,13 +57,7 @@ const Button = ({ children, variant = 'default', size = 'default', className = '
 
 const Input = ({ placeholder, className = '', value, onChange, ...props }: any) => (
   <input
-    className={`flex h-10 w-full rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-    style={{
-      backgroundColor: '#FFFFFF',
-      border: '1px solid #E0E6ED',
-      color: '#1A1A1A',
-      ['--tw-ring-color' as any]: '#3D8BFF'
-    }}
+    className={`flex h-10 w-full rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-background border border-border text-foreground focus-visible:ring-ring ${className}`}
     placeholder={placeholder}
     value={value}
     onChange={onChange}
@@ -74,13 +67,7 @@ const Input = ({ placeholder, className = '', value, onChange, ...props }: any) 
 
 const Textarea = ({ placeholder, className = '', value, onChange, rows = 4, ...props }: any) => (
   <textarea
-    className={`flex w-full rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none ${className}`}
-    style={{
-      backgroundColor: '#FFFFFF',
-      border: '1px solid #E0E6ED',
-      color: '#1A1A1A',
-      ['--tw-ring-color' as any]: '#3D8BFF'
-    }}
+    className={`flex w-full rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none bg-background border border-border text-foreground focus-visible:ring-ring ${className}`}
     placeholder={placeholder}
     value={value}
     onChange={onChange}
@@ -89,15 +76,9 @@ const Textarea = ({ placeholder, className = '', value, onChange, rows = 4, ...p
   />
 )
 
-const Select = ({ children, value, onValueChange, placeholder, disabled, ...props }: any) => (
+const Select = ({ children, value, onValueChange, placeholder, disabled, className = '', ...props }: any) => (
   <select 
-    className="flex h-10 w-full rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
-    style={{
-      backgroundColor: '#FFFFFF',
-      border: '1px solid #E0E6ED',
-      color: '#1A1A1A',
-      ['--tw-ring-color' as any]: '#3D8BFF'
-    }}
+    className={`flex h-10 w-full rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 bg-background border border-border text-foreground focus-visible:ring-ring ${className}`}
     value={value}
     onChange={(e) => onValueChange?.(e.target.value)}
     disabled={disabled}
@@ -109,27 +90,20 @@ const Select = ({ children, value, onValueChange, placeholder, disabled, ...prop
 )
 
 const Label = ({ children, className = '' }: any) => (
-  <label className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`} style={{color: '#1A1A1A'}}>
+  <label className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground ${className}`}>
     {children}
   </label>
 )
 
 const Alert = ({ children, variant = 'default' }: any) => {
-  const variants: { [key: string]: any } = {
-    default: { backgroundColor: '#F7F9FC', borderColor: '#E0E6ED', color: '#1A1A1A' },
-    destructive: { backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626' },
-    success: { backgroundColor: '#F0F9FF', borderColor: '#BAE6FD', color: '#065F46' }
+  const variantClasses: { [key: string]: string } = {
+    default: 'bg-secondary border-border text-foreground',
+    destructive: 'bg-destructive/10 border-destructive/20 text-destructive',
+    success: 'bg-muted border-border text-foreground'
   }
   
   return (
-    <div 
-      className="relative w-full rounded-lg border p-4"
-      style={{
-        backgroundColor: variants[variant].backgroundColor,
-        borderColor: variants[variant].borderColor,
-        color: variants[variant].color
-      }}
-    >
+    <div className={`relative w-full rounded-lg border p-4 ${variantClasses[variant]}`}>
       {children}
     </div>
   )
@@ -280,7 +254,7 @@ export default function AddKeywords() {
   if (domainsLoading || countriesLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{borderColor: '#3D8BFF'}}></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -293,10 +267,10 @@ export default function AddKeywords() {
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold" style={{color: '#1A1A1A'}}>
+          <h1 className="text-3xl font-bold text-foreground">
             Add Keywords to Track
           </h1>
-          <p style={{color: '#6C757D'}} className="text-sm mt-1">
+          <p className="text-sm mt-1 text-muted-foreground">
             Add keywords to monitor their search rankings and performance
           </p>
         </div>
@@ -304,19 +278,15 @@ export default function AddKeywords() {
 
       {/* Step indicator */}
       <div className="flex items-center gap-4">
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${step >= 1 ? 'font-medium' : ''}`} 
-             style={{backgroundColor: step >= 1 ? '#3D8BFF' : '#F7F9FC', color: step >= 1 ? '#FFFFFF' : '#6C757D'}}>
-          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs"
-                style={{backgroundColor: step >= 1 ? '#FFFFFF' : 'transparent', color: step >= 1 ? '#3D8BFF' : '#6C757D'}}>
+        <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${step >= 1 ? 'font-medium bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-primary-foreground text-primary' : 'bg-transparent text-muted-foreground'}`}>
             1
           </span>
           Select Domain
         </div>
-        <div className="w-8 h-px" style={{backgroundColor: step >= 2 ? '#3D8BFF' : '#E0E6ED'}}></div>
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${step >= 2 ? 'font-medium' : ''}`}
-             style={{backgroundColor: step >= 2 ? '#3D8BFF' : '#F7F9FC', color: step >= 2 ? '#FFFFFF' : '#6C757D'}}>
-          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs"
-                style={{backgroundColor: step >= 2 ? '#FFFFFF' : 'transparent', color: step >= 2 ? '#3D8BFF' : '#6C757D'}}>
+        <div className={`w-8 h-px ${step >= 2 ? 'bg-primary' : 'bg-border'}`}></div>
+        <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${step >= 2 ? 'font-medium bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-primary-foreground text-primary' : 'bg-transparent text-muted-foreground'}`}>
             2
           </span>
           Add Keywords
@@ -327,10 +297,10 @@ export default function AddKeywords() {
         <Card>
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-semibold mb-2" style={{color: '#1A1A1A'}}>
+              <h2 className="text-xl font-semibold mb-2 text-foreground">
                 Select or Add Domain
               </h2>
-              <p style={{color: '#6C757D'}}>
+              <p className="text-muted-foreground">
                 Choose an existing domain or add a new one to track keywords for.
               </p>
             </div>
@@ -338,33 +308,28 @@ export default function AddKeywords() {
             {/* Existing Domains */}
             {domains.length > 0 && (
               <div className="space-y-4">
-                <h3 className="font-medium" style={{color: '#1A1A1A'}}>Existing Domains</h3>
+                <h3 className="font-medium text-foreground">Existing Domains</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {domains.map((domain: any) => (
                     <div
                       key={domain.id}
                       className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                        selectedDomain === domain.id ? 'ring-2' : ''
+                        selectedDomain === domain.id ? 'ring-2 bg-primary/10 border-primary ring-primary' : 'bg-background border-border'
                       }`}
-                      style={{
-                        backgroundColor: selectedDomain === domain.id ? '#F0F9FF' : '#FFFFFF',
-                        borderColor: selectedDomain === domain.id ? '#3D8BFF' : '#E0E6ED',
-                        ['--tw-ring-color' as any]: '#3D8BFF'
-                      }}
                       onClick={() => setSelectedDomain(domain.id)}
                     >
                       <div className="flex items-center gap-3">
-                        <Globe className="w-5 h-5" style={{color: '#3D8BFF'}} />
+                        <Globe className="w-5 h-5 text-primary" />
                         <div>
-                          <div className="font-medium" style={{color: '#1A1A1A'}}>
+                          <div className="font-medium text-foreground">
                             {domain.display_name || domain.domain_name}
                           </div>
-                          <div className="text-sm" style={{color: '#6C757D'}}>
+                          <div className="text-sm text-muted-foreground">
                             {domain.domain_name}
                           </div>
                         </div>
                         {selectedDomain === domain.id && (
-                          <CheckCircle2 className="w-5 h-5 ml-auto" style={{color: '#3D8BFF'}} />
+                          <CheckCircle2 className="w-5 h-5 ml-auto text-primary" />
                         )}
                       </div>
                     </div>
@@ -374,8 +339,8 @@ export default function AddKeywords() {
             )}
 
             {/* Add New Domain */}
-            <div className="space-y-4" style={{borderTop: domains.length > 0 ? '1px solid #E0E6ED' : 'none', paddingTop: domains.length > 0 ? '1.5rem' : '0'}}>
-              <h3 className="font-medium" style={{color: '#1A1A1A'}}>Add New Domain</h3>
+            <div className={`space-y-4 ${domains.length > 0 ? 'border-t border-border pt-6' : ''}`}>
+              <h3 className="font-medium text-foreground">Add New Domain</h3>
               <div className="flex gap-3">
                 <div className="flex-1">
                   <Input
@@ -402,7 +367,7 @@ export default function AddKeywords() {
             </div>
 
             {/* Next Button */}
-            <div className="flex justify-end pt-4" style={{borderTop: '1px solid #E0E6ED'}}>
+            <div className="flex justify-end pt-4 border-t border-border">
               <Button 
                 onClick={() => setStep(2)} 
                 disabled={!selectedDomain}
@@ -419,12 +384,12 @@ export default function AddKeywords() {
           {/* Selected Domain Info */}
           <Card>
             <div className="flex items-center gap-3">
-              <Globe className="w-5 h-5" style={{color: '#3D8BFF'}} />
+              <Globe className="w-5 h-5 text-primary" />
               <div>
-                <div className="font-medium" style={{color: '#1A1A1A'}}>
+                <div className="font-medium text-foreground">
                   Selected Domain: {domains.find((d: any) => d.id === selectedDomain)?.display_name}
                 </div>
-                <div className="text-sm" style={{color: '#6C757D'}}>
+                <div className="text-sm text-muted-foreground">
                   {domains.find((d: any) => d.id === selectedDomain)?.domain_name}
                 </div>
               </div>
@@ -437,10 +402,10 @@ export default function AddKeywords() {
           <Card>
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-semibold mb-2" style={{color: '#1A1A1A'}}>
+                <h2 className="text-xl font-semibold mb-2 text-foreground">
                   Keyword Configuration
                 </h2>
-                <p style={{color: '#6C757D'}}>
+                <p className="text-muted-foreground">
                   Configure your keywords with device type, location, and optional tags.
                 </p>
               </div>
@@ -453,38 +418,28 @@ export default function AddKeywords() {
                     <div className="relative mr-6">
                       <div
                         className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                          deviceType === 'desktop' ? 'ring-2' : ''
+                          deviceType === 'desktop' ? 'bg-primary/10 border-primary ring-2 ring-primary' : 'bg-background border-border'
                         }`}
-                        style={{
-                          backgroundColor: deviceType === 'desktop' ? '#F0F9FF' : '#FFFFFF',
-                          borderColor: deviceType === 'desktop' ? '#3D8BFF' : '#E0E6ED',
-                          ['--tw-ring-color' as any]: '#3D8BFF'
-                        }}
                         onClick={() => setDeviceType('desktop')}
                       >
                         <div className="flex items-center gap-2">
-                          <Monitor className="w-4 h-4" style={{color: '#3D8BFF'}} />
-                          <span className="font-medium" style={{color: '#1A1A1A'}}>Desktop</span>
+                          <Monitor className="w-4 h-4 text-primary" />
+                          <span className="font-medium text-foreground">Desktop</span>
                         </div>
                       </div>
-                      <div className="absolute -top-2 -right-2 flex items-center gap-1 px-2 py-1 rounded text-xs font-medium" style={{backgroundColor: '#4BB543', color: '#FFFFFF'}}>
+                      <div className="absolute -top-2 -right-2 flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
                         <span>Recommended</span>
                       </div>
                     </div>
                     <div
                       className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        deviceType === 'mobile' ? 'ring-2' : ''
+                        deviceType === 'mobile' ? 'bg-primary/10 border-primary ring-2 ring-primary' : 'bg-background border-border'
                       }`}
-                      style={{
-                        backgroundColor: deviceType === 'mobile' ? '#F0F9FF' : '#FFFFFF',
-                        borderColor: deviceType === 'mobile' ? '#3D8BFF' : '#E0E6ED',
-                        ['--tw-ring-color' as any]: '#3D8BFF'
-                      }}
                       onClick={() => setDeviceType('mobile')}
                     >
                       <div className="flex items-center gap-2">
-                        <Smartphone className="w-4 h-4" style={{color: '#3D8BFF'}} />
-                        <span className="font-medium" style={{color: '#1A1A1A'}}>Mobile</span>
+                        <Smartphone className="w-4 h-4 text-primary" />
+                        <span className="font-medium text-foreground">Mobile</span>
                       </div>
                     </div>
                   </div>
@@ -494,23 +449,16 @@ export default function AddKeywords() {
                 <div className="space-y-2">
                   <Label>Country</Label>
                   <div
-                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                      selectedCountry ? 'ring-2' : ''
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all min-h-[48px] ${
+                      selectedCountry ? 'bg-primary/10 border-primary ring-2 ring-primary' : 'bg-background border-border'
                     }`}
-                    style={{
-                      backgroundColor: selectedCountry ? '#F0F9FF' : '#FFFFFF',
-                      borderColor: selectedCountry ? '#3D8BFF' : '#E0E6ED',
-                      ['--tw-ring-color' as any]: '#3D8BFF',
-                      minHeight: '48px'
-                    }}
                   >
-                    <MapPin className="w-4 h-4" style={{color: '#3D8BFF'}} />
+                    <MapPin className="w-4 h-4 text-primary" />
                     <Select 
                       value={selectedCountry} 
                       onValueChange={setSelectedCountry} 
                       placeholder="Select country"
                       className="border-0 bg-transparent flex-1 focus:ring-0"
-                      style={{ backgroundColor: 'transparent', border: 'none' }}
                     >
                       {countries.map((country: any) => (
                         <option key={country.id} value={country.id}>
@@ -520,7 +468,7 @@ export default function AddKeywords() {
                     </Select>
                   </div>
                   {errors.country && (
-                    <p className="text-sm" style={{color: '#E63946'}}>{errors.country}</p>
+                    <p className="text-sm text-destructive">{errors.country}</p>
                   )}
                 </div>
               </div>
@@ -529,7 +477,7 @@ export default function AddKeywords() {
               <div className="space-y-4">
                 <div>
                   <Label>Keywords</Label>
-                  <p className="text-sm mt-1" style={{color: '#6C757D'}}>
+                  <p className="text-sm mt-1 text-muted-foreground">
                     Enter one keyword per line. Each keyword + device + country combination will consume 1 quota.
                   </p>
                 </div>
@@ -542,7 +490,7 @@ keyword 3`}
                   onChange={(e: any) => setKeywordText(e.target.value)}
                 />
                 {keywordsList.length > 0 && (
-                  <div className="text-sm" style={{color: '#6C757D'}}>
+                  <div className="text-sm text-muted-foreground">
                     {keywordsList.length} keyword(s) to be added • {keywordsList.length} quota will be consumed
                   </div>
                 )}
@@ -558,7 +506,7 @@ keyword 3`}
               <div className="space-y-4">
                 <div>
                   <Label>Tags (Optional)</Label>
-                  <p className="text-sm mt-1" style={{color: '#6C757D'}}>
+                  <p className="text-sm mt-1 text-muted-foreground">
                     Add tags to organize and filter your keywords easily.
                   </p>
                 </div>
@@ -578,15 +526,14 @@ keyword 3`}
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag) => (
-                      <div key={tag} className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-sm" 
-                           style={{backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED'}}>
-                        <Tag className="w-3 h-3" style={{color: '#6C757D'}} />
-                        <span style={{color: '#1A1A1A'}}>{tag}</span>
+                      <div key={tag} className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-sm bg-secondary border border-border">
+                        <Tag className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-foreground">{tag}</span>
                         <button 
                           onClick={() => handleRemoveTag(tag)}
-                          className="ml-1 hover:bg-red-100 rounded-full p-0.5"
+                          className="ml-1 hover:bg-destructive/10 rounded-full p-0.5"
                         >
-                          <Trash2 className="w-3 h-3" style={{color: '#E63946'}} />
+                          <Trash2 className="w-3 h-3 text-destructive" />
                         </button>
                       </div>
                     ))}
@@ -595,7 +542,7 @@ keyword 3`}
               </div>
 
               {/* Submit */}
-              <div className="flex gap-3 pt-4" style={{borderTop: '1px solid #E0E6ED'}}>
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <Button variant="outline" onClick={() => setStep(1)}>
                   Back
                 </Button>

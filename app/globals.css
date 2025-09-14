@@ -29,6 +29,11 @@
   --mint-green: #4BB543;
   --amber: #F0A202;
   --rose-red: #E63946;
+  --light-blue-bg: #F0F9FF; /* Light blue background for selected states */
+  --light-red-bg: #FEF2F2; /* Light red background for error states */
+  --light-red-border: #FECACA; /* Light red border for error states */
+  --success-text: #065F46; /* Dark green text for success messages */
+  --error-text: #DC2626; /* Red text for error messages */
   
   /* Brand-specific colors for semantic usage */
   --brand-primary: var(--graphite); /* #1A1A1A */
