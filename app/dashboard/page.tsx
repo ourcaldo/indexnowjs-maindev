@@ -337,25 +337,25 @@ export default function Dashboard() {
 
       {/* Dashboard Error State */}
       {dashboardError && !isDataLoading ? (
-        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+        <Card className="border-destructive/20 bg-destructive/10 dark:border-destructive/20 dark:bg-destructive/10">
           <CardContent className="py-12 text-center">
-            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-500" />
-            <h3 className="text-xl font-semibold mb-2 text-red-900 dark:text-red-100">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+            <h3 className="text-xl font-semibold mb-2 text-destructive dark:text-destructive">
               Failed to Load Dashboard Data
             </h3>
-            <p className="text-red-700 dark:text-red-200 mb-6 max-w-md mx-auto">
+            <p className="text-destructive/80 dark:text-destructive/80 mb-6 max-w-md mx-auto">
               We encountered an error while loading your dashboard. Please try again.
             </p>
             <div className="space-y-3">
               <Button 
                 onClick={() => window.location.reload()}
-                className="bg-red-600 text-white btn-hover"
+                className="bg-destructive text-destructive-foreground btn-hover"
                 data-testid="button-retry-dashboard"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Retry Loading
               </Button>
-              <div className="text-xs text-red-600 dark:text-red-300">
+              <div className="text-xs text-destructive/80 dark:text-destructive/80">
                 Error: {dashboardError.message}
               </div>
             </div>
@@ -468,24 +468,24 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Top 10 Positions */}
-                <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <div className="flex items-center justify-center w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg mx-auto mb-2">
-                    <Target className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <div className="text-center p-4 bg-success/10 dark:bg-success/10 rounded-lg border border-success/20 dark:border-success/20">
+                  <div className="flex items-center justify-center w-10 h-10 bg-success/20 dark:bg-success/20 rounded-lg mx-auto mb-2">
+                    <Target className="w-5 h-5 text-success dark:text-success" />
                   </div>
-                  <div className="text-2xl font-bold text-green-700 dark:text-green-400" data-testid="stat-top-10">
+                  <div className="text-2xl font-bold text-success dark:text-success" data-testid="stat-top-10">
                     {domainKeywords.filter((k: KeywordData) => k.recent_ranking?.position && k.recent_ranking.position <= 10).length}
                   </div>
-                  <div className="text-xs text-green-600 dark:text-green-500 font-medium">
+                  <div className="text-xs text-success/80 dark:text-success/80 font-medium">
                     Top 10 Rankings
                   </div>
                 </div>
                 
                 {/* Average Position */}
-                <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg mx-auto mb-2">
-                    <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="text-center p-4 bg-info/10 dark:bg-info/10 rounded-lg border border-info/20 dark:border-info/20">
+                  <div className="flex items-center justify-center w-10 h-10 bg-info/20 dark:bg-info/20 rounded-lg mx-auto mb-2">
+                    <BarChart3 className="w-5 h-5 text-info dark:text-info" />
                   </div>
-                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-400" data-testid="stat-avg-position">
+                  <div className="text-2xl font-bold text-info dark:text-info" data-testid="stat-avg-position">
                     {(() => {
                       const ranked = domainKeywords.filter((k: KeywordData) => k.recent_ranking?.position)
                       return ranked.length > 0 
@@ -493,20 +493,20 @@ export default function Dashboard() {
                         : 'N/A'
                     })()}
                   </div>
-                  <div className="text-xs text-blue-600 dark:text-blue-500 font-medium">
+                  <div className="text-xs text-info/80 dark:text-info/80 font-medium">
                     Avg Position
                   </div>
                 </div>
                 
                 {/* Daily Usage */}
-                <div className="text-center p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <div className="flex items-center justify-center w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg mx-auto mb-2">
-                    <Activity className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <div className="text-center p-4 bg-warning/10 dark:bg-warning/10 rounded-lg border border-warning/20 dark:border-warning/20">
+                  <div className="flex items-center justify-center w-10 h-10 bg-warning/20 dark:bg-warning/20 rounded-lg mx-auto mb-2">
+                    <Activity className="w-5 h-5 text-warning dark:text-warning" />
                   </div>
-                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400" data-testid="stat-daily-usage">
+                  <div className="text-2xl font-bold text-warning dark:text-warning" data-testid="stat-daily-usage">
                     {userProfile?.daily_quota_used || 0}
                   </div>
-                  <div className="text-xs text-amber-600 dark:text-amber-500 font-medium">
+                  <div className="text-xs text-warning/80 dark:text-warning/80 font-medium">
                     Daily Usage
                   </div>
                 </div>
@@ -752,30 +752,30 @@ export default function Dashboard() {
               />
 
               {/* Enhanced FastIndexing Tool */}
-              <Card className="border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
+              <Card className="border-warning/20 dark:border-warning/20 bg-gradient-to-br from-warning/10 to-warning/20 dark:from-warning/10 dark:to-warning/10">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-                        <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <div className="p-2 bg-warning/20 dark:bg-warning/20 rounded-lg">
+                        <Zap className="w-4 h-4 text-warning dark:text-warning" />
                       </div>
                       <div>
                         <CardTitle className="text-base">FastIndexing</CardTitle>
-                        <p className="text-xs text-amber-700 dark:text-amber-300">Google URL submission</p>
+                        <p className="text-xs text-warning/80 dark:text-warning/80">Google URL submission</p>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                    <Badge variant="secondary" className="bg-warning/20 text-warning dark:bg-warning/20 dark:text-warning">
                       Pro Tool
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                  <p className="text-sm text-warning/80 dark:text-warning/80 mb-4">
                     Accelerate Google discovery of your new content.
                   </p>
                   <Button 
                     variant="outline"
-                    className="w-full border-amber-300 text-amber-800 dark:border-amber-700 dark:text-amber-200 btn-hover"
+                    className="w-full border-warning/30 text-warning dark:border-warning/30 dark:text-warning btn-hover"
                     onClick={() => router.push('/dashboard/tools/fastindexing')}
                     data-testid="action-fast-indexing"
                   >
