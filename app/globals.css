@@ -22,13 +22,19 @@
   --pure-white: #FFFFFF;
   --light-gray: #F7F9FC;
   --charcoal: #2C2C2E;
-  --soft-blue: #5B7BBF;
+  --soft-blue: #3D8BFF; /* Fixed: Using project spec color instead of #5B7BBF */
   --cool-gray: #E0E6ED;
   --graphite: #1A1A1A;
   --slate-gray: #6C757D;
   --mint-green: #4BB543;
   --amber: #F0A202;
   --rose-red: #E63946;
+  
+  /* Brand-specific colors for semantic usage */
+  --brand-primary: var(--graphite); /* #1A1A1A */
+  --brand-secondary: var(--charcoal); /* #2C2C2E */
+  --brand-accent: var(--soft-blue); /* #3D8BFF */
+  --brand-text: var(--slate-gray); /* #6C757D */
   
   /* Button specific colors */
   --button-primary: #1C2331;
@@ -61,8 +67,20 @@
   --warning-foreground: 0 0% 7%;
   --error: 354 70% 54%; /* #E63946 converted to HSL */
   --error-foreground: 0 0% 100%;
-  --info: 218 49% 56%; /* #5B7BBF converted to HSL */
+  --info: 218 58% 63%; /* #3D8BFF converted to HSL */
   --info-foreground: 0 0% 100%;
+  
+  /* Status-specific colors for badges and indicators */
+  --status-excellent: var(--success);
+  --status-good: var(--info); 
+  --status-warning: var(--warning);
+  --status-poor: var(--error);
+  
+  /* Interactive element colors */
+  --hover-overlay: 0 0% 0% / 0.05; /* rgba(0,0,0,0.05) in HSL format */
+  --focus-ring: var(--soft-blue);
+  --disabled-bg: var(--cool-gray);
+  --disabled-text: var(--slate-gray);
   
   /* UI Elements */
   --border: var(--cool-gray);
@@ -175,8 +193,66 @@
   }
   
   .btn-hover:hover {
-    background-color: #100E09 !important;
-    color: white !important;
+    background-color: var(--button-dark) !important;
+    color: var(--pure-white) !important;
+  }
+  
+  /* Form Elements */
+  .form-field-default {
+    @apply border-border bg-background text-foreground rounded-md px-3 py-2;
+    border: 1px solid var(--border);
+  }
+  
+  .form-field-error {
+    @apply border-error bg-background text-foreground rounded-md px-3 py-2;
+    border: 1px solid hsl(var(--error));
+  }
+  
+  .form-field-success {
+    @apply border-success bg-background text-foreground rounded-md px-3 py-2;
+    border: 1px solid hsl(var(--success));
+  }
+  
+  .form-field-focus {
+    @apply outline-none ring-2;
+    border-color: var(--focus-ring);
+    ring-color: var(--focus-ring);
+  }
+  
+  /* Cards and Containers */
+  .card-default {
+    @apply bg-card border-border rounded-lg;
+    border: 1px solid var(--border);
+  }
+  
+  .card-bordered {
+    @apply bg-card border-border rounded-lg shadow-sm;
+    border: 1px solid var(--border);
+  }
+  
+  /* Status Badges */
+  .badge-success {
+    @apply px-2 py-1 rounded text-xs font-medium;
+    background: hsl(var(--success));
+    color: hsl(var(--success-foreground));
+  }
+  
+  .badge-warning {
+    @apply px-2 py-1 rounded text-xs font-medium;
+    background: hsl(var(--warning));
+    color: hsl(var(--warning-foreground));
+  }
+  
+  .badge-error {
+    @apply px-2 py-1 rounded text-xs font-medium;
+    background: hsl(var(--error));
+    color: hsl(var(--error-foreground));
+  }
+  
+  .badge-info {
+    @apply px-2 py-1 rounded text-xs font-medium;
+    background: hsl(var(--info));
+    color: hsl(var(--info-foreground));
   }
 
   /* Radial gradient utility */
