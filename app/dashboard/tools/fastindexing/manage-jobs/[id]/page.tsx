@@ -68,21 +68,21 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case 'success':
     case 'submitted':
-      return 'bg-[#4BB543] text-white';
+      return 'bg-green-500 text-white';
     case 'failed':
-      return 'bg-[#E63946] text-white';
+      return 'bg-red-500 text-white';
     case 'pending':
-      return 'bg-[#6C757D] text-white';
+      return 'bg-muted text-white';
     case 'quota_exceeded':
-      return 'bg-[#F0A202] text-[#1A1A1A]';
+      return 'bg-yellow-500 text-foreground';
     case 'paused':
-      return 'bg-[#F0A202] text-[#1A1A1A]';
+      return 'bg-yellow-500 text-foreground';
     case 'completed':
-      return 'bg-[#4BB543] text-white';
+      return 'bg-green-500 text-white';
     case 'running':
-      return 'bg-[#3D8BFF] text-white';
+      return 'bg-blue-500 text-white';
     default:
-      return 'bg-[#6C757D] text-white';
+      return 'bg-muted text-white';
   }
 };
 
@@ -443,7 +443,7 @@ export default function JobDetailsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-[#1A1A1A]">Loading job details...</div>
+        <div className="text-foreground">Loading job details...</div>
       </div>
     );
   }
@@ -452,8 +452,8 @@ export default function JobDetailsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Job not found</h3>
-          <p className="text-[#1A1A1A]">The requested job could not be found.</p>
+          <h3 className="text-lg font-medium text-foreground mb-2">Job not found</h3>
+          <p className="text-foreground">The requested job could not be found.</p>
         </div>
       </div>
     );
@@ -464,7 +464,7 @@ export default function JobDetailsPage() {
       {/* Back Button */}
       <div className="flex items-center gap-4">
         <Link href="/dashboard/manage-jobs">
-          <Button variant="ghost" size="sm" className="text-[#1A1A1A] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]">
+          <Button variant="ghost" size="sm" className="text-foreground hover:text-foreground hover:bg-secondary">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Jobs
           </Button>
@@ -474,8 +474,8 @@ export default function JobDetailsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">{job.name}</h1>
-          <p className="text-[#1A1A1A] mt-1">Job ID: #{job.id}</p>
+          <h1 className="text-2xl font-bold text-foreground">{job.name}</h1>
+          <p className="text-foreground mt-1">Job ID: #{job.id}</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Dynamic Start/Stop button */}
@@ -483,7 +483,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('start')}
-              className="bg-[#4BB543] text-white hover:bg-[#4BB543]/90 hover:text-white"
+              className="bg-green-500 text-white hover:bg-green-500/90 hover:text-white"
             >
               <Play className="h-4 w-4 mr-2" />
               Start Job
@@ -493,7 +493,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('stop')}
-              className="bg-[#E63946] text-white hover:bg-[#E63946]/90 hover:text-white"
+              className="bg-red-500 text-white hover:bg-red-500/90 hover:text-white"
             >
               <XCircle className="h-4 w-4 mr-2" />
               Stop Job
@@ -505,7 +505,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('pause')}
-              className="bg-[#F0A202] text-[#1A1A1A] hover:bg-[#F0A202]/90 hover:text-[#1A1A1A]"
+              className="bg-yellow-500 text-foreground hover:bg-yellow-500/90 hover:text-foreground"
             >
               <Pause className="h-4 w-4 mr-2" />
               Pause Job
@@ -515,7 +515,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('resume')}
-              className="bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:text-white"
+              className="bg-primary text-white hover:bg-slate-900 hover:text-white"
             >
               <Play className="h-4 w-4 mr-2" />
               Resume Job
@@ -528,7 +528,7 @@ export default function JobDetailsPage() {
               variant="outline" 
               size="sm"
               onClick={() => handleJobAction('retry')}
-              className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A]"
+              className="border-border text-foreground hover:bg-secondary hover:text-foreground"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Re-run Job
@@ -540,7 +540,7 @@ export default function JobDetailsPage() {
             variant="outline" 
             size="sm"
             onClick={() => handleJobAction('delete')}
-            className="border-[#E63946] text-[#E63946] hover:bg-[#E63946] hover:text-white"
+            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
           >
             <Archive className="h-4 w-4 mr-2" />
             Delete Job
@@ -551,79 +551,79 @@ export default function JobDetailsPage() {
       {/* Job Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Job Status */}
-        <Card className="bg-white border-[#E0E6ED]">
+        <Card className="bg-white border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-[#1A1A1A] flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Job Status
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#1A1A1A]">Status</span>
+              <span className="text-sm text-foreground">Status</span>
               <Badge className={`${getStatusColor(job.status)} flex items-center gap-1`}>
                 {getStatusIcon(job.status)}
                 {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#1A1A1A]">Schedule</span>
-              <span className="text-sm font-medium text-[#1A1A1A]">{job.schedule_type}</span>
+              <span className="text-sm text-foreground">Schedule</span>
+              <span className="text-sm font-medium text-foreground">{job.schedule_type}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#1A1A1A]">Created</span>
-              <span className="text-sm font-medium text-[#1A1A1A]">{formatDate(job.created_at)}</span>
+              <span className="text-sm text-foreground">Created</span>
+              <span className="text-sm font-medium text-foreground">{formatDate(job.created_at)}</span>
             </div>
             {job.started_at && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#1A1A1A]">Last Run</span>
-                <span className="text-sm font-medium text-[#1A1A1A]">{formatDate(job.started_at)}</span>
+                <span className="text-sm text-foreground">Last Run</span>
+                <span className="text-sm font-medium text-foreground">{formatDate(job.started_at)}</span>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Progress */}
-        <Card className="bg-white border-[#E0E6ED]">
+        <Card className="bg-white border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-[#1A1A1A] flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Progress
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#1A1A1A]">Overall Progress</span>
-              <span className="text-sm font-medium text-[#1A1A1A]">{Math.round(job.progress_percentage)}%</span>
+              <span className="text-sm text-foreground">Overall Progress</span>
+              <span className="text-sm font-medium text-foreground">{Math.round(job.progress_percentage)}%</span>
             </div>
             <Progress value={job.progress_percentage} className="h-2" />
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
-                <div className="text-lg font-bold text-[#1A1A1A]">{job.total_urls}</div>
-                <div className="text-xs text-[#1A1A1A]">Total URLs</div>
+                <div className="text-lg font-bold text-foreground">{job.total_urls}</div>
+                <div className="text-xs text-foreground">Total URLs</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-[#1A1A1A]">{job.processed_urls}</div>
-                <div className="text-xs text-[#1A1A1A]">Processed</div>
+                <div className="text-lg font-bold text-foreground">{job.processed_urls}</div>
+                <div className="text-xs text-foreground">Processed</div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-center pt-2 border-t border-[#E0E6ED]">
+            <div className="grid grid-cols-2 gap-4 text-center pt-2 border-t border-border">
               <div>
-                <div className="text-lg font-bold text-[#4BB543]">{job.successful_urls}</div>
-                <div className="text-xs text-[#1A1A1A]">Successful</div>
+                <div className="text-lg font-bold text-green-500">{job.successful_urls}</div>
+                <div className="text-xs text-foreground">Successful</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-[#E63946]">{job.failed_urls}</div>
-                <div className="text-xs text-[#1A1A1A]">Failed</div>
+                <div className="text-lg font-bold text-red-500">{job.failed_urls}</div>
+                <div className="text-xs text-foreground">Failed</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Source */}
-        <Card className="bg-white border-[#E0E6ED]">
+        <Card className="bg-white border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-[#1A1A1A] flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
               <Globe className="h-4 w-4" />
               Source
             </CardTitle>
@@ -631,31 +631,31 @@ export default function JobDetailsPage() {
           <CardContent className="space-y-3">
             {job.type === 'manual' ? (
               <div>
-                <div className="text-sm font-medium text-[#1A1A1A] mb-2">Manual URL list</div>
+                <div className="text-sm font-medium text-foreground mb-2">Manual URL list</div>
                 {job.source_data?.urls && job.source_data.urls.length > 0 ? (
                   <div className="space-y-2">
                     {/* Show only first few URLs that fit in card space, then count */}
                     {job.source_data.urls.slice(0, 2).map((url: string, index: number) => (
-                      <div key={index} className="text-xs text-[#1A1A1A] break-all p-2 rounded border border-[#E0E6ED]">
+                      <div key={index} className="text-xs text-foreground break-all p-2 rounded border border-border">
                         {url.length > 50 ? `${url.slice(0, 50)}...` : url}
                       </div>
                     ))}
                     {job.source_data.urls.length > 2 && (
-                      <div className="text-sm text-[#1A1A1A] font-medium text-center p-2 rounded bg-[#F7F9FC]">
+                      <div className="text-sm text-foreground font-medium text-center p-2 rounded bg-secondary">
                         +{job.source_data.urls.length - 2} more URLs
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="text-sm text-[#1A1A1A]">No URLs specified</div>
+                  <div className="text-sm text-foreground">No URLs specified</div>
                 )}
               </div>
             ) : (
               <div>
-                <div className="text-sm font-medium text-[#1A1A1A] mb-2">Sitemap URL</div>
+                <div className="text-sm font-medium text-foreground mb-2">Sitemap URL</div>
                 {job.source_data?.sitemap_url ? (
                   <>
-                    <div className="text-sm text-[#1A1A1A] break-all p-2 rounded border border-[#E0E6ED]">
+                    <div className="text-sm text-foreground break-all p-2 rounded border border-border">
                       {job.source_data.sitemap_url.length > 50 ? 
                         `${job.source_data.sitemap_url.slice(0, 50)}...` : 
                         job.source_data.sitemap_url
@@ -664,7 +664,7 @@ export default function JobDetailsPage() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full mt-2 border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC] hover:text-[#1A1A1A]"
+                      className="w-full mt-2 border-border text-foreground hover:bg-secondary hover:text-foreground"
                       asChild
                     >
                       <a href={job.source_data.sitemap_url} target="_blank" rel="noopener noreferrer">
@@ -674,7 +674,7 @@ export default function JobDetailsPage() {
                     </Button>
                   </>
                 ) : (
-                  <div className="text-sm text-[#1A1A1A]">No sitemap URL available</div>
+                  <div className="text-sm text-foreground">No sitemap URL available</div>
                 )}
               </div>
             )}
@@ -683,37 +683,37 @@ export default function JobDetailsPage() {
       </div>
 
       {/* URL Submissions History */}
-      <Card className="bg-white border-[#E0E6ED]">
+      <Card className="bg-white border-border">
         <CardHeader>
-          <CardTitle className="text-lg text-[#1A1A1A]">URL Submissions</CardTitle>
-          <p className="text-sm text-[#1A1A1A]">Detailed history of each URL submission attempt</p>
+          <CardTitle className="text-lg text-foreground">URL Submissions</CardTitle>
+          <p className="text-sm text-foreground">Detailed history of each URL submission attempt</p>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
+              <thead className="bg-secondary border-b border-border">
                 <tr>
-                  <th className="text-left p-4 font-medium text-[#1A1A1A] w-16">#</th>
-                  <th className="text-left p-4 font-medium text-[#1A1A1A]">URL</th>
-                  <th className="text-left p-4 font-medium text-[#1A1A1A]">Status</th>
-                  <th className="text-left p-4 font-medium text-[#1A1A1A]">Submitted At</th>
-                  <th className="text-left p-4 font-medium text-[#1A1A1A]">Error Message</th>
+                  <th className="text-left p-4 font-medium text-foreground w-16">#</th>
+                  <th className="text-left p-4 font-medium text-foreground">URL</th>
+                  <th className="text-left p-4 font-medium text-foreground">Status</th>
+                  <th className="text-left p-4 font-medium text-foreground">Submitted At</th>
+                  <th className="text-left p-4 font-medium text-foreground">Error Message</th>
                 </tr>
               </thead>
               <tbody>
                 {submissions.length > 0 ? (
                   submissions.map((submission, index) => (
-                    <tr key={submission.id} className="border-b border-[#E0E6ED] hover:bg-[#F7F9FC] transition-colors">
+                    <tr key={submission.id} className="border-b border-border hover:bg-secondary transition-colors">
                       <td className="p-4">
-                        <div className="text-sm font-medium text-[#1A1A1A]">
+                        <div className="text-sm font-medium text-foreground">
                           {(currentPage - 1) * itemsPerPage + index + 1}
                         </div>
                       </td>
                       <td className="p-4 w-2/5">
                         <div className="flex items-start gap-2">
-                          <Globe className="h-4 w-4 text-[#1A1A1A] flex-shrink-0 mt-0.5" />
+                          <Globe className="h-4 w-4 text-foreground flex-shrink-0 mt-0.5" />
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm font-medium text-[#1A1A1A] leading-tight break-words">
+                            <div className="text-sm font-medium text-foreground leading-tight break-words">
                               {submission.url}
                             </div>
                           </div>
@@ -728,7 +728,7 @@ export default function JobDetailsPage() {
                         </Badge>
                       </td>
                       <td className="p-4 w-1/6">
-                        <div className="text-sm text-[#1A1A1A]">
+                        <div className="text-sm text-foreground">
                           {(() => {
                             // Use submitted_at if available, otherwise use created_at
                             const dateToFormat = submission.submitted_at || submission.created_at;
@@ -745,21 +745,21 @@ export default function JobDetailsPage() {
                       </td>
                       <td className="p-4 w-1/3">
                         {submission.error_message ? (
-                          <div className="text-sm text-[#E63946] leading-tight">
+                          <div className="text-sm text-red-500 leading-tight">
                             {submission.error_message.length > 100 ? 
                               `${submission.error_message.slice(0, 100)}...` : 
                               submission.error_message
                             }
                           </div>
                         ) : (
-                          <div className="text-sm text-[#1A1A1A]">-</div>
+                          <div className="text-sm text-foreground">-</div>
                         )}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-[#1A1A1A]">
+                    <td colSpan={5} className="p-8 text-center text-foreground">
                       No URL submissions found
                     </td>
                   </tr>
@@ -770,9 +770,9 @@ export default function JobDetailsPage() {
 
           {/* Pagination Controls */}
           {totalSubmissions > 0 && totalPages > 1 && (
-            <div className="p-4 border-t border-[#E0E6ED] bg-[#F7F9FC]">
+            <div className="p-4 border-t border-border bg-secondary">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-[#1A1A1A]">
+                <div className="text-sm text-foreground">
                   Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalSubmissions)} of {totalSubmissions} submissions
                 </div>
                 <div className="flex items-center gap-2">
@@ -781,7 +781,7 @@ export default function JobDetailsPage() {
                     size="sm"
                     onClick={() => goToPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-white hover:text-[#1A1A1A] disabled:opacity-50"
+                    className="border-border text-foreground hover:bg-white hover:text-foreground disabled:opacity-50"
                   >
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Previous
@@ -808,8 +808,8 @@ export default function JobDetailsPage() {
                           onClick={() => goToPage(pageNum)}
                           className={
                             currentPage === pageNum
-                              ? "bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:text-white"
-                              : "border-[#E0E6ED] text-[#1A1A1A] hover:bg-white hover:text-[#1A1A1A]"
+                              ? "bg-primary text-white hover:bg-slate-900 hover:text-white"
+                              : "border-border text-foreground hover:bg-white hover:text-foreground"
                           }
                         >
                           {pageNum}
@@ -823,7 +823,7 @@ export default function JobDetailsPage() {
                     size="sm"
                     onClick={() => goToPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-white hover:text-[#1A1A1A] disabled:opacity-50"
+                    className="border-border text-foreground hover:bg-white hover:text-foreground disabled:opacity-50"
                   >
                     Next
                     <ChevronRight className="h-4 w-4 ml-1" />
@@ -835,9 +835,9 @@ export default function JobDetailsPage() {
 
           {submissions.length === 0 && !isSubmissionsLoading && (
             <div className="p-8 text-center">
-              <Archive className="h-12 w-12 text-[#1A1A1A] mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No submissions yet</h3>
-              <p className="text-[#1A1A1A]">
+              <Archive className="h-12 w-12 text-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No submissions yet</h3>
+              <p className="text-foreground">
                 This job hasn't started processing URLs yet.
               </p>
             </div>
