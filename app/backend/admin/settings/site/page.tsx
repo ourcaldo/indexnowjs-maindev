@@ -157,7 +157,7 @@ export default function SiteSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-[#1C2331]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-border border-t-primary"></div>
       </div>
     )
   }
@@ -165,8 +165,8 @@ export default function SiteSettings() {
   if (!settings) {
     return (
       <div className="text-center py-12">
-        <AlertTriangle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-        <p className="text-[#6C757D]">Failed to load site settings</p>
+        <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <p className="text-muted-foreground">Failed to load site settings</p>
       </div>
     )
   }
@@ -176,13 +176,13 @@ export default function SiteSettings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Site Settings</h1>
-          <p className="text-[#6C757D] mt-1">Configure your site's basic information and appearance</p>
+          <h1 className="text-2xl font-bold text-foreground">Site Settings</h1>
+          <p className="text-muted-foreground mt-1">Configure your site's basic information and appearance</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center space-x-2 px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors disabled:opacity-50"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           <span>{saving ? 'Saving...' : 'Save Changes'}</span>
@@ -193,8 +193,8 @@ export default function SiteSettings() {
       {message && (
         <div className={`flex items-center space-x-2 p-4 rounded-lg border ${
           message.type === 'success' 
-            ? 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20' 
-            : 'bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20'
+            ? 'bg-success/10 text-success border-success/20' 
+            : 'bg-destructive/10 text-destructive border-destructive/20'
         }`}>
           {message.type === 'success' ? (
             <CheckCircle className="h-5 w-5" />
@@ -206,75 +206,75 @@ export default function SiteSettings() {
       )}
 
       {/* Basic Information */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex items-center space-x-2 mb-6">
-          <Globe className="h-5 w-5 text-[#3D8BFF]" />
-          <h2 className="text-lg font-semibold text-[#1A1A1A]">Basic Information</h2>
+          <Globe className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Basic Information</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Site Name
             </label>
             <input
               type="text"
               value={settings.site_name}
               onChange={(e) => updateSettings('site_name', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="IndexNow Studio"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Contact Email
             </label>
             <input
               type="email"
               value={settings.contact_email || ''}
               onChange={(e) => updateSettings('contact_email', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="contact@indexnowpro.com"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Site Tagline
             </label>
             <input
               type="text"
               value={settings.site_tagline || ''}
               onChange={(e) => updateSettings('site_tagline', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="Rank Tracking Made Simple for Smarter SEO Decisions"
             />
-            <p className="text-xs text-[#6C757D] mt-1">Short tagline that appears in page titles and branding</p>
+            <p className="text-xs text-muted-foreground mt-1">Short tagline that appears in page titles and branding</p>
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Site Description
             </label>
             <textarea
               value={settings.site_description}
               onChange={(e) => updateSettings('site_description', e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="Professional URL indexing automation platform"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Support Email
             </label>
             <input
               type="email"
               value={settings.support_email || ''}
               onChange={(e) => updateSettings('support_email', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="support@indexnowpro.com"
             />
           </div>
@@ -282,83 +282,83 @@ export default function SiteSettings() {
       </div>
 
       {/* Branding */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex items-center space-x-2 mb-6">
-          <Image className="h-5 w-5 text-[#F0A202]" />
-          <h2 className="text-lg font-semibold text-[#1A1A1A]">Branding & Assets</h2>
+          <Image className="h-5 w-5 text-warning" />
+          <h2 className="text-lg font-semibold text-foreground">Branding & Assets</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Site Logo URL
             </label>
             <input
               type="url"
               value={settings.site_logo_url || ''}
               onChange={(e) => updateSettings('site_logo_url', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="https://example.com/logo.png"
             />
-            <p className="text-xs text-[#6C757D] mt-1">Main logo for header and branding</p>
+            <p className="text-xs text-muted-foreground mt-1">Main logo for header and branding</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               White Logo URL
             </label>
             <input
               type="url"
               value={settings.white_logo || ''}
               onChange={(e) => updateSettings('white_logo', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="https://example.com/white-logo.png"
             />
-            <p className="text-xs text-[#6C757D] mt-1">White version for dark backgrounds</p>
+            <p className="text-xs text-muted-foreground mt-1">White version for dark backgrounds</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Site Icon URL
             </label>
             <input
               type="url"
               value={settings.site_icon_url || ''}
               onChange={(e) => updateSettings('site_icon_url', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="https://example.com/icon.png"
             />
-            <p className="text-xs text-[#6C757D] mt-1">Square icon for mobile and apps</p>
+            <p className="text-xs text-muted-foreground mt-1">Square icon for mobile and apps</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Favicon URL
             </label>
             <input
               type="url"
               value={settings.site_favicon_url || ''}
               onChange={(e) => updateSettings('site_favicon_url', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="https://example.com/favicon.ico"
             />
-            <p className="text-xs text-[#6C757D] mt-1">Browser tab icon (16x16 or 32x32)</p>
+            <p className="text-xs text-muted-foreground mt-1">Browser tab icon (16x16 or 32x32)</p>
           </div>
         </div>
       </div>
 
       {/* System Settings */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex items-center space-x-2 mb-6">
-          <SettingsIcon className="h-5 w-5 text-[#1C2331]" />
-          <h2 className="text-lg font-semibold text-[#1A1A1A]">System Settings</h2>
+          <SettingsIcon className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">System Settings</h2>
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
             <div>
-              <h3 className="text-sm font-medium text-[#1A1A1A]">Maintenance Mode</h3>
-              <p className="text-xs text-[#6C757D]">Temporarily disable public access to the site</p>
+              <h3 className="text-sm font-medium text-foreground">Maintenance Mode</h3>
+              <p className="text-xs text-muted-foreground">Temporarily disable public access to the site</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -367,14 +367,14 @@ export default function SiteSettings() {
                 onChange={(e) => updateSettings('maintenance_mode', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#3D8BFF]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3D8BFF]"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
             <div>
-              <h3 className="text-sm font-medium text-[#1A1A1A]">User Registration</h3>
-              <p className="text-xs text-[#6C757D]">Allow new users to register accounts</p>
+              <h3 className="text-sm font-medium text-foreground">User Registration</h3>
+              <p className="text-xs text-muted-foreground">Allow new users to register accounts</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -383,35 +383,35 @@ export default function SiteSettings() {
                 onChange={(e) => updateSettings('registration_enabled', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#3D8BFF]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3D8BFF]"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
         </div>
       </div>
 
       {/* SEO Management */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex items-center space-x-2 mb-6">
-          <Search className="h-5 w-5 text-[#4BB543]" />
-          <h2 className="text-lg font-semibold text-[#1A1A1A]">SEO Management</h2>
+          <Search className="h-5 w-5 text-success" />
+          <h2 className="text-lg font-semibold text-foreground">SEO Management</h2>
         </div>
 
         {/* Robots.txt Section */}
         <div className="space-y-6">
-          <div className="border border-[#E0E6ED] rounded-lg p-4">
+          <div className="border border-border rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-4">
-              <FileText className="h-4 w-4 text-[#3D8BFF]" />
-              <h3 className="text-md font-medium text-[#1A1A1A]">Robots.txt Configuration</h3>
+              <FileText className="h-4 w-4 text-primary" />
+              <h3 className="text-md font-medium text-foreground">Robots.txt Configuration</h3>
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Robots.txt Content
               </label>
               <textarea
                 value={settings.robots_txt_content || ''}
                 onChange={(e) => updateSettings('robots_txt_content', e.target.value)}
                 rows={12}
-                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent font-mono text-sm"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
                 placeholder={`User-agent: *
 Allow: /
 
@@ -433,9 +433,9 @@ Allow: /faq/
 # Crawl delay
 Crawl-delay: 1`}
               />
-              <p className="text-xs text-[#6C757D] mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Configure how search engines crawl your site. Changes are cached for 1 hour. 
-                <a href="/robots.txt" target="_blank" className="text-[#3D8BFF] hover:underline ml-1">
+                <a href="/robots.txt" target="_blank" className="text-primary hover:underline ml-1">
                   View current robots.txt
                 </a>
               </p>
@@ -443,18 +443,18 @@ Crawl-delay: 1`}
           </div>
 
           {/* Sitemap Configuration */}
-          <div className="border border-[#E0E6ED] rounded-lg p-4">
+          <div className="border border-border rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-4">
-              <Map className="h-4 w-4 text-[#F0A202]" />
-              <h3 className="text-md font-medium text-[#1A1A1A]">Sitemap Configuration</h3>
+              <Map className="h-4 w-4 text-warning" />
+              <h3 className="text-md font-medium text-foreground">Sitemap Configuration</h3>
             </div>
 
             <div className="space-y-4">
               {/* Master Sitemap Toggle */}
-              <div className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
                 <div>
-                  <h4 className="text-sm font-medium text-[#1A1A1A]">Enable Sitemaps</h4>
-                  <p className="text-xs text-[#6C757D]">Generate XML sitemaps for search engines</p>
+                  <h4 className="text-sm font-medium text-foreground">Enable Sitemaps</h4>
+                  <p className="text-xs text-muted-foreground">Generate XML sitemaps for search engines</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -463,7 +463,7 @@ Crawl-delay: 1`}
                     onChange={(e) => updateSettings('sitemap_enabled', e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#3D8BFF]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3D8BFF]"></div>
+                  <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 </label>
               </div>
 
@@ -471,55 +471,55 @@ Crawl-delay: 1`}
                 <>
                   {/* Individual Sitemap Toggles */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="flex items-center justify-between p-3 border border-[#E0E6ED] rounded-lg">
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                       <div>
-                        <span className="text-sm font-medium text-[#1A1A1A]">Posts</span>
-                        <p className="text-xs text-[#6C757D]">Blog posts</p>
+                        <span className="text-sm font-medium text-foreground">Posts</span>
+                        <p className="text-xs text-muted-foreground">Blog posts</p>
                       </div>
                       <input
                         type="checkbox"
                         checked={settings.sitemap_posts_enabled}
                         onChange={(e) => updateSettings('sitemap_posts_enabled', e.target.checked)}
-                        className="w-4 h-4 text-[#3D8BFF] border-gray-300 rounded focus:ring-[#3D8BFF]"
+                        className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 border border-[#E0E6ED] rounded-lg">
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                       <div>
-                        <span className="text-sm font-medium text-[#1A1A1A]">Pages</span>
-                        <p className="text-xs text-[#6C757D]">Static pages</p>
+                        <span className="text-sm font-medium text-foreground">Pages</span>
+                        <p className="text-xs text-muted-foreground">Static pages</p>
                       </div>
                       <input
                         type="checkbox"
                         checked={settings.sitemap_pages_enabled}
                         onChange={(e) => updateSettings('sitemap_pages_enabled', e.target.checked)}
-                        className="w-4 h-4 text-[#3D8BFF] border-gray-300 rounded focus:ring-[#3D8BFF]"
+                        className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 border border-[#E0E6ED] rounded-lg">
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                       <div>
-                        <span className="text-sm font-medium text-[#1A1A1A]">Categories</span>
-                        <p className="text-xs text-[#6C757D]">Blog categories</p>
+                        <span className="text-sm font-medium text-foreground">Categories</span>
+                        <p className="text-xs text-muted-foreground">Blog categories</p>
                       </div>
                       <input
                         type="checkbox"
                         checked={settings.sitemap_categories_enabled}
                         onChange={(e) => updateSettings('sitemap_categories_enabled', e.target.checked)}
-                        className="w-4 h-4 text-[#3D8BFF] border-gray-300 rounded focus:ring-[#3D8BFF]"
+                        className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 border border-[#E0E6ED] rounded-lg">
+                    <div className="flex items-center justify-between p-3 border border-border rounded-lg">
                       <div>
-                        <span className="text-sm font-medium text-[#1A1A1A]">Tags</span>
-                        <p className="text-xs text-[#6C757D]">Blog tags</p>
+                        <span className="text-sm font-medium text-foreground">Tags</span>
+                        <p className="text-xs text-muted-foreground">Blog tags</p>
                       </div>
                       <input
                         type="checkbox"
                         checked={settings.sitemap_tags_enabled}
                         onChange={(e) => updateSettings('sitemap_tags_enabled', e.target.checked)}
-                        className="w-4 h-4 text-[#3D8BFF] border-gray-300 rounded focus:ring-[#3D8BFF]"
+                        className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
                       />
                     </div>
                   </div>
@@ -527,7 +527,7 @@ Crawl-delay: 1`}
                   {/* Sitemap Settings */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Max URLs per Sitemap File
                       </label>
                       <input
@@ -536,20 +536,20 @@ Crawl-delay: 1`}
                         max="50000"
                         value={settings.sitemap_max_urls_per_file}
                         onChange={(e) => updateSettings('sitemap_max_urls_per_file', parseInt(e.target.value) || 5000)}
-                        className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                        className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="5000"
                       />
-                      <p className="text-xs text-[#6C757D] mt-1">Maximum URLs per sitemap file (100-50000, max 50MB)</p>
+                      <p className="text-xs text-muted-foreground mt-1">Maximum URLs per sitemap file (100-50000, max 50MB)</p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Change Frequency
                       </label>
                       <select
                         value={settings.sitemap_change_frequency}
                         onChange={(e) => updateSettings('sitemap_change_frequency', e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                        className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                       >
                         <option value="always">Always</option>
                         <option value="hourly">Hourly</option>
@@ -559,34 +559,34 @@ Crawl-delay: 1`}
                         <option value="yearly">Yearly</option>
                         <option value="never">Never</option>
                       </select>
-                      <p className="text-xs text-[#6C757D] mt-1">How frequently content changes (hint for search engines)</p>
+                      <p className="text-xs text-muted-foreground mt-1">How frequently content changes (hint for search engines)</p>
                     </div>
                   </div>
 
                   {/* Sitemap Links */}
-                  <div className="bg-[#F7F9FC] rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">Generated Sitemaps</h4>
+                  <div className="bg-secondary rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-foreground mb-2">Generated Sitemaps</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                      <a href="/sitemap.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                      <a href="/sitemap.xml" target="_blank" className="text-primary hover:underline">
                         📋 Main Sitemap Index
                       </a>
                       {settings.sitemap_posts_enabled && (
-                        <a href="/sitemap-posts.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                        <a href="/sitemap-posts.xml" target="_blank" className="text-primary hover:underline">
                           📝 Posts Sitemap
                         </a>
                       )}
                       {settings.sitemap_pages_enabled && (
-                        <a href="/sitemap-pages.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                        <a href="/sitemap-pages.xml" target="_blank" className="text-primary hover:underline">
                           📄 Pages Sitemap
                         </a>
                       )}
                       {settings.sitemap_categories_enabled && (
-                        <a href="/sitemap-categories.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                        <a href="/sitemap-categories.xml" target="_blank" className="text-primary hover:underline">
                           🏷️ Categories Sitemap
                         </a>
                       )}
                       {settings.sitemap_tags_enabled && (
-                        <a href="/sitemap-tags.xml" target="_blank" className="text-[#3D8BFF] hover:underline">
+                        <a href="/sitemap-tags.xml" target="_blank" className="text-primary hover:underline">
                           🏷️ Tags Sitemap
                         </a>
                       )}
@@ -600,11 +600,11 @@ Crawl-delay: 1`}
       </div>
 
       {/* SMTP Email Configuration */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
-            <Mail className="h-5 w-5 text-[#3D8BFF]" />
-            <h2 className="text-lg font-semibold text-[#1A1A1A]">Email Configuration</h2>
+            <Mail className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Email Configuration</h2>
           </div>
           <label className="flex items-center cursor-pointer">
             <input
@@ -614,13 +614,13 @@ Crawl-delay: 1`}
               className="sr-only"
             />
             <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              settings.smtp_enabled ? 'bg-[#4BB543]' : 'bg-[#E0E6ED]'
+              settings.smtp_enabled ? 'bg-success' : 'bg-muted'
             }`}>
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-card transition-transform ${
                 settings.smtp_enabled ? 'translate-x-6' : 'translate-x-1'
               }`} />
             </div>
-            <span className="ml-2 text-sm text-[#6C757D]">
+            <span className="ml-2 text-sm text-muted-foreground">
               {settings.smtp_enabled ? 'Enabled' : 'Disabled'}
             </span>
           </label>
@@ -630,7 +630,7 @@ Crawl-delay: 1`}
           {/* Server Settings */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 <Server className="h-4 w-4 inline mr-2" />
                 SMTP Host
               </label>
@@ -638,13 +638,13 @@ Crawl-delay: 1`}
                 type="text"
                 value={settings.smtp_host || ''}
                 onChange={(e) => updateSettings('smtp_host', e.target.value)}
-                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="mail.example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 <SettingsIcon className="h-4 w-4 inline mr-2" />
                 SMTP Port
               </label>
@@ -652,7 +652,7 @@ Crawl-delay: 1`}
                 type="number"
                 value={settings.smtp_port || 465}
                 onChange={(e) => updateSettings('smtp_port', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="465"
               />
             </div>
@@ -661,7 +661,7 @@ Crawl-delay: 1`}
           {/* Authentication */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 <Mail className="h-4 w-4 inline mr-2" />
                 SMTP Username
               </label>
@@ -669,13 +669,13 @@ Crawl-delay: 1`}
                 type="text"
                 value={settings.smtp_user || ''}
                 onChange={(e) => updateSettings('smtp_user', e.target.value)}
-                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="username@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 <Lock className="h-4 w-4 inline mr-2" />
                 SMTP Password
               </label>
@@ -683,7 +683,7 @@ Crawl-delay: 1`}
                 type="password"
                 value={settings.smtp_pass || ''}
                 onChange={(e) => updateSettings('smtp_pass', e.target.value)}
-                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="••••••••••••"
               />
             </div>
@@ -692,27 +692,27 @@ Crawl-delay: 1`}
           {/* Sender Settings */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 From Name
               </label>
               <input
                 type="text"
                 value={settings.smtp_from_name || 'IndexNow Studio'}
                 onChange={(e) => updateSettings('smtp_from_name', e.target.value)}
-                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="IndexNow Studio"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 From Email Address
               </label>
               <input
                 type="email"
                 value={settings.smtp_from_email || ''}
                 onChange={(e) => updateSettings('smtp_from_email', e.target.value)}
-                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="noreply@example.com"
               />
             </div>
@@ -728,33 +728,33 @@ Crawl-delay: 1`}
                 className="sr-only"
               />
               <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.smtp_secure ? 'bg-[#4BB543]' : 'bg-[#E0E6ED]'
+                settings.smtp_secure ? 'bg-success' : 'bg-muted'
               }`}>
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-card transition-transform ${
                   settings.smtp_secure ? 'translate-x-6' : 'translate-x-1'
                 }`} />
               </div>
-              <span className="ml-3 text-sm text-[#1A1A1A]">
+              <span className="ml-3 text-sm text-foreground">
                 <Shield className="h-4 w-4 inline mr-1" />
                 Use TLS/SSL Encryption
               </span>
             </label>
-            <p className="text-xs text-[#6C757D] ml-14 mt-1">
+            <p className="text-xs text-muted-foreground ml-14 mt-1">
               Recommended for secure email transmission (typically required for port 465)
             </p>
           </div>
 
           {/* Test Email */}
-          <div className="pt-4 border-t border-[#E0E6ED]">
+          <div className="pt-4 border-t border-border">
             <button
               onClick={handleTestEmail}
               disabled={testing || !settings.smtp_enabled}
-              className="flex items-center space-x-2 px-4 py-2 border border-[#E0E6ED] rounded-lg hover:bg-[#F7F9FC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <TestTube2 className="h-4 w-4" />
               <span>{testing ? 'Testing...' : 'Test Email Configuration'}</span>
             </button>
-            <p className="text-xs text-[#6C757D] mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Send a test email to verify SMTP configuration is working correctly
             </p>
           </div>
