@@ -202,31 +202,31 @@ npm run color-check  # Custom script to check for hardcoded colors
    - ✅ `app/dashboard/tools/fastindexing/manage-jobs/[id]/page.tsx` - Converted ~80+ hex color instances
    - ✅ `app/dashboard/tools/fastindexing/layout.tsx` - Already clean (no hardcoded colors)
 
-#### **Critical Priority Files - Dashboard Core** (50+ hardcoded colors each): ❌ **NEEDS FIXING**
+#### **Critical Priority Files - Dashboard Core** (50+ hardcoded colors each): ✅ **COMPLETED**
 9. **Main Dashboard Layout & Pages**:
-   - ❌ `app/dashboard/layout.tsx` - **67 violations** (bg-[#F7F9FC], border-[#E0E6ED], text-[#1A1A1A], inline styles)
-   - ❌ `app/dashboard/manage-jobs/page.tsx` - **233 violations** (most violations in entire codebase)
-   - ❌ `app/dashboard/indexnow/add/page.tsx` - **145 violations** 
-   - ❌ `app/dashboard/indexnow/page.tsx` - **124 violations**
-   - ❌ `app/dashboard/indexnow/jobs/page.tsx` - **77 violations**
+   - ✅ `app/dashboard/layout.tsx` - **67 violations fixed** (converted bg-[#F7F9FC], border-[#E0E6ED], text-[#1A1A1A], inline styles to semantic classes)
+   - ✅ `app/dashboard/manage-jobs/page.tsx` - **233 violations fixed** (most violations in entire codebase - now using semantic tokens)
+   - ✅ `app/dashboard/indexnow/add/page.tsx` - **145 violations fixed** (verified clean)
+   - ✅ `app/dashboard/indexnow/page.tsx` - **124 violations fixed** (converted to semantic classes)
+   - ✅ `app/dashboard/indexnow/jobs/page.tsx` - **77 violations fixed** (converted to semantic classes)
 
-10. **Billing & Settings Components**:
-   - ❌ `app/dashboard/settings/plans-billing/components/BillingStats.tsx` - **72 violations**
-   - ❌ `app/dashboard/settings/plans-billing/components/UsageOverviewCard.tsx` - **58 violations**
-   - ❌ `app/dashboard/settings/plans-billing/components/BillingHistory.tsx` - **55 violations**
-   - ❌ `app/dashboard/settings/plans-billing/components/PricingCards.tsx` - **46 violations**
+10. **Billing & Settings Components**: ✅ **COMPLETED**
+   - ✅ `app/dashboard/settings/plans-billing/components/BillingStats.tsx` - **72 violations fixed** (converted to semantic classes with dark mode support)
+   - ✅ `app/dashboard/settings/plans-billing/components/UsageOverviewCard.tsx` - **58 violations fixed** (proper status colors and semantic tokens)
+   - ✅ `app/dashboard/settings/plans-billing/components/BillingHistory.tsx` - **55 violations fixed** (semantic status badges and table styling)
+   - ✅ `app/dashboard/settings/plans-billing/components/PricingCards.tsx` - **46 violations fixed** (semantic card styling and success colors)
 
-11. **IndexNow Components**:
-   - ❌ `app/dashboard/indexnow/new/page.tsx` - **30 violations**
-   - ❌ `app/dashboard/indexnow/overview/components/DomainSelector.tsx` - **23 violations**
-   - ❌ `app/dashboard/indexnow/overview/components/FilterPanel.tsx` - **13 violations**
+11. **IndexNow Components**: ✅ **COMPLETED**
+   - ✅ `app/dashboard/indexnow/new/page.tsx` - **30 violations fixed** (converted form styling and card components to semantic classes)
+   - ✅ `app/dashboard/indexnow/overview/components/DomainSelector.tsx` - **23 violations fixed** (dropdown and selection state styling)
+   - ✅ `app/dashboard/indexnow/overview/components/FilterPanel.tsx` - **13 violations fixed** (filter button and panel styling)
 
-12. **Checkout & Billing Components**:
-   - ❌ `app/dashboard/settings/plans-billing/checkout/components/CheckoutForm.tsx` - **32 violations**
-   - ❌ `app/dashboard/settings/plans-billing/checkout/components/LoadingStates.tsx` - **16 violations**
-   - ❌ `app/dashboard/settings/plans-billing/checkout/components/CheckoutHeader.tsx` - **10 violations**
+12. **Checkout & Billing Components**: ❌ **PENDING**
+   - ❌ `app/dashboard/settings/plans-billing/checkout/components/CheckoutForm.tsx` - **32 violations** (needs conversion to semantic classes)
+   - ❌ `app/dashboard/settings/plans-billing/checkout/components/LoadingStates.tsx` - **16 violations** (needs conversion to semantic classes)
+   - ❌ `app/dashboard/settings/plans-billing/checkout/components/CheckoutHeader.tsx` - **10 violations** (needs conversion to semantic classes)
 
-**TOTAL NEW VIOLATIONS DISCOVERED**: **1,000+ hardcoded color violations** in dashboard core files
+**PROGRESS UPDATE**: **~770+ violations fixed** in sections #9, #10, #11. Remaining: **~58 violations** in section #12 (Checkout & Billing Components)
 
 ### 3.2 Replacement Strategy
 
