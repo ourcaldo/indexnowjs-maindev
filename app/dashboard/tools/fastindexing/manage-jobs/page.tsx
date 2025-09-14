@@ -53,15 +53,15 @@ interface Job {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'completed':
-      return 'bg-[#4BB543] text-white';
+      return 'bg-green-500 text-white';
     case 'failed':
-      return 'bg-[#E63946] text-white';
+      return 'bg-red-500 text-white';
     case 'running':
-      return 'bg-[#1C2331] text-white';
+      return 'bg-primary text-white';
     case 'paused':
-      return 'bg-[#F0A202] text-[#1A1A1A]';
+      return 'bg-yellow-500 text-foreground';
     default:
-      return 'bg-[#6C757D] text-white';
+      return 'bg-muted text-white';
   }
 };
 
@@ -322,13 +322,13 @@ export default function ManageJobsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Manage Jobs</h1>
-          <p className="text-[#6C757D] mt-1">View and manage your indexing jobs</p>
+          <h1 className="text-2xl font-bold text-foreground">Manage Jobs</h1>
+          <p className="text-muted-foreground mt-1">View and manage your indexing jobs</p>
         </div>
         {selectedJobs.length > 0 && (
           <Button 
             variant="destructive"
-            className="bg-[#E63946] hover:bg-[#d62839] text-white"
+            className="bg-red-500 hover:bg-red-600 text-white"
           >
             <Archive className="h-4 w-4 mr-2" />
             Delete Selected ({selectedJobs.length})
@@ -337,52 +337,52 @@ export default function ManageJobsPage() {
       </div>
 
       {/* Filters Section */}
-      <div className="bg-white border border-[#E0E6ED] rounded-lg p-6">
+      <div className="bg-white border border-border rounded-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search Jobs */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[#1A1A1A]">Search Jobs</label>
+            <label className="text-sm font-medium text-foreground">Search Jobs</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by name or ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-[#E0E6ED] focus:border-[#6C757D] focus:ring-[#6C757D]"
+                className="pl-10 border-border focus:border-muted-foreground focus:ring-muted-foreground"
               />
             </div>
           </div>
 
           {/* Status Filter */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[#1A1A1A]">Status</label>
+            <label className="text-sm font-medium text-foreground">Status</label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="border-[#E0E6ED] focus:border-[#6C757D] focus:ring-[#6C757D] focus-visible:ring-[#6C757D]">
+              <SelectTrigger className="border-border focus:border-muted-foreground focus:ring-muted-foreground focus-visible:ring-muted-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white border-[#E0E6ED]">
-                <SelectItem value="All Status" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">All Status</SelectItem>
-                <SelectItem value="completed" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Completed</SelectItem>
-                <SelectItem value="paused" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Paused</SelectItem>
-                <SelectItem value="running" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Running</SelectItem>
-                <SelectItem value="failed" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Failed</SelectItem>
+              <SelectContent className="bg-white border-border">
+                <SelectItem value="All Status" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">All Status</SelectItem>
+                <SelectItem value="completed" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Completed</SelectItem>
+                <SelectItem value="paused" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Paused</SelectItem>
+                <SelectItem value="running" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Running</SelectItem>
+                <SelectItem value="failed" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Failed</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Schedule Filter */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[#1A1A1A]">Schedule</label>
+            <label className="text-sm font-medium text-foreground">Schedule</label>
             <Select value={scheduleFilter} onValueChange={setScheduleFilter}>
-              <SelectTrigger className="border-[#E0E6ED] focus:border-[#6C757D] focus:ring-[#6C757D] focus-visible:ring-[#6C757D]">
+              <SelectTrigger className="border-border focus:border-muted-foreground focus:ring-muted-foreground focus-visible:ring-muted-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white border-[#E0E6ED]">
-                <SelectItem value="All Schedules" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">All Schedules</SelectItem>
-                <SelectItem value="one-time" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">One-time</SelectItem>
-                <SelectItem value="daily" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Daily</SelectItem>
-                <SelectItem value="weekly" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Weekly</SelectItem>
-                <SelectItem value="monthly" className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">Monthly</SelectItem>
+              <SelectContent className="bg-white border-border">
+                <SelectItem value="All Schedules" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">All Schedules</SelectItem>
+                <SelectItem value="one-time" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">One-time</SelectItem>
+                <SelectItem value="daily" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Daily</SelectItem>
+                <SelectItem value="weekly" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Weekly</SelectItem>
+                <SelectItem value="monthly" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Monthly</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -390,13 +390,13 @@ export default function ManageJobsPage() {
       </div>
 
       {/* Jobs Table */}
-      <div className="bg-white border border-[#E0E6ED] rounded-lg">
+      <div className="bg-white border border-border rounded-lg">
         {/* Table Header */}
-        <div className="px-6 py-4 border-b border-[#E0E6ED] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Archive className="h-5 w-5 text-[#1A1A1A]" />
-            <h2 className="text-lg font-semibold text-[#1A1A1A]">Indexing Jobs</h2>
-            <Badge variant="secondary" className="bg-[#F7F9FC] text-[#6C757D]">
+            <Archive className="h-5 w-5 text-foreground" />
+            <h2 className="text-lg font-semibold text-foreground">Indexing Jobs</h2>
+            <Badge variant="secondary" className="bg-secondary text-muted-foreground">
               {totalCount} jobs
             </Badge>
           </div>
@@ -405,63 +405,63 @@ export default function ManageJobsPage() {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
+            <thead className="bg-secondary border-b border-border">
               <tr>
                 <th className="text-left p-4 w-12">
                   <Checkbox
                     checked={selectedJobs.length === jobs.length && jobs.length > 0}
                     onCheckedChange={handleSelectAll}
-                    className="border-[#E0E6ED]"
+                    className="border-border"
                   />
                 </th>
-                <th className="text-left p-4 font-medium text-[#1A1A1A]">Name</th>
-                <th className="text-left p-4 font-medium text-[#1A1A1A]">Created</th>
-                <th className="text-left p-4 font-medium text-[#1A1A1A] min-w-[120px]">Schedule</th>
-                <th className="text-left p-4 font-medium text-[#1A1A1A]">URLs</th>
-                <th className="text-left p-4 font-medium text-[#1A1A1A]">Status</th>
-                <th className="text-left p-4 font-medium text-[#1A1A1A]">Progress</th>
-                <th className="text-left p-4 font-medium text-[#1A1A1A]">Actions</th>
+                <th className="text-left p-4 font-medium text-foreground">Name</th>
+                <th className="text-left p-4 font-medium text-foreground">Created</th>
+                <th className="text-left p-4 font-medium text-foreground min-w-[120px]">Schedule</th>
+                <th className="text-left p-4 font-medium text-foreground">URLs</th>
+                <th className="text-left p-4 font-medium text-foreground">Status</th>
+                <th className="text-left p-4 font-medium text-foreground">Progress</th>
+                <th className="text-left p-4 font-medium text-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center">
-                    <div className="text-[#6C757D]">Loading jobs...</div>
+                    <div className="text-muted-foreground">Loading jobs...</div>
                   </td>
                 </tr>
               ) : (
                 jobs.map((job) => (
-                  <tr key={job.id} className="border-b border-[#E0E6ED] hover:bg-[#F7F9FC] transition-colors duration-200">
+                  <tr key={job.id} className="border-b border-border hover:bg-secondary transition-colors duration-200">
                     <td className="p-4">
                       <Checkbox
                         checked={selectedJobs.includes(job.id)}
                         onCheckedChange={(checked) => handleSelectJob(job.id, checked as boolean)}
-                        className="border-[#E0E6ED]"
+                        className="border-border"
                       />
                     </td>
                     <td className="p-4">
                       <div>
                         <Link 
                           href={`/dashboard/manage-jobs/${job.id}`}
-                          className="font-medium text-[#1A1A1A] hover:text-[#1C2331] hover:underline"
+                          className="font-medium text-foreground hover:text-primary hover:underline"
                         >
                           {job.name}
                         </Link>
-                        <p className="text-sm text-[#6C757D] mt-1">{generateJobId(job.id)}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{generateJobId(job.id)}</p>
                       </div>
                     </td>
-                    <td className="p-4 text-[#1A1A1A]">{formatDate(job.created_at)}</td>
+                    <td className="p-4 text-foreground">{formatDate(job.created_at)}</td>
                     <td className="p-4 min-w-[100px]">
-                      <Badge className="bg-[#1C2331] text-white hover:bg-[#0d1b2a] whitespace-nowrap">
+                      <Badge className="bg-primary text-white hover:bg-slate-900 whitespace-nowrap">
                         {job.schedule_type}
                       </Badge>
                     </td>
                     <td className="p-4">
                       <div className="text-sm">
-                        <div className="text-[#1A1A1A] font-medium">{job.total_urls} total</div>
-                        <div className="text-[#6C757D]">
-                          <span className="text-[#4BB543]">{job.successful_urls} success</span>, <span className="text-[#E63946]">{job.failed_urls} failed</span>
+                        <div className="text-foreground font-medium">{job.total_urls} total</div>
+                        <div className="text-muted-foreground">
+                          <span className="text-green-500">{job.successful_urls} success</span>, <span className="text-red-500">{job.failed_urls} failed</span>
                         </div>
                       </div>
                     </td>
@@ -473,7 +473,7 @@ export default function ManageJobsPage() {
                     </td>
                     <td className="p-4">
                       <div className="space-y-2">
-                        <div className="text-sm text-[#1A1A1A] font-medium">
+                        <div className="text-sm text-foreground font-medium">
                           {job.total_urls > 0 ? `${Math.round(job.progress_percentage)}%` : '0%'} processed
                         </div>
                         <Progress 
@@ -485,12 +485,12 @@ export default function ManageJobsPage() {
                     <td className="p-4">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]">
+                          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-secondary">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white border-[#E0E6ED]">
-                          <DropdownMenuItem asChild className="hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]">
+                        <DropdownMenuContent align="end" className="bg-white border-border">
+                          <DropdownMenuItem asChild className="hover:bg-secondary focus:bg-secondary focus:text-foreground">
                             <Link 
                               href={`/dashboard/manage-jobs/${job.id}`}
                               className="flex items-center gap-2 cursor-pointer"
@@ -501,14 +501,14 @@ export default function ManageJobsPage() {
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleRerunJob(job.id)}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-[#F7F9FC] focus:bg-[#F7F9FC] focus:text-[#1A1A1A]"
+                            className="flex items-center gap-2 cursor-pointer hover:bg-secondary focus:bg-secondary focus:text-foreground"
                           >
                             <RefreshCw className="h-4 w-4" />
                             Re-run
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleDeleteJob(job.id)}
-                            className="flex items-center gap-2 cursor-pointer text-[#E63946] hover:bg-[#fef2f2] focus:bg-[#fef2f2] focus:text-[#E63946]"
+                            className="flex items-center gap-2 cursor-pointer text-red-500 hover:bg-red-50 focus:bg-red-50 focus:text-red-500"
                           >
                             <Trash2 className="h-4 w-4" />
                             Delete
@@ -525,9 +525,9 @@ export default function ManageJobsPage() {
 
         {!loading && jobs.length === 0 && (
           <div className="p-8 text-center">
-            <Archive className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No jobs found</h3>
-            <p className="text-[#6C757D]">
+            <Archive className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No jobs found</h3>
+            <p className="text-muted-foreground">
               {searchTerm || statusFilter !== 'All Status' || scheduleFilter !== 'All Schedules'
                 ? "Try adjusting your filters to see more jobs."
                 : "You haven't created any indexing jobs yet."
@@ -538,8 +538,8 @@ export default function ManageJobsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-[#E0E6ED] flex items-center justify-between">
-            <div className="text-sm text-[#6C757D]">
+          <div className="px-6 py-4 border-t border-border flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
               Showing {startIndex + 1} to {Math.min(startIndex + jobsPerPage, totalCount)} of {totalCount} jobs
             </div>
             <div className="flex items-center gap-2">
@@ -548,7 +548,7 @@ export default function ManageJobsPage() {
                 size="sm"
                 onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                className="border-border text-foreground hover:bg-secondary"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
@@ -561,8 +561,8 @@ export default function ManageJobsPage() {
                     size="sm"
                     onClick={() => setCurrentPage(page)}
                     className={currentPage === page 
-                      ? "bg-[#1C2331] text-white hover:bg-[#0d1b2a]" 
-                      : "border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                      ? "bg-primary text-white hover:bg-slate-900" 
+                      : "border-border text-foreground hover:bg-secondary"
                     }
                   >
                     {page}
@@ -574,7 +574,7 @@ export default function ManageJobsPage() {
                 size="sm"
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="border-[#E0E6ED] text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                className="border-border text-foreground hover:bg-secondary"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
