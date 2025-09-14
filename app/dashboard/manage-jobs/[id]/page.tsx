@@ -68,21 +68,21 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case 'success':
     case 'submitted':
-      return 'bg-[#4BB543] text-white';
+      return 'bg-success text-white';
     case 'failed':
-      return 'bg-[#E63946] text-white';
+      return 'bg-error text-white';
     case 'pending':
-      return 'bg-[#6C757D] text-white';
+      return 'bg-info text-white';
     case 'quota_exceeded':
-      return 'bg-[#F0A202] text-[#1A1A1A]';
+      return 'bg-warning text-brand-primary';
     case 'paused':
-      return 'bg-[#F0A202] text-[#1A1A1A]';
+      return 'bg-warning text-brand-primary';
     case 'completed':
-      return 'bg-[#4BB543] text-white';
+      return 'bg-success text-white';
     case 'running':
-      return 'bg-[#3D8BFF] text-white';
+      return 'bg-brand-accent text-white';
     default:
-      return 'bg-[#6C757D] text-white';
+      return 'bg-info text-white';
   }
 };
 
@@ -443,7 +443,7 @@ export default function JobDetailsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-[#1A1A1A]">Loading job details...</div>
+        <div className="text-brand-primary">Loading job details...</div>
       </div>
     );
   }
@@ -452,8 +452,8 @@ export default function JobDetailsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Job not found</h3>
-          <p className="text-[#1A1A1A]">The requested job could not be found.</p>
+          <h3 className="text-lg font-medium text-brand-primary mb-2">Job not found</h3>
+          <p className="text-brand-primary">The requested job could not be found.</p>
         </div>
       </div>
     );
@@ -464,7 +464,7 @@ export default function JobDetailsPage() {
       {/* Back Button */}
       <div className="flex items-center gap-4">
         <Link href="/dashboard/manage-jobs">
-          <Button variant="ghost" size="sm" className="text-[#1A1A1A] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]">
+          <Button variant="ghost" size="sm" className="text-brand-primary hover:text-brand-primary hover:bg-secondary">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Jobs
           </Button>
@@ -474,8 +474,8 @@ export default function JobDetailsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">{job.name}</h1>
-          <p className="text-[#1A1A1A] mt-1">Job ID: #{job.id}</p>
+          <h1 className="text-2xl font-bold text-brand-primary">{job.name}</h1>
+          <p className="text-brand-primary mt-1">Job ID: #{job.id}</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Dynamic Start/Stop button */}
@@ -483,7 +483,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('start')}
-              className="bg-[#4BB543] text-white hover:bg-[#4BB543]/90 hover:text-white"
+              className="bg-success text-white hover:bg-success/90 hover:text-white"
             >
               <Play className="h-4 w-4 mr-2" />
               Start Job
@@ -493,7 +493,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('stop')}
-              className="bg-[#E63946] text-white hover:bg-[#E63946]/90 hover:text-white"
+              className="bg-error text-white hover:bg-error/90 hover:text-white"
             >
               <XCircle className="h-4 w-4 mr-2" />
               Stop Job
@@ -505,7 +505,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('pause')}
-              className="bg-[#F0A202] text-[#1A1A1A] hover:bg-[#F0A202]/90 hover:text-[#1A1A1A]"
+              className="bg-warning text-brand-primary hover:bg-warning/90 hover:text-brand-primary"
             >
               <Pause className="h-4 w-4 mr-2" />
               Pause Job
@@ -515,7 +515,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('resume')}
-              className="bg-[#1C2331] text-white hover:bg-[#0d1b2a] hover:text-white"
+              className="bg-brand-primary text-white hover:bg-brand-primary/90 hover:text-white"
             >
               <Play className="h-4 w-4 mr-2" />
               Resume Job
@@ -551,50 +551,50 @@ export default function JobDetailsPage() {
       {/* Job Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Job Status */}
-        <Card className="bg-white border-[#E0E6ED]">
+        <Card className="bg-background border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-[#1A1A1A] flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-brand-primary flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Job Status
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#1A1A1A]">Status</span>
+              <span className="text-sm text-brand-primary">Status</span>
               <Badge className={`${getStatusColor(job.status)} flex items-center gap-1`}>
                 {getStatusIcon(job.status)}
                 {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#1A1A1A]">Schedule</span>
-              <span className="text-sm font-medium text-[#1A1A1A]">{job.schedule_type}</span>
+              <span className="text-sm text-brand-primary">Schedule</span>
+              <span className="text-sm font-medium text-brand-primary">{job.schedule_type}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#1A1A1A]">Created</span>
-              <span className="text-sm font-medium text-[#1A1A1A]">{formatDate(job.created_at)}</span>
+              <span className="text-sm text-brand-primary">Created</span>
+              <span className="text-sm font-medium text-brand-primary">{formatDate(job.created_at)}</span>
             </div>
             {job.started_at && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#1A1A1A]">Last Run</span>
-                <span className="text-sm font-medium text-[#1A1A1A]">{formatDate(job.started_at)}</span>
+                <span className="text-sm text-brand-primary">Last Run</span>
+                <span className="text-sm font-medium text-brand-primary">{formatDate(job.started_at)}</span>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Progress */}
-        <Card className="bg-white border-[#E0E6ED]">
+        <Card className="bg-background border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-[#1A1A1A] flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-brand-primary flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Progress
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[#1A1A1A]">Overall Progress</span>
-              <span className="text-sm font-medium text-[#1A1A1A]">{Math.round(job.progress_percentage)}%</span>
+              <span className="text-sm text-brand-primary">Overall Progress</span>
+              <span className="text-sm font-medium text-brand-primary">{Math.round(job.progress_percentage)}%</span>
             </div>
             <Progress value={job.progress_percentage} className="h-2" />
             <div className="grid grid-cols-2 gap-4 text-center">
@@ -621,9 +621,9 @@ export default function JobDetailsPage() {
         </Card>
 
         {/* Source */}
-        <Card className="bg-white border-[#E0E6ED]">
+        <Card className="bg-background border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-[#1A1A1A] flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-brand-primary flex items-center gap-2">
               <Globe className="h-4 w-4" />
               Source
             </CardTitle>

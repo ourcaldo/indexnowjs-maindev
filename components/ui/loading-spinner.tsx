@@ -13,7 +13,7 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
   }
 
   return (
-    <div className={cn("animate-spin rounded-full border-2 border-gray-300 border-t-[#1C2331]", sizeClasses[size], className)}>
+    <div className={cn("animate-spin rounded-full border-2 border-muted border-t-brand-primary", sizeClasses[size], className)}>
       <span className="sr-only">Loading...</span>
     </div>
   )
