@@ -253,6 +253,23 @@
     color: hsl(var(--info-foreground));
   }
 
+  /* Status Border Utilities for Toast */
+  .border-success {
+    border-color: hsl(var(--success)) !important;
+  }
+  
+  .border-warning {
+    border-color: hsl(var(--warning)) !important;
+  }
+  
+  .border-error {
+    border-color: hsl(var(--error)) !important;
+  }
+  
+  .border-info {
+    border-color: hsl(var(--info)) !important;
+  }
+
   /* Radial gradient utility */
   .bg-gradient-radial {
     background: radial-gradient(var(--tw-gradient-stops));

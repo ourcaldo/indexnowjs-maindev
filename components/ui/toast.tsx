@@ -54,10 +54,10 @@ export function ToastContainer({ children }: { children: React.ReactNode }) {
               "rounded-lg border p-4 shadow-lg transition-all duration-300",
               "max-w-sm w-full",
               {
-                "bg-white border-[#4BB543] text-[#1A1A1A]": toast.type === 'success',
-                "bg-white border-[#E63946] text-[#1A1A1A]": toast.type === 'error',
-                "bg-white border-[#F0A202] text-[#1A1A1A]": toast.type === 'warning',
-                "bg-white border-[#3D8BFF] text-[#1A1A1A]": toast.type === 'info' || !toast.type,
+                "bg-background border-success text-foreground": toast.type === 'success',
+                "bg-background border-error text-foreground": toast.type === 'error',
+                "bg-background border-warning text-foreground": toast.type === 'warning',
+                "bg-background border-info text-foreground": toast.type === 'info' || !toast.type,
               }
             )}
           >
@@ -67,12 +67,12 @@ export function ToastContainer({ children }: { children: React.ReactNode }) {
                   <div className="font-semibold text-sm mb-1">{toast.title}</div>
                 )}
                 {toast.description && (
-                  <div className="text-sm text-[#6C757D]">{toast.description}</div>
+                  <div className="text-sm text-muted-foreground">{toast.description}</div>
                 )}
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="ml-2 text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+                className="ml-2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>

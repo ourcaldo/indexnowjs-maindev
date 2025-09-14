@@ -4,7 +4,7 @@ interface SkeletonProps {
 
 export function Skeleton({ className = '' }: SkeletonProps) {
   return (
-    <div className={`animate-pulse bg-[#E0E6ED] rounded ${className}`} />
+    <div className={`animate-pulse bg-muted rounded ${className}`} />
   )
 }
 
@@ -12,7 +12,7 @@ export function ProfileSkeleton() {
   return (
     <div className="grid lg:grid-cols-2 gap-8 items-stretch">
       {/* Profile Information Skeleton */}
-      <div className="p-6 rounded-lg flex flex-col" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
+      <div className="card-default p-6 rounded-lg flex flex-col">
         <Skeleton className="h-6 w-48 mb-6" />
         
         <div className="flex-1 space-y-6">
@@ -42,7 +42,7 @@ export function ProfileSkeleton() {
       </div>
 
       {/* Password Change Skeleton */}
-      <div className="p-6 rounded-lg flex flex-col" style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}>
+      <div className="card-default p-6 rounded-lg flex flex-col">
         <Skeleton className="h-6 w-40 mb-6" />
         
         <div className="flex-1 space-y-6">
@@ -91,7 +91,7 @@ export function DashboardSkeleton() {
   return (
     <div className="space-y-8">
       {/* User Profile Skeleton */}
-      <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+      <div className="card-default rounded-xl p-6">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-4">
             <Skeleton className="w-12 h-12 rounded-full" />
@@ -104,7 +104,7 @@ export function DashboardSkeleton() {
         </div>
         <div className="grid md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-[#F7F9FC] rounded-lg p-4 border border-[#E0E6ED]">
+            <div key={i} className="bg-secondary rounded-lg p-4 border border-border">
               <Skeleton className="h-3 w-20 mb-2" />
               <Skeleton className="h-6 w-12" />
             </div>
@@ -116,7 +116,7 @@ export function DashboardSkeleton() {
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           {/* Domain Header Skeleton */}
-          <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+          <div className="card-default rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <Skeleton className="w-8 h-8 rounded-lg" />
@@ -132,7 +132,7 @@ export function DashboardSkeleton() {
             </div>
             <div className="grid md:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-[#F7F9FC] rounded-lg p-4 border border-[#E0E6ED]">
+                <div key={i} className="bg-secondary rounded-lg p-4 border border-border">
                   <Skeleton className="h-3 w-20 mb-2" />
                   <Skeleton className="h-6 w-12" />
                 </div>
@@ -141,14 +141,14 @@ export function DashboardSkeleton() {
           </div>
 
           {/* Keywords Skeleton */}
-          <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+          <div className="card-default rounded-xl p-6">
             <div className="flex items-center justify-between mb-6">
               <Skeleton className="h-6 w-48" />
               <Skeleton className="h-4 w-24" />
             </div>
             <div className="space-y-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                <div key={i} className="flex items-center justify-between p-4 bg-secondary rounded-lg border border-border">
                   <div className="flex-1">
                     <Skeleton className="h-4 w-1/3 mb-2" />
                     <Skeleton className="h-3 w-1/2" />
@@ -161,7 +161,7 @@ export function DashboardSkeleton() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+          <div className="card-default rounded-xl p-6">
             <Skeleton className="h-5 w-24 mb-4" />
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -196,7 +196,7 @@ export function IndexNowFormSkeleton() {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main Form Skeleton */}
         <div className="lg:col-span-2">
-          <div className="p-6 rounded-lg border" style={{backgroundColor: '#FFFFFF', borderColor: '#E0E6ED'}}>
+          <div className="card-default p-6 rounded-lg">
             <div className="flex items-center gap-2 mb-6">
               <Skeleton className="w-5 h-5" />
               <Skeleton className="h-6 w-48" />
@@ -211,7 +211,7 @@ export function IndexNowFormSkeleton() {
 
             {/* Tab Skeleton */}
             <div className="mb-6">
-              <div className="flex border rounded-lg p-1" style={{borderColor: '#E0E6ED', backgroundColor: '#F7F9FC'}}>
+              <div className="flex border border-border rounded-lg p-1 bg-secondary">
                 <Skeleton className="flex-1 h-10 mx-1" />
                 <Skeleton className="flex-1 h-10 mx-1" />
               </div>
@@ -228,7 +228,7 @@ export function IndexNowFormSkeleton() {
             </div>
 
             {/* Schedule Skeleton */}
-            <div className="mb-6 pt-4 border-t" style={{borderColor: '#E0E6ED'}}>
+            <div className="mb-6 pt-4 border-t border-border">
               <div className="flex items-center gap-2 mb-4">
                 <Skeleton className="w-4 h-4" />
                 <Skeleton className="h-5 w-16" />
@@ -252,7 +252,7 @@ export function IndexNowFormSkeleton() {
 
         {/* API Quota Skeleton */}
         <div className="lg:col-span-1">
-          <div className="p-6 rounded-lg border" style={{backgroundColor: '#FFFFFF', borderColor: '#E0E6ED'}}>
+          <div className="card-default p-6 rounded-lg">
             <Skeleton className="h-6 w-32 mb-4" />
             <ApiQuotaSkeleton />
           </div>
@@ -272,7 +272,7 @@ export function SettingsPageSkeleton() {
 
       <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+          <div key={i} className="card-default rounded-lg p-6">
             <div className="flex items-center mb-4">
               <Skeleton className="w-8 h-8 rounded-lg mr-3" />
               <div>
