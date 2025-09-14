@@ -74,7 +74,7 @@ export default function DashboardLayout({
     return (
       <QueryProvider>
         <ToastContainer>
-          <div className="min-h-screen bg-[#F7F9FC]">
+          <div className="min-h-screen bg-secondary">
             {children}
           </div>
         </ToastContainer>
@@ -87,7 +87,7 @@ export default function DashboardLayout({
     return (
       <QueryProvider>
         <ToastContainer>
-          <div className="min-h-screen bg-[#F7F9FC]">
+          <div className="min-h-screen bg-secondary">
             {/* Skeleton Sidebar */}
             <SkeletonSidebar isCollapsed={sidebarCollapsed} />
 
@@ -96,14 +96,14 @@ export default function DashboardLayout({
               sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
             }`}>
               {/* Mobile header skeleton */}
-              <div className="lg:hidden bg-white border-b border-[#E0E6ED] px-4 py-3 flex items-center justify-between">
+              <div className="lg:hidden bg-background border-b border-border px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-3 min-w-0 flex-1">
-                  <div className="w-6 h-6 bg-[#E0E6ED] rounded animate-pulse flex-shrink-0"></div>
-                  <div className="h-5 bg-[#E0E6ED] rounded w-32 animate-pulse"></div>
+                  <div className="w-6 h-6 bg-muted rounded animate-pulse flex-shrink-0"></div>
+                  <div className="h-5 bg-muted rounded w-32 animate-pulse"></div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-9 h-9 bg-[#E0E6ED] rounded-lg animate-pulse"></div>
-                  <div className="w-9 h-9 bg-[#E0E6ED] rounded-md animate-pulse"></div>
+                  <div className="w-9 h-9 bg-muted rounded-lg animate-pulse"></div>
+                  <div className="w-9 h-9 bg-muted rounded-md animate-pulse"></div>
                 </div>
               </div>
               
@@ -111,22 +111,22 @@ export default function DashboardLayout({
               <main className="p-6">
                 <div className="space-y-8">
                   {/* Main content skeleton */}
-                  <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
+                  <div className="bg-background rounded-xl border border-border p-6">
                     <div className="flex items-start justify-between mb-6">
                       <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-[#E0E6ED] rounded-full animate-pulse"></div>
+                        <div className="w-12 h-12 bg-muted rounded-full animate-pulse"></div>
                         <div>
-                          <div className="h-5 bg-[#E0E6ED] rounded w-48 mb-2 animate-pulse"></div>
-                          <div className="h-4 bg-[#E0E6ED] rounded w-64 animate-pulse"></div>
+                          <div className="h-5 bg-muted rounded w-48 mb-2 animate-pulse"></div>
+                          <div className="h-4 bg-muted rounded w-64 animate-pulse"></div>
                         </div>
                       </div>
-                      <div className="w-20 h-8 bg-[#E0E6ED] rounded-full animate-pulse"></div>
+                      <div className="w-20 h-8 bg-muted rounded-full animate-pulse"></div>
                     </div>
                     <div className="grid md:grid-cols-4 gap-4">
                       {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="bg-[#F7F9FC] rounded-lg p-4 border border-[#E0E6ED]">
-                          <div className="h-3 bg-[#E0E6ED] rounded w-20 mb-2 animate-pulse"></div>
-                          <div className="h-6 bg-[#E0E6ED] rounded w-12 animate-pulse"></div>
+                        <div key={i} className="bg-secondary rounded-lg p-4 border border-border">
+                          <div className="h-3 bg-muted rounded w-20 mb-2 animate-pulse"></div>
+                          <div className="h-6 bg-muted rounded w-12 animate-pulse"></div>
                         </div>
                       ))}
                     </div>
@@ -135,16 +135,16 @@ export default function DashboardLayout({
                   {/* Additional content skeleton */}
                   <div className="grid lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-6">
-                      <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
-                        <div className="h-6 bg-[#E0E6ED] rounded w-48 mb-6 animate-pulse"></div>
+                      <div className="bg-background rounded-xl border border-border p-6">
+                        <div className="h-6 bg-muted rounded w-48 mb-6 animate-pulse"></div>
                         <div className="space-y-3">
                           {Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                            <div key={i} className="flex items-center justify-between p-4 bg-secondary rounded-lg border border-border">
                               <div className="flex-1">
-                                <div className="h-4 bg-[#E0E6ED] rounded w-1/3 mb-2 animate-pulse"></div>
-                                <div className="h-3 bg-[#E0E6ED] rounded w-1/2 animate-pulse"></div>
+                                <div className="h-4 bg-muted rounded w-1/3 mb-2 animate-pulse"></div>
+                                <div className="h-3 bg-muted rounded w-1/2 animate-pulse"></div>
                               </div>
-                              <div className="h-6 bg-[#E0E6ED] rounded w-12 animate-pulse"></div>
+                              <div className="h-6 bg-muted rounded w-12 animate-pulse"></div>
                             </div>
                           ))}
                         </div>
@@ -152,11 +152,11 @@ export default function DashboardLayout({
                     </div>
 
                     <div className="space-y-6">
-                      <div className="bg-white rounded-xl border border-[#E0E6ED] p-6">
-                        <div className="h-5 bg-[#E0E6ED] rounded w-24 mb-4 animate-pulse"></div>
+                      <div className="bg-background rounded-xl border border-border p-6">
+                        <div className="h-5 bg-muted rounded w-24 mb-4 animate-pulse"></div>
                         <div className="space-y-3">
                           {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="h-12 bg-[#E0E6ED] rounded animate-pulse"></div>
+                            <div key={i} className="h-12 bg-muted rounded animate-pulse"></div>
                           ))}
                         </div>
                       </div>
@@ -175,7 +175,7 @@ export default function DashboardLayout({
   return (
     <QueryProvider>
       <ToastContainer>
-        <div className="min-h-screen bg-[#F7F9FC]">
+        <div className="min-h-screen bg-secondary">
           {/* Sidebar */}
           <Sidebar 
             isOpen={sidebarOpen}
@@ -194,7 +194,7 @@ export default function DashboardLayout({
             sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
           }`}>
             {/* Mobile header */}
-            <div className="lg:hidden bg-white border-b border-[#E0E6ED] px-4 py-3 flex items-center justify-between">
+            <div className="lg:hidden bg-background border-b border-border px-4 py-3 flex items-center justify-between">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
                 {iconUrl && (
                   <img 
@@ -203,17 +203,17 @@ export default function DashboardLayout({
                     className="w-6 h-6 rounded flex-shrink-0"
                   />
                 )}
-                <h1 className="text-lg font-semibold text-[#1A1A1A] truncate">{siteName}</h1>
+                <h1 className="text-lg font-semibold text-foreground truncate">{siteName}</h1>
               </div>
               <div className="flex items-center space-x-2">
-                <button className="p-2 rounded-lg transition-colors" style={{backgroundColor: '#F7F9FC', color: '#6C757D'}} onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#E0E6ED'} onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#F7F9FC'}>
+                <button className="p-2 rounded-lg transition-colors bg-secondary text-muted-foreground hover:bg-muted">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                 </button>
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 rounded-md text-[#6C757D] hover:bg-[#F7F9FC] flex-shrink-0"
+                  className="p-2 rounded-md text-muted-foreground hover:bg-secondary flex-shrink-0"
                   aria-label="Mobile Menu"
                 >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
