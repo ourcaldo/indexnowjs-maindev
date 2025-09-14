@@ -75,11 +75,10 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
     }}>
 
       {/* Dashboard Mock Slideshow */}
-      <div style={{
+      <div className="shadow-2xl" style={{
         backgroundColor: 'hsl(var(--background))',
         borderRadius: '16px',
         padding: isMobile ? '20px' : '32px',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
         position: 'relative',
         opacity: styles.opacity,
         width: '100%',

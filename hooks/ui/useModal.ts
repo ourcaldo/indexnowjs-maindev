@@ -132,14 +132,14 @@ export function useModal(): UseModalReturn {
       title: config.title,
       content: (
         <div className="space-y-4">
-          <p className="text-[#6C757D]">{config.message}</p>
+          <p className="text-muted-foreground">{config.message}</p>
           <div className="flex justify-end space-x-3">
             <button
               onClick={() => {
                 if (config.onCancel) config.onCancel()
                 closeModal()
               }}
-              className="px-4 py-2 border border-[#E0E6ED] text-[#6C757D] rounded-lg hover:bg-[#F7F9FC] transition-colors"
+              className="px-4 py-2 border border-border text-muted-foreground rounded-lg hover:bg-secondary transition-colors"
             >
               {config.cancelText || 'Cancel'}
             </button>
@@ -154,8 +154,8 @@ export function useModal(): UseModalReturn {
               }}
               className={`px-4 py-2 rounded-lg text-white transition-colors ${
                 config.type === 'error' 
-                  ? 'bg-[#E63946] hover:bg-[#E63946]/90' 
-                  : 'bg-[#1C2331] hover:bg-[#0d1b2a]'
+                  ? 'bg-destructive hover:bg-destructive/90' 
+                  : 'bg-primary hover:bg-primary/90'
               }`}
             >
               {config.confirmText || 'Confirm'}
@@ -180,9 +180,9 @@ export function useModal(): UseModalReturn {
       title: config.title || 'Loading...',
       content: (
         <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-[#1C2331]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-primary"></div>
           {config.message && (
-            <span className="ml-3 text-[#6C757D]">{config.message}</span>
+            <span className="ml-3 text-muted-foreground">{config.message}</span>
           )}
         </div>
       ),
@@ -222,13 +222,13 @@ export function useModal(): UseModalReturn {
       content: (
         <div className="text-center">
           <IconComponent />
-          <p className="text-[#6C757D] mb-6">{config.message}</p>
+          <p className="text-muted-foreground mb-6">{config.message}</p>
           <button
             onClick={() => {
               if (config.onClose) config.onClose()
               closeModal()
             }}
-            className="px-6 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
             OK
           </button>

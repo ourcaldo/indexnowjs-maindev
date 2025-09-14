@@ -82,7 +82,7 @@ export default function AdvancedNeonCard({
     // Get neon color based on intensity (using project color scheme)
     const getColor = () => {
       // Get accent color from CSS custom property for consistency
-      const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--soft-blue').trim() || '#3D8BFF'
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--soft-blue').trim() || 'hsl(var(--accent))'
       return accentColor
     }
 

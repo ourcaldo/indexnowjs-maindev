@@ -50,7 +50,7 @@ export default function ServiceAccountQuotaNotification() {
   if (localNotifications.length === 0) return null
 
   return (
-    <div className="sticky top-0 left-0 right-0 z-40 bg-[#E63946] text-white shadow-lg">
+    <div className="sticky top-0 left-0 right-0 z-40 bg-destructive text-white shadow-lg">
       {localNotifications.map((notification) => (
         <div key={notification.id} className="w-full">
           <div className="px-4 py-2">

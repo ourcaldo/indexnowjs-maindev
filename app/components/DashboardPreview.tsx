@@ -32,7 +32,7 @@ export default function DashboardPreview() {
       {/* Elegant background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"></div>
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-white/10 to-transparent"></div>
       </div>
 
       {/* Header */}

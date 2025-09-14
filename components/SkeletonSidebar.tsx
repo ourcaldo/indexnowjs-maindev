@@ -8,7 +8,7 @@ export const SkeletonSidebar = ({ isCollapsed = false }: SkeletonSidebarProps) =
   return (
     <>
       {/* Desktop Skeleton Sidebar */}
-      <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-[#E5E7EB] transition-all duration-300 ease-in-out ${
+      <div className={`fixed left-0 top-0 z-50 h-full bg-white border-r border-border transition-all duration-300 ease-in-out ${
         isCollapsed ? 'w-20' : 'w-64'
       } hidden md:block`}>
         <div className="flex flex-col h-full">
@@ -85,14 +85,14 @@ export const SkeletonSidebar = ({ isCollapsed = false }: SkeletonSidebarProps) =
           </div>
 
           {/* Bottom Section Skeleton */}
-          <div className="border-t border-[#E5E7EB] p-4">
+          <div className="border-t border-border p-4">
             <div className={`h-10 bg-gray-200 animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
           </div>
         </div>
       </div>
 
       {/* Mobile Header Skeleton */}
-      <div className="md:hidden bg-white border-b border-[#E5E7EB] p-4">
+      <div className="md:hidden bg-white border-b border-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 min-w-0 flex-1">
             <div className="w-6 h-6 bg-gray-200 animate-pulse rounded"></div>
