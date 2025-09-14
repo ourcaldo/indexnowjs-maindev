@@ -114,13 +114,13 @@ export default function CMSPosts() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published':
-        return 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20'
+        return 'bg-success/10 text-success border-success/20'
       case 'draft':
-        return 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+        return 'bg-muted/10 text-muted-foreground border-muted/20'
       case 'archived':
-        return 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20'
+        return 'bg-warning/10 text-warning border-warning/20'
       default:
-        return 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+        return 'bg-muted/10 text-muted-foreground border-muted/20'
     }
   }
 
@@ -140,7 +140,7 @@ export default function CMSPosts() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-[#1C2331]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-muted border-t-primary"></div>
       </div>
     )
   }
@@ -150,12 +150,12 @@ export default function CMSPosts() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Posts</h1>
-          <p className="text-[#6C757D] mt-1">Manage blog posts and content articles</p>
+          <h1 className="text-2xl font-bold text-foreground">Posts</h1>
+          <p className="text-muted-foreground mt-1">Manage blog posts and content articles</p>
         </div>
         <button 
           onClick={() => window.location.href = '/backend/admin/cms/posts/create'}
-          className="flex items-center space-x-2 px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-4 w-4" />
           <span>New Post</span>
@@ -164,77 +164,77 @@ export default function CMSPosts() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
-              <FileText className="h-5 w-5 text-[#3D8BFF]" />
+            <div className="p-2 rounded-lg bg-accent/10">
+              <FileText className="h-5 w-5 text-accent" />
             </div>
             <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">{posts.length}</p>
-              <p className="text-xs text-[#6C757D]">Total Posts</p>
+              <p className="text-lg font-bold text-foreground">{posts.length}</p>
+              <p className="text-xs text-muted-foreground">Total Posts</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#4BB543]/10">
-              <CheckCircle className="h-5 w-5 text-[#4BB543]" />
+            <div className="p-2 rounded-lg bg-success/10">
+              <CheckCircle className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
+              <p className="text-lg font-bold text-foreground">
                 {posts.filter(p => p.status === 'published').length}
               </p>
-              <p className="text-xs text-[#6C757D]">Published</p>
+              <p className="text-xs text-muted-foreground">Published</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#F0A202]/10">
-              <Clock className="h-5 w-5 text-[#F0A202]" />
+            <div className="p-2 rounded-lg bg-warning/10">
+              <Clock className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
+              <p className="text-lg font-bold text-foreground">
                 {posts.filter(p => p.status === 'draft').length}
               </p>
-              <p className="text-xs text-[#6C757D]">Drafts</p>
+              <p className="text-xs text-muted-foreground">Drafts</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#E63946]/10">
-              <AlertTriangle className="h-5 w-5 text-[#E63946]" />
+            <div className="p-2 rounded-lg bg-warning/10">
+              <AlertTriangle className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
+              <p className="text-lg font-bold text-foreground">
                 {posts.filter(p => p.status === 'archived').length}
               </p>
-              <p className="text-xs text-[#6C757D]">Archived</p>
+              <p className="text-xs text-muted-foreground">Archived</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+      <div className="bg-white rounded-lg border border-border p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search posts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             />
           </div>
           <div className="flex items-center space-x-2">
-            <Filter className="h-4 w-4 text-[#6C757D]" />
+            <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="published">Published</option>
@@ -243,11 +243,11 @@ export default function CMSPosts() {
             </select>
           </div>
           <div className="flex items-center space-x-2">
-            <Tag className="h-4 w-4 text-[#6C757D]" />
+            <Tag className="h-4 w-4 text-muted-foreground" />
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             >
               <option value="all">All Types</option>
               <option value="post">Post</option>
@@ -259,42 +259,42 @@ export default function CMSPosts() {
       </div>
 
       {/* Posts Table */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] overflow-hidden">
+      <div className="bg-white rounded-lg border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
+            <thead className="bg-secondary border-b border-border">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Title</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Author</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Type</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Date</th>
-                <th className="text-right py-3 px-4 font-medium text-[#1A1A1A]">Actions</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Title</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Author</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Status</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Type</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Date</th>
+                <th className="text-right py-3 px-4 font-medium text-foreground">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E0E6ED]">
+            <tbody className="divide-y divide-border">
               {filteredPosts.map((post) => (
-                <tr key={post.id} className="hover:bg-[#F7F9FC]">
+                <tr key={post.id} className="hover:bg-secondary">
                   <td className="py-4 px-4">
                     <div>
-                      <h3 className="text-sm font-medium text-[#1A1A1A] truncate max-w-xs">
+                      <h3 className="text-sm font-medium text-foreground truncate max-w-xs">
                         {post.title}
                       </h3>
-                      <p className="text-xs text-[#6C757D] truncate max-w-xs">
+                      <p className="text-xs text-muted-foreground truncate max-w-xs">
                         {post.excerpt || 'No excerpt available'}
                       </p>
-                      <p className="text-xs text-[#6C757D] mt-1">/{post.slug}</p>
+                      <p className="text-xs text-muted-foreground mt-1">/{post.slug}</p>
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-[#3D8BFF]/10 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-medium text-[#3D8BFF]">
+                      <div className="w-6 h-6 bg-accent/10 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-medium text-accent">
                           {post.author_name?.charAt(0) || 'U'}
                         </span>
                       </div>
                       <div>
-                        <p className="text-sm text-[#1A1A1A]">{post.author_name || 'Unknown'}</p>
+                        <p className="text-sm text-foreground">{post.author_name || 'Unknown'}</p>
                       </div>
                     </div>
                   </td>
@@ -307,26 +307,26 @@ export default function CMSPosts() {
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="text-sm text-[#6C757D] capitalize">{post.post_type}</span>
+                    <span className="text-sm text-muted-foreground capitalize">{post.post_type}</span>
                   </td>
                   <td className="py-4 px-4">
                     <div>
-                      <p className="text-sm text-[#1A1A1A]">
+                      <p className="text-sm text-foreground">
                         {post.published_at ? new Date(post.published_at).toLocaleDateString() : '-'}
                       </p>
-                      <p className="text-xs text-[#6C757D]">
+                      <p className="text-xs text-muted-foreground">
                         Created: {new Date(post.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center justify-end space-x-2">
-                      <button className="p-1 text-[#6C757D] hover:text-[#3D8BFF] hover:bg-[#3D8BFF]/10 rounded">
+                      <button className="p-1 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded">
                         <Eye className="h-4 w-4" />
                       </button>
                       <button 
                         onClick={() => window.location.href = `/backend/admin/cms/posts/${post.id}/edit`}
-                        className="p-1 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded"
+                        className="p-1 text-muted-foreground hover:text-foreground hover:bg-secondary rounded"
                         title="Edit post"
                       >
                         <Edit3 className="h-4 w-4" />
@@ -334,7 +334,7 @@ export default function CMSPosts() {
                       <select
                         value={post.status}
                         onChange={(e) => handleStatusChange(post.id, e.target.value)}
-                        className="text-xs px-2 py-1 border border-[#E0E6ED] rounded focus:ring-1 focus:ring-[#3D8BFF]"
+                        className="text-xs px-2 py-1 border border-border rounded focus:ring-1 focus:ring-accent"
                       >
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
@@ -342,7 +342,7 @@ export default function CMSPosts() {
                       </select>
                       <button
                         onClick={() => handleDelete(post.id)}
-                        className="p-1 text-[#6C757D] hover:text-[#E63946] hover:bg-[#E63946]/10 rounded"
+                        className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -356,8 +356,8 @@ export default function CMSPosts() {
 
         {filteredPosts.length === 0 && (
           <div className="text-center py-12">
-            <FileText className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-            <p className="text-[#6C757D]">No posts found</p>
+            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No posts found</p>
           </div>
         )}
       </div>
