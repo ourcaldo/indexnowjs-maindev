@@ -10,9 +10,9 @@ const dashboardData = {
   title: "IndexNow Rank Tracker",
   description: "Professional keyword ranking monitoring with real-time SEO insights",
   stats: [
-    { value: "1,247", label: "Keywords Tracked", color: "#1a1a1a", bg: "#f8f9fa" },
-    { value: "89", label: "Top 10 Positions", color: "#4BB543", bg: "#f0fdf4", border: "#dcfce7" },
-    { value: "12.4", label: "Average Position", color: "#5B7BBF", bg: "#f0f4ff", border: "#e0e8ff" }
+    { value: "1,247", label: "Keywords Tracked", color: "hsl(var(--foreground))", bg: "hsl(var(--secondary))" },
+    { value: "89", label: "Top 10 Positions", color: "hsl(var(--success))", bg: "hsl(var(--success) / 0.1)", border: "hsl(var(--success) / 0.3)" },
+    { value: "12.4", label: "Average Position", color: "hsl(var(--info))", bg: "hsl(var(--info) / 0.1)", border: "hsl(var(--info) / 0.3)" }
   ],
   rankingChart: [
     { height: '45%', value: '156', change: '+12' },
@@ -29,10 +29,10 @@ const dashboardData = {
     { name: "business.net", keywords: 287, avgPos: 15.3, trend: "down" }
   ],
   bottomMetrics: [
-    { value: "15", label: "Active Domains", color: "#5B7BBF", bg: "#f0f4ff", border: "#e0e8ff" },
-    { value: "24", label: "Countries", color: "#F0A202", bg: "#fffbeb", border: "#fde68a" }
+    { value: "15", label: "Active Domains", color: "hsl(var(--info))", bg: "hsl(var(--info) / 0.1)", border: "hsl(var(--info) / 0.3)" },
+    { value: "24", label: "Countries", color: "hsl(var(--warning))", bg: "hsl(var(--warning) / 0.1)", border: "hsl(var(--warning) / 0.3)" }
   ],
-  status: { color: "#4BB543", label: "" }
+  status: { color: "hsl(var(--success))", label: "" }
 }
 
 export default function DashboardPreview({}: DashboardPreviewProps) {
@@ -76,7 +76,7 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
 
       {/* Dashboard Mock Slideshow */}
       <div style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: 'hsl(var(--background))',
         borderRadius: '16px',
         padding: isMobile ? '20px' : '32px',
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
@@ -110,7 +110,7 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
               </div>
               <div style={{
                 fontSize: isMobile ? '11px' : '12px',
-                color: stat.color === '#1a1a1a' ? '#6b7280' : stat.color,
+                color: stat.color === 'hsl(var(--foreground))' ? 'hsl(var(--muted-foreground))' : stat.color,
                 fontWeight: '500'
               }}>
                 {stat.label}
@@ -121,7 +121,7 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
 
         {/* Chart Area */}
         <div style={{
-          backgroundColor: '#fafafa',
+          backgroundColor: 'hsl(var(--muted))',
           borderRadius: '12px',
           padding: isMobile ? '16px' : '24px',
           marginBottom: isMobile ? '16px' : '24px'
@@ -135,7 +135,7 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
             <h3 style={{
               fontSize: isMobile ? '14px' : '16px',
               fontWeight: '600',
-              color: '#1a1a1a',
+              color: 'hsl(var(--foreground))',
               margin: 0
             }}>
               {dashboardData.title}
@@ -144,7 +144,7 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
               fontSize: '12px',
               color: dashboardData.status.color,
               fontWeight: '600',
-              backgroundColor: `${dashboardData.status.color}15`,
+              backgroundColor: `hsl(var(--success) / 0.15)`,
               padding: '4px 8px',
               borderRadius: '6px'
             }}>
@@ -164,7 +164,7 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                 <div style={{
                   fontSize: '8px',
-                  color: bar.change.startsWith('+') ? '#4BB543' : '#E63946',
+                  color: bar.change.startsWith('+') ? 'hsl(var(--success))' : 'hsl(var(--error))',
                   marginBottom: '2px',
                   fontWeight: '600'
                 }}>
@@ -172,14 +172,14 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
                 </div>
                 <div style={{
                   fontSize: '9px',
-                  color: '#6b7280',
+                  color: 'hsl(var(--muted-foreground))',
                   marginBottom: '4px',
                   fontWeight: '500'
                 }}>
                   {bar.value}
                 </div>
                 <div style={{
-                  backgroundColor: idx === dashboardData.rankingChart.length - 1 ? dashboardData.status.color : (bar.change.startsWith('+') ? '#4BB543' : '#d1d5db'),
+                  backgroundColor: idx === dashboardData.rankingChart.length - 1 ? dashboardData.status.color : (bar.change.startsWith('+') ? 'hsl(var(--success))' : 'hsl(var(--muted))'),
                   height: bar.height,
                   width: '100%',
                   borderRadius: '3px',
@@ -192,7 +192,7 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
           <div style={{
             marginTop: '12px',
             fontSize: '10px',
-            color: '#9ca3af',
+            color: 'hsl(var(--muted-foreground))',
             fontWeight: '500',
             textAlign: 'center'
           }}>
@@ -206,7 +206,7 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
         }}>
           <div style={{
             fontSize: isMobile ? '12px' : '14px',
-            color: '#1a1a1a',
+            color: 'hsl(var(--foreground))',
             fontWeight: '600',
             marginBottom: '12px'
           }}>
@@ -222,15 +222,15 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                backgroundColor: '#fafafa',
+                backgroundColor: 'hsl(var(--muted))',
                 padding: '8px 12px',
                 borderRadius: '8px',
-                border: '1px solid #e5e7eb'
+                border: '1px solid hsl(var(--border))'
               }}>
                 <div style={{
                   fontSize: '11px',
                   fontWeight: '600',
-                  color: '#1a1a1a'
+                  color: 'hsl(var(--foreground))'
                 }}>
                   {domain.name}
                 </div>
@@ -241,13 +241,13 @@ export default function DashboardPreview({}: DashboardPreviewProps) {
                 }}>
                   <span style={{
                     fontSize: '10px',
-                    color: '#6b7280'
+                    color: 'hsl(var(--muted-foreground))'
                   }}>
                     {domain.keywords} keywords
                   </span>
                   <span style={{
                     fontSize: '10px',
-                    color: domain.trend === 'up' ? '#4BB543' : domain.trend === 'down' ? '#E63946' : '#6b7280'
+                    color: domain.trend === 'up' ? 'hsl(var(--success))' : domain.trend === 'down' ? 'hsl(var(--error))' : 'hsl(var(--muted-foreground))'
                   }}>
                     {domain.trend === 'up' ? '↗' : domain.trend === 'down' ? '↘' : '→'}
                   </span>
