@@ -202,6 +202,32 @@ npm run color-check  # Custom script to check for hardcoded colors
    - ✅ `app/dashboard/tools/fastindexing/manage-jobs/[id]/page.tsx` - Converted ~80+ hex color instances
    - ✅ `app/dashboard/tools/fastindexing/layout.tsx` - Already clean (no hardcoded colors)
 
+#### **Critical Priority Files - Dashboard Core** (50+ hardcoded colors each): ❌ **NEEDS FIXING**
+9. **Main Dashboard Layout & Pages**:
+   - ❌ `app/dashboard/layout.tsx` - **67 violations** (bg-[#F7F9FC], border-[#E0E6ED], text-[#1A1A1A], inline styles)
+   - ❌ `app/dashboard/manage-jobs/page.tsx` - **233 violations** (most violations in entire codebase)
+   - ❌ `app/dashboard/indexnow/add/page.tsx` - **145 violations** 
+   - ❌ `app/dashboard/indexnow/page.tsx` - **124 violations**
+   - ❌ `app/dashboard/indexnow/jobs/page.tsx` - **77 violations**
+
+10. **Billing & Settings Components**:
+   - ❌ `app/dashboard/settings/plans-billing/components/BillingStats.tsx` - **72 violations**
+   - ❌ `app/dashboard/settings/plans-billing/components/UsageOverviewCard.tsx` - **58 violations**
+   - ❌ `app/dashboard/settings/plans-billing/components/BillingHistory.tsx` - **55 violations**
+   - ❌ `app/dashboard/settings/plans-billing/components/PricingCards.tsx` - **46 violations**
+
+11. **IndexNow Components**:
+   - ❌ `app/dashboard/indexnow/new/page.tsx` - **30 violations**
+   - ❌ `app/dashboard/indexnow/overview/components/DomainSelector.tsx` - **23 violations**
+   - ❌ `app/dashboard/indexnow/overview/components/FilterPanel.tsx` - **13 violations**
+
+12. **Checkout & Billing Components**:
+   - ❌ `app/dashboard/settings/plans-billing/checkout/components/CheckoutForm.tsx` - **32 violations**
+   - ❌ `app/dashboard/settings/plans-billing/checkout/components/LoadingStates.tsx` - **16 violations**
+   - ❌ `app/dashboard/settings/plans-billing/checkout/components/CheckoutHeader.tsx` - **10 violations**
+
+**TOTAL NEW VIOLATIONS DISCOVERED**: **1,000+ hardcoded color violations** in dashboard core files
+
 ### 3.2 Replacement Strategy
 
 #### **Color Mapping Strategy**:
@@ -240,30 +266,7 @@ className="bg-background border-success text-brand-primary"
 
 ---
 
-## Phase 4: Implementation Roadmap
-
-### 4.1 Week 1: Foundation Setup
-- [ ] **Day 1-2**: Enhance `app/globals.css` with missing utilities
-- [ ] **Day 3-4**: Update `tailwind.config.ts` with semantic colors  
-- [ ] **Day 5-7**: Implement ESLint rules and color detection scripts
-
-### 4.2 Week 2-3: Critical File Remediation
-- [ ] **Days 8-10**: Fix authentication pages (`login/page.tsx`, `register/page.tsx`)
-- [ ] **Days 11-14**: Fix core UI components (`skeleton.tsx`, `toast.tsx`, `select.tsx`)
-- [ ] **Days 15-21**: Fix form components (`MidtransCreditCardForm.tsx`)
-
-### 4.3 Week 4-5: Dashboard & High Priority Files  
-- [ ] **Days 22-28**: Fix dashboard widget components (4 files)
-- [ ] **Days 29-35**: Fix settings and admin components (6 files)
-
-### 4.4 Week 6: Medium Priority & Cleanup
-- [ ] **Days 36-38**: Fix utility components and remaining pages
-- [ ] **Days 39-42**: Final verification and testing
-- [ ] **Day 42**: ESLint enforcement activation
-
----
-
-## Phase 5: Quality Assurance & Testing
+## Phase 4: Quality Assurance & Testing
 
 ### 5.1 Automated Testing
 1. **Color Consistency Tests**:
