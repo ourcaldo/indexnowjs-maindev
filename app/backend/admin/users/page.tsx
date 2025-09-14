@@ -121,28 +121,28 @@ export default function UserManagement() {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'super_admin':
-        return 'bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20'
+        return 'bg-destructive/10 text-destructive border-destructive/20'
       case 'admin':
-        return 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20'
+        return 'bg-warning/10 text-warning border-warning/20'
       case 'user':
-        return 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20'
+        return 'bg-success/10 text-success border-success/20'
       default:
-        return 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+        return 'bg-muted/10 text-muted-foreground border-muted/20'
     }
   }
 
   const getStatusIcon = (user: UserProfile) => {
     if (user.email_confirmed_at) {
-      return <CheckCircle className="h-4 w-4 text-[#4BB543]" />
+      return <CheckCircle className="h-4 w-4 text-success" />
     } else {
-      return <AlertTriangle className="h-4 w-4 text-[#F0A202]" />
+      return <AlertTriangle className="h-4 w-4 text-warning" />
     }
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-[#1C2331]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-primary"></div>
       </div>
     )
   }
@@ -152,12 +152,12 @@ export default function UserManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">User Management</h1>
-          <p className="text-[#6C757D] mt-1">Manage user accounts, roles, and permissions</p>
+          <h1 className="text-2xl font-bold text-foreground">User Management</h1>
+          <p className="text-muted-foreground mt-1">Manage user accounts, roles, and permissions</p>
         </div>
         <button
           onClick={fetchUsers}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
         >
           Refresh
         </button>
@@ -165,77 +165,77 @@ export default function UserManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
-              <Users className="h-5 w-5 text-[#3D8BFF]" />
+            <div className="p-2 rounded-lg bg-accent/10">
+              <Users className="h-5 w-5 text-accent" />
             </div>
             <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">{users.length}</p>
-              <p className="text-xs text-[#6C757D]">Total Users</p>
+              <p className="text-lg font-bold text-foreground">{users.length}</p>
+              <p className="text-xs text-muted-foreground">Total Users</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#4BB543]/10">
-              <Shield className="h-5 w-5 text-[#4BB543]" />
+            <div className="p-2 rounded-lg bg-success/10">
+              <Shield className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
+              <p className="text-lg font-bold text-foreground">
                 {users.filter(u => u.role === 'admin' || u.role === 'super_admin').length}
               </p>
-              <p className="text-xs text-[#6C757D]">Admins</p>
+              <p className="text-xs text-muted-foreground">Admins</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#F0A202]/10">
-              <CheckCircle className="h-5 w-5 text-[#F0A202]" />
+            <div className="p-2 rounded-lg bg-warning/10">
+              <CheckCircle className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
+              <p className="text-lg font-bold text-foreground">
                 {users.filter(u => u.email_confirmed_at).length}
               </p>
-              <p className="text-xs text-[#6C757D]">Verified</p>
+              <p className="text-xs text-muted-foreground">Verified</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-white rounded-lg border border-border p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-[#E63946]/10">
-              <AlertTriangle className="h-5 w-5 text-[#E63946]" />
+            <div className="p-2 rounded-lg bg-destructive/10">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <p className="text-lg font-bold text-[#1A1A1A]">
+              <p className="text-lg font-bold text-foreground">
                 {users.filter(u => !u.email_confirmed_at).length}
               </p>
-              <p className="text-xs text-[#6C757D]">Unverified</p>
+              <p className="text-xs text-muted-foreground">Unverified</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+      <div className="bg-white rounded-lg border border-border p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search users by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             />
           </div>
           <div className="flex items-center space-x-2">
-            <Filter className="h-4 w-4 text-[#6C757D]" />
+            <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             >
               <option value="all">All Roles</option>
               <option value="user">Users</option>
@@ -247,38 +247,38 @@ export default function UserManagement() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] overflow-hidden">
+      <div className="bg-white rounded-lg border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
+            <thead className="bg-secondary border-b border-border">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">User</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Role</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Package</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-[#1A1A1A]">Joined</th>
-                <th className="text-center py-3 px-4 font-medium text-[#1A1A1A]">Actions</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">User</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Role</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Package</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Status</th>
+                <th className="text-left py-3 px-4 font-medium text-foreground">Joined</th>
+                <th className="text-center py-3 px-4 font-medium text-foreground">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E0E6ED]">
+            <tbody className="divide-y divide-border">
               {filteredUsers.map((user) => (
                 <tr 
                   key={user.id} 
-                  className="hover:bg-[#F7F9FC] cursor-pointer transition-colors"
+                  className="hover:bg-secondary cursor-pointer transition-colors"
                   onClick={() => router.push(`/backend/admin/users/${user.user_id}`)}
                 >
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-[#3D8BFF]/10 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-[#3D8BFF]">
+                      <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-accent">
                           {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                         </span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#1A1A1A]">
+                        <p className="text-sm font-medium text-foreground">
                           {user.full_name || 'No name'}
                         </p>
-                        <p className="text-xs text-[#6C757D]">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
                       </div>
                     </div>
                   </td>
@@ -290,10 +290,10 @@ export default function UserManagement() {
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${
-                        user.package?.slug === 'free' ? 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20' :
-                        user.package?.slug === 'premium' ? 'bg-[#3D8BFF]/10 text-[#3D8BFF] border-[#3D8BFF]/20' :
-                        user.package?.slug === 'pro' ? 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20' :
-                        'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                        user.package?.slug === 'free' ? 'bg-muted/10 text-muted-foreground border-muted/20' :
+                        user.package?.slug === 'premium' ? 'bg-accent/10 text-accent border-accent/20' :
+                        user.package?.slug === 'pro' ? 'bg-warning/10 text-warning border-warning/20' :
+                        'bg-muted/10 text-muted-foreground border-muted/20'
                       }`}>
                         {user.package?.name || 'No Package'}
                       </span>
@@ -302,13 +302,13 @@ export default function UserManagement() {
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
                       {getStatusIcon(user)}
-                      <span className="text-sm text-[#6C757D]">
+                      <span className="text-sm text-muted-foreground">
                         {user.email_confirmed_at ? 'Verified' : 'Unverified'}
                       </span>
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="text-sm text-[#6C757D]">
+                    <span className="text-sm text-muted-foreground">
                       {new Date(user.created_at).toLocaleDateString()}
                     </span>
                   </td>
@@ -319,7 +319,7 @@ export default function UserManagement() {
                           e.stopPropagation()
                           router.push(`/backend/admin/users/${user.user_id}`)
                         }}
-                        className="p-1 text-[#6C757D] hover:text-[#3D8BFF] hover:bg-[#3D8BFF]/10 rounded transition-colors"
+                        className="p-1 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded transition-colors"
                         title="View Details"
                       >
                         <Eye className="h-4 w-4" />
@@ -329,7 +329,7 @@ export default function UserManagement() {
                           e.stopPropagation()
                           router.push(`/backend/admin/users/${user.user_id}`)
                         }}
-                        className="p-1 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded transition-colors"
+                        className="p-1 text-muted-foreground hover:text-foreground hover:bg-secondary rounded transition-colors"
                         title="Edit User"
                       >
                         <Edit3 className="h-4 w-4" />
@@ -339,7 +339,7 @@ export default function UserManagement() {
                           e.stopPropagation()
                           // Quick actions could be implemented here
                         }}
-                        className="p-1 text-[#6C757D] hover:text-[#F0A202] hover:bg-[#F0A202]/10 rounded transition-colors"
+                        className="p-1 text-muted-foreground hover:text-warning hover:bg-warning/10 rounded transition-colors"
                         title="Reset Password"
                       >
                         <Key className="h-4 w-4" />
@@ -349,7 +349,7 @@ export default function UserManagement() {
                           e.stopPropagation()
                           // Quick actions could be implemented here
                         }}
-                        className="p-1 text-[#6C757D] hover:text-[#E63946] hover:bg-[#E63946]/10 rounded transition-colors"
+                        className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
                         title="Suspend User"
                       >
                         <Ban className="h-4 w-4" />
@@ -364,8 +364,8 @@ export default function UserManagement() {
 
         {filteredUsers.length === 0 && (
           <div className="text-center py-12">
-            <Users className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-            <p className="text-[#6C757D]">No users found matching your criteria</p>
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No users found matching your criteria</p>
           </div>
         )}
       </div>
