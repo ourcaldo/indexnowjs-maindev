@@ -63,11 +63,11 @@ export default function PostContent({ content, className = '' }: PostContentProp
     <article 
       className={`prose prose-invert prose-lg max-w-none ${className}`}
       style={{
-        // Custom CSS for the prose content to match our dark theme
+        // Custom CSS for the prose content using project colors
         '--tw-prose-body': '#d1d5db',
         '--tw-prose-headings': '#ffffff',
         '--tw-prose-lead': '#9ca3af',
-        '--tw-prose-links': '#60a5fa',
+        '--tw-prose-links': '#3D8BFF',
         '--tw-prose-bold': '#ffffff',
         '--tw-prose-counters': '#9ca3af',
         '--tw-prose-bullets': '#6b7280',
@@ -80,7 +80,7 @@ export default function PostContent({ content, className = '' }: PostContentProp
         '--tw-prose-pre-bg': '#1f2937',
         '--tw-prose-th-borders': '#374151',
         '--tw-prose-td-borders': '#4b5563'
-      }}
+      } as React.CSSProperties}
       data-testid="post-content"
     >
       <div dangerouslySetInnerHTML={processContent(contentToRender)} />

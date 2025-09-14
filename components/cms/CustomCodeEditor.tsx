@@ -84,13 +84,13 @@ document.addEventListener('DOMContentLoaded', function() {
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-[#1A1A1A] flex items-center gap-2">
+        <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
           <Code className="h-5 w-5" />
           Custom Code
         </h3>
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="inline-flex items-center gap-2 px-3 py-1 text-sm text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded transition-colors"
+          className="inline-flex items-center gap-2 px-3 py-1 text-sm text-accent hover:bg-accent/5 rounded transition-colors"
           type="button"
           data-testid="button-code-preview"
         >
@@ -100,43 +100,43 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       {showPreview && (
-        <div className="bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg p-4">
-          <h4 className="text-sm font-medium text-[#1A1A1A] mb-3">Code Preview</h4>
+        <div className="bg-secondary border border-border rounded-lg p-4">
+          <h4 className="text-sm font-medium text-foreground mb-3">Code Preview</h4>
           <div className="space-y-4">
             {customCSS && (
               <div>
-                <h5 className="text-xs font-medium text-[#6C757D] mb-2">CSS ({customCSS.length} characters)</h5>
-                <div className="bg-[#1A1A1A] text-[#4BB543] p-3 rounded text-xs font-mono overflow-auto max-h-32">
+                <h5 className="text-xs font-medium text-muted-foreground mb-2">CSS ({customCSS.length} characters)</h5>
+                <div className="bg-foreground text-success p-3 rounded text-xs font-mono overflow-auto max-h-32">
                   {customCSS.substring(0, 200)}{customCSS.length > 200 ? '...' : ''}
                 </div>
               </div>
             )}
             {customJS && (
               <div>
-                <h5 className="text-xs font-medium text-[#6C757D] mb-2">JavaScript ({customJS.length} characters)</h5>
-                <div className="bg-[#1A1A1A] text-[#F0A202] p-3 rounded text-xs font-mono overflow-auto max-h-32">
+                <h5 className="text-xs font-medium text-muted-foreground mb-2">JavaScript ({customJS.length} characters)</h5>
+                <div className="bg-foreground text-warning p-3 rounded text-xs font-mono overflow-auto max-h-32">
                   {customJS.substring(0, 200)}{customJS.length > 200 ? '...' : ''}
                 </div>
               </div>
             )}
             {!customCSS && !customJS && (
-              <p className="text-sm text-[#6C757D] italic">No custom code added yet.</p>
+              <p className="text-sm text-muted-foreground italic">No custom code added yet.</p>
             )}
           </div>
         </div>
       )}
 
       {/* Tab Navigation */}
-      <div className="border border-[#E0E6ED] rounded-lg overflow-hidden bg-white">
-        <div className="flex border-b border-[#E0E6ED]">
+      <div className="border border-border rounded-lg overflow-hidden bg-card">
+        <div className="flex border-b border-border">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-[#3D8BFF] text-white'
-                  : 'text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
               }`}
               data-testid={`button-tab-${tab.id}`}
             >
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         {/* CSS Editor */}
         {activeTab === 'css' && (
           <div className="p-4 space-y-4">
-            <div className="flex items-center gap-2 text-sm text-[#6C757D]">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Info className="h-4 w-4" />
               <span>Add custom CSS styles that will be applied to this page only.</span>
             </div>
@@ -158,13 +158,13 @@ document.addEventListener('DOMContentLoaded', function() {
               value={customCSS}
               onChange={(e) => onCSSChange(e.target.value)}
               placeholder={getCodeExample('css')}
-              className="w-full h-64 p-3 text-sm font-mono border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent resize-none bg-[#1A1A1A] text-[#4BB543]"
+              className="w-full h-64 p-3 text-sm font-mono border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent resize-none bg-foreground text-success"
               data-testid="textarea-custom-css"
             />
             
-            <div className="flex items-start gap-2 p-3 bg-[#F0A202]/5 border border-[#F0A202]/20 rounded-lg text-sm">
-              <AlertTriangle className="h-4 w-4 text-[#F0A202] flex-shrink-0 mt-0.5" />
-              <div className="text-[#F0A202]">
+            <div className="flex items-start gap-2 p-3 bg-warning/5 border border-warning/20 rounded-lg text-sm">
+              <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
+              <div className="text-warning">
                 <strong>CSS Guidelines:</strong>
                 <ul className="mt-1 text-xs space-y-1 list-disc list-inside">
                   <li>Use specific class names to avoid conflicts</li>
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         {/* JavaScript Editor */}
         {activeTab === 'js' && (
           <div className="p-4 space-y-4">
-            <div className="flex items-center gap-2 text-sm text-[#6C757D]">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Info className="h-4 w-4" />
               <span>Add custom JavaScript that will execute when this page loads.</span>
             </div>
@@ -189,13 +189,13 @@ document.addEventListener('DOMContentLoaded', function() {
               value={customJS}
               onChange={(e) => onJSChange(e.target.value)}
               placeholder={getCodeExample('js')}
-              className="w-full h-64 p-3 text-sm font-mono border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent resize-none bg-[#1A1A1A] text-[#F0A202]"
+              className="w-full h-64 p-3 text-sm font-mono border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent resize-none bg-foreground text-warning"
               data-testid="textarea-custom-js"
             />
             
-            <div className="flex items-start gap-2 p-3 bg-[#E63946]/5 border border-[#E63946]/20 rounded-lg text-sm">
-              <AlertTriangle className="h-4 w-4 text-[#E63946] flex-shrink-0 mt-0.5" />
-              <div className="text-[#E63946]">
+            <div className="flex items-start gap-2 p-3 bg-destructive/5 border border-destructive/20 rounded-lg text-sm">
+              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="text-destructive">
                 <strong>JavaScript Security:</strong>
                 <ul className="mt-1 text-xs space-y-1 list-disc list-inside">
                   <li>Only add trusted JavaScript code</li>
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
         )}
       </div>
 
-      <div className="text-xs text-[#6C757D] bg-[#F7F9FC] p-3 rounded-lg">
+      <div className="text-xs text-muted-foreground bg-secondary p-3 rounded-lg">
         <strong>Note:</strong> Custom code is specific to this page only. For site-wide styles, use your theme's global CSS files. 
         All code is sanitized for security before being applied to your page.
       </div>

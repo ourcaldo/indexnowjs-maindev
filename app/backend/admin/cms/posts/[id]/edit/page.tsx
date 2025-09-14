@@ -105,10 +105,10 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
   if (isFetching) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#3D8BFF] mx-auto mb-4" />
-          <p className="text-[#6C757D]">Loading post...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-accent mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading post...</p>
         </div>
       </div>
     )
@@ -116,14 +116,14 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
   if (error || !postData) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <div className="bg-[#E63946]/10 border border-[#E63946]/20 rounded-lg p-6 max-w-md">
-            <h2 className="text-lg font-medium text-[#E63946] mb-2">Error</h2>
-            <p className="text-[#6C757D] mb-4">{error || 'Post not found'}</p>
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 max-w-md">
+            <h2 className="text-lg font-medium text-destructive mb-2">Error</h2>
+            <p className="text-muted-foreground mb-4">{error || 'Post not found'}</p>
             <button
               onClick={() => router.push('/backend/admin/cms/posts')}
-              className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
               Back to Posts
             </button>
@@ -134,26 +134,26 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC]">
+    <div className="min-h-screen bg-secondary">
       {/* Header */}
-      <div className="bg-white border-b border-[#E0E6ED] sticky top-0 z-10">
+      <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.push('/backend/admin/cms/posts')}
-                className="flex items-center space-x-2 text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+                className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span>Back to Posts</span>
               </button>
-              <div className="h-6 w-px bg-[#E0E6ED]"></div>
+              <div className="h-6 w-px bg-border"></div>
               <div>
-                <h1 className="text-xl font-bold text-[#1A1A1A] flex items-center gap-2">
+                <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
                   <Edit3 className="h-5 w-5" />
                   Edit Post
                 </h1>
-                <p className="text-sm text-[#6C757D]">
+                <p className="text-sm text-muted-foreground">
                   Editing: {postData.title}
                 </p>
               </div>
@@ -161,15 +161,15 @@ export default function EditPostPage({ params }: EditPostPageProps) {
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleDelete}
-                className="px-3 py-1.5 text-sm text-[#E63946] border border-[#E63946]/20 rounded hover:bg-[#E63946]/5 transition-colors"
+                className="px-3 py-1.5 text-sm text-destructive border border-destructive/20 rounded hover:bg-destructive/5 transition-colors"
               >
                 Delete Post
               </button>
-              <span className="text-xs text-[#6C757D] bg-[#F7F9FC] px-2 py-1 rounded">
+              <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
                 Auto-save: Enabled
               </span>
               {isLoading && (
-                <span className="text-xs text-[#3D8BFF] bg-[#3D8BFF]/10 px-2 py-1 rounded">
+                <span className="text-xs text-accent bg-accent/10 px-2 py-1 rounded">
                   Saving...
                 </span>
               )}
@@ -191,9 +191,9 @@ export default function EditPostPage({ params }: EditPostPageProps) {
 
       {/* Help Text */}
       <div className="max-w-7xl mx-auto px-6 pb-8">
-        <div className="bg-[#3D8BFF]/5 border border-[#3D8BFF]/20 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-[#1A1A1A] mb-2">Editing Tips</h3>
-          <ul className="text-xs text-[#6C757D] space-y-1">
+        <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-foreground mb-2">Editing Tips</h3>
+          <ul className="text-xs text-muted-foreground space-y-1">
             <li>• Changes are automatically saved as you type</li>
             <li>• Use preview to see how your post looks to visitors</li>
             <li>• Publishing will make your post visible to everyone</li>

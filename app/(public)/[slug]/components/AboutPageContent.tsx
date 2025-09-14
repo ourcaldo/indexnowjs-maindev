@@ -76,11 +76,11 @@ export default function AboutPageContent({ page }: AboutPageContentProps) {
               ) : (
                 <div className="space-y-8">
                   <div>
-                    <h2 className="text-3xl font-bold text-[#1A1A1A] mb-6">Our Story</h2>
-                    <p className="text-lg text-[#6C757D] leading-relaxed mb-6">
+                    <h2 className="text-3xl font-bold text-foreground mb-6">Our Story</h2>
+                    <p className="text-lg text-muted-foreground leading-relaxed mb-6">
                       IndexNow Studio was born from the need to simplify and automate SEO processes for digital marketers and website owners. We understand the challenges of managing large-scale indexing operations and the importance of accurate rank tracking.
                     </p>
-                    <p className="text-lg text-[#6C757D] leading-relaxed">
+                    <p className="text-lg text-muted-foreground leading-relaxed">
                       Our team of SEO experts and developers work tirelessly to provide you with the most advanced tools for Google indexing and rank monitoring, helping you stay ahead in the competitive digital landscape.
                     </p>
                   </div>
@@ -90,20 +90,20 @@ export default function AboutPageContent({ page }: AboutPageContentProps) {
 
             {/* Sidebar Stats */}
             <div className="space-y-8">
-              <div className="bg-[#F7F9FC] rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">Company Stats</h3>
+              <div className="bg-secondary rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Company Stats</h3>
                 <div className="space-y-4">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-[#3D8BFF] mb-1">1000+</div>
-                    <div className="text-sm text-[#6C757D]">Active Users</div>
+                    <div className="text-3xl font-bold text-accent mb-1">1000+</div>
+                    <div className="text-sm text-muted-foreground">Active Users</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-[#4BB543] mb-1">1M+</div>
-                    <div className="text-sm text-[#6C757D]">URLs Indexed</div>
+                    <div className="text-3xl font-bold text-success mb-1">1M+</div>
+                    <div className="text-sm text-muted-foreground">URLs Indexed</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-[#F0A202] mb-1">99.9%</div>
-                    <div className="text-sm text-[#6C757D]">Uptime</div>
+                    <div className="text-3xl font-bold text-warning mb-1">99.9%</div>
+                    <div className="text-sm text-muted-foreground">Uptime</div>
                   </div>
                 </div>
               </div>
@@ -113,13 +113,13 @@ export default function AboutPageContent({ page }: AboutPageContentProps) {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-[#F7F9FC]">
+      <section className="py-20 bg-secondary">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6">
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6">
               Our Values
             </h2>
-            <p className="text-xl text-[#6C757D] max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               These core values guide everything we do at IndexNow Studio
             </p>
           </div>
@@ -150,13 +150,13 @@ export default function AboutPageContent({ page }: AboutPageContentProps) {
               const IconComponent = value.icon
               return (
                 <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-[#3D8BFF]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <IconComponent className="h-8 w-8 text-[#3D8BFF]" />
+                  <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <IconComponent className="h-8 w-8 text-accent" />
                   </div>
-                  <h3 className="text-xl font-semibold text-[#1A1A1A] mb-3">
+                  <h3 className="text-xl font-semibold text-foreground mb-3">
                     {value.title}
                   </h3>
-                  <p className="text-[#6C757D] leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed">
                     {value.description}
                   </p>
                 </div>
@@ -170,10 +170,10 @@ export default function AboutPageContent({ page }: AboutPageContentProps) {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6">
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6">
               Meet Our Team
             </h2>
-            <p className="text-xl text-[#6C757D] max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               The passionate people behind IndexNow Studio who make it all possible
             </p>
           </div>
@@ -188,16 +188,16 @@ export default function AboutPageContent({ page }: AboutPageContentProps) {
               }
             ].map((member, index) => (
               <div key={index} className="text-center">
-                <div className="w-32 h-32 bg-[#F7F9FC] rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <Users className="h-16 w-16 text-[#6C757D]" />
+                <div className="w-32 h-32 bg-secondary rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <Users className="h-16 w-16 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold text-[#1A1A1A] mb-2">
+                <h3 className="text-xl font-semibold text-foreground mb-2">
                   {member.name}
                 </h3>
-                <p className="text-[#3D8BFF] font-medium mb-4">
+                <p className="text-accent font-medium mb-4">
                   {member.role}
                 </p>
-                <p className="text-[#6C757D] leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   {member.description}
                 </p>
               </div>

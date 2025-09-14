@@ -85,7 +85,7 @@ export class ContactEmailService {
           <meta charset="utf-8">
           <title>Contact Form Submission</title>
         </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #1A1A1A;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #1A1A1A; border-bottom: 2px solid #3D8BFF; padding-bottom: 10px;">
               New Contact Form Submission

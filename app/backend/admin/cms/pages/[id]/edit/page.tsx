@@ -125,10 +125,10 @@ export default function EditPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF] mb-4"></div>
-          <p className="text-[#6C757D]">Loading page...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent mb-4"></div>
+          <p className="text-muted-foreground">Loading page...</p>
         </div>
       </div>
     )
@@ -136,13 +136,13 @@ export default function EditPage() {
 
   if (!page) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-[#1A1A1A] mb-2">Page not found</h2>
-          <p className="text-[#6C757D] mb-4">The page you are looking for does not exist.</p>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Page not found</h2>
+          <p className="text-muted-foreground mb-4">The page you are looking for does not exist.</p>
           <button
             onClick={() => router.push('/backend/admin/cms/pages')}
-            className="px-4 py-2 bg-[#3D8BFF] text-white rounded-lg hover:bg-[#3D8BFF]/90 transition-colors"
+            className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
           >
             Back to Pages
           </button>
@@ -152,21 +152,21 @@ export default function EditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC]">
-      <div className="bg-white border-b border-[#E0E6ED] sticky top-0 z-10">
+    <div className="min-h-screen bg-secondary">
+      <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/backend/admin/cms/pages')}
-                className="p-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 data-testid="button-back"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-[#1A1A1A]">Edit Page</h1>
-                <p className="text-[#6C757D] text-sm">
+                <h1 className="text-2xl font-bold text-foreground">Edit Page</h1>
+                <p className="text-muted-foreground text-sm">
                   Editing: <span className="font-medium">{page.title}</span>
                   {/* Removed homepage badge */}
                 </p>
@@ -177,7 +177,7 @@ export default function EditPage() {
               {page.status === 'published' && (
                 <button
                   onClick={handlePreview}
-                  className="flex items-center gap-2 px-4 py-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                   data-testid="button-preview"
                 >
                   <ExternalLink className="h-4 w-4" />
@@ -187,14 +187,14 @@ export default function EditPage() {
               
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
+                className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 disabled={isLoading}
                 data-testid="button-cancel-edit"
               >
                 Cancel
               </button>
 
-              <div className="flex items-center gap-2 px-3 py-2 bg-[#F7F9FC] rounded-lg text-sm text-[#6C757D]">
+              <div className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-lg text-sm text-muted-foreground">
                 <Save className="h-4 w-4" />
                 Auto-save: {isLoading ? 'Saving...' : 'Ready'}
               </div>
@@ -204,7 +204,7 @@ export default function EditPage() {
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="bg-card rounded-lg border border-border p-6">
           <PageForm
             initialData={{
               ...page,
@@ -222,32 +222,32 @@ export default function EditPage() {
 
       {/* Quick Stats */}
       <div className="max-w-7xl mx-auto px-6 pb-6">
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-4">
+        <div className="bg-card rounded-lg border border-border p-4">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="text-sm text-[#6C757D]">Status</div>
+              <div className="text-sm text-muted-foreground">Status</div>
               <div className={`text-lg font-semibold ${
-                page.status === 'published' ? 'text-[#4BB543]' :
-                page.status === 'archived' ? 'text-[#F0A202]' : 'text-[#6C757D]'
+                page.status === 'published' ? 'text-success' :
+                page.status === 'archived' ? 'text-warning' : 'text-muted-foreground'
               }`}>
                 {page.status.charAt(0).toUpperCase() + page.status.slice(1)}
               </div>
             </div>
             <div>
-              <div className="text-sm text-[#6C757D]">Template</div>
-              <div className="text-lg font-semibold text-[#1A1A1A]">
+              <div className="text-sm text-muted-foreground">Template</div>
+              <div className="text-lg font-semibold text-foreground">
                 {page.template.charAt(0).toUpperCase() + page.template.slice(1)}
               </div>
             </div>
             <div>
-              <div className="text-sm text-[#6C757D]">Created</div>
-              <div className="text-lg font-semibold text-[#1A1A1A]">
+              <div className="text-sm text-muted-foreground">Created</div>
+              <div className="text-lg font-semibold text-foreground">
                 {new Date(page.created_at).toLocaleDateString()}
               </div>
             </div>
             <div>
-              <div className="text-sm text-[#6C757D]">Last Updated</div>
-              <div className="text-lg font-semibold text-[#1A1A1A]">
+              <div className="text-sm text-muted-foreground">Last Updated</div>
+              <div className="text-lg font-semibold text-foreground">
                 {new Date(page.updated_at).toLocaleDateString()}
               </div>
             </div>

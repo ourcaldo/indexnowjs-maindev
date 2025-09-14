@@ -50,27 +50,27 @@ export default function PageSEOFields({
   const metaDescriptionLength = getMetaDescriptionDisplay().length
 
   const getTitleColorClass = () => {
-    if (metaTitleLength > 60) return 'text-[#E63946]'
-    if (metaTitleLength > 50) return 'text-[#F0A202]'
-    return 'text-[#4BB543]'
+    if (metaTitleLength > 60) return 'text-destructive'
+    if (metaTitleLength > 50) return 'text-warning'
+    return 'text-success'
   }
 
   const getDescriptionColorClass = () => {
-    if (metaDescriptionLength > 160) return 'text-[#E63946]'
-    if (metaDescriptionLength > 140) return 'text-[#F0A202]'
-    return 'text-[#4BB543]'
+    if (metaDescriptionLength > 160) return 'text-destructive'
+    if (metaDescriptionLength > 140) return 'text-warning'
+    return 'text-success'
   }
 
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-[#1A1A1A] flex items-center gap-2">
+        <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
           <Search className="h-5 w-5" />
           SEO Settings
         </h3>
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="inline-flex items-center gap-2 px-3 py-1 text-sm text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded transition-colors"
+          className="inline-flex items-center gap-2 px-3 py-1 text-sm text-accent hover:bg-accent/5 rounded transition-colors"
           type="button"
           data-testid="button-seo-preview"
         >
@@ -82,42 +82,42 @@ export default function PageSEOFields({
       {showPreview && (
         <div className="space-y-4">
           {/* Google Search Preview */}
-          <div className="bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg p-4">
+          <div className="bg-secondary border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Globe className="h-4 w-4 text-[#6C757D]" />
-              <h4 className="text-sm font-medium text-[#1A1A1A]">Google Search Preview</h4>
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <h4 className="text-sm font-medium text-foreground">Google Search Preview</h4>
             </div>
             <div className="space-y-2">
-              <div className="text-sm text-[#3D8BFF] underline">
+              <div className="text-sm text-accent underline">
                 {getUrlDisplay()}
               </div>
-              <div className="text-lg text-[#1A1A1A] font-medium leading-tight">
+              <div className="text-lg text-foreground font-medium leading-tight">
                 {getMetaTitleDisplay()}
               </div>
-              <div className="text-sm text-[#6C757D] leading-relaxed">
+              <div className="text-sm text-muted-foreground leading-relaxed">
                 {getMetaDescriptionDisplay()}
               </div>
             </div>
           </div>
 
           {/* Social Media Preview */}
-          <div className="bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg p-4">
+          <div className="bg-secondary border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Share2 className="h-4 w-4 text-[#6C757D]" />
-              <h4 className="text-sm font-medium text-[#1A1A1A]">Social Media Preview</h4>
+              <Share2 className="h-4 w-4 text-muted-foreground" />
+              <h4 className="text-sm font-medium text-foreground">Social Media Preview</h4>
             </div>
-            <div className="border border-[#E0E6ED] rounded-lg p-3 bg-white">
-              <div className="w-full h-32 bg-[#F7F9FC] rounded border-2 border-dashed border-[#E0E6ED] flex items-center justify-center mb-3">
-                <span className="text-xs text-[#6C757D]">Featured Image Preview</span>
+            <div className="border border-border rounded-lg p-3 bg-card">
+              <div className="w-full h-32 bg-secondary rounded border-2 border-dashed border-border flex items-center justify-center mb-3">
+                <span className="text-xs text-muted-foreground">Featured Image Preview</span>
               </div>
               <div className="space-y-1">
-                <div className="text-sm font-medium text-[#1A1A1A] leading-tight">
+                <div className="text-sm font-medium text-foreground leading-tight">
                   {getMetaTitleDisplay()}
                 </div>
-                <div className="text-xs text-[#6C757D]">
+                <div className="text-xs text-muted-foreground">
                   {getMetaDescriptionDisplay()}
                 </div>
-                <div className="text-xs text-[#6C757D] uppercase">
+                <div className="text-xs text-muted-foreground uppercase">
                   {getUrlDisplay()}
                 </div>
               </div>
@@ -128,7 +128,7 @@ export default function PageSEOFields({
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="page-meta-title" className="block text-sm font-medium text-[#1A1A1A] mb-2">
+          <label htmlFor="page-meta-title" className="block text-sm font-medium text-foreground mb-2">
             Meta Title
           </label>
           <input
@@ -137,12 +137,12 @@ export default function PageSEOFields({
             value={metaTitle}
             onChange={(e) => onMetaTitleChange(e.target.value)}
             placeholder={title || "Enter meta title for search engines..."}
-            className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
             maxLength={70}
             data-testid="input-meta-title"
           />
           <div className="flex justify-between items-center mt-1">
-            <p className="text-xs text-[#6C757D]">
+            <p className="text-xs text-muted-foreground">
               This title will appear in search engine results and browser tabs
             </p>
             <span className={`text-xs font-medium ${getTitleColorClass()}`}>
@@ -152,7 +152,7 @@ export default function PageSEOFields({
         </div>
 
         <div>
-          <label htmlFor="page-meta-description" className="block text-sm font-medium text-[#1A1A1A] mb-2">
+          <label htmlFor="page-meta-description" className="block text-sm font-medium text-foreground mb-2">
             Meta Description
           </label>
           <textarea
@@ -160,13 +160,13 @@ export default function PageSEOFields({
             value={metaDescription}
             onChange={(e) => onMetaDescriptionChange(e.target.value)}
             placeholder="Write a compelling description that summarizes what visitors will find on this page..."
-            className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent resize-none"
             rows={3}
             maxLength={170}
             data-testid="textarea-meta-description"
           />
           <div className="flex justify-between items-center mt-1">
-            <p className="text-xs text-[#6C757D]">
+            <p className="text-xs text-muted-foreground">
               A good description helps search engines understand your page content
             </p>
             <span className={`text-xs font-medium ${getDescriptionColorClass()}`}>
@@ -176,9 +176,9 @@ export default function PageSEOFields({
         </div>
       </div>
 
-      <div className="bg-[#3D8BFF]/5 border border-[#3D8BFF]/20 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-[#3D8BFF] mb-2">SEO Tips for Pages</h4>
-        <ul className="text-xs text-[#3D8BFF] space-y-1">
+      <div className="bg-accent/5 border border-[#3D8BFF]/20 rounded-lg p-4">
+        <h4 className="text-sm font-medium text-accent mb-2">SEO Tips for Pages</h4>
+        <ul className="text-xs text-accent space-y-1">
           <li>• Keep your meta title under 60 characters for best display</li>
           <li>• Write meta descriptions between 140-160 characters</li>
           <li>• Include your main keyword naturally in both title and description</li>

@@ -48,22 +48,22 @@
   --button-dark: #1E1E1E;
   
   /* CSS Variables using new palette */
-  --background: var(--pure-white);
-  --foreground: var(--graphite);
-  --card: var(--pure-white);
-  --card-foreground: var(--graphite);
-  --popover: var(--pure-white);
-  --popover-foreground: var(--graphite);
+  --background: 0 0% 100%; /* #FFFFFF */
+  --foreground: 0 0% 10%; /* #1A1A1A */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 0 0% 10%; /* #1A1A1A */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 0 0% 10%; /* #1A1A1A */
   
   /* Primary elements using button colors */
-  --primary: var(--button-primary);
-  --primary-foreground: var(--pure-white);
-  --secondary: var(--light-gray);
-  --secondary-foreground: var(--charcoal);
-  --muted: var(--light-gray);
-  --muted-foreground: var(--slate-gray);
-  --accent: var(--soft-blue);
-  --accent-foreground: var(--pure-white);
+  --primary: 220 27% 15%; /* #1C2331 */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --secondary: 210 40% 98%; /* #F7F9FC */
+  --secondary-foreground: 240 3% 18%; /* #2C2C2E */
+  --muted: 210 40% 98%; /* #F7F9FC */
+  --muted-foreground: 210 8% 46%; /* #6C757D */
+  --accent: 218 100% 62%; /* #3D8BFF */
+  --accent-foreground: 0 0% 100%; /* #FFFFFF */
   
   /* Semantic colors */
   --success: 142 70% 49%; /* #4BB543 converted to HSL */
@@ -88,11 +88,11 @@
   --disabled-text: var(--slate-gray);
   
   /* UI Elements */
-  --border: var(--cool-gray);
-  --input: var(--cool-gray);
-  --ring: var(--soft-blue);
-  --destructive: var(--rose-red);
-  --destructive-foreground: var(--pure-white);
+  --border: 215 16% 88%; /* #E0E6ED */
+  --input: 215 16% 88%; /* #E0E6ED */
+  --ring: 218 100% 62%; /* #3D8BFF */
+  --destructive: 354 70% 54%; /* #E63946 */
+  --destructive-foreground: 0 0% 100%; /* #FFFFFF */
   --radius: 0.5rem;
   
   /* Table specific */
@@ -101,25 +101,25 @@
 }
 
 .dark {
-  --background: hsl(215, 28%, 9%); /* slate-900 equivalent */
-  --foreground: hsl(0, 0%, 98%);
-  --card: hsl(215, 28%, 9%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --popover: hsl(215, 28%, 9%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --primary: hsl(0, 0%, 98%);
-  --primary-foreground: hsl(215, 28%, 9%);
-  --secondary: hsl(215, 25%, 15%); /* slate-800 equivalent */
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --muted: hsl(215, 25%, 15%);
-  --muted-foreground: hsl(215, 20%, 65%);
-  --accent: hsl(0, 0%, 98%);
-  --accent-foreground: hsl(215, 28%, 9%);
-  --destructive: hsl(0, 84%, 60%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --border: hsl(215, 25%, 15%);
-  --input: hsl(215, 25%, 15%);
-  --ring: hsl(0, 0%, 98%);
+  --background: 215 28% 9%; /* slate-900 equivalent */
+  --foreground: 0 0% 98%;
+  --card: 215 28% 9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 215 28% 9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 215 28% 9%;
+  --secondary: 215 25% 15%; /* slate-800 equivalent */
+  --secondary-foreground: 0 0% 98%;
+  --muted: 215 25% 15%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 218 100% 62%; /* Keep brand accent consistent */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 215 25% 15%;
+  --input: 215 25% 15%;
+  --ring: 218 100% 62%; /* Keep accent ring consistent */
   
   /* Table specific - dark mode */
   --table-frozen-column: hsl(215, 35%, 18%);

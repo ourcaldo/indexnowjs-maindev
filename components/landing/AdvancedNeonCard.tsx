@@ -81,16 +81,9 @@ export default function AdvancedNeonCard({
 
     // Get neon color based on intensity (using project color scheme)
     const getColor = () => {
-      switch (intensity) {
-        case 'high':
-          return '#3D8BFF' // Project Soft Blue
-        case 'medium':
-          return '#3D8BFF'
-        case 'low':
-          return '#3D8BFF'
-        default:
-          return '#3D8BFF'
-      }
+      // Get accent color from CSS custom property for consistency
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--soft-blue').trim() || '#3D8BFF'
+      return accentColor
     }
 
     const neonColor = getColor()

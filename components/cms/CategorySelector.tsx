@@ -161,21 +161,21 @@ export default function CategorySelector({
   return (
     <div className={className}>
       <div className="space-y-3">
-        <label className="block text-sm font-medium text-[#1A1A1A]">
+        <label className="block text-sm font-medium text-foreground">
           Categories
         </label>
         
         {/* WordPress-style Category Box */}
-        <div className="border border-[#E0E6ED] rounded-lg bg-white">
+        <div className="border border-border rounded-lg bg-card">
           {/* Tabs */}
-          <div className="flex border-b border-[#E0E6ED]">
+          <div className="flex border-b border-border">
             <button
               type="button"
               onClick={() => setActiveTab('all')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'all'
-                  ? 'border-[#3D8BFF] text-[#3D8BFF] bg-white'
-                  : 'border-transparent text-[#6C757D] hover:text-[#1A1A1A]'
+                  ? 'border-accent text-accent bg-card'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               All Categories
@@ -185,8 +185,8 @@ export default function CategorySelector({
               onClick={() => setActiveTab('most-used')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'most-used'
-                  ? 'border-[#3D8BFF] text-[#3D8BFF] bg-white'
-                  : 'border-transparent text-[#6C757D] hover:text-[#1A1A1A]'
+                  ? 'border-accent text-accent bg-card'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               Most Used
@@ -196,26 +196,26 @@ export default function CategorySelector({
           {/* Category List */}
           <div className="p-3">
             {isLoading ? (
-              <div className="text-sm text-[#6C757D]">Loading categories...</div>
+              <div className="text-sm text-muted-foreground">Loading categories...</div>
             ) : (
               <div className="max-h-48 overflow-y-auto space-y-2">
                 {displayCategories.map((category) => (
                   <label
                     key={category.id}
-                    className="flex items-center space-x-2 text-sm cursor-pointer hover:bg-[#F7F9FC] p-1 rounded"
+                    className="flex items-center space-x-2 text-sm cursor-pointer hover:bg-secondary p-1 rounded"
                   >
                     <input
                       type="checkbox"
                       checked={selectedCategories.includes(category.id)}
                       onChange={() => handleCategoryToggle(category.id)}
-                      className="w-4 h-4 text-[#3D8BFF] border-[#E0E6ED] rounded focus:ring-[#3D8BFF] focus:ring-1"
+                      className="w-4 h-4 text-accent border-border rounded focus:ring-accent focus:ring-1"
                     />
-                    <span className="text-[#1A1A1A] flex-1">{category.name}</span>
+                    <span className="text-foreground flex-1">{category.name}</span>
                   </label>
                 ))}
                 
                 {displayCategories.length === 0 && (
-                  <div className="text-sm text-[#6C757D] py-2">
+                  <div className="text-sm text-muted-foreground py-2">
                     No categories available
                   </div>
                 )}
@@ -224,9 +224,9 @@ export default function CategorySelector({
           </div>
 
           {/* Add New Category Section */}
-          <div className="border-t border-[#E0E6ED] p-3 bg-[#F7F9FC]">
+          <div className="border-t border-border p-3 bg-secondary">
             <div className="space-y-2">
-              <div className="text-sm font-medium text-[#1A1A1A]">
+              <div className="text-sm font-medium text-foreground">
                 + Add New Category
               </div>
               <div className="space-y-2">
@@ -241,13 +241,13 @@ export default function CategorySelector({
                     }
                   }}
                   placeholder="New category name"
-                  className="w-full px-3 py-2 text-sm border border-[#E0E6ED] rounded focus:ring-1 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm border border-border rounded focus:ring-1 focus:ring-accent focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={handleAddCategory}
                   disabled={isAddingCategory || !newCategoryName.trim()}
-                  className="w-full px-3 py-2 text-sm bg-[#3D8BFF] text-white rounded hover:bg-[#2A7AE0] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full px-3 py-2 text-sm bg-accent text-white rounded hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isAddingCategory ? 'Adding Category...' : 'Add New Category'}
                 </button>
@@ -259,7 +259,7 @@ export default function CategorySelector({
         {/* Primary Category Selection */}
         {selectedCategories.length > 1 && (
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#1A1A1A]">
+            <label className="block text-sm font-medium text-foreground">
               Primary Category
             </label>
             <select
@@ -272,7 +272,7 @@ export default function CategorySelector({
                 }
                 onChange(updatedSelected, categoryId)
               }}
-              className="w-full px-3 py-2 text-sm border border-[#E0E6ED] rounded focus:ring-1 focus:ring-[#3D8BFF] focus:border-transparent bg-white text-[#1A1A1A]"
+              className="w-full px-3 py-2 text-sm border border-border rounded focus:ring-1 focus:ring-accent focus:border-transparent bg-card text-foreground"
             >
               {categories
                 .filter(cat => selectedCategories.includes(cat.id))
@@ -282,7 +282,7 @@ export default function CategorySelector({
                   </option>
                 ))}
             </select>
-            <p className="text-xs text-[#6C757D]">
+            <p className="text-xs text-muted-foreground">
               The primary category will be used in the URL structure
             </p>
           </div>
@@ -291,8 +291,8 @@ export default function CategorySelector({
 
       {/* Selected Categories Display */}
       {selectedCategories.length > 0 && (
-        <div className="mt-3 p-3 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
-          <div className="text-xs font-medium text-[#6C757D] mb-2">Selected Categories:</div>
+        <div className="mt-3 p-3 bg-secondary rounded-lg border border-border">
+          <div className="text-xs font-medium text-muted-foreground mb-2">Selected Categories:</div>
           <div className="flex flex-wrap gap-2">
             {categories
               .filter(cat => selectedCategories.includes(cat.id))
@@ -301,8 +301,8 @@ export default function CategorySelector({
                   key={category.id}
                   className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${
                     category.id === mainCategory
-                      ? 'bg-[#3D8BFF] text-white'
-                      : 'bg-white text-[#1A1A1A] border border-[#E0E6ED]'
+                      ? 'bg-accent text-white'
+                      : 'bg-card text-foreground border border-border'
                   }`}
                 >
                   {category.name}
