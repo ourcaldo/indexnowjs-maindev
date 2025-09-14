@@ -257,34 +257,34 @@ export default function AdminOrderDetailPage() {
     switch (status) {
       case 'pending':
         return (
-          <Badge className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20">
+          <Badge className="bg-muted/10 text-muted-foreground border-border">
             <Clock className="w-3 h-3 mr-1" />
             Pending
           </Badge>
         )
       case 'proof_uploaded':
         return (
-          <Badge className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20">
+          <Badge className="bg-muted/10 text-muted-foreground border-border">
             <AlertCircle className="w-3 h-3 mr-1" />
             Waiting for Confirmation
           </Badge>
         )
       case 'completed':
         return (
-          <Badge className="bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20">
+          <Badge className="bg-success/10 text-success border-success/20">
             <CheckCircle className="w-3 h-3 mr-1" />
             Completed
           </Badge>
         )
       case 'failed':
         return (
-          <Badge className="bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20">
+          <Badge className="bg-destructive/10 text-destructive border-destructive/20">
             <XCircle className="w-3 h-3 mr-1" />
             Failed
           </Badge>
         )
       default:
-        return <Badge className="bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20">{status}</Badge>
+        return <Badge className="bg-muted/10 text-muted-foreground border-border">{status}</Badge>
     }
   }
 
@@ -297,8 +297,8 @@ export default function AdminOrderDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A] mx-auto mb-4"></div>
-          <p className="text-[#6C757D]">Loading order details...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading order details...</p>
         </div>
       </div>
     )
@@ -308,15 +308,15 @@ export default function AdminOrderDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <XCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading Order</h3>
-          <p className="text-[#6C757D] mb-4">{error}</p>
+          <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Order</h3>
+          <p className="text-muted-foreground mb-4">{error}</p>
           <div className="space-x-2">
-            <Button onClick={() => router.back()} variant="outline" className="border-[#E0E6ED]">
+            <Button onClick={() => router.back()} variant="outline" className="border-border">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Go Back
             </Button>
-            <Button onClick={loadOrderDetail} className="bg-[#1C2331] hover:bg-[#0d1b2a] text-white">
+            <Button onClick={loadOrderDetail} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Try Again
             </Button>
           </div>
@@ -339,14 +339,14 @@ export default function AdminOrderDetailPage() {
             onClick={() => router.back()} 
             variant="outline" 
             size="sm"
-            className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+            className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-[#1A1A1A]">Order #{order.id}</h1>
-            <p className="text-[#6C757D]">Order details and management</p>
+            <h1 className="text-2xl font-bold text-foreground">Order #{order.id}</h1>
+            <p className="text-muted-foreground">Order details and management</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -362,7 +362,7 @@ export default function AdminOrderDetailPage() {
           {/* Order Details Box */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center text-[#1A1A1A]">
+              <CardTitle className="flex items-center text-foreground">
                 <FileText className="w-5 h-5 mr-2" />
                 Order Details
               </CardTitle>
@@ -370,30 +370,30 @@ export default function AdminOrderDetailPage() {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Order ID</label>
-                  <p className="font-mono text-sm text-[#1A1A1A]">{order.id}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Order ID</label>
+                  <p className="font-mono text-sm text-foreground">{order.id}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Amount</label>
-                  <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Amount</label>
+                  <p className="text-lg font-bold text-foreground">{formatCurrency(order.amount, order.currency)}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Created</label>
-                  <p className="text-sm text-[#1A1A1A]">{formatDate(order.created_at)}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Created</label>
+                  <p className="text-sm text-foreground">{formatDate(order.created_at)}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Last Updated</label>
-                  <p className="text-sm text-[#1A1A1A]">{formatRelativeTime(order.updated_at)}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Last Updated</label>
+                  <p className="text-sm text-foreground">{formatRelativeTime(order.updated_at)}</p>
                 </div>
               </div>
               
               {order.verified_by && order.verified_at && (
-                <div className="mt-4 pt-4 border-t border-[#E0E6ED]">
-                  <label className="text-sm font-medium text-[#6C757D]">Verified</label>
-                  <p className="text-sm text-[#1A1A1A]">
+                <div className="mt-4 pt-4 border-t border-border">
+                  <label className="text-sm font-medium text-muted-foreground">Verified</label>
+                  <p className="text-sm text-foreground">
                     {formatDate(order.verified_at)}
                     {order.verifier && (
-                      <span className="text-[#6C757D]"> by {order.verifier.full_name}</span>
+                      <span className="text-muted-foreground"> by {order.verifier.full_name}</span>
                     )}
                   </p>
                 </div>
@@ -404,24 +404,24 @@ export default function AdminOrderDetailPage() {
           {/* Customer Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center text-[#1A1A1A]">
+              <CardTitle className="flex items-center text-foreground">
                 <User className="w-5 h-5 mr-2" />
                 Customer Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Full Name</label>
-                <p className="font-medium text-[#1A1A1A]">{order.user.full_name}</p>
+                <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                <p className="font-medium text-foreground">{order.user.full_name}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Email</label>
+                <label className="text-sm font-medium text-muted-foreground">Email</label>
                 <div className="flex items-center space-x-2">
-                  <p className="text-sm text-[#1A1A1A]">{order.user.email}</p>
+                  <p className="text-sm text-foreground">{order.user.email}</p>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                    className="text-muted-foreground hover:text-foreground hover:bg-secondary"
                     onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
                   >
                     <Mail className="w-3 h-3" />
@@ -430,13 +430,13 @@ export default function AdminOrderDetailPage() {
               </div>
               {order.metadata?.customer_info?.phone_number && (
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Phone</label>
+                  <label className="text-sm font-medium text-muted-foreground">Phone</label>
                   <div className="flex items-center space-x-2">
-                    <p className="text-sm text-[#1A1A1A]">{order.metadata.customer_info.phone_number}</p>
+                    <p className="text-sm text-foreground">{order.metadata.customer_info.phone_number}</p>
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                      className="text-muted-foreground hover:text-foreground hover:bg-secondary"
                       onClick={() => window.open(`tel:${order.metadata.customer_info.phone_number}`, '_blank')}
                     >
                       <Phone className="w-3 h-3" />
@@ -445,12 +445,12 @@ export default function AdminOrderDetailPage() {
                 </div>
               )}
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Registration Date</label>
-                <p className="text-sm text-[#1A1A1A]">{formatDate(order.user.created_at)}</p>
+                <label className="text-sm font-medium text-muted-foreground">Registration Date</label>
+                <p className="text-sm text-foreground">{formatDate(order.user.created_at)}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Current Plan Status</label>
-                <p className="text-sm text-[#1A1A1A]">
+                <label className="text-sm font-medium text-muted-foreground">Current Plan Status</label>
+                <p className="text-sm text-foreground">
                   {order.user.expires_at ? (
                     <>Active until {formatDate(order.user.expires_at)}</>
                   ) : (
@@ -464,7 +464,7 @@ export default function AdminOrderDetailPage() {
           {/* Package Details */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center text-[#1A1A1A]">
+              <CardTitle className="flex items-center text-foreground">
                 <Package className="w-5 h-5 mr-2" />
                 Package Details
               </CardTitle>
@@ -472,31 +472,31 @@ export default function AdminOrderDetailPage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Package Name</label>
-                  <p className="font-medium text-[#1A1A1A]">{order.package.name}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Package Name</label>
+                  <p className="font-medium text-foreground">{order.package.name}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Billing Period</label>
-                  <p className="text-sm text-[#1A1A1A]">{order.metadata?.billing_period || order.package.billing_period}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Billing Period</label>
+                  <p className="text-sm text-foreground">{order.metadata?.billing_period || order.package.billing_period}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Amount</label>
-                  <p className="text-lg font-bold text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Amount</label>
+                  <p className="text-lg font-bold text-foreground">{formatCurrency(order.amount, order.currency)}</p>
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Description</label>
-                <p className="text-sm text-[#6C757D]">{order.package.description}</p>
+                <label className="text-sm font-medium text-muted-foreground">Description</label>
+                <p className="text-sm text-muted-foreground">{order.package.description}</p>
               </div>
               
               {order.package.features && Array.isArray(order.package.features) && (
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D] mb-2 block">Features</label>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">Features</label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {order.package.features.map((feature, index) => (
                       <div key={index} className="flex items-center text-sm">
-                        <CheckCircle className="w-3 h-3 mr-2 text-[#4BB543] flex-shrink-0" />
-                        <span className="text-[#1A1A1A]">{typeof feature === 'string' ? feature : feature.name || 'Feature'}</span>
+                        <CheckCircle className="w-3 h-3 mr-2 text-success flex-shrink-0" />
+                        <span className="text-foreground">{typeof feature === 'string' ? feature : feature.name || 'Feature'}</span>
                       </div>
                     ))}
                   </div>
@@ -508,7 +508,7 @@ export default function AdminOrderDetailPage() {
           {/* Activity */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center text-[#1A1A1A]">
+              <CardTitle className="flex items-center text-foreground">
                 <Activity className="w-5 h-5 mr-2" />
                 Activity
               </CardTitle>
@@ -548,31 +548,31 @@ export default function AdminOrderDetailPage() {
                   return allActivity.length > 0 ? (
                     <div className="relative">
                       {/* Timeline line */}
-                      <div className="absolute left-2 top-0 bottom-0 w-px bg-[#E0E6ED]"></div>
+                      <div className="absolute left-2 top-0 bottom-0 w-px bg-border"></div>
                       
                       {allActivity.map((activity, index) => (
                         <div key={activity.id} className="relative flex items-start space-x-3 pb-4">
                           {/* Timeline dot */}
-                          <div className="flex-shrink-0 w-4 h-4 bg-[#3D8BFF] rounded-full border-2 border-white relative z-10"></div>
+                          <div className="flex-shrink-0 w-4 h-4 bg-brand-accent rounded-full border-2 border-background relative z-10"></div>
                           
                           {/* Activity content */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-[#1A1A1A]">{activity.action_description}</p>
+                            <p className="text-sm font-medium text-foreground">{activity.action_description}</p>
                             
                             {/* Enhanced display for transaction history */}
                             {activity.type === 'transaction' && activity.metadata?.old_status && (
-                              <p className="text-xs text-[#6C757D] mt-1">
+                              <p className="text-xs text-muted-foreground mt-1">
                                 Status: {activity.metadata.old_status} → {activity.metadata.new_status}
                               </p>
                             )}
                             
                             {activity.metadata?.notes && (
-                              <p className="text-xs text-[#6C757D] mt-1 italic">
+                              <p className="text-xs text-muted-foreground mt-1 italic">
                                 "{activity.metadata.notes}"
                               </p>
                             )}
                             
-                            <div className="flex items-center space-x-1 text-xs text-[#6C757D] mt-1">
+                            <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-1">
                               <CalendarDays className="w-3 h-3" />
                               <span>{formatRelativeTime(activity.created_at)}</span>
                               {activity.user?.full_name && (
@@ -580,7 +580,7 @@ export default function AdminOrderDetailPage() {
                                   <span>•</span>
                                   <span>{activity.user.full_name}</span>
                                   {activity.user.role && (
-                                    <span className="text-[#3D8BFF]">({activity.user.role})</span>
+                                    <span className="text-brand-accent">({activity.user.role})</span>
                                   )}
                                 </>
                               )}
@@ -591,8 +591,8 @@ export default function AdminOrderDetailPage() {
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <Activity className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
-                      <p className="text-sm text-[#6C757D]">No activity yet</p>
+                      <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No activity yet</p>
                     </div>
                   )
                 })()}
@@ -606,14 +606,14 @@ export default function AdminOrderDetailPage() {
           {/* Admin Actions */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-[#1A1A1A]">Admin Actions</CardTitle>
+              <CardTitle className="text-foreground">Admin Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {canUpdateStatus && (
                 <div className="space-y-2">
                   <Button
                     onClick={() => openStatusModal('completed')}
-                    className="w-full bg-[#4BB543] hover:bg-[#3DA53A] text-white"
+                    className="w-full bg-success hover:bg-success/90 text-success-foreground"
                     disabled={updating}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
@@ -622,7 +622,7 @@ export default function AdminOrderDetailPage() {
                   <Button
                     onClick={() => openStatusModal('failed')}
                     variant="outline"
-                    className="w-full border-[#E63946] text-[#E63946] hover:bg-[#E63946] hover:text-white"
+                    className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
                     disabled={updating}
                   >
                     <XCircle className="w-4 h-4 mr-2" />
@@ -631,12 +631,12 @@ export default function AdminOrderDetailPage() {
                 </div>
               )}
               
-              <Separator className="bg-[#E0E6ED]" />
+              <Separator className="bg-border" />
               
               <div className="space-y-2">
                 <Button
                   variant="outline"
-                  className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                  className="w-full border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
                   onClick={() => window.open(`mailto:${order.user.email}`, '_blank')}
                 >
                   <Mail className="w-4 h-4 mr-2" />
@@ -644,7 +644,7 @@ export default function AdminOrderDetailPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                  className="w-full border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
                   onClick={() => router.push(`/backend/admin/users?search=${order.user.email}`)}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
@@ -657,33 +657,33 @@ export default function AdminOrderDetailPage() {
           {/* Payment Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center text-[#1A1A1A]">
+              <CardTitle className="flex items-center text-foreground">
                 <CreditCard className="w-5 h-5 mr-2" />
                 Payment Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Gateway</label>
-                <p className="font-medium text-[#1A1A1A]">{order.gateway.name}</p>
+                <label className="text-sm font-medium text-muted-foreground">Gateway</label>
+                <p className="font-medium text-foreground">{order.gateway.name}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Payment Method</label>
-                <p className="text-sm text-[#1A1A1A]">{order.payment_method}</p>
+                <label className="text-sm font-medium text-muted-foreground">Payment Method</label>
+                <p className="text-sm text-foreground">{order.payment_method}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Reference Number</label>
-                <p className="font-mono text-sm text-[#1A1A1A]">{order.id}</p>
+                <label className="text-sm font-medium text-muted-foreground">Reference Number</label>
+                <p className="font-mono text-sm text-foreground">{order.id}</p>
               </div>
               {order.gateway_transaction_id && (
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Gateway Transaction ID</label>
-                  <p className="font-mono text-sm text-[#1A1A1A]">{order.gateway_transaction_id}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Gateway Transaction ID</label>
+                  <p className="font-mono text-sm text-foreground">{order.gateway_transaction_id}</p>
                 </div>
               )}
               <div>
-                <label className="text-sm font-medium text-[#6C757D]">Package</label>
-                <p className="text-sm text-[#1A1A1A]">{order.package.name} ({order.metadata?.billing_period || order.package.billing_period})</p>
+                <label className="text-sm font-medium text-muted-foreground">Package</label>
+                <p className="text-sm text-foreground">{order.package.name} ({order.metadata?.billing_period || order.package.billing_period})</p>
               </div>
             </CardContent>
           </Card>
@@ -692,14 +692,14 @@ export default function AdminOrderDetailPage() {
           {order.payment_proof_url && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center text-[#1A1A1A]">
+                <CardTitle className="flex items-center text-foreground">
                   <ImageIcon className="w-5 h-5 mr-2" />
                   Payment Proof
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="aspect-video bg-[#F7F9FC] rounded-lg flex items-center justify-center">
+                  <div className="aspect-video bg-secondary rounded-lg flex items-center justify-center">
                     <img
                       src={order.payment_proof_url}
                       alt="Payment Proof"
@@ -710,8 +710,8 @@ export default function AdminOrderDetailPage() {
                       }}
                     />
                     <div className="hidden text-center">
-                      <FileText className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
-                      <p className="text-sm text-[#6C757D]">Unable to preview file</p>
+                      <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Unable to preview file</p>
                     </div>
                   </div>
                   <div className="flex justify-center">
@@ -719,7 +719,7 @@ export default function AdminOrderDetailPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(order.payment_proof_url, '_blank')}
-                      className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                      className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
                     >
                       <Download className="w-4 h-4 mr-2" />
                       Download
@@ -733,7 +733,7 @@ export default function AdminOrderDetailPage() {
           {/* Notes */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center text-[#1A1A1A]">
+              <CardTitle className="flex items-center text-foreground">
                 <FileText className="w-5 h-5 mr-2" />
                 Notes
               </CardTitle>
@@ -741,13 +741,13 @@ export default function AdminOrderDetailPage() {
             <CardContent>
               {order.notes ? (
                 <div>
-                  <label className="text-sm font-medium text-[#6C757D]">Admin Notes</label>
-                  <p className="text-sm bg-[#F7F9FC] p-3 rounded-lg mt-1 text-[#1A1A1A]">{order.notes}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Admin Notes</label>
+                  <p className="text-sm bg-secondary p-3 rounded-lg mt-1 text-foreground">{order.notes}</p>
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <FileText className="w-12 h-12 text-[#6C757D] mx-auto mb-2" />
-                  <p className="text-sm text-[#6C757D]">No notes added yet</p>
+                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No notes added yet</p>
                 </div>
               )}
             </CardContent>
@@ -760,10 +760,10 @@ export default function AdminOrderDetailPage() {
         <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="text-[#1A1A1A]">
+              <DialogTitle className="text-foreground">
                 {statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
               </DialogTitle>
-              <DialogDescription className="text-[#6C757D]">
+              <DialogDescription className="text-muted-foreground">
                 {statusAction === 'completed' 
                   ? 'This will immediately activate the customer\'s subscription and grant access to their selected plan.'
                   : 'This will mark the payment as failed and notify the customer.'
@@ -772,18 +772,18 @@ export default function AdminOrderDetailPage() {
             </DialogHeader>
             
             <div className="space-y-4">
-              <div className="p-4 bg-[#F7F9FC] rounded-lg">
-                <h4 className="font-medium text-[#1A1A1A] mb-2">Order Summary</h4>
+              <div className="p-4 bg-secondary rounded-lg">
+                <h4 className="font-medium text-foreground mb-2">Order Summary</h4>
                 <div className="text-sm space-y-1">
-                  <p><span className="text-[#6C757D]">Order:</span> <span className="text-[#1A1A1A]">#{order.id}</span></p>
-                  <p><span className="text-[#6C757D]">Customer:</span> <span className="text-[#1A1A1A]">{order.user.email}</span></p>
-                  <p><span className="text-[#6C757D]">Package:</span> <span className="text-[#1A1A1A]">{order.package.name} ({order.metadata?.billing_period})</span></p>
-                  <p><span className="text-[#6C757D]">Amount:</span> <span className="text-[#1A1A1A]">{formatCurrency(order.amount, order.currency)}</span></p>
+                  <p><span className="text-muted-foreground">Order:</span> <span className="text-foreground">#{order.id}</span></p>
+                  <p><span className="text-muted-foreground">Customer:</span> <span className="text-foreground">{order.user.email}</span></p>
+                  <p><span className="text-muted-foreground">Package:</span> <span className="text-foreground">{order.package.name} ({order.metadata?.billing_period})</span></p>
+                  <p><span className="text-muted-foreground">Amount:</span> <span className="text-foreground">{formatCurrency(order.amount, order.currency)}</span></p>
                 </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-[#1A1A1A] mb-2 block">
+                <label className="text-sm font-medium text-foreground mb-2 block">
                   Notes (optional)
                 </label>
                 <Textarea
@@ -793,7 +793,7 @@ export default function AdminOrderDetailPage() {
                   }
                   value={statusNotes}
                   onChange={(e) => setStatusNotes(e.target.value)}
-                  className="border-[#E0E6ED]"
+                  className="border-border"
                 />
               </div>
             </div>
@@ -803,7 +803,7 @@ export default function AdminOrderDetailPage() {
                 variant="outline" 
                 onClick={() => setStatusModalOpen(false)}
                 disabled={updating}
-                className="border-[#E0E6ED] text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+                className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
               >
                 Cancel
               </Button>
@@ -811,8 +811,8 @@ export default function AdminOrderDetailPage() {
                 onClick={handleStatusUpdate}
                 disabled={updating}
                 className={statusAction === 'completed' 
-                  ? 'bg-[#4BB543] hover:bg-[#3DA53A] text-white' 
-                  : 'bg-[#E63946] hover:bg-[#CC2936] text-white'
+                  ? 'bg-success hover:bg-success/90 text-white' 
+                  : 'bg-destructive hover:bg-destructive/90 text-white'
                 }
               >
                 {updating ? 'Processing...' : statusAction === 'completed' ? 'Approve Payment' : 'Reject Payment'}
