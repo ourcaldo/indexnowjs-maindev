@@ -101,7 +101,7 @@ export default function Login() {
             {/* Magic Link Success Notification */}
             {magicLinkSent && (
               <div className="bg-info/10 border border-info rounded-xl p-5 mb-8 text-center">
-                <div style={{ marginBottom: '16px', fontSize: '32px' }}>✨</div>
+                <div className="mb-4 text-[32px]">✨</div>
                 <h3 className="text-lg font-semibold text-foreground mb-2 m-0">
                   Magic Link Sent!
                 </h3>
@@ -114,7 +114,7 @@ export default function Login() {
                     setMagicLinkSent(false)
                     setIsMagicLinkMode(false)
                   }}
-                  className="mt-4 bg-transparent border-none text-info text-sm cursor-pointer underline"
+                  className="mt-4 bg-transparent border-0 text-info text-sm cursor-pointer underline hover:text-info-foreground transition-colors"
                 >
                   Back to login
                 </button>
@@ -126,14 +126,14 @@ export default function Login() {
               <>
                 {/* Email Field */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg bg-background text-gray-800 outline-none transition-colors duration-200 focus:border-brand-primary"
+                    className="form-field-default form-field-focus w-full px-4 py-3 text-base"
                     placeholder="your@email.com"
                     required
                   />
@@ -143,7 +143,7 @@ export default function Login() {
                 {!isMagicLinkMode && (
                   <>
                     <div className="mb-6">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">
                         Password
                       </label>
                       <div className="relative">
@@ -151,30 +151,14 @@ export default function Login() {
                           type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full px-4 py-3 pr-12 text-base border border-gray-300 rounded-lg bg-background text-gray-800 outline-none transition-colors duration-200 focus:border-brand-primary"
-                          onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                          onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                          className="form-field-default form-field-focus w-full px-4 py-3 pr-12 text-base"
                           placeholder="Your password"
                           required
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          style={{
-                            position: 'absolute',
-                            right: '12px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            background: 'none',
-                            border: 'none',
-                            color: '#9ca3af',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            padding: '4px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 text-muted-foreground cursor-pointer text-sm p-1 flex items-center justify-center hover:text-foreground transition-colors"
                         >
                           {showPassword ? (
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -192,47 +176,22 @@ export default function Login() {
                     </div>
 
                     {/* Remember Me & Forgot Password */}
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '32px'
-                    }}>
-                      <label style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        cursor: 'pointer'
-                      }}>
+                    <div className="flex justify-between items-center mb-8">
+                      <label className="flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           checked={rememberMe}
                           onChange={(e) => setRememberMe(e.target.checked)}
-                          style={{
-                            marginRight: '8px',
-                            width: '16px',
-                            height: '16px'
-                          }}
+                          className="mr-2 w-4 h-4 accent-brand"
                         />
-                        <span style={{
-                          fontSize: '14px',
-                          color: '#6b7280'
-                        }}>
+                        <span className="text-sm text-muted-foreground">
                           Remember Me
                         </span>
                       </label>
                       <button
                         type="button"
                         onClick={() => router.push("/forgot-password")}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#1a1a1a',
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          textDecoration: 'none'
-                        }}
-                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.textDecoration = 'underline'}
-                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.textDecoration = 'none'}
+                        className="bg-transparent border-0 text-brand-primary text-sm cursor-pointer hover:underline transition-all"
                       >
                         Forgot Your Password?
                       </button>
@@ -261,22 +220,7 @@ export default function Login() {
                       }
                     }}
                     disabled={isLoading}
-                    style={{
-                      width: '100%',
-                      padding: '14px 24px',
-                      backgroundColor: '#0ea5e9',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: isLoading ? 'not-allowed' : 'pointer',
-                      marginBottom: '24px',
-                      opacity: isLoading ? 0.7 : 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
+                    className="w-full py-[14px] px-6 bg-info text-info-foreground border-0 rounded-lg text-base font-semibold cursor-pointer mb-6 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center hover:opacity-90 transition-opacity"
                   >
                     <span style={{ marginRight: '8px' }}>✨</span>
                     {isLoading ? "Sending..." : "Send Magic Link"}
@@ -285,19 +229,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    style={{
-                      width: '100%',
-                      padding: '14px 24px',
-                      backgroundColor: '#1a1a1a',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: isLoading ? 'not-allowed' : 'pointer',
-                      marginBottom: '24px',
-                      opacity: isLoading ? 0.7 : 1
-                    }}
+                    className="w-full py-[14px] px-6 bg-brand-primary text-white border-0 rounded-lg text-base font-semibold cursor-pointer mb-6 disabled:opacity-70 disabled:cursor-not-allowed hover:bg-brand-secondary transition-colors"
                   >
                     {isLoading ? "Signing In..." : "Sign In"}
                   </button>
@@ -305,35 +237,17 @@ export default function Login() {
 
                 {/* Error Message */}
                 {error && (
-                  <div style={{
-                    backgroundColor: '#fef2f2',
-                    border: '1px solid #fecaca',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginBottom: '24px',
-                    color: '#dc2626',
-                    fontSize: '14px',
-                    textAlign: 'center'
-                  }}>
+                  <div className="badge-error p-3 mb-6 text-center rounded-lg">
                     {error}
                   </div>
                 )}
 
                 {/* Toggle Magic Link Mode */}
-                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div className="text-center mb-6">
                   <button
                     type="button"
                     onClick={() => setIsMagicLinkMode(!isMagicLinkMode)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#6b7280',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      textDecoration: 'none'
-                    }}
-                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.textDecoration = 'underline'}
-                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.textDecoration = 'none'}
+                    className="bg-transparent border-0 text-muted-foreground text-sm cursor-pointer hover:underline hover:text-foreground transition-all"
                   >
                     {isMagicLinkMode ? "← Back to password login" : "✨ Login with magic link instead"}
                   </button>
@@ -343,30 +257,12 @@ export default function Login() {
           </form>
 
           {/* Register Link */}
-          <div style={{
-            textAlign: 'center',
-            paddingTop: '24px',
-            borderTop: '1px solid #e5e7eb'
-          }}>
-            <p style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              margin: '0'
-            }}>
+          <div className="text-center pt-6 border-t border-border">
+            <p className="text-sm text-muted-foreground m-0">
               Don't have an account?{' '}
               <button
                 onClick={() => router.push("/register")}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#1a1a1a',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  textDecoration: 'none'
-                }}
-                onMouseEnter={(e) => (e.target as HTMLButtonElement).style.textDecoration = 'underline'}
-                onMouseLeave={(e) => (e.target as HTMLButtonElement).style.textDecoration = 'none'}
+                className="bg-transparent border-0 text-brand-primary text-sm font-semibold cursor-pointer hover:underline transition-all"
               >
                 Sign up here
               </button>

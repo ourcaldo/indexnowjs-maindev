@@ -112,53 +112,18 @@ export default function Register() {
 
   if (success) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        backgroundColor: '#f7f9fc'
-      }}>
-        <div style={{
-          maxWidth: '400px',
-          width: '100%',
-          padding: '40px',
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          textAlign: 'center',
-          border: '1px solid #e0e6ed'
-        }}>
-          <div style={{ fontSize: '48px', marginBottom: '20px' }}>✨</div>
-          <h2 style={{
-            fontSize: '24px',
-            fontWeight: '700',
-            color: '#1a1a1a',
-            marginBottom: '12px'
-          }}>
+      <div className="min-h-screen flex items-center justify-center font-sans bg-secondary">
+        <div className="card-bordered max-w-md w-full p-10 text-center">
+          <div className="text-5xl mb-5">✨</div>
+          <h2 className="text-2xl font-bold text-brand-primary mb-3">
             Check your email
           </h2>
-          <p style={{
-            fontSize: '16px',
-            color: '#6c757d',
-            marginBottom: '32px',
-            lineHeight: '1.5'
-          }}>
+          <p className="text-base text-brand-text mb-8 leading-relaxed">
             We've sent you a confirmation link at <strong>{email}</strong>. Click the link to verify your account.
           </p>
           <button
             onClick={() => router.push('/login')}
-            style={{
-              width: '100%',
-              padding: '12px 24px',
-              backgroundColor: '#1a1a1a',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
+            className="w-full py-3 px-6 bg-brand-primary text-white border-0 rounded-lg text-base font-semibold cursor-pointer hover:bg-brand-secondary transition-colors"
           >
             Back to Sign In
           </button>
@@ -168,34 +133,13 @@ export default function Register() {
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
+    <div className={`min-h-screen flex ${isMobile ? 'flex-col' : 'flex-row'} font-sans`}>
 
       {/* Left Side - Register Form */}
-      <div style={{
-        width: isMobile ? '100%' : '50%',
-        backgroundColor: '#ffffff',
-        padding: isMobile ? '40px 20px' : '60px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: isMobile ? 'center' : 'flex-start',
-        position: 'relative'
-      }}>
+      <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-background ${isMobile ? 'px-5 py-10' : 'p-[60px]'} flex flex-col justify-center ${isMobile ? 'items-center' : 'items-start'} relative`}>
         {/* Logo for both mobile and desktop */}
         {logoUrl && (
-          <div style={{
-            position: 'absolute',
-            top: isMobile ? '20px' : '32px',
-            left: isMobile ? '20px' : '60px',
-            display: 'flex',
-            alignItems: 'center',
-            zIndex: 10
-          }}>
+          <div className={`absolute ${isMobile ? 'top-5 left-5' : 'top-8 left-[60px]'} flex items-center z-10`}>
             <img 
               src={logoUrl} 
               alt="Logo"
@@ -209,106 +153,48 @@ export default function Register() {
         )}
 
         {/* Main Content */}
-        <div style={{ 
-          maxWidth: '400px', 
-          width: '100%',
-          textAlign: isMobile ? 'center' : 'left',
-          marginTop: isMobile ? '90px' : '80px'
-        }}>
-          <h1 style={{
-            fontSize: isMobile ? '24px' : '32px',
-            fontWeight: '700',
-            color: '#1a1a1a',
-            marginBottom: '8px',
-            lineHeight: '1.2'
-          }}>
+        <div className={`max-w-md w-full ${isMobile ? 'text-center mt-[90px]' : 'text-left mt-20'}`}>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-brand-primary mb-2 leading-tight`}>
             Create Account
           </h1>
-          <p style={{
-            fontSize: isMobile ? '14px' : '16px',
-            color: '#6b7280',
-            marginBottom: '40px',
-            lineHeight: '1.5'
-          }}>
+          <p className={`${isMobile ? 'text-sm' : 'text-base'} text-muted-foreground mb-10 leading-relaxed`}>
             Join {siteName} to start indexing your URLs instantly.
           </p>
 
           <form onSubmit={handleSubmit}>
             {/* Name Field */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '8px'
-              }}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Full Name
               </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  fontSize: '16px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                className="form-field-default form-field-focus w-full px-4 py-3 text-base"
                 placeholder="Enter your full name"
                 required
               />
             </div>
 
             {/* Email Field */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '8px'
-              }}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  fontSize: '16px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                className="form-field-default form-field-focus w-full px-4 py-3 text-base"
                 placeholder="you@company.com"
                 required
               />
             </div>
 
             {/* Phone Number Field */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '8px'
-              }}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Phone Number
               </label>
               <input
@@ -319,53 +205,22 @@ export default function Register() {
                   const value = e.target.value.replace(/[^+\-0-9\s\(\)]/g, '')
                   setPhoneNumber(value)
                 }}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  fontSize: '16px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                className="form-field-default form-field-focus w-full px-4 py-3 text-base"
                 placeholder="+1 (555) 123-4567"
                 required
               />
             </div>
 
             {/* Country Field */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '8px'
-              }}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Country
               </label>
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
                 disabled={isDetectingCountry}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  fontSize: '16px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  backgroundColor: isDetectingCountry ? '#f9fafb' : '#ffffff',
-                  color: '#1f2937',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  cursor: isDetectingCountry ? 'not-allowed' : 'pointer'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                className={`form-field-default form-field-focus w-full px-4 py-3 text-base ${isDetectingCountry ? 'bg-muted cursor-not-allowed' : 'cursor-pointer'}`}
                 required
               >
                 <option value="">Select your country</option>
@@ -378,55 +233,23 @@ export default function Register() {
             </div>
 
             {/* Password Field */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '8px'
-              }}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Password
               </label>
-              <div style={{ position: 'relative' }}>
+              <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    paddingRight: '48px',
-                    fontSize: '16px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#1f2937',
-                    outline: 'none',
-                    transition: 'border-color 0.2s'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                  onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                  className="form-field-default form-field-focus w-full px-4 py-3 pr-12 text-base"
                   placeholder="Create a password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: '#9ca3af',
-                    cursor: 'pointer',
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 text-muted-foreground cursor-pointer p-1 flex items-center justify-center hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -434,55 +257,23 @@ export default function Register() {
             </div>
 
             {/* Confirm Password Field */}
-            <div style={{ marginBottom: '32px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '8px'
-              }}>
+            <div className="mb-8">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Confirm Password
               </label>
-              <div style={{ position: 'relative' }}>
+              <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    paddingRight: '48px',
-                    fontSize: '16px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#1f2937',
-                    outline: 'none',
-                    transition: 'border-color 0.2s'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                  onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                  className="form-field-default form-field-focus w-full px-4 py-3 pr-12 text-base"
                   placeholder="Confirm your password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: '#9ca3af',
-                    cursor: 'pointer',
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 text-muted-foreground cursor-pointer p-1 flex items-center justify-center hover:text-foreground transition-colors"
                 >
                   {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -491,18 +282,8 @@ export default function Register() {
 
             {/* Error Message */}
             {error && (
-              <div style={{
-                padding: '12px 16px',
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '8px',
-                marginBottom: '24px'
-              }}>
-                <p style={{
-                  fontSize: '14px',
-                  color: '#dc2626',
-                  margin: '0'
-                }}>
+              <div className="badge-error p-3 mb-6 rounded-lg">
+                <p className="text-sm m-0">
                   {error}
                 </p>
               </div>
@@ -512,41 +293,23 @@ export default function Register() {
             <button
               type="submit"
               disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '14px 20px',
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#ffffff',
-                backgroundColor: isLoading ? '#9ca3af' : '#1a1a1a',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s'
-              }}
+              className={`w-full py-[14px] px-5 text-base font-semibold text-white border-0 rounded-lg transition-colors ${
+                isLoading 
+                  ? 'bg-muted-foreground cursor-not-allowed' 
+                  : 'bg-brand-primary cursor-pointer hover:bg-brand-secondary'
+              }`}
             >
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
 
             {/* Sign In Link */}
-            <div style={{
-              textAlign: 'center',
-              marginTop: '24px'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                color: '#6b7280'
-              }}>
+            <div className="text-center mt-6">
+              <span className="text-sm text-muted-foreground">
                 Already have an account?{' '}
               </span>
               <a
                 href="/login"
-                style={{
-                  fontSize: '14px',
-                  color: '#1a1a1a',
-                  textDecoration: 'none',
-                  fontWeight: '600'
-                }}
+                className="text-sm text-brand-primary no-underline font-semibold hover:underline transition-all"
               >
                 Sign In
               </a>
@@ -557,21 +320,8 @@ export default function Register() {
 
       {/* Right Side - Dashboard Preview (Desktop Only) */}
       {!isMobile && (
-        <div style={{
-          width: '50%',
-          backgroundColor: '#1a1a1a',
-          padding: '80px 60px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          color: '#ffffff',
-          position: 'relative'
-        }}>
-          <div style={{ 
-            overflow: 'hidden', 
-            width: '100%',
-            position: 'relative'
-          }}>
+        <div className="w-1/2 bg-brand-primary p-[80px_60px] flex flex-col justify-center text-white relative">
+          <div className="overflow-hidden w-full relative">
             <DashboardPreview />
           </div>
         </div>
