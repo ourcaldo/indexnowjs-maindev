@@ -29,7 +29,7 @@ export default function ServicesPageContent({ page }: ServicesPageContentProps) 
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-[#1A1A1A] text-white">
+      <section className="bg-brand-primary text-white">
         <div className="max-w-7xl mx-auto px-6 py-20">
           <div className="max-w-4xl">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">
@@ -37,14 +37,14 @@ export default function ServicesPageContent({ page }: ServicesPageContentProps) 
             </h1>
             
             {page.meta_description && (
-              <p className="text-xl text-[#F7F9FC] leading-relaxed mb-8">
+              <p className="text-xl text-secondary leading-relaxed mb-8">
                 {page.meta_description}
               </p>
             )}
 
             <a
               href="/pricing"
-              className="inline-flex items-center gap-2 bg-[#3D8BFF] hover:bg-[#3D8BFF]/90 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+              className="inline-flex items-center gap-2 bg-brand-accent hover:bg-brand-accent/90 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
             >
               View Pricing
               <ArrowRight className="h-5 w-5" />
@@ -75,7 +75,7 @@ export default function ServicesPageContent({ page }: ServicesPageContentProps) 
             <div className="prose prose-lg max-w-none">
               <div 
                 dangerouslySetInnerHTML={{ __html: page.content }} 
-                className="text-[#1A1A1A] leading-relaxed"
+                className="text-brand-primary leading-relaxed"
               />
             </div>
           </div>
@@ -83,13 +83,13 @@ export default function ServicesPageContent({ page }: ServicesPageContentProps) 
       )}
 
       {/* Services Grid */}
-      <section className={`${page.content ? 'py-10' : 'py-20'} bg-[#F7F9FC]`}>
+      <section className={`${page.content ? 'py-10' : 'py-20'} bg-secondary`}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6">
+            <h2 className="text-3xl lg:text-4xl font-bold text-brand-primary mb-6">
               Our Services
             </h2>
-            <p className="text-xl text-[#6C757D] max-w-3xl mx-auto">
+            <p className="text-xl text-brand-text max-w-3xl mx-auto">
               Professional SEO tools and services designed to accelerate your online success
             </p>
           </div>
@@ -121,34 +121,34 @@ export default function ServicesPageContent({ page }: ServicesPageContentProps) 
               const IconComponent = service.icon
               return (
                 <div key={index} className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-12 h-12 bg-[#3D8BFF]/10 rounded-lg flex items-center justify-center mb-6">
-                    <IconComponent className="h-6 w-6 text-[#3D8BFF]" />
+                  <div className="w-12 h-12 bg-brand-accent/10 rounded-lg flex items-center justify-center mb-6">
+                    <IconComponent className="h-6 w-6 text-brand-accent" />
                   </div>
                   
-                  <h3 className="text-xl font-semibold text-[#1A1A1A] mb-4">
+                  <h3 className="text-xl font-semibold text-brand-primary mb-4">
                     {service.title}
                   </h3>
                   
-                  <p className="text-[#6C757D] leading-relaxed mb-6">
+                  <p className="text-brand-text leading-relaxed mb-6">
                     {service.description}
                   </p>
                   
                   <ul className="space-y-2 mb-6">
                     {service.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-[#4BB543] flex-shrink-0" />
-                        <span className="text-sm text-[#6C757D]">{feature}</span>
+                        <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                        <span className="text-sm text-brand-text">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   
-                  <div className="border-t border-[#E0E6ED] pt-6">
-                    <div className="text-lg font-semibold text-[#1A1A1A] mb-4">
+                  <div className="border-t border-border pt-6">
+                    <div className="text-lg font-semibold text-brand-primary mb-4">
                       {service.price}
                     </div>
                     <a
                       href="/pricing"
-                      className="w-full inline-flex items-center justify-center gap-2 bg-[#3D8BFF] hover:bg-[#3D8BFF]/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accent/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
                     >
                       Get Started
                       <ArrowRight className="h-4 w-4" />
@@ -165,10 +165,10 @@ export default function ServicesPageContent({ page }: ServicesPageContentProps) 
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6">
+            <h2 className="text-3xl lg:text-4xl font-bold text-brand-primary mb-6">
               Why Choose Our Services?
             </h2>
-            <p className="text-xl text-[#6C757D] max-w-3xl mx-auto">
+            <p className="text-xl text-brand-text max-w-3xl mx-auto">
               We provide the most comprehensive and reliable SEO tools in the industry
             </p>
           </div>
@@ -198,10 +198,10 @@ export default function ServicesPageContent({ page }: ServicesPageContentProps) 
             ].map((feature, index) => (
               <div key={index} className="text-center">
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-lg font-semibold text-[#1A1A1A] mb-3">
+                <h3 className="text-lg font-semibold text-brand-primary mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-[#6C757D] leading-relaxed">
+                <p className="text-brand-text leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -211,26 +211,26 @@ export default function ServicesPageContent({ page }: ServicesPageContentProps) 
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-[#1A1A1A] text-white">
+      <section className="py-20 bg-brand-primary text-white">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold mb-6">
             Ready to Boost Your SEO?
           </h2>
-          <p className="text-xl text-[#F7F9FC] mb-12 max-w-3xl mx-auto">
+          <p className="text-xl text-secondary mb-12 max-w-3xl mx-auto">
             Join thousands of SEO professionals who trust our services to accelerate their online success.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/auth/register"
-              className="inline-flex items-center justify-center gap-2 bg-[#3D8BFF] hover:bg-[#3D8BFF]/90 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accent/90 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
             >
               Start Free Trial
               <ArrowRight className="h-5 w-5" />
             </a>
             <a
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 border-2 border-white hover:bg-white hover:text-[#1A1A1A] text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all"
+              className="inline-flex items-center justify-center gap-2 border-2 border-white hover:bg-white hover:text-brand-primary text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all"
             >
               Contact Sales
             </a>
