@@ -94,7 +94,7 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
   }, [post.meta_title, post.title])
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden bg-background">
+    <div className="min-h-screen text-foreground relative overflow-hidden bg-background">
       <Background />
       <Header 
         user={user}
@@ -144,8 +144,8 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
                     data-testid="author-avatar"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center">
-                    <span className="text-xl font-semibold text-gray-300">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                    <span className="text-xl font-semibold text-muted-foreground">
                       {post.author.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -154,7 +154,7 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
                   <h3 className="text-lg font-semibold text-white mb-1" data-testid="author-name">
                     {post.author.name}
                   </h3>
-                  <p className="text-gray-400" data-testid="author-description">
+                  <p className="text-muted-foreground" data-testid="author-description">
                     SEO Expert & Content Strategist at IndexNow Studio. Passionate about helping businesses improve their search rankings and online visibility.
                   </p>
                 </div>
@@ -169,7 +169,7 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-800/50 border border-gray-700/50 text-gray-300 hover:bg-gray-700/50 transition-colors"
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-muted/20 border border-border text-muted-foreground hover:bg-muted/30 transition-colors"
                       data-testid={`post-tag-${tag.replace(/\s+/g, '-').toLowerCase()}`}
                     >
                       #{tag}
@@ -195,24 +195,24 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
             <h2 className="text-3xl font-bold text-white mb-4">
               Stay Updated with SEO Insights
             </h2>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Get the latest rank tracking strategies and SEO tips delivered to your inbox. Join thousands of marketers improving their search performance.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-4 py-3 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
+                className="flex-1 px-4 py-3 bg-muted/10 border border-border rounded-lg text-foreground placeholder-muted-foreground/70 focus:outline-none focus:border-info/50 focus:ring-1 focus:ring-info/20"
                 data-testid="newsletter-email-input"
               />
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                className="bg-info hover:bg-info/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
                 data-testid="newsletter-subscribe-button"
               >
                 Subscribe
               </button>
             </div>
-            <p className="text-sm text-gray-400 mt-4">
+            <p className="text-sm text-muted-foreground mt-4">
               No spam. Unsubscribe at any time.
             </p>
           </div>
