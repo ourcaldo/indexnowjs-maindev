@@ -125,7 +125,7 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
   }
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
+    <div className="min-h-screen text-white relative overflow-hidden bg-background">
       <Background />
       <Header 
         user={user}

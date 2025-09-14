@@ -94,7 +94,7 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
   }, [post.meta_title, post.title])
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
+    <div className="min-h-screen text-white relative overflow-hidden bg-background">
       <Background />
       <Header 
         user={user}

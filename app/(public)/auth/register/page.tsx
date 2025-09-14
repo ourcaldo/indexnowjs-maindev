@@ -123,12 +123,12 @@ export default function Register() {
       {/* Mobile: Show dashboard preview first */}
       {isMobile && (
         <div style={{
-          backgroundColor: '#1a1a1a',
+          backgroundColor: 'var(--brand-primary)',
           padding: '80px 20px 40px 20px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          color: '#ffffff',
+          color: 'var(--background)',
           position: 'relative'
         }}>
           {/* Mobile Logo on left side */}
@@ -142,7 +142,7 @@ export default function Register() {
             <span style={{
               fontSize: '18px',
               fontWeight: '600',
-              color: '#ffffff'
+              color: 'var(--background)'
             }}>
               IndexNow
             </span>
@@ -165,7 +165,7 @@ export default function Register() {
       {/* Left Side - Register Form */}
       <div style={{
         width: isMobile ? '100%' : '50%',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--background)',
         padding: isMobile ? '40px 20px' : '60px',
         display: 'flex',
         flexDirection: 'column',
@@ -207,7 +207,7 @@ export default function Register() {
           <h1 style={{
             fontSize: '32px',
             fontWeight: '700',
-            color: '#1a1a1a',
+            color: 'var(--brand-primary)',
             marginBottom: '8px',
             lineHeight: '1.2'
           }}>
@@ -215,7 +215,7 @@ export default function Register() {
           </h1>
           <p style={{
             fontSize: '16px',
-            color: '#6b7280',
+            color: 'var(--brand-text)',
             marginBottom: '40px',
             lineHeight: '1.5'
           }}>
@@ -229,7 +229,7 @@ export default function Register() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--foreground)',
                 marginBottom: '8px'
               }}>
                 Full Name
@@ -242,15 +242,15 @@ export default function Register() {
                   width: '100%',
                   padding: '12px 16px',
                   fontSize: '16px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
+                  backgroundColor: 'var(--background)',
+                  color: 'hsl(var(--foreground))',
                   outline: 'none',
                   transition: 'border-color 0.2s'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--brand-primary)'}
+                onBlur={(e) => e.target.style.borderColor = 'hsl(var(--border))'}
                 placeholder="Enter your full name"
                 required
               />
@@ -262,7 +262,7 @@ export default function Register() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--foreground)',
                 marginBottom: '8px'
               }}>
                 Email
@@ -275,15 +275,15 @@ export default function Register() {
                   width: '100%',
                   padding: '12px 16px',
                   fontSize: '16px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
+                  backgroundColor: 'var(--background)',
+                  color: 'hsl(var(--foreground))',
                   outline: 'none',
                   transition: 'border-color 0.2s'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--brand-primary)'}
+                onBlur={(e) => e.target.style.borderColor = 'hsl(var(--border))'}
                 placeholder="you@company.com"
                 required
               />
@@ -295,7 +295,7 @@ export default function Register() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--foreground)',
                 marginBottom: '8px'
               }}>
                 Phone Number
@@ -312,15 +312,15 @@ export default function Register() {
                   width: '100%',
                   padding: '12px 16px',
                   fontSize: '16px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
+                  backgroundColor: 'var(--background)',
+                  color: 'hsl(var(--foreground))',
                   outline: 'none',
                   transition: 'border-color 0.2s'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--brand-primary)'}
+                onBlur={(e) => e.target.style.borderColor = 'hsl(var(--border))'}
                 placeholder="+1 (555) 123-4567"
                 required
               />
@@ -332,7 +332,7 @@ export default function Register() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--foreground)',
                 marginBottom: '8px'
               }}>
                 Country
@@ -345,16 +345,16 @@ export default function Register() {
                   width: '100%',
                   padding: '12px 16px',
                   fontSize: '16px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
-                  backgroundColor: isDetectingCountry ? '#f9fafb' : '#ffffff',
-                  color: '#1f2937',
+                  backgroundColor: isDetectingCountry ? 'hsl(var(--muted))' : 'var(--background)',
+                  color: 'hsl(var(--foreground))',
                   outline: 'none',
                   transition: 'border-color 0.2s',
                   cursor: isDetectingCountry ? 'not-allowed' : 'pointer'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--brand-primary)'}
+                onBlur={(e) => e.target.style.borderColor = 'hsl(var(--border))'}
                 required
               >
                 <option value="">Select your country</option>
@@ -372,7 +372,7 @@ export default function Register() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--foreground)',
                 marginBottom: '8px'
               }}>
                 Password
@@ -387,15 +387,15 @@ export default function Register() {
                     padding: '12px 16px',
                     paddingRight: '48px',
                     fontSize: '16px',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#1f2937',
+                    backgroundColor: 'var(--background)',
+                    color: 'hsl(var(--foreground))',
                     outline: 'none',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                  onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--brand-primary)'}
+                  onBlur={(e) => e.target.style.borderColor = 'hsl(var(--border))'}
                   placeholder="Create a password"
                   required
                 />
@@ -409,7 +409,7 @@ export default function Register() {
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: '#9ca3af',
+                    color: 'hsl(var(--muted-foreground))',
                     cursor: 'pointer',
                     padding: '4px',
                     display: 'flex',
@@ -428,7 +428,7 @@ export default function Register() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--foreground)',
                 marginBottom: '8px'
               }}>
                 Confirm Password
@@ -443,15 +443,15 @@ export default function Register() {
                     padding: '12px 16px',
                     paddingRight: '48px',
                     fontSize: '16px',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#1f2937',
+                    backgroundColor: 'var(--background)',
+                    color: 'hsl(var(--foreground))',
                     outline: 'none',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                  onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--brand-primary)'}
+                  onBlur={(e) => e.target.style.borderColor = 'hsl(var(--border))'}
                   placeholder="Confirm your password"
                   required
                 />
@@ -465,7 +465,7 @@ export default function Register() {
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: '#9ca3af',
+                    color: 'hsl(var(--muted-foreground))',
                     cursor: 'pointer',
                     padding: '4px',
                     display: 'flex',
@@ -482,14 +482,14 @@ export default function Register() {
             {error && (
               <div style={{
                 padding: '12px 16px',
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
+                backgroundColor: 'hsl(var(--destructive) / 0.1)',
+                border: '1px solid hsl(var(--destructive) / 0.3)',
                 borderRadius: '8px',
                 marginBottom: '24px'
               }}>
                 <p style={{
                   fontSize: '14px',
-                  color: '#dc2626',
+                  color: 'hsl(var(--destructive))',
                   margin: '0'
                 }}>
                   {error}
@@ -506,8 +506,8 @@ export default function Register() {
                 padding: '14px 20px',
                 fontSize: '16px',
                 fontWeight: '600',
-                color: '#ffffff',
-                backgroundColor: isLoading ? '#9ca3af' : '#1a1a1a',
+                color: 'var(--background)',
+                backgroundColor: isLoading ? 'hsl(var(--muted-foreground))' : 'var(--brand-primary)',
                 border: 'none',
                 borderRadius: '8px',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -524,7 +524,7 @@ export default function Register() {
             }}>
               <span style={{
                 fontSize: '14px',
-                color: '#6b7280'
+                color: 'var(--brand-text)'
               }}>
                 Already have an account?{' '}
               </span>
@@ -532,7 +532,7 @@ export default function Register() {
                 href="/login"
                 style={{
                   fontSize: '14px',
-                  color: '#1a1a1a',
+                  color: 'var(--brand-primary)',
                   textDecoration: 'none',
                   fontWeight: '600'
                 }}
@@ -548,12 +548,12 @@ export default function Register() {
       {!isMobile && (
         <div style={{
           width: '50%',
-          backgroundColor: '#1a1a1a',
+          backgroundColor: 'var(--brand-primary)',
           padding: '80px 60px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          color: '#ffffff',
+          color: 'var(--background)',
           position: 'relative'
         }}>
           <div style={{ 

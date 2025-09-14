@@ -30,13 +30,13 @@ export default function CustomCodeEditor({
     if (type === 'css') {
       return `/* Example CSS */
 .custom-page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-secondary) 100%);
   padding: 4rem 0;
   color: white;
 }
 
 .custom-button {
-  background-color: #3D8BFF;
+  background-color: var(--brand-accent);
   border: none;
   padding: 12px 24px;
   border-radius: 8px;
@@ -46,7 +46,7 @@ export default function CustomCodeEditor({
 }
 
 .custom-button:hover {
-  background-color: #2563eb;
+  background-color: var(--brand-accent);
   transform: translateY(-1px);
 }`
     } else {

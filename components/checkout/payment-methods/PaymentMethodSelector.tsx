@@ -25,9 +25,9 @@ export default function PaymentMethodSelector({
   
   return (
     <PaymentErrorBoundary>
-      <Card className="border-[#E0E6ED] bg-[#FFFFFF]">
+      <Card className="border-border bg-background">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Payment Method</CardTitle>
+          <CardTitle className="text-lg font-semibold text-brand-primary">Payment Method</CardTitle>
         </CardHeader>
         <CardContent>
         <RadioGroup value={selectedMethod} onValueChange={onMethodChange}>
@@ -35,24 +35,24 @@ export default function PaymentMethodSelector({
             <div key={gateway.id} className="space-y-4">
               <div className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                 selectedMethod === gateway.id 
-                  ? 'border-[#3D8BFF] bg-[#3D8BFF]/5 shadow-sm' 
-                  : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
+                  ? 'border-brand-accent bg-brand-accent/5 shadow-sm' 
+                  : 'border-border hover:border-brand-accent hover:bg-secondary'
               }`}>
                 <RadioGroupItem 
                   value={gateway.id} 
                   id={gateway.id}
-                  className={selectedMethod === gateway.id ? 'border-[#3D8BFF] text-[#3D8BFF]' : 'border-[#E0E6ED] text-[#6C757D]'}
+                  className={selectedMethod === gateway.id ? 'border-brand-accent text-brand-accent' : 'border-border text-brand-text'}
                 />
                 <div className="flex-1">
                   <Label htmlFor={gateway.id} className="flex items-center justify-between cursor-pointer">
                     <div className="flex items-center">
                       {gateway.slug === 'bank_transfer' && (
-                        <Building2 className="h-5 w-5 text-[#6C757D] mr-3" />
+                        <Building2 className="h-5 w-5 text-brand-text mr-3" />
                       )}
-                      <div className="font-medium text-[#1A1A1A]">{gateway.name}</div>
+                      <div className="font-medium text-brand-primary">{gateway.name}</div>
                     </div>
                     {gateway.is_default && (
-                      <span className="text-xs bg-[#F0A202] text-[#FFFFFF] px-2 py-1 rounded-full font-medium">
+                      <span className="text-xs bg-warning text-white px-2 py-1 rounded-full font-medium">
                         Recommended
                       </span>
                     )}
@@ -62,7 +62,7 @@ export default function PaymentMethodSelector({
 
               {/* Credit card form with proper spacing and styling */}
               {selectedMethod === gateway.id && gateway.slug === 'midtrans' && onCreditCardSubmit && (
-                <div className="ml-8 mt-4 mb-8 p-4 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                <div className="ml-8 mt-4 mb-8 p-4 bg-secondary rounded-lg border border-border">
                   <MidtransCreditCardForm
                     onSubmit={onCreditCardSubmit}
                     loading={loading}

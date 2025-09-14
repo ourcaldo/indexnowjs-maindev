@@ -93,12 +93,12 @@ export default function ImageUploader({ value, onChange, onRemove, className = "
           <img
             src={value}
             alt="Featured image"
-            className="w-full h-48 object-cover rounded-lg border border-[#E0E6ED]"
+            className="w-full h-48 object-cover rounded-lg border border-border"
           />
           <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
             <button
               onClick={onRemove}
-              className="bg-[#E63946] text-white p-2 rounded-full hover:bg-[#E63946]/80 transition-colors"
+              className="bg-destructive text-white p-2 rounded-full hover:bg-destructive/80 transition-colors"
               title="Remove image"
             >
               <X className="h-4 w-4" />
@@ -114,8 +114,8 @@ export default function ImageUploader({ value, onChange, onRemove, className = "
       <div
         className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
           dragActive
-            ? 'border-[#3D8BFF] bg-[#3D8BFF]/5'
-            : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
+            ? 'border-brand-accent bg-brand-accent/5'
+            : 'border-border hover:border-brand-accent hover:bg-secondary'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -124,16 +124,16 @@ export default function ImageUploader({ value, onChange, onRemove, className = "
       >
         {isUploading ? (
           <div className="flex flex-col items-center">
-            <Loader2 className="h-8 w-8 text-[#3D8BFF] animate-spin mb-2" />
-            <p className="text-sm text-[#6C757D]">Uploading...</p>
+            <Loader2 className="h-8 w-8 text-brand-accent animate-spin mb-2" />
+            <p className="text-sm text-brand-text">Uploading...</p>
           </div>
         ) : (
           <>
-            <ImageIcon className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
+            <ImageIcon className="h-12 w-12 text-brand-text mx-auto mb-4" />
             <div className="space-y-2">
-              <p className="text-sm font-medium text-[#1A1A1A]">
+              <p className="text-sm font-medium text-brand-primary">
                 Drop your image here, or{' '}
-                <label className="text-[#3D8BFF] hover:underline cursor-pointer">
+                <label className="text-brand-accent hover:underline cursor-pointer">
                   browse
                   <input
                     type="file"
@@ -143,7 +143,7 @@ export default function ImageUploader({ value, onChange, onRemove, className = "
                   />
                 </label>
               </p>
-              <p className="text-xs text-[#6C757D]">
+              <p className="text-xs text-brand-text">
                 Support for JPEG, PNG, WebP, GIF up to 5MB
               </p>
             </div>

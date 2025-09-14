@@ -29,7 +29,7 @@ export default function LandingPageContent({ page }: LandingPageContentProps) {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2C2C2E] text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-brand-primary to-brand-secondary text-white overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10"></div>
         
         <div className="relative max-w-7xl mx-auto px-6 py-20 lg:py-32">
@@ -41,7 +41,7 @@ export default function LandingPageContent({ page }: LandingPageContentProps) {
               </h1>
               
               {page.meta_description && (
-                <p className="text-xl lg:text-2xl text-[#F7F9FC] leading-relaxed mb-12">
+                <p className="text-xl lg:text-2xl text-secondary leading-relaxed mb-12">
                   {page.meta_description}
                 </p>
               )}
@@ -50,14 +50,14 @@ export default function LandingPageContent({ page }: LandingPageContentProps) {
               <div className="flex flex-col sm:flex-row gap-4">
                 <a
                   href="/dashboard"
-                  className="inline-flex items-center justify-center gap-2 bg-[#3D8BFF] hover:bg-[#3D8BFF]/90 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+                  className="inline-flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accent/90 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
                 >
                   Get Started
                   <ArrowRight className="h-5 w-5" />
                 </a>
                 <a
                   href="/pricing"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-white hover:bg-white hover:text-[#1A1A1A] text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-white hover:bg-white hover:text-brand-primary text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all"
                 >
                   View Pricing
                 </a>
@@ -85,7 +85,7 @@ export default function LandingPageContent({ page }: LandingPageContentProps) {
             <div className="prose prose-xl max-w-none">
               <div 
                 dangerouslySetInnerHTML={{ __html: page.content }} 
-                className="text-[#1A1A1A] leading-relaxed"
+                className="text-brand-primary leading-relaxed"
               />
             </div>
           </div>
@@ -94,13 +94,13 @@ export default function LandingPageContent({ page }: LandingPageContentProps) {
 
       {/* Features Section (if no custom content) */}
       {!page.content && (
-        <section className="py-20 bg-[#F7F9FC]">
+        <section className="py-20 bg-secondary">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6">
+              <h2 className="text-3xl lg:text-4xl font-bold text-brand-primary mb-6">
                 Why Choose IndexNow Studio?
               </h2>
-              <p className="text-xl text-[#6C757D] max-w-3xl mx-auto">
+              <p className="text-xl text-brand-text max-w-3xl mx-auto">
                 Professional-grade SEO tools designed for marketers who demand results
               </p>
             </div>
@@ -125,10 +125,10 @@ export default function LandingPageContent({ page }: LandingPageContentProps) {
               ].map((feature, index) => (
                 <div key={index} className="bg-white rounded-lg p-8 text-center shadow-lg">
                   <div className="text-4xl mb-4">{feature.icon}</div>
-                  <h3 className="text-xl font-semibold text-[#1A1A1A] mb-4">
+                  <h3 className="text-xl font-semibold text-brand-primary mb-4">
                     {feature.title}
                   </h3>
-                  <p className="text-[#6C757D] leading-relaxed">
+                  <p className="text-brand-text leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -139,26 +139,26 @@ export default function LandingPageContent({ page }: LandingPageContentProps) {
       )}
 
       {/* CTA Section */}
-      <section className="py-20 bg-[#1A1A1A] text-white">
+      <section className="py-20 bg-brand-primary text-white">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold mb-6">
             Ready to Get Started?
           </h2>
-          <p className="text-xl text-[#F7F9FC] mb-12 max-w-3xl mx-auto">
+          <p className="text-xl text-secondary mb-12 max-w-3xl mx-auto">
             Join thousands of SEO professionals who trust IndexNow Studio for their indexing and ranking needs.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/auth/register"
-              className="inline-flex items-center justify-center gap-2 bg-[#3D8BFF] hover:bg-[#3D8BFF]/90 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accent/90 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
             >
               Start Free Trial
               <ArrowRight className="h-5 w-5" />
             </a>
             <a
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 border-2 border-white hover:bg-white hover:text-[#1A1A1A] text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all"
+              className="inline-flex items-center justify-center gap-2 border-2 border-white hover:bg-white hover:text-brand-primary text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all"
             >
               Contact Sales
             </a>

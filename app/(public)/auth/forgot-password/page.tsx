@@ -43,7 +43,7 @@ export default function ForgotPassword() {
     return (
       <div style={{ 
         minHeight: '100vh', 
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--background)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -53,7 +53,7 @@ export default function ForgotPassword() {
           <div style={{
             width: '60px',
             height: '60px',
-            backgroundColor: '#059669',
+            backgroundColor: 'hsl(var(--success))',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
@@ -66,13 +66,13 @@ export default function ForgotPassword() {
           <h1 style={{
             fontSize: '24px',
             fontWeight: '700',
-            color: '#1a1a1a',
+            color: 'var(--brand-primary)',
             marginBottom: '16px'
           }}>
             Check Your Email
           </h1>
           <p style={{
-            color: '#6b7280',
+            color: 'var(--brand-text)',
             fontSize: '16px',
             marginBottom: '32px',
             lineHeight: '1.5'
@@ -83,8 +83,8 @@ export default function ForgotPassword() {
             onClick={() => router.push("/")}
             style={{
               padding: '12px 24px',
-              backgroundColor: '#1a1a1a',
-              color: '#ffffff',
+              backgroundColor: 'var(--brand-primary)',
+              color: 'var(--background)',
               border: 'none',
               borderRadius: '8px',
               fontSize: '16px',
@@ -109,12 +109,12 @@ export default function ForgotPassword() {
       {/* Mobile: Show dashboard preview first */}
       {isMobile && (
         <div style={{
-          backgroundColor: '#1a1a1a',
+          backgroundColor: 'var(--brand-primary)',
           padding: '40px 20px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          color: '#ffffff',
+          color: 'var(--background)',
           position: 'relative'
         }}>
           {/* Mobile Logo on left side */}
@@ -129,7 +129,7 @@ export default function ForgotPassword() {
             <span style={{
               fontSize: '18px',
               fontWeight: '600',
-              color: '#ffffff'
+              color: 'var(--background)'
             }}>
               IndexNow
             </span>
@@ -142,14 +142,14 @@ export default function ForgotPassword() {
             <h2 style={{
               fontSize: '24px',
               fontWeight: '600',
-              color: '#ffffff',
+              color: 'var(--background)',
               marginBottom: '16px'
             }}>
               Get back to your indexing dashboard.
             </h2>
             <p style={{
               fontSize: '16px',
-              color: 'rgba(255, 255, 255, 0.8)',
+              color: 'hsl(var(--background) / 0.8)',
               lineHeight: '1.5'
             }}>
               Your analytics and performance data are waiting for you to return.
@@ -161,7 +161,7 @@ export default function ForgotPassword() {
       {/* Left Side - Forgot Password Form */}
       <div style={{
         width: isMobile ? '100%' : '50%',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--background)',
         padding: isMobile ? '40px 20px' : '60px',
         display: 'flex',
         flexDirection: 'column',
@@ -181,7 +181,7 @@ export default function ForgotPassword() {
             <span style={{
               fontSize: '18px',
               fontWeight: '600',
-              color: '#1a1a1a'
+              color: 'var(--brand-primary)'
             }}>
               IndexNow
             </span>
@@ -197,7 +197,7 @@ export default function ForgotPassword() {
           <h1 style={{
             fontSize: '32px',
             fontWeight: '700',
-            color: '#1a1a1a',
+            color: 'var(--brand-primary)',
             marginBottom: '8px',
             lineHeight: '1.2'
           }}>
@@ -205,7 +205,7 @@ export default function ForgotPassword() {
           </h1>
           <p style={{
             fontSize: '16px',
-            color: '#6b7280',
+            color: 'var(--brand-text)',
             marginBottom: '40px',
             lineHeight: '1.5'
           }}>
@@ -219,7 +219,7 @@ export default function ForgotPassword() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--foreground)',
                 marginBottom: '8px'
               }}>
                 Email
@@ -232,15 +232,15 @@ export default function ForgotPassword() {
                   width: '100%',
                   padding: '12px 16px',
                   fontSize: '16px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#1f2937',
+                  backgroundColor: 'var(--background)',
+                  color: 'hsl(var(--foreground))',
                   outline: 'none',
                   transition: 'border-color 0.2s'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => e.target.style.borderColor = 'var(--brand-primary)'}
+                onBlur={(e) => e.target.style.borderColor = 'hsl(var(--border))'}
                 placeholder="you@company.com"
                 required
               />
@@ -253,8 +253,8 @@ export default function ForgotPassword() {
               style={{
                 width: '100%',
                 padding: '14px 24px',
-                backgroundColor: '#1a1a1a',
-                color: '#ffffff',
+                backgroundColor: 'var(--brand-primary)',
+                color: 'var(--background)',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '16px',
@@ -270,14 +270,14 @@ export default function ForgotPassword() {
             {/* Error Message */}
             {error && (
               <div style={{
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
+                backgroundColor: 'hsl(var(--destructive) / 0.1)',
+                border: '1px solid hsl(var(--destructive) / 0.3)',
                 borderRadius: '8px',
                 padding: '12px',
                 marginBottom: '24px'
               }}>
                 <p style={{
-                  color: '#dc2626',
+                  color: 'hsl(var(--destructive))',
                   fontSize: '14px',
                   margin: '0'
                 }}>
@@ -294,7 +294,7 @@ export default function ForgotPassword() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#1a1a1a',
+                  color: 'var(--brand-primary)',
                   fontSize: '14px',
                   cursor: 'pointer',
                   textDecoration: 'none',
@@ -314,12 +314,12 @@ export default function ForgotPassword() {
       {!isMobile && (
         <div style={{
           width: '50%',
-          backgroundColor: '#1a1a1a',
+          backgroundColor: 'var(--brand-primary)',
           padding: '60px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          color: '#ffffff',
+          color: 'var(--background)',
           position: 'relative'
         }}>
           <div style={{
@@ -329,14 +329,14 @@ export default function ForgotPassword() {
             <h2 style={{
               fontSize: '24px',
               fontWeight: '600',
-              color: '#ffffff',
+              color: 'var(--background)',
               marginBottom: '16px'
             }}>
               Get back to your indexing dashboard.
             </h2>
             <p style={{
               fontSize: '16px',
-              color: 'rgba(255, 255, 255, 0.8)',
+              color: 'hsl(var(--background) / 0.8)',
               lineHeight: '1.5'
             }}>
               Your analytics and performance data are waiting for you to return.

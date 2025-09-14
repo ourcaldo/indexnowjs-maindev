@@ -86,7 +86,7 @@ export default function PagePublishControls({
                 className={`px-3 py-2 text-xs font-medium rounded transition-colors ${
                   status === statusOption
                     ? 'bg-accent text-white'
-                    : 'bg-[#F7F9FC] text-muted-foreground hover:bg-[#E0E6ED] hover:text-foreground'
+                    : 'bg-secondary text-muted-foreground hover:bg-border hover:text-foreground'
                 }`}
                 disabled={isLoading}
                 data-testid={`button-status-${statusOption}`}
@@ -104,7 +104,7 @@ export default function PagePublishControls({
         <button
           onClick={onSave}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-accent hover:bg-accent/90 disabled:bg-[#6C757D]/50 text-white text-sm font-medium rounded-lg transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-accent hover:bg-accent/90 disabled:bg-brand-text/50 text-white text-sm font-medium rounded-lg transition-colors"
           data-testid="button-save-page"
         >
           <Save className="h-4 w-4" />
@@ -114,7 +114,7 @@ export default function PagePublishControls({
         {onPreview && (
           <button
             onClick={onPreview}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#F7F9FC] hover:bg-[#E0E6ED] text-foreground text-sm font-medium rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-secondary hover:bg-border text-foreground text-sm font-medium rounded-lg transition-colors"
             disabled={isLoading}
             data-testid="button-preview-page"
           >
@@ -126,19 +126,19 @@ export default function PagePublishControls({
 
       {/* Status Info */}
       {status === 'draft' && (
-        <div className="text-xs text-muted-foreground bg-[#6C757D]/5 p-3 rounded-lg">
+        <div className="text-xs text-muted-foreground bg-brand-text/5 p-3 rounded-lg">
           <strong>Draft:</strong> Page is saved but not visible to the public. Only you can see it in preview mode.
         </div>
       )}
       
       {status === 'published' && (
-        <div className="text-xs text-success bg-[#4BB543]/5 p-3 rounded-lg">
+        <div className="text-xs text-success bg-success/5 p-3 rounded-lg">
           <strong>Published:</strong> Page is live and visible to all visitors.
         </div>
       )}
       
       {status === 'archived' && (
-        <div className="text-xs text-warning bg-[#F0A202]/5 p-3 rounded-lg">
+        <div className="text-xs text-warning bg-warning/5 p-3 rounded-lg">
           <strong>Archived:</strong> Page is hidden from public but preserved. You can republish it anytime.
         </div>
       )}

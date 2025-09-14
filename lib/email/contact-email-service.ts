@@ -85,13 +85,13 @@ export class ContactEmailService {
           <meta charset="utf-8">
           <title>Contact Form Submission</title>
         </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #1A1A1A;">
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: var(--brand-primary);">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #1A1A1A; border-bottom: 2px solid #3D8BFF; padding-bottom: 10px;">
+            <h2 style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent); padding-bottom: 10px;">
               New Contact Form Submission
             </h2>
             
-            <div style="background: #F7F9FC; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <div style="background: var(--secondary); padding: 20px; border-radius: 8px; margin: 20px 0;">
               <p><strong>Name:</strong> {{name}}</p>
               <p><strong>Email:</strong> {{email}}</p>
               <p><strong>Type:</strong> {{type}}</p>
@@ -100,11 +100,11 @@ export class ContactEmailService {
             </div>
             
             <div style="margin: 20px 0;">
-              <h3 style="color: #1A1A1A;">Message:</h3>
-              <div style="background: white; border: 1px solid #E0E6ED; padding: 15px; border-radius: 5px; white-space: pre-wrap;">{{message}}</div>
+              <h3 style="color: var(--brand-primary);">Message:</h3>
+              <div style="background: white; border: 1px solid hsl(var(--border)); padding: 15px; border-radius: 5px; white-space: pre-wrap;">{{message}}</div>
             </div>
             
-            <div style="margin: 20px 0; padding: 15px; background: #F7F9FC; border-radius: 5px; font-size: 12px; color: #6C757D;">
+            <div style="margin: 20px 0; padding: 15px; background: var(--secondary); border-radius: 5px; font-size: 12px; color: var(--brand-text);">
               <p><strong>Submission Details:</strong></p>
               <p>IP Address: {{ipAddress}}</p>
               <p>User Agent: {{userAgent}}</p>

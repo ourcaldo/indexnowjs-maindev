@@ -137,7 +137,7 @@ export default function PageSEOFields({
             value={metaTitle}
             onChange={(e) => onMetaTitleChange(e.target.value)}
             placeholder={title || "Enter meta title for search engines..."}
-            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-accent focus:border-transparent"
             maxLength={70}
             data-testid="input-meta-title"
           />
@@ -160,7 +160,7 @@ export default function PageSEOFields({
             value={metaDescription}
             onChange={(e) => onMetaDescriptionChange(e.target.value)}
             placeholder="Write a compelling description that summarizes what visitors will find on this page..."
-            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-brand-accent focus:border-transparent resize-none"
             rows={3}
             maxLength={170}
             data-testid="textarea-meta-description"
@@ -176,7 +176,7 @@ export default function PageSEOFields({
         </div>
       </div>
 
-      <div className="bg-accent/5 border border-[#3D8BFF]/20 rounded-lg p-4">
+      <div className="bg-accent/5 border border-brand-accent/20 rounded-lg p-4">
         <h4 className="text-sm font-medium text-accent mb-2">SEO Tips for Pages</h4>
         <ul className="text-xs text-accent space-y-1">
           <li>• Keep your meta title under 60 characters for best display</li>
