@@ -52,6 +52,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Email template colors - using project color scheme (from globals.css)
+    const emailColors = {
+      brandPrimary: '#1A1A1A',    // var(--brand-primary)
+      brandAccent: '#3D8BFF',     // var(--brand-accent) 
+      brandText: '#6C757D',       // var(--brand-text)
+      secondary: '#F7F9FC',       // var(--secondary)
+      border: '#E0E6ED',          // var(--border)
+      background: '#FFFFFF',      // var(--background)
+      lightBlueBg: '#F0F9FF'      // var(--light-blue-bg)
+    }
+
     // Send test email
     const testEmailOptions = {
       from: `${smtp_from_name || 'IndexNow Studio'} <${smtp_from_email}>`,
@@ -65,15 +76,15 @@ export async function POST(request: NextRequest) {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>SMTP Test Email</title>
         </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1A1A1A; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: #F7F9FC; padding: 30px; border-radius: 8px; margin-bottom: 20px;">
-            <h1 style="color: #3D8BFF; margin: 0 0 10px 0; font-size: 24px;">✅ SMTP Test Successful</h1>
-            <p style="margin: 0; color: #6C757D;">Your email configuration is working correctly!</p>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: ${emailColors.brandPrimary}; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: ${emailColors.secondary}; padding: 30px; border-radius: 8px; margin-bottom: 20px;">
+            <h1 style="color: ${emailColors.brandAccent}; margin: 0 0 10px 0; font-size: 24px;">✅ SMTP Test Successful</h1>
+            <p style="margin: 0; color: ${emailColors.brandText};">Your email configuration is working correctly!</p>
           </div>
           
-          <div style="background: white; border: 1px solid #E0E6ED; border-radius: 8px; padding: 20px;">
-            <h2 style="color: #1A1A1A; margin: 0 0 15px 0; font-size: 18px;">Configuration Details</h2>
-            <ul style="margin: 0; padding-left: 20px; color: #6C757D;">
+          <div style="background: ${emailColors.background}; border: 1px solid ${emailColors.border}; border-radius: 8px; padding: 20px;">
+            <h2 style="color: ${emailColors.brandPrimary}; margin: 0 0 15px 0; font-size: 18px;">Configuration Details</h2>
+            <ul style="margin: 0; padding-left: 20px; color: ${emailColors.brandText};">
               <li><strong>SMTP Host:</strong> ${smtp_host}</li>
               <li><strong>SMTP Port:</strong> ${smtp_port}</li>
               <li><strong>Username:</strong> ${smtp_user}</li>
@@ -82,14 +93,14 @@ export async function POST(request: NextRequest) {
             </ul>
           </div>
           
-          <div style="margin-top: 20px; padding: 15px; background: #F0F9FF; border-radius: 8px; border-left: 4px solid #3D8BFF;">
-            <p style="margin: 0; color: #1A1A1A; font-size: 14px;">
+          <div style="margin-top: 20px; padding: 15px; background: ${emailColors.lightBlueBg}; border-radius: 8px; border-left: 4px solid ${emailColors.brandAccent};">
+            <p style="margin: 0; color: ${emailColors.brandPrimary}; font-size: 14px;">
               <strong>Test completed at:</strong> ${new Date().toLocaleString()}<br>
               <strong>Tested by:</strong> ${adminUser?.email || 'Admin'}
             </p>
           </div>
           
-          <div style="margin-top: 30px; text-align: center; color: #6C757D; font-size: 12px;">
+          <div style="margin-top: 30px; text-align: center; color: ${emailColors.brandText}; font-size: 12px;">
             <p>IndexNow Studio - Professional URL Indexing Platform</p>
           </div>
         </body>

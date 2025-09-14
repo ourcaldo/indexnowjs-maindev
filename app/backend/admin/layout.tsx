@@ -91,7 +91,7 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingSpinner />
       </div>
     )
@@ -103,7 +103,7 @@ export default function AdminLayout({
 
   return (
     <ToastContainer>
-      <div className="min-h-screen bg-[#F7F9FC]">
+      <div className="min-h-screen bg-secondary">
         <AdminSidebar 
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}

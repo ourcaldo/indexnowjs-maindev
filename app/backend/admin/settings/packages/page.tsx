@@ -611,7 +611,7 @@ export default function PackageManagement() {
                         <span className={`px-2 py-1 text-xs font-medium rounded-full border ${
                           pkg.is_active 
                             ? 'bg-success/10 text-success border-success/20'
-                            : 'bg-[#6C757D]/10 text-muted-foreground border-[#6C757D]/20'
+                            : 'bg-muted/50 text-muted-foreground border-muted'
                         }`}>
                           {pkg.is_active ? 'Active' : 'Inactive'}
                         </span>
