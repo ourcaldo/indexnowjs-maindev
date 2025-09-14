@@ -234,24 +234,24 @@ export default function OrderCompletedPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge className="bg-[#F0A202] text-white"><Clock className="w-3 h-3 mr-1" />Pending Payment</Badge>
+        return <Badge className="bg-warning text-warning-foreground"><Clock className="w-3 h-3 mr-1" />Pending Payment</Badge>
       case 'proof_uploaded':
-        return <Badge className="bg-[#F0A202] text-white"><Upload className="w-3 h-3 mr-1" />Waiting for Confirmation</Badge>
+        return <Badge className="bg-warning text-warning-foreground"><Upload className="w-3 h-3 mr-1" />Waiting for Confirmation</Badge>
       case 'completed':
-        return <Badge className="bg-[#4BB543] text-white"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>
+        return <Badge className="bg-success text-success-foreground"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>
       case 'failed':
-        return <Badge className="bg-[#E63946] text-white"><AlertCircle className="w-3 h-3 mr-1" />Failed</Badge>
+        return <Badge className="bg-destructive text-destructive-foreground"><AlertCircle className="w-3 h-3 mr-1" />Failed</Badge>
       default:
-        return <Badge className="bg-[#6C757D] text-white">{status}</Badge>
+        return <Badge className="bg-muted text-muted-foreground">{status}</Badge>
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A1A1A] mx-auto mb-4"></div>
-          <p className="text-[#6C757D]">Loading order details...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading order details...</p>
         </div>
       </div>
     )
@@ -259,14 +259,14 @@ export default function OrderCompletedPage() {
 
   if (!transaction) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-[#E63946] mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-[#1A1A1A] mb-2">Order Not Found</h2>
-          <p className="text-[#6C757D] mb-4">The order you're looking for doesn't exist or you don't have access to it.</p>
+          <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-foreground mb-2">Order Not Found</h2>
+          <p className="text-muted-foreground mb-4">The order you're looking for doesn't exist or you don't have access to it.</p>
           <Button 
             onClick={() => router.push('/dashboard/settings?tab=plans-billing')}
-            className="bg-[#1A1A1A] hover:bg-[#2C2C2E] text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             Back to Billing
           </Button>
@@ -276,14 +276,14 @@ export default function OrderCompletedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] py-8">
+    <div className="min-h-screen bg-secondary py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <Button
             variant="ghost"
             onClick={() => router.push('/dashboard/settings?tab=plans-billing')}
-            className="mb-4 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC]"
+            className="mb-4 text-muted-foreground hover:text-foreground hover:bg-secondary"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Billing
@@ -291,8 +291,8 @@ export default function OrderCompletedPage() {
 
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1A1A]">Order Completed</h1>
-              <p className="text-[#6C757D] mt-1">Thank you for your order! Here are your order details.</p>
+              <h1 className="text-2xl font-bold text-foreground">Order Completed</h1>
+              <p className="text-muted-foreground mt-1">Thank you for your order! Here are your order details.</p>
             </div>
             {getStatusBadge(transaction.transaction_status)}
           </div>
@@ -305,17 +305,17 @@ export default function OrderCompletedPage() {
             {/* Order Information */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Order Information</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Order Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Order ID</p>
-                    <p className="text-sm text-[#6C757D] font-mono">{transaction.id}</p>
+                    <p className="text-sm font-medium text-foreground">Order ID</p>
+                    <p className="text-sm text-muted-foreground font-mono">{transaction.id}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Order Date</p>
-                    <p className="text-sm text-[#6C757D]">
+                    <p className="text-sm font-medium text-foreground">Order Date</p>
+                    <p className="text-sm text-muted-foreground">
                       {new Date(transaction.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
@@ -324,12 +324,12 @@ export default function OrderCompletedPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Package</p>
-                    <p className="text-sm text-[#6C757D]">{transaction.package.name}</p>
+                    <p className="text-sm font-medium text-foreground">Package</p>
+                    <p className="text-sm text-muted-foreground">{transaction.package.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Billing Period</p>
-                    <p className="text-sm text-[#6C757D]">{transaction.billing_period ? transaction.billing_period.charAt(0).toUpperCase() + transaction.billing_period.slice(1) : 'N/A'}</p>
+                    <p className="text-sm font-medium text-foreground">Billing Period</p>
+                    <p className="text-sm text-muted-foreground">{transaction.billing_period ? transaction.billing_period.charAt(0).toUpperCase() + transaction.billing_period.slice(1) : 'N/A'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -338,21 +338,21 @@ export default function OrderCompletedPage() {
             {/* Package Details */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Package Details</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Package Details</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold text-[#1A1A1A]">{transaction.package.name}</h3>
-                    <p className="text-sm text-[#6C757D] mt-1">{transaction.package.description}</p>
+                    <h3 className="font-semibold text-foreground">{transaction.package.name}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{transaction.package.description}</p>
                   </div>
 
                   <div>
-                    <p className="font-medium text-[#1A1A1A] mb-2">Package Features:</p>
+                    <p className="font-medium text-foreground mb-2">Package Features:</p>
                     <ul className="space-y-1">
                       {transaction.package.features?.map((feature: string, index: number) => (
-                        <li key={index} className="text-sm text-[#6C757D] flex items-center">
-                          <CheckCircle className="w-3 h-3 text-[#4BB543] mr-2 flex-shrink-0" />
+                        <li key={index} className="text-sm text-muted-foreground flex items-center">
+                          <CheckCircle className="w-3 h-3 text-success mr-2 flex-shrink-0" />
                           {feature}
                         </li>
                       ))}
@@ -362,8 +362,8 @@ export default function OrderCompletedPage() {
                   <Separator />
 
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-[#1A1A1A]">Total Amount</span>
-                    <span className="text-xl font-bold text-[#1A1A1A]">
+                    <span className="font-semibold text-foreground">Total Amount</span>
+                    <span className="text-xl font-bold text-foreground">
                       {transaction.currency === 'USD' 
                         ? `$${transaction.amount}` 
                         : `Rp ${transaction.amount.toLocaleString('id-ID')}`
@@ -377,23 +377,23 @@ export default function OrderCompletedPage() {
             {/* Customer Information */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Customer Information</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Customer Information</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Name</p>
-                    <p className="text-sm text-[#6C757D]">
+                    <p className="text-sm font-medium text-foreground">Name</p>
+                    <p className="text-sm text-muted-foreground">
                       {transaction.customer_info.first_name} {transaction.customer_info.last_name}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Email</p>
-                    <p className="text-sm text-[#6C757D]">{transaction.customer_info.email}</p>
+                    <p className="text-sm font-medium text-foreground">Email</p>
+                    <p className="text-sm text-muted-foreground">{transaction.customer_info.email}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Phone</p>
-                    <p className="text-sm text-[#6C757D]">{transaction.customer_info.phone || transaction.metadata?.customer_info?.phone || 'N/A'}</p>
+                    <p className="text-sm font-medium text-foreground">Phone</p>
+                    <p className="text-sm text-muted-foreground">{transaction.customer_info.phone || transaction.metadata?.customer_info?.phone || 'N/A'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -405,28 +405,28 @@ export default function OrderCompletedPage() {
             {/* Payment Instructions */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Payment Instructions</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Payment Instructions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {transaction.transaction_status === 'completed' ? (
-                  <div className="bg-[#D4EDDA] border border-[#C3E6CB] rounded-lg p-4">
+                  <div className="bg-success/10 border border-success/20 rounded-lg p-4">
                     <div className="flex items-start space-x-2">
-                      <CheckCircle className="w-5 h-5 text-[#4BB543] flex-shrink-0 mt-0.5" />
+                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-[#1A1A1A] mb-1">Payment Completed Successfully</p>
-                        <p className="text-sm text-[#6C757D]">
+                        <p className="font-medium text-foreground mb-1">Payment Completed Successfully</p>
+                        <p className="text-sm text-muted-foreground">
                           Your payment has been processed and your package is now active.
                         </p>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-[#FFF3CD] border border-[#FFEAA7] rounded-lg p-4">
+                  <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
                     <div className="flex items-start space-x-2">
-                      <AlertCircle className="w-5 h-5 text-[#F0A202] flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-[#1A1A1A] mb-1">Payment Processing</p>
-                        <p className="text-sm text-[#6C757D]">
+                        <p className="font-medium text-foreground mb-1">Payment Processing</p>
+                        <p className="text-sm text-muted-foreground">
                           Your payment is being processed. You will be notified once it's completed.
                         </p>
                       </div>
@@ -436,30 +436,30 @@ export default function OrderCompletedPage() {
 
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Payment Method</p>
-                    <p className="text-sm text-[#6C757D]">{transaction.gateway.name}</p>
+                    <p className="text-sm font-medium text-foreground">Payment Method</p>
+                    <p className="text-sm text-muted-foreground">{transaction.gateway.name}</p>
                   </div>
 
                   {transaction.gateway.configuration?.bank_name && (
                     <>
                       <div>
-                        <p className="text-sm font-medium text-[#1A1A1A]">Bank</p>
-                        <p className="text-sm text-[#6C757D]">{transaction.gateway.configuration.bank_name}</p>
+                        <p className="text-sm font-medium text-foreground">Bank</p>
+                        <p className="text-sm text-muted-foreground">{transaction.gateway.configuration.bank_name}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#1A1A1A]">Account Name</p>
-                        <p className="text-sm text-[#6C757D]">{transaction.gateway.configuration.account_name}</p>
+                        <p className="text-sm font-medium text-foreground">Account Name</p>
+                        <p className="text-sm text-muted-foreground">{transaction.gateway.configuration.account_name}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#1A1A1A]">Account Number</p>
-                        <p className="text-sm text-[#6C757D] font-mono">{transaction.gateway.configuration.account_number}</p>
+                        <p className="text-sm font-medium text-foreground">Account Number</p>
+                        <p className="text-sm text-muted-foreground font-mono">{transaction.gateway.configuration.account_number}</p>
                       </div>
                     </>
                   )}
 
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Amount to Pay</p>
-                    <p className="text-lg font-bold text-[#1A1A1A]">
+                    <p className="text-sm font-medium text-foreground">Amount to Pay</p>
+                    <p className="text-lg font-bold text-foreground">
                       {transaction.currency === 'USD' 
                         ? `$${transaction.amount}` 
                         : `Rp ${transaction.amount.toLocaleString('id-ID')}`
@@ -468,8 +468,8 @@ export default function OrderCompletedPage() {
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Reference Number</p>
-                    <p className="text-sm text-[#6C757D] font-mono">{transaction.id}</p>
+                    <p className="text-sm font-medium text-foreground">Reference Number</p>
+                    <p className="text-sm text-muted-foreground font-mono">{transaction.id}</p>
                   </div>
                 </div>
               </CardContent>
@@ -478,28 +478,28 @@ export default function OrderCompletedPage() {
             {/* Payment Proof Upload */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Payment Confirmation</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Payment Confirmation</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {transaction.payment_proof_url ? (
                   <div className="text-center py-6">
-                    <CheckCircle className="w-12 h-12 text-[#4BB543] mx-auto mb-3" />
-                    <h3 className="font-semibold text-[#1A1A1A] mb-2">Payment Proof Uploaded</h3>
-                    <p className="text-sm text-[#6C757D] mb-4">
+                    <CheckCircle className="w-12 h-12 text-success mx-auto mb-3" />
+                    <h3 className="font-semibold text-foreground mb-2">Payment Proof Uploaded</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
                       We have received your payment proof and will verify it soon.
                     </p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(transaction.payment_proof_url!, '_blank')}
-                      className="border-[#E0E6ED] text-[#6C757D] hover:bg-[#F7F9FC]"
+                      className="border-[#E0E6ED] text-muted-foreground hover:bg-[#F7F9FC]"
                     >
                       View Uploaded Proof
                     </Button>
                   </div>
                 ) : (
                   <>
-                    <p className="text-sm text-[#6C757D] text-center">
+                    <p className="text-sm text-muted-foreground text-center">
                       {transaction.transaction_status === 'completed' ? 'Payment has been processed successfully. No further action required.' : 'Upload your payment proof here to speed up payment verification.'}
                     </p>
 
@@ -515,7 +515,7 @@ export default function OrderCompletedPage() {
                     {showUploadForm && (
                       <div className="space-y-4 pt-4 border-t border-[#E0E6ED]">
                         <div>
-                          <Label htmlFor="proof_file" className="text-sm font-medium text-[#1A1A1A]">
+                          <Label htmlFor="proof_file" className="text-sm font-medium text-foreground">
                             Select Payment Proof *
                           </Label>
                           <Input
@@ -525,16 +525,16 @@ export default function OrderCompletedPage() {
                             onChange={handleFileSelect}
                             className="mt-1"
                           />
-                          <p className="text-xs text-[#6C757D] mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             Supported formats: JPG, PNG, WebP, PDF (Max 5MB)
                           </p>
                         </div>
 
                         {proofFile && (
                           <div className="bg-[#F7F9FC] border border-[#E0E6ED] rounded-lg p-3">
-                            <p className="text-sm font-medium text-[#1A1A1A]">Selected File:</p>
-                            <p className="text-sm text-[#6C757D]">{proofFile.name}</p>
-                            <p className="text-xs text-[#6C757D]">
+                            <p className="text-sm font-medium text-foreground">Selected File:</p>
+                            <p className="text-sm text-muted-foreground">{proofFile.name}</p>
+                            <p className="text-xs text-muted-foreground">
                               Size: {(proofFile.size / 1024 / 1024).toFixed(2)} MB
                             </p>
                           </div>

@@ -121,23 +121,23 @@ export default function BillingHistoryPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-[#4BB543]" />
-      case 'pending': return <Clock className="h-4 w-4 text-[#F0A202]" />
-      case 'proof_uploaded': return <Clock className="h-4 w-4 text-[#F0A202]" />
-      case 'failed': return <XCircle className="h-4 w-4 text-[#E63946]" />
-      case 'cancelled': return <XCircle className="h-4 w-4 text-[#6C757D]" />
-      default: return <AlertCircle className="h-4 w-4 text-[#6C757D]" />
+      case 'completed': return <CheckCircle className="h-4 w-4 text-success" />
+      case 'pending': return <Clock className="h-4 w-4 text-warning" />
+      case 'proof_uploaded': return <Clock className="h-4 w-4 text-warning" />
+      case 'failed': return <XCircle className="h-4 w-4 text-destructive" />
+      case 'cancelled': return <XCircle className="h-4 w-4 text-muted-foreground" />
+      default: return <AlertCircle className="h-4 w-4 text-muted-foreground" />
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return { bg: 'bg-[#4BB543]/10', text: 'text-[#4BB543]', border: 'border-[#4BB543]/20' }
-      case 'pending': return { bg: 'bg-[#F0A202]/10', text: 'text-[#F0A202]', border: 'border-[#F0A202]/20' }
-      case 'proof_uploaded': return { bg: 'bg-[#F0A202]/10', text: 'text-[#F0A202]', border: 'border-[#F0A202]/20' }
-      case 'failed': return { bg: 'bg-[#E63946]/10', text: 'text-[#E63946]', border: 'border-[#E63946]/20' }
-      case 'cancelled': return { bg: 'bg-[#6C757D]/10', text: 'text-[#6C757D]', border: 'border-[#6C757D]/20' }
-      default: return { bg: 'bg-[#6C757D]/10', text: 'text-[#6C757D]', border: 'border-[#6C757D]/20' }
+      case 'completed': return { bg: 'bg-success/10', text: 'text-success', border: 'border-success/20' }
+      case 'pending': return { bg: 'bg-warning/10', text: 'text-warning', border: 'border-warning/20' }
+      case 'proof_uploaded': return { bg: 'bg-warning/10', text: 'text-warning', border: 'border-warning/20' }
+      case 'failed': return { bg: 'bg-destructive/10', text: 'text-destructive', border: 'border-destructive/20' }
+      case 'cancelled': return { bg: 'bg-muted/10', text: 'text-muted-foreground', border: 'border-muted/20' }
+      default: return { bg: 'bg-muted/10', text: 'text-muted-foreground', border: 'border-muted/20' }
     }
   }
 
@@ -190,12 +190,12 @@ export default function BillingHistoryPage() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Error Loading History</h3>
-        <p className="text-[#6C757D] mb-4">{error}</p>
+        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading History</h3>
+        <p className="text-muted-foreground mb-4">{error}</p>
         <button
           onClick={loadBillingHistory}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Try Again
         </button>
@@ -208,12 +208,12 @@ export default function BillingHistoryPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Billing History</h1>
-          <p className="text-[#6C757D] mt-1">View and manage your payment transactions</p>
+          <h1 className="text-2xl font-bold text-foreground">Billing History</h1>
+          <p className="text-muted-foreground mt-1">View and manage your payment transactions</p>
         </div>
         <button
           onClick={loadBillingHistory}
-          className="px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Refresh
         </button>
@@ -222,46 +222,46 @@ export default function BillingHistoryPage() {
       {/* Summary Stats */}
       {historyData?.summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-white p-3 rounded-lg border border-[#E0E6ED]">
-            <div className="text-xl font-bold text-[#1A1A1A]">
+          <div className="bg-card p-3 rounded-lg border border-border">
+            <div className="text-xl font-bold text-foreground">
               {historyData.summary.total_transactions}
             </div>
-            <div className="text-xs text-[#6C757D]">Total Transactions</div>
+            <div className="text-xs text-muted-foreground">Total Transactions</div>
           </div>
-          <div className="bg-white p-3 rounded-lg border border-[#E0E6ED]">
-            <div className="text-xl font-bold text-[#4BB543]">
+          <div className="bg-card p-3 rounded-lg border border-border">
+            <div className="text-xl font-bold text-success">
               {historyData.summary.completed_transactions}
             </div>
-            <div className="text-xs text-[#6C757D]">Completed</div>
+            <div className="text-xs text-muted-foreground">Completed</div>
           </div>
-          <div className="bg-white p-3 rounded-lg border border-[#E0E6ED]">
-            <div className="text-xl font-bold text-[#F0A202]">
+          <div className="bg-card p-3 rounded-lg border border-border">
+            <div className="text-xl font-bold text-warning">
               {historyData.summary.pending_transactions}
             </div>
-            <div className="text-xs text-[#6C757D]">Pending</div>
+            <div className="text-xs text-muted-foreground">Pending</div>
           </div>
-          <div className="bg-white p-3 rounded-lg border border-[#E0E6ED]">
-            <div className="text-xl font-bold text-[#1A1A1A]">
+          <div className="bg-card p-3 rounded-lg border border-border">
+            <div className="text-xl font-bold text-foreground">
               {formatCurrency(historyData.summary.total_amount_spent)}
             </div>
-            <div className="text-xs text-[#6C757D]">Total Spent</div>
+            <div className="text-xs text-muted-foreground">Total Spent</div>
           </div>
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-white p-6 rounded-lg border border-[#E0E6ED]">
+      <div className="bg-card p-6 rounded-lg border border-border">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search by package, order ID, or transaction ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               />
             </div>
           </div>
@@ -271,7 +271,7 @@ export default function BillingHistoryPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             >
               <option value="">All Status</option>
               <option value="completed">Completed</option>
@@ -286,7 +286,7 @@ export default function BillingHistoryPage() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             >
               <option value="">All Types</option>
               <option value="subscription">New Subscription</option>
@@ -299,50 +299,50 @@ export default function BillingHistoryPage() {
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-white rounded-lg border border-[#E0E6ED] overflow-hidden">
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
         {filteredTransactions.length > 0 ? (
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[#F7F9FC] border-b border-[#E0E6ED]">
+                <thead className="bg-secondary border-b border-border">
                   <tr>
-                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Transaction</th>
-                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Package</th>
-                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Amount</th>
-                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Status</th>
-                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Date</th>
-                    <th className="text-left py-2 px-4 text-xs font-medium text-[#6C757D]">Method</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-muted-foreground">Transaction</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-muted-foreground">Package</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-muted-foreground">Amount</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-muted-foreground">Status</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-muted-foreground">Date</th>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-muted-foreground">Method</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E0E6ED]">
+                <tbody className="divide-y divide-border">
                   {filteredTransactions.map((transaction) => (
                     <tr 
                       key={transaction.id} 
-                      className="hover:bg-[#F7F9FC]/50 transition-colors cursor-pointer"
+                      className="hover:bg-secondary/50 transition-colors cursor-pointer"
                       onClick={() => window.location.href = `/dashboard/settings/plans-billing/order/${transaction.id}`}
                     >
                       <td className="py-3 px-4">
                         <div>
-                          <div className="font-medium text-[#1A1A1A] text-sm">
+                          <div className="font-medium text-foreground text-sm">
                             {formatTransactionType(transaction.transaction_type)}
                           </div>
-                          <div className="text-xs text-[#6C757D]">
+                          <div className="text-xs text-muted-foreground">
                             ID: {transaction.id}
                           </div>
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="font-medium text-[#1A1A1A] text-sm">
+                        <div className="font-medium text-foreground text-sm">
                           {transaction.package.name}
                         </div>
                         {transaction.subscription && (
-                          <div className="text-xs text-[#6C757D]">
+                          <div className="text-xs text-muted-foreground">
                             {transaction.subscription.billing_period}
                           </div>
                         )}
                       </td>
                       <td className="py-3 px-4">
-                        <div className="font-semibold text-[#1A1A1A] text-sm">
+                        <div className="font-semibold text-foreground text-sm">
                           {formatCurrency(transaction.amount, transaction.currency)}
                         </div>
                       </td>
@@ -359,20 +359,20 @@ export default function BillingHistoryPage() {
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="text-xs text-[#1A1A1A]">
+                        <div className="text-xs text-foreground">
                           {formatDate(transaction.created_at)}
                         </div>
                         {transaction.verified_at && (
-                          <div className="text-xs text-[#6C757D]">
+                          <div className="text-xs text-muted-foreground">
                             Verified: {formatDate(transaction.verified_at)}
                           </div>
                         )}
                       </td>
                       <td className="py-3 px-4">
-                        <div className="text-xs text-[#1A1A1A]">
+                        <div className="text-xs text-foreground">
                           {transaction.gateway.name}
                         </div>
-                        <div className="text-xs text-[#6C757D]">
+                        <div className="text-xs text-muted-foreground">
                           {transaction.payment_method || 'N/A'}
                         </div>
                       </td>
@@ -384,8 +384,8 @@ export default function BillingHistoryPage() {
 
             {/* Pagination */}
             {historyData?.pagination && historyData.pagination.total_pages > 1 && (
-              <div className="px-6 py-4 border-t border-[#E0E6ED] flex items-center justify-between">
-                <div className="text-sm text-[#6C757D]">
+              <div className="px-6 py-4 border-t border-border flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
                   Showing {((historyData.pagination.current_page - 1) * historyData.pagination.items_per_page) + 1} to{' '}
                   {Math.min(historyData.pagination.current_page * historyData.pagination.items_per_page, historyData.pagination.total_items)} of{' '}
                   {historyData.pagination.total_items} transactions
@@ -396,13 +396,13 @@ export default function BillingHistoryPage() {
                     disabled={!historyData.pagination.has_prev}
                     className={`p-2 rounded-lg transition-colors ${
                       historyData.pagination.has_prev
-                        ? 'hover:bg-[#F7F9FC] text-[#1A1A1A]'
-                        : 'text-[#6C757D] cursor-not-allowed'
+                        ? 'hover:bg-secondary text-foreground'
+                        : 'text-muted-foreground cursor-not-allowed'
                     }`}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <span className="text-sm text-[#1A1A1A] px-3 py-1">
+                  <span className="text-sm text-foreground px-3 py-1">
                     Page {historyData.pagination.current_page} of {historyData.pagination.total_pages}
                   </span>
                   <button
@@ -410,8 +410,8 @@ export default function BillingHistoryPage() {
                     disabled={!historyData.pagination.has_next}
                     className={`p-2 rounded-lg transition-colors ${
                       historyData.pagination.has_next
-                        ? 'hover:bg-[#F7F9FC] text-[#1A1A1A]'
-                        : 'text-[#6C757D] cursor-not-allowed'
+                        ? 'hover:bg-secondary text-foreground'
+                        : 'text-muted-foreground cursor-not-allowed'
                     }`}
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -422,9 +422,9 @@ export default function BillingHistoryPage() {
           </>
         ) : (
           <div className="text-center py-12">
-            <Receipt className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">No Transactions Found</h3>
-            <p className="text-[#6C757D]">
+            <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No Transactions Found</h3>
+            <p className="text-muted-foreground">
               {searchTerm || statusFilter || typeFilter
                 ? 'No transactions match your current filters.'
                 : 'You haven\'t made any transactions yet.'
