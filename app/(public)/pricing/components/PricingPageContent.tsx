@@ -136,21 +136,21 @@ export default function PricingPageContent() {
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
               Fair, transparent pricing built to{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-info via-cyan-300 to-info">
                 grow with you
               </span>
             </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               No hidden fees. No confusing credits. Just straightforward plans that scale when you need them.
             </p>
             <button
               onClick={handleGetStarted}
-              className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center space-x-2"
+              className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center space-x-2"
             >
               <span>Start free</span>
               <ArrowRight className="w-5 h-5" />
             </button>
-            <p className="text-sm text-gray-400 mt-4">
+            <p className="text-sm text-muted-foreground mt-4">
               3-day free trial • cancel anytime
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function PricingPageContent() {
             {/* Period Toggle */}
             <div className="flex justify-center mb-12">
               <div className="flex items-center space-x-6 rounded-2xl p-4">
-                <span className={`text-base font-medium ${selectedPeriod === 'monthly' ? 'text-white' : 'text-gray-300'}`}>
+                <span className={`text-base font-medium ${selectedPeriod === 'monthly' ? 'text-white' : 'text-muted-foreground'}`}>
                   Monthly
                 </span>
                 <button
@@ -180,11 +180,11 @@ export default function PricingPageContent() {
                   />
                 </button>
                 <div className="flex items-center space-x-2">
-                  <span className={`text-base font-medium ${selectedPeriod === 'annual' ? 'text-white' : 'text-gray-300'}`}>
+                  <span className={`text-base font-medium ${selectedPeriod === 'annual' ? 'text-white' : 'text-muted-foreground'}`}>
                     Annual
                   </span>
                   {getSavingsPercentage('annual') && (
-                    <span className="text-xs text-green-400 font-semibold bg-green-400/10 px-2 py-1 rounded-full">
+                    <span className="text-xs text-success font-semibold bg-success/10 px-2 py-1 rounded-full">
                       Save {getSavingsPercentage('annual')}%
                     </span>
                   )}
@@ -217,7 +217,7 @@ export default function PricingPageContent() {
                         {/* Popular Badge */}
                         {isPopular && (
                           <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                            <div className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                            <div className="bg-gradient-to-r from-info to-cyan-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
                               MOST POPULAR
                             </div>
                           </div>
@@ -228,7 +228,7 @@ export default function PricingPageContent() {
                           <h3 className="text-2xl font-bold text-white mb-2">
                             {pkg.name}
                           </h3>
-                          <p className="text-gray-300 text-sm">
+                          <p className="text-muted-foreground text-sm">
                             {pkg.description}
                           </p>
                         </div>
@@ -237,7 +237,7 @@ export default function PricingPageContent() {
                         <div className="mb-8">
                           {pricing.originalPrice && (
                             <div className="mb-2">
-                              <span className="text-lg text-gray-500 line-through">
+                              <span className="text-lg text-muted-foreground/70 line-through">
                                 {formatPriceFunc(pricing.originalPrice)}
                               </span>
                             </div>
@@ -248,7 +248,7 @@ export default function PricingPageContent() {
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-400 text-sm">
+                            <span className="text-muted-foreground text-sm">
                               per {selectedPeriod === 'monthly' ? 'month' : 'year'}
                             </span>
                           </div>
@@ -260,9 +260,9 @@ export default function PricingPageContent() {
                             {features.map((feature, featureIndex) => (
                               <li key={featureIndex} className="flex items-start">
                                 <div className="flex-shrink-0 w-5 h-5 mt-0.5">
-                                  <Check className="w-5 h-5 text-green-400" />
+                                  <Check className="w-5 h-5 text-success" />
                                 </div>
-                                <span className="ml-3 text-gray-300 text-sm">
+                                <span className="ml-3 text-muted-foreground text-sm">
                                   {feature}
                                 </span>
                               </li>
@@ -274,7 +274,7 @@ export default function PricingPageContent() {
                         <div className="mt-auto">
                           <button
                             onClick={handleGetStarted}
-                            className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+                            className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200">
                           >
                             Get started
                           </button>
@@ -303,13 +303,13 @@ export default function PricingPageContent() {
                 { icon: <MessageCircle className="w-8 h-8" />, title: "GDPR-ready privacy", desc: "Compliant data handling and storage" }
               ].map((item, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-blue-400 mb-4 flex justify-center">
+                  <div className="text-info mb-4 flex justify-center">
                     {item.icon}
                   </div>
                   <h3 className="text-white font-semibold mb-2 text-sm">
                     {item.title}
                   </h3>
-                  <p className="text-gray-400 text-xs">
+                  <p className="text-muted-foreground text-xs">
                     {item.desc}
                   </p>
                 </div>
@@ -325,7 +325,7 @@ export default function PricingPageContent() {
               <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
                 Pricing questions answered
               </h2>
-              <p className="text-xl text-gray-300">
+              <p className="text-xl text-muted-foreground">
                 Everything you need to know about our plans and pricing.
               </p>
             </div>
@@ -344,16 +344,16 @@ export default function PricingPageContent() {
                         </h3>
                         <div className="flex-shrink-0">
                           {expandedFAQ === index ? (
-                            <ChevronUp className="w-5 h-5 text-gray-300" />
+                            <ChevronUp className="w-5 h-5 text-muted-foreground" />
                           ) : (
-                            <ChevronDown className="w-5 h-5 text-gray-300" />
+                            <ChevronDown className="w-5 h-5 text-muted-foreground" />
                           )}
                         </div>
                       </div>
                     </button>
                     {expandedFAQ === index && (
                       <div className="px-6 pb-6">
-                        <p className="text-gray-300 leading-relaxed">
+                        <p className="text-muted-foreground leading-relaxed">
                           {faq.answer}
                         </p>
                       </div>
@@ -387,15 +387,15 @@ export default function PricingPageContent() {
                     "No feature bloat"
                   ].map((item, index) => (
                     <div key={index} className="flex items-center">
-                      <Check className="w-5 h-5 text-green-400 mr-3" />
-                      <span className="text-gray-300">{item}</span>
+                      <Check className="w-5 h-5 text-success mr-3" />
+                      <span className="text-muted-foreground">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* All-in-one tools - Right Side */}
-              <div className="bg-red-500/5 backdrop-blur-sm rounded-2xl border border-red-500/20 p-8">
+              <div className="bg-destructive/5 backdrop-blur-sm rounded-2xl border border-destructive/20 p-8">
                 <h3 className="text-2xl font-bold text-white mb-6">All-in-one tools</h3>
                 <div className="space-y-4">
                   {[
@@ -406,8 +406,8 @@ export default function PricingPageContent() {
                     "Pay for tools you never touch"
                   ].map((item, index) => (
                     <div key={index} className="flex items-center">
-                      <X className="w-5 h-5 text-red-400 mr-3" />
-                      <span className="text-gray-300">{item}</span>
+                      <X className="w-5 h-5 text-destructive mr-3" />
+                      <span className="text-muted-foreground">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -422,13 +422,13 @@ export default function PricingPageContent() {
             <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-white">
               Track rankings with clarity without breaking the bank
             </h2>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-xl text-muted-foreground mb-8">
               Start your 3-day free trial today and see how simple rank tracking can be.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleGetStarted}
-                className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center justify-center space-x-2"
+                className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center justify-center space-x-2">
               >
                 <span>Start free</span>
                 <ArrowRight className="w-5 h-5" />

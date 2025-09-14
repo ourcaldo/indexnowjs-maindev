@@ -125,7 +125,7 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
   }
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden bg-background">
+    <div className="min-h-screen text-foreground relative overflow-hidden bg-background">
       <Background />
       <Header 
         user={user}
@@ -138,13 +138,13 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
 
       <main className="relative z-10 pt-24">
         {/* Hero Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 border-b border-gray-800/50">
+        <section className="py-16 px-4 sm:px-6 lg:px-8 border-b border-border">
           <div className="max-w-7xl mx-auto">
             {/* Breadcrumb */}
             <div className="mb-8">
               <Link
                 href="/blog"
-                className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors"
                 data-testid="back-to-blog"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -154,14 +154,14 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
 
             {/* Category Title */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-600/20 border border-blue-500/30 rounded-xl">
-                <Folder className="w-8 h-8 text-blue-400" />
+              <div className="p-3 bg-info/20 border border-info/30 rounded-xl">
+                <Folder className="w-8 h-8 text-info" />
               </div>
               <div>
                 <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2" data-testid="category-title">
                   {categoryName}
                 </h1>
-                <p className="text-xl text-gray-400" data-testid="category-description">
+                <p className="text-xl text-muted-foreground" data-testid="category-description">
                   Explore all posts in the {categoryName} category
                 </p>
               </div>
@@ -169,7 +169,7 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
 
             {/* Post Count */}
             {pagination && (
-              <p className="text-gray-500" data-testid="post-count">
+              <p className="text-muted-foreground/70" data-testid="post-count">
                 {pagination.total_posts} {pagination.total_posts === 1 ? 'post' : 'posts'} found
               </p>
             )}
@@ -183,11 +183,11 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
             {loading && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" data-testid="category-loading">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-6 animate-pulse">
-                    <div className="w-full h-48 bg-gray-800 rounded-lg mb-4"></div>
-                    <div className="h-4 bg-gray-800 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-800 rounded w-3/4 mb-4"></div>
-                    <div className="h-3 bg-gray-800 rounded w-1/2"></div>
+                  <div key={i} className="bg-muted/10 border border-border rounded-xl p-6 animate-pulse">
+                    <div className="w-full h-48 bg-muted/20 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-muted/20 rounded mb-2"></div>
+                    <div className="h-4 bg-muted/20 rounded w-3/4 mb-4"></div>
+                    <div className="h-3 bg-muted/20 rounded w-1/2"></div>
                   </div>
                 ))}
               </div>
@@ -196,14 +196,14 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
             {/* Error State */}
             {error && !loading && (
               <div className="text-center py-12" data-testid="category-error">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-red-600/20 border border-red-500/30 rounded-full mb-4">
-                  <Folder className="w-8 h-8 text-red-400" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-destructive/20 border border-destructive/30 rounded-full mb-4">
+                  <Folder className="w-8 h-8 text-destructive" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">Failed to Load Posts</h3>
-                <p className="text-gray-400 mb-6">{error}</p>
+                <p className="text-muted-foreground mb-6">{error}</p>
                 <button 
                   onClick={() => fetchCategoryPosts(currentPage)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+                  className="bg-info hover:bg-info/90 text-white px-6 py-3 rounded-lg transition-colors">
                 >
                   Try Again
                 </button>
@@ -236,14 +236,14 @@ export default function CategoryArchiveContent({ category }: CategoryArchiveCont
             {/* No Posts State */}
             {!loading && !error && posts.length === 0 && (
               <div className="text-center py-12" data-testid="category-no-posts">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-600/20 border border-gray-500/30 rounded-full mb-4">
-                  <Folder className="w-8 h-8 text-gray-400" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-muted/20 border border-muted/30 rounded-full mb-4">
+                  <Folder className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">No Posts Found</h3>
-                <p className="text-gray-400 mb-6">There are no published posts in the {categoryName} category yet.</p>
+                <p className="text-muted-foreground mb-6">There are no published posts in the {categoryName} category yet.</p>
                 <Link 
                   href="/blog"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors inline-block"
+                  className="bg-info hover:bg-info/90 text-white px-6 py-3 rounded-lg transition-colors inline-block">
                 >
                   Browse All Posts
                 </Link>
