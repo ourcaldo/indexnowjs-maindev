@@ -180,7 +180,7 @@ export function useModal(): UseModalReturn {
       title: config.title || 'Loading...',
       content: (
         <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-border border-t-primary"></div>
           {config.message && (
             <span className="ml-3 text-muted-foreground">{config.message}</span>
           )}
@@ -203,15 +203,15 @@ export function useModal(): UseModalReturn {
   }) => {
     const IconComponent = config.type === 'success' 
       ? () => (
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-success/10 mb-4">
+            <svg className="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
         )
       : () => (
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-            <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-destructive/10 mb-4">
+            <svg className="h-6 w-6 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
