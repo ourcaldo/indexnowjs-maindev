@@ -61,6 +61,26 @@ export default {
           DEFAULT: "hsl(var(--error))",
           foreground: "hsl(var(--error-foreground))",
         },
+        brand: {
+          primary: "var(--brand-primary)",
+          secondary: "var(--brand-secondary)",
+          accent: "var(--brand-accent)",
+          text: "var(--brand-text)",
+        },
+        status: {
+          excellent: "hsl(var(--status-excellent))",
+          good: "hsl(var(--status-good))",
+          warning: "hsl(var(--status-warning))",
+          poor: "hsl(var(--status-poor))",
+        },
+        interactive: {
+          hover: "hsl(var(--hover-overlay))",
+          focus: "var(--focus-ring)",
+          disabled: {
+            bg: "var(--disabled-bg)",
+            text: "var(--disabled-text)",
+          },
+        },
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
