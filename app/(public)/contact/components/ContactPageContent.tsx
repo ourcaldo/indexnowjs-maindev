@@ -106,7 +106,7 @@ export default function ContactPageContent() {
   }
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden bg-[hsl(var(--primary))]">
+    <div className="min-h-screen text-foreground relative overflow-hidden bg-[hsl(var(--primary))]">
       <Background />
       <Header 
         user={user}
@@ -124,7 +124,7 @@ export default function ContactPageContent() {
             <div className="mb-6">
               <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">SUPPORT</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-foreground">
               Hello, how can we help?
             </h1>
             <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -163,15 +163,15 @@ export default function ContactPageContent() {
                   <div className="w-12 h-12 bg-destructive/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <Bug className="w-6 h-6 text-destructive" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">Issues</h3>
-                  <p className="text-gray-300 text-sm mb-6">
+                  <h3 className="text-xl font-semibold text-foreground mb-3">Issues</h3>
+                  <p className="text-muted-foreground text-sm mb-6">
                     Found a bug? We'd love to hear about it in our GitHub issues.
                   </p>
                   <button 
                     className={`inline-flex items-center space-x-2 font-medium transition-colors duration-200 ${
                       selectedType === 'Issues' 
                         ? 'text-destructive' 
-                        : 'text-muted-foreground hover:text-white'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <span>Open GitHub Issue</span>
@@ -186,7 +186,7 @@ export default function ContactPageContent() {
                   <div className="w-12 h-12 bg-info/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <Lightbulb className="w-6 h-6 text-info" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">Feature requests</h3>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">Feature requests</h3>
                   <p className="text-muted-foreground text-sm mb-6">
                     Want to suggest a new feature? Share it with our community.
                   </p>
@@ -205,7 +205,7 @@ export default function ContactPageContent() {
                   <div className="w-12 h-12 bg-success/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <Users className="w-6 h-6 text-success" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">Ask the Community</h3>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">Ask the Community</h3>
                   <p className="text-muted-foreground text-sm mb-6">
                     Join our GitHub discussions or our Discord server to browse for help and best practices.
                   </p>
@@ -226,16 +226,16 @@ export default function ContactPageContent() {
           <div className="max-w-2xl mx-auto">
             {/* Can't find what you're looking for section */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 mb-8">
-              <h2 className="text-2xl font-bold text-white mb-4">Can't find what you're looking for?</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Can't find what you're looking for?</h2>
               <p className="text-muted-foreground mb-6">
                 The IndexNow Studio Support Team is ready to help. Response time for support tickets will vary depending on plan type and severity of the issue.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center space-x-2">
+                <button className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-muted transition-colors duration-200 flex items-center justify-center space-x-2">
                   <MessageCircle className="w-5 h-5" />
                   <span>Contact Enterprise Sales</span>
                 </button>
-                <button className="border border-white/20 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/5 transition-colors duration-200 flex items-center justify-center space-x-2">
+                <button className="border border-white/20 text-foreground px-6 py-3 rounded-lg font-semibold hover:bg-white/5 transition-colors duration-200 flex items-center justify-center space-x-2">
                   <Send className="w-5 h-5" />
                   <span>Open Ticket</span>
                 </button>
@@ -244,7 +244,7 @@ export default function ContactPageContent() {
 
             {/* Contact Form */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
-              <h3 className="text-xl font-semibold text-white mb-6">Send us a message</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-6">Send us a message</h3>
               
               {submitStatus === 'success' && (
                 <div className="mb-6 p-4 bg-success/20 border border-success/30 rounded-lg">
@@ -270,7 +270,7 @@ export default function ContactPageContent() {
                       required
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-foreground placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                       placeholder="Your full name"
                     />
                   </div>
@@ -283,7 +283,7 @@ export default function ContactPageContent() {
                       required
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-foreground placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -291,13 +291,13 @@ export default function ContactPageContent() {
 
                 {/* Type Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Type *
                   </label>
                   <select
                     value={formData.type}
                     onChange={(e) => handleInputChange('type', e.target.value as ContactType)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                   >
                     <option value="Support" className="bg-background text-foreground">Support</option>
                     <option value="Sales" className="bg-background text-foreground">Sales</option>
@@ -308,7 +308,7 @@ export default function ContactPageContent() {
 
                 {/* Subject */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Subject *
                   </label>
                   <input
@@ -316,28 +316,28 @@ export default function ContactPageContent() {
                     required
                     value={formData.subject}
                     onChange={(e) => handleInputChange('subject', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-foreground placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                     placeholder="Brief description of your inquiry"
                   />
                 </div>
 
                 {/* Order ID */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Order ID <span className="text-muted-foreground/70">(if any, optional)</span>
                   </label>
                   <input
                     type="text"
                     value={formData.orderId}
                     onChange={(e) => handleInputChange('orderId', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-foreground placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
                     placeholder="ORDER-1234567890-ABC123"
                   />
                 </div>
 
                 {/* Message */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Message *
                   </label>
                   <textarea
@@ -345,7 +345,7 @@ export default function ContactPageContent() {
                     rows={6}
                     value={formData.message}
                     onChange={(e) => handleInputChange('message', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent resize-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-foreground placeholder-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent resize-none"
                     placeholder="Please provide as much detail as possible about your inquiry..."
                   />
                 </div>
@@ -354,7 +354,7 @@ export default function ContactPageContent() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-muted transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {isSubmitting ? (
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
