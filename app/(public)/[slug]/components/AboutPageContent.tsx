@@ -27,9 +27,9 @@ interface AboutPageContentProps {
 
 export default function AboutPageContent({ page }: AboutPageContentProps) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-[#1A1A1A] text-white">
+      <section className="bg-primary text-white">
         <div className="max-w-7xl mx-auto px-6 py-20">
           <div className="max-w-4xl">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">
@@ -37,7 +37,7 @@ export default function AboutPageContent({ page }: AboutPageContentProps) {
             </h1>
             
             {page.meta_description && (
-              <p className="text-xl text-[#F7F9FC] leading-relaxed">
+              <p className="text-xl text-secondary leading-relaxed">
                 {page.meta_description}
               </p>
             )}
@@ -70,7 +70,7 @@ export default function AboutPageContent({ page }: AboutPageContentProps) {
                 <div className="prose prose-lg max-w-none">
                   <div 
                     dangerouslySetInnerHTML={{ __html: page.content }} 
-                    className="text-[#1A1A1A] leading-relaxed"
+                    className="text-foreground leading-relaxed"
                   />
                 </div>
               ) : (

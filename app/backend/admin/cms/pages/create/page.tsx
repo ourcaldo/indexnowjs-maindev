@@ -62,34 +62,34 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC]">
-      <div className="bg-white border-b border-[#E0E6ED] sticky top-0 z-10">
+    <div className="min-h-screen bg-secondary">
+      <div className="bg-background border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.back()}
-                className="p-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 data-testid="button-back"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-[#1A1A1A]">Create New Page</h1>
-                <p className="text-[#6C757D] text-sm">Create a new page for your website</p>
+                <h1 className="text-2xl font-bold text-foreground">Create New Page</h1>
+                <p className="text-muted-foreground text-sm">Create a new page for your website</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
+                className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 disabled={isLoading}
                 data-testid="button-cancel-create"
               >
                 Cancel
               </button>
-              <div className="flex items-center gap-2 px-3 py-2 bg-[#F7F9FC] rounded-lg text-sm text-[#6C757D]">
+              <div className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-lg text-sm text-muted-foreground">
                 <Save className="h-4 w-4" />
                 Auto-save: {isLoading ? 'Saving...' : 'Ready'}
               </div>
@@ -99,7 +99,7 @@ export default function CreatePage() {
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
-        <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+        <div className="bg-background rounded-lg border border-border p-6">
           <PageForm
             mode="create"
             onSubmit={handleSubmit}

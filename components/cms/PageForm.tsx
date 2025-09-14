@@ -130,29 +130,29 @@ export default function PageForm({
         <div className="lg:col-span-2 space-y-6">
           {/* Title */}
           <div>
-            <label htmlFor="page-title" className="block text-sm font-medium text-[#1A1A1A] mb-2">
-              Page Title <span className="text-[#E63946]">*</span>
+            <label htmlFor="page-title" className="block text-sm font-medium text-foreground mb-2">
+              Page Title <span className="text-destructive">*</span>
             </label>
             <input
               id="page-title"
               type="text"
               {...form.register('title')}
               placeholder="Enter your page title..."
-              className="w-full px-4 py-3 text-lg border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-4 py-3 text-lg border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               data-testid="input-page-title"
             />
             {errors.title && (
-              <p className="mt-2 text-sm text-[#E63946]">{errors.title.message}</p>
+              <p className="mt-2 text-sm text-destructive">{errors.title.message}</p>
             )}
           </div>
 
           {/* Slug */}
           <div>
-            <label htmlFor="page-slug" className="block text-sm font-medium text-[#1A1A1A] mb-2">
-              Page URL Slug <span className="text-[#E63946]">*</span>
+            <label htmlFor="page-slug" className="block text-sm font-medium text-foreground mb-2">
+              Page URL Slug <span className="text-destructive">*</span>
             </label>
             <div className="flex items-center">
-              <span className="px-3 py-3 text-sm text-[#6C757D] bg-[#F7F9FC] border border-r-0 border-[#E0E6ED] rounded-l-lg">
+              <span className="px-3 py-3 text-sm text-muted-foreground bg-secondary border border-r-0 border-border rounded-l-lg">
                 indexnow.studio/
               </span>
               <input
@@ -161,21 +161,21 @@ export default function PageForm({
                 value={watchedSlug}
                 onChange={(e) => handleSlugChange(e.target.value)}
                 placeholder="page-slug"
-                className="flex-1 px-3 py-3 text-sm border border-[#E0E6ED] rounded-r-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="flex-1 px-3 py-3 text-sm border border-border rounded-r-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 data-testid="input-page-slug"
               />
             </div>
             {errors.slug && (
-              <p className="mt-2 text-sm text-[#E63946]">{errors.slug.message}</p>
+              <p className="mt-2 text-sm text-destructive">{errors.slug.message}</p>
             )}
-            <p className="mt-1 text-xs text-[#6C757D]">
+            <p className="mt-1 text-xs text-muted-foreground">
               The slug is the URL-friendly version of the page title
             </p>
           </div>
 
           {/* Content Editor */}
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Page Content
             </label>
             <TiptapEditor
@@ -185,13 +185,13 @@ export default function PageForm({
               className="min-h-[400px]"
             />
             {errors.content && (
-              <p className="mt-2 text-sm text-[#E63946]">{errors.content.message}</p>
+              <p className="mt-2 text-sm text-destructive">{errors.content.message}</p>
             )}
           </div>
 
           {/* Featured Image */}
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Featured Image
             </label>
             <ImageUploader
@@ -201,7 +201,7 @@ export default function PageForm({
               className="w-full"
             />
             {errors.featured_image_url && (
-              <p className="mt-2 text-sm text-[#E63946]">{errors.featured_image_url.message}</p>
+              <p className="mt-2 text-sm text-destructive">{errors.featured_image_url.message}</p>
             )}
           </div>
 
@@ -241,7 +241,7 @@ export default function PageForm({
 
           {/* Form Status */}
           {isDirty && (
-            <div className="text-xs text-[#F0A202] bg-[#F0A202]/5 p-3 rounded-lg">
+            <div className="text-xs text-warning bg-warning/5 p-3 rounded-lg">
               <strong>Unsaved Changes:</strong> You have unsaved changes. Make sure to save your page before leaving.
             </div>
           )}

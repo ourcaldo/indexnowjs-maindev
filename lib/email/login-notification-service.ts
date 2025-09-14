@@ -117,11 +117,11 @@ export class LoginNotificationService {
         <head>
           <title>Login Notification</title>
           <style>
-            body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+            body { font-family: Arial, sans-serif; color: var(--foreground); line-height: 1.6; }
             .container { max-width: 500px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #1A1A1A; color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; border: 1px solid #e0e0e0; }
-            .alert { background-color: #e8f4fd; padding: 15px; margin: 20px 0; border-left: 4px solid #3D8BFF; }
+            .header { background-color: var(--brand-primary); color: var(--pure-white); padding: 20px; text-align: center; }
+            .content { padding: 20px; border: 1px solid var(--border); }
+            .alert { background-color: var(--light-blue-bg); padding: 15px; margin: 20px 0; border-left: 4px solid var(--brand-accent); }
           </style>
         </head>
         <body>
