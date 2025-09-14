@@ -1,14 +1,17 @@
 import React from 'react'
+import { cn } from '@/lib/utils'
 
 interface CardProps {
   children: React.ReactNode
   className?: string
 }
 
-export const Card = ({ children, className = '' }: CardProps) => (
+export const Card = ({ children, className }: CardProps) => (
   <div 
-    className={`p-6 rounded-lg ${className}`} 
-    style={{backgroundColor: '#FFFFFF', border: '1px solid #E0E6ED'}}
+    className={cn(
+      'p-6 rounded-lg bg-background border border-border',
+      className
+    )}
   >
     {children}
   </div>
