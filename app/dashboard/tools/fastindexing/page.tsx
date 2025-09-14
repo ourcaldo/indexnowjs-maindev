@@ -474,8 +474,7 @@ export default function IndexNowPage() {
                   value={urls}
                   onChange={(e) => setUrls(e.target.value)}
                   rows={8}
-                  className="w-full px-3 py-2 border rounded-lg font-mono text-sm focus:ring-2 focus:border-transparent"
-                  className="border-border focus-visible:ring-ring"
+                  className="w-full px-3 py-2 border border-border rounded-lg font-mono text-sm focus:ring-2 focus:border-transparent focus-visible:ring-ring"
                   placeholder="https://example.com/page1&#10;https://example.com/page2&#10;https://example.com/page3"
                 />
                 <div className="flex justify-between text-xs mt-2">
@@ -506,15 +505,13 @@ export default function IndexNowPage() {
                       }
                     }}
                     maxLength={2000}
-                    className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                    className="border-border focus-visible:ring-ring"
+                    className="flex-1 px-3 py-2 border border-border rounded-lg focus:ring-2 focus:border-transparent focus-visible:ring-ring"
                     placeholder="https://example.com/sitemap.xml"
                   />
                   <button
                     onClick={handleParseSitemap}
                     disabled={parsingSitemap || !sitemapUrl.trim()}
-                    className="px-4 py-2 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50"
-                    className="bg-brand-primary"
+                    className="px-4 py-2 rounded-lg font-medium text-white bg-brand-primary transition-all duration-200 hover:opacity-90 disabled:opacity-50"
                   >
                     <Download className="w-4 h-4 mr-2 inline" />
                     {parsingSitemap ? 'Parsing...' : 'Parse'}
@@ -575,8 +572,7 @@ export default function IndexNowPage() {
                       type="datetime-local"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                      className="border-border text-foreground bg-background"
+                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:border-transparent text-foreground bg-background"
                     />
                   </div>
                 )}
