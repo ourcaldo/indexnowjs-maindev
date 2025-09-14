@@ -96,13 +96,13 @@ export default function CMSPages() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published':
-        return 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20'
+        return 'bg-success/10 text-success border-success/20'
       case 'draft':
-        return 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+        return 'bg-muted/10 text-muted-foreground border-muted/20'
       case 'archived':
-        return 'bg-[#F0A202]/10 text-[#F0A202] border-[#F0A202]/20'
+        return 'bg-warning/10 text-warning border-warning/20'
       default:
-        return 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+        return 'bg-muted/10 text-muted-foreground border-muted/20'
     }
   }
 
@@ -151,7 +151,7 @@ export default function CMSPages() {
         <div className="mt-4 sm:mt-0">
           <a
             href="/backend/admin/cms/pages/create"
-            className="inline-flex items-center gap-2 bg-[#3D8BFF] hover:bg-[#3D8BFF]/90 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-colors"
             data-testid="button-create-page"
           >
             <Plus className="h-5 w-5" />
@@ -160,19 +160,19 @@ export default function CMSPages() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-[#E0E6ED] overflow-hidden">
+      <div className="bg-white rounded-lg border border-border overflow-hidden">
         {/* Filters */}
-        <div className="border-b border-[#E0E6ED] p-6">
+        <div className="border-b border-border p-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             {/* Search */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search pages..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 data-testid="input-search-pages"
               />
             </div>
@@ -182,7 +182,7 @@ export default function CMSPages() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none bg-white border border-[#E0E6ED] rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="appearance-none bg-white border border-border rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-primary focus:border-transparent"
                 data-testid="select-status-filter"
               >
                 <option value="all">All Status</option>
@@ -190,7 +190,7 @@ export default function CMSPages() {
                 <option value="draft">Draft</option>
                 <option value="archived">Archived</option>
               </select>
-              <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D] pointer-events-none" />
+              <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
 
             {/* Template Filter */}
@@ -198,7 +198,7 @@ export default function CMSPages() {
               <select
                 value={templateFilter}
                 onChange={(e) => setTemplateFilter(e.target.value)}
-                className="appearance-none bg-white border border-[#E0E6ED] rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                className="appearance-none bg-white border border-border rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-primary focus:border-transparent"
                 data-testid="select-template-filter"
               >
                 <option value="all">All Templates</option>
@@ -208,7 +208,7 @@ export default function CMSPages() {
                 <option value="contact">Contact Page</option>
                 <option value="services">Services Page</option>
               </select>
-              <Layout className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D] pointer-events-none" />
+              <Layout className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
           </div>
         </div>
@@ -217,19 +217,19 @@ export default function CMSPages() {
         <div className="overflow-x-auto">
           {loading ? (
             <div className="p-8 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#3D8BFF]"></div>
-              <p className="text-[#6C757D] mt-2">Loading pages...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-muted-foreground mt-2">Loading pages...</p>
             </div>
           ) : filteredPages.length === 0 ? (
             <div className="p-8 text-center">
-              <FileText className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
                 {searchTerm || statusFilter !== 'all' || templateFilter !== 'all' 
                   ? 'No pages match your filters' 
                   : 'No pages yet'
                 }
               </h3>
-              <p className="text-[#6C757D] mb-4">
+              <p className="text-muted-foreground mb-4">
                 {searchTerm || statusFilter !== 'all' || templateFilter !== 'all'
                   ? 'Try adjusting your search terms or filters.'
                   : 'Get started by creating your first page.'
@@ -238,7 +238,7 @@ export default function CMSPages() {
               {!searchTerm && statusFilter === 'all' && templateFilter === 'all' && (
                 <a
                   href="/backend/admin/cms/pages/create"
-                  className="inline-flex items-center gap-2 bg-[#3D8BFF] hover:bg-[#3D8BFF]/90 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   <Plus className="h-5 w-5" />
                   Create Your First Page
@@ -247,52 +247,52 @@ export default function CMSPages() {
             </div>
           ) : (
             <table className="w-full">
-              <thead className="bg-[#F7F9FC]">
+              <thead className="bg-secondary">
                 <tr>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Page
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Template
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Author
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Updated
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-[#6C757D] uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-[#E0E6ED]">
+              <tbody className="bg-white divide-y divide-border">
                 {filteredPages.map((page) => {
                   const StatusIcon = getStatusIcon(page.status)
                   const TemplateIcon = getTemplateIcon(page.template)
                   
                   return (
-                    <tr key={page.id} className="hover:bg-[#F7F9FC] transition-colors">
+                    <tr key={page.id} className="hover:bg-secondary transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-start gap-3">
                           {page.featured_image_url && (
                             <img 
                               src={page.featured_image_url}
                               alt=""
-                              className="w-12 h-12 object-cover rounded-lg border border-[#E0E6ED]"
+                              className="w-12 h-12 object-cover rounded-lg border border-border"
                             />
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <h3 className="text-sm font-medium text-[#1A1A1A] truncate">
+                              <h3 className="text-sm font-medium text-foreground truncate">
                                 {page.title}
                               </h3>
                               {/* Removed homepage badge */}
                             </div>
-                            <p className="text-xs text-[#6C757D] truncate">
+                            <p className="text-xs text-muted-foreground truncate">
                               /{page.slug}
                             </p>
                           </div>
@@ -300,8 +300,8 @@ export default function CMSPages() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <TemplateIcon className="h-4 w-4 text-[#6C757D]" />
-                          <span className="text-sm text-[#1A1A1A]">
+                          <TemplateIcon className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-foreground">
                             {getTemplateLabel(page.template)}
                           </span>
                         </div>
@@ -320,16 +320,16 @@ export default function CMSPages() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-[#6C757D]" />
-                          <span className="text-sm text-[#1A1A1A]">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-foreground">
                             {page.author_name || 'Unknown'}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-[#6C757D]" />
-                          <span className="text-sm text-[#1A1A1A]">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-foreground">
                             {new Date(page.updated_at).toLocaleDateString()}
                           </span>
                         </div>
@@ -338,7 +338,7 @@ export default function CMSPages() {
                         <div className="flex items-center gap-2">
                           <a
                             href={`/backend/admin/cms/pages/${page.id}/edit`}
-                            className="p-2 text-[#6C757D] hover:text-[#3D8BFF] hover:bg-[#3D8BFF]/5 rounded transition-colors"
+                            className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded transition-colors"
                             title="Edit page"
                             data-testid={`button-edit-${page.id}`}
                           >
@@ -349,7 +349,7 @@ export default function CMSPages() {
                               href={`/${page.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-2 text-[#6C757D] hover:text-[#4BB543] hover:bg-[#4BB543]/5 rounded transition-colors"
+                              className="p-2 text-muted-foreground hover:text-success hover:bg-success/5 rounded transition-colors"
                               title="View page"
                               data-testid={`button-view-${page.id}`}
                             >
@@ -358,7 +358,7 @@ export default function CMSPages() {
                           )}
                           <button
                             onClick={() => handleDelete(page.id)}
-                            className="p-2 text-[#6C757D] hover:text-[#E63946] hover:bg-[#E63946]/5 rounded transition-colors"
+                            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded transition-colors"
                             title="Delete page"
                             data-testid={`button-delete-${page.id}`}
                           >
@@ -377,7 +377,7 @@ export default function CMSPages() {
 
       {filteredPages.length > 0 && (
         <div className="mt-6 flex items-center justify-between">
-          <div className="text-sm text-[#6C757D]">
+          <div className="text-sm text-muted-foreground">
             Showing {filteredPages.length} of {pages.length} pages
           </div>
           <div className="flex items-center gap-2">
