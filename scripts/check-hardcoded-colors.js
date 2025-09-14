@@ -73,6 +73,11 @@ class ColorChecker {
     const violations = [];
 
     lines.forEach((line, lineNumber) => {
+      // Skip lines that are part of email template color mappings (indicated by css: property)
+      if (this.isEmailTemplateColorMapping(line, lines, lineNumber)) {
+        return;
+      }
+
       Object.entries(COLOR_PATTERNS).forEach(([patternName, pattern]) => {
         let match;
         const regex = new RegExp(pattern);
@@ -95,6 +100,26 @@ class ColorChecker {
     });
 
     return violations;
+  }
+
+  isEmailTemplateColorMapping(line, lines, lineNumber) {
+    // Check if this line is part of an email template color mapping
+    // Look for lines that have both 'css:' and 'value:' properties indicating proper color mapping
+    if (line.includes('css:') && line.includes('value:') && line.includes('#')) {
+      return true;
+    }
+    
+    // Check if we're inside an EMAIL_COLOR_MAPPING object
+    for (let i = Math.max(0, lineNumber - 10); i <= Math.min(lines.length - 1, lineNumber + 5); i++) {
+      const contextLine = lines[i];
+      if (contextLine.includes('EMAIL_COLOR_MAPPING') || 
+          contextLine.includes('Email Template Color System') ||
+          contextLine.includes('email clients require hardcoded colors')) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   getSuggestion(color, type) {

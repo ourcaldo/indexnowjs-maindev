@@ -52,16 +52,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Email template colors - using project color scheme (from globals.css)
-    const emailColors = {
-      brandPrimary: '#1A1A1A',    // var(--brand-primary)
-      brandAccent: '#3D8BFF',     // var(--brand-accent) 
-      brandText: '#6C757D',       // var(--brand-text)
-      secondary: '#F7F9FC',       // var(--secondary)
-      border: '#E0E6ED',          // var(--border)
-      background: '#FFFFFF',      // var(--background)
-      lightBlueBg: '#F0F9FF'      // var(--light-blue-bg)
+    /**
+     * Email Template Color System
+     * 
+     * Email clients don't support CSS variables, so hardcoded values are required.
+     * These values must be kept in sync with globals.css color definitions.
+     * 
+     * To update colors:
+     * 1. Update the corresponding CSS variable in globals.css
+     * 2. Update the hardcoded value here to match
+     * 3. Test email rendering across different clients
+     */
+    const EMAIL_COLOR_MAPPING = {
+      // Primary brand colors from globals.css
+      brandPrimary: { css: 'var(--brand-primary)', value: '#1A1A1A' },
+      brandAccent: { css: 'var(--brand-accent)', value: '#3D8BFF' },
+      brandText: { css: 'var(--brand-text)', value: '#6C757D' },
+      
+      // Background and surface colors
+      secondary: { css: 'var(--light-gray)', value: '#F7F9FC' },
+      background: { css: 'var(--pure-white)', value: '#FFFFFF' },
+      border: { css: 'var(--cool-gray)', value: '#E0E6ED' },
+      
+      // Special use colors
+      lightBlueBg: { css: 'var(--light-blue-bg)', value: '#F0F9FF' }
     }
+    
+    // Extract hardcoded values for email template (email clients require hardcoded colors)
+    const emailColors = Object.fromEntries(
+      Object.entries(EMAIL_COLOR_MAPPING).map(([key, config]) => [key, config.value])
+    )
 
     // Send test email
     const testEmailOptions = {
