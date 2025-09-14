@@ -57,10 +57,10 @@ export default function BillingPeriodSelector({
   }
 
   return (
-    <Card className="border-[#E0E6ED] bg-[#FFFFFF]">
+    <Card className="border-border bg-background">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-[#1A1A1A]">Billing Period</CardTitle>
-        <p className="text-sm text-[#6C757D]">Choose your preferred billing cycle</p>
+        <CardTitle className="text-lg font-semibold text-foreground">Billing Period</CardTitle>
+        <p className="text-sm text-muted-foreground">Choose your preferred billing cycle</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -75,8 +75,8 @@ export default function BillingPeriodSelector({
                 key={`${option.period}-${index}`}
                 className={`relative border rounded-lg p-3 cursor-pointer transition-all ${
                   isSelected 
-                    ? 'border-[#3D8BFF] bg-[#3D8BFF]/5' 
-                    : 'border-[#E0E6ED] hover:border-[#3D8BFF] hover:bg-[#F7F9FC]'
+                    ? 'border-accent bg-accent/5' 
+                    : 'border-border hover:border-accent hover:bg-secondary'
                 }`}
                 onClick={(e) => {
                   e.preventDefault()
@@ -91,8 +91,8 @@ export default function BillingPeriodSelector({
                     <div 
                       className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
                         isSelected 
-                          ? 'border-[#3D8BFF] bg-[#3D8BFF]' 
-                          : 'border-[#E0E6ED] bg-white'
+                          ? 'border-accent bg-accent' 
+                          : 'border-border bg-white'
                       }`}
                     >
                       {isSelected && (
@@ -100,11 +100,11 @@ export default function BillingPeriodSelector({
                       )}
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-[#1A1A1A]">
+                      <span className="font-medium text-foreground">
                         {option.period_label}
                       </span>
                       {discount > 0 && (
-                        <span className="bg-[#F0A202] text-[#FFFFFF] text-xs px-2 py-0.5 rounded-full font-medium">
+                        <span className="bg-warning text-white text-xs px-2 py-0.5 rounded-full font-medium">
                           {discount}% OFF
                         </span>
                       )}
@@ -114,11 +114,11 @@ export default function BillingPeriodSelector({
                   <div className="text-right">
                     <div className="flex items-center space-x-2">
                       {option.promo_price && option.regular_price > 0 && option.regular_price !== option.promo_price && (
-                        <span className="text-sm text-[#6C757D] line-through">
+                        <span className="text-sm text-muted-foreground line-through">
                           {formatCurrency(option.regular_price, userCurrency)}
                         </span>
                       )}
-                      <span className="text-lg font-bold text-[#1A1A1A]">
+                      <span className="text-lg font-bold text-foreground">
                         {formatCurrency(finalPrice, userCurrency)}
                       </span>
                     </div>

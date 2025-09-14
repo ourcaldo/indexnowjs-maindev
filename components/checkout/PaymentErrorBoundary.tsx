@@ -102,22 +102,22 @@ export default class PaymentErrorBoundary extends Component<Props, State> {
 
       // Default error UI
       return (
-        <Card className="border-[#E63946] bg-[#E63946]/5">
+        <Card className="border-destructive bg-destructive/5">
           <CardHeader>
-            <CardTitle className="text-[#E63946] flex items-center">
+            <CardTitle className="text-destructive flex items-center">
               <AlertTriangle className="h-5 w-5 mr-2" />
               Payment System Error
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <p className="text-[#6C757D]">
+              <p className="text-muted-foreground">
                 We encountered an unexpected error while processing your payment. 
                 This error has been logged and our team has been notified.
               </p>
               
-              <div className="text-sm text-[#6C757D] bg-[#F7F9FC] p-3 rounded border">
-                <div className="font-medium text-[#1A1A1A] mb-1">Error Details:</div>
+              <div className="text-sm text-muted-foreground bg-secondary p-3 rounded border">
+                <div className="font-medium text-foreground mb-1">Error Details:</div>
                 <div>Error ID: <code className="text-xs bg-white px-1 py-0.5 rounded">{this.state.errorId}</code></div>
                 {this.state.error?.name && (
                   <div>Type: <code className="text-xs bg-white px-1 py-0.5 rounded">{this.state.error.name}</code></div>
@@ -129,7 +129,7 @@ export default class PaymentErrorBoundary extends Component<Props, State> {
               <Button 
                 onClick={this.handleRetry}
                 variant="outline"
-                className="flex-1 border-[#3D8BFF] text-[#3D8BFF] hover:bg-[#3D8BFF] hover:text-white"
+                className="flex-1 border-accent text-accent hover:bg-accent hover:text-white"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Try Again
@@ -145,14 +145,14 @@ export default class PaymentErrorBoundary extends Component<Props, State> {
               
               <Button 
                 onClick={this.handleGoHome}
-                className="flex-1 bg-[#1C2331] hover:bg-[#0d1b2a]"
+                className="flex-1 bg-primary hover:bg-primary/90"
               >
                 <Home className="h-4 w-4 mr-2" />
                 Go to Dashboard
               </Button>
             </div>
 
-            <div className="text-xs text-[#6C757D] border-t border-[#E0E6ED] pt-3">
+            <div className="text-xs text-muted-foreground border-t border-border pt-3">
               <p>If this problem persists, please contact support with the error ID above.</p>
             </div>
           </CardContent>
