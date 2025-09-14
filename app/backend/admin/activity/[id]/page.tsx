@@ -152,10 +152,10 @@ export default function ActivityDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] p-6">
+      <div className="min-h-screen bg-secondary p-6">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-[#1A1A1A]">Loading Activity Details...</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Loading Activity Details...</h1>
           </div>
         </div>
       </div>
@@ -164,7 +164,7 @@ export default function ActivityDetailPage() {
 
   if (error || !activity) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] p-6">
+      <div className="min-h-screen bg-secondary p-6">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <Button 
@@ -178,9 +178,9 @@ export default function ActivityDetailPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="text-center">
-                  <AlertCircle className="h-12 w-12 text-[#E63946] mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Activity Not Found</h3>
-                  <p className="text-[#6C757D]">{error || 'The requested activity log could not be found.'}</p>
+                  <AlertCircle className="h-12 w-12 text-error mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">Activity Not Found</h3>
+                  <p className="text-muted-foreground">{error || 'The requested activity log could not be found.'}</p>
                 </div>
               </CardContent>
             </Card>
@@ -196,7 +196,7 @@ export default function ActivityDetailPage() {
   const formattedDate = formatDate(activity.created_at)
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] p-6">
+    <div className="min-h-screen bg-secondary p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -208,8 +208,8 @@ export default function ActivityDetailPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Activity Logs
           </Button>
-          <h1 className="text-2xl font-semibold text-[#1A1A1A]">Activity Details</h1>
-          <p className="text-[#6C757D] mt-2">
+          <h1 className="text-2xl font-semibold text-foreground">Activity Details</h1>
+          <p className="text-muted-foreground mt-2">
             Complete information about this user activity
           </p>
         </div>
@@ -221,14 +221,14 @@ export default function ActivityDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
-                    <EventIcon className="h-6 w-6 text-[#3D8BFF]" />
+                  <div className="p-2 rounded-lg bg-accent/10">
+                    <EventIcon className="h-6 w-6 text-accent" />
                   </div>
                   <div>
-                    <div className="text-xl text-[#1A1A1A]">
+                    <div className="text-xl text-foreground">
                       {activity.event_type.replace('_', ' ').toUpperCase()}
                     </div>
-                    <div className="text-sm text-[#6C757D] font-normal">
+                    <div className="text-sm text-muted-foreground font-normal">
                       Activity ID: {activity.id}
                     </div>
                   </div>
@@ -236,17 +236,17 @@ export default function ActivityDetailPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">Description</h4>
-                  <p className="text-[#1A1A1A] bg-[#F7F9FC] p-3 rounded-lg">
+                  <h4 className="text-sm font-medium text-foreground mb-2">Description</h4>
+                  <p className="text-foreground bg-secondary p-3 rounded-lg">
                     {activity.action_description}
                   </p>
                 </div>
 
                 {activity.error_message && (
                   <div>
-                    <h4 className="text-sm font-medium text-[#E63946] mb-2">Error Details</h4>
-                    <div className="bg-[#E63946]/5 border border-[#E63946]/20 p-3 rounded-lg">
-                      <p className="text-[#E63946] text-sm">
+                    <h4 className="text-sm font-medium text-error mb-2">Error Details</h4>
+                    <div className="bg-error/5 border border-error/20 p-3 rounded-lg">
+                      <p className="text-error text-sm">
                         {activity.error_message}
                       </p>
                     </div>
@@ -255,25 +255,25 @@ export default function ActivityDetailPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">Status</h4>
+                    <h4 className="text-sm font-medium text-foreground mb-2">Status</h4>
                     <div className="flex items-center gap-2">
                       {activity.success ? (
                         <>
-                          <CheckCircle className="h-5 w-5 text-[#4BB543]" />
-                          <span className="text-[#4BB543] font-medium">Success</span>
+                          <CheckCircle className="h-5 w-5 text-success" />
+                          <span className="text-success font-medium">Success</span>
                         </>
                       ) : (
                         <>
-                          <XCircle className="h-5 w-5 text-[#E63946]" />
-                          <span className="text-[#E63946] font-medium">Failed</span>
+                          <XCircle className="h-5 w-5 text-error" />
+                          <span className="text-error font-medium">Failed</span>
                         </>
                       )}
                     </div>
                   </div>
                   
                   <div>
-                    <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">Timestamp</h4>
-                    <div className="flex items-center gap-2 text-[#6C757D]">
+                    <h4 className="text-sm font-medium text-foreground mb-2">Timestamp</h4>
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
                       <span className="text-sm">{formattedDate.full}</span>
                     </div>
@@ -282,8 +282,8 @@ export default function ActivityDetailPage() {
 
                 {activity.target_type && (
                   <div>
-                    <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">Target Resource</h4>
-                    <div className="bg-[#F7F9FC] p-3 rounded-lg">
+                    <h4 className="text-sm font-medium text-foreground mb-2">Target Resource</h4>
+                    <div className="bg-secondary p-3 rounded-lg">
                       <div className="text-sm">
                         <span className="font-medium">Type:</span> {activity.target_type}
                       </div>
@@ -308,7 +308,7 @@ export default function ActivityDetailPage() {
                   <CardTitle>Additional Information</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <pre className="bg-[#F7F9FC] p-4 rounded-lg text-sm overflow-auto">
+                  <pre className="bg-secondary p-4 rounded-lg text-sm overflow-auto">
                     {JSON.stringify(activity.metadata, null, 2)}
                   </pre>
                 </CardContent>
@@ -327,19 +327,19 @@ export default function ActivityDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center pb-4 border-b border-[#E0E6ED]">
-                  <div className="w-16 h-16 bg-[#3D8BFF]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <User className="h-8 w-8 text-[#3D8BFF]" />
+                <div className="text-center pb-4 border-b border-border">
+                  <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <User className="h-8 w-8 text-accent" />
                   </div>
-                  <h3 className="font-medium text-[#1A1A1A]">{activity.user_name}</h3>
-                  <p className="text-sm text-[#6C757D]">{activity.user_email}</p>
+                  <h3 className="font-medium text-foreground">{activity.user_name}</h3>
+                  <p className="text-sm text-muted-foreground">{activity.user_email}</p>
                 </div>
                 
                 <Link 
                   href={`/backend/admin/users/${activity.user_id}`}
                   className="block"
                 >
-                  <Button className="w-full bg-[#1C2331] hover:bg-[#0d1b2a] text-white">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View User Profile
                   </Button>
@@ -357,8 +357,8 @@ export default function ActivityDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">Device & Browser</h4>
-                  <div className="flex items-center gap-2 text-[#6C757D]">
+                  <h4 className="text-sm font-medium text-foreground mb-2">Device & Browser</h4>
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <DeviceIcon className="h-4 w-4" />
                     <div className="text-sm">
                       <div>{deviceInfo.text}</div>
@@ -369,10 +369,10 @@ export default function ActivityDetailPage() {
 
                 {activity.ip_address && (
                   <div>
-                    <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">IP Address</h4>
-                    <div className="flex items-center gap-2 text-[#6C757D]">
+                    <h4 className="text-sm font-medium text-foreground mb-2">IP Address</h4>
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Globe className="h-4 w-4" />
-                      <code className="text-sm bg-[#F7F9FC] px-2 py-1 rounded">
+                      <code className="text-sm bg-secondary px-2 py-1 rounded">
                         {activity.ip_address}
                       </code>
                     </div>
@@ -381,8 +381,8 @@ export default function ActivityDetailPage() {
 
                 {activity.user_agent && (
                   <div>
-                    <h4 className="text-sm font-medium text-[#1A1A1A] mb-2">User Agent</h4>
-                    <p className="text-xs text-[#6C757D] bg-[#F7F9FC] p-2 rounded break-all">
+                    <h4 className="text-sm font-medium text-foreground mb-2">User Agent</h4>
+                    <p className="text-xs text-muted-foreground bg-secondary p-2 rounded break-all">
                       {activity.user_agent}
                     </p>
                   </div>
@@ -398,7 +398,7 @@ export default function ActivityDetailPage() {
                     <Activity className="h-5 w-5" />
                     Recent Activities
                   </CardTitle>
-                  <p className="text-sm text-[#6C757D]">
+                  <p className="text-sm text-muted-foreground">
                     Latest activities from this user
                   </p>
                 </CardHeader>
@@ -412,23 +412,23 @@ export default function ActivityDetailPage() {
                         <Link 
                           key={relatedActivity.id}
                           href={`/backend/admin/activity/${relatedActivity.id}`}
-                          className="block hover:bg-[#F7F9FC] p-2 rounded transition-colors"
+                          className="block hover:bg-secondary p-2 rounded transition-colors"
                         >
                           <div className="flex items-start gap-2">
-                            <RelatedIcon className="h-4 w-4 text-[#6C757D] mt-0.5 flex-shrink-0" />
+                            <RelatedIcon className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-[#1A1A1A] truncate">
+                              <p className="text-sm text-foreground truncate">
                                 {relatedActivity.action_description}
                               </p>
-                              <p className="text-xs text-[#6C757D]">
+                              <p className="text-xs text-muted-foreground">
                                 {relatedDate.short}
                               </p>
                             </div>
                             <div className="flex items-center">
                               {relatedActivity.success ? (
-                                <CheckCircle className="h-3 w-3 text-[#4BB543]" />
+                                <CheckCircle className="h-3 w-3 text-success" />
                               ) : (
-                                <XCircle className="h-3 w-3 text-[#E63946]" />
+                                <XCircle className="h-3 w-3 text-error" />
                               )}
                             </div>
                           </div>
