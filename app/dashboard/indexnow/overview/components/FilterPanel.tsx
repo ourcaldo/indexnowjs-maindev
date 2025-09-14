@@ -37,7 +37,7 @@ export const FilterPanel = ({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{color: '#6C757D'}} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search keywords..."
               value={searchTerm}
@@ -56,8 +56,8 @@ export const FilterPanel = ({
 
       {/* Bulk Actions Row */}
       {selectedKeywords.length > 0 && (
-        <div className="flex items-center justify-between p-3 rounded-lg" style={{backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED'}}>
-          <span className="text-sm" style={{color: '#1A1A1A'}}>
+        <div className="flex items-center justify-between p-3 rounded-lg bg-secondary border border-border">
+          <span className="text-sm text-foreground">
             {selectedKeywords.length} keyword{selectedKeywords.length > 1 ? 's' : ''} selected
           </span>
           
@@ -66,7 +66,7 @@ export const FilterPanel = ({
               variant="outline"
               size="sm"
               onClick={() => setShowDeleteConfirm(true)}
-              style={{color: '#E63946', borderColor: '#E63946'}}
+              className="text-error border-error hover:bg-error/10"
             >
               <Trash2 className="w-4 h-4 mr-1" />
               Delete
@@ -75,7 +75,7 @@ export const FilterPanel = ({
               variant="outline"
               size="sm"
               onClick={() => setShowTagModal(true)}
-              style={{color: '#F0A202', borderColor: '#F0A202'}}
+              className="text-warning border-warning hover:bg-warning/10"
             >
               <Tag className="w-4 h-4 mr-1" />
               Add Tag
