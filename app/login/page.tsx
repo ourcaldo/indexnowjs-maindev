@@ -69,33 +69,13 @@ export default function Login() {
   }, [])
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
+    <div className={`min-h-screen flex ${isMobile ? 'flex-col' : 'flex-row'} font-sans`}>
 
       {/* Left Side - Login Form */}
-      <div style={{
-        width: isMobile ? '100%' : '50%',
-        backgroundColor: '#ffffff',
-        padding: isMobile ? '40px 20px' : '60px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: isMobile ? 'center' : 'flex-start',
-        position: 'relative'
-      }}>
+      <div className={`${isMobile ? 'w-full' : 'w-1/2'} bg-background ${isMobile ? 'px-5 py-10' : 'p-[60px]'} flex flex-col justify-center ${isMobile ? 'items-center' : 'items-start'} relative`}>
         {/* Logo for both mobile and desktop */}
         {logoUrl && (
-          <div style={{
-            position: 'absolute',
-            top: isMobile ? '20px' : '40px',
-            left: isMobile ? '20px' : '60px',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          <div className={`absolute ${isMobile ? 'top-5 left-5' : 'top-10 left-[60px]'} flex items-center`}>
             <img 
               src={logoUrl} 
               alt="Logo"
@@ -109,57 +89,23 @@ export default function Login() {
         )}
 
         {/* Main Content */}
-        <div style={{ 
-          maxWidth: '400px', 
-          width: '100%',
-          textAlign: isMobile ? 'center' : 'left',
-          marginTop: isMobile ? '90px' : '0'
-        }}>
-          <h1 style={{
-            fontSize: isMobile ? '24px' : '32px',
-            fontWeight: '700',
-            color: '#1a1a1a',
-            marginBottom: '8px',
-            lineHeight: '1.2'
-          }}>
+        <div className={`max-w-md w-full ${isMobile ? 'text-center mt-24' : 'text-left'}`}>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-brand-primary mb-2 leading-tight`}>
             Welcome Back
           </h1>
-          <p style={{
-            fontSize: isMobile ? '14px' : '16px',
-            color: '#6b7280',
-            marginBottom: '40px',
-            lineHeight: '1.5'
-          }}>
+          <p className={`${isMobile ? 'text-sm' : 'text-base'} text-muted-foreground mb-10 leading-relaxed`}>
             Enter your email and password to access your account.
           </p>
 
           <form onSubmit={handleSubmit}>
             {/* Magic Link Success Notification */}
             {magicLinkSent && (
-              <div style={{
-                backgroundColor: '#f0f9ff',
-                border: '1px solid #0ea5e9',
-                borderRadius: '12px',
-                padding: '20px',
-                marginBottom: '32px',
-                textAlign: 'center'
-              }}>
+              <div className="bg-info/10 border border-info rounded-xl p-5 mb-8 text-center">
                 <div style={{ marginBottom: '16px', fontSize: '32px' }}>✨</div>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#0f172a',
-                  marginBottom: '8px',
-                  margin: '0 0 8px 0'
-                }}>
+                <h3 className="text-lg font-semibold text-foreground mb-2 m-0">
                   Magic Link Sent!
                 </h3>
-                <p style={{
-                  color: '#64748b',
-                  fontSize: '14px',
-                  margin: '0',
-                  lineHeight: '1.5'
-                }}>
+                <p className="text-muted-foreground text-sm m-0 leading-relaxed">
                   Check your email ({email}) and click the link to log in instantly.
                 </p>
                 <button
@@ -168,15 +114,7 @@ export default function Login() {
                     setMagicLinkSent(false)
                     setIsMagicLinkMode(false)
                   }}
-                  style={{
-                    marginTop: '16px',
-                    background: 'none',
-                    border: 'none',
-                    color: '#0ea5e9',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  }}
+                  className="mt-4 bg-transparent border-none text-info text-sm cursor-pointer underline"
                 >
                   Back to login
                 </button>
@@ -187,33 +125,15 @@ export default function Login() {
             {!magicLinkSent && (
               <>
                 {/* Email Field */}
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '8px'
-                  }}>
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      fontSize: '16px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      backgroundColor: '#ffffff',
-                      color: '#1f2937',
-                      outline: 'none',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg bg-background text-gray-800 outline-none transition-colors duration-200 focus:border-brand-primary"
                     placeholder="your@email.com"
                     required
                   />
@@ -222,33 +142,16 @@ export default function Login() {
                 {/* Password Field - Hidden in magic link mode */}
                 {!isMagicLinkMode && (
                   <>
-                    <div style={{ marginBottom: '24px' }}>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        color: '#374151',
-                        marginBottom: '8px'
-                      }}>
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Password
                       </label>
-                      <div style={{ position: 'relative' }}>
+                      <div className="relative">
                         <input
                           type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            paddingRight: '48px',
-                            fontSize: '16px',
-                            border: '1px solid #d1d5db',
-                            borderRadius: '8px',
-                            backgroundColor: '#ffffff',
-                            color: '#1f2937',
-                            outline: 'none',
-                            transition: 'border-color 0.2s'
-                          }}
+                          className="w-full px-4 py-3 pr-12 text-base border border-gray-300 rounded-lg bg-background text-gray-800 outline-none transition-colors duration-200 focus:border-brand-primary"
                           onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
                           onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                           placeholder="Your password"
@@ -474,23 +377,8 @@ export default function Login() {
 
       {/* Right Side - Dashboard Preview (Desktop Only) */}
       {!isMobile && (
-        <div style={{
-          width: '50%',
-          backgroundColor: '#1a1a1a',
-          padding: '60px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          color: '#ffffff',
-          position: 'relative'
-        }}>
-          <div style={{ 
-            overflow: 'hidden', 
-            width: '100%', 
-            height: '100%',
-            position: 'relative'
-          }}>
+        <div className="w-1/2 bg-brand-primary p-[60px] flex flex-col justify-center items-center text-white relative">
+          <div className="overflow-hidden w-full h-full relative">
             <DashboardPreview />
           </div>
         </div>
