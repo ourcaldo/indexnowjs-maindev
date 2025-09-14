@@ -51,7 +51,7 @@ export default function JobsPage() {
               placeholder="Search jobs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-brand-accent text-foreground"
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-ring text-foreground"
             />
           </div>
 
@@ -59,7 +59,7 @@ export default function JobsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-brand-accent text-foreground"
+            className="px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-ring text-foreground"
           >
             <option>All Status</option>
             <option>Completed</option>
@@ -72,7 +72,7 @@ export default function JobsPage() {
           <select
             value={scheduleFilter}
             onChange={(e) => setScheduleFilter(e.target.value)}
-            className="px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-brand-accent text-foreground"
+            className="px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-ring text-foreground"
           >
             <option>All Schedules</option>
             <option>one-time</option>
@@ -115,10 +115,10 @@ export default function JobsPage() {
                   <td className="py-3 px-4">
                     <input type="checkbox" className="rounded border border-border" />
                   </td>
-                  <td className="py-3 px-4 font-medium text-brand-primary">{job.id}</td>
+                  <td className="py-3 px-4 font-medium text-foreground">{job.id}</td>
                   <td className="py-3 px-4 text-muted-foreground">{job.created}</td>
                   <td className="py-3 px-4">
-                    <span className="text-xs px-2 py-1 rounded-full font-medium bg-brand-primary text-white">
+                    <span className="text-xs px-2 py-1 rounded-full font-medium bg-primary text-primary-foreground">
                       {job.schedule}
                     </span>
                   </td>
@@ -130,9 +130,9 @@ export default function JobsPage() {
                   </td>
                   <td className="py-3 px-4">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      job.status === 'Completed' ? 'bg-success text-white' 
-                        : job.status === 'Paused' ? 'bg-warning text-brand-primary' 
-                        : 'bg-brand-primary text-white'
+                      job.status === 'Completed' ? 'bg-success text-success-foreground' 
+                        : job.status === 'Paused' ? 'bg-warning text-warning-foreground' 
+                        : 'bg-primary text-primary-foreground'
                     }`}>
                       {job.status}
                     </span>
@@ -147,7 +147,7 @@ export default function JobsPage() {
                     )}
                   </td>
                   <td className="py-3 px-4">
-                    <button className="transition-colors text-muted-foreground hover:text-brand-primary">...</button>
+                    <button className="transition-colors text-muted-foreground hover:text-primary">...</button>
                   </td>
                 </tr>
               ))}
