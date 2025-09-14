@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -p 5000",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "color-check": "node scripts/check-hardcoded-colors.js",
+    "color-check:verbose": "node scripts/check-hardcoded-colors.js --verbose"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
