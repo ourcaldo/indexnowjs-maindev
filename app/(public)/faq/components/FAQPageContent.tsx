@@ -192,7 +192,7 @@ export default function FAQPageContent() {
   ]
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
+    <div className="min-h-screen text-white relative overflow-hidden bg-[hsl(var(--primary))]">
       <Background />
       <Header 
         user={user}

@@ -136,114 +136,114 @@ export default function ActivityLogsPage() {
   const getEventTypeBadge = (eventType: string, success: boolean) => {
     const eventConfig = {
       login: { 
-        color: success ? 'bg-[#4BB543]/10 text-[#4BB543]' : 'bg-[#E63946]/10 text-[#E63946]',
+        color: success ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive',
         icon: LogIn,
         label: 'Sign In'
       },
       logout: { 
-        color: 'bg-[#6C757D]/10 text-[#6C757D]',
+        color: 'bg-[#6C757D]/10 text-muted-foreground',
         icon: LogOut,
         label: 'Sign Out'
       },
       register: { 
-        color: success ? 'bg-[#4BB543]/10 text-[#4BB543]' : 'bg-[#E63946]/10 text-[#E63946]',
+        color: success ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive',
         icon: User,
         label: 'Registration'
       },
       job_create: { 
-        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        color: 'bg-accent/10 text-accent',
         icon: Zap,
         label: 'Job Created'
       },
       job_update: { 
-        color: 'bg-[#F0A202]/10 text-[#F0A202]',
+        color: 'bg-warning/10 text-warning',
         icon: Settings,
         label: 'Job Updated'
       },
       job_delete: { 
-        color: 'bg-[#E63946]/10 text-[#E63946]',
+        color: 'bg-destructive/10 text-destructive',
         icon: XCircle,
         label: 'Job Deleted'
       },
       job_start: { 
-        color: 'bg-[#4BB543]/10 text-[#4BB543]',
+        color: 'bg-success/10 text-success',
         icon: CheckCircle,
         label: 'Job Started'
       },
       service_account_add: { 
-        color: 'bg-[#4BB543]/10 text-[#4BB543]',
+        color: 'bg-success/10 text-success',
         icon: Shield,
         label: 'Service Added'
       },
       service_account_delete: { 
-        color: 'bg-[#E63946]/10 text-[#E63946]',
+        color: 'bg-destructive/10 text-destructive',
         icon: XCircle,
         label: 'Service Removed'
       },
       profile_update: { 
-        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        color: 'bg-accent/10 text-accent',
         icon: User,
         label: 'Profile Updated'
       },
       admin_login: { 
-        color: 'bg-[#F0A202]/10 text-[#F0A202]',
+        color: 'bg-warning/10 text-warning',
         icon: Shield,
         label: 'Admin Access'
       },
       user_management: { 
-        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        color: 'bg-accent/10 text-accent',
         icon: Settings,
         label: 'User Management'
       },
       api_call: { 
-        color: 'bg-[#6C757D]/10 text-[#6C757D]',
+        color: 'bg-[#6C757D]/10 text-muted-foreground',
         icon: Server,
         label: 'API Call'
       },
       settings_change: { 
-        color: 'bg-[#F0A202]/10 text-[#F0A202]',
+        color: 'bg-warning/10 text-warning',
         icon: Settings,
         label: 'Settings Changed'
       },
       user_password_reset: {
-        color: 'bg-[#E63946]/10 text-[#E63946]',
+        color: 'bg-destructive/10 text-destructive',
         icon: Key,
         label: 'Password Reset'
       },
       user_profile_update: {
-        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        color: 'bg-accent/10 text-accent',
         icon: User,
         label: 'Profile Updated'
       },
       user_role_change: {
-        color: 'bg-[#F0A202]/10 text-[#F0A202]',
+        color: 'bg-warning/10 text-warning',
         icon: Shield,
         label: 'Role Changed'
       },
       user_security_view: {
-        color: 'bg-[#6C757D]/10 text-[#6C757D]',
+        color: 'bg-[#6C757D]/10 text-muted-foreground',
         icon: Shield,
         label: 'Security Analysis'
       },
       user_activity_view: {
-        color: 'bg-[#6C757D]/10 text-[#6C757D]',
+        color: 'bg-[#6C757D]/10 text-muted-foreground',
         icon: Activity,
         label: 'Activity Review'
       },
       page_view: {
-        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        color: 'bg-accent/10 text-accent',
         icon: Globe,
         label: 'Page Visit'
       },
       dashboard_view: {
-        color: 'bg-[#3D8BFF]/10 text-[#3D8BFF]',
+        color: 'bg-accent/10 text-accent',
         icon: Monitor,
         label: 'Dashboard'
       }
     }
     
     return eventConfig[eventType as keyof typeof eventConfig] || {
-      color: 'bg-[#6C757D]/10 text-[#6C757D]',
+      color: 'bg-[#6C757D]/10 text-muted-foreground',
       icon: Activity,
       label: eventType.replace('_', ' ').toUpperCase()
     }
@@ -269,11 +269,11 @@ export default function ActivityLogsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] p-6">
+      <div className="min-h-screen bg-secondary p-6">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-[#1A1A1A]">Activity Logs</h1>
-            <p className="text-[#6C757D] mt-2">Loading activity logs...</p>
+            <h1 className="text-2xl font-semibold text-foreground">Activity Logs</h1>
+            <p className="text-muted-foreground mt-2">Loading activity logs...</p>
           </div>
         </div>
       </div>
@@ -282,16 +282,16 @@ export default function ActivityLogsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#F7F9FC] p-6">
+      <div className="min-h-screen bg-secondary p-6">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-[#1A1A1A]">Activity Logs</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Activity Logs</h1>
             <Card className="mt-4">
               <CardContent className="p-6">
-                <p className="text-[#E63946]">Error: {error}</p>
+                <p className="text-destructive">Error: {error}</p>
                 <Button 
                   onClick={fetchActivityLogs}
-                  className="mt-4 bg-[#1C2331] hover:bg-[#0d1b2a] text-white"
+                  className="mt-4 bg-primary hover:bg-primary/90 text-white"
                 >
                   Retry
                 </Button>
@@ -304,12 +304,12 @@ export default function ActivityLogsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] p-6">
+    <div className="min-h-screen bg-secondary p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-[#1A1A1A]">Activity Logs</h1>
-          <p className="text-[#6C757D] mt-2">
+          <h1 className="text-2xl font-semibold text-foreground">Activity Logs</h1>
+          <p className="text-muted-foreground mt-2">
             Track backend events, user actions (logins, changes, API calls), and system warnings or errors for audits and debugging
           </p>
         </div>
@@ -320,11 +320,11 @@ export default function ActivityLogsPage() {
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-lg bg-[#3D8BFF]/10">
-                  <Activity className="h-5 w-5 text-[#3D8BFF]" />
+                  <Activity className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">{filteredLogs.length}</p>
-                  <p className="text-xs text-[#6C757D]">Total Activities</p>
+                  <p className="text-lg font-bold text-foreground">{filteredLogs.length}</p>
+                  <p className="text-xs text-muted-foreground">Total Activities</p>
                 </div>
               </div>
             </CardContent>
@@ -333,13 +333,13 @@ export default function ActivityLogsPage() {
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-lg bg-[#4BB543]/10">
-                  <User className="h-5 w-5 text-[#4BB543]" />
+                  <User className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">
+                  <p className="text-lg font-bold text-foreground">
                     {new Set(filteredLogs.map(l => l.user_id)).size}
                   </p>
-                  <p className="text-xs text-[#6C757D]">Active Users</p>
+                  <p className="text-xs text-muted-foreground">Active Users</p>
                 </div>
               </div>
             </CardContent>
@@ -348,13 +348,13 @@ export default function ActivityLogsPage() {
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-lg bg-[#4BB543]/10">
-                  <Activity className="h-5 w-5 text-[#4BB543]" />
+                  <Activity className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">
+                  <p className="text-lg font-bold text-foreground">
                     {filteredLogs.filter(l => l.success).length}
                   </p>
-                  <p className="text-xs text-[#6C757D]">Successful Actions</p>
+                  <p className="text-xs text-muted-foreground">Successful Actions</p>
                 </div>
               </div>
             </CardContent>
@@ -363,13 +363,13 @@ export default function ActivityLogsPage() {
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-lg bg-[#E63946]/10">
-                  <Activity className="h-5 w-5 text-[#E63946]" />
+                  <Activity className="h-5 w-5 text-destructive" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">
+                  <p className="text-lg font-bold text-foreground">
                     {filteredLogs.filter(l => !l.success).length}
                   </p>
-                  <p className="text-xs text-[#6C757D]">Failed Actions</p>
+                  <p className="text-xs text-muted-foreground">Failed Actions</p>
                 </div>
               </div>
             </CardContent>
@@ -382,7 +382,7 @@ export default function ActivityLogsPage() {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6C757D]" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by user name, email, action, or event type..."
                     value={searchTerm}
@@ -428,29 +428,29 @@ export default function ActivityLogsPage() {
               <Activity className="h-5 w-5" />
               User Activity Logs
             </CardTitle>
-            <p className="text-[#6C757D] text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               Showing {filteredLogs.length} activities from all users (latest first)
             </p>
           </CardHeader>
           <CardContent>
             {filteredLogs.length === 0 ? (
               <div className="text-center py-12">
-                <Activity className="h-16 w-16 text-[#6C757D] mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No activity logs found</h3>
-                <p className="text-[#6C757D]">No user activities match your current filters</p>
+                <Activity className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No activity logs found</h3>
+                <p className="text-muted-foreground">No user activities match your current filters</p>
               </div>
             ) : (
-              <div className="border border-[#E0E6ED] rounded-lg overflow-hidden">
+              <div className="border border-border rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-[#F7F9FC] hover:bg-[#F7F9FC]">
-                      <TableHead className="w-16 text-center text-[#1A1A1A] font-semibold">#</TableHead>
-                      <TableHead className="text-center text-[#1A1A1A] font-semibold">Timestamp</TableHead>
-                      <TableHead className="text-center text-[#1A1A1A] font-semibold">User</TableHead>
-                      <TableHead className="text-center text-[#1A1A1A] font-semibold">Action/Event</TableHead>
-                      <TableHead className="text-center text-[#1A1A1A] font-semibold">Device & IP</TableHead>
-                      <TableHead className="text-center text-[#1A1A1A] font-semibold">Status</TableHead>
-                      <TableHead className="w-16 text-center text-[#1A1A1A] font-semibold">Details</TableHead>
+                    <TableRow className="bg-secondary hover:bg-secondary">
+                      <TableHead className="w-16 text-center text-foreground font-semibold">#</TableHead>
+                      <TableHead className="text-center text-foreground font-semibold">Timestamp</TableHead>
+                      <TableHead className="text-center text-foreground font-semibold">User</TableHead>
+                      <TableHead className="text-center text-foreground font-semibold">Action/Event</TableHead>
+                      <TableHead className="text-center text-foreground font-semibold">Device & IP</TableHead>
+                      <TableHead className="text-center text-foreground font-semibold">Status</TableHead>
+                      <TableHead className="w-16 text-center text-foreground font-semibold">Details</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -463,16 +463,16 @@ export default function ActivityLogsPage() {
                       return (
                         <TableRow 
                           key={log.id}
-                          className="hover:bg-[#F7F9FC] border-b border-[#E0E6ED]"
+                          className="hover:bg-secondary border-b border-border"
                         >
                           {/* Row Number */}
-                          <TableCell className="text-center text-[#6C757D] font-mono text-sm">
+                          <TableCell className="text-center text-muted-foreground font-mono text-sm">
                             {(currentPage - 1) * 50 + index + 1}
                           </TableCell>
                           
                           {/* Timestamp */}
                           <TableCell className="text-left">
-                            <div className="text-[#1A1A1A] text-sm font-medium">
+                            <div className="text-foreground text-sm font-medium">
                               {formatDate(log.created_at)}
                             </div>
                           </TableCell>
@@ -481,12 +481,12 @@ export default function ActivityLogsPage() {
                           <TableCell className="text-left">
                             <Link 
                               href={`/backend/admin/users/${log.user_id}`}
-                              className="hover:text-[#3D8BFF] transition-colors"
+                              className="hover:text-accent transition-colors"
                             >
-                              <div className="text-[#1A1A1A] font-medium text-sm">
+                              <div className="text-foreground font-medium text-sm">
                                 {log.user_name}
                               </div>
-                              <div className="text-[#6C757D] text-xs">
+                              <div className="text-muted-foreground text-xs">
                                 {log.user_email}
                               </div>
                             </Link>
@@ -497,11 +497,11 @@ export default function ActivityLogsPage() {
                             <Badge className={`${eventConfig.color} border-0 text-xs mb-1`}>
                               {eventConfig.label}
                             </Badge>
-                            <div className="text-[#1A1A1A] text-sm">
+                            <div className="text-foreground text-sm">
                               {log.action_description}
                             </div>
                             {log.error_message && (
-                              <div className="text-[#E63946] text-xs mt-1 bg-[#E63946]/5 px-2 py-1 rounded">
+                              <div className="text-destructive text-xs mt-1 bg-[#E63946]/5 px-2 py-1 rounded">
                                 <strong>Error:</strong> {log.error_message}
                               </div>
                             )}
@@ -509,13 +509,13 @@ export default function ActivityLogsPage() {
                           
                           {/* Device & IP */}
                           <TableCell className="text-center">
-                            <div className="flex items-center justify-center gap-1 text-[#6C757D] text-sm mb-1">
+                            <div className="flex items-center justify-center gap-1 text-muted-foreground text-sm mb-1">
                               <DeviceIcon className="h-4 w-4 flex-shrink-0" />
                               <span className="font-medium">{deviceInfo.text}</span>
                             </div>
                             {log.ip_address && (
-                              <div className="text-[#6C757D] text-xs">
-                                <span className="font-mono bg-[#F7F9FC] px-1.5 py-0.5 rounded">
+                              <div className="text-muted-foreground text-xs">
+                                <span className="font-mono bg-secondary px-1.5 py-0.5 rounded">
                                   {log.ip_address}
                                 </span>
                               </div>
@@ -527,13 +527,13 @@ export default function ActivityLogsPage() {
                             <div className="flex items-center justify-center gap-2">
                               {log.success ? (
                                 <>
-                                  <CheckCircle className="h-4 w-4 text-[#4BB543]" />
-                                  <span className="text-[#4BB543] text-sm font-medium">Success</span>
+                                  <CheckCircle className="h-4 w-4 text-success" />
+                                  <span className="text-success text-sm font-medium">Success</span>
                                 </>
                               ) : (
                                 <>
-                                  <XCircle className="h-4 w-4 text-[#E63946]" />
-                                  <span className="text-[#E63946] text-sm font-medium">Failed</span>
+                                  <XCircle className="h-4 w-4 text-destructive" />
+                                  <span className="text-destructive text-sm font-medium">Failed</span>
                                 </>
                               )}
                             </div>
@@ -545,7 +545,7 @@ export default function ActivityLogsPage() {
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-[#3D8BFF]/10 hover:text-[#3D8BFF]"
+                                className="h-8 w-8 p-0 hover:bg-[#3D8BFF]/10 hover:text-accent"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -562,7 +562,7 @@ export default function ActivityLogsPage() {
             {/* Pagination */}
             {pagination.totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
-                <p className="text-sm text-[#6C757D]">
+                <p className="text-sm text-muted-foreground">
                   Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
                   {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
                   {pagination.total} entries
@@ -577,7 +577,7 @@ export default function ActivityLogsPage() {
                     <ChevronLeft className="h-4 w-4" />
                     Previous
                   </Button>
-                  <span className="text-sm text-[#6C757D]">
+                  <span className="text-sm text-muted-foreground">
                     Page {pagination.page} of {pagination.totalPages}
                   </span>
                   <Button

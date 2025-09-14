@@ -119,7 +119,7 @@ export default function PricingPageContent() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
-      <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: '#111113'}}>
+      <div className="min-h-screen text-white relative overflow-hidden bg-[hsl(var(--primary))]">
         <Background />
         <Header 
           user={user}

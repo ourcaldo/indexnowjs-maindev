@@ -145,37 +145,37 @@ export default function PaymentGateways() {
     }
 
     return (
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      <div className="bg-white rounded-lg border border-border p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Name</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Name</label>
             <input
               type="text"
               value={formData.name || ''}
               onChange={(e) => updateField('name', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               placeholder="PayPal"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Slug</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Slug</label>
             <input
               type="text"
               value={formData.slug || ''}
               onChange={(e) => updateField('slug', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               placeholder="paypal"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Description</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Description</label>
             <textarea
               value={formData.description || ''}
               onChange={(e) => updateField('description', e.target.value)}
               rows={2}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               placeholder="PayPal payment gateway integration"
             />
           </div>
@@ -184,51 +184,51 @@ export default function PaymentGateways() {
           {formData.slug === 'bank_transfer' && (
             <>
               <div className="md:col-span-2">
-                <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
+                <h3 className="text-lg font-medium text-foreground mb-4 border-b border-border pb-2">
                   Bank Transfer Configuration
                 </h3>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Bank Name</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Bank Name</label>
                 <input
                   type="text"
                   value={formData.configuration?.bank_name || ''}
                   onChange={(e) => updateConfigurationField('bank_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="Bank Central Asia"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Bank Code</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Bank Code</label>
                 <input
                   type="text"
                   value={formData.configuration?.bank_code || ''}
                   onChange={(e) => updateConfigurationField('bank_code', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="014"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Account Name</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Account Name</label>
                 <input
                   type="text"
                   value={formData.configuration?.account_name || ''}
                   onChange={(e) => updateConfigurationField('account_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="PT. IndexNow Studio"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Account Number</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Account Number</label>
                 <input
                   type="text"
                   value={formData.configuration?.account_number || ''}
                   onChange={(e) => updateConfigurationField('account_number', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="1234567890"
                 />
               </div>
@@ -239,7 +239,7 @@ export default function PaymentGateways() {
           {formData.slug === 'midtrans' && (
             <>
               <div className="md:col-span-2">
-                <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
+                <h3 className="text-lg font-medium text-foreground mb-4 border-b border-border pb-2">
                   Midtrans Recurring API Configuration
                 </h3>
                 <p className="text-sm text-[#6C757D] mb-4">
@@ -248,11 +248,11 @@ export default function PaymentGateways() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Environment</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Environment</label>
                 <select
                   value={formData.configuration?.environment || 'sandbox'}
                   onChange={(e) => updateConfigurationField('environment', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                 >
                   <option value="sandbox">Sandbox</option>
                   <option value="production">Production</option>
@@ -260,7 +260,7 @@ export default function PaymentGateways() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Merchant ID</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Merchant ID</label>
                 <input
                   type="text"
                   value={formData.api_credentials?.merchant_id || ''}
@@ -271,13 +271,13 @@ export default function PaymentGateways() {
                       merchant_id: e.target.value
                     }
                   }))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="G123456789"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Client Key</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Client Key</label>
                 <input
                   type="text"
                   value={formData.api_credentials?.client_key || ''}
@@ -288,13 +288,13 @@ export default function PaymentGateways() {
                       client_key: e.target.value
                     }
                   }))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="SB-Mid-client-..."
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Server Key</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Server Key</label>
                 <input
                   type="password"
                   value={formData.api_credentials?.server_key || ''}
@@ -305,7 +305,7 @@ export default function PaymentGateways() {
                       server_key: e.target.value
                     }
                   }))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="SB-Mid-server-..."
                 />
                 <p className="text-xs text-[#6C757D] mt-1">
@@ -314,12 +314,12 @@ export default function PaymentGateways() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Webhook URL</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Webhook URL</label>
                 <input
                   type="url"
                   value={formData.configuration?.webhook_url || ''}
                   onChange={(e) => updateConfigurationField('webhook_url', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="https://yourdomain.com/api/midtrans/webhook"
                   readOnly
                 />
@@ -334,7 +334,7 @@ export default function PaymentGateways() {
           {formData.slug === 'midtrans_snap' && (
             <>
               <div className="md:col-span-2">
-                <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
+                <h3 className="text-lg font-medium text-foreground mb-4 border-b border-border pb-2">
                   Midtrans Snap API Configuration
                 </h3>
                 <p className="text-sm text-[#6C757D] mb-4">
@@ -343,11 +343,11 @@ export default function PaymentGateways() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Environment</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Environment</label>
                 <select
                   value={formData.configuration?.environment || 'sandbox'}
                   onChange={(e) => updateConfigurationField('environment', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                 >
                   <option value="sandbox">Sandbox</option>
                   <option value="production">Production</option>
@@ -355,7 +355,7 @@ export default function PaymentGateways() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Merchant ID</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Merchant ID</label>
                 <input
                   type="text"
                   value={formData.api_credentials?.merchant_id || ''}
@@ -366,13 +366,13 @@ export default function PaymentGateways() {
                       merchant_id: e.target.value
                     }
                   }))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="G123456789"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Client Key</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Client Key</label>
                 <input
                   type="text"
                   value={formData.api_credentials?.client_key || ''}
@@ -383,13 +383,13 @@ export default function PaymentGateways() {
                       client_key: e.target.value
                     }
                   }))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="SB-Mid-client-..."
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Server Key</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Server Key</label>
                 <input
                   type="password"
                   value={formData.api_credentials?.server_key || ''}
@@ -400,7 +400,7 @@ export default function PaymentGateways() {
                       server_key: e.target.value
                     }
                   }))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="SB-Mid-server-..."
                 />
                 <p className="text-xs text-[#6C757D] mt-1">
@@ -409,12 +409,12 @@ export default function PaymentGateways() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Webhook URL</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Webhook URL</label>
                 <input
                   type="url"
                   value={formData.configuration?.webhook_url || ''}
                   onChange={(e) => updateConfigurationField('webhook_url', e.target.value)}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="https://yourdomain.com/api/midtrans/webhook"
                   readOnly
                 />
@@ -431,9 +431,9 @@ export default function PaymentGateways() {
                 type="checkbox"
                 checked={formData.is_active || false}
                 onChange={(e) => updateField('is_active', e.target.checked)}
-                className="rounded border-[#E0E6ED] text-[#3D8BFF] focus:ring-[#3D8BFF]"
+                className="rounded border-border text-[#3D8BFF] focus:ring-accent"
               />
-              <span className="ml-2 text-sm text-[#1A1A1A]">Active</span>
+              <span className="ml-2 text-sm text-foreground">Active</span>
             </label>
 
             <label className="flex items-center">
@@ -441,9 +441,9 @@ export default function PaymentGateways() {
                 type="checkbox"
                 checked={formData.is_default || false}
                 onChange={(e) => updateField('is_default', e.target.checked)}
-                className="rounded border-[#E0E6ED] text-[#3D8BFF] focus:border-transparent"
+                className="rounded border-border text-[#3D8BFF] focus:border-transparent"
               />
-              <span className="ml-2 text-sm text-[#1A1A1A]">Default</span>
+              <span className="ml-2 text-sm text-foreground">Default</span>
             </label>
           </div>
         </div>
@@ -451,7 +451,7 @@ export default function PaymentGateways() {
         <div className="flex justify-end space-x-3 mt-6">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+            className="px-4 py-2 text-[#6C757D] hover:text-foreground transition-colors"
           >
             Cancel
           </button>
@@ -480,7 +480,7 @@ export default function PaymentGateways() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Payment Gateways</h1>
+          <h1 className="text-2xl font-bold text-foreground">Payment Gateways</h1>
           <p className="text-[#6C757D] mt-1">Manage payment methods and processing options</p>
         </div>
         <button
@@ -528,7 +528,7 @@ export default function PaymentGateways() {
                 onCancel={() => setEditingGateway(null)}
               />
             ) : (
-              <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+              <div className="bg-white rounded-lg border border-border p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-[#3D8BFF]/10 rounded-lg flex items-center justify-center">
@@ -536,7 +536,7 @@ export default function PaymentGateways() {
                     </div>
                     <div>
                       <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-semibold text-[#1A1A1A]">{gateway.name}</h3>
+                        <h3 className="text-lg font-semibold text-foreground">{gateway.name}</h3>
                         {gateway.is_default && (
                           <span className="px-2 py-1 text-xs font-medium bg-[#4BB543]/10 text-[#4BB543] rounded-full border border-[#4BB543]/20">
                             Default
@@ -578,7 +578,7 @@ export default function PaymentGateways() {
                     )}
                     <button
                       onClick={() => setEditingGateway(gateway)}
-                      className="p-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
+                      className="p-2 text-[#6C757D] hover:text-foreground hover:bg-[#F7F9FC] rounded-lg transition-colors"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>

@@ -223,48 +223,48 @@ export default function PackageManagement() {
     }, [formData.slug])
 
     return (
-      <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+      <div className="bg-white rounded-lg border border-border p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Package Name</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Package Name</label>
             <input
               type="text"
               value={formData.name || ''}
               onChange={(e) => updateField('name', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               placeholder="Premium"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Slug</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Slug</label>
             <input
               type="text"
               value={formData.slug || ''}
               onChange={(e) => updateField('slug', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               placeholder="premium"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Description</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Description</label>
             <textarea
               value={formData.description || ''}
               onChange={(e) => updateField('description', e.target.value)}
               rows={2}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               placeholder="Enhanced features for professionals"
             />
           </div>
 
           {/* Currency */}
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Currency</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Currency</label>
             <select
               value={formData.currency || 'IDR'}
               onChange={(e) => updateField('currency', e.target.value)}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             >
               <option value="IDR">IDR (Indonesian Rupiah)</option>
               <option value="USD">USD (US Dollar)</option>
@@ -273,57 +273,57 @@ export default function PackageManagement() {
 
           {/* Sort Order */}
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Sort Order</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Sort Order</label>
             <input
               type="number"
               value={formData.sort_order || 0}
               onChange={(e) => updateField('sort_order', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               placeholder="0"
             />
           </div>
 
           {/* Quota Limits */}
           <div className="md:col-span-2">
-            <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
+            <h3 className="text-lg font-medium text-foreground mb-4 border-b border-border pb-2">
               Quota Limits
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Service Accounts</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Service Accounts</label>
                 <input
                   type="number"
                   value={formData.quota_limits?.service_accounts || 0}
                   onChange={(e) => updateQuotaLimit('service_accounts', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="1 (use -1 for unlimited)"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Daily URLs</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Daily URLs</label>
                 <input
                   type="number"
                   value={formData.quota_limits?.daily_urls || 0}
                   onChange={(e) => updateQuotaLimit('daily_urls', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="50 (use -1 for unlimited)"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Concurrent Jobs</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Concurrent Jobs</label>
                 <input
                   type="number"
                   value={formData.quota_limits?.concurrent_jobs || 0}
                   onChange={(e) => updateQuotaLimit('concurrent_jobs', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="1"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   <span className="flex items-center gap-2">
                     Keywords Limit
-                    <span className="px-2 py-1 text-xs bg-[#4BB543]/10 text-[#4BB543] rounded-full border border-[#4BB543]/20">
+                    <span className="px-2 py-1 text-xs bg-success/10 text-success rounded-full border border-success/20">
                       Rank Tracker
                     </span>
                   </span>
@@ -332,10 +332,10 @@ export default function PackageManagement() {
                   type="number"
                   value={formData.quota_limits?.keywords_limit || 0}
                   onChange={(e) => updateQuotaLimit('keywords_limit', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                   placeholder="100 (use -1 for unlimited)"
                 />
-                <p className="text-xs text-[#6C757D] mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Maximum number of keywords that can be tracked simultaneously for rank monitoring
                 </p>
               </div>
@@ -345,7 +345,7 @@ export default function PackageManagement() {
           {/* Pricing Tiers (only for paid packages) */}
           {formData.slug !== 'free' && (
             <div className="md:col-span-2">
-              <h3 className="text-lg font-medium text-[#1A1A1A] mb-4 border-b border-[#E0E6ED] pb-2">
+              <h3 className="text-lg font-medium text-foreground mb-4 border-b border-border pb-2">
                 Pricing Tiers
               </h3>
               <div className="space-y-6">
@@ -356,11 +356,11 @@ export default function PackageManagement() {
                   const tierData = (formData.pricing_tiers as any)?.[periodInfo.period] || {}
                   
                   return (
-                    <div key={periodInfo.period} className="p-6 bg-[#F7F9FC] rounded-lg border border-[#E0E6ED]">
+                    <div key={periodInfo.period} className="p-6 bg-secondary rounded-lg border border-border">
                       {/* Period Header */}
                       <div className="mb-4">
-                        <h4 className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
-                          <Clock className="h-5 w-5 text-[#3D8BFF]" />
+                        <h4 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                          <Clock className="h-5 w-5 text-accent" />
                           {periodInfo.label} Billing
                         </h4>
                       </div>
@@ -368,39 +368,39 @@ export default function PackageManagement() {
                       {/* Currency Pricing Grid */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* IDR Pricing */}
-                        <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-                          <h4 className="text-md font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
-                            <span className="bg-[#4BB543] text-white px-2 py-1 text-xs rounded">IDR</span>
+                        <div className="bg-white p-4 rounded-lg border border-border">
+                          <h4 className="text-md font-semibold text-foreground mb-3 flex items-center gap-2">
+                            <span className="bg-success text-white px-2 py-1 text-xs rounded">IDR</span>
                             Indonesian Rupiah
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
-                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Period Label</label>
+                              <label className="block text-sm font-medium text-foreground mb-2">Period Label</label>
                               <input
                                 type="text"
                                 value={tierData.IDR?.period_label || periodInfo.defaultLabel}
                                 onChange={(e) => updatePricingTierField(periodInfo.period, 'IDR', 'period_label', e.target.value)}
-                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
                                 placeholder={periodInfo.defaultLabel}
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Regular Price</label>
+                              <label className="block text-sm font-medium text-foreground mb-2">Regular Price</label>
                               <input
                                 type="number"
                                 value={tierData.IDR?.regular_price || 0}
                                 onChange={(e) => updatePricingTierField(periodInfo.period, 'IDR', 'regular_price', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
                                 placeholder="50000"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Promo Price</label>
+                              <label className="block text-sm font-medium text-foreground mb-2">Promo Price</label>
                               <input
                                 type="number"
                                 value={tierData.IDR?.promo_price || 0}
                                 onChange={(e) => updatePricingTierField(periodInfo.period, 'IDR', 'promo_price', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
                                 placeholder="25000"
                               />
                             </div>
@@ -408,39 +408,39 @@ export default function PackageManagement() {
                         </div>
 
                         {/* USD Pricing */}
-                        <div className="bg-white p-4 rounded-lg border border-[#E0E6ED]">
-                          <h4 className="text-md font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
-                            <span className="bg-[#3D8BFF] text-white px-2 py-1 text-xs rounded">USD</span>
+                        <div className="bg-white p-4 rounded-lg border border-border">
+                          <h4 className="text-md font-semibold text-foreground mb-3 flex items-center gap-2">
+                            <span className="bg-accent text-white px-2 py-1 text-xs rounded">USD</span>
                             US Dollar
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
-                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Period Label</label>
+                              <label className="block text-sm font-medium text-foreground mb-2">Period Label</label>
                               <input
                                 type="text"
                                 value={tierData.USD?.period_label || periodInfo.defaultLabel}
                                 onChange={(e) => updatePricingTierField(periodInfo.period, 'USD', 'period_label', e.target.value)}
-                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
                                 placeholder={periodInfo.defaultLabel}
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Regular Price</label>
+                              <label className="block text-sm font-medium text-foreground mb-2">Regular Price</label>
                               <input
                                 type="number"
                                 value={tierData.USD?.regular_price || 0}
                                 onChange={(e) => updatePricingTierField(periodInfo.period, 'USD', 'regular_price', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
                                 placeholder="10"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Promo Price</label>
+                              <label className="block text-sm font-medium text-foreground mb-2">Promo Price</label>
                               <input
                                 type="number"
                                 value={tierData.USD?.promo_price || 0}
                                 onChange={(e) => updatePricingTierField(periodInfo.period, 'USD', 'promo_price', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent text-sm"
+                                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
                                 placeholder="5"
                               />
                             </div>
@@ -457,12 +457,12 @@ export default function PackageManagement() {
           {/* Features */}
           <div className="md:col-span-2">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-[#1A1A1A] border-b border-[#E0E6ED] pb-2">
+              <h3 className="text-lg font-medium text-foreground border-b border-border pb-2">
                 Features
               </h3>
               <button
                 onClick={addFeature}
-                className="flex items-center space-x-2 px-3 py-1 text-sm bg-[#3D8BFF] text-white rounded-lg hover:bg-[#2563EB] transition-colors"
+                className="flex items-center space-x-2 px-3 py-1 text-sm bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Feature</span>
@@ -475,12 +475,12 @@ export default function PackageManagement() {
                     type="text"
                     value={feature}
                     onChange={(e) => updateFeature(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-[#E0E6ED] rounded-lg focus:ring-2 focus:ring-[#3D8BFF] focus:border-transparent"
+                    className="flex-1 px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                     placeholder="Feature description"
                   />
                   <button
                     onClick={() => removeFeature(index)}
-                    className="p-2 text-[#E63946] hover:bg-[#E63946]/10 rounded-lg transition-colors"
+                    className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -496,9 +496,9 @@ export default function PackageManagement() {
                 type="checkbox"
                 checked={formData.is_active || false}
                 onChange={(e) => updateField('is_active', e.target.checked)}
-                className="rounded border-[#E0E6ED] text-[#3D8BFF] focus:ring-[#3D8BFF]"
+                className="rounded border-border text-accent focus:ring-accent"
               />
-              <span className="ml-2 text-sm text-[#1A1A1A]">Active</span>
+              <span className="ml-2 text-sm text-foreground">Active</span>
             </label>
 
             <label className="flex items-center">
@@ -506,9 +506,9 @@ export default function PackageManagement() {
                 type="checkbox"
                 checked={formData.is_popular || false}
                 onChange={(e) => updateField('is_popular', e.target.checked)}
-                className="rounded border-[#E0E6ED] text-[#3D8BFF] focus:ring-[#3D8BFF]"
+                className="rounded border-border text-accent focus:ring-accent"
               />
-              <span className="ml-2 text-sm text-[#1A1A1A]">Popular</span>
+              <span className="ml-2 text-sm text-foreground">Popular</span>
             </label>
           </div>
         </div>
@@ -516,13 +516,13 @@ export default function PackageManagement() {
         <div className="flex justify-end space-x-3 mt-6">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-[#6C757D] hover:text-[#1A1A1A] transition-colors"
+            className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(formData)}
-            className="flex items-center space-x-2 px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
             <Save className="h-4 w-4" />
             <span>Save</span>
@@ -535,7 +535,7 @@ export default function PackageManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-[#1C2331]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-primary"></div>
       </div>
     )
   }
@@ -545,12 +545,12 @@ export default function PackageManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Package Management</h1>
-          <p className="text-[#6C757D] mt-1">Manage subscription packages and pricing tiers</p>
+          <h1 className="text-2xl font-bold text-foreground">Package Management</h1>
+          <p className="text-muted-foreground mt-1">Manage subscription packages and pricing tiers</p>
         </div>
         <button
           onClick={() => setIsCreating(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-[#1C2331] text-white rounded-lg hover:bg-[#0d1b2a] transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-4 w-4" />
           <span>Add Package</span>
@@ -561,8 +561,8 @@ export default function PackageManagement() {
       {message && (
         <div className={`flex items-center space-x-2 p-4 rounded-lg border ${
           message.type === 'success' 
-            ? 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20' 
-            : 'bg-[#E63946]/10 text-[#E63946] border-[#E63946]/20'
+            ? 'bg-success/10 text-success border-success/20' 
+            : 'bg-destructive/10 text-destructive border-destructive/20'
         }`}>
           {message.type === 'success' ? (
             <CheckCircle className="h-5 w-5" />
@@ -593,34 +593,34 @@ export default function PackageManagement() {
                 onCancel={() => setEditingPackage(null)}
               />
             ) : (
-              <div className="bg-white rounded-lg border border-[#E0E6ED] p-6">
+              <div className="bg-white rounded-lg border border-border p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-[#3D8BFF]/10 rounded-lg flex items-center justify-center">
-                      <Package className="h-6 w-6 text-[#3D8BFF]" />
+                    <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                      <Package className="h-6 w-6 text-accent" />
                     </div>
                     <div>
                       <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-semibold text-[#1A1A1A]">{pkg.name}</h3>
+                        <h3 className="text-lg font-semibold text-foreground">{pkg.name}</h3>
                         {pkg.is_popular && (
-                          <span className="px-2 py-1 text-xs font-medium bg-[#F0A202]/10 text-[#F0A202] rounded-full border border-[#F0A202]/20 flex items-center space-x-1">
+                          <span className="px-2 py-1 text-xs font-medium bg-warning/10 text-warning rounded-full border border-warning/20 flex items-center space-x-1">
                             <Star className="h-3 w-3" />
                             <span>Popular</span>
                           </span>
                         )}
                         <span className={`px-2 py-1 text-xs font-medium rounded-full border ${
                           pkg.is_active 
-                            ? 'bg-[#4BB543]/10 text-[#4BB543] border-[#4BB543]/20'
-                            : 'bg-[#6C757D]/10 text-[#6C757D] border-[#6C757D]/20'
+                            ? 'bg-success/10 text-success border-success/20'
+                            : 'bg-[#6C757D]/10 text-muted-foreground border-[#6C757D]/20'
                         }`}>
                           {pkg.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
-                      <p className="text-sm text-[#6C757D] mt-1">{pkg.description}</p>
-                      <p className="text-xs text-[#6C757D] mt-1">Slug: {pkg.slug}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{pkg.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Slug: {pkg.slug}</p>
                       
                       {/* Package Details */}
-                      <div className="mt-3 flex items-center flex-wrap gap-x-6 gap-y-2 text-xs text-[#6C757D]">
+                      <div className="mt-3 flex items-center flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
                         <div className="flex items-center space-x-1">
                           <Users className="h-4 w-4" />
                           <span>{pkg.quota_limits?.service_accounts === -1 ? 'Unlimited' : pkg.quota_limits?.service_accounts || 0} Service Accounts</span>
@@ -634,7 +634,7 @@ export default function PackageManagement() {
                           <span>{pkg.quota_limits?.concurrent_jobs || 0} Concurrent Jobs</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <Search className="h-4 w-4 text-[#4BB543]" />
+                          <Search className="h-4 w-4 text-success" />
                           <span>{pkg.quota_limits?.keywords_limit === -1 ? 'Unlimited' : pkg.quota_limits?.keywords_limit || 0} Keywords</span>
                         </div>
                       </div>
@@ -642,8 +642,8 @@ export default function PackageManagement() {
                       {/* Features Preview */}
                       {pkg.features && pkg.features.length > 0 && (
                         <div className="mt-2">
-                          <p className="text-xs text-[#6C757D] font-medium">Features:</p>
-                          <p className="text-xs text-[#6C757D]">{pkg.features.slice(0, 3).join(', ')}{pkg.features.length > 3 ? '...' : ''}</p>
+                          <p className="text-xs text-muted-foreground font-medium">Features:</p>
+                          <p className="text-xs text-muted-foreground">{pkg.features.slice(0, 3).join(', ')}{pkg.features.length > 3 ? '...' : ''}</p>
                         </div>
                       )}
                     </div>
@@ -651,13 +651,13 @@ export default function PackageManagement() {
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setEditingPackage(pkg)}
-                      className="p-2 text-[#6C757D] hover:text-[#1A1A1A] hover:bg-[#F7F9FC] rounded-lg transition-colors"
+                      className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(pkg.id)}
-                      className="p-2 text-[#6C757D] hover:text-[#E63946] hover:bg-[#E63946]/10 rounded-lg transition-colors"
+                      className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -670,11 +670,11 @@ export default function PackageManagement() {
 
         {packages.length === 0 && (
           <div className="text-center py-12">
-            <Package className="h-12 w-12 text-[#6C757D] mx-auto mb-4" />
-            <p className="text-[#6C757D]">No packages configured</p>
+            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No packages configured</p>
             <button
               onClick={() => setIsCreating(true)}
-              className="mt-4 text-[#3D8BFF] hover:underline"
+              className="mt-4 text-accent hover:underline"
             >
               Create your first package
             </button>
