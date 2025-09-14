@@ -393,22 +393,22 @@ export default function IndexNowPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold" style={{color: '#1A1A1A'}}>IndexNow</h1>
-        <p className="mt-1" style={{color: '#6C757D'}}>Submit URLs for indexing and manage schedules</p>
+        <h1 className="text-2xl font-bold text-brand-primary">IndexNow</h1>
+        <p className="mt-1 text-muted-foreground">Submit URLs for indexing and manage schedules</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main Form */}
         <div className="lg:col-span-2">
-          <div className="p-6 rounded-lg border" style={{backgroundColor: '#FFFFFF', borderColor: '#E0E6ED'}}>
+          <div className="p-6 rounded-lg border bg-background border-border">
             <div className="flex items-center gap-2 mb-6">
-              <Zap className="w-5 h-5" style={{color: '#6C757D'}} />
-              <h2 className="text-lg font-semibold" style={{color: '#1A1A1A'}}>Submit URLs for Indexing</h2>
+              <Zap className="w-5 h-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold text-brand-primary">Submit URLs for Indexing</h2>
             </div>
 
             {/* Job Name */}
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-2" style={{color: '#6C757D'}}>
+              <label className="block text-sm font-medium mb-2 text-muted-foreground">
                 Job Name
               </label>
               <input
@@ -422,26 +422,24 @@ export default function IndexNowPage() {
                   }
                 }}
                 maxLength={100}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                style={{borderColor: '#E0E6ED', '--tw-ring-color': '#3D8BFF'} as any}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-brand-accent"
                 placeholder={`#Job-${nextJobNumber}`}
               />
-              <p className="text-xs mt-1" style={{color: '#6C757D'}}>
+              <p className="text-xs mt-1 text-muted-foreground">
                 {jobName.length}/100 characters
               </p>
             </div>
 
             {/* Input Method Tabs */}
             <div className="mb-6">
-              <div className="flex border rounded-lg p-1" style={{borderColor: '#E0E6ED', backgroundColor: '#F7F9FC'}}>
+              <div className="flex border rounded-lg p-1 bg-secondary border-border">
                 <button
                   onClick={() => setActiveTab('manual')}
-                  className="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                  style={{
-                    backgroundColor: activeTab === 'manual' ? '#FFFFFF' : 'transparent',
-                    color: activeTab === 'manual' ? '#1A1A1A' : '#6C757D',
-                    boxShadow: activeTab === 'manual' ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none'
-                  }}
+                  className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    activeTab === 'manual' 
+                      ? 'bg-background text-brand-primary shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span>✋</span>
@@ -450,12 +448,11 @@ export default function IndexNowPage() {
                 </button>
                 <button
                   onClick={() => setActiveTab('sitemap')}
-                  className="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                  style={{
-                    backgroundColor: activeTab === 'sitemap' ? '#FFFFFF' : 'transparent',
-                    color: activeTab === 'sitemap' ? '#1A1A1A' : '#6C757D',
-                    boxShadow: activeTab === 'sitemap' ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none'
-                  }}
+                  className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    activeTab === 'sitemap' 
+                      ? 'bg-background text-brand-primary shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 >
                   <div className="flex items-center justify-center gap-2">
                     <Download className="w-4 h-4" />
@@ -468,22 +465,21 @@ export default function IndexNowPage() {
             {/* URL Input */}
             {activeTab === 'manual' && (
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2" style={{color: '#6C757D'}}>
+                <label className="block text-sm font-medium mb-2 text-muted-foreground">
                   URLs (one per line)
                 </label>
                 <textarea
                   value={urls}
                   onChange={(e) => setUrls(e.target.value)}
                   rows={8}
-                  className="w-full px-3 py-2 border rounded-lg font-mono text-sm focus:ring-2 focus:border-transparent"
-                  style={{borderColor: '#E0E6ED', '--tw-ring-color': '#3D8BFF'} as any}
+                  className="w-full px-3 py-2 border rounded-lg font-mono text-sm focus:ring-2 focus:border-transparent bg-background border-border focus:ring-brand-accent text-foreground"
                   placeholder="https://example.com/page1&#10;https://example.com/page2&#10;https://example.com/page3"
                 />
                 <div className="flex justify-between text-xs mt-2">
-                  <span style={{color: '#6C757D'}}>
+                  <span className="text-muted-foreground">
                     Enter one URL per line (newline separated format).
                   </span>
-                  <span style={{color: '#6C757D'}}>
+                  <span className="text-muted-foreground">
                     {urls.split('\n').filter(url => url.trim()).length} URLs
                   </span>
                 </div>
@@ -492,7 +488,7 @@ export default function IndexNowPage() {
 
             {activeTab === 'sitemap' && (
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2" style={{color: '#6C757D'}}>
+                <label className="block text-sm font-medium mb-2 text-muted-foreground">
                   Sitemap URL
                 </label>
                 <div className="flex gap-2">
@@ -507,29 +503,27 @@ export default function IndexNowPage() {
                       }
                     }}
                     maxLength={2000}
-                    className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                    style={{borderColor: '#E0E6ED', '--tw-ring-color': '#3D8BFF'} as any}
+                    className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-brand-accent text-foreground"
                     placeholder="https://example.com/sitemap.xml"
                   />
                   <button
                     onClick={handleParseSitemap}
                     disabled={parsingSitemap || !sitemapUrl.trim()}
-                    className="px-4 py-2 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50"
-                    style={{backgroundColor: '#1C2331'}}
+                    className="px-4 py-2 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50 bg-brand-primary"
                   >
                     <Download className="w-4 h-4 mr-2 inline" />
                     {parsingSitemap ? 'Parsing...' : 'Parse'}
                   </button>
                 </div>
-                <p className="text-xs mt-2" style={{color: '#6C757D'}}>
+                <p className="text-xs mt-2 text-muted-foreground">
                   Supports nested sitemaps and sitemap indexes.
                 </p>
                 {parsedUrls.length > 0 && (
-                  <div className="mt-3 p-3 rounded-lg" style={{backgroundColor: '#F7F9FC', borderColor: '#E0E6ED'}}>
-                    <p className="text-sm font-medium" style={{color: '#1A1A1A'}}>
+                  <div className="mt-3 p-3 rounded-lg bg-secondary border border-border">
+                    <p className="text-sm font-medium text-brand-primary">
                       Found {parsedUrls.length} URLs
                     </p>
-                    <div className="mt-2 max-h-32 overflow-y-auto text-xs" style={{color: '#6C757D'}}>
+                    <div className="mt-2 max-h-32 overflow-y-auto text-xs text-muted-foreground">
                       {parsedUrls.slice(0, 10).map((url, idx) => (
                         <div key={idx}>{url}</div>
                       ))}
@@ -543,22 +537,21 @@ export default function IndexNowPage() {
             )}
 
             {/* Schedule Section */}
-            <div className="mb-6 pt-4 border-t" style={{borderColor: '#E0E6ED'}}>
+            <div className="mb-6 pt-4 border-t border-border">
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="w-4 h-4" style={{color: '#6C757D'}} />
-                <h3 className="font-medium" style={{color: '#1A1A1A'}}>Schedule</h3>
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <h3 className="font-medium text-brand-primary">Schedule</h3>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{color: '#6C757D'}}>
+                  <label className="block text-sm font-medium mb-2 text-muted-foreground">
                     Frequency
                   </label>
                   <select
                     value={scheduleType}
                     onChange={(e) => setScheduleType(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                    style={{borderColor: '#E0E6ED', color: '#1A1A1A', backgroundColor: '#FFFFFF'}}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-brand-accent text-foreground"
                   >
                     <option value="one-time">One-time</option>
                     <option value="hourly">Hourly</option>
@@ -570,15 +563,14 @@ export default function IndexNowPage() {
 
                 {scheduleType !== 'one-time' && (
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{color: '#6C757D'}}>
+                    <label className="block text-sm font-medium mb-2 text-muted-foreground">
                       Start Time
                     </label>
                     <input
                       type="datetime-local"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                      style={{borderColor: '#E0E6ED', color: '#1A1A1A', backgroundColor: '#FFFFFF'}}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-background border-border focus:ring-brand-accent text-foreground"
                     />
                   </div>
                 )}
@@ -590,16 +582,14 @@ export default function IndexNowPage() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="flex-1 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50"
-                style={{backgroundColor: '#1C2331'}}
+                className="flex-1 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50 bg-brand-primary"
               >
                 <Zap className="w-4 h-4 mr-2 inline" />
                 {loading ? 'Creating Job...' : 'Submit for Indexing'}
               </button>
               <button
                 onClick={clearForm}
-                className="px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:opacity-90"
-                style={{backgroundColor: '#F7F9FC', color: '#1A1A1A', border: '1px solid #E0E6ED'}}
+                className="px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:opacity-90 bg-secondary text-foreground border border-border"
               >
                 Clear Form
               </button>
@@ -609,25 +599,25 @@ export default function IndexNowPage() {
 
         {/* API Quota Status */}
         <div className="lg:col-span-1">
-          <div className="p-6 rounded-lg border" style={{backgroundColor: '#FFFFFF', borderColor: '#E0E6ED'}}>
-            <h3 className="text-lg font-semibold mb-4" style={{color: '#1A1A1A'}}>API Quota Status</h3>
+          <div className="p-6 rounded-lg border bg-background border-border">
+            <h3 className="text-lg font-semibold mb-4 text-brand-primary">API Quota Status</h3>
             
             {loadingServiceAccounts ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{borderColor: '#1A1A1A'}}></div>
-                <p className="mt-2 text-sm" style={{color: '#6C757D'}}>Loading...</p>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto border-brand-primary"></div>
+                <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
               </div>
             ) : (
               <>
                 {/* Total Daily Quota */}
-                <div className="mb-6 p-4 rounded-lg" style={{backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED'}}>
+                <div className="mb-6 p-4 rounded-lg bg-secondary border border-border">
                   <div className="text-center">
-                    <h4 className="text-sm font-medium mb-2" style={{color: '#6C757D'}}>Total Daily Quota</h4>
-                    <div className="text-3xl font-bold mb-1" style={{color: '#1A1A1A'}}>
+                    <h4 className="text-sm font-medium mb-2 text-muted-foreground">Total Daily Quota</h4>
+                    <div className="text-3xl font-bold mb-1 text-brand-primary">
                       {totalQuota.toLocaleString()}
                     </div>
-                    <div className="text-sm" style={{color: '#6C757D'}}>Requests per day</div>
-                    <div className="mt-3 text-xs" style={{color: '#6C757D'}}>
+                    <div className="text-sm text-muted-foreground">Requests per day</div>
+                    <div className="mt-3 text-xs text-muted-foreground">
                       {usedQuota}/{totalQuota} used today ({Math.round((usedQuota / totalQuota) * 100) || 0}%)
                     </div>
                   </div>
@@ -637,34 +627,34 @@ export default function IndexNowPage() {
                 {serviceAccounts.length > 0 ? (
                   <div className="space-y-3">
                     {serviceAccounts.map((account, idx) => (
-                      <div key={account.id} className="p-3 rounded-lg" style={{backgroundColor: '#F7F9FC', border: '1px solid #E0E6ED'}}>
+                      <div key={account.id} className="p-3 rounded-lg bg-secondary border border-border">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-medium truncate flex-1" style={{color: '#1A1A1A'}}>
+                          <span className="text-xs font-medium truncate flex-1 text-brand-primary">
                             {account.email}
                           </span>
                           <span 
-                            className="text-xs px-2 py-1 rounded-full"
-                            style={{
-                              backgroundColor: account.is_active ? '#4BB543' : '#6C757D',
-                              color: '#FFFFFF'
-                            }}
+                            className={`text-xs px-2 py-1 rounded-full text-white ${
+                              account.is_active ? 'bg-success' : 'bg-muted-foreground'
+                            }`}
                           >
                             {account.is_active ? 'Active' : 'Inactive'}
                           </span>
                         </div>
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs">
-                            <span style={{color: '#6C757D'}}>Daily Requests</span>
-                            <span style={{color: '#1A1A1A'}}>
+                            <span className="text-muted-foreground">Daily Requests</span>
+                            <span className="text-brand-primary">
                               {account.quota_usage?.requests_made || 0}/{account.daily_quota_limit || 200}
                             </span>
                           </div>
-                          <div className="w-full rounded-full h-1.5" style={{backgroundColor: '#E0E6ED'}}>
+                          <div className="w-full rounded-full h-1.5 bg-border">
                             <div 
-                              className="h-1.5 rounded-full transition-all duration-300" 
+                              className={`h-1.5 rounded-full transition-all duration-300 ${
+                                (account.quota_usage?.requests_made || 0) > (account.daily_quota_limit || 200) * 0.9 
+                                  ? 'bg-error' : 'bg-success'
+                              }`}
                               style={{
-                                width: `${Math.min(((account.quota_usage?.requests_made || 0) / (account.daily_quota_limit || 200)) * 100, 100)}%`,
-                                backgroundColor: (account.quota_usage?.requests_made || 0) > (account.daily_quota_limit || 200) * 0.9 ? '#E63946' : '#4BB543'
+                                width: `${Math.min(((account.quota_usage?.requests_made || 0) / (account.daily_quota_limit || 200)) * 100, 100)}%`
                               }}
                             ></div>
                           </div>
@@ -674,9 +664,9 @@ export default function IndexNowPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Database className="w-12 h-12 mx-auto mb-3" style={{color: '#6C757D'}} />
-                    <p className="text-sm font-medium" style={{color: '#1A1A1A'}}>No Service Accounts</p>
-                    <p className="text-xs mt-1" style={{color: '#6C757D'}}>
+                    <Database className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-sm font-medium text-brand-primary">No Service Accounts</p>
+                    <p className="text-xs mt-1 text-muted-foreground">
                       Add service accounts in Settings to start indexing
                     </p>
                   </div>
@@ -684,10 +674,10 @@ export default function IndexNowPage() {
 
                 {/* Warning if low quota */}
                 {totalQuota > 0 && (usedQuota / totalQuota) > 0.8 && (
-                  <div className="mt-4 p-3 rounded-lg" style={{backgroundColor: '#FFF3CD', border: '1px solid #F0A202'}}>
+                  <div className="mt-4 p-3 rounded-lg bg-warning/10 border border-warning/20">
                     <div className="flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{color: '#F0A202'}} />
-                      <div className="text-xs" style={{color: '#1A1A1A'}}>
+                      <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-warning" />
+                      <div className="text-xs text-brand-primary">
                         API quota is running low. Consider adding more service accounts.
                       </div>
                     </div>
