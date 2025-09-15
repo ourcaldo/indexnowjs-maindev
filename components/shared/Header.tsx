@@ -98,8 +98,8 @@ export default function Header({
                 onClick={onAuthAction}
                 className={`font-medium transition-all duration-300 rounded-full ${
                   isHeaderSticky 
-                    ? 'bg-white text-black px-4 py-2 hover:bg-gray-100 text-sm' 
-                    : 'bg-white text-black px-6 py-2 hover:bg-gray-100'
+                    ? 'bg-white text-black px-4 py-2 hover:bg-muted text-sm' 
+                    : 'bg-white text-black px-6 py-2 hover:bg-muted'
                 }`}
               >
                 {user ? (isHeaderSticky ? 'Dashboard' : 'Go to Dashboard') : 'Sign In'}
@@ -110,14 +110,14 @@ export default function Header({
             <div className="md:hidden flex items-center space-x-4">
               <button
                 onClick={onAuthAction}
-                className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+                className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-muted transition-colors"
               >
                 {user ? 'Dashboard' : 'Sign In'}
               </button>
               
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-white hover:text-gray-300 transition-colors"
+                className="text-white hover:text-muted-foreground transition-colors"
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -129,7 +129,7 @@ export default function Header({
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-black border-t border-gray-800">
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-black border-t border-border">
             {navigation.map((item, index) => (
               <NavItem
                 key={index}
@@ -163,7 +163,7 @@ function NavItem({ item, onClick, currentPage, isMobile = false }: NavItemProps)
 
   const stateClasses = isActive 
     ? "text-white" 
-    : "text-gray-300 hover:text-white"
+    : "text-muted-foreground hover:text-white"
 
   if (item.href) {
     return (

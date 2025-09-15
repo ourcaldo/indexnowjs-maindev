@@ -23,16 +23,16 @@ export default function RankTrackerPreview() {
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
-              <div className="text-2xl font-bold text-green-400">247</div>
-              <div className="text-xs text-gray-400">Keywords Tracked</div>
+              <div className="text-2xl font-bold text-success">247</div>
+              <div className="text-xs text-muted-foreground">Keywords Tracked</div>
             </div>
             <div className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
-              <div className="text-2xl font-bold text-blue-400">15</div>
-              <div className="text-xs text-gray-400">Top 10 Rankings</div>
+              <div className="text-2xl font-bold text-info">15</div>
+              <div className="text-xs text-muted-foreground">Top 10 Rankings</div>
             </div>
             <div className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
-              <div className="text-2xl font-bold text-yellow-400">+12</div>
-              <div className="text-xs text-gray-400">Position Changes</div>
+              <div className="text-2xl font-bold text-warning">+12</div>
+              <div className="text-xs text-muted-foreground">Position Changes</div>
             </div>
           </div>
           
@@ -42,36 +42,36 @@ export default function RankTrackerPreview() {
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-1">
                     {item.device === 'mobile' ? 
-                      <Phone className="w-3 h-3 text-gray-400" /> : 
-                      <Monitor className="w-3 h-3 text-gray-400" />
+                      <Phone className="w-3 h-3 text-muted-foreground" /> : 
+                      <Monitor className="w-3 h-3 text-muted-foreground" />
                     }
-                    <MapPin className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-400">{item.location}</span>
+                    <MapPin className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">{item.location}</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm font-medium text-white">{item.keyword}</span>
+                  <span className="text-sm font-medium text-foreground">{item.keyword}</span>
                   <div className="flex items-center space-x-2">
                     <span className={`text-lg font-bold ${
-                      item.position <= 3 ? 'text-green-400' : 
-                      item.position <= 10 ? 'text-yellow-400' : 'text-gray-400'
+                      item.position <= 3 ? 'text-success' : 
+                      item.position <= 10 ? 'text-warning' : 'text-muted-foreground'
                     }`}>
                       #{item.position}
                     </span>
                     {item.change > 0 && (
-                      <div className="flex items-center space-x-1 text-green-400">
+                      <div className="flex items-center space-x-1 text-success">
                         <TrendingUp className="w-3 h-3" />
                         <span className="text-xs">+{item.change}</span>
                       </div>
                     )}
                     {item.change < 0 && (
-                      <div className="flex items-center space-x-1 text-red-400">
+                      <div className="flex items-center space-x-1 text-error">
                         <TrendingDown className="w-3 h-3" />
                         <span className="text-xs">{item.change}</span>
                       </div>
                     )}
                     {item.change === 0 && (
-                      <Minus className="w-3 h-3 text-gray-400" />
+                      <Minus className="w-3 h-3 text-muted-foreground" />
                     )}
                   </div>
                 </div>
@@ -89,22 +89,22 @@ export default function RankTrackerPreview() {
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-center space-x-2 mb-2">
-                <Globe className="w-4 h-4 text-blue-400" />
+                <Globe className="w-4 h-4 text-info" />
                 <span className="text-sm font-medium">Global Tracking</span>
               </div>
-              <div className="text-xl font-bold text-white">12 Countries</div>
+              <div className="text-xl font-bold text-foreground">12 Countries</div>
             </div>
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-center space-x-2 mb-2">
-                <MapPin className="w-4 h-4 text-green-400" />
+                <MapPin className="w-4 h-4 text-success" />
                 <span className="text-sm font-medium">City Level</span>
               </div>
-              <div className="text-xl font-bold text-white">24 Cities</div>
+              <div className="text-xl font-bold text-foreground">24 Cities</div>
             </div>
           </div>
           
           <div className="space-y-3">
-            <div className="text-sm font-medium text-gray-300 mb-3">Location Performance</div>
+            <div className="text-sm font-medium text-muted-foreground mb-3">Location Performance</div>
             {[
               { location: 'New York, US', rank: 3, traffic: '+15%', color: 'green' },
               { location: 'London, UK', rank: 7, traffic: '+8%', color: 'yellow' },
@@ -113,14 +113,14 @@ export default function RankTrackerPreview() {
             ].map((item, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center space-x-3">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-white">{item.location}</span>
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-foreground">{item.location}</span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm font-medium">Rank #{item.rank}</span>
                   <span className={`text-sm font-medium ${
-                    item.color === 'green' ? 'text-green-400' : 
-                    item.color === 'yellow' ? 'text-yellow-400' : 'text-red-400'
+                    item.color === 'green' ? 'text-success' : 
+                    item.color === 'yellow' ? 'text-warning' : 'text-error'
                   }`}>
                     {item.traffic}
                   </span>
@@ -136,19 +136,19 @@ export default function RankTrackerPreview() {
       description: "View keyword ranking trends and manage domains with organized tracking",
       content: (
         <div className="space-y-4">
-          <div className="bg-gradient-to-r from-blue-500/10 to-cyan-400/10 rounded-lg p-4 border border-blue-500/20">
+          <div className="bg-gradient-to-r from-info/10 to-info/5 rounded-lg p-4 border border-info/20">
             <div className="flex items-center space-x-2 mb-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className="text-sm font-medium text-blue-400">DOMAIN STATS</span>
+              <div className="w-2 h-2 bg-info rounded-full"></div>
+              <span className="text-sm font-medium text-info">DOMAIN STATS</span>
             </div>
-            <div className="text-white font-medium">
+            <div className="text-foreground font-medium">
               example.com: 47 keywords tracked
             </div>
-            <div className="text-xs text-gray-400 mt-1">Last updated today</div>
+            <div className="text-xs text-muted-foreground mt-1">Last updated today</div>
           </div>
           
           <div className="space-y-2">
-            <div className="text-sm font-medium text-gray-300 mb-3">Recent Position Changes</div>
+            <div className="text-sm font-medium text-muted-foreground mb-3">Recent Position Changes</div>
             {[
               { keyword: 'seo tools', position: 3, change: '+2', device: 'Desktop' },
               { keyword: 'rank tracker', position: 1, change: '-', device: 'Mobile' },
@@ -156,14 +156,14 @@ export default function RankTrackerPreview() {
             ].map((item, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm text-white">{item.keyword}</span>
-                  <span className="text-xs text-gray-400">{item.device}</span>
+                  <span className="text-sm text-foreground">{item.keyword}</span>
+                  <span className="text-xs text-muted-foreground">{item.device}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium">#{item.position}</span>
                   <span className={`text-xs ${
-                    item.change.includes('+') ? 'text-green-400' : 
-                    item.change === '-' ? 'text-gray-400' : 'text-red-400'
+                    item.change.includes('+') ? 'text-success' : 
+                    item.change === '-' ? 'text-muted-foreground' : 'text-error'
                   }`}>
                     {item.change}
                   </span>
@@ -173,8 +173,8 @@ export default function RankTrackerPreview() {
           </div>
           
           <div className="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
-            <div className="text-sm text-gray-400 mb-1">Position History Available</div>
-            <button className="text-blue-400 text-sm font-medium hover:underline">
+            <div className="text-sm text-muted-foreground mb-1">Position History Available</div>
+            <button className="text-info text-sm font-medium hover:underline">
               View Historical Data
             </button>
           </div>
@@ -200,10 +200,10 @@ export default function RankTrackerPreview() {
       <div className="p-6">
         <div className={`transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-white mb-1">
+            <h3 className="text-lg font-semibold text-foreground mb-1">
               {slides[activeSlide].title}
             </h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-muted-foreground">
               {slides[activeSlide].description}
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function RankTrackerPreview() {
               key={idx}
               onClick={() => setActiveSlide(idx)}
               className={`w-2 h-2 rounded-full transition-colors ${
-                idx === activeSlide ? 'bg-blue-400' : 'bg-white/20'
+                idx === activeSlide ? 'bg-info' : 'bg-muted/20'
               }`}
             />
           ))}

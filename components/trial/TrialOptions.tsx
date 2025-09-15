@@ -99,8 +99,8 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
       <Card>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-4 bg-muted rounded w-3/4"></div>
+            <div className="h-4 bg-muted rounded w-1/2"></div>
           </div>
         </CardContent>
       </Card>
@@ -109,21 +109,21 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
 
   if (!eligibility?.eligible) {
     return (
-      <Card className="border-gray-200">
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-lg font-semibold text-foreground">
             Free Trial
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-4">
             <div className="mb-4">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="h-8 w-8 text-muted-foreground" />
               </div>
-              <p className="text-gray-600 mb-2">{eligibility?.message}</p>
+              <p className="text-muted-foreground mb-2">{eligibility?.message}</p>
               {eligibility?.reason === 'already_used' && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   Each user can only use the free trial once per lifetime.
                 </p>
               )}
@@ -135,25 +135,25 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
   }
 
   return (
-    <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+    <Card className="border-info/20 bg-gradient-to-br from-info/10 to-info/5">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center mb-2">
-          <Star className="h-6 w-6 text-blue-600 mr-2" />
-          <CardTitle className="text-xl font-bold text-blue-900">
+          <Star className="h-6 w-6 text-info mr-2" />
+          <CardTitle className="text-xl font-bold text-info-foreground">
             3-Day Free Trial
           </CardTitle>
         </div>
-        <p className="text-blue-700">
+        <p className="text-info/80">
           Try our Premium or Pro plans risk-free for 3 days
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="bg-blue-100 border border-blue-200 rounded-lg p-4">
+        <div className="bg-info/10 border border-info/20 rounded-lg p-4">
           <div className="flex items-center space-x-3">
-            <CheckCircle className="h-5 w-5 text-blue-600" />
+            <CheckCircle className="h-5 w-5 text-info" />
             <div>
-              <p className="font-medium text-blue-900">What's included:</p>
-              <ul className="text-sm text-blue-800 mt-1 space-y-1">
+              <p className="font-medium text-info-foreground">What's included:</p>
+              <ul className="text-sm text-info/80 mt-1 space-y-1">
                 <li>• Full access to all plan features</li>
                 <li>• No charges for 3 days</li>
                 <li>• Cancel anytime during trial</li>
@@ -169,38 +169,38 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
             return (
               <div 
                 key={pkg.id} 
-                className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow"
+                className="border border-border rounded-lg p-4 bg-background hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="font-semibold text-gray-900">{pkg.name}</h3>
+                      <h3 className="font-semibold text-foreground">{pkg.name}</h3>
                       {pkg.is_popular && (
-                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                        <Badge className="bg-info/10 text-info-foreground border-info/20">
                           Popular
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">{pkg.description}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{pkg.description}</p>
                     
                     <div className="flex items-baseline space-x-2 mb-3">
-                      <span className="text-2xl font-bold text-gray-900">
+                      <span className="text-2xl font-bold text-foreground">
                         {formatCurrency(pricing.price)}
                       </span>
-                      <span className="text-sm text-gray-500">/month</span>
+                      <span className="text-sm text-muted-foreground">/month</span>
                       {pricing.originalPrice > 0 && pricing.originalPrice > pricing.price && (
-                        <span className="text-sm text-gray-400 line-through">
+                        <span className="text-sm text-muted-foreground/60 line-through">
                           {formatCurrency(pricing.originalPrice)}
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center text-sm text-green-700 mb-4">
+                    <div className="flex items-center text-sm text-success mb-4">
                       <Clock className="h-4 w-4 mr-1" />
                       <span className="font-medium">Free for 3 days, then {formatCurrency(pricing.price)}/month</span>
                     </div>
 
-                    <div className="flex items-center text-sm text-amber-700 mb-4">
+                    <div className="flex items-center text-sm text-warning mb-4">
                       <CreditCard className="h-4 w-4 mr-1 flex-shrink-0" />
                       <span>Credit card required - auto-billing after trial</span>
                     </div>
@@ -210,7 +210,7 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
                     <Button
                       onClick={() => startTrial(pkg.id, pkg.slug)}
                       disabled={startingTrial === pkg.id}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                      className="bg-info hover:bg-info/90 text-info-foreground px-6 py-2"
                     >
                       {startingTrial === pkg.id ? (
                         <>Starting...</>
@@ -225,14 +225,14 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
           })}
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
           <div className="flex items-start space-x-3">
-            <CreditCard className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <CreditCard className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-amber-900 mb-1">
+              <p className="text-sm font-medium text-warning-foreground mb-1">
                 Important: Credit Card Required
               </p>
-              <p className="text-sm text-amber-800">
+              <p className="text-sm text-warning/80">
                 A valid credit card is required to start your free trial. You'll be charged automatically 
                 when the trial ends unless you cancel before then. Other payment methods (bank transfer) 
                 are not available for trial subscriptions.

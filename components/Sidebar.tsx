@@ -210,7 +210,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           }`}>
             <div className="flex items-center">
               {isLoading ? (
-                <div className={`bg-gray-200 animate-pulse rounded ${
+                <div className={`bg-muted animate-pulse rounded ${
                   isCollapsed ? 'h-8 w-8' : 'h-12 w-24'
                 }`}></div>
               ) : logoUrl && (
@@ -235,7 +235,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {!isCollapsed && (
             <div className="px-4 mb-6">
               {isLoading ? (
-                <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+                <div className="h-10 bg-muted animate-pulse rounded-lg"></div>
               ) : (
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -260,18 +260,18 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
               // Skeleton navigation while loading
               <div className="space-y-6">
                 <div className="space-y-1">
-                  {!isCollapsed && <div className="px-3 mb-3"><div className="h-3 w-20 bg-gray-200 animate-pulse rounded"></div></div>}
-                  <div className={`h-10 bg-gray-200 animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
+                  {!isCollapsed && <div className="px-3 mb-3"><div className="h-3 w-20 bg-muted animate-pulse rounded"></div></div>}
+                  <div className={`h-10 bg-muted animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
                 </div>
                 <div className="space-y-1">
-                  {!isCollapsed && <div className="px-3 mb-3"><div className="h-3 w-32 bg-gray-200 animate-pulse rounded"></div></div>}
-                  <div className={`h-10 bg-gray-200 animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
-                  <div className={`h-10 bg-gray-200 animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
+                  {!isCollapsed && <div className="px-3 mb-3"><div className="h-3 w-32 bg-muted animate-pulse rounded"></div></div>}
+                  <div className={`h-10 bg-muted animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
+                  <div className={`h-10 bg-muted animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
                 </div>
                 <div className="space-y-1">
-                  {!isCollapsed && <div className="px-3 mb-3"><div className="h-3 w-16 bg-gray-200 animate-pulse rounded"></div></div>}
-                  <div className={`h-10 bg-gray-200 animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
-                  <div className={`h-10 bg-gray-200 animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
+                  {!isCollapsed && <div className="px-3 mb-3"><div className="h-3 w-16 bg-muted animate-pulse rounded"></div></div>}
+                  <div className={`h-10 bg-muted animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
+                  <div className={`h-10 bg-muted animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
                 </div>
               </div>
             ) : (
@@ -283,7 +283,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {!isCollapsed && (
             <div className="px-4 py-4">
               {isLoading ? (
-                <div className="bg-gray-200 animate-pulse rounded-xl h-32"></div>
+                <div className="bg-muted animate-pulse rounded-xl h-32"></div>
               ) : (
                 <div className="bg-gradient-to-br from-primary to-primary/80 rounded-xl p-4 text-primary-foreground">
                 {(() => {
@@ -300,12 +300,12 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                       </div>
                       <div className="mb-3">
                         {isLoading ? (
-                          <div className="text-xs text-blue-100 mb-1">Loading...</div>
+                          <div className="text-xs text-primary-foreground/80 mb-1">Loading...</div>
                         ) : !hasActivePackage ? (
-                          <div className="text-xs text-blue-100 mb-1">No Active Package found</div>
+                          <div className="text-xs text-primary-foreground/80 mb-1">No Active Package found</div>
                         ) : (
                           <>
-                            <div className="text-xs text-blue-100 mb-1">
+                            <div className="text-xs text-primary-foreground/80 mb-1">
                               {keywordUsage?.is_unlimited 
                                 ? `${keywordUsage.keywords_used?.toLocaleString() || 0} Keywords Used`
                                 : `${keywordUsage?.keywords_used?.toLocaleString() || 0}/${keywordUsage?.keywords_limit?.toLocaleString() || 0} Keywords`
@@ -341,7 +341,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {/* Settings */}
           <div className="px-4 pb-2">
             {isLoading ? (
-              <div className={`h-10 bg-gray-200 animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
+              <div className={`h-10 bg-muted animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
             ) : (
               <div className="relative group">
                 <a
@@ -377,7 +377,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {/* Bottom Section */}
           <div className="border-t border-border p-4">
             {isLoading ? (
-              <div className={`h-10 bg-gray-200 animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
+              <div className={`h-10 bg-muted animate-pulse rounded-lg ${isCollapsed ? 'mx-auto w-10' : ''}`}></div>
             ) : (
               <button
                 onClick={handleLogout}
@@ -418,7 +418,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {/* Search Bar */}
           <div className="px-6 py-4 bg-secondary">
             {isLoading ? (
-              <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
+              <div className="h-12 bg-muted animate-pulse rounded-xl"></div>
             ) : (
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -439,18 +439,18 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
               // Skeleton navigation while loading
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <div className="px-3 mb-3"><div className="h-3 w-20 bg-gray-200 animate-pulse rounded"></div></div>
-                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
+                  <div className="px-3 mb-3"><div className="h-3 w-20 bg-muted animate-pulse rounded"></div></div>
+                  <div className="h-12 bg-muted animate-pulse rounded-xl"></div>
                 </div>
                 <div className="space-y-2">
-                  <div className="px-3 mb-3"><div className="h-3 w-32 bg-gray-200 animate-pulse rounded"></div></div>
-                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
-                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
+                  <div className="px-3 mb-3"><div className="h-3 w-32 bg-muted animate-pulse rounded"></div></div>
+                  <div className="h-12 bg-muted animate-pulse rounded-xl"></div>
+                  <div className="h-12 bg-muted animate-pulse rounded-xl"></div>
                 </div>
                 <div className="space-y-2">
-                  <div className="px-3 mb-3"><div className="h-3 w-16 bg-gray-200 animate-pulse rounded"></div></div>
-                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
-                  <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
+                  <div className="px-3 mb-3"><div className="h-3 w-16 bg-muted animate-pulse rounded"></div></div>
+                  <div className="h-12 bg-muted animate-pulse rounded-xl"></div>
+                  <div className="h-12 bg-muted animate-pulse rounded-xl"></div>
                 </div>
               </div>
             ) : (
@@ -461,7 +461,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {/* Settings */}
           <div className="px-4 pb-2">
             {isLoading ? (
-              <div className="h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+              <div className="h-10 bg-muted animate-pulse rounded-lg"></div>
             ) : (
               <a
                 href="/dashboard/settings"
@@ -485,7 +485,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {/* Upgrade Section */}
           <div className="px-4 py-4">
             {isLoading ? (
-              <div className="bg-gray-200 animate-pulse rounded-xl h-32"></div>
+              <div className="bg-muted animate-pulse rounded-xl h-32"></div>
             ) : (
               <div className="bg-gradient-to-br from-primary to-primary/80 rounded-xl p-4 text-primary-foreground">
               {(() => {
@@ -502,12 +502,12 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                     </div>
                     <div className="mb-3">
                       {isLoading ? (
-                        <div className="text-xs text-blue-100 mb-1">Loading...</div>
+                        <div className="text-xs text-primary-foreground/80 mb-1">Loading...</div>
                       ) : !hasActivePackage ? (
-                        <div className="text-xs text-blue-100 mb-1">No Active Package found</div>
+                        <div className="text-xs text-primary-foreground/80 mb-1">No Active Package found</div>
                       ) : (
                         <>
-                          <div className="text-xs text-blue-100 mb-1">
+                          <div className="text-xs text-primary-foreground/80 mb-1">
                             {keywordUsage?.is_unlimited 
                               ? `${keywordUsage.keywords_used?.toLocaleString() || 0} Keywords Used`
                               : `${keywordUsage?.keywords_used?.toLocaleString() || 0}/${keywordUsage?.keywords_limit?.toLocaleString() || 0} Keywords`
@@ -543,7 +543,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
           {/* Sign Out Section */}
           <div className="border-t border-border px-4 py-4">
             {isLoading ? (
-              <div className="h-12 bg-gray-200 animate-pulse rounded-xl"></div>
+              <div className="h-12 bg-muted animate-pulse rounded-xl"></div>
             ) : (
               <button
                 onClick={handleLogout}

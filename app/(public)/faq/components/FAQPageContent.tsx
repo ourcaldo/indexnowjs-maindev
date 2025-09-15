@@ -208,13 +208,13 @@ export default function FAQPageContent() {
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Frequently Asked Questions
           </h1>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             From setup to billing, here's everything you need to know about IndexNow. 
             Still have questions? Our team is just an email away.
           </p>
           <a 
             href="mailto:hello@indexnow.studio"
-            className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-muted transition-colors"
           >
             <Mail className="w-5 h-5 mr-2" />
             Contact Support
@@ -244,7 +244,7 @@ export default function FAQPageContent() {
                             {item.question}
                           </h3>
                           <ChevronDown 
-                            className={`w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
+                            className={`w-5 h-5 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
                               isQuestionOpen(sectionIndex, questionIndex) ? 'transform rotate-180' : ''
                             }`}
                           />
@@ -255,7 +255,7 @@ export default function FAQPageContent() {
                           className="px-6 py-4 bg-white/10 border-t border-white/10"
                           data-testid={`faq-answer-${sectionIndex}-${questionIndex}`}
                         >
-                          <p className="text-gray-300 leading-relaxed">
+                          <p className="text-muted-foreground leading-relaxed">
                             {item.answer}
                           </p>
                         </div>
@@ -266,10 +266,10 @@ export default function FAQPageContent() {
                 
                 {/* Section CTA */}
                 <div className="mt-8 text-center">
-                  <p className="text-gray-400 mb-3">Still need help with {section.title.toLowerCase()}?</p>
+                  <p className="text-muted-foreground/80 mb-3">Still need help with {section.title.toLowerCase()}?</p>
                   <a 
                     href="mailto:hello@indexnow.studio"
-                    className="text-white hover:text-gray-300 font-medium transition-colors"
+                    className="text-white hover:text-muted-foreground font-medium transition-colors"
                   >
                     Contact us →
                   </a>
@@ -287,13 +287,13 @@ export default function FAQPageContent() {
             <h2 className="text-3xl font-bold text-white mb-4">
               Didn't find your answer?
             </h2>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-xl text-muted-foreground mb-8">
               Reach out and we'll get back to you quickly.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a 
                 href="mailto:hello@indexnow.studio"
-                className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-muted transition-colors"
                 data-testid="contact-support-final"
               >
                 <Mail className="w-5 h-5 mr-2" />

@@ -90,8 +90,8 @@ export default function TrialStatusCard() {
       <Card>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-4 bg-muted rounded w-3/4"></div>
+            <div className="h-4 bg-muted rounded w-1/2"></div>
           </div>
         </CardContent>
       </Card>
@@ -104,10 +104,10 @@ export default function TrialStatusCard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800'
-      case 'ended': return 'bg-gray-100 text-gray-800'
-      case 'converted': return 'bg-blue-100 text-blue-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'active': return 'bg-success/10 text-success-foreground'
+      case 'ended': return 'bg-muted text-muted-foreground'
+      case 'converted': return 'bg-info/10 text-info-foreground'
+      default: return 'bg-muted text-muted-foreground'
     }
   }
 
@@ -121,10 +121,10 @@ export default function TrialStatusCard() {
   }
 
   return (
-    <Card className="border-blue-200 bg-blue-50/50">
+    <Card className="border-info/20 bg-info/5">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-blue-900">
+          <CardTitle className="text-lg font-semibold text-info-foreground">
             Free Trial Status
           </CardTitle>
           <Badge className={`${getStatusColor(trialData.trial_status)} border-0`}>
@@ -136,22 +136,22 @@ export default function TrialStatusCard() {
         {trialData.trial_status === 'active' && (
           <>
             <div className="flex items-center space-x-3">
-              <Clock className="h-5 w-5 text-blue-600" />
+              <Clock className="h-5 w-5 text-info" />
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-foreground">
                   {trialData.days_remaining || 0} days remaining
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   {trialData.hours_remaining || 0} hours left in your trial
                 </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
-              <Calendar className="h-5 w-5 text-blue-600" />
+              <Calendar className="h-5 w-5 text-info" />
               <div>
-                <p className="font-medium text-gray-900">Trial ends</p>
-                <p className="text-sm text-gray-600">
+                <p className="font-medium text-foreground">Trial ends</p>
+                <p className="text-sm text-muted-foreground">
                   {trialData.trial_ends_at ? 
                     new Date(trialData.trial_ends_at).toLocaleDateString('en-US', {
                       weekday: 'long',
@@ -165,10 +165,10 @@ export default function TrialStatusCard() {
 
             {trialData.auto_billing_enabled && trialData.next_billing_date && (
               <div className="flex items-center space-x-3">
-                <CreditCard className="h-5 w-5 text-amber-600" />
+                <CreditCard className="h-5 w-5 text-warning" />
                 <div>
-                  <p className="font-medium text-gray-900">Next billing</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="font-medium text-foreground">Next billing</p>
+                  <p className="text-sm text-muted-foreground">
                     {new Date(trialData.next_billing_date).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -179,14 +179,14 @@ export default function TrialStatusCard() {
               </div>
             )}
 
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
               <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-amber-900">
+                  <p className="text-sm font-medium text-warning-foreground">
                     Auto-billing enabled
                   </p>
-                  <p className="text-sm text-amber-700 mt-1">
+                  <p className="text-sm text-warning/80 mt-1">
                     Your card will be automatically charged when the trial ends. 
                     You can cancel anytime before the trial expires.
                   </p>
@@ -198,7 +198,7 @@ export default function TrialStatusCard() {
               <Button
                 variant="outline"
                 onClick={handleCancelTrial}
-                className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
+                className="flex-1 border-error/20 text-error hover:bg-error/10"
               >
                 Cancel Trial
               </Button>
@@ -208,11 +208,11 @@ export default function TrialStatusCard() {
 
         {trialData.trial_status === 'ended' && (
           <div className="text-center py-4">
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Your free trial has ended. You're now on a paid subscription.
             </p>
             {trialData.next_billing_date && (
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-muted-foreground/80 mt-2">
                 Next billing: {new Date(trialData.next_billing_date).toLocaleDateString()}
               </p>
             )}
@@ -220,7 +220,7 @@ export default function TrialStatusCard() {
         )}
 
         {trialData.trial_package && (
-          <div className="text-sm text-gray-600 pt-2 border-t">
+          <div className="text-sm text-muted-foreground pt-2 border-t">
             <p>
               <span className="font-medium">Plan:</span> {trialData.trial_package.name}
             </p>
