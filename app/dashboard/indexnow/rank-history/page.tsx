@@ -446,6 +446,9 @@ export default function RankHistoryPage() {
     rankHistory.flatMap((item: RankHistoryData) => item.tags || [])
   )).filter(Boolean) as string[]
 
+  // Get comparison date strings for calculations
+  const { todayStr: currentDateStr, comparisonDate: prevDateStr, periodLabel } = getComparisonPeriods(dateRange)
+
   // Calculate stats for RankOverviewStats
   const statsData = {
     totalKeywords: filteredData.length,
