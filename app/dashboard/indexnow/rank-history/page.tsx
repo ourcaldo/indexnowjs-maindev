@@ -777,12 +777,7 @@ export default function RankHistoryPage() {
                                 </td>
                                 <td className="text-center py-2 px-3" data-testid={`current-pos-${item.keyword_id}`}>
                                   {currentPosition ? (
-                                    <span className={`inline-flex items-center justify-center w-8 h-6 rounded text-xs font-semibold ${
-                                      currentPosition <= 3 ? 'bg-success text-success-foreground' :
-                                      currentPosition <= 10 ? 'bg-info text-info-foreground' :
-                                      currentPosition <= 50 ? 'bg-warning text-warning-foreground' :
-                                      'bg-destructive text-destructive-foreground'
-                                    }`}>
+                                    <span className="text-sm font-medium text-foreground">
                                       {currentPosition}
                                     </span>
                                   ) : (
@@ -791,12 +786,7 @@ export default function RankHistoryPage() {
                                 </td>
                                 <td className="text-center py-2 px-3" data-testid={`comparison-pos-${item.keyword_id}`}>
                                   {comparisonPosition ? (
-                                    <span className={`inline-flex items-center justify-center w-8 h-6 rounded text-xs font-semibold ${
-                                      comparisonPosition <= 3 ? 'bg-success text-success-foreground' :
-                                      comparisonPosition <= 10 ? 'bg-info text-info-foreground' :
-                                      comparisonPosition <= 50 ? 'bg-warning text-warning-foreground' :
-                                      'bg-destructive text-destructive-foreground'
-                                    }`}>
+                                    <span className="text-sm font-medium text-foreground">
                                       {comparisonPosition}
                                     </span>
                                   ) : (
