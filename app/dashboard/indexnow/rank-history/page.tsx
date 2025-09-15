@@ -26,6 +26,8 @@ import {
   Minus,
   Info
 } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
 
 interface Domain {
   id: string
@@ -47,10 +49,10 @@ interface RankHistoryData {
 const getComparisonPeriods = (dateRangeType: string) => {
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
-  
+
   let comparisonDate: string
   let periodLabel: string
-  
+
   switch (dateRangeType) {
     case '7d':
       comparisonDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -68,7 +70,7 @@ const getComparisonPeriods = (dateRangeType: string) => {
       comparisonDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       periodLabel = '7 days ago'
   }
-  
+
   return { todayStr, comparisonDate, periodLabel }
 }
 
@@ -83,7 +85,7 @@ const getPositionChangeDisplay = (change: number | null) => {
   if (change === null || change === 0) {
     return { icon: Minus, color: 'text-muted-foreground', text: '—' }
   }
-  
+
   if (change > 0) {
     return { icon: TrendingUp, color: 'text-success', text: `+${change}` }
   } else {
@@ -99,24 +101,24 @@ const formatDateDisplay = (dateStr: string): string => {
 
 export default function RankHistoryPage() {
   const router = useRouter()
-  
+
   // Activity logging
   usePageViewLogger('/dashboard/indexnow/rank-history', 'Rank History', { section: 'keyword_tracker' })
 
   // State for domain management
   const [selectedDomainId, setSelectedDomainId] = useState<string>('')
   const [showDomainsManager, setShowDomainsManager] = useState(false)
-  
+
   // State for filters
   const [selectedDevice, setSelectedDevice] = useState<string>('')
   const [selectedCountry, setSelectedCountry] = useState<string>('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [showTagsDropdown, setShowTagsDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState<string>('')
-  
+
   // State for keyword selection (checkboxes)
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
-  
+
   // State for date range and pagination
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '60d' | 'custom'>('7d')
   const [customStartDate, setCustomStartDate] = useState<string>('')
@@ -131,7 +133,7 @@ export default function RankHistoryPage() {
     const today = new Date()
     let startDate: string
     let endDate: string = today.toISOString().split('T')[0]
-    
+
     switch (dateRange) {
       case '7d':
         startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -154,7 +156,7 @@ export default function RankHistoryPage() {
       default:
         startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     }
-    
+
     return { startDate, endDate }
   }
 
@@ -228,7 +230,7 @@ export default function RankHistoryPage() {
       if (selectedDevice) params.append('device_type', selectedDevice)
       if (selectedCountry) params.append('country_id', selectedCountry)
       params.append('limit', '1000')
-      
+
       const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
@@ -253,7 +255,7 @@ export default function RankHistoryPage() {
       if (startDate) params.append('start_date', startDate)
       if (endDate) params.append('end_date', endDate)
       params.append('limit', '1000')
-      
+
       const response = await fetch(`/api/v1/rank-tracking/rank-history?${params}`, {
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
@@ -272,7 +274,7 @@ export default function RankHistoryPage() {
   // Merge keywords with rank history data
   const rankHistory = useMemo(() => {
     if (!keywordsData || keywordsData.length === 0) return []
-    
+
     // Create a map of rank history data by keyword_id
     const historyMap: { [keywordId: string]: any } = {}
     if (rankHistoryData && rankHistoryData.length > 0) {
@@ -280,7 +282,7 @@ export default function RankHistoryPage() {
         historyMap[historyItem.keyword_id] = historyItem
       })
     }
-    
+
     // Transform keywords to match expected format, merging with history data
     return keywordsData.map((keyword: any) => ({
       keyword_id: keyword.id,
@@ -319,7 +321,7 @@ export default function RankHistoryPage() {
     if (searchQuery && !item.keyword.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false
     }
-    
+
     // Tags filter
     if (selectedTags.length > 0) {
       const hasMatchingTag = selectedTags.some(tag => 
@@ -327,7 +329,7 @@ export default function RankHistoryPage() {
       )
       if (!hasMatchingTag) return false
     }
-    
+
     return true
   })
 
@@ -416,7 +418,7 @@ export default function RankHistoryPage() {
                     <option value="desktop">Desktop</option>
                     <option value="mobile">Mobile</option>
                   </select>
-                  
+
                   <select
                     value={selectedCountry}
                     onChange={(e) => setSelectedCountry(e.target.value)}
@@ -488,7 +490,7 @@ export default function RankHistoryPage() {
                           </Button>
                         ))}
                       </div>
-                      
+
                       {/* Custom Date Range Picker */}
                       <div className="relative">
                         <Button
@@ -507,7 +509,7 @@ export default function RankHistoryPage() {
                             : 'Custom'
                           }
                         </Button>
-                        
+
                         {showDatePicker && (
                           <div className="absolute top-full left-0 mt-1 bg-background border rounded-lg shadow-lg p-4 z-50 min-w-[300px]">
                             <div className="space-y-3">
@@ -586,7 +588,7 @@ export default function RankHistoryPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </Button>
-                      
+
                       {showTagsDropdown && (
                         <div className="absolute top-full right-0 mt-1 bg-background border rounded-lg shadow-lg z-50 min-w-[200px] max-h-[200px] overflow-y-auto">
                           <div className="p-2">
@@ -615,7 +617,7 @@ export default function RankHistoryPage() {
                                 </label>
                               ))
                             )}
-                            
+
                             {selectedTags.length > 0 && (
                               <div className="border-t pt-2 mt-2">
                                 <Button
@@ -639,7 +641,7 @@ export default function RankHistoryPage() {
 
               {/* Pagination Info */}
               <div className="flex justify-end items-center">
-                
+
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
                   <div className="flex items-center gap-2">
@@ -652,11 +654,11 @@ export default function RankHistoryPage() {
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    
+
                     <span className="text-sm text-foreground">
                       Page {currentPage} of {totalPages}
                     </span>
-                    
+
                     <Button
                       size="sm"
                       variant="outline"
@@ -679,13 +681,23 @@ export default function RankHistoryPage() {
                         Rank History
                       </CardTitle>
                       {/* Info icon with tooltip */}
-                      <div className="relative group">
-                        <Info className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
-                        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-popover text-popover-foreground px-3 py-2 rounded-md shadow-lg text-sm max-w-sm z-50 pointer-events-none whitespace-nowrap">
-                          This report shows keyword position comparison between today and {periodLabel}, including position changes and trends for better performance tracking.
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-popover"></div>
-                        </div>
-                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button className="inline-flex items-center justify-center rounded-full w-5 h-5 text-muted-foreground hover:text-foreground transition-colors">
+                              <Info className="w-4 h-4" />
+                              <span className="sr-only">Information about rank history</span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent 
+                            side="bottom" 
+                            align="start"
+                            className="max-w-sm p-3 text-sm bg-card border border-border text-foreground shadow-lg"
+                          >
+                            <p>This report shows keyword position comparison between today and {periodLabel}, including position changes and trends for better performance tracking.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                     <span className="text-xs text-muted-foreground" data-testid="text-results-info">
                       Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
@@ -746,7 +758,7 @@ export default function RankHistoryPage() {
                             const comparisonPosition = item.history[comparisonDate]?.position
                             const positionChange = calculatePositionChange(currentPosition, comparisonPosition)
                             const changeDisplay = getPositionChangeDisplay(positionChange)
-                            
+
                             return (
                               <tr key={item.keyword_id} className="border-b border-border hover:bg-muted/30" data-testid={`row-keyword-${item.keyword_id}`}>
                                 <td className="text-center py-2 px-3 w-10 sticky left-0 bg-card z-10">
@@ -849,7 +861,7 @@ export default function RankHistoryPage() {
                       <ChevronLeft className="w-4 h-4" />
                       Previous
                     </Button>
-                    
+
                     <div className="flex gap-1">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i
@@ -866,7 +878,7 @@ export default function RankHistoryPage() {
                         )
                       })}
                     </div>
-                    
+
                     <Button
                       size="sm"
                       variant="outline"
