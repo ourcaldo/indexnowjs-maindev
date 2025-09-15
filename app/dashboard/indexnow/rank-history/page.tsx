@@ -27,7 +27,7 @@ import {
   Info
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { SemrushCalendar } from './components/SemrushCalendar'
+import { DateRangeCalendar } from './components/DateRangeCalendar'
 
 
 interface Domain {
@@ -518,7 +518,7 @@ export default function RankHistoryPage() {
                             <div className="flex">
                               {/* Calendar Section */}
                               <div className="p-4 border-r border-border">
-                                <SemrushCalendar
+                                <DateRangeCalendar
                                   selectedRange={{ start: customStartDate, end: customEndDate }}
                                   onRangeChange={(start, end) => {
                                     setCustomStartDate(start)
