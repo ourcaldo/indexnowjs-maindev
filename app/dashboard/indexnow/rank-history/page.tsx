@@ -114,7 +114,7 @@ export default function RankHistoryPage() {
   const [searchQuery, setSearchQuery] = useState<string>('')
   
   // State for date range and pagination
-  const [dateRange, setDateRange] = useState<'7d' | '30d' | '60d' | 'custom'>('30d')
+  const [dateRange, setDateRange] = useState<'7d' | '30d' | '60d' | 'custom'>('7d')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
   const [showDatePicker, setShowDatePicker] = useState(false)
