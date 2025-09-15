@@ -753,6 +753,39 @@ export default function RankHistoryPage() {
                 onFilterChange={setActiveFilter}
               />
 
+              {/* Filter Buttons Section */}
+              <div className="flex justify-center">
+                <div className="flex items-center gap-1 bg-secondary/30 p-1 rounded-lg">
+                  <Button
+                    variant={activeFilter === 'positions' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveFilter('positions')}
+                    data-testid="filter-positions"
+                    className="text-xs h-8 px-3"
+                  >
+                    Positions
+                  </Button>
+                  <Button
+                    variant={activeFilter === 'traffic' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveFilter('traffic')}
+                    data-testid="filter-traffic"
+                    className="text-xs h-8 px-3"
+                  >
+                    Est. Traffic
+                  </Button>
+                  <Button
+                    variant={activeFilter === 'all' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveFilter('all')}
+                    data-testid="filter-all"
+                    className="text-xs h-8 px-3"
+                  >
+                    Visibility
+                  </Button>
+                </div>
+              </div>
+
               {/* Rank History Table - Semrush Style Comparison */}
               <Card>
                 <CardHeader className="py-3">
@@ -801,35 +834,6 @@ export default function RankHistoryPage() {
                           Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant={activeFilter === 'positions' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setActiveFilter('positions')}
-                              data-testid="filter-positions"
-                              className="text-xs h-6 px-2"
-                            >
-                              Positions
-                            </Button>
-                            <Button
-                              variant={activeFilter === 'traffic' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setActiveFilter('traffic')}
-                              data-testid="filter-traffic"
-                              className="text-xs h-6 px-2"
-                            >
-                              Est. Traffic
-                            </Button>
-                            <Button
-                              variant={activeFilter === 'all' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setActiveFilter('all')}
-                              data-testid="filter-all"
-                              className="text-xs h-6 px-2"
-                            >
-                              Visibility
-                            </Button>
-                          </div>
                           <Button
                             variant="outline"
                             size="sm"
