@@ -20,7 +20,7 @@ export const RankOverviewStats = ({
       <StatCard
         title="Total Keywords"
         value={totalKeywords.toLocaleString()}
-        variant="primary"
+        variant="info"
         icon={<Search className="w-6 h-6" />}
         description="Keywords being tracked"
       />
