@@ -27,6 +27,7 @@ import {
   Info
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { SemrushCalendar } from './components/SemrushCalendar'
 
 
 interface Domain {
@@ -491,7 +492,7 @@ export default function RankHistoryPage() {
                         ))}
                       </div>
 
-                      {/* Custom Date Range Picker */}
+                      {/* Custom Date Range Picker - Semrush Style */}
                       <div className="relative">
                         <Button
                           size="sm"
@@ -511,60 +512,75 @@ export default function RankHistoryPage() {
                         </Button>
 
                         {showDatePicker && (
-                          <div className="absolute top-full left-0 mt-1 bg-background border rounded-lg shadow-lg p-4 z-50 min-w-[300px]">
-                            <div className="space-y-3">
-                              <div className="text-sm font-medium text-foreground">
-                                Select Date Range
-                              </div>
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <label className="text-xs text-muted-foreground">From</label>
-                                  <Input
-                                    type="date"
-                                    value={customStartDate}
-                                    onChange={(e) => setCustomStartDate(e.target.value)}
-                                    className="text-xs"
-                                    data-testid="date-from"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-xs text-muted-foreground">To</label>
-                                  <Input
-                                    type="date"
-                                    value={customEndDate}
-                                    onChange={(e) => setCustomEndDate(e.target.value)}
-                                    className="text-xs"
-                                    data-testid="date-to"
-                                  />
-                                </div>
-                              </div>
-                              <div className="flex justify-end gap-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  onClick={() => {
-                                    setShowDatePicker(false)
-                                    setCustomStartDate('')
-                                    setCustomEndDate('')
+                          <div className="absolute top-full right-0 mt-1 bg-background border rounded-lg shadow-xl z-50 overflow-hidden">
+                            <div className="flex">
+                              {/* Calendar Section */}
+                              <div className="p-4 border-r border-border">
+                                <SemrushCalendar
+                                  selectedRange={{ start: customStartDate, end: customEndDate }}
+                                  onRangeChange={(start, end) => {
+                                    setCustomStartDate(start)
+                                    setCustomEndDate(end)
                                   }}
-                                  data-testid="button-date-cancel"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => {
-                                    if (customStartDate && customEndDate) {
-                                      setAppliedCustomDates({ start: customStartDate, end: customEndDate })
-                                    }
-                                    setShowDatePicker(false)
-                                  }}
-                                  disabled={!customStartDate || !customEndDate}
-                                  data-testid="button-date-apply"
-                                >
-                                  Apply
-                                </Button>
+                                />
                               </div>
+                              
+                              {/* Quick Options Section */}
+                              <div className="p-4 bg-slate-50 min-w-[160px]">
+                                <div className="space-y-1">
+                                  <div className="text-sm font-medium text-foreground mb-3">Quick Select</div>
+                                  {[
+                                    { label: 'Past 2 days', value: 2 },
+                                    { label: 'Past 7 days', value: 7 },
+                                    { label: 'Past 30 days', value: 30 },
+                                    { label: 'Past 60 days', value: 60 },
+                                    { label: 'Past 90 days', value: 90 }
+                                  ].map(({ label, value }) => (
+                                    <button
+                                      key={value}
+                                      onClick={() => {
+                                        const today = new Date()
+                                        const startDate = new Date(today.getTime() - value * 24 * 60 * 60 * 1000)
+                                        setCustomStartDate(startDate.toISOString().split('T')[0])
+                                        setCustomEndDate(today.toISOString().split('T')[0])
+                                      }}
+                                      className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-slate-200 rounded transition-colors"
+                                    >
+                                      {label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Action Buttons */}
+                            <div className="flex justify-end gap-2 p-4 border-t border-border bg-background">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => {
+                                  setShowDatePicker(false)
+                                  setCustomStartDate('')
+                                  setCustomEndDate('')
+                                }}
+                                data-testid="button-date-reset"
+                              >
+                                Reset
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                onClick={() => {
+                                  if (customStartDate && customEndDate) {
+                                    setAppliedCustomDates({ start: customStartDate, end: customEndDate })
+                                  }
+                                  setShowDatePicker(false)
+                                }}
+                                disabled={!customStartDate || !customEndDate}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                data-testid="button-date-apply"
+                              >
+                                Apply
+                              </Button>
                             </div>
                           </div>
                         )}
