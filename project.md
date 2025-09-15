@@ -8273,6 +8273,50 @@ ON public.indb_cms_posts(category, status);
   - **Workflow Status**: "Start application" workflow successfully restarted and running
   - **Application Ready**: IndexNow Studio is now operational on port 5000 for development and testing
 
+### September 15, 2025 - Rank History Page Professional UI Enhancement ✅
+
+- 🎯 **COMPREHENSIVE RANK HISTORY TABLE REDESIGN**: Enhanced rank history page with professional Semrush-style design and improved functionality following user requirements
+  - **Checkbox Selection System**: Added checkbox column before keyword column in both header and data rows for bulk keyword selection
+    - Master checkbox in header for select all/none functionality
+    - Individual checkboxes for each keyword row with proper state management
+    - Automatic selection reset when filters change to prevent inconsistent state
+  - **Enhanced Tooltip Design**: Replaced hover title tooltip with professional small info icon and proper tooltip component
+    - Clean info icon (4x4) positioned next to table title with hover states
+    - Professional tooltip with proper positioning, arrow pointer, and semantic colors
+    - Improved user experience matching modern design patterns
+  - **Table Title Size Optimization**: Changed table title from text-lg to text-base (16px) for better visual hierarchy
+  - **Default Filter Enhancement**: Changed default date filter from 30D to 7D for faster data loading and better user experience
+
+- 📊 **DATE CALCULATION FIX**: Corrected date range calculation logic to match Semrush approach for accurate historical comparisons  
+  - **Exact Day Calculation**: Fixed 7D filter to use exactly 7 days back (not 6 days) to match industry standard
+  - **30D and 60D Correction**: Applied same fix to 30D and 60D filters for consistent date range behavior
+  - **Semrush Compatibility**: Date ranges now calculate backwards from today exactly as Semrush does (e.g., 17 Aug to 15 Sep for 30D)
+
+- 🔍 **KEYWORD VISIBILITY ENHANCEMENT**: Modified data fetching approach to show all keywords even when ranking data is empty/null
+  - **Dual API Approach**: Combined keywords endpoint (shows all keywords) with rank history endpoint (historical data)
+  - **Data Merging Logic**: Implemented useMemo-based merging to combine keywords with their rank history data
+  - **Empty Data Display**: Keywords without ranking data now show with empty positions (—) instead of being hidden
+  - **No More "No Data" Messages**: Eliminated "No rank history data found" message that was hiding legitimate keywords
+
+- 🛠️ **TECHNICAL IMPLEMENTATION EXCELLENCE**: Used professional coding practices and semantic design patterns
+  - **React Hooks Integration**: Proper useState, useEffect, useMemo usage for efficient state management
+  - **Semantic CSS Classes**: Used project's established color scheme and semantic Tailwind classes (no hardcoding)
+  - **TypeScript Safety**: Maintained strict typing throughout with proper interfaces and error handling
+  - **Performance Optimization**: Efficient data processing with memoization and proper dependency arrays
+
+- ✅ **FILES MODIFIED**:
+  - `app/dashboard/indexnow/rank-history/page.tsx` - Complete rank history page enhancement with all improvements
+
+- 🎯 **USER EXPERIENCE BENEFITS**:
+  - **Professional Interface**: Clean, modern design matching industry standards (Semrush-style)
+  - **Improved Functionality**: Checkbox selection enables future bulk operations on keywords
+  - **Better Information Design**: Small info icon provides help without cluttering the interface  
+  - **Complete Data Visibility**: All keywords shown regardless of ranking data availability
+  - **Accurate Date Ranges**: Date calculations now match user expectations and industry standards
+  - **Faster Loading**: 7D default filter provides quicker initial data loading for better UX
+
+**Status**: ✅ **RANK HISTORY UI ENHANCEMENT COMPLETE** - Successfully implemented all requested improvements including checkbox selection, tooltip redesign, date calculation fixes, keyword visibility enhancement, and table title optimization
+
 
 ### September 13, 2025 - IndexNow Overview Table Header Alignment Fix ✅
 

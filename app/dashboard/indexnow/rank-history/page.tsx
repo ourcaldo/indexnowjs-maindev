@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/database'
@@ -218,8 +218,31 @@ export default function RankHistoryPage() {
     }
   })
 
-  // Fetch rank history data
-  const { data: rankHistory = [], isLoading } = useQuery({
+  // Fetch all keywords for domain (regardless of ranking data)
+  const { data: keywordsData = [], isLoading: keywordsLoading } = useQuery({
+    queryKey: ['/api/v1/rank-tracking/keywords', selectedDomainId, selectedDevice, selectedCountry],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const params = new URLSearchParams()
+      if (selectedDomainId) params.append('domain_id', selectedDomainId)
+      if (selectedDevice) params.append('device_type', selectedDevice)
+      if (selectedCountry) params.append('country_id', selectedCountry)
+      params.append('limit', '1000')
+      
+      const response = await fetch(`/api/v1/rank-tracking/keywords?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      const data = await response.json()
+      return data.success ? data.data : []
+    },
+    enabled: !!selectedDomainId
+  })
+
+  // Fetch rank history data to merge with keywords
+  const { data: rankHistoryData = [], isLoading: rankHistoryLoading } = useQuery({
     queryKey: ['/api/v1/rank-tracking/rank-history', selectedDomainId, selectedDevice, selectedCountry, startDate, endDate],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -242,6 +265,33 @@ export default function RankHistoryPage() {
     },
     enabled: !!startDate && !!endDate && !!selectedDomainId
   })
+
+  // Combine loading states
+  const isLoading = keywordsLoading || rankHistoryLoading
+
+  // Merge keywords with rank history data
+  const rankHistory = useMemo(() => {
+    if (!keywordsData || keywordsData.length === 0) return []
+    
+    // Create a map of rank history data by keyword_id
+    const historyMap: { [keywordId: string]: any } = {}
+    if (rankHistoryData && rankHistoryData.length > 0) {
+      rankHistoryData.forEach((historyItem: any) => {
+        historyMap[historyItem.keyword_id] = historyItem
+      })
+    }
+    
+    // Transform keywords to match expected format, merging with history data
+    return keywordsData.map((keyword: any) => ({
+      keyword_id: keyword.id,
+      keyword: keyword.keyword,
+      device_type: keyword.device_type,
+      tags: keyword.tags || [],
+      domain: keyword.domain,
+      country: keyword.country,
+      history: historyMap[keyword.id]?.history || {} // Empty history if no data
+    }))
+  }, [keywordsData, rankHistoryData])
 
   const domains = domainsWithCounts || []
   const countries = countriesData?.data || []
