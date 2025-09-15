@@ -101,6 +101,9 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
+        slate: {
+          50: "var(--slate-50)",
+        },
       },
       keyframes: {
         "accordion-down": {

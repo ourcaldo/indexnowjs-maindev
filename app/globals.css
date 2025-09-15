@@ -98,6 +98,9 @@
   /* Table specific */
   --table-frozen-column: #E8F4F8;
   --table-frozen-column-foreground: var(--charcoal);
+  
+  /* Table header colors - Semrush style */
+  --slate-50: #f8fafc;
 }
 
 .dark {
@@ -124,6 +127,9 @@
   /* Table specific - dark mode */
   --table-frozen-column: hsl(215, 35%, 18%);
   --table-frozen-column-foreground: hsl(0, 0%, 95%);
+  
+  /* Table header colors - dark mode */
+  --slate-50: hsl(215, 25%, 12%);
 }
 
 @layer base {

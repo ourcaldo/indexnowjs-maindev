@@ -719,8 +719,8 @@ export default function RankHistoryPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full">
                         <thead>
-                          <tr className="bg-muted/50 border-b border-border">
-                            <th className="text-center py-2 px-3 w-10 sticky left-0 bg-muted/50 z-10">
+                          <tr className="bg-slate-50 border-b border-border">
+                            <th className="text-center py-2 px-3 w-10 sticky left-0 bg-slate-50 z-10">
                               <input
                                 type="checkbox"
                                 checked={selectedKeywords.length === filteredData.length && filteredData.length > 0}
@@ -729,7 +729,7 @@ export default function RankHistoryPage() {
                                 data-testid="checkbox-select-all"
                               />
                             </th>
-                            <th className="text-left py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sticky left-10 bg-muted/50 z-10">
+                            <th className="text-left py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sticky left-10 bg-slate-50 z-10">
                               KEYWORD
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
