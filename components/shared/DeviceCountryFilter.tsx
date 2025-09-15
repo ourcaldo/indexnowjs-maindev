@@ -30,7 +30,7 @@ export const DeviceCountryFilter = ({
     <div className={`flex items-center gap-3 ${className}`}>
       {/* Device Filter */}
       <Select value={selectedDevice} onValueChange={onDeviceChange}>
-        <SelectTrigger className={`${compact ? 'w-[140px]' : 'w-[160px]'} text-sm bg-background`} data-testid="select-device">
+        <SelectTrigger className={`${compact ? 'w-[140px]' : 'w-[180px]'} text-sm bg-background`} data-testid="select-device">
           <div className="flex items-center gap-2">
             {selectedDevice === 'desktop' && <Monitor className="w-3 h-3" />}
             {selectedDevice === 'mobile' && <Smartphone className="w-3 h-3" />}
@@ -62,7 +62,7 @@ export const DeviceCountryFilter = ({
 
       {/* Country Filter */}
       <Select value={selectedCountry} onValueChange={onCountryChange}>
-        <SelectTrigger className={`${compact ? 'w-[150px]' : 'min-w-[160px] max-w-[200px]'} text-sm bg-background`} data-testid="select-country">
+        <SelectTrigger className={`${compact ? 'w-[150px]' : 'min-w-[180px] max-w-[220px]'} text-sm bg-background`} data-testid="select-country">
           <div className="flex items-center gap-2">
             <Globe className="w-3 h-3 text-muted-foreground" />
             <SelectValue placeholder="All Countries" />
