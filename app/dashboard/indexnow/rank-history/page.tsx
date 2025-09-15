@@ -42,25 +42,58 @@ interface RankHistoryData {
   history: { [date: string]: { position: number | null, url: string | null } }
 }
 
-// Generate array of dates for the date range
-const generateDateRange = (startDate: string, endDate: string): string[] => {
-  const dates: string[] = []
-  const start = new Date(startDate)
-  const end = new Date(endDate)
+// Get comparison periods based on selected date range
+const getComparisonPeriods = (dateRangeType: string) => {
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0]
   
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    dates.push(d.toISOString().split('T')[0])
+  let comparisonDate: string
+  let periodLabel: string
+  
+  switch (dateRangeType) {
+    case '7d':
+      comparisonDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      periodLabel = '7 days ago'
+      break
+    case '30d':
+      comparisonDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      periodLabel = '30 days ago'
+      break
+    case '60d':
+      comparisonDate = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      periodLabel = '60 days ago'
+      break
+    default:
+      comparisonDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      periodLabel = '7 days ago'
   }
   
-  return dates.reverse() // Most recent first
+  return { todayStr, comparisonDate, periodLabel }
 }
 
-// Format date for display (e.g., "13/09")
-const formatDateHeader = (dateStr: string): string => {
+// Calculate position change
+const calculatePositionChange = (currentPos: number | null, previousPos: number | null): number | null => {
+  if (!currentPos || !previousPos) return null
+  return previousPos - currentPos // Positive means improvement (moved up)
+}
+
+// Get position change indicator
+const getPositionChangeDisplay = (change: number | null) => {
+  if (change === null || change === 0) {
+    return { icon: Minus, color: 'text-muted-foreground', text: '—' }
+  }
+  
+  if (change > 0) {
+    return { icon: TrendingUp, color: 'text-success', text: `+${change}` }
+  } else {
+    return { icon: TrendingDown, color: 'text-destructive', text: `${change}` }
+  }
+}
+
+// Format date for display (e.g., "Sep 13")
+const formatDateDisplay = (dateStr: string): string => {
   const date = new Date(dateStr)
-  const day = date.getDate().toString().padStart(2, '0')
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  return `${day}/${month}`
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 export default function RankHistoryPage() {
@@ -234,7 +267,7 @@ export default function RankHistoryPage() {
     rankHistory.flatMap((item: RankHistoryData) => item.tags || [])
   )).filter(Boolean) as string[]
 
-  const dateColumns = startDate && endDate ? generateDateRange(startDate, endDate) : []
+  const { todayStr, comparisonDate, periodLabel } = getComparisonPeriods(dateRange)
 
   // Calculate stats for RankOverviewStats
   const statsData = {
@@ -242,28 +275,22 @@ export default function RankHistoryPage() {
     avgPosition: (() => {
       if (filteredData.length === 0) return 0
       const itemsWithPosition = filteredData.filter((item: RankHistoryData) => {
-        const latestDate = dateColumns[0]
-        return latestDate && item.history[latestDate]?.position
+        return item.history[todayStr]?.position
       })
       if (itemsWithPosition.length === 0) return 0
       const totalPositions = filteredData.reduce((acc: number, item: RankHistoryData) => {
-        const latestDate = dateColumns[0]
-        const position = latestDate ? item.history[latestDate]?.position : null
+        const position = item.history[todayStr]?.position
         return position ? acc + position : acc
       }, 0)
       return Math.round(totalPositions / itemsWithPosition.length)
     })(),
     topTenCount: filteredData.filter((item: RankHistoryData) => {
-      const latestDate = dateColumns[0]
-      const position = latestDate ? item.history[latestDate]?.position : null
+      const position = item.history[todayStr]?.position
       return position && position <= 10
     }).length,
     improvingCount: filteredData.filter((item: RankHistoryData) => {
-      const latestDate = dateColumns[0]
-      const previousDate = dateColumns[1]
-      if (!latestDate || !previousDate) return false
-      const currentPos = item.history[latestDate]?.position
-      const previousPos = item.history[previousDate]?.position
+      const currentPos = item.history[todayStr]?.position
+      const previousPos = item.history[comparisonDate]?.position
       return currentPos && previousPos && currentPos < previousPos
     }).length
   }
@@ -567,18 +594,26 @@ export default function RankHistoryPage() {
                 )}
               </div>
 
-              {/* Rank History Table */}
+              {/* Rank History Table - Semrush Style Comparison */}
               <Card>
-                <CardHeader className="py-2">
+                <CardHeader className="py-3">
                   <div className="flex justify-between items-center">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Rank History</CardTitle>
+                    <div className="flex items-center gap-2 group">
+                      <CardTitle className="text-lg font-bold text-foreground group-hover:text-accent cursor-help" data-testid="title-rank-history">
+                        Rank History
+                      </CardTitle>
+                      {/* Tooltip on hover */}
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute bg-popover text-popover-foreground px-3 py-2 rounded-md shadow-lg text-sm max-w-sm z-50 pointer-events-none" style={{ transform: 'translateY(-100%)', marginTop: '-8px' }}>
+                        This report shows keyword position comparison between today and {periodLabel}, including position changes and trends for better performance tracking.
+                      </div>
+                    </div>
                     <span className="text-xs text-muted-foreground" data-testid="text-results-info">
                       Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
                     </span>
                   </div>
                 </CardHeader>
                 <div className="border-t border-border"></div>
-                <CardContent className="pt-1 pb-1">
+                <CardContent className="p-0">
                   {isLoading ? (
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -590,74 +625,113 @@ export default function RankHistoryPage() {
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
-                      <div className="relative">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b border-border/40" style={{backgroundColor: 'var(--muted)'}}>
-                              <th className="text-left py-1 px-2 sticky left-0 z-10 text-xs font-bold uppercase tracking-wider" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)', color: 'var(--table-frozen-column-foreground)'}}>
-                                Keyword
-                              </th>
-                              {dateColumns.map((date) => (
-                                <th key={date} className="text-center py-1 px-1 text-xs font-bold uppercase tracking-wider" style={{minWidth: '50px', color: 'var(--foreground)'}}>
-                                  {formatDateHeader(date)}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {paginatedData.map((item: RankHistoryData) => (
-                              <tr key={item.keyword_id} className="border-b border-border/30 hover:bg-muted/30" data-testid={`row-keyword-${item.keyword_id}`}>
-                                <td className="py-1 px-2 sticky left-0 z-10" style={{width: '200px', minWidth: '200px', backgroundColor: 'var(--table-frozen-column)'}}>
-                                  <div className="font-medium text-sm truncate" style={{color: 'var(--table-frozen-column-foreground)'}}>
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-muted/50 border-b border-border">
+                            <th className="text-left py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sticky left-0 bg-muted/50 z-10">
+                              KEYWORD
+                            </th>
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
+                              POS. {formatDateDisplay(todayStr)}
+                            </th>
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
+                              POS. {formatDateDisplay(comparisonDate)}
+                            </th>
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
+                              DIFF
+                            </th>
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                              DEVICE
+                            </th>
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                              TAGS
+                            </th>
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                              COUNTRY
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-card">
+                          {paginatedData.map((item: RankHistoryData) => {
+                            const currentPosition = item.history[todayStr]?.position
+                            const comparisonPosition = item.history[comparisonDate]?.position
+                            const positionChange = calculatePositionChange(currentPosition, comparisonPosition)
+                            const changeDisplay = getPositionChangeDisplay(positionChange)
+                            
+                            return (
+                              <tr key={item.keyword_id} className="border-b border-border hover:bg-muted/30" data-testid={`row-keyword-${item.keyword_id}`}>
+                                <td className="py-2 px-3 sticky left-0 bg-card z-10">
+                                  <div className="font-medium text-sm text-foreground max-w-[200px] truncate">
                                     {item.keyword}
                                   </div>
                                 </td>
-                                {dateColumns.map((date, dateIndex) => {
-                                  const dayData = item.history[date]
-                                  const position = dayData?.position
-                                  
-                                  // Get previous day's position for trend comparison
-                                  const previousDate = dateColumns[dateIndex + 1] // Next index since dates are reversed
-                                  const previousDayData = previousDate ? item.history[previousDate] : null
-                                  const previousPosition = previousDayData?.position
-                                  
-                                  // Calculate trend (positive means improved - lower number)
-                                  const trend = position && previousPosition ? 
-                                    previousPosition - position : null
-                                  
-                                  return (
-                                    <td key={date} className="text-center py-1 px-0.5 text-xs" data-testid={`cell-${item.keyword_id}-${date}`}>
-                                      {position ? (
-                                        <div className="flex items-center justify-center gap-0.5">
-                                          <span className={`font-semibold text-xs inline-flex items-center justify-center w-6 h-5 rounded ${
-                                            position <= 3 ? 'text-success-foreground bg-success' :
-                                            position <= 10 ? 'text-info-foreground bg-info' :
-                                            position <= 50 ? 'text-warning-foreground bg-warning' :
-                                            'text-destructive-foreground bg-destructive'
-                                          }`}>
-                                            {position}
-                                          </span>
-                                          {trend !== null && trend !== 0 && (
-                                            <div className="ml-0.5">
-                                              {trend > 0 ? (
-                                                <TrendingUp className="w-2.5 h-2.5 text-success" data-testid="trend-up" />
-                                              ) : (
-                                                <TrendingDown className="w-2.5 h-2.5 text-destructive" data-testid="trend-down" />
-                                              )}
-                                            </div>
-                                          )}
-                                        </div>
-                                      ) : (
-                                        <span className="text-muted-foreground text-xs">-</span>
-                                      )}
-                                    </td>
-                                  )
-                                })}
+                                <td className="text-center py-2 px-3" data-testid={`current-pos-${item.keyword_id}`}>
+                                  {currentPosition ? (
+                                    <span className={`inline-flex items-center justify-center w-8 h-6 rounded text-xs font-semibold ${
+                                      currentPosition <= 3 ? 'bg-success text-success-foreground' :
+                                      currentPosition <= 10 ? 'bg-info text-info-foreground' :
+                                      currentPosition <= 50 ? 'bg-warning text-warning-foreground' :
+                                      'bg-destructive text-destructive-foreground'
+                                    }`}>
+                                      {currentPosition}
+                                    </span>
+                                  ) : (
+                                    <span className="text-muted-foreground text-sm">—</span>
+                                  )}
+                                </td>
+                                <td className="text-center py-2 px-3" data-testid={`comparison-pos-${item.keyword_id}`}>
+                                  {comparisonPosition ? (
+                                    <span className={`inline-flex items-center justify-center w-8 h-6 rounded text-xs font-semibold ${
+                                      comparisonPosition <= 3 ? 'bg-success text-success-foreground' :
+                                      comparisonPosition <= 10 ? 'bg-info text-info-foreground' :
+                                      comparisonPosition <= 50 ? 'bg-warning text-warning-foreground' :
+                                      'bg-destructive text-destructive-foreground'
+                                    }`}>
+                                      {comparisonPosition}
+                                    </span>
+                                  ) : (
+                                    <span className="text-muted-foreground text-sm">—</span>
+                                  )}
+                                </td>
+                                <td className="text-center py-2 px-3" data-testid={`diff-${item.keyword_id}`}>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <changeDisplay.icon className={`w-4 h-4 ${changeDisplay.color}`} />
+                                    <span className={`text-sm font-medium ${changeDisplay.color}`}>
+                                      {changeDisplay.text}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="text-center py-2 px-3">
+                                  <span className="text-xs text-muted-foreground capitalize">
+                                    {item.device_type || 'Desktop'}
+                                  </span>
+                                </td>
+                                <td className="text-center py-2 px-3">
+                                  <div className="flex flex-wrap gap-1 justify-center max-w-[120px]">
+                                    {item.tags && item.tags.length > 0 ? (
+                                      item.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                        <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground">
+                                          {tag}
+                                        </span>
+                                      ))
+                                    ) : (
+                                      <span className="text-muted-foreground text-xs">—</span>
+                                    )}
+                                    {item.tags && item.tags.length > 2 && (
+                                      <span className="text-xs text-muted-foreground">+{item.tags.length - 2}</span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="text-center py-2 px-3">
+                                  <span className="text-xs text-muted-foreground">
+                                    {item.country?.name || 'Global'}
+                                  </span>
+                                </td>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                            )
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </CardContent>
