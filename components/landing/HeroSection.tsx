@@ -21,12 +21,12 @@ export default function HeroSection({ user, onGetStarted, onScrollToDemo }: Hero
             <div className="space-y-6">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 Rank tracking,{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-accent/80 to-accent">
                   minus the bloat
                 </span>
               </h1>
               
-              <p className="text-xl text-gray-300 leading-relaxed">
+              <p className="text-xl text-muted-foreground leading-relaxed">
                 IndexNow focuses on one job and does it right: precise keyword rankings 
                 with clean reports and fair pricing. No tool fatigue. No surprise fees.
               </p>
@@ -35,7 +35,7 @@ export default function HeroSection({ user, onGetStarted, onScrollToDemo }: Hero
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={onGetStarted}
-                className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+                className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-muted transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
               >
                 <span>Start free</span>
                 <ArrowRight className="w-5 h-5" />
@@ -50,7 +50,7 @@ export default function HeroSection({ user, onGetStarted, onScrollToDemo }: Hero
             </div>
 
             <div className="pt-4 border-t border-white/10">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Google URL indexing • Keyword rank tracking • Service account management
               </p>
             </div>
@@ -59,7 +59,7 @@ export default function HeroSection({ user, onGetStarted, onScrollToDemo }: Hero
           {/* Right Column - Rank Tracker Preview */}
           <div className="lg:pl-8">
             <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-cyan-400/20 to-blue-500/20 rounded-3xl blur-xl"></div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-accent/20 via-accent/30 to-accent/20 rounded-3xl blur-xl"></div>
               <div className="relative">
                 <RankTrackerPreview />
               </div>

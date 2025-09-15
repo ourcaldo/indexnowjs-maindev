@@ -36,7 +36,7 @@ export default function HowItWorksSection() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
             How it works
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Get started in minutes, not hours. Three simple steps to professional rank tracking.
           </p>
         </div>
@@ -48,7 +48,7 @@ export default function HowItWorksSection() {
               <div key={index} className="text-center relative h-full flex flex-col">
                 {/* Connection line */}
                 {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-blue-400/50 to-cyan-400/50 -translate-y-1/2 z-0"></div>
+                  <div className="hidden md:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-accent/50 to-accent/70 -translate-y-1/2 z-0"></div>
                 )}
                 
                 <AdvancedNeonCard 
@@ -59,10 +59,10 @@ export default function HowItWorksSection() {
                 >
                   {/* Step number and icon */}
                   <div className="w-32 h-32 bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20 flex flex-col items-center justify-center mx-auto mb-6 relative hover:bg-white/20 transition-all duration-300">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-cyan-400/30 rounded-3xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-accent/30 to-accent/40 rounded-3xl"></div>
                     <div className="relative z-10">
                       <div className="text-2xl font-bold text-white mb-2">{step.number}</div>
-                      <step.icon className="w-8 h-8 text-blue-400" />
+                      <step.icon className="w-8 h-8 text-accent" />
                     </div>
                   </div>
                   
@@ -71,10 +71,10 @@ export default function HowItWorksSection() {
                   </h3>
                   
                   {step.details && (
-                    <p className="text-sm text-gray-400 mb-2">{step.details}</p>
+                    <p className="text-sm text-muted-foreground mb-2">{step.details}</p>
                   )}
                   
-                  <p className="text-gray-300 flex-grow">
+                  <p className="text-muted-foreground flex-grow">
                     {step.description}
                   </p>
                 </AdvancedNeonCard>
