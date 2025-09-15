@@ -23,7 +23,8 @@ import {
   Plus,
   TrendingUp,
   TrendingDown,
-  Minus
+  Minus,
+  Info
 } from 'lucide-react'
 
 interface Domain {
@@ -623,13 +624,17 @@ export default function RankHistoryPage() {
               <Card>
                 <CardHeader className="py-3">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2 group">
-                      <CardTitle className="text-lg font-bold text-foreground group-hover:text-accent cursor-help" data-testid="title-rank-history">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-base font-bold text-foreground" data-testid="title-rank-history">
                         Rank History
                       </CardTitle>
-                      {/* Tooltip on hover */}
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute bg-popover text-popover-foreground px-3 py-2 rounded-md shadow-lg text-sm max-w-sm z-50 pointer-events-none" style={{ transform: 'translateY(-100%)', marginTop: '-8px' }}>
-                        This report shows keyword position comparison between today and {periodLabel}, including position changes and trends for better performance tracking.
+                      {/* Info icon with tooltip */}
+                      <div className="relative group">
+                        <Info className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
+                        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-popover text-popover-foreground px-3 py-2 rounded-md shadow-lg text-sm max-w-sm z-50 pointer-events-none whitespace-nowrap">
+                          This report shows keyword position comparison between today and {periodLabel}, including position changes and trends for better performance tracking.
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-popover"></div>
+                        </div>
                       </div>
                     </div>
                     <span className="text-xs text-muted-foreground" data-testid="text-results-info">
