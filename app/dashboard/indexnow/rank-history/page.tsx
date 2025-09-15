@@ -507,6 +507,8 @@ export default function RankHistoryPage() {
                           <Calendar className="w-3 h-3" />
                           {dateRange === 'custom' && appliedCustomDates 
                             ? `${new Date(appliedCustomDates.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(appliedCustomDates.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                            : dateRange !== 'custom'
+                            ? `${new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
                             : 'Custom'
                           }
                         </Button>

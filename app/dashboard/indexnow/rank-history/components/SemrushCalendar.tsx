@@ -4,12 +4,12 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-interface SemrushCalendarProps {
+interface CalendarProps {
   selectedRange: { start: string; end: string }
   onRangeChange: (start: string, end: string) => void
 }
 
-export const SemrushCalendar = ({ selectedRange, onRangeChange }: SemrushCalendarProps) => {
+export const SemrushCalendar = ({ selectedRange, onRangeChange }: CalendarProps) => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [tempStart, setTempStart] = useState<string | null>(null)
   const [tempEnd, setTempEnd] = useState<string | null>(null)
@@ -112,12 +112,6 @@ export const SemrushCalendar = ({ selectedRange, onRangeChange }: SemrushCalenda
 
     return (
       <div className="select-none">
-        <div className="flex items-center justify-center mb-3">
-          <h3 className="text-sm font-medium text-gray-900">
-            {monthNames[month]} {year}
-          </h3>
-        </div>
-        
         {/* Day headers */}
         <div className="grid grid-cols-7 gap-0 mb-1">
           {dayNames.map(day => (
