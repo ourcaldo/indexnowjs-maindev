@@ -742,38 +742,7 @@ export default function RankHistoryPage() {
                 </CardContent>
               </Card>
 
-              {/* Pagination Info */}
-              <div className="flex justify-end items-center">
-
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      data-testid="button-prev-page"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-
-                    <span className="text-sm text-foreground">
-                      Page {currentPage} of {totalPages}
-                    </span>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      data-testid="button-next-page"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
+              
 
               {/* Bulk Actions Bar */}
               <BulkActionsBar
@@ -810,9 +779,6 @@ export default function RankHistoryPage() {
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                      <span className="text-xs text-muted-foreground" data-testid="text-results-info">
-                        {totalItems} keywords
-                      </span>
                     </div>
                   </div>
                 </CardHeader>
@@ -828,8 +794,24 @@ export default function RankHistoryPage() {
                       <p className="text-muted-foreground">No rank history data found for the selected filters.</p>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
+                    <>
+                      {/* Table Top Controls */}
+                      <div className="flex justify-between items-center p-3 bg-slate-50 border-b">
+                        <div className="text-sm text-muted-foreground">
+                          Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-6 px-2"
+                          onClick={() => {/* Add domain filter functionality */}}
+                        >
+                          All for {selectedDomainInfo?.domain_name}
+                        </Button>
+                      </div>
+                      
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
                         <thead>
                           <tr className="bg-slate-50 border-b border-border">
                             <th className="text-center py-2 px-3 w-10 sticky left-0 bg-slate-50 hover:bg-slate-100 z-10 transition-colors duration-150">
@@ -861,16 +843,6 @@ export default function RankHistoryPage() {
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               COUNTRY
-                            </th>
-                            <th className="text-right py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-xs h-6 px-2"
-                                onClick={() => {/* Add domain filter functionality */}}
-                              >
-                                All for {selectedDomainInfo?.domain_name}
-                              </Button>
                             </th>
                           </tr>
                         </thead>
@@ -949,13 +921,13 @@ export default function RankHistoryPage() {
                                     {item.country?.name || 'Global'}
                                   </span>
                                 </td>
-                                <td className="py-2 px-3"></td>
                               </tr>
                             )
                           })}
                         </tbody>
                       </table>
-                    </div>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
