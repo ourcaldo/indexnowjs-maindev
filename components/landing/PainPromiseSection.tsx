@@ -34,26 +34,26 @@ export default function PainPromiseSection({ onGetStarted }: PainPromiseSectionP
         <div className="grid md:grid-cols-2 gap-12 mb-12">
           {/* Pain Points */}
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-red-400 mb-6">Common Problems</h3>
+            <h3 className="text-xl font-semibold text-destructive mb-6">Common Problems</h3>
             {painPoints.map((pain, index) => (
               <div key={index} className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center mt-1">
-                  <X className="w-4 h-4 text-red-400" />
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center mt-1">
+                  <X className="w-4 h-4 text-destructive" />
                 </div>
-                <p className="text-gray-300 leading-relaxed">{pain}</p>
+                <p className="text-muted-foreground leading-relaxed">{pain}</p>
               </div>
             ))}
           </div>
 
           {/* Solutions */}
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-green-400 mb-6">IndexNow Solutions</h3>
+            <h3 className="text-xl font-semibold text-success mb-6">IndexNow Solutions</h3>
             {solutions.map((solution, index) => (
               <div key={index} className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center mt-1">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success/20 flex items-center justify-center mt-1">
+                  <CheckCircle className="w-4 h-4 text-success" />
                 </div>
-                <p className="text-gray-300 leading-relaxed">{solution}</p>
+                <p className="text-muted-foreground leading-relaxed">{solution}</p>
               </div>
             ))}
           </div>
@@ -63,7 +63,7 @@ export default function PainPromiseSection({ onGetStarted }: PainPromiseSectionP
         <div className="text-center">
           <button
             onClick={onGetStarted}
-            className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
+            className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-muted transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
           >
             <span>Track your first keywords</span>
             <ArrowRight className="w-5 h-5" />
