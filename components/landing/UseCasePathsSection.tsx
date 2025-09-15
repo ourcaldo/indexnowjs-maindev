@@ -10,21 +10,21 @@ export default function UseCasePathsSection() {
       title: "Solo/Small Team",
       description: "Everything you need for Google indexing and keyword tracking without complexity.",
       features: ["Keyword rank tracking", "Daily position checks", "Google URL indexing", "Service account management"],
-      color: "text-blue-400"
+      color: "text-accent"
     },
     {
       icon: Building2,
       title: "Agencies",
       description: "Manage multiple client domains with organized keyword tracking and indexing jobs.",
       features: ["Multiple domains", "Job scheduling", "Position history", "Quota monitoring"],
-      color: "text-cyan-400"
+      color: "text-accent"
     },
     {
       icon: Users,
       title: "In-house Marketer",
       description: "Track your website's keyword positions and automate Google URL submission.",
       features: ["Domain management", "Automated indexing", "Historical tracking", "Tag organization"],
-      color: "text-green-400"
+      color: "text-success"
     }
   ]
 
@@ -35,7 +35,7 @@ export default function UseCasePathsSection() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
             Built for your workflow
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Whether you're flying solo or managing a team, IndexNow adapts to your needs.
           </p>
         </div>
@@ -51,15 +51,15 @@ export default function UseCasePathsSection() {
                 {useCase.title}
               </h3>
               
-              <p className="text-gray-300 mb-6 leading-relaxed flex-grow">
+              <p className="text-muted-foreground mb-6 leading-relaxed flex-grow">
                 {useCase.description}
               </p>
               
               <ul className="space-y-2">
                 {useCase.features.map((feature, idx) => (
                   <li key={idx} className="flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                    <span className="text-sm text-gray-400">{feature}</span>
+                    <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
+                    <span className="text-sm text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
