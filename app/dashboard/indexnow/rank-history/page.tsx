@@ -800,14 +800,45 @@ export default function RankHistoryPage() {
                         <div className="text-sm text-muted-foreground">
                           Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs h-6 px-2"
-                          onClick={() => {/* Add domain filter functionality */}}
-                        >
-                          All for {selectedDomainInfo?.domain_name}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant={activeFilter === 'positions' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setActiveFilter('positions')}
+                              data-testid="filter-positions"
+                              className="text-xs h-6 px-2"
+                            >
+                              Positions
+                            </Button>
+                            <Button
+                              variant={activeFilter === 'traffic' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setActiveFilter('traffic')}
+                              data-testid="filter-traffic"
+                              className="text-xs h-6 px-2"
+                            >
+                              Est. Traffic
+                            </Button>
+                            <Button
+                              variant={activeFilter === 'all' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setActiveFilter('all')}
+                              data-testid="filter-all"
+                              className="text-xs h-6 px-2"
+                            >
+                              Visibility
+                            </Button>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-6 px-2"
+                            onClick={() => {/* Add domain filter functionality */}}
+                          >
+                            All for {selectedDomainInfo?.domain_name}
+                          </Button>
+                        </div>
                       </div>
                       
                       <div className="overflow-x-auto">

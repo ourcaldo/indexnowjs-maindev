@@ -19,38 +19,7 @@ export const BulkActionsBar = ({
   onFilterChange
 }: BulkActionsBarProps) => {
   if (selectedCount === 0) {
-    return (
-      <div className="bg-background border-b border-border p-3">
-        <div className="flex items-center justify-end">
-          <div className="flex items-center gap-2">
-            <Button
-              variant={activeFilter === 'positions' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => onFilterChange('positions')}
-              data-testid="filter-positions"
-            >
-              Positions
-            </Button>
-            <Button
-              variant={activeFilter === 'traffic' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => onFilterChange('traffic')}
-              data-testid="filter-traffic"
-            >
-              Est. Traffic
-            </Button>
-            <Button
-              variant={activeFilter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => onFilterChange('all')}
-              data-testid="filter-all"
-            >
-              Visibility
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
+    return null // Don't show anything when no keywords are selected
   }
 
   return (
