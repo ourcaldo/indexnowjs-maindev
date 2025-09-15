@@ -17,7 +17,7 @@ export default function CompanyLogos() {
     <div className="py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-gray-400 text-sm uppercase tracking-wider font-medium">
+          <p className="text-muted-foreground text-sm uppercase tracking-wider font-medium">
             Trusted by Leading Platforms
           </p>
         </div>

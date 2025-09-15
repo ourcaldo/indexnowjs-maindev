@@ -470,7 +470,7 @@ export default function PaymentGateways() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-border border-t-primary"></div>
       </div>
     )
   }

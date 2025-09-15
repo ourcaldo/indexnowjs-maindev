@@ -9,19 +9,19 @@ export default function CoreDifferentiatorsSection() {
       icon: Target,
       title: "Dual-purpose automation",
       description: "Combines Google URL indexing with keyword rank tracking in one platform for complete SEO workflow automation.",
-      color: "text-blue-400"
+      color: "text-info"
     },
     {
       icon: Eye,
       title: "Enterprise-grade security",
       description: "AES-256 encryption for credentials, comprehensive audit logging, and secure service account management.",
-      color: "text-cyan-400"
+      color: "text-accent"
     },
     {
       icon: DollarSign,
       title: "Transparent operations",
       description: "Clear quota monitoring, job scheduling with email notifications, and organized domain management.",
-      color: "text-green-400"
+      color: "text-success"
     }
   ]
 
@@ -32,7 +32,7 @@ export default function CoreDifferentiatorsSection() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
             Three pillars that set us apart
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             While others overcomplicate, we focus on what actually matters for your success.
           </p>
         </div>
@@ -46,7 +46,7 @@ export default function CoreDifferentiatorsSection() {
               <h3 className="text-xl font-semibold mb-4 text-white">
                 {item.title}
               </h3>
-              <p className="text-gray-300 leading-relaxed flex-grow">
+              <p className="text-muted-foreground leading-relaxed flex-grow">
                 {item.description}
               </p>
             </NeonBorderCard>

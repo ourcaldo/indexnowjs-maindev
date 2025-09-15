@@ -68,21 +68,21 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case 'success':
     case 'submitted':
-      return 'bg-green-500 text-white';
+      return 'bg-success text-success-foreground';
     case 'failed':
-      return 'bg-red-500 text-white';
+      return 'bg-destructive text-destructive-foreground';
     case 'pending':
-      return 'bg-muted text-white';
+      return 'bg-muted text-muted-foreground';
     case 'quota_exceeded':
-      return 'bg-yellow-500 text-foreground';
+      return 'bg-warning text-warning-foreground';
     case 'paused':
-      return 'bg-yellow-500 text-foreground';
+      return 'bg-warning text-warning-foreground';
     case 'completed':
-      return 'bg-green-500 text-white';
+      return 'bg-success text-success-foreground';
     case 'running':
-      return 'bg-blue-500 text-white';
+      return 'bg-info text-info-foreground';
     default:
-      return 'bg-muted text-white';
+      return 'bg-muted text-muted-foreground';
   }
 };
 
@@ -483,7 +483,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('start')}
-              className="bg-green-500 text-white hover:bg-green-500/90 hover:text-white"
+              className="bg-success text-success-foreground hover:bg-success/90"
             >
               <Play className="h-4 w-4 mr-2" />
               Start Job
@@ -493,7 +493,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('stop')}
-              className="bg-red-500 text-white hover:bg-red-500/90 hover:text-white"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               <XCircle className="h-4 w-4 mr-2" />
               Stop Job
@@ -505,7 +505,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('pause')}
-              className="bg-yellow-500 text-foreground hover:bg-yellow-500/90 hover:text-foreground"
+              className="bg-warning text-warning-foreground hover:bg-warning/90"
             >
               <Pause className="h-4 w-4 mr-2" />
               Pause Job
@@ -515,7 +515,7 @@ export default function JobDetailsPage() {
             <Button 
               size="sm"
               onClick={() => handleJobAction('resume')}
-              className="bg-primary text-white hover:bg-slate-900 hover:text-white"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Play className="h-4 w-4 mr-2" />
               Resume Job
@@ -540,7 +540,7 @@ export default function JobDetailsPage() {
             variant="outline" 
             size="sm"
             onClick={() => handleJobAction('delete')}
-            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+            className="border-destructive text-destructive hover:bg-destructive hover:text-white"
           >
             <Archive className="h-4 w-4 mr-2" />
             Delete Job
@@ -551,7 +551,7 @@ export default function JobDetailsPage() {
       {/* Job Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Job Status */}
-        <Card className="bg-white border-border">
+        <Card className="bg-card border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
               <Calendar className="h-4 w-4" />
@@ -584,7 +584,7 @@ export default function JobDetailsPage() {
         </Card>
 
         {/* Progress */}
-        <Card className="bg-white border-border">
+        <Card className="bg-card border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
               <Clock className="h-4 w-4" />
@@ -609,11 +609,11 @@ export default function JobDetailsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4 text-center pt-2 border-t border-border">
               <div>
-                <div className="text-lg font-bold text-green-500">{job.successful_urls}</div>
+                <div className="text-lg font-bold text-success">{job.successful_urls}</div>
                 <div className="text-xs text-foreground">Successful</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-red-500">{job.failed_urls}</div>
+                <div className="text-lg font-bold text-destructive">{job.failed_urls}</div>
                 <div className="text-xs text-foreground">Failed</div>
               </div>
             </div>
@@ -621,7 +621,7 @@ export default function JobDetailsPage() {
         </Card>
 
         {/* Source */}
-        <Card className="bg-white border-border">
+        <Card className="bg-card border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
               <Globe className="h-4 w-4" />
@@ -745,7 +745,7 @@ export default function JobDetailsPage() {
                       </td>
                       <td className="p-4 w-1/3">
                         {submission.error_message ? (
-                          <div className="text-sm text-red-500 leading-tight">
+                          <div className="text-sm text-destructive leading-tight">
                             {submission.error_message.length > 100 ? 
                               `${submission.error_message.slice(0, 100)}...` : 
                               submission.error_message
@@ -808,7 +808,7 @@ export default function JobDetailsPage() {
                           onClick={() => goToPage(pageNum)}
                           className={
                             currentPage === pageNum
-                              ? "bg-primary text-white hover:bg-slate-900 hover:text-white"
+                              ? "bg-primary text-white hover:bg-primary/90 hover:text-white"
                               : "border-border text-foreground hover:bg-white hover:text-foreground"
                           }
                         >

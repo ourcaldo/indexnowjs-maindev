@@ -56,7 +56,7 @@ export default function BlogPagination({ pagination, onPageChange, className = '
   return (
     <div className={`flex flex-col items-center gap-4 ${className}`}>
       {/* Page info */}
-      <div className="text-sm text-gray-400" data-testid="pagination-info">
+      <div className="text-sm text-muted-foreground" data-testid="pagination-info">
         Showing {((current_page - 1) * pagination.per_page) + 1} to {Math.min(current_page * pagination.per_page, pagination.total_posts)} of {pagination.total_posts} posts
       </div>
       
@@ -69,8 +69,8 @@ export default function BlogPagination({ pagination, onPageChange, className = '
           className={`
             flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors
             ${has_prev_page 
-              ? 'text-gray-300 hover:text-white hover:bg-gray-800/50 border border-gray-700/50' 
-              : 'text-gray-600 cursor-not-allowed border border-gray-800/50'
+              ? 'text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-border' 
+              : 'text-muted-foreground/60 cursor-not-allowed border border-border/50'
             }
           `}
           data-testid="pagination-prev"
@@ -85,7 +85,7 @@ export default function BlogPagination({ pagination, onPageChange, className = '
             if (page === 'dots') {
               return (
                 <div key={`dots-${index}`} className="px-3 py-2" data-testid="pagination-dots">
-                  <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                  <MoreHorizontal className="w-4 h-4 text-muted-foreground/70" />
                 </div>
               )
             }
@@ -100,8 +100,8 @@ export default function BlogPagination({ pagination, onPageChange, className = '
                 className={`
                   px-3 py-2 text-sm font-medium rounded-lg border transition-colors
                   ${isActive 
-                    ? 'bg-blue-600 text-white border-blue-600' 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-800/50 border-gray-700/50'
+                    ? 'bg-info text-info-foreground border-info' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 border-border'
                   }
                 `}
                 data-testid={`pagination-page-${pageNum}`}
@@ -119,8 +119,8 @@ export default function BlogPagination({ pagination, onPageChange, className = '
           className={`
             flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors
             ${has_next_page 
-              ? 'text-gray-300 hover:text-white hover:bg-gray-800/50 border border-gray-700/50' 
-              : 'text-gray-600 cursor-not-allowed border border-gray-800/50'
+              ? 'text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-border' 
+              : 'text-muted-foreground/60 cursor-not-allowed border border-border/50'
             }
           `}
           data-testid="pagination-next"

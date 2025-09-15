@@ -427,7 +427,7 @@ export default function BillingPage() {
       case 'active':
       case 'completed':
       case 'confirmed': 
-        return { bg: 'bg-green-50 dark:bg-green-950', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-800' }
+        return { bg: 'bg-success/10', text: 'text-success', border: 'border-success/20' }
       case 'expired':
       case 'failed':
       case 'cancelled': 
@@ -435,7 +435,7 @@ export default function BillingPage() {
       case 'expiring_soon':
       case 'pending':
       case 'proof_uploaded': 
-        return { bg: 'bg-yellow-50 dark:bg-yellow-950', text: 'text-yellow-700 dark:text-yellow-300', border: 'border-yellow-200 dark:border-yellow-800' }
+        return { bg: 'bg-warning/10', text: 'text-warning', border: 'border-warning/20' }
       default: 
         return { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-border' }
     }

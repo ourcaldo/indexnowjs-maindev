@@ -76,7 +76,7 @@ export default function PostHeader({
       <div className="mb-8">
         <Link
           href="/blog"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           data-testid="back-to-blog"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -90,7 +90,7 @@ export default function PostHeader({
           {tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-600/20 border border-blue-500/30 text-blue-300"
+              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-info/20 border border-info/30 text-info"
               data-testid={`post-tag-${tag.replace(/\s+/g, '-').toLowerCase()}`}
             >
               <Tag className="w-3 h-3 mr-1" />
@@ -101,19 +101,19 @@ export default function PostHeader({
       )}
 
       {/* Title */}
-      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight" data-testid="post-title">
+      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight" data-testid="post-title">
         {title}
       </h1>
 
       {/* Excerpt */}
       {excerpt && (
-        <p className="text-xl text-gray-300 mb-8 leading-relaxed max-w-4xl" data-testid="post-excerpt">
+        <p className="text-xl text-muted-foreground mb-8 leading-relaxed max-w-4xl" data-testid="post-excerpt">
           {excerpt}
         </p>
       )}
 
       {/* Meta Information */}
-      <div className="flex flex-wrap items-center gap-6 mb-8 text-gray-400" data-testid="post-meta">
+      <div className="flex flex-wrap items-center gap-6 mb-8 text-muted-foreground" data-testid="post-meta">
         <div className="flex items-center gap-2">
           <User className="w-5 h-5" />
           <span data-testid="post-author">{author.name}</span>
@@ -135,7 +135,7 @@ export default function PostHeader({
         <div className="relative ml-auto">
           <button
             onClick={handleShare}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-accent/50 hover:bg-accent/70 border border-border rounded-lg transition-colors"
             data-testid="post-share-button"
           >
             <Share2 className="w-4 h-4" />
@@ -144,11 +144,11 @@ export default function PostHeader({
 
           {/* Share Menu */}
           {showShareMenu && (
-            <div className="absolute top-full mt-2 right-0 bg-gray-900 border border-gray-700/50 rounded-xl shadow-xl z-50 min-w-48">
+            <div className="absolute top-full mt-2 right-0 bg-card border border-border rounded-xl shadow-xl z-50 min-w-48">
               <div className="p-2">
                 <button
                   onClick={copyToClipboard}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-800/50 rounded-lg text-sm transition-colors"
+                  className="w-full text-left px-3 py-2 hover:bg-accent/50 rounded-lg text-sm transition-colors"
                   data-testid="copy-link-button"
                 >
                   Copy Link
@@ -157,7 +157,7 @@ export default function PostHeader({
                   href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-left px-3 py-2 hover:bg-gray-800/50 rounded-lg text-sm transition-colors"
+                  className="block w-full text-left px-3 py-2 hover:bg-accent/50 rounded-lg text-sm transition-colors"
                   data-testid="share-twitter"
                 >
                   Share on Twitter
@@ -166,7 +166,7 @@ export default function PostHeader({
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-left px-3 py-2 hover:bg-gray-800/50 rounded-lg text-sm transition-colors"
+                  className="block w-full text-left px-3 py-2 hover:bg-accent/50 rounded-lg text-sm transition-colors"
                   data-testid="share-linkedin"
                 >
                   Share on LinkedIn
@@ -180,7 +180,7 @@ export default function PostHeader({
       {/* Featured Image */}
       {featured_image_url && !imageError && (
         <div className="mb-12">
-          <div className="aspect-[16/9] relative overflow-hidden rounded-2xl bg-gray-800/50">
+          <div className="aspect-[16/9] relative overflow-hidden rounded-2xl bg-muted/50">
             <img
               src={featured_image_url}
               alt={title}

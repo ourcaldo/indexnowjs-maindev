@@ -41,7 +41,7 @@ export default function EnhancedFAQSection() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
             Frequently asked questions
           </h2>
-          <p className="text-xl text-gray-300">
+          <p className="text-xl text-muted-foreground">
             Everything you need to know about IndexNow rank tracking.
           </p>
         </div>
@@ -59,16 +59,16 @@ export default function EnhancedFAQSection() {
                       {faq.question}
                     </h3>
                     {expandedFAQ === index ? (
-                      <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     )}
                   </div>
                 </button>
                 
                 {expandedFAQ === index && (
                   <div className="px-6 pb-6">
-                    <div className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{
+                    <div className="text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{
                       __html: faq.answer.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
                     }} />
                   </div>

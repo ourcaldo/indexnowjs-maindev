@@ -11,14 +11,14 @@ export const PositionChange = ({ change, className = '' }: PositionChangeProps) 
   
   if (change > 0) {
     return (
-      <span className={`inline-flex items-center text-emerald-600 ${className}`}>
+      <span className={`inline-flex items-center text-success ${className}`}>
         <TrendingUp className="w-4 h-4 mr-1" />
         +{change}
       </span>
     )
   } else if (change < 0) {
     return (
-      <span className={`inline-flex items-center text-red-600 ${className}`}>
+      <span className={`inline-flex items-center text-destructive ${className}`}>
         <TrendingDown className="w-4 h-4 mr-1" />
         {change}
       </span>

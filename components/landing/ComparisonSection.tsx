@@ -47,7 +47,7 @@ export default function ComparisonSection({ onGetStarted }: ComparisonSectionPro
           <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
             Why choose IndexNow over all-in-one suites?
           </h2>
-          <p className="text-xl text-gray-300">
+          <p className="text-xl text-muted-foreground">
             Sometimes less is more. Focus on what actually moves the needle.
           </p>
         </div>
@@ -56,33 +56,33 @@ export default function ComparisonSection({ onGetStarted }: ComparisonSectionPro
           <div className="grid grid-cols-3 gap-0">
             {/* Headers */}
             <div className="p-6 border-r border-white/10">
-              <h3 className="text-lg font-semibold text-gray-300">Features</h3>
+              <h3 className="text-lg font-semibold text-muted-foreground">Features</h3>
             </div>
             <div className="p-6 border-r border-white/10 text-center">
               <h3 className="text-lg font-semibold text-white">IndexNow</h3>
             </div>
             <div className="p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-400">All-in-One Tools</h3>
+              <h3 className="text-lg font-semibold text-muted-foreground">All-in-One Tools</h3>
             </div>
 
             {/* Comparison rows */}
             {comparisons.map((item, index) => (
               <div key={index} className="contents">
                 <div className={`p-6 border-r border-white/10 ${index < comparisons.length - 1 ? 'border-b border-white/5' : ''}`}>
-                  <span className="text-gray-300">{item.feature}</span>
+                  <span className="text-muted-foreground">{item.feature}</span>
                 </div>
                 <div className={`p-6 border-r border-white/10 text-center ${index < comparisons.length - 1 ? 'border-b border-white/5' : ''}`}>
                   {item.indexnow ? (
-                    <CheckCircle className="w-6 h-6 text-green-400 mx-auto" />
+                    <CheckCircle className="w-6 h-6 text-success mx-auto" />
                   ) : (
-                    <X className="w-6 h-6 text-red-400 mx-auto" />
+                    <X className="w-6 h-6 text-destructive mx-auto" />
                   )}
                 </div>
                 <div className={`p-6 text-center ${index < comparisons.length - 1 ? 'border-b border-white/5' : ''}`}>
                   {item.competitors ? (
-                    <X className="w-6 h-6 text-red-400 mx-auto" />
+                    <X className="w-6 h-6 text-destructive mx-auto" />
                   ) : (
-                    <CheckCircle className="w-6 h-6 text-green-400 mx-auto" />
+                    <CheckCircle className="w-6 h-6 text-success mx-auto" />
                   )}
                 </div>
               </div>
@@ -94,7 +94,7 @@ export default function ComparisonSection({ onGetStarted }: ComparisonSectionPro
         <div className="text-center mt-12">
           <button
             onClick={onGetStarted}
-            className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
+            className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
           >
             <span>Keep it simple, start free</span>
             <ArrowRight className="w-5 h-5" />

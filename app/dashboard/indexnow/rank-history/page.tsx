@@ -630,19 +630,19 @@ export default function RankHistoryPage() {
                                       {position ? (
                                         <div className="flex items-center justify-center gap-0.5">
                                           <span className={`font-semibold text-xs inline-flex items-center justify-center w-6 h-5 rounded ${
-                                            position <= 3 ? 'text-white bg-green-500' :
-                                            position <= 10 ? 'text-white bg-blue-500' :
-                                            position <= 50 ? 'text-white bg-orange-500' :
-                                            'text-white bg-red-500'
+                                            position <= 3 ? 'text-success-foreground bg-success' :
+                                            position <= 10 ? 'text-info-foreground bg-info' :
+                                            position <= 50 ? 'text-warning-foreground bg-warning' :
+                                            'text-destructive-foreground bg-destructive'
                                           }`}>
                                             {position}
                                           </span>
                                           {trend !== null && trend !== 0 && (
                                             <div className="ml-0.5">
                                               {trend > 0 ? (
-                                                <TrendingUp className="w-2.5 h-2.5 text-green-600 dark:text-green-400" data-testid="trend-up" />
+                                                <TrendingUp className="w-2.5 h-2.5 text-success" data-testid="trend-up" />
                                               ) : (
-                                                <TrendingDown className="w-2.5 h-2.5 text-red-600 dark:text-red-400" data-testid="trend-down" />
+                                                <TrendingDown className="w-2.5 h-2.5 text-destructive" data-testid="trend-down" />
                                               )}
                                             </div>
                                           )}

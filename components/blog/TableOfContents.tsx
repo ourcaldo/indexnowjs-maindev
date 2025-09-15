@@ -111,15 +111,15 @@ export default function TableOfContents({ content, className = '' }: TableOfCont
   if (tocItems.length === 0) return null
 
   return (
-    <div className={`bg-gray-900/50 border border-gray-700/50 rounded-xl p-4 ${className}`}>
+    <div className={`bg-card/50 border border-border rounded-xl p-4 ${className}`}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <List className="w-5 h-5 text-blue-400" />
+          <List className="w-5 h-5 text-accent" />
           <h3 className="font-semibold text-white">Table of Contents</h3>
         </div>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-muted-foreground hover:text-white transition-colors"
           data-testid="toc-toggle"
         >
           {isCollapsed ? (
@@ -145,8 +145,8 @@ export default function TableOfContents({ content, className = '' }: TableOfCont
                 ${item.level === 5 ? 'ml-12' : ''}
                 ${item.level === 6 ? 'ml-16' : ''}
                 ${activeId === item.id
-                  ? 'bg-blue-600/20 border-l-2 border-blue-500 text-blue-300'
-                  : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                  ? 'bg-accent/20 border-l-2 border-accent text-accent'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-white'
                 }
               `}
               data-testid={`toc-item-${item.id}`}

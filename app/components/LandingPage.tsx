@@ -121,7 +121,7 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden bg-gray-900">
+    <div className="min-h-screen text-white relative overflow-hidden bg-background">
       <Background />
       <Header 
         user={user}

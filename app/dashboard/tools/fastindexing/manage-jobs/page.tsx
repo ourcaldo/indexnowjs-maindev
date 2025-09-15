@@ -53,15 +53,15 @@ interface Job {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'completed':
-      return 'bg-green-500 text-white';
+      return 'bg-success text-success-foreground';
     case 'failed':
-      return 'bg-red-500 text-white';
+      return 'bg-destructive text-destructive-foreground';
     case 'running':
-      return 'bg-primary text-white';
+      return 'bg-primary text-primary-foreground';
     case 'paused':
-      return 'bg-yellow-500 text-foreground';
+      return 'bg-warning text-warning-foreground';
     default:
-      return 'bg-muted text-white';
+      return 'bg-muted text-muted-foreground';
   }
 };
 
@@ -328,7 +328,7 @@ export default function ManageJobsPage() {
         {selectedJobs.length > 0 && (
           <Button 
             variant="destructive"
-            className="bg-red-500 hover:bg-red-600 text-white"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
             <Archive className="h-4 w-4 mr-2" />
             Delete Selected ({selectedJobs.length})
@@ -337,7 +337,7 @@ export default function ManageJobsPage() {
       </div>
 
       {/* Filters Section */}
-      <div className="bg-white border border-border rounded-lg p-6">
+      <div className="bg-card border border-border rounded-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search Jobs */}
           <div className="space-y-2">
@@ -360,7 +360,7 @@ export default function ManageJobsPage() {
               <SelectTrigger className="border-border focus:border-muted-foreground focus:ring-muted-foreground focus-visible:ring-muted-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white border-border">
+              <SelectContent className="bg-card border-border">
                 <SelectItem value="All Status" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">All Status</SelectItem>
                 <SelectItem value="completed" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Completed</SelectItem>
                 <SelectItem value="paused" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Paused</SelectItem>
@@ -377,7 +377,7 @@ export default function ManageJobsPage() {
               <SelectTrigger className="border-border focus:border-muted-foreground focus:ring-muted-foreground focus-visible:ring-muted-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white border-border">
+              <SelectContent className="bg-card border-border">
                 <SelectItem value="All Schedules" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">All Schedules</SelectItem>
                 <SelectItem value="one-time" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">One-time</SelectItem>
                 <SelectItem value="daily" className="hover:bg-secondary focus:bg-secondary focus:text-foreground">Daily</SelectItem>
@@ -390,7 +390,7 @@ export default function ManageJobsPage() {
       </div>
 
       {/* Jobs Table */}
-      <div className="bg-white border border-border rounded-lg">
+      <div className="bg-card border border-border rounded-lg">
         {/* Table Header */}
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -453,7 +453,7 @@ export default function ManageJobsPage() {
                     </td>
                     <td className="p-4 text-foreground">{formatDate(job.created_at)}</td>
                     <td className="p-4 min-w-[100px]">
-                      <Badge className="bg-primary text-white hover:bg-slate-900 whitespace-nowrap">
+                      <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap">
                         {job.schedule_type}
                       </Badge>
                     </td>
@@ -461,7 +461,7 @@ export default function ManageJobsPage() {
                       <div className="text-sm">
                         <div className="text-foreground font-medium">{job.total_urls} total</div>
                         <div className="text-muted-foreground">
-                          <span className="text-green-500">{job.successful_urls} success</span>, <span className="text-red-500">{job.failed_urls} failed</span>
+                          <span className="text-success">{job.successful_urls} success</span>, <span className="text-destructive">{job.failed_urls} failed</span>
                         </div>
                       </div>
                     </td>
@@ -489,7 +489,7 @@ export default function ManageJobsPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white border-border">
+                        <DropdownMenuContent align="end" className="bg-card border-border">
                           <DropdownMenuItem asChild className="hover:bg-secondary focus:bg-secondary focus:text-foreground">
                             <Link 
                               href={`/dashboard/manage-jobs/${job.id}`}
@@ -508,7 +508,7 @@ export default function ManageJobsPage() {
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleDeleteJob(job.id)}
-                            className="flex items-center gap-2 cursor-pointer text-red-500 hover:bg-red-50 focus:bg-red-50 focus:text-red-500"
+                            className="flex items-center gap-2 cursor-pointer text-destructive hover:bg-destructive/10 focus:bg-destructive/10 focus:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
                             Delete
@@ -561,7 +561,7 @@ export default function ManageJobsPage() {
                     size="sm"
                     onClick={() => setCurrentPage(page)}
                     className={currentPage === page 
-                      ? "bg-primary text-white hover:bg-slate-900" 
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90" 
                       : "border-border text-foreground hover:bg-secondary"
                     }
                   >

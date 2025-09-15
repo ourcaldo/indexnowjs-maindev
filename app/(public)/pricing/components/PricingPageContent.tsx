@@ -136,7 +136,7 @@ export default function PricingPageContent() {
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
               Fair, transparent pricing built to{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-info via-cyan-300 to-info">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-info via-accent to-info">
                 grow with you
               </span>
             </h1>
@@ -145,7 +145,7 @@ export default function PricingPageContent() {
             </p>
             <button
               onClick={handleGetStarted}
-              className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center space-x-2"
+              className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center space-x-2"
             >
               <span>Start free</span>
               <ArrowRight className="w-5 h-5" />
@@ -217,7 +217,7 @@ export default function PricingPageContent() {
                         {/* Popular Badge */}
                         {isPopular && (
                           <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                            <div className="bg-gradient-to-r from-info to-cyan-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                            <div className="bg-gradient-to-r from-info to-accent text-white px-4 py-2 rounded-full text-sm font-semibold">
                               MOST POPULAR
                             </div>
                           </div>
@@ -274,7 +274,7 @@ export default function PricingPageContent() {
                         <div className="mt-auto">
                           <button
                             onClick={handleGetStarted}
-                            className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200">
+                            className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-accent/10 transition-colors duration-200">
                           >
                             Get started
                           </button>
@@ -428,7 +428,7 @@ export default function PricingPageContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleGetStarted}
-                className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center justify-center space-x-2">
+                className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center justify-center space-x-2">
               >
                 <span>Start free</span>
                 <ArrowRight className="w-5 h-5" />

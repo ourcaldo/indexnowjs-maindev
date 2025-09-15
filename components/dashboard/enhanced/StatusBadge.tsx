@@ -28,10 +28,10 @@ export const StatusBadge = ({ status, variant, icon }: StatusBadgeProps) => {
   const getBadgeClassName = (determinedVariant: string) => {
     const lowerStatus = status.toLowerCase()
     if (lowerStatus.includes('completed') || lowerStatus.includes('success') || lowerStatus.includes('active')) {
-      return 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+      return 'bg-success/10 text-success hover:bg-success/20'
     }
     if (lowerStatus.includes('pending') || lowerStatus.includes('processing') || lowerStatus.includes('warning')) {
-      return 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+      return 'bg-warning/10 text-warning hover:bg-warning/20'
     }
     return ''
   }

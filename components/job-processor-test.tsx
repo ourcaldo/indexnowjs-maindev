@@ -110,8 +110,8 @@ export function JobProcessorTest() {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-red-600">🔧 Rank Tracker Test Panel</CardTitle>
-        <CardDescription className="text-red-500">
+        <CardTitle className="text-destructive">🔧 Rank Tracker Test Panel</CardTitle>
+        <CardDescription className="text-destructive">
           Development/Testing Component - DELETE AFTER TESTING
         </CardDescription>
       </CardHeader>
@@ -197,7 +197,7 @@ export function JobProcessorTest() {
             <Separator />
             <div>
               <h3 className="text-lg font-semibold mb-3">Last Result</h3>
-              <div className="bg-gray-50 p-3 rounded text-sm font-mono">
+              <div className="bg-muted/50 p-3 rounded text-sm font-mono">
                 {lastResult}
               </div>
             </div>
