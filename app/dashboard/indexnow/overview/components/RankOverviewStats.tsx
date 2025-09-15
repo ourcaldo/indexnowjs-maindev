@@ -44,7 +44,7 @@ export const RankOverviewStats = ({
       <StatCard
         title="Improving (1D)"
         value={improvingCount}
-        variant="info"
+        variant="error"
         icon={<TrendingUp className="w-6 h-6" />}
         description="Keywords moving up"
       />
