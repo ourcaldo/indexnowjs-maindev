@@ -17,6 +17,7 @@ import {
 } from './components'
 import { SharedDomainSelector } from '@/components/shared/DomainSelector'
 import { NoDomainState } from '@/components/shared/NoDomainState'
+import { DeviceCountryFilter } from '@/components/shared/DeviceCountryFilter'
 import { UsageChart, RankingDistribution } from '@/components/dashboard/enhanced'
 
 export default function IndexNowOverview() {
@@ -335,28 +336,14 @@ export default function IndexNowOverview() {
 
             {/* Device and Country Filters + Add Keyword Button */}
             <div className="flex items-center gap-3">
-              <select
-                value={selectedDevice}
-                onChange={(e) => setSelectedDevice(e.target.value)}
-                className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="">All Devices</option>
-                <option value="desktop">Desktop</option>
-                <option value="mobile">Mobile</option>
-              </select>
-              
-              <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="">All Countries</option>
-                {countries.map((country: any) => (
-                  <option key={country.id} value={country.id}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
+              <DeviceCountryFilter
+                selectedDevice={selectedDevice}
+                selectedCountry={selectedCountry}
+                countries={countries}
+                onDeviceChange={setSelectedDevice}
+                onCountryChange={setSelectedCountry}
+                compact={false}
+              />
 
               <Button 
                 onClick={() => router.push('/dashboard/indexnow/add')}

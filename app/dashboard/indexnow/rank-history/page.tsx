@@ -8,6 +8,7 @@ import { usePageViewLogger } from '@/hooks/useActivityLogger'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { NoDomainState } from '@/components/shared/NoDomainState'
 import { SharedDomainSelector } from '@/components/shared/DomainSelector'
+import { DeviceCountryFilter } from '@/components/shared/DeviceCountryFilter'
 import { RankOverviewStats } from '@/app/dashboard/indexnow/overview/components/RankOverviewStats'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,6 +29,7 @@ import {
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DateRangeCalendar } from './components/DateRangeCalendar'
+import { BulkActionsBar } from './components/BulkActionsBar'
 
 
 interface Domain {
@@ -120,6 +122,14 @@ export default function RankHistoryPage() {
   // State for keyword selection (checkboxes)
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
 
+  // State for bulk actions
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showTagModal, setShowTagModal] = useState(false)
+  const [newTag, setNewTag] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isAddingTag, setIsAddingTag] = useState(false)
+  const [activeFilter, setActiveFilter] = useState<'all' | 'positions' | 'traffic'>('all')
+
   // State for date range and pagination
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '60d' | 'custom'>('7d')
   const [customStartDate, setCustomStartDate] = useState<string>('')
@@ -163,15 +173,6 @@ export default function RankHistoryPage() {
 
   const { startDate, endDate } = getDateRange()
 
-  // Checkbox selection handlers
-  const handleSelectAll = () => {
-    if (selectedKeywords.length === filteredData.length) {
-      setSelectedKeywords([])
-    } else {
-      setSelectedKeywords(filteredData.map((item: RankHistoryData) => item.keyword_id))
-    }
-  }
-
   const handleKeywordSelect = (keywordId: string) => {
     setSelectedKeywords(prev => 
       prev.includes(keywordId) 
@@ -184,6 +185,69 @@ export default function RankHistoryPage() {
   useEffect(() => {
     setSelectedKeywords([])
   }, [selectedDomainId, selectedDevice, selectedCountry, selectedTags, searchQuery, dateRange])
+
+  // Bulk action handlers
+  const handleBulkDelete = async () => {
+    if (selectedKeywords.length === 0) return
+    
+    setIsDeleting(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/v1/rank-tracking/keywords/bulk-delete', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ keywordIds: selectedKeywords })
+      })
+
+      if (response.ok) {
+        setSelectedKeywords([])
+        // Refresh data by re-fetching
+        refetchKeywords()
+        refetchRankHistory()
+        setShowDeleteConfirm(false)
+      }
+    } catch (error) {
+      console.error('Failed to delete keywords:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleAddTag = async () => {
+    if (selectedKeywords.length === 0 || !newTag.trim()) return
+    
+    setIsAddingTag(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/v1/rank-tracking/keywords/add-tag', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          keywordIds: selectedKeywords,
+          tag: newTag.trim()
+        })
+      })
+
+      if (response.ok) {
+        setSelectedKeywords([])
+        setNewTag('')
+        // Refresh data by re-fetching
+        refetchKeywords()
+        refetchRankHistory()
+        setShowTagModal(false)
+      }
+    } catch (error) {
+      console.error('Failed to add tag:', error)
+    } finally {
+      setIsAddingTag(false)
+    }
+  }
 
   // Use merged dashboard API for better performance and to prevent loading glitches
   const { data: dashboardData, isLoading: dashboardLoading } = useDashboardData()
@@ -222,7 +286,7 @@ export default function RankHistoryPage() {
   })
 
   // Fetch all keywords for domain (regardless of ranking data)
-  const { data: keywordsData = [], isLoading: keywordsLoading } = useQuery({
+  const { data: keywordsData = [], isLoading: keywordsLoading, refetch: refetchKeywords } = useQuery({
     queryKey: ['/api/v1/rank-tracking/keywords', selectedDomainId, selectedDevice, selectedCountry],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -245,7 +309,7 @@ export default function RankHistoryPage() {
   })
 
   // Fetch rank history data to merge with keywords
-  const { data: rankHistoryData = [], isLoading: rankHistoryLoading } = useQuery({
+  const { data: rankHistoryData = [], isLoading: rankHistoryLoading, refetch: refetchRankHistory } = useQuery({
     queryKey: ['/api/v1/rank-tracking/rank-history', selectedDomainId, selectedDevice, selectedCountry, startDate, endDate],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -334,19 +398,55 @@ export default function RankHistoryPage() {
     return true
   })
 
+  const { todayStr, comparisonDate, periodLabel } = getComparisonPeriods(dateRange)
+
+  // Apply active filter sorting/filtering
+  const sortedAndFilteredData = (() => {
+    let data = [...filteredData]
+    
+    switch (activeFilter) {
+      case 'positions':
+        // Sort by current position (ascending - best positions first)
+        return data.sort((a, b) => {
+          const posA = a.history[todayStr]?.position || 999
+          const posB = b.history[todayStr]?.position || 999
+          return posA - posB
+        })
+      case 'traffic':
+        // Sort by estimated traffic (for now, sort by position as a proxy)
+        return data.sort((a, b) => {
+          const posA = a.history[todayStr]?.position || 999
+          const posB = b.history[todayStr]?.position || 999
+          // Better positions typically get more traffic
+          return posA - posB
+        })
+      case 'all':
+      default:
+        // Default sorting (by keyword name)
+        return data.sort((a, b) => a.keyword.localeCompare(b.keyword))
+    }
+  })()
+
+  // Checkbox selection handlers
+  const handleSelectAll = () => {
+    if (selectedKeywords.length === sortedAndFilteredData.length) {
+      setSelectedKeywords([])
+    } else {
+      setSelectedKeywords(sortedAndFilteredData.map((item: RankHistoryData) => item.keyword_id))
+    }
+  }
+
   // Pagination logic
-  const totalItems = filteredData.length
+  const totalItems = sortedAndFilteredData.length
   const totalPages = Math.ceil(totalItems / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedData = filteredData.slice(startIndex, endIndex)
+  const paginatedData = sortedAndFilteredData.slice(startIndex, endIndex)
 
   // Get unique tags for filter
   const availableTags = Array.from(new Set(
     rankHistory.flatMap((item: RankHistoryData) => item.tags || [])
   )).filter(Boolean) as string[]
-
-  const { todayStr, comparisonDate, periodLabel } = getComparisonPeriods(dateRange)
 
   // Calculate stats for RankOverviewStats
   const statsData = {
@@ -409,30 +509,14 @@ export default function RankHistoryPage() {
 
                 {/* Device and Country Filters + Add Keyword Button */}
                 <div className="flex items-center gap-3">
-                  <select
-                    value={selectedDevice}
-                    onChange={(e) => setSelectedDevice(e.target.value)}
-                    className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    data-testid="select-device"
-                  >
-                    <option value="">All Devices</option>
-                    <option value="desktop">Desktop</option>
-                    <option value="mobile">Mobile</option>
-                  </select>
-
-                  <select
-                    value={selectedCountry}
-                    onChange={(e) => setSelectedCountry(e.target.value)}
-                    className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    data-testid="select-country"
-                  >
-                    <option value="">All Countries</option>
-                    {countries.map((country: any) => (
-                      <option key={country.id} value={country.id}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
+                  <DeviceCountryFilter
+                    selectedDevice={selectedDevice}
+                    selectedCountry={selectedCountry}
+                    countries={countries}
+                    onDeviceChange={setSelectedDevice}
+                    onCountryChange={setSelectedCountry}
+                    compact={true}
+                  />
 
                   <Button 
                     onClick={() => router.push('/dashboard/indexnow/add')}
@@ -690,6 +774,15 @@ export default function RankHistoryPage() {
                 )}
               </div>
 
+              {/* Bulk Actions Bar */}
+              <BulkActionsBar
+                selectedCount={selectedKeywords.length}
+                onDeleteKeywords={() => setShowDeleteConfirm(true)}
+                onAddTag={() => setShowTagModal(true)}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+              />
+
               {/* Rank History Table - Semrush Style Comparison */}
               <Card>
                 <CardHeader className="py-3">
@@ -901,6 +994,75 @@ export default function RankHistoryPage() {
                 </div>
               )}
             </>
+          )}
+
+          {/* Bulk Actions Modals */}
+          {/* Delete Confirmation Modal */}
+          {showDeleteConfirm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-background border border-border rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 className="text-lg font-semibold text-foreground mb-4">
+                  Delete Keywords
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Are you sure you want to delete {selectedKeywords.length} keyword{selectedKeywords.length > 1 ? 's' : ''}? This action cannot be undone.
+                </p>
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={isDeleting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleBulkDelete}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Add Tag Modal */}
+          {showTagModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-background border border-border rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 className="text-lg font-semibold text-foreground mb-4">
+                  Add Tag
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Add a tag to {selectedKeywords.length} keyword{selectedKeywords.length > 1 ? 's' : ''}:
+                </p>
+                <Input
+                  placeholder="Enter tag name..."
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  className="mb-6"
+                />
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowTagModal(false)
+                      setNewTag('')
+                    }}
+                    disabled={isAddingTag}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAddTag}
+                    disabled={isAddingTag || !newTag.trim()}
+                  >
+                    {isAddingTag ? 'Adding...' : 'Add Tag'}
+                  </Button>
+                </div>
+              </div>
+            </div>
           )}
     </div>
   )
