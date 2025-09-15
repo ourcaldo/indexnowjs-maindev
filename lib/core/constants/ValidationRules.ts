@@ -39,7 +39,7 @@ export const FIELD_LIMITS = {
 
 // Numerical limits
 export const NUMERIC_LIMITS = {
-  PAGINATION: { min: 1, max: 100 },
+  PAGINATION: { min: 1, max: 1000 }, // Increased for bulk data fetching
   QUOTA: { min: 0, max: 999999999 },
   PRICE: { min: 0, max: 999999999 },
   PERCENTAGE: { min: 0, max: 100 },

@@ -165,7 +165,7 @@ export const apiRequestSchemas = {
   // Query parameter schemas
   paginationQuery: z.object({
     page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
-    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default('10'),
+    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('10'),
   }),
 
   ordersQuery: z.object({
@@ -206,7 +206,7 @@ export const apiRequestSchemas = {
     sort: z.enum(['keyword', 'position', 'created_at', 'updated_at']).optional(),
     order: z.enum(['asc', 'desc']).optional(),
     page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
-    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default('20'),
+    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('20'),
   }),
 
   // URL parameter schemas

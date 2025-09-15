@@ -541,7 +541,7 @@ export const validationMiddleware = ValidationMiddleware.getInstance();
 export const CommonValidationSchemas = {
   pagination: z.object({
     page: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('1'),
-    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(100)).optional().default('10'),
+    limit: z.string().transform(val => parseInt(val, 10)).pipe(z.number().min(1).max(1000)).optional().default('10'),
   }),
 
   idParam: z.object({
