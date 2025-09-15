@@ -55,7 +55,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
         {/* Period Toggle */}
         <div className="flex justify-center mb-12">
           <div className="flex items-center space-x-6 rounded-2xl p-4">
-            <span className={`text-base font-medium ${selectedPeriod === 'monthly' ? 'text-white' : 'text-gray-300'}`}>
+            <span className={`text-base font-medium ${selectedPeriod === 'monthly' ? 'text-white' : 'text-muted-foreground'}`}>
               Monthly
             </span>
             <button
@@ -73,11 +73,11 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
               />
             </button>
             <div className="flex items-center space-x-2">
-              <span className={`text-base font-medium ${selectedPeriod === 'annual' ? 'text-white' : 'text-gray-300'}`}>
+              <span className={`text-base font-medium ${selectedPeriod === 'annual' ? 'text-white' : 'text-muted-foreground'}`}>
                 Annual
               </span>
               {getSavingsPercentage('annual') && (
-                <span className="text-xs text-green-400 font-semibold bg-green-400/10 px-2 py-1 rounded-full">
+                <span className="text-xs text-success font-semibold bg-success/10 px-2 py-1 rounded-full">
                   Save {getSavingsPercentage('annual')}%
                 </span>
               )}
@@ -105,7 +105,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 {/* Popular Badge */}
                 {isPopular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                    <div className="bg-gradient-to-r from-accent to-accent text-white px-4 py-2 rounded-full text-sm font-semibold">
                       MOST POPULAR
                     </div>
                   </div>
@@ -116,7 +116,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                   <h3 className="text-2xl font-bold text-white mb-2">
                     {pkg.name} plan
                   </h3>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {pkg.description}
                   </p>
                 </div>
@@ -126,7 +126,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                   {/* Original Price - Above */}
                   {pricing.originalPrice && (
                     <div className="mb-2">
-                      <span className="text-lg text-gray-500 line-through">
+                      <span className="text-lg text-muted-foreground line-through">
                         {formatPrice(pricing.originalPrice)}
                       </span>
                     </div>
@@ -139,7 +139,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                   </div>
                   {/* Period Label */}
                   <div>
-                    <span className="text-gray-400 text-sm">
+                    <span className="text-muted-foreground text-sm">
                       per {selectedPeriod === 'monthly' ? 'month' : 'year'}
                     </span>
                   </div>
@@ -147,7 +147,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 
                 {/* Description */}
                 <div className="mb-8">
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {pkg.name === 'Free' ? 'Basic indexing features for personal use' : 
                      pkg.name === 'Premium' ? 'Enhanced features for professionals' :
                      'Full features for agencies and enterprises'}
@@ -160,7 +160,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                     <h4 className="text-sm font-semibold text-white uppercase tracking-wide">
                       FEATURES
                     </h4>
-                    <p className="text-gray-400 text-sm mt-1">
+                    <p className="text-muted-foreground text-sm mt-1">
                       Everything in {pkg.name} plan plus...
                     </p>
                   </div>
@@ -168,11 +168,11 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                     {features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
                         <div className="flex-shrink-0 w-5 h-5 mt-0.5">
-                          <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <span className="ml-3 text-gray-300 text-sm">
+                        <span className="ml-3 text-muted-foreground text-sm">
                           {feature}
                         </span>
                       </li>
@@ -184,7 +184,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
                 <div className="mt-auto">
                   <button
                     onClick={onGetStarted}
-                    className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+                    className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-muted transition-colors duration-200"
                   >
                     Get started
                   </button>
@@ -200,7 +200,7 @@ export default function PricingTeaserSection({ onGetStarted, onScrollToPricing }
         <div className="text-center mt-12">
           <button
             onClick={onScrollToPricing}
-            className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
+            className="text-accent hover:text-accent/80 transition-colors font-medium"
           >
             See detailed comparison →
           </button>
