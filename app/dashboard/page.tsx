@@ -455,9 +455,9 @@ export default function Dashboard() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Total Keywords */}
-                <div className="text-center p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-lg mx-auto mb-2">
-                    <Search className="w-5 h-5 text-primary" />
+                <div className="text-center p-4 bg-info/10 rounded-lg border border-info/20">
+                  <div className="flex items-center justify-center w-10 h-10 bg-info/20 rounded-lg mx-auto mb-2">
+                    <Search className="w-5 h-5 text-info" />
                   </div>
                   <div className="text-2xl font-bold text-foreground" data-testid="stat-total-keywords">
                     {domainKeywords.length.toLocaleString()}

@@ -10,9 +10,9 @@ const dashboardData = {
   title: "IndexNow Rank Tracker",
   description: "Professional keyword ranking monitoring with real-time SEO insights",
   stats: [
-    { value: "1,247", label: "Keywords Tracked", color: "hsl(var(--foreground))", bg: "hsl(var(--secondary))" },
+    { value: "1,247", label: "Keywords Tracked", color: "hsl(var(--info))", bg: "hsl(var(--info) / 0.1)", border: "hsl(var(--info) / 0.3)" },
     { value: "89", label: "Top 10 Positions", color: "hsl(var(--success))", bg: "hsl(var(--success) / 0.1)", border: "hsl(var(--success) / 0.3)" },
-    { value: "12.4", label: "Average Position", color: "hsl(var(--info))", bg: "hsl(var(--info) / 0.1)", border: "hsl(var(--info) / 0.3)" }
+    { value: "12.4", label: "Average Position", color: "hsl(var(--warning))", bg: "hsl(var(--warning) / 0.1)", border: "hsl(var(--warning) / 0.3)" }
   ],
   rankingChart: [
     { height: '45%', value: '156', change: '+12' },
