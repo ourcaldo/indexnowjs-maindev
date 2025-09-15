@@ -189,7 +189,7 @@ export default function RankHistoryPage() {
   // Bulk action handlers
   const handleBulkDelete = async () => {
     if (selectedKeywords.length === 0) return
-    
+
     setIsDeleting(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -218,7 +218,7 @@ export default function RankHistoryPage() {
 
   const handleAddTag = async () => {
     if (selectedKeywords.length === 0 || !newTag.trim()) return
-    
+
     setIsAddingTag(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -398,25 +398,25 @@ export default function RankHistoryPage() {
     return true
   })
 
-  const { todayStr, comparisonDate, periodLabel } = getComparisonPeriods(dateRange)
+  const { todayStr: currentDateStr, comparisonDate: prevDateStr, periodLabel: comparisonPeriodLabel } = getComparisonPeriods(dateRange)
 
   // Apply active filter sorting/filtering
   const sortedAndFilteredData = (() => {
     let data = [...filteredData]
-    
+
     switch (activeFilter) {
       case 'positions':
         // Sort by current position (ascending - best positions first)
         return data.sort((a, b) => {
-          const posA = a.history[todayStr]?.position || 999
-          const posB = b.history[todayStr]?.position || 999
+          const posA = a.history[currentDateStr]?.position || 999
+          const posB = b.history[currentDateStr]?.position || 999
           return posA - posB
         })
       case 'traffic':
         // Sort by estimated traffic (for now, sort by position as a proxy)
         return data.sort((a, b) => {
-          const posA = a.history[todayStr]?.position || 999
-          const posB = b.history[todayStr]?.position || 999
+          const posA = a.history[currentDateStr]?.position || 999
+          const posB = b.history[currentDateStr]?.position || 999
           // Better positions typically get more traffic
           return posA - posB
         })
@@ -454,22 +454,22 @@ export default function RankHistoryPage() {
     avgPosition: (() => {
       if (filteredData.length === 0) return 0
       const itemsWithPosition = filteredData.filter((item: RankHistoryData) => {
-        return item.history[todayStr]?.position
+        return item.history[currentDateStr]?.position
       })
       if (itemsWithPosition.length === 0) return 0
       const totalPositions = filteredData.reduce((acc: number, item: RankHistoryData) => {
-        const position = item.history[todayStr]?.position
+        const position = item.history[currentDateStr]?.position
         return position ? acc + position : acc
       }, 0)
       return Math.round(totalPositions / itemsWithPosition.length)
     })(),
     topTenCount: filteredData.filter((item: RankHistoryData) => {
-      const position = item.history[todayStr]?.position
+      const position = item.history[currentDateStr]?.position
       return position && position <= 10
     }).length,
     improvingCount: filteredData.filter((item: RankHistoryData) => {
-      const currentPos = item.history[todayStr]?.position
-      const previousPos = item.history[comparisonDate]?.position
+      const currentPos = item.history[currentDateStr]?.position
+      const previousPos = item.history[prevDateStr]?.position
       return currentPos && previousPos && currentPos < previousPos
     }).length
   }
@@ -610,7 +610,7 @@ export default function RankHistoryPage() {
                                   }}
                                 />
                               </div>
-                              
+
                               {/* Quick Options Section */}
                               <div className="p-4 bg-slate-50 min-w-[160px]">
                                 <div className="space-y-1">
@@ -638,7 +638,7 @@ export default function RankHistoryPage() {
                                 </div>
                               </div>
                             </div>
-                            
+
                             {/* Action Buttons */}
                             <div className="flex justify-end gap-2 p-4 border-t border-border bg-background">
                               <Button 
@@ -805,7 +805,7 @@ export default function RankHistoryPage() {
                             align="start"
                             className="max-w-sm p-3 text-sm bg-card border border-border text-foreground shadow-lg"
                           >
-                            <p>This report shows keyword position comparison between today and {periodLabel}, including position changes and trends for better performance tracking.</p>
+                            <p>This report shows keyword position comparison between today and {comparisonPeriodLabel}, including position changes and trends for better performance tracking.</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -844,10 +844,10 @@ export default function RankHistoryPage() {
                               KEYWORD
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
-                              POS. {formatDateDisplay(todayStr)}
+                              POS. {formatDateDisplay(currentDateStr)}
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
-                              POS. {formatDateDisplay(comparisonDate)}
+                              POS. {formatDateDisplay(prevDateStr)}
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               DIFF
@@ -865,8 +865,8 @@ export default function RankHistoryPage() {
                         </thead>
                         <tbody className="bg-card">
                           {paginatedData.map((item: RankHistoryData) => {
-                            const currentPosition = item.history[todayStr]?.position
-                            const comparisonPosition = item.history[comparisonDate]?.position
+                            const currentPosition = item.history[currentDateStr]?.position
+                            const comparisonPosition = item.history[prevDateStr]?.position
                             const positionChange = calculatePositionChange(currentPosition, comparisonPosition)
                             const changeDisplay = getPositionChangeDisplay(positionChange)
 
