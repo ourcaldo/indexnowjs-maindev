@@ -753,39 +753,6 @@ export default function RankHistoryPage() {
                 onFilterChange={setActiveFilter}
               />
 
-              {/* Filter Buttons Section */}
-              <div className="flex justify-center">
-                <div className="flex items-center gap-1 bg-secondary/30 p-1 rounded-lg">
-                  <Button
-                    variant={activeFilter === 'positions' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setActiveFilter('positions')}
-                    data-testid="filter-positions"
-                    className="text-xs h-8 px-3"
-                  >
-                    Positions
-                  </Button>
-                  <Button
-                    variant={activeFilter === 'traffic' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setActiveFilter('traffic')}
-                    data-testid="filter-traffic"
-                    className="text-xs h-8 px-3"
-                  >
-                    Est. Traffic
-                  </Button>
-                  <Button
-                    variant={activeFilter === 'all' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setActiveFilter('all')}
-                    data-testid="filter-all"
-                    className="text-xs h-8 px-3"
-                  >
-                    Visibility
-                  </Button>
-                </div>
-              </div>
-
               {/* Rank History Table - Semrush Style Comparison */}
               <Card>
                 <CardHeader className="py-3">
@@ -813,6 +780,45 @@ export default function RankHistoryPage() {
                         </Tooltip>
                       </TooltipProvider>
                     </div>
+                    
+                    {/* Filter buttons inline with title */}
+                    <div className="flex items-center gap-1 bg-secondary/30 p-1 rounded-lg">
+                      <Button
+                        variant={activeFilter === 'positions' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setActiveFilter('positions')}
+                        data-testid="filter-positions"
+                        className="text-xs h-8 px-3"
+                      >
+                        Positions
+                      </Button>
+                      <Button
+                        variant={activeFilter === 'traffic' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setActiveFilter('traffic')}
+                        data-testid="filter-traffic"
+                        className="text-xs h-8 px-3"
+                      >
+                        Est. Traffic
+                      </Button>
+                      <Button
+                        variant={activeFilter === 'all' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setActiveFilter('all')}
+                        data-testid="filter-all"
+                        className="text-xs h-8 px-3"
+                      >
+                        Visibility
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-8 px-2"
+                        onClick={() => {/* Add domain filter functionality */}}
+                      >
+                        All for {selectedDomainInfo?.domain_name}
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <div className="border-t border-border"></div>
@@ -831,17 +837,7 @@ export default function RankHistoryPage() {
                       {/* Table Top Controls */}
                       <div className="flex justify-between items-center p-3 bg-slate-50 border-b">
                         <div className="text-sm text-muted-foreground">
-                          Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs h-6 px-2"
-                            onClick={() => {/* Add domain filter functionality */}}
-                          >
-                            All for {selectedDomainInfo?.domain_name}
-                          </Button>
+                          {startIndex + 1}-{Math.min(endIndex, totalItems)} ({totalItems})
                         </div>
                       </div>
                       
