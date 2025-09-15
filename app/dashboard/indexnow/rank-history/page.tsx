@@ -719,7 +719,7 @@ export default function RankHistoryPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full">
                         <thead>
-                          <tr className="bg-slate-50 border-b border-border hover:bg-slate-100 transition-colors duration-150">
+                          <tr className="bg-slate-50 border-b border-border">
                             <th className="text-center py-2 px-3 w-10 sticky left-0 bg-slate-50 hover:bg-slate-100 z-10 transition-colors duration-150">
                               <input
                                 type="checkbox"
@@ -732,22 +732,22 @@ export default function RankHistoryPage() {
                             <th className="text-left py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sticky left-10 bg-slate-50 hover:bg-slate-100 z-10 transition-colors duration-150">
                               KEYWORD
                             </th>
-                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               POS. {formatDateDisplay(todayStr)}
                             </th>
-                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               POS. {formatDateDisplay(comparisonDate)}
                             </th>
-                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               DIFF
                             </th>
-                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               DEVICE
                             </th>
-                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               TAGS
                             </th>
-                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                            <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               COUNTRY
                             </th>
                           </tr>
