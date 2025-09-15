@@ -398,8 +398,6 @@ export default function RankHistoryPage() {
     return true
   })
 
-  const { todayStr: currentDateStr, comparisonDate: prevDateStr, periodLabel: comparisonPeriodLabel } = getComparisonPeriods(dateRange)
-
   // Apply active filter sorting/filtering
   const sortedAndFilteredData = (() => {
     let data = [...filteredData]
@@ -787,7 +785,7 @@ export default function RankHistoryPage() {
               <Card>
                 <CardHeader className="py-3">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <CardTitle className="text-base font-bold text-foreground" data-testid="title-rank-history">
                         Rank History
                       </CardTitle>
@@ -805,14 +803,14 @@ export default function RankHistoryPage() {
                             align="start"
                             className="max-w-sm p-3 text-sm bg-card border border-border text-foreground shadow-lg"
                           >
-                            <p>This report shows keyword position comparison between today and {comparisonPeriodLabel}, including position changes and trends for better performance tracking.</p>
+                            <p>This report shows keyword position comparison between today and {getComparisonPeriods(dateRange).periodLabel}, including position changes and trends for better performance tracking.</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
+                      <span className="text-xs text-muted-foreground" data-testid="text-results-info">
+                        {totalItems} keywords
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground" data-testid="text-results-info">
-                      Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} keywords
-                    </span>
                   </div>
                 </CardHeader>
                 <div className="border-t border-border"></div>
@@ -844,10 +842,10 @@ export default function RankHistoryPage() {
                               KEYWORD
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
-                              POS. {formatDateDisplay(currentDateStr)}
+                              POS. {formatDateDisplay(getComparisonPeriods(dateRange).todayStr)}
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
-                              POS. {formatDateDisplay(prevDateStr)}
+                              POS. {formatDateDisplay(getComparisonPeriods(dateRange).comparisonDate)}
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px] bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               DIFF
@@ -860,6 +858,16 @@ export default function RankHistoryPage() {
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
                               COUNTRY
+                            </th>
+                            <th className="text-right py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground bg-slate-50 hover:bg-slate-100 transition-colors duration-150">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs h-6 px-2"
+                                onClick={() => {/* Add domain filter functionality */}}
+                              >
+                                All for {selectedDomainInfo?.domain_name}
+                              </Button>
                             </th>
                           </tr>
                         </thead>
@@ -938,6 +946,7 @@ export default function RankHistoryPage() {
                                     {item.country?.name || 'Global'}
                                   </span>
                                 </td>
+                                <td className="py-2 px-3"></td>
                               </tr>
                             )
                           })}

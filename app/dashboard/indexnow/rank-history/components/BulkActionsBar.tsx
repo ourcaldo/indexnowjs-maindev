@@ -47,9 +47,6 @@ export const BulkActionsBar = ({
             >
               Visibility
             </Button>
-            <Badge variant="outline" className="ml-2 text-xs">
-              All for nexjob.tech
-            </Badge>
           </div>
         </div>
       </div>
