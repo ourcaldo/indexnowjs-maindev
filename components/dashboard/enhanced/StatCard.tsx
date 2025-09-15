@@ -42,15 +42,15 @@ export const StatCard = ({
   const getVariantClasses = () => {
     switch (variant) {
       case 'success':
-        return 'bg-success/5'
+        return 'bg-success/10 border-success/20'
       case 'warning':
-        return 'bg-warning/5'
+        return 'bg-warning/10 border-warning/20'
       case 'info':
-        return 'bg-info/5'
+        return 'bg-info/10 border-info/20'
       case 'error':
-        return 'bg-destructive/5'
+        return 'bg-destructive/10 border-destructive/20'
       default:
-        return 'bg-primary/5'
+        return 'bg-primary/10 border-primary/20'
     }
   }
 
@@ -70,7 +70,7 @@ export const StatCard = ({
   }
 
   return (
-    <Card className={`${getVariantClasses()} border border-border ${className}`}>
+    <Card className={`${getVariantClasses()} ${className}`}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
