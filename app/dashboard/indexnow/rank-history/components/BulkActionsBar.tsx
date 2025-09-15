@@ -21,18 +21,7 @@ export const BulkActionsBar = ({
   if (selectedCount === 0) {
     return (
       <div className="bg-background border-b border-border p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="bg-success text-success-foreground hover:bg-success/90">
-              <Plus className="w-4 h-4 mr-2" />
-              Buy more keywords
-            </Button>
-            <Button variant="outline" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add keywords
-            </Button>
-          </div>
-          
+        <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
             <Button
               variant={activeFilter === 'positions' ? 'default' : 'outline'}
