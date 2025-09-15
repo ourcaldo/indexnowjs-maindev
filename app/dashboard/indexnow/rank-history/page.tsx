@@ -779,6 +779,11 @@ export default function RankHistoryPage() {
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
+                      
+                      {/* Count text inline with title */}
+                      <div className="text-sm text-muted-foreground">
+                        {startIndex + 1}-{Math.min(endIndex, totalItems)} ({totalItems})
+                      </div>
                     </div>
                     
                     {/* Filter buttons inline with title */}
@@ -834,12 +839,7 @@ export default function RankHistoryPage() {
                     </div>
                   ) : (
                     <>
-                      {/* Table Top Controls */}
-                      <div className="flex justify-between items-center p-3 bg-slate-50 border-b">
-                        <div className="text-sm text-muted-foreground">
-                          {startIndex + 1}-{Math.min(endIndex, totalItems)} ({totalItems})
-                        </div>
-                      </div>
+                      
                       
                       <div className="overflow-x-auto">
                         <table className="w-full">
