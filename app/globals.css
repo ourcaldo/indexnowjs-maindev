@@ -101,6 +101,7 @@
   
   /* Table header colors - Semrush style */
   --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
 }
 
 .dark {
@@ -130,6 +131,7 @@
   
   /* Table header colors - dark mode */
   --slate-50: hsl(215, 25%, 12%);
+  --slate-100: hsl(215, 25%, 15%);
 }
 
 @layer base {

@@ -719,8 +719,8 @@ export default function RankHistoryPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full">
                         <thead>
-                          <tr className="bg-slate-50 border-b border-border">
-                            <th className="text-center py-2 px-3 w-10 sticky left-0 bg-slate-50 z-10">
+                          <tr className="bg-slate-50 border-b border-border hover:bg-slate-100 transition-colors duration-150">
+                            <th className="text-center py-2 px-3 w-10 sticky left-0 bg-slate-50 hover:bg-slate-100 z-10 transition-colors duration-150">
                               <input
                                 type="checkbox"
                                 checked={selectedKeywords.length === filteredData.length && filteredData.length > 0}
@@ -729,7 +729,7 @@ export default function RankHistoryPage() {
                                 data-testid="checkbox-select-all"
                               />
                             </th>
-                            <th className="text-left py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sticky left-10 bg-slate-50 z-10">
+                            <th className="text-left py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sticky left-10 bg-slate-50 hover:bg-slate-100 z-10 transition-colors duration-150">
                               KEYWORD
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
@@ -760,8 +760,8 @@ export default function RankHistoryPage() {
                             const changeDisplay = getPositionChangeDisplay(positionChange)
 
                             return (
-                              <tr key={item.keyword_id} className="border-b border-border hover:bg-muted/30" data-testid={`row-keyword-${item.keyword_id}`}>
-                                <td className="text-center py-2 px-3 w-10 sticky left-0 bg-card z-10">
+                              <tr key={item.keyword_id} className="border-b border-border hover:bg-slate-50 transition-colors duration-150 group" data-testid={`row-keyword-${item.keyword_id}`}>
+                                <td className="text-center py-2 px-3 w-10 sticky left-0 bg-card group-hover:bg-slate-50 z-10 transition-colors duration-150">
                                   <input
                                     type="checkbox"
                                     checked={selectedKeywords.includes(item.keyword_id)}
@@ -770,7 +770,7 @@ export default function RankHistoryPage() {
                                     data-testid={`checkbox-keyword-${item.keyword_id}`}
                                   />
                                 </td>
-                                <td className="py-2 px-3 sticky left-10 bg-card z-10">
+                                <td className="py-2 px-3 sticky left-10 bg-card group-hover:bg-slate-50 z-10 transition-colors duration-150">
                                   <div className="font-medium text-sm text-foreground max-w-[200px] truncate">
                                     {item.keyword}
                                   </div>

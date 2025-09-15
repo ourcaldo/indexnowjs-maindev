@@ -103,6 +103,7 @@ export default {
         },
         slate: {
           50: "var(--slate-50)",
+          100: "var(--slate-100)",
         },
       },
       keyframes: {
