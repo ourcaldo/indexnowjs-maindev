@@ -113,6 +113,9 @@ export default function RankHistoryPage() {
   const [showTagsDropdown, setShowTagsDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState<string>('')
   
+  // State for keyword selection (checkboxes)
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
+  
   // State for date range and pagination
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '60d' | 'custom'>('7d')
   const [customStartDate, setCustomStartDate] = useState<string>('')
@@ -130,13 +133,13 @@ export default function RankHistoryPage() {
     
     switch (dateRange) {
       case '7d':
-        startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         break
       case '30d':
-        startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         break
       case '60d':
-        startDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        startDate = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         break
       case 'custom':
         if (appliedCustomDates) {
@@ -155,6 +158,28 @@ export default function RankHistoryPage() {
   }
 
   const { startDate, endDate } = getDateRange()
+
+  // Checkbox selection handlers
+  const handleSelectAll = () => {
+    if (selectedKeywords.length === filteredData.length) {
+      setSelectedKeywords([])
+    } else {
+      setSelectedKeywords(filteredData.map((item: RankHistoryData) => item.keyword_id))
+    }
+  }
+
+  const handleKeywordSelect = (keywordId: string) => {
+    setSelectedKeywords(prev => 
+      prev.includes(keywordId) 
+        ? prev.filter(id => id !== keywordId)
+        : [...prev, keywordId]
+    )
+  }
+
+  // Reset selection when filters change
+  useEffect(() => {
+    setSelectedKeywords([])
+  }, [selectedDomainId, selectedDevice, selectedCountry, selectedTags, searchQuery, dateRange])
 
   // Use merged dashboard API for better performance and to prevent loading glitches
   const { data: dashboardData, isLoading: dashboardLoading } = useDashboardData()
@@ -628,7 +653,16 @@ export default function RankHistoryPage() {
                       <table className="w-full">
                         <thead>
                           <tr className="bg-muted/50 border-b border-border">
-                            <th className="text-left py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sticky left-0 bg-muted/50 z-10">
+                            <th className="text-center py-2 px-3 w-10 sticky left-0 bg-muted/50 z-10">
+                              <input
+                                type="checkbox"
+                                checked={selectedKeywords.length === filteredData.length && filteredData.length > 0}
+                                onChange={handleSelectAll}
+                                className="w-4 h-4 rounded border-input"
+                                data-testid="checkbox-select-all"
+                              />
+                            </th>
+                            <th className="text-left py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sticky left-10 bg-muted/50 z-10">
                               KEYWORD
                             </th>
                             <th className="text-center py-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[80px]">
@@ -660,7 +694,16 @@ export default function RankHistoryPage() {
                             
                             return (
                               <tr key={item.keyword_id} className="border-b border-border hover:bg-muted/30" data-testid={`row-keyword-${item.keyword_id}`}>
-                                <td className="py-2 px-3 sticky left-0 bg-card z-10">
+                                <td className="text-center py-2 px-3 w-10 sticky left-0 bg-card z-10">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedKeywords.includes(item.keyword_id)}
+                                    onChange={() => handleKeywordSelect(item.keyword_id)}
+                                    className="w-4 h-4 rounded border-input"
+                                    data-testid={`checkbox-keyword-${item.keyword_id}`}
+                                  />
+                                </td>
+                                <td className="py-2 px-3 sticky left-10 bg-card z-10">
                                   <div className="font-medium text-sm text-foreground max-w-[200px] truncate">
                                     {item.keyword}
                                   </div>
