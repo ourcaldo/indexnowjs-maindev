@@ -51,7 +51,23 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
     return dateStr > selectedRange.start && dateStr < selectedRange.end
   }
 
+  const isFutureDate = (dateStr: string): boolean => {
+    const today = new Date()
+    const date = new Date(dateStr)
+    
+    // Reset time to 00:00:00 for comparison
+    today.setHours(0, 0, 0, 0)
+    date.setHours(0, 0, 0, 0)
+    
+    return date > today
+  }
+
   const handleDateClick = (dateStr: string) => {
+    // Prevent selection of future dates
+    if (isFutureDate(dateStr)) {
+      return
+    }
+
     if (!tempStart || (tempStart && tempEnd)) {
       // Start new selection
       setTempStart(dateStr)
@@ -101,29 +117,28 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
         const isStart = isStartDate(dateStr)
         const isEnd = isEndDate(dateStr)
         const isMiddle = isMiddleDate(dateStr)
+        const isFuture = isFutureDate(dateStr)
 
         days.push(
           <button
             key={dateStr}
-            onClick={() => isCurrentMonth && handleDateClick(dateStr)}
-            disabled={!isCurrentMonth}
+            onClick={() => isCurrentMonth && !isFuture && handleDateClick(dateStr)}
+            disabled={!isCurrentMonth || isFuture}
             className={`
-              w-8 h-8 text-sm flex items-center justify-center transition-colors duration-150 relative
+              w-full h-8 text-sm flex items-center justify-center transition-colors duration-150 relative
               ${!isCurrentMonth 
                 ? 'text-muted-foreground/50 cursor-not-allowed' 
+                : isFuture
+                ? 'text-muted-foreground/40 cursor-not-allowed opacity-50'
                 : 'text-foreground cursor-pointer'
               }
-              ${isToday && isCurrentMonth ? 'ring-2 ring-primary ring-inset z-10' : ''}
-              ${isSelected ? 'bg-primary text-primary-foreground hover:bg-primary/80 hover:text-white font-bold z-10' : ''}
-              ${isMiddle ? 'bg-primary/20 dark:bg-primary/30 font-semibold hover:bg-primary/30 dark:hover:bg-primary/40' : ''}
+              ${isToday && isCurrentMonth && !isFuture ? 'ring-2 ring-primary ring-inset z-10' : ''}
+              ${isSelected && !isFuture ? 'bg-primary text-primary-foreground hover:bg-primary/80 hover:text-white font-bold z-10' : ''}
+              ${isMiddle && !isFuture ? 'bg-primary/20 dark:bg-primary/30 font-semibold hover:bg-primary/30 dark:hover:bg-primary/40' : ''}
               ${isStart ? 'rounded-l-md' : ''}
               ${isEnd ? 'rounded-r-md' : ''}
-              ${!isCurrentMonth || (!isInRange && !isSelected) ? 'hover:bg-slate-50 dark:hover:bg-slate-800' : ''}
+              ${!isFuture && isCurrentMonth && !isInRange && !isSelected ? 'hover:bg-slate-50 dark:hover:bg-slate-800' : ''}
             `}
-            style={isInRange && !isSelected ? {
-              marginLeft: '0',
-              marginRight: '0'
-            } : {}}
           >
             {currentIterDate.getDate()}
           </button>

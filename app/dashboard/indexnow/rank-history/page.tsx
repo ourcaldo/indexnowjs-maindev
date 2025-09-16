@@ -628,7 +628,7 @@ export default function RankHistoryPage() {
                                       key={value}
                                       onClick={() => {
                                         const today = new Date()
-                                        const startDate = new Date(today.getTime() - value * 24 * 60 * 60 * 1000)
+                                        const startDate = new Date(today.getTime() - (value - 1) * 24 * 60 * 60 * 1000)
                                         setCustomStartDate(startDate.toISOString().split('T')[0])
                                         setCustomEndDate(today.toISOString().split('T')[0])
                                       }}
