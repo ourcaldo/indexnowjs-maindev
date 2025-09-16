@@ -91,7 +91,7 @@ export default function RelatedPosts({ posts, className = '' }: RelatedPostsProp
               {/* Content */}
               <div className="p-6">
                 {/* Meta information */}
-                <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-4 mb-3 text-sm text-gray-400">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     <span>{formatDate(post.published_at)}</span>
@@ -104,17 +104,18 @@ export default function RelatedPosts({ posts, className = '' }: RelatedPostsProp
                 </div>
 
                 {/* Title */}
-                <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-accent transition-colors">
+                <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-accent transition-colors leading-tight">
                   <Link 
                     href={`/blog/${post.slug}`}
                     data-testid={`related-post-title-${post.slug}`}
+                    className="hover:text-accent transition-colors"
                   >
                     {post.title}
                   </Link>
                 </h3>
 
                 {/* Excerpt */}
-                <p className="text-muted-foreground mb-4 line-clamp-2 text-sm" data-testid={`related-post-excerpt-${post.slug}`}>
+                <p className="text-gray-300 mb-4 line-clamp-2 text-sm leading-relaxed" data-testid={`related-post-excerpt-${post.slug}`}>
                   {post.excerpt}
                 </p>
 
