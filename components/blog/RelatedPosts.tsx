@@ -56,11 +56,11 @@ export default function RelatedPosts({ posts, className = '' }: RelatedPostsProp
           {posts.map((post) => (
             <article
               key={post.id}
-              className="group bg-card/30 border border-border rounded-xl overflow-hidden hover:border-accent/50 transition-all duration-300 hover:transform hover:-translate-y-1"
+              className="group bg-black border border-gray-800 rounded-xl overflow-hidden hover:border-gray-600 transition-all duration-300 hover:transform hover:-translate-y-1"
               data-testid={`related-post-${post.slug}`}
             >
               {/* Featured Image */}
-              <div className="aspect-[16/10] relative overflow-hidden bg-muted/50">
+              <div className="aspect-[16/10] relative overflow-hidden bg-black">
                 {post.featured_image_url && !imageErrors[post.id] ? (
                   <img
                     src={post.featured_image_url}
