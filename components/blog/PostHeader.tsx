@@ -135,7 +135,7 @@ export default function PostHeader({
         <div className="relative ml-auto">
           <button
             onClick={handleShare}
-            className="flex items-center gap-2 px-4 py-2 bg-accent/50 hover:bg-accent/70 border border-border rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-border rounded-lg transition-colors text-white"
             data-testid="post-share-button"
           >
             <Share2 className="w-4 h-4" />
@@ -148,7 +148,7 @@ export default function PostHeader({
               <div className="p-2">
                 <button
                   onClick={copyToClipboard}
-                  className="w-full text-left px-3 py-2 hover:bg-accent/50 rounded-lg text-sm transition-colors"
+                  className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors"
                   data-testid="copy-link-button"
                 >
                   Copy Link
@@ -157,7 +157,7 @@ export default function PostHeader({
                   href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-left px-3 py-2 hover:bg-accent/50 rounded-lg text-sm transition-colors"
+                  className="block w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors"
                   data-testid="share-twitter"
                 >
                   Share on Twitter
@@ -166,7 +166,7 @@ export default function PostHeader({
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full text-left px-3 py-2 hover:bg-accent/50 rounded-lg text-sm transition-colors"
+                  className="block w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg text-sm transition-colors"
                   data-testid="share-linkedin"
                 >
                   Share on LinkedIn
