@@ -326,7 +326,7 @@ export default function Dashboard() {
               size="sm"
               onClick={() => router.push('/dashboard/indexnow/add')}
               data-testid="button-add-keyword"
-              className="bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground hover:border-primary/90 transition-none"
+              className="bg-primary text-primary-foreground border-primary hover:bg-slate-50 hover:text-primary hover:border-primary transition-colors duration-150"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Keywords
