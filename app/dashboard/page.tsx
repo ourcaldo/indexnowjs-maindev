@@ -326,7 +326,7 @@ export default function Dashboard() {
               size="sm"
               onClick={() => router.push('/dashboard/indexnow/add')}
               data-testid="button-add-keyword"
-              className="bg-primary text-primary-foreground border-primary hover:bg-slate-50 hover:text-primary hover:border-primary transition-colors duration-150"
+              className="bg-primary text-primary-foreground border-primary hover:bg-slate-50 hover:text-foreground hover:border-primary transition-colors duration-150"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Keywords
@@ -701,20 +701,20 @@ export default function Dashboard() {
                   
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-150"
+                    className="w-full justify-start h-11 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                     onClick={() => router.push('/dashboard/indexnow/overview')}
                     data-testid="action-view-keywords"
                   >
                     <Search className="w-4 h-4 mr-3" />
                     <div className="text-left">
                       <div className="font-medium">View All Keywords</div>
-                      <div className="text-xs text-muted-foreground">{domainKeywords.length} tracked</div>
+                      <div className="text-xs text-muted-foreground hover:text-muted-foreground">{domainKeywords.length} tracked</div>
                     </div>
                   </Button>
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-150"
+                    className="w-full justify-start h-11 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                     onClick={() => router.push('/dashboard/indexnow/rank-history')}
                     data-testid="action-rank-history"
                   >
@@ -727,7 +727,7 @@ export default function Dashboard() {
 
                   <Button 
                     variant="outline"
-                    className="w-full justify-start h-11 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-150"
+                    className="w-full justify-start h-11 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                     onClick={() => router.push('/dashboard/settings/plans-billing')}
                     data-testid="action-manage-billing"
                   >

@@ -571,6 +571,7 @@ export default function RankHistoryPage() {
                               setShowDatePicker(false)
                             }}
                             data-testid={`filter-date-${range}`}
+                            className="hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                           >
                             {range.toUpperCase()}
                           </Button>
@@ -586,7 +587,7 @@ export default function RankHistoryPage() {
                             setDateRange('custom')
                             setShowDatePicker(!showDatePicker)
                           }}
-                          className="flex items-center gap-1"
+                          className="flex items-center gap-1 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                           data-testid="filter-date-custom"
                         >
                           <Calendar className="w-3 h-3" />
@@ -793,7 +794,7 @@ export default function RankHistoryPage() {
                         size="sm"
                         onClick={() => setActiveFilter('positions')}
                         data-testid="filter-positions"
-                        className="text-xs h-8 px-3"
+                        className="text-xs h-8 px-3 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                       >
                         Positions
                       </Button>
@@ -802,7 +803,7 @@ export default function RankHistoryPage() {
                         size="sm"
                         onClick={() => setActiveFilter('traffic')}
                         data-testid="filter-traffic"
-                        className="text-xs h-8 px-3"
+                        className="text-xs h-8 px-3 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                       >
                         Est. Traffic
                       </Button>
@@ -811,14 +812,14 @@ export default function RankHistoryPage() {
                         size="sm"
                         onClick={() => setActiveFilter('all')}
                         data-testid="filter-all"
-                        className="text-xs h-8 px-3"
+                        className="text-xs h-8 px-3 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                       >
                         Visibility
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-xs h-8 px-2"
+                        className="text-xs h-8 px-2 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
                         onClick={() => {/* Add domain filter functionality */}}
                       >
                         All for {selectedDomainInfo?.domain_name}

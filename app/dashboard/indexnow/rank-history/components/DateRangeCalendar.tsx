@@ -98,8 +98,8 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
                 : 'text-foreground hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer'
               }
               ${isToday && isCurrentMonth ? 'ring-2 ring-primary ring-inset' : ''}
-              ${isSelected ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}
-              ${isInRange && !isSelected ? 'bg-slate-50 dark:bg-slate-800' : ''}
+              ${isSelected ? 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold' : ''}
+              ${isInRange && !isSelected ? 'bg-primary/20 dark:bg-primary/30 font-semibold' : ''}
             `}
           >
             {currentIterDate.getDate()}
@@ -130,9 +130,9 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
   }
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-3">
       {/* Navigation and Current Month */}
-      <div className="min-w-[250px]">
+      <div className="min-w-[230px]">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigateMonth('prev')}
@@ -154,7 +154,7 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
       </div>
 
       {/* Next Month */}
-      <div className="min-w-[250px]">
+      <div className="min-w-[230px]">
         <div className="flex items-center justify-center mb-4">
           <span className="text-sm font-medium">
             {monthNames[nextMonthStart.getMonth()]} {nextMonthStart.getFullYear()}

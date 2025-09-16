@@ -39,19 +39,19 @@ export const DeviceCountryFilter = ({
           </div>
         </SelectTrigger>
         <SelectContent className="text-left">
-          <SelectItem value="" className="justify-start pl-2 text-left">
+          <SelectItem value="" className="justify-start pl-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 focus:bg-slate-50 dark:focus:bg-slate-800 focus:text-foreground dark:focus:text-foreground data-[highlighted]:bg-slate-50 dark:data-[highlighted]:bg-slate-800 data-[highlighted]:text-foreground dark:data-[highlighted]:text-foreground transition-colors duration-150">
             <div className="flex items-center gap-2 w-full text-left">
               <Monitor className="w-3 h-3 text-muted-foreground" />
               <span className="text-left">All Devices</span>
             </div>
           </SelectItem>
-          <SelectItem value="desktop" className="justify-start pl-2 text-left">
+          <SelectItem value="desktop" className="justify-start pl-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 focus:bg-slate-50 dark:focus:bg-slate-800 focus:text-foreground dark:focus:text-foreground data-[highlighted]:bg-slate-50 dark:data-[highlighted]:bg-slate-800 data-[highlighted]:text-foreground dark:data-[highlighted]:text-foreground transition-colors duration-150">
             <div className="flex items-center gap-2 w-full text-left">
               <Monitor className="w-3 h-3" />
               <span className="text-left">Desktop</span>
             </div>
           </SelectItem>
-          <SelectItem value="mobile" className="justify-start pl-2 text-left">
+          <SelectItem value="mobile" className="justify-start pl-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 focus:bg-slate-50 dark:focus:bg-slate-800 focus:text-foreground dark:focus:text-foreground data-[highlighted]:bg-slate-50 dark:data-[highlighted]:bg-slate-800 data-[highlighted]:text-foreground dark:data-[highlighted]:text-foreground transition-colors duration-150">
             <div className="flex items-center gap-2 w-full text-left">
               <Smartphone className="w-3 h-3" />
               <span className="text-left">Mobile</span>
@@ -66,11 +66,11 @@ export const DeviceCountryFilter = ({
           <SelectValue placeholder="All Countries" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="" className="pl-2 text-left">
+          <SelectItem value="" className="pl-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 focus:bg-slate-50 dark:focus:bg-slate-800 focus:text-foreground dark:focus:text-foreground data-[highlighted]:bg-slate-50 dark:data-[highlighted]:bg-slate-800 data-[highlighted]:text-foreground dark:data-[highlighted]:text-foreground transition-colors duration-150">
             <span>All Countries</span>
           </SelectItem>
           {countries.map((country: Country) => (
-            <SelectItem key={country.id} value={country.id} className="pl-2 text-left">
+            <SelectItem key={country.id} value={country.id} className="pl-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 focus:bg-slate-50 dark:focus:bg-slate-800 focus:text-foreground dark:focus:text-foreground data-[highlighted]:bg-slate-50 dark:data-[highlighted]:bg-slate-800 data-[highlighted]:text-foreground dark:data-[highlighted]:text-foreground transition-colors duration-150">
               <span className="truncate">{country.name}</span>
             </SelectItem>
           ))}

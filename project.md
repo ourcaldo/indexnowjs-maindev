@@ -7197,6 +7197,10 @@ ON public.indb_cms_posts(category, status);
   - **✅ AdminSidebar Navigation**: All menu items, settings buttons, and logout actions now use consistent gray hover
   - **✅ Checkout Components**: Payment submit buttons and service management actions standardized
   - **✅ Settings Pages**: Service account management and billing components aligned with hover pattern
+  - **✅ Quick Actions**: Fixed hover contrast issues with proper text color transitions (hover:text-foreground) for better readability
+  - **✅ DeviceCountryFilter**: Select dropdown items now use consistent gray hover effects with full dark-mode support
+  - **✅ Rank History Filters**: All filter buttons ("Positions", "Est. Traffic", "Visibility") and date range selectors use gray hover pattern
+  - **✅ DateRangeCalendar**: Enhanced with bolder date range colors (bg-primary/20) and reduced padding for improved UX
 
 - **Technical Implementation**:
   - **Pattern Consistency**: Replaced `hover:bg-primary/90`, `hover:bg-destructive/10`, `hover:bg-muted`, `hover:bg-error/10` with uniform `hover:bg-slate-50`
@@ -7207,10 +7211,13 @@ ON public.indb_cms_posts(category, status);
 - **Files Modified**:
   - `app/dashboard/indexnow/overview/components/BulkActions.tsx` - Modal button hover standardization
   - `app/dashboard/indexnow/overview/components/FilterPanel.tsx` - Bulk action button consistency  
-  - `app/dashboard/page.tsx` - Main dashboard button standardization
+  - `app/dashboard/page.tsx` - Main dashboard button standardization and Quick Actions hover contrast fixes
   - `app/dashboard/settings/plans-billing/checkout/components/CheckoutSubmitButton.tsx` - Payment button consistency
   - `app/dashboard/settings/service-accounts/page.tsx` - Service management action standardization
   - `components/AdminSidebar.tsx` - Complete navigation hover pattern alignment
+  - `components/shared/DeviceCountryFilter.tsx` - Select dropdown hover effects with dark-mode support
+  - `app/dashboard/indexnow/rank-history/page.tsx` - Filter buttons and date range selectors standardization
+  - `app/dashboard/indexnow/rank-history/components/DateRangeCalendar.tsx` - Enhanced date range colors and padding optimization
 
 - **Quality Assurance**: 
   - **Architect Review**: All changes reviewed and approved for proper implementation and consistency
