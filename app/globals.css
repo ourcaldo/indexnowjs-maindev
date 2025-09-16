@@ -107,22 +107,22 @@
 .dark {
   --background: 0 0% 0%; /* Pure black background */
   --foreground: 0 0% 100%; /* Pure white text */
-  --card: 0 0% 5%; /* Very dark grey for cards */
-  --card-foreground: 0 0% 100%; /* Pure white text on cards */
-  --popover: 0 0% 5%;
+  --card: 0 0% 0%; /* Black cards */
+  --card-foreground: 0 0% 100%; /* White text on cards */
+  --popover: 0 0% 0%;
   --popover-foreground: 0 0% 100%;
   --primary: 0 0% 100%;
   --primary-foreground: 0 0% 0%;
-  --secondary: 0 0% 10%; /* Darker secondary background */
+  --secondary: 0 0% 5%; /* Very dark secondary background */
   --secondary-foreground: 0 0% 100%;
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 85%; /* Much brighter muted text */
+  --muted: 0 0% 5%;
+  --muted-foreground: 0 0% 100%; /* White muted text */
   --accent: 218 100% 62%; /* Keep brand accent consistent */
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 15%; /* Brighter borders */
-  --input: 0 0% 10%;
+  --border: 0 0% 20%; /* Dark borders */
+  --input: 0 0% 5%;
   --ring: 218 100% 62%; /* Keep accent ring consistent */
   
   /* Table specific - dark mode */
