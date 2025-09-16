@@ -114,12 +114,11 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
                 : 'text-foreground cursor-pointer'
               }
               ${isToday && isCurrentMonth ? 'ring-2 ring-primary ring-inset z-10' : ''}
-              ${isSelected ? 'bg-primary text-primary-foreground hover:bg-primary/90 font-bold z-10' : ''}
-              ${isMiddle ? 'bg-primary/20 dark:bg-primary/30 font-semibold' : ''}
+              ${isSelected ? 'bg-primary text-primary-foreground hover:bg-primary/80 hover:text-white font-bold z-10' : ''}
+              ${isMiddle ? 'bg-primary/20 dark:bg-primary/30 font-semibold hover:bg-primary/30 dark:hover:bg-primary/40' : ''}
               ${isStart ? 'rounded-l-md' : ''}
               ${isEnd ? 'rounded-r-md' : ''}
               ${!isCurrentMonth || (!isInRange && !isSelected) ? 'hover:bg-slate-50 dark:hover:bg-slate-800' : ''}
-              ${isSelected && isCurrentMonth ? 'hover:text-primary-foreground' : ''}
             `}
             style={isInRange && !isSelected ? {
               marginLeft: '0',
