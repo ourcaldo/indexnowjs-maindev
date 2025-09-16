@@ -274,7 +274,7 @@ export default function PricingPageContent() {
                         <div className="mt-auto">
                           <button
                             onClick={handleGetStarted}
-                            className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-accent/10 transition-colors duration-200">
+                            className="w-full bg-white text-black py-3 px-6 rounded-lg font-semibold hover:bg-accent/10 transition-colors duration-200"
                           >
                             Get started
                           </button>
@@ -428,7 +428,7 @@ export default function PricingPageContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleGetStarted}
-                className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center justify-center space-x-2">
+                className="bg-white text-black px-8 py-4 rounded-full font-semibold text-lg hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center justify-center space-x-2"
               >
                 <span>Start free</span>
                 <ArrowRight className="w-5 h-5" />
