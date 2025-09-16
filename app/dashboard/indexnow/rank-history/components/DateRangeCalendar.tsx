@@ -180,48 +180,53 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
           { label: 'Past 30 days', value: 30 },
           { label: 'Past 60 days', value: 60 },
           { label: 'Past 90 days', value: 90 }
-        ].map(({ label, value }) => (
-          <button
-            key={value}
-            onClick={() => {
-              const today = new Date()
-              let startDate: Date
+        ].map(({ label, value }) => {
+          const today = new Date()
+          let calculatedStartDate: Date
 
-              // Use exact same logic as main page getDateRange() function
-              switch (value) {
-                case 2:
-                  startDate = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000)
-                  break
-                case 7:
-                  startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000)
-                  break
-                case 30:
-                  startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000)
-                  break
-                case 60:
-                  startDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000)
-                  break
-                case 90:
-                  startDate = new Date(today.getTime() - 89 * 24 * 60 * 60 * 1000)
-                  break
-                default:
-                  startDate = new Date(today.getTime() - (value - 1) * 24 * 60 * 60 * 1000)
-              }
+          // Use exact same logic as main page getDateRange() function
+          switch (value) {
+            case 2:
+              calculatedStartDate = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000)
+              break
+            case 7:
+              calculatedStartDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000)
+              break
+            case 30:
+              calculatedStartDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000)
+              break
+            case 60:
+              calculatedStartDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000)
+              break
+            case 90:
+              calculatedStartDate = new Date(today.getTime() - 89 * 24 * 60 * 60 * 1000)
+              break
+            default:
+              calculatedStartDate = new Date(today.getTime() - (value - 1) * 24 * 60 * 60 * 1000)
+          }
 
-              setCustomStartDate(startDate.toISOString().split('T')[0])
-              setCustomEndDate(today.toISOString().split('T')[0])
-              onRangeChange(startDate.toISOString().split('T')[0], today.toISOString().split('T')[0])
-            }}
-            className={`text-left text-sm px-2 py-1 rounded ${
-              customStartDate && customEndDate &&
-              formatDateString(new Date(customStartDate)) === formatDateString(new Date(startDate.toISOString().split('T')[0])) &&
-              formatDateString(new Date(customEndDate)) === formatDateString(new Date(today.toISOString().split('T')[0]))
-              ? 'bg-primary text-primary-foreground font-medium' : 'hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+          const calculatedStartDateStr = calculatedStartDate.toISOString().split('T')[0]
+          const todayStr = today.toISOString().split('T')[0]
+          const isActive = customStartDate === calculatedStartDateStr && customEndDate === todayStr
+
+          return (
+            <button
+              key={value}
+              onClick={() => {
+                setCustomStartDate(calculatedStartDateStr)
+                setCustomEndDate(todayStr)
+                onRangeChange(calculatedStartDateStr, todayStr)
+              }}
+              className={`text-left text-sm px-2 py-1 rounded ${
+                isActive
+                ? 'bg-primary text-primary-foreground font-medium' 
+                : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              {label}
+            </button>
+          )
+        })}
       </div>
 
       {/* Navigation and Current Month */}
