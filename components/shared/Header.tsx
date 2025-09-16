@@ -163,7 +163,7 @@ function NavItem({ item, onClick, currentPage, isMobile = false }: NavItemProps)
 
   const stateClasses = isActive 
     ? "text-white" 
-    : "text-muted-foreground hover:text-white"
+    : "text-white/80 hover:text-white"
 
   if (item.href) {
     return (
