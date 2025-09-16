@@ -111,7 +111,7 @@ export default function TableOfContents({ content, className = '' }: TableOfCont
   if (tocItems.length === 0) return null
 
   return (
-    <div className={`bg-card/50 border border-border rounded-xl p-4 ${className}`}>
+    <div className={`bg-transparent border border-border rounded-xl p-4 ${className}`}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <List className="w-5 h-5 text-accent" />
