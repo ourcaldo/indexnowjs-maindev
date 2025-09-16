@@ -287,7 +287,7 @@ export default function BlogArchiveContent() {
                       setSelectedTag(null)
                       setCurrentPage(1)
                     }}
-                    className="text-info hover:text-info/90 font-medium">
+                    className="text-info hover:text-info/90 font-medium"
                   >
                     Clear Filters
                   </button>
