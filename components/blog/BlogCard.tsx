@@ -40,11 +40,11 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
 
   return (
     <article 
-      className={`group bg-card border border-border rounded-xl overflow-hidden hover:border-border transition-all duration-300 hover:transform hover:-translate-y-1 ${className}`}
+      className={`group bg-black border border-gray-800 rounded-xl overflow-hidden hover:border-gray-600 transition-all duration-300 hover:transform hover:-translate-y-1 ${className}`}
       data-testid={`blog-card-${post.slug}`}
     >
       {/* Featured Image */}
-      <div className="aspect-[16/10] relative overflow-hidden bg-muted">
+      <div className="aspect-[16/10] relative overflow-hidden bg-black">
         {post.featured_image_url && !imageError ? (
           <img
             src={post.featured_image_url}
@@ -54,7 +54,7 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
             data-testid={`blog-image-${post.slug}`}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+          <div className="w-full h-full flex items-center justify-center text-white">
             <div className="text-center">
               <Tag className="w-12 h-12 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No image available</p>
@@ -78,7 +78,7 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
       {/* Content */}
       <div className="p-6">
         {/* Meta information */}
-        <div className="flex items-center gap-4 mb-3 text-sm text-foreground/70">
+        <div className="flex items-center gap-4 mb-3 text-sm text-white/70">
           <div className="flex items-center gap-1" data-testid={`blog-date-${post.slug}`}>
             <Calendar className="w-4 h-4" />
             <span>{formatDate(post.published_at)}</span>
@@ -91,14 +91,14 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-semibold text-foreground mb-3 line-clamp-2 group-hover:text-info transition-colors">
+        <h3 className="text-xl font-semibold text-white mb-3 line-clamp-2 group-hover:text-info transition-colors">
           <Link href={`/blog/${post.category}/${post.slug}`} data-testid={`blog-title-link-${post.slug}`}>
             {post.title}
           </Link>
         </h3>
 
         {/* Excerpt */}
-        <p className="text-foreground/80 mb-4 line-clamp-3" data-testid={`blog-excerpt-${post.slug}`}>
+        <p className="text-white/80 mb-4 line-clamp-3" data-testid={`blog-excerpt-${post.slug}`}>
           {post.excerpt}
         </p>
 
