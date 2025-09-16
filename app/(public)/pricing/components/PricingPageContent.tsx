@@ -18,7 +18,7 @@ import { usePageData } from '@/hooks/shared/usePageData'
 export default function PricingPageContent() {
   const { user, siteSettings, handleAuthAction, handleGetStarted } = usePageData()
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
-  
+
   // Use shared pricing hook with fallback to static data
   const {
     packages: dynamicPackages,
@@ -31,7 +31,7 @@ export default function PricingPageContent() {
     getFeaturesList,
     getSavingsPercentage
   } = usePricingData()
-  
+
   // Use static data for SEO and fallback when dynamic data isn't loaded
   const packages = !isLoading && dynamicPackages.length > 0 ? dynamicPackages : staticPricingData.packages
   const formatPriceFunc = !isLoading && dynamicPackages.length > 0 ? dynamicFormatPrice : 
@@ -118,7 +118,7 @@ export default function PricingPageContent() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      
+
       <div className="min-h-screen text-white relative overflow-hidden bg-[hsl(var(--primary))]">
         <Background />
         <Header 
@@ -205,7 +205,7 @@ export default function PricingPageContent() {
                     }
                     const isPopular = pkg.is_popular
                     const features = !isLoading && dynamicPackages.length > 0 ? getFeaturesList(pkg) : pkg.features
-                    
+
                     return (
                       <AdvancedNeonCard 
                         key={pkg.id} 
@@ -222,7 +222,7 @@ export default function PricingPageContent() {
                             </div>
                           </div>
                         )}
-                        
+
                         {/* Plan Name */}
                         <div className="mb-6">
                           <h3 className="text-2xl font-bold text-white mb-2">
@@ -232,7 +232,7 @@ export default function PricingPageContent() {
                             {pkg.description}
                           </p>
                         </div>
-                        
+
                         {/* Price */}
                         <div className="mb-8">
                           {pricing.originalPrice && (
@@ -253,7 +253,7 @@ export default function PricingPageContent() {
                             </span>
                           </div>
                         </div>
-                        
+
                         {/* Features */}
                         <div className="flex-grow">
                           <ul className="space-y-3 mb-8">
@@ -269,7 +269,7 @@ export default function PricingPageContent() {
                             ))}
                           </ul>
                         </div>
-                        
+
                         {/* CTA Button */}
                         <div className="mt-auto">
                           <button

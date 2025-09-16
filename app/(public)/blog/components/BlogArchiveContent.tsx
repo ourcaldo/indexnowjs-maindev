@@ -98,35 +98,35 @@ export default function BlogArchiveContent() {
   const fetchPosts = useCallback(async (page: number = 1, search: string = '', tag: string | null = null, category: string | null = null) => {
     setLoading(true)
     setError(null)
-    
+
     try {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '12'
       })
-      
+
       if (search) params.append('search', search)
       if (tag) params.append('tag', tag)
       if (category) params.append('category', category)
-      
+
       const response = await fetch(`/api/v1/blog/posts?${params}`)
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch blog posts')
       }
-      
+
       const data: BlogResponse = await response.json()
-      
+
       setPosts(data.posts)
       setPagination(data.pagination)
-      
+
       // Extract unique tags from posts for filter dropdown
       const tags = new Set<string>()
       data.posts.forEach(post => {
         post.tags.forEach(tag => tags.add(tag))
       })
       setAvailableTags(Array.from(tags).sort())
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load blog posts')
     } finally {
@@ -201,7 +201,7 @@ export default function BlogArchiveContent() {
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed" data-testid="blog-hero-description">
               Discover expert insights on rank tracking, search engine optimization, and digital marketing strategies to boost your website's performance.
             </p>
-            
+
             {/* Feature highlights */}
             <div className="flex flex-wrap justify-center gap-6 mt-12">
               <div className="flex items-center gap-2 text-muted-foreground">
