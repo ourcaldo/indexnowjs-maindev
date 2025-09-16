@@ -105,24 +105,24 @@
 }
 
 .dark {
-  --background: 215 28% 9%; /* slate-900 equivalent */
-  --foreground: 0 0% 98%;
-  --card: 215 28% 9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 215 28% 9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 215 28% 9%;
-  --secondary: 215 25% 15%; /* slate-800 equivalent */
-  --secondary-foreground: 0 0% 98%;
-  --muted: 215 25% 15%;
-  --muted-foreground: 215 20% 65%;
+  --background: 0 0% 0%; /* Pure black background */
+  --foreground: 0 0% 100%; /* Pure white text */
+  --card: 0 0% 5%; /* Very dark grey for cards */
+  --card-foreground: 0 0% 100%; /* Pure white text on cards */
+  --popover: 0 0% 5%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 10%; /* Darker secondary background */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 85%; /* Much brighter muted text */
   --accent: 218 100% 62%; /* Keep brand accent consistent */
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 215 25% 15%;
-  --input: 215 25% 15%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 15%; /* Brighter borders */
+  --input: 0 0% 10%;
   --ring: 218 100% 62%; /* Keep accent ring consistent */
   
   /* Table specific - dark mode */
