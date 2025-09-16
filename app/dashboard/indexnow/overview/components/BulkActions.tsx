@@ -52,7 +52,7 @@ export const BulkActions = ({
               <Button 
                 onClick={handleBulkDelete}
                 disabled={isDeleting}
-                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                className="bg-destructive hover:bg-slate-50 hover:text-destructive hover:border-destructive text-destructive-foreground transition-colors duration-150"
               >
                 {isDeleting ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -99,7 +99,7 @@ export const BulkActions = ({
               <Button 
                 onClick={handleAddTag}
                 disabled={isAddingTag || !newTag.trim()}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="bg-primary hover:bg-slate-50 hover:text-primary hover:border-primary text-primary-foreground transition-colors duration-150"
               >
                 {isAddingTag ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
