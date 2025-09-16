@@ -68,17 +68,17 @@ export default function PostContent({ content, className = '' }: PostContentProp
         '--tw-prose-headings': 'hsl(var(--foreground))',
         '--tw-prose-lead': 'hsl(var(--muted-foreground))',
         '--tw-prose-links': 'hsl(var(--accent))',
-        '--tw-prose-bold': 'hsl(var(--foreground))','
+        '--tw-prose-bold': 'hsl(var(--foreground))',
         '--tw-prose-counters': 'hsl(var(--muted-foreground))',
         '--tw-prose-bullets': 'hsl(var(--muted-foreground))',
         '--tw-prose-hr': 'hsl(var(--border))',
         '--tw-prose-quotes': 'hsl(var(--muted))',
-        '--tw-prose-quote-borders': 'hsl(var(--border))','
+        '--tw-prose-quote-borders': 'hsl(var(--border))',
         '--tw-prose-captions': 'hsl(var(--muted-foreground))',
         '--tw-prose-code': 'hsl(var(--muted))',
         '--tw-prose-pre-code': 'hsl(var(--muted-foreground))',
         '--tw-prose-pre-bg': 'hsl(var(--background))',
-        '--tw-prose-th-borders': 'hsl(var(--border))','
+        '--tw-prose-th-borders': 'hsl(var(--border))',
         '--tw-prose-td-borders': 'hsl(var(--border))'
       } as React.CSSProperties}
       data-testid="post-content"
