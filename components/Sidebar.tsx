@@ -152,7 +152,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
               ? isCollapsed 
                 ? 'bg-primary/10 text-primary' 
                 : 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+              : 'text-muted-foreground hover:text-foreground hover:bg-slate-50'
           }`}
         >
           <item.icon className={`${isCollapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0 ${
@@ -224,7 +224,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
             </div>
             <button 
               onClick={onCollapse}
-              className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-muted-foreground transition-colors duration-150"
               title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <Menu className="h-5 w-5" />
@@ -469,7 +469,7 @@ const Sidebar = ({ isOpen, onToggle, onCollapse, user, isCollapsed = false }: Si
                 className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                   pathname === '/dashboard/settings'
                     ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-slate-50'
                 }`}
               >
                 <Settings className={`mr-3 h-5 w-5 flex-shrink-0 ${

@@ -92,14 +92,14 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
             onClick={() => isCurrentMonth && handleDateClick(dateStr)}
             disabled={!isCurrentMonth}
             className={`
-              w-8 h-8 text-sm flex items-center justify-center transition-colors
+              w-8 h-8 text-sm flex items-center justify-center transition-colors duration-150
               ${!isCurrentMonth 
-                ? 'text-gray-300 cursor-not-allowed' 
-                : 'text-gray-700 hover:bg-blue-100 cursor-pointer'
+                ? 'text-muted-foreground/50 cursor-not-allowed' 
+                : 'text-foreground hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer'
               }
-              ${isToday && isCurrentMonth ? 'ring-2 ring-blue-500 ring-inset' : ''}
-              ${isSelected ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
-              ${isInRange && !isSelected ? 'bg-blue-100' : ''}
+              ${isToday && isCurrentMonth ? 'ring-2 ring-primary ring-inset' : ''}
+              ${isSelected ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}
+              ${isInRange && !isSelected ? 'bg-slate-50 dark:bg-slate-800' : ''}
             `}
           >
             {currentIterDate.getDate()}
@@ -115,7 +115,7 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
         {/* Day headers */}
         <div className="grid grid-cols-7 gap-0 mb-1">
           {dayNames.map(day => (
-            <div key={day} className="text-xs text-gray-500 text-center py-1 font-medium">
+            <div key={day} className="text-xs text-muted-foreground text-center py-1 font-medium">
               {day}
             </div>
           ))}
@@ -136,7 +136,7 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors duration-150"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -145,7 +145,7 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
           </span>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors duration-150"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

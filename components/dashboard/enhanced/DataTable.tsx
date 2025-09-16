@@ -73,7 +73,7 @@ export const DataTable = ({
           </thead>
           <tbody className="bg-card">
             {data.map((row, index) => (
-              <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
+              <tr key={index} className="border-b border-border hover:bg-slate-50 transition-colors duration-150">
                 {columns.map((column) => (
                   <td
                     key={column.key}
