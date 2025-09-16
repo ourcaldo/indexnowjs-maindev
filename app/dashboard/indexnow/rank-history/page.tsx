@@ -578,24 +578,6 @@ export default function RankHistoryPage() {
 
                     {/* Date Range Filter */}
                     <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        {['7d', '30d', '60d'].map((range) => (
-                          <Button
-                            key={range}
-                            size="sm"
-                            variant={dateRange === range ? 'default' : 'outline'}
-                            onClick={() => {
-                              setDateRange(range as any)
-                              setShowDatePicker(false)
-                            }}
-                            data-testid={`filter-date-${range}`}
-                            className="hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
-                          >
-                            {range.toUpperCase()}
-                          </Button>
-                        ))}
-                      </div>
-
                       {/* Custom Date Range Picker - Semrush Style */}
                       <div className="relative">
                         <Button
