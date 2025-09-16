@@ -35,7 +35,7 @@ export default function RankTrackerPreview() {
               <div className="text-xs text-muted-foreground">Position Changes</div>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             {keywordData.slice(0, 4).map((item, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
@@ -102,14 +102,14 @@ export default function RankTrackerPreview() {
               <div className="text-xl font-bold text-foreground">24 Cities</div>
             </div>
           </div>
-          
+
           <div className="space-y-3">
             <div className="text-sm font-medium text-muted-foreground mb-3">Location Performance</div>
             {[
-              { location: 'New York, US', rank: 3, traffic: '+15%', color: 'green' },
-              { location: 'London, UK', rank: 7, traffic: '+8%', color: 'yellow' },
-              { location: 'Toronto, CA', rank: 12, traffic: '-3%', color: 'red' },
-              { location: 'Sydney, AU', rank: 5, traffic: '+22%', color: 'green' }
+              { location: 'New York, US', rank: 3, traffic: '+15%', color: 'success' },
+              { location: 'London, UK', rank: 7, traffic: '+8%', color: 'warning' },
+              { location: 'Toronto, CA', rank: 12, traffic: '-3%', color: 'destructive' },
+              { location: 'Sydney, AU', rank: 5, traffic: '+22%', color: 'success' }
             ].map((item, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center space-x-3">
@@ -119,8 +119,8 @@ export default function RankTrackerPreview() {
                 <div className="flex items-center space-x-4">
                   <span className="text-sm font-medium">Rank #{item.rank}</span>
                   <span className={`text-sm font-medium ${
-                    item.color === 'green' ? 'text-success' : 
-                    item.color === 'yellow' ? 'text-warning' : 'text-error'
+                    item.color === 'success' ? 'text-success' : 
+                    item.color === 'warning' ? 'text-warning' : 'text-destructive'
                   }`}>
                     {item.traffic}
                   </span>
@@ -146,7 +146,7 @@ export default function RankTrackerPreview() {
             </div>
             <div className="text-xs text-muted-foreground mt-1">Last updated today</div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="text-sm font-medium text-muted-foreground mb-3">Recent Position Changes</div>
             {[
@@ -171,7 +171,7 @@ export default function RankTrackerPreview() {
               </div>
             ))}
           </div>
-          
+
           <div className="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
             <div className="text-sm text-muted-foreground mb-1">Position History Available</div>
             <button className="text-info text-sm font-medium hover:underline">
@@ -207,12 +207,12 @@ export default function RankTrackerPreview() {
               {slides[activeSlide].description}
             </p>
           </div>
-          
+
           <div className="h-[400px] overflow-hidden">
             {slides[activeSlide].content}
           </div>
         </div>
-        
+
         <div className="flex space-x-2 mt-6 justify-center">
           {slides.map((_, idx) => (
             <button
