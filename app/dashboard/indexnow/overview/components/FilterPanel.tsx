@@ -66,7 +66,7 @@ export const FilterPanel = ({
               variant="outline"
               size="sm"
               onClick={() => setShowDeleteConfirm(true)}
-              className="text-error border-error hover:bg-error/10"
+              className="text-error border-error hover:bg-slate-50 transition-colors duration-150"
             >
               <Trash2 className="w-4 h-4 mr-1" />
               Delete
@@ -75,7 +75,7 @@ export const FilterPanel = ({
               variant="outline"
               size="sm"
               onClick={() => setShowTagModal(true)}
-              className="text-warning border-warning hover:bg-warning/10"
+              className="text-warning border-warning hover:bg-slate-50 transition-colors duration-150"
             >
               <Tag className="w-4 h-4 mr-1" />
               Add Tag
