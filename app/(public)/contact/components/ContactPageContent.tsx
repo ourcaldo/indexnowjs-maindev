@@ -262,7 +262,7 @@ export default function ContactPageContent() {
                 {/* Name and Email Row */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="block text-sm font-medium text-white mb-2">
                       Name *
                     </label>
                     <input
@@ -275,7 +275,7 @@ export default function ContactPageContent() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="block text-sm font-medium text-white mb-2">
                       Email *
                     </label>
                     <input
@@ -291,7 +291,7 @@ export default function ContactPageContent() {
 
                 {/* Type Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Type *
                   </label>
                   <select
@@ -308,7 +308,7 @@ export default function ContactPageContent() {
 
                 {/* Subject */}
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Subject *
                   </label>
                   <input
@@ -323,8 +323,8 @@ export default function ContactPageContent() {
 
                 {/* Order ID */}
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Order ID <span className="text-muted-foreground/70">(if any, optional)</span>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Order ID <span className="text-white/70">(if any, optional)</span>
                   </label>
                   <input
                     type="text"
@@ -337,7 +337,7 @@ export default function ContactPageContent() {
 
                 {/* Message */}
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Message *
                   </label>
                   <textarea
