@@ -48,29 +48,45 @@ interface RankHistoryData {
   history: { [date: string]: { position: number | null, url: string | null } }
 }
 
+// Helper to format date in local timezone
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // Get comparison periods based on selected date range
 const getComparisonPeriods = (dateRangeType: string) => {
   const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
+  const todayStr = formatLocalDate(today)
 
   let comparisonDate: string
   let periodLabel: string
 
   switch (dateRangeType) {
     case '7d':
-      comparisonDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      const sevenDaysAgo = new Date(today)
+      sevenDaysAgo.setDate(today.getDate() - 7)
+      comparisonDate = formatLocalDate(sevenDaysAgo)
       periodLabel = '7 days ago'
       break
     case '30d':
-      comparisonDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      const thirtyDaysAgo = new Date(today)
+      thirtyDaysAgo.setDate(today.getDate() - 30)
+      comparisonDate = formatLocalDate(thirtyDaysAgo)
       periodLabel = '30 days ago'
       break
     case '60d':
-      comparisonDate = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      const sixtyDaysAgo = new Date(today)
+      sixtyDaysAgo.setDate(today.getDate() - 60)
+      comparisonDate = formatLocalDate(sixtyDaysAgo)
       periodLabel = '60 days ago'
       break
     default:
-      comparisonDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      const defaultSevenDaysAgo = new Date(today)
+      defaultSevenDaysAgo.setDate(today.getDate() - 7)
+      comparisonDate = formatLocalDate(defaultSevenDaysAgo)
       periodLabel = '7 days ago'
   }
 
@@ -143,29 +159,31 @@ export default function RankHistoryPage() {
   const getDateRange = () => {
     const today = new Date()
     let startDate: string
-    let endDate: string = today.toISOString().split('T')[0]
+    let endDate: string = formatLocalDate(today)
 
-    switch (dateRange) {
-      case '7d':
-        startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-        break
-      case '30d':
-        startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-        break
-      case '60d':
-        startDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-        break
-      case 'custom':
-        if (appliedCustomDates) {
-          startDate = appliedCustomDates.start
-          endDate = appliedCustomDates.end
-        } else {
-          // Don't return dates until custom dates are applied
-          return { startDate: '', endDate: '' }
-        }
-        break
-      default:
-        startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    if (dateRange === 'custom' && appliedCustomDates) {
+      startDate = appliedCustomDates.start
+      endDate = appliedCustomDates.end
+    } else {
+      let daysBack: number
+      switch (dateRange) {
+        case '7d':
+          daysBack = 6 // 7 days including today
+          break
+        case '30d':
+          daysBack = 29 // 30 days including today
+          break
+        case '60d':
+          daysBack = 59 // 60 days including today
+          break
+        default:
+          daysBack = 6
+      }
+
+      // Calculate start date in local timezone
+      const startDateTime = new Date(today)
+      startDateTime.setDate(today.getDate() - daysBack)
+      startDate = formatLocalDate(startDateTime)
     }
 
     return { startDate, endDate }
@@ -634,8 +652,8 @@ export default function RankHistoryPage() {
                                       onClick={() => {
                                         const today = new Date()
                                         const startDate = new Date(today.getTime() - (value - 1) * 24 * 60 * 60 * 1000)
-                                        setCustomStartDate(startDate.toISOString().split('T')[0])
-                                        setCustomEndDate(today.toISOString().split('T')[0])
+                                        setCustomStartDate(formatLocalDate(startDate))
+                                        setCustomEndDate(formatLocalDate(today))
                                       }}
                                       className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-slate-200 rounded transition-colors"
                                     >
@@ -748,7 +766,7 @@ export default function RankHistoryPage() {
                 </CardContent>
               </Card>
 
-              
+
 
               {/* Bulk Actions Bar */}
               <BulkActionsBar
@@ -785,13 +803,13 @@ export default function RankHistoryPage() {
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                      
+
                       {/* Count text inline with title */}
                       <div className="text-sm text-muted-foreground">
                         {startIndex + 1}-{Math.min(endIndex, totalItems)} ({totalItems})
                       </div>
                     </div>
-                    
+
                     {/* Filter buttons inline with title */}
                     <div className="flex items-center gap-1 bg-secondary/30 p-1 rounded-lg">
                       <Button
@@ -845,8 +863,8 @@ export default function RankHistoryPage() {
                     </div>
                   ) : (
                     <>
-                      
-                      
+
+
                       <div className="overflow-x-auto">
                         <table className="w-full">
                         <thead>

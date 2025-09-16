@@ -27,8 +27,18 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+  // Get user's timezone offset and format date in local timezone
   const formatDateString = (date: Date): string => {
-    return date.toISOString().split('T')[0]
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  // Get today's date in user's local timezone
+  const getTodayInLocalTimezone = (): string => {
+    const today = new Date()
+    return formatDateString(today)
   }
 
   const isDateInRange = (dateStr: string): boolean => {
@@ -54,14 +64,8 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
   }
 
   const isFutureDate = (dateStr: string): boolean => {
-    const today = new Date()
-    const date = new Date(dateStr)
-
-    // Reset time to 00:00:00 for comparison
-    today.setHours(0, 0, 0, 0)
-    date.setHours(0, 0, 0, 0)
-
-    return date > today
+    const todayStr = getTodayInLocalTimezone()
+    return dateStr > todayStr
   }
 
   const handleDateClick = (dateStr: string) => {
@@ -113,7 +117,7 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
       for (let day = 0; day < 7; day++) {
         const dateStr = formatDateString(currentIterDate)
         const isCurrentMonth = currentIterDate.getMonth() === month
-        const isToday = formatDateString(currentIterDate) === formatDateString(new Date())
+        const isToday = formatDateString(currentIterDate) === getTodayInLocalTimezone()
         const isInRange = isDateInRange(dateStr)
         const isSelected = isDateSelected(dateStr)
         const isStart = isStartDate(dateStr)
@@ -181,45 +185,36 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
           { label: 'Past 60 days', value: 60 },
           { label: 'Past 90 days', value: 90 }
         ].map(({ label, value }) => {
-          // Use local date to avoid timezone issues
+          // Get today in local timezone
+          const todayStr = getTodayInLocalTimezone()
           const today = new Date()
-          const year = today.getFullYear()
-          const month = today.getMonth()
-          const date = today.getDate()
           
-          // Create date in local timezone, then convert to YYYY-MM-DD format
-          const todayLocal = new Date(year, month, date)
-          let startDateLocal: Date
-
-          // Use exact same logic as main page getDateRange() function
+          // Calculate start date by going back the specified number of days (minus 1 because we include today)
+          let daysBack: number
           switch (value) {
             case 2:
-              startDateLocal = new Date(year, month, date - 1) // Yesterday
+              daysBack = 1 // Yesterday to today = 2 days
               break
             case 7:
-              startDateLocal = new Date(year, month, date - 6) // 6 days back + today = 7 days
+              daysBack = 6 // 6 days back + today = 7 days
               break
             case 30:
-              startDateLocal = new Date(year, month, date - 29) // 29 days back + today = 30 days
+              daysBack = 29 // 29 days back + today = 30 days
               break
             case 60:
-              startDateLocal = new Date(year, month, date - 59) // 59 days back + today = 60 days
+              daysBack = 59 // 59 days back + today = 60 days
               break
             case 90:
-              startDateLocal = new Date(year, month, date - 89) // 89 days back + today = 90 days
+              daysBack = 89 // 89 days back + today = 90 days
               break
             default:
-              startDateLocal = new Date(year, month, date - (value - 1))
+              daysBack = value - 1
           }
-
-          // Format dates as YYYY-MM-DD in local timezone
-          const calculatedStartDateStr = startDateLocal.getFullYear() + '-' + 
-            String(startDateLocal.getMonth() + 1).padStart(2, '0') + '-' + 
-            String(startDateLocal.getDate()).padStart(2, '0')
           
-          const todayStr = todayLocal.getFullYear() + '-' + 
-            String(todayLocal.getMonth() + 1).padStart(2, '0') + '-' + 
-            String(todayLocal.getDate()).padStart(2, '0')
+          // Create start date by subtracting days in local timezone
+          const startDate = new Date(today)
+          startDate.setDate(today.getDate() - daysBack)
+          const calculatedStartDateStr = formatDateString(startDate)
           
           const isActive = customStartDate === calculatedStartDateStr && customEndDate === todayStr
 
