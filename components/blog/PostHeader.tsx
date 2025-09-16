@@ -76,7 +76,7 @@ export default function PostHeader({
       <div className="mb-8">
         <Link
           href="/blog"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
           data-testid="back-to-blog"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -101,19 +101,19 @@ export default function PostHeader({
       )}
 
       {/* Title */}
-      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight" data-testid="post-title">
+      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight" data-testid="post-title">
         {title}
       </h1>
 
       {/* Excerpt */}
       {excerpt && (
-        <p className="text-xl text-muted-foreground mb-8 leading-relaxed max-w-4xl" data-testid="post-excerpt">
+        <p className="text-xl text-gray-300 mb-8 leading-relaxed max-w-4xl" data-testid="post-excerpt">
           {excerpt}
         </p>
       )}
 
       {/* Meta Information */}
-      <div className="flex flex-wrap items-center gap-6 mb-8 text-muted-foreground" data-testid="post-meta">
+      <div className="flex flex-wrap items-center gap-6 mb-8 text-gray-300" data-testid="post-meta">
         <div className="flex items-center gap-2">
           <User className="w-5 h-5" />
           <span data-testid="post-author">{author.name}</span>

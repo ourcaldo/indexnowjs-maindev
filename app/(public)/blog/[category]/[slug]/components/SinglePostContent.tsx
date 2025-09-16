@@ -151,10 +151,10 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
                   </div>
                 )}
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1" data-testid="author-name">
+                  <h3 className="text-lg font-semibold text-white mb-1" data-testid="author-name">
                     {post.author.name}
                   </h3>
-                  <p className="text-muted-foreground" data-testid="author-description">
+                  <p className="text-gray-300" data-testid="author-description">
                     SEO Expert & Content Strategist at IndexNow Studio. Passionate about helping businesses improve their search rankings and online visibility.
                   </p>
                 </div>
@@ -164,12 +164,12 @@ export default function SinglePostContent({ post, relatedPosts }: SinglePostCont
             {/* Tags Section */}
             {post.tags.length > 0 && (
               <div className="border-t border-border/50 pt-8 mb-16" data-testid="post-tags-section">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Tags</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">Tags</h3>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-muted/20 border border-border text-muted-foreground hover:bg-muted/30 transition-colors"
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-muted/20 border border-border text-gray-300 hover:bg-muted/30 transition-colors"
                       data-testid={`post-tag-${tag.replace(/\s+/g, '-').toLowerCase()}`}
                     >
                       #{tag}
