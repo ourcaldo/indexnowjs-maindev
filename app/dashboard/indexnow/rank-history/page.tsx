@@ -636,32 +636,7 @@ export default function RankHistoryPage() {
                                 />
                               </div>
 
-                              {/* Quick Options Section */}
-                              <div className="p-4 bg-slate-50 min-w-[160px]">
-                                <div className="space-y-1">
-                                  <div className="text-sm font-medium text-foreground mb-3">Quick Select</div>
-                                  {[
-                                    { label: 'Past 2 days', value: 2 },
-                                    { label: 'Past 7 days', value: 7 },
-                                    { label: 'Past 30 days', value: 30 },
-                                    { label: 'Past 60 days', value: 60 },
-                                    { label: 'Past 90 days', value: 90 }
-                                  ].map(({ label, value }) => (
-                                    <button
-                                      key={value}
-                                      onClick={() => {
-                                        const today = new Date()
-                                        const startDate = new Date(today.getTime() - (value - 1) * 24 * 60 * 60 * 1000)
-                                        setCustomStartDate(formatLocalDate(startDate))
-                                        setCustomEndDate(formatLocalDate(today))
-                                      }}
-                                      className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-slate-200 rounded transition-colors"
-                                    >
-                                      {label}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
+                              
                             </div>
 
                             {/* Action Buttons */}
