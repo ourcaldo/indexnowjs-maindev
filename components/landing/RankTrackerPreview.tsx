@@ -200,10 +200,10 @@ export default function RankTrackerPreview() {
       <div className="p-6">
         <div className={`transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-foreground mb-1">
+            <h3 className="text-lg font-semibold text-white mb-1">
               {slides[activeSlide].title}
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-300">
               {slides[activeSlide].description}
             </p>
           </div>
