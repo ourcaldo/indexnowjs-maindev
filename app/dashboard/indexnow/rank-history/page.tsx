@@ -585,6 +585,11 @@ export default function RankHistoryPage() {
                           variant={dateRange === 'custom' ? 'default' : 'outline'}
                           onClick={() => {
                             setDateRange('custom')
+                            // Initialize custom dates with current preset values when opening picker
+                            if (!showDatePicker && startDate && endDate) {
+                              setCustomStartDate(startDate)
+                              setCustomEndDate(endDate)
+                            }
                             setShowDatePicker(!showDatePicker)
                           }}
                           className="flex items-center gap-1 hover:bg-slate-50 hover:text-foreground dark:hover:bg-slate-800 dark:hover:text-foreground transition-colors duration-150"
