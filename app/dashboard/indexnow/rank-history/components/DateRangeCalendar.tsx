@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState } from 'react'
@@ -13,6 +12,9 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
   const [currentDate, setCurrentDate] = useState(new Date())
   const [tempStart, setTempStart] = useState<string | null>(null)
   const [tempEnd, setTempEnd] = useState<string | null>(null)
+  // Dummy state for custom start and end dates, as they are used in the quick select logic
+  const [customStartDate, setCustomStartDate] = useState<string | null>(null)
+  const [customEndDate, setCustomEndDate] = useState<string | null>(null)
 
   // Get the start of current month and next month
   const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
@@ -54,11 +56,11 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
   const isFutureDate = (dateStr: string): boolean => {
     const today = new Date()
     const date = new Date(dateStr)
-    
+
     // Reset time to 00:00:00 for comparison
     today.setHours(0, 0, 0, 0)
     date.setHours(0, 0, 0, 0)
-    
+
     return date > today
   }
 
@@ -126,8 +128,8 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
             disabled={!isCurrentMonth || isFuture}
             className={`
               w-full h-8 text-sm flex items-center justify-center transition-colors duration-150 relative
-              ${!isCurrentMonth 
-                ? 'text-muted-foreground/50 cursor-not-allowed' 
+              ${!isCurrentMonth
+                ? 'text-muted-foreground/50 cursor-not-allowed'
                 : isFuture
                 ? 'text-muted-foreground/40 cursor-not-allowed opacity-50'
                 : 'text-foreground cursor-pointer'
@@ -158,7 +160,7 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
             </div>
           ))}
         </div>
-        
+
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-0">
           {days}
@@ -169,6 +171,59 @@ export const DateRangeCalendar = ({ selectedRange, onRangeChange }: CalendarProp
 
   return (
     <div className="flex gap-3">
+      {/* Quick Select Buttons */}
+      <div className="flex flex-col gap-2 min-w-[150px]">
+        <span className="text-sm font-medium">Quick Select</span>
+        {[
+          { label: 'Past 2 days', value: 2 },
+          { label: 'Past 7 days', value: 7 },
+          { label: 'Past 30 days', value: 30 },
+          { label: 'Past 60 days', value: 60 },
+          { label: 'Past 90 days', value: 90 }
+        ].map(({ label, value }) => (
+          <button
+            key={value}
+            onClick={() => {
+              const today = new Date()
+              let startDate: Date
+
+              // Use exact same logic as main page getDateRange() function
+              switch (value) {
+                case 2:
+                  startDate = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000)
+                  break
+                case 7:
+                  startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000)
+                  break
+                case 30:
+                  startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000)
+                  break
+                case 60:
+                  startDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000)
+                  break
+                case 90:
+                  startDate = new Date(today.getTime() - 89 * 24 * 60 * 60 * 1000)
+                  break
+                default:
+                  startDate = new Date(today.getTime() - (value - 1) * 24 * 60 * 60 * 1000)
+              }
+
+              setCustomStartDate(startDate.toISOString().split('T')[0])
+              setCustomEndDate(today.toISOString().split('T')[0])
+              onRangeChange(startDate.toISOString().split('T')[0], today.toISOString().split('T')[0])
+            }}
+            className={`text-left text-sm px-2 py-1 rounded ${
+              customStartDate && customEndDate &&
+              formatDateString(new Date(customStartDate)) === formatDateString(new Date(startDate.toISOString().split('T')[0])) &&
+              formatDateString(new Date(customEndDate)) === formatDateString(new Date(today.toISOString().split('T')[0]))
+              ? 'bg-primary text-primary-foreground font-medium' : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* Navigation and Current Month */}
       <div className="min-w-[230px]">
         <div className="flex items-center justify-between mb-4">
