@@ -85,7 +85,7 @@ export default function BlogFilters({
               placeholder="Search blog posts..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-10 pr-10 py-3 bg-muted/50 border border-border/50 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20"
+              className="w-full pl-10 pr-10 py-3 bg-black/50 border border-border/50 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20"
               data-testid="blog-search-input"
             />
             {searchInput && (
@@ -106,7 +106,7 @@ export default function BlogFilters({
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className={`
-              flex items-center gap-2 px-4 py-3 bg-muted/50 border border-border/50 rounded-xl text-foreground hover:border-border/70 transition-colors
+              flex items-center gap-2 px-4 py-3 bg-black/50 border border-border/50 rounded-xl text-foreground hover:border-border/70 transition-colors
               ${isFilterOpen ? 'border-accent/50' : ''}
             `}
             data-testid="blog-filter-toggle"
@@ -147,7 +147,7 @@ export default function BlogFilters({
                           w-full text-left px-3 py-2 rounded-lg transition-colors text-sm
                           ${currentTag === tag
                             ? 'bg-accent text-accent-foreground'
-                            : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                            : 'text-muted-foreground hover:bg-black/50 hover:text-foreground'
                           }
                         `}
                         data-testid={`blog-tag-filter-${tag.replace(/\s+/g, '-').toLowerCase()}`}
@@ -175,7 +175,7 @@ export default function BlogFilters({
                 px-4 py-2 rounded-lg text-sm font-medium transition-colors
                 ${!currentCategory
                   ? 'bg-accent text-accent-foreground'
-                  : 'bg-muted/50 border border-border/50 text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                  : 'bg-black/50 border border-border/50 text-muted-foreground hover:bg-black/70 hover:text-foreground'
                 }
               `}
               data-testid="category-filter-all"
@@ -190,7 +190,7 @@ export default function BlogFilters({
                   px-4 py-2 rounded-lg text-sm font-medium transition-colors
                   ${currentCategory === category.slug
                     ? 'bg-accent text-accent-foreground'
-                    : 'bg-muted/50 border border-border/50 text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                    : 'bg-black/50 border border-border/50 text-muted-foreground hover:bg-black/70 hover:text-foreground'
                   }
                 `}
                 data-testid={`category-filter-${category.slug}`}
