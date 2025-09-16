@@ -124,7 +124,7 @@ export default function ContactPageContent() {
             <div className="mb-6">
               <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">SUPPORT</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-foreground">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
               Hello, how can we help?
             </h1>
             <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
