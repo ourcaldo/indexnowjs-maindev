@@ -1,5 +1,5 @@
 import React from 'react'
-import { Monitor, Smartphone, Globe } from 'lucide-react'
+import { Monitor, Smartphone } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface Country {
@@ -63,24 +63,15 @@ export const DeviceCountryFilter = ({
       {/* Country Filter */}
       <Select value={selectedCountry} onValueChange={onCountryChange}>
         <SelectTrigger className={`${compact ? 'w-[150px]' : 'min-w-[180px] max-w-[220px]'} text-sm bg-background`} data-testid="select-country">
-          <div className="flex items-center gap-2">
-            <Globe className="w-3 h-3 text-muted-foreground" />
-            <SelectValue placeholder="All Countries" />
-          </div>
+          <SelectValue placeholder="All Countries" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="">
-            <div className="flex items-center gap-2">
-              <Globe className="w-3 h-3 text-muted-foreground" />
-              <span>All Countries</span>
-            </div>
+            <span>All Countries</span>
           </SelectItem>
           {countries.map((country: Country) => (
             <SelectItem key={country.id} value={country.id}>
-              <div className="flex items-center gap-2">
-                <Globe className="w-3 h-3" />
-                <span className="truncate">{country.name}</span>
-              </div>
+              <span className="truncate">{country.name}</span>
             </SelectItem>
           ))}
         </SelectContent>
