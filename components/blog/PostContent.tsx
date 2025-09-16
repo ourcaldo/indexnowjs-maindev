@@ -65,7 +65,7 @@ export default function PostContent({ content, className = '' }: PostContentProp
       style={{
         // Custom CSS for the prose content using project colors
         '--tw-prose-body': 'hsl(var(--muted-foreground))',
-        '--tw-prose-headings': 'hsl(var(--foreground))',
+        '--tw-prose-headings': '#ffffff',
         '--tw-prose-lead': 'hsl(var(--muted-foreground))',
         '--tw-prose-links': 'hsl(var(--accent))',
         '--tw-prose-bold': 'hsl(var(--foreground))',
