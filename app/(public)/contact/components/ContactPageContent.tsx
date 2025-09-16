@@ -244,7 +244,7 @@ export default function ContactPageContent() {
 
             {/* Contact Form */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
-              <h3 className="text-xl font-semibold text-foreground mb-6">Send us a message</h3>
+              <h3 className="text-xl font-semibold text-white mb-6">Send us a message</h3>
               
               {submitStatus === 'success' && (
                 <div className="mb-6 p-4 bg-success/20 border border-success/30 rounded-lg">
