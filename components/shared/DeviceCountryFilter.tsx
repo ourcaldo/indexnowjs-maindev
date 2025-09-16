@@ -39,22 +39,22 @@ export const DeviceCountryFilter = ({
           </div>
         </SelectTrigger>
         <SelectContent className="text-left">
-          <SelectItem value="" className="justify-start">
-            <div className="flex items-center gap-2">
+          <SelectItem value="" className="justify-start pl-2 text-left">
+            <div className="flex items-center gap-2 w-full text-left">
               <Monitor className="w-3 h-3 text-muted-foreground" />
-              <span>All Devices</span>
+              <span className="text-left">All Devices</span>
             </div>
           </SelectItem>
-          <SelectItem value="desktop" className="justify-start">
-            <div className="flex items-center gap-2">
+          <SelectItem value="desktop" className="justify-start pl-2 text-left">
+            <div className="flex items-center gap-2 w-full text-left">
               <Monitor className="w-3 h-3" />
-              <span>Desktop</span>
+              <span className="text-left">Desktop</span>
             </div>
           </SelectItem>
-          <SelectItem value="mobile" className="justify-start">
-            <div className="flex items-center gap-2">
+          <SelectItem value="mobile" className="justify-start pl-2 text-left">
+            <div className="flex items-center gap-2 w-full text-left">
               <Smartphone className="w-3 h-3" />
-              <span>Mobile</span>
+              <span className="text-left">Mobile</span>
             </div>
           </SelectItem>
         </SelectContent>
