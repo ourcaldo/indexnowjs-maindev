@@ -94,7 +94,7 @@ export const SharedDomainSelector = ({
                     key={domain.id} 
                     className={`flex items-center justify-between py-2 px-3 text-sm rounded-lg cursor-pointer transition-colors duration-150 ${
                       selectedDomainId === domain.id 
-                        ? 'bg-accent/10 text-accent-foreground' 
+                        ? 'bg-accent/10 text-foreground' 
                         : 'hover:bg-muted/50 text-foreground'
                     }`}
                     onClick={(e) => {
@@ -111,7 +111,7 @@ export const SharedDomainSelector = ({
                         <span className="text-xs text-muted-foreground">Keywords</span>
                         <span className={`font-bold px-2 py-1 rounded text-xs ${
                           selectedDomainId === domain.id
-                            ? 'bg-accent/20 text-accent-foreground'
+                            ? 'bg-accent/20 text-foreground'
                             : 'bg-muted text-foreground'
                         }`}>
                           {getDomainKeywordCount(domain.id)}
