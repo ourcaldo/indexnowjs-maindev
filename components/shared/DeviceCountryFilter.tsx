@@ -66,11 +66,11 @@ export const DeviceCountryFilter = ({
           <SelectValue placeholder="All Countries" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">
+          <SelectItem value="" className="pl-2 text-left">
             <span>All Countries</span>
           </SelectItem>
           {countries.map((country: Country) => (
-            <SelectItem key={country.id} value={country.id}>
+            <SelectItem key={country.id} value={country.id} className="pl-2 text-left">
               <span className="truncate">{country.name}</span>
             </SelectItem>
           ))}
