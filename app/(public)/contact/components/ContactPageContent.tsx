@@ -226,7 +226,7 @@ export default function ContactPageContent() {
           <div className="max-w-2xl mx-auto">
             {/* Can't find what you're looking for section */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-4">Can't find what you're looking for?</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">Can't find what you're looking for?</h2>
               <p className="text-muted-foreground mb-6">
                 The IndexNow Studio Support Team is ready to help. Response time for support tickets will vary depending on plan type and severity of the issue.
               </p>
