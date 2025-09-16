@@ -40,11 +40,11 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
 
   return (
     <article 
-      className={`group bg-card/50 border border-border/50 rounded-xl overflow-hidden hover:border-border transition-all duration-300 hover:transform hover:-translate-y-1 ${className}`}
+      className={`group bg-card border border-border rounded-xl overflow-hidden hover:border-border transition-all duration-300 hover:transform hover:-translate-y-1 ${className}`}
       data-testid={`blog-card-${post.slug}`}
     >
       {/* Featured Image */}
-      <div className="aspect-[16/10] relative overflow-hidden bg-muted/50">
+      <div className="aspect-[16/10] relative overflow-hidden bg-muted">
         {post.featured_image_url && !imageError ? (
           <img
             src={post.featured_image_url}
@@ -78,7 +78,7 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
       {/* Content */}
       <div className="p-6">
         {/* Meta information */}
-        <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
+        <div className="flex items-center gap-4 mb-3 text-sm text-foreground/70">
           <div className="flex items-center gap-1" data-testid={`blog-date-${post.slug}`}>
             <Calendar className="w-4 h-4" />
             <span>{formatDate(post.published_at)}</span>
@@ -98,7 +98,7 @@ export default function BlogCard({ post, className = '' }: BlogCardProps) {
         </h3>
 
         {/* Excerpt */}
-        <p className="text-muted-foreground mb-4 line-clamp-3" data-testid={`blog-excerpt-${post.slug}`}>
+        <p className="text-foreground/80 mb-4 line-clamp-3" data-testid={`blog-excerpt-${post.slug}`}>
           {post.excerpt}
         </p>
 
