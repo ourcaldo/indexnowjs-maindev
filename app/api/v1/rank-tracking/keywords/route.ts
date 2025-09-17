@@ -369,6 +369,7 @@ export async function POST(request: NextRequest) {
 
     // Trigger immediate rank checks for newly added keywords if user has API key configured
     let hasAPIKey = false
+    let enrichmentTriggered = false
     try {
       const { APIKeyManager } = await import('@/lib/rank-tracking/api-key-manager')
       const { RankTracker } = await import('@/lib/rank-tracking/rank-tracker')
@@ -413,10 +414,55 @@ export async function POST(request: NextRequest) {
       // Don't fail the keyword creation if rank checking fails
     }
 
+    // Trigger SeRanking keyword enrichment for newly added keywords
+    try {
+      if (insertedKeywords && insertedKeywords.length > 0) {
+        // Prepare keywords for SeRanking enrichment
+        const keywordsForEnrichment = insertedKeywords.map((keyword: any) => ({
+          keyword: keyword.keyword,
+          country_code: keyword.country.iso2_code.toLowerCase(),
+          language_code: 'en'
+        }))
+
+        console.log(`[INFO] Starting SeRanking enrichment for ${keywordsForEnrichment.length} keywords`)
+
+        // Get system API key for internal SeRanking API call
+        const systemApiKey = process.env.SYSTEM_API_KEY
+        if (!systemApiKey) {
+          console.error('System API key not configured - skipping keyword enrichment')
+        } else {
+          // Make internal API call to SeRanking bulk enrichment endpoint
+          const enrichmentResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/v1/integrations/seranking/keyword-data/bulk`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-System-API-Key': systemApiKey
+            },
+            body: JSON.stringify({
+              keywords: keywordsForEnrichment,
+              priority: 'NORMAL'
+            })
+          })
+
+          if (enrichmentResponse.ok) {
+            const enrichmentData = await enrichmentResponse.json()
+            console.log(`[INFO] SeRanking enrichment queued: Job ID ${enrichmentData.job_id}`)
+            enrichmentTriggered = true
+          } else {
+            const errorText = await enrichmentResponse.text()
+            console.error(`[ERROR] SeRanking enrichment failed:`, errorText)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error triggering SeRanking keyword enrichment:', error)
+      // Don't fail the keyword creation if enrichment fails
+    }
+
     return NextResponse.json({
       success: true,
       data: insertedKeywords,
-      message: `Successfully added ${newKeywords.length} keywords${existingKeywordTexts.length > 0 ? ` (${existingKeywordTexts.length} duplicates skipped)` : ''}${hasAPIKey ? '. Rank checking started.' : '. Contact admin to configure ScrapingDog API key.'}`
+      message: `Successfully added ${newKeywords.length} keywords${existingKeywordTexts.length > 0 ? ` (${existingKeywordTexts.length} duplicates skipped)` : ''}${hasAPIKey ? '. Rank checking started.' : '. Contact admin to configure ScrapingDog API key.'}${enrichmentTriggered ? ' SeRanking keyword enrichment queued.' : ''}`
     })
 
   } catch (error) {
