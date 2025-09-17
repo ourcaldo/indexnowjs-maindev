@@ -109,7 +109,26 @@ function calculateEstimatedCompletion(keywordCount: number, batchSize: number = 
 export async function POST(request: NextRequest) {
   try {
     // Parse request body
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError);
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid JSON in request body',
+        message: 'Request body must be valid JSON'
+      } as BulkEnrichmentResponse, { status: 400 });
+    }
+
+    // Check if body is empty or not an object
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid request body',
+        message: 'Request body must be a JSON object'
+      } as BulkEnrichmentResponse, { status: 400 });
+    }
 
     // Validate request
     const validation = BulkEnrichmentRequestSchema.safeParse(body);

@@ -397,7 +397,7 @@ export class HealthChecker implements IHealthChecker {
     try {
       // Test database connectivity
       const { data, error } = await supabaseAdmin
-        .from('indb_seranking_integrations')
+        .from('indb_site_integration')
         .select('id')
         .limit(1);
 
@@ -905,7 +905,7 @@ export class HealthChecker implements IHealthChecker {
   private async recoverDatabase(healthCheck: DetailedHealthCheck): Promise<boolean> {
     // Database recovery logic - typically involves connection pool refresh
     try {
-      const { error } = await supabaseAdmin.from('indb_seranking_integrations').select('id').limit(1);
+      const { error } = await supabaseAdmin.from('indb_site_integration').select('id').limit(1);
       return !error;
     } catch {
       return false;

@@ -678,7 +678,7 @@ export interface Database {
           updated_at?: string
         }
       }
-      indb_seranking_integrations: {
+      indb_site_integration: {
         Row: {
           id: string
           user_id: string
@@ -802,7 +802,7 @@ export type KeywordKeyword = Database['public']['Tables']['indb_keyword_keywords
 export type KeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Row']
 export type KeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Row']
 export type SiteIntegration = Database['public']['Tables']['indb_site_integration']['Row']
-export type SeRankingIntegration = Database['public']['Tables']['indb_seranking_integrations']['Row']
+export type SeRankingIntegration = Database['public']['Tables']['indb_site_integration']['Row']
 export type SeRankingUsageLog = Database['public']['Tables']['indb_seranking_usage_logs']['Row']
 
 // Insert types
@@ -818,7 +818,7 @@ export type InsertKeywordKeyword = Database['public']['Tables']['indb_keyword_ke
 export type InsertKeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Insert']
 export type InsertKeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Insert']
 export type InsertSiteIntegration = Database['public']['Tables']['indb_site_integration']['Insert']
-export type InsertSeRankingIntegration = Database['public']['Tables']['indb_seranking_integrations']['Insert']
+export type InsertSeRankingIntegration = Database['public']['Tables']['indb_site_integration']['Insert']
 export type InsertSeRankingUsageLog = Database['public']['Tables']['indb_seranking_usage_logs']['Insert']
 
 // Update types
@@ -832,5 +832,5 @@ export type UpdateKeywordKeyword = Database['public']['Tables']['indb_keyword_ke
 export type UpdateKeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Update']
 export type UpdateKeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Update']
 export type UpdateSiteIntegration = Database['public']['Tables']['indb_site_integration']['Update']
-export type UpdateSeRankingIntegration = Database['public']['Tables']['indb_seranking_integrations']['Update']
+export type UpdateSeRankingIntegration = Database['public']['Tables']['indb_site_integration']['Update']
 export type UpdateSeRankingUsageLog = Database['public']['Tables']['indb_seranking_usage_logs']['Update']

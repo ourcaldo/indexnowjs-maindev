@@ -199,7 +199,7 @@ describe('IntegrationService', () => {
     beforeEach(() => {
       // Mock getIntegrationSettings for recordApiUsage
       mockSupabaseAdmin.from.mockImplementation((table: string) => {
-        if (table === 'indb_seranking_integrations') {
+        if (table === 'indb_site_integration') {
           return {
             select: () => ({
               eq: () => ({
@@ -287,7 +287,7 @@ describe('IntegrationService', () => {
     it('should return healthy status with API client', async () => {
       // Mock getIntegrationSettings
       mockSupabaseAdmin.from.mockImplementation((table: string) => {
-        if (table === 'indb_seranking_integrations') {
+        if (table === 'indb_site_integration') {
           if (mockSupabaseAdmin.from.mock.calls.length <= 2) { // First call is for getIntegrationSettings
             return {
               select: () => ({
@@ -323,7 +323,7 @@ describe('IntegrationService', () => {
 
     it('should return unhealthy status when integration is inactive', async () => {
       mockSupabaseAdmin.from.mockImplementation((table: string) => {
-        if (table === 'indb_seranking_integrations') {
+        if (table === 'indb_site_integration') {
           if (mockSupabaseAdmin.from.mock.calls.length <= 2) {
             return {
               select: () => ({
@@ -504,7 +504,7 @@ describe('IntegrationService', () => {
               })
             })
           };
-        } else if (table === 'indb_seranking_integrations') {
+        } else if (table === 'indb_site_integration') {
           return {
             select: () => ({
               eq: () => ({

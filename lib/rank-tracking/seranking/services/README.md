@@ -25,7 +25,7 @@ The service follows the established architectural patterns in the SeRanking inte
 
 Two new tables have been added to support integration management:
 
-### `indb_seranking_integrations`
+### `indb_site_integration`
 Stores integration configuration and settings:
 - `id`: Primary key
 - `user_id`: Associated user
@@ -221,7 +221,7 @@ await runManualTests();
 ## Database Migrations
 
 When deploying, ensure the following database tables are created:
-1. `indb_seranking_integrations`
+1. `indb_site_integration`
 2. `indb_seranking_usage_logs`
 
 Table schemas are defined in `lib/database/database-types.ts`.

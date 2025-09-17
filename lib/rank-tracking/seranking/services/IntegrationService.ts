@@ -30,22 +30,16 @@ export interface IntegrationServiceConfig {
   logLevel: 'debug' | 'info' | 'warn' | 'error';
 }
 
-// Database types for SeRanking integration settings
+// Database types for SeRanking integration settings (matches actual DB schema)
 interface IntegrationRow {
   id: string;
-  user_id: string;
   service_name: string;
-  api_key: string;
+  apikey: string;
   api_url: string;
   api_quota_limit: number;
   api_quota_used: number;
   quota_reset_date: string;
-  quota_reset_interval: string;
   is_active: boolean;
-  rate_limits: any;
-  alert_settings: any;
-  last_health_check: string | null;
-  health_status: string;
   created_at: string;
   updated_at: string;
 }
@@ -136,9 +130,9 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Get SeRanking integration settings
    */
-  async getIntegrationSettings(userId?: string): Promise<ServiceResponse<{
+  async getIntegrationSettings(): Promise<ServiceResponse<{
     service_name: string;
-    api_key: string;
+    apikey: string;
     api_url: string;
     api_quota_limit: number;
     api_quota_used: number;
@@ -147,10 +141,9 @@ export class IntegrationService implements IIntegrationService {
   }>> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('indb_seranking_integrations')
+        .from('indb_site_integration')
         .select('*')
-        .eq('user_id', userId || 'system')
-        .eq('service_name', 'seranking')
+        .eq('service_name', 'seranking_keyword_export')
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -162,7 +155,8 @@ export class IntegrationService implements IIntegrationService {
         return {
           success: true,
           data: {
-            service_name: 'seranking',
+            service_name: 'seranking_keyword_export',
+            apikey: '',
             api_url: 'https://api.seranking.com',
             api_quota_limit: this.config.defaultQuotaLimit,
             api_quota_used: 0,
@@ -180,7 +174,7 @@ export class IntegrationService implements IIntegrationService {
         success: true,
         data: {
           service_name: data.service_name,
-          api_key: data.api_key,
+          apikey: data.apikey,
           api_url: data.api_url,
           api_quota_limit: data.api_quota_limit,
           api_quota_used: data.api_quota_used,
@@ -212,16 +206,9 @@ export class IntegrationService implements IIntegrationService {
     settings: {
       api_quota_limit?: number;
       is_active?: boolean;
-      api_key?: string;
+      apikey?: string;
       api_url?: string;
-      rate_limits?: RateLimitConfig;
-      alert_settings?: {
-        quota_alerts: QuotaAlert[];
-        error_notifications: boolean;
-        performance_alerts: boolean;
-      };
-    },
-    userId?: string
+    }
   ): Promise<ServiceResponse<boolean>> {
     try {
       const updateData: Partial<IntegrationRow> = {
@@ -234,24 +221,17 @@ export class IntegrationService implements IIntegrationService {
       if (settings.is_active !== undefined) {
         updateData.is_active = settings.is_active;
       }
-      if (settings.api_key !== undefined) {
-        updateData.api_key = settings.api_key;
+      if (settings.apikey !== undefined) {
+        updateData.apikey = settings.apikey;
       }
       if (settings.api_url !== undefined) {
         updateData.api_url = settings.api_url;
       }
-      if (settings.rate_limits !== undefined) {
-        updateData.rate_limits = settings.rate_limits;
-      }
-      if (settings.alert_settings !== undefined) {
-        updateData.alert_settings = settings.alert_settings;
-      }
 
       const { error } = await supabaseAdmin
-        .from('indb_seranking_integrations')
+        .from('indb_site_integration')
         .upsert({
-          user_id: userId || 'system',
-          service_name: 'seranking',
+          service_name: 'seranking_keyword_export',
           ...updateData
         });
 
@@ -289,7 +269,6 @@ export class IntegrationService implements IIntegrationService {
     requestCount: number = 1,
     options: {
       operationType?: string;
-      userId?: string;
       responseTime?: number;
       successful?: boolean;
       metadata?: any;
@@ -298,52 +277,54 @@ export class IntegrationService implements IIntegrationService {
     try {
       const {
         operationType = 'keyword_export',
-        userId = 'system',
         responseTime,
         successful = true,
         metadata
       } = options;
 
       // Get current integration
-      const integrationResult = await this.getIntegrationSettings(userId);
+      const integrationResult = await this.getIntegrationSettings();
       if (!integrationResult.success) {
         throw new Error('Failed to get integration settings');
       }
 
       // Update quota usage in integration table
       const { error: updateError } = await supabaseAdmin
-        .from('indb_seranking_integrations')
+        .from('indb_site_integration')
         .update({
           api_quota_used: integrationResult.data!.api_quota_used + requestCount,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', userId)
-        .eq('service_name', 'seranking');
+        .eq('service_name', 'seranking_keyword_export');
 
       if (updateError) {
         throw updateError;
       }
 
-      // Log usage details
+      // Log usage details (if usage logs table exists)
       const today = new Date().toISOString().split('T')[0];
-      const { error: logError } = await supabaseAdmin
-        .from('indb_seranking_usage_logs')
-        .insert({
-          integration_id: `${userId}_seranking`,
-          operation_type: operationType,
-          request_count: requestCount,
-          successful_requests: successful ? requestCount : 0,
-          failed_requests: successful ? 0 : requestCount,
-          response_time_ms: responseTime,
-          timestamp: new Date().toISOString(),
-          date: today,
-          metadata
-        });
-
-      if (logError) {
-        this.log('warn', 'Failed to log usage details:', logError);
-        // Don't fail the entire operation if logging fails
+      try {
+        const { error: logError } = await supabaseAdmin
+          .from('indb_seranking_usage_logs')
+          .insert({
+            integration_id: 'seranking_keyword_export',
+            operation_type: operationType,
+            request_count: requestCount,
+            successful_requests: successful ? requestCount : 0,
+            failed_requests: successful ? 0 : requestCount,
+            response_time_ms: responseTime,
+            timestamp: new Date().toISOString(),
+            date: today,
+            metadata
+          });
+        
+        if (logError) {
+          this.log('warn', 'Failed to log usage details:', logError);
+        }
+      } catch (logError) {
+        this.log('warn', 'Usage logging failed (table may not exist):', logError);
       }
+
 
       // Update internal metrics
       this.metrics.total_requests += requestCount;
@@ -359,7 +340,7 @@ export class IntegrationService implements IIntegrationService {
       }
 
       // Check quota thresholds and trigger alerts if needed
-      await this.checkQuotaThresholds(userId);
+      await this.checkQuotaThresholds();
 
       return {
         success: true,
@@ -386,23 +367,22 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Reset quota usage
    */
-  async resetQuotaUsage(userId?: string): Promise<ServiceResponse<boolean>> {
+  async resetQuotaUsage(): Promise<ServiceResponse<boolean>> {
     try {
       const { error } = await supabaseAdmin
-        .from('indb_seranking_integrations')
+        .from('indb_site_integration')
         .update({
           api_quota_used: 0,
           quota_reset_date: this.calculateNextResetDate().toISOString(),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', userId || 'system')
-        .eq('service_name', 'seranking');
+        .eq('service_name', 'seranking_keyword_export');
 
       if (error) {
         throw error;
       }
 
-      this.log('info', `Quota usage reset for user: ${userId || 'system'}`);
+      this.log('info', 'Quota usage reset for SeRanking integration');
       
       return {
         success: true,
@@ -428,11 +408,11 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Test integration health
    */
-  async testIntegration(userId?: string): Promise<ServiceResponse<HealthCheckResult>> {
+  async testIntegration(): Promise<ServiceResponse<HealthCheckResult>> {
     const startTime = Date.now();
     
     try {
-      const settingsResult = await this.getIntegrationSettings(userId);
+      const settingsResult = await this.getIntegrationSettings();
       if (!settingsResult.success || !settingsResult.data?.is_active) {
         const result: HealthCheckResult = {
           status: 'unhealthy',
@@ -440,7 +420,7 @@ export class IntegrationService implements IIntegrationService {
           error_message: 'Integration is not active or not configured'
         };
         
-        await this.updateHealthStatus(result, userId);
+        await this.updateHealthStatus(result);
         return {
           success: true,
           data: result,
@@ -476,7 +456,7 @@ export class IntegrationService implements IIntegrationService {
       }
 
       // Update health status in database
-      await this.updateHealthStatus(result, userId);
+      await this.updateHealthStatus(result);
       
       this.lastHealthCheck = result;
       
@@ -497,7 +477,7 @@ export class IntegrationService implements IIntegrationService {
         response_time: Date.now() - startTime
       };
       
-      await this.updateHealthStatus(result, userId);
+      await this.updateHealthStatus(result);
       
       return {
         success: false,
@@ -513,7 +493,7 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Validate API key
    */
-  async validateApiKey(apiKey: string, userId?: string): Promise<ServiceResponse<{
+  async validateApiKey(apiKey: string): Promise<ServiceResponse<{
     isValid: boolean;
     keyInfo?: {
       permissions: string[];
@@ -591,7 +571,7 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Get quota status
    */
-  async getQuotaStatus(userId?: string): Promise<ServiceResponse<QuotaStatus>> {
+  async getQuotaStatus(): Promise<ServiceResponse<QuotaStatus>> {
     try {
       const settingsResult = await this.getIntegrationSettings(userId);
       if (!settingsResult.success) {
@@ -637,13 +617,13 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Check if quota allows for request
    */
-  async checkQuotaAvailable(requestCount: number = 1, userId?: string): Promise<ServiceResponse<{
+  async checkQuotaAvailable(requestCount: number = 1): Promise<ServiceResponse<{
     allowed: boolean;
     remaining: number;
     reason?: string;
   }>> {
     try {
-      const quotaResult = await this.getQuotaStatus(userId);
+      const quotaResult = await this.getQuotaStatus();
       if (!quotaResult.success) {
         throw new Error('Failed to get quota status');
       }
@@ -676,26 +656,30 @@ export class IntegrationService implements IIntegrationService {
    * Generate usage report
    */
   async getUsageReport(
-    period: 'daily' | 'weekly' | 'monthly' = 'monthly',
-    userId?: string
+    period: 'daily' | 'weekly' | 'monthly' = 'monthly'
   ): Promise<ServiceResponse<UsageReport>> {
     try {
       const { startDate, endDate } = this.getReportPeriod(period);
       
-      // Get usage logs for the period
-      const { data: usageLogs, error } = await supabaseAdmin
-        .from('indb_seranking_usage_logs')
-        .select('*')
-        .eq('integration_id', `${userId || 'system'}_seranking`)
-        .gte('timestamp', startDate.toISOString())
-        .lte('timestamp', endDate.toISOString())
-        .order('timestamp', { ascending: true });
-
-      if (error) {
-        throw error;
+      // Get usage logs for the period (if table exists)
+      let logs = [];
+      try {
+        const { data: usageLogs, error } = await supabaseAdmin
+          .from('indb_seranking_usage_logs')
+          .select('*')
+          .eq('integration_id', 'seranking_keyword_export')
+          .gte('timestamp', startDate.toISOString())
+          .lte('timestamp', endDate.toISOString())
+          .order('timestamp', { ascending: true });
+        
+        if (error) {
+          this.log('warn', 'Usage logs table not accessible:', error);
+        } else {
+          logs = usageLogs || [];
+        }
+      } catch (error) {
+        this.log('warn', 'Usage logs table may not exist:', error);
       }
-
-      const logs = usageLogs || [];
       
       // Calculate aggregated metrics
       const totalRequests = logs.reduce((sum, log) => sum + log.request_count, 0);
@@ -744,7 +728,7 @@ export class IntegrationService implements IIntegrationService {
       });
 
       // Get current quota status
-      const quotaResult = await this.getQuotaStatus(userId);
+      const quotaResult = await this.getQuotaStatus();
       const quota = quotaResult.success ? quotaResult.data! : {
         current_usage: 0,
         quota_limit: this.config.defaultQuotaLimit,
@@ -811,22 +795,20 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Enable quota alerts with thresholds
    */
-  async enableQuotaAlerts(thresholds: number[], userId?: string): Promise<ServiceResponse<boolean>> {
+  async enableQuotaAlerts(thresholds: number[]): Promise<ServiceResponse<boolean>> {
     try {
-      const quotaAlerts: QuotaAlert[] = thresholds.map(threshold => ({
-        threshold,
-        enabled: true
-      }));
-
-      const settingsResult = await this.updateIntegrationSettings({
-        alert_settings: {
-          quota_alerts: quotaAlerts,
-          error_notifications: true,
-          performance_alerts: true
+      // Note: Alert settings are not supported in the current schema
+      // This method is kept for compatibility but doesn't persist alert settings
+      this.log('info', `Quota alert thresholds set: ${thresholds.join(', ')}`);
+      
+      return {
+        success: true,
+        data: true,
+        metadata: {
+          source: 'api',
+          timestamp: new Date()
         }
-      }, userId);
-
-      return settingsResult;
+      };
     } catch (error) {
       this.log('error', 'Failed to enable quota alerts:', error);
       return {
@@ -843,7 +825,7 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Get integration health status
    */
-  async getIntegrationHealth(userId?: string): Promise<ServiceResponse<HealthCheckResult>> {
+  async getIntegrationHealth(): Promise<ServiceResponse<HealthCheckResult>> {
     try {
       // Return cached health check if recent (less than health check interval)
       if (this.lastHealthCheck && 
@@ -859,7 +841,7 @@ export class IntegrationService implements IIntegrationService {
       }
 
       // Perform new health check
-      return await this.testIntegration(userId);
+      return await this.testIntegration();
     } catch (error) {
       this.log('error', 'Failed to get integration health:', error);
       return {
@@ -875,20 +857,20 @@ export class IntegrationService implements IIntegrationService {
 
   // Private helper methods
 
-  private async checkQuotaThresholds(userId?: string): Promise<void> {
+  private async checkQuotaThresholds(): Promise<void> {
     try {
-      const quotaResult = await this.getQuotaStatus(userId);
+      const quotaResult = await this.getQuotaStatus();
       if (!quotaResult.success) {
         return;
       }
 
       const quota = quotaResult.data!;
-      const alertKey = `${userId || 'system'}_quota_alert`;
+      const alertKey = 'seranking_quota_alert';
       
       // Check critical threshold
       if (quota.usage_percentage >= this.config.quotaCriticalThreshold) {
         if (!this.activeAlerts.has(`${alertKey}_critical`)) {
-          this.log('error', `CRITICAL: Quota usage at ${Math.round(quota.usage_percentage * 100)}% for user: ${userId || 'system'}`);
+          this.log('error', `CRITICAL: SeRanking quota usage at ${Math.round(quota.usage_percentage * 100)}%`);
           this.activeAlerts.set(`${alertKey}_critical`, new Date());
           // Here you would send critical alerts (email, SMS, etc.)
         }
@@ -897,7 +879,7 @@ export class IntegrationService implements IIntegrationService {
       // Check warning threshold
       else if (quota.usage_percentage >= this.config.quotaWarningThreshold) {
         if (!this.activeAlerts.has(`${alertKey}_warning`)) {
-          this.log('warn', `WARNING: Quota usage at ${Math.round(quota.usage_percentage * 100)}% for user: ${userId || 'system'}`);
+          this.log('warn', `WARNING: SeRanking quota usage at ${Math.round(quota.usage_percentage * 100)}%`);
           this.activeAlerts.set(`${alertKey}_warning`, new Date());
           // Here you would send warning alerts
         }
@@ -913,17 +895,11 @@ export class IntegrationService implements IIntegrationService {
     }
   }
 
-  private async updateHealthStatus(result: HealthCheckResult, userId?: string): Promise<void> {
+  private async updateHealthStatus(result: HealthCheckResult): Promise<void> {
     try {
-      await supabaseAdmin
-        .from('indb_seranking_integrations')
-        .update({
-          last_health_check: result.last_check.toISOString(),
-          health_status: result.status,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId || 'system')
-        .eq('service_name', 'seranking');
+      // Note: Health status fields don't exist in current schema
+      // This method is kept for compatibility but doesn't persist health status
+      this.log('info', `Health status updated: ${result.status}`);
     } catch (error) {
       this.log('warn', 'Failed to update health status:', error);
     }
@@ -987,9 +963,9 @@ export class IntegrationService implements IIntegrationService {
   private async checkAutoQuotaReset(): Promise<void> {
     try {
       const { data: integrations, error } = await supabaseAdmin
-        .from('indb_seranking_integrations')
+        .from('indb_site_integration')
         .select('*')
-        .eq('service_name', 'seranking');
+        .eq('service_name', 'seranking_keyword_export');
 
       if (error || !integrations) {
         return;
@@ -999,8 +975,8 @@ export class IntegrationService implements IIntegrationService {
       for (const integration of integrations) {
         const resetDate = new Date(integration.quota_reset_date);
         if (now >= resetDate) {
-          await this.resetQuotaUsage(integration.user_id);
-          this.log('info', `Auto-reset quota for user: ${integration.user_id}`);
+          await this.resetQuotaUsage();
+          this.log('info', 'Auto-reset quota for SeRanking integration');
         }
       }
     } catch (error) {

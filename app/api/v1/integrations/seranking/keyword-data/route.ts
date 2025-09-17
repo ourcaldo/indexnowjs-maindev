@@ -98,8 +98,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const queryParams = {
       keyword: searchParams.get('keyword'),
-      country_code: searchParams.get('country_code'),
-      language_code: searchParams.get('language_code'),
+      country_code: searchParams.get('country_code') || undefined,
+      language_code: searchParams.get('language_code') || undefined,
       force_refresh: searchParams.get('force_refresh') === 'true'
     };
 
