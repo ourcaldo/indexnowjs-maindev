@@ -40,7 +40,7 @@ export class KeywordBankService implements IKeywordBankService {
         .from('indb_keyword_bank')
         .select('*')
         .eq('keyword', keyword.trim().toLowerCase())
-        .eq('country_code', countryCode.toLowerCase())
+        .eq('country_id', countryCode.toLowerCase())
         .eq('language_code', languageCode.toLowerCase())
         .single();
 
@@ -73,7 +73,7 @@ export class KeywordBankService implements IKeywordBankService {
         .from('indb_keyword_bank')
         .select('*')
         .in('keyword', normalizedKeywords)
-        .eq('country_code', countryCode.toLowerCase())
+        .eq('country_id', countryCode.toLowerCase())
         .eq('language_code', languageCode.toLowerCase());
 
       if (error) {
@@ -151,7 +151,7 @@ export class KeywordBankService implements IKeywordBankService {
     try {
       const insertData: KeywordBankInsertRow = {
         keyword: keyword.trim().toLowerCase(),
-        country_code: countryCode.toLowerCase(),
+        country_id: countryCode.toLowerCase(),
         language_code: languageCode.toLowerCase(),
         is_data_found: apiData.is_data_found,
         volume: apiData.volume,
@@ -167,7 +167,7 @@ export class KeywordBankService implements IKeywordBankService {
       const { data, error } = await supabaseAdmin
         .from('indb_keyword_bank')
         .upsert(insertData, {
-          onConflict: 'keyword,country_code,language_code'
+          onConflict: 'keyword,country_id,language_code'
         })
         .select()
         .single();
@@ -230,7 +230,7 @@ export class KeywordBankService implements IKeywordBankService {
 
       const insertData: KeywordBankInsertRow[] = keywordDataPairs.map(pair => ({
         keyword: pair.keyword.trim().toLowerCase(),
-        country_code: pair.countryCode.toLowerCase(),
+        country_id: pair.countryCode.toLowerCase(),
         language_code: (pair.languageCode || 'en').toLowerCase(),
         is_data_found: pair.apiData.is_data_found,
         volume: pair.apiData.volume,
@@ -245,7 +245,7 @@ export class KeywordBankService implements IKeywordBankService {
       const { data, error } = await supabaseAdmin
         .from('indb_keyword_bank')
         .upsert(insertData, {
-          onConflict: 'keyword,country_code,language_code'
+          onConflict: 'keyword,country_id,language_code'
         })
         .select();
 
@@ -398,7 +398,7 @@ export class KeywordBankService implements IKeywordBankService {
       }
 
       if (query.country_code) {
-        dbQuery = dbQuery.eq('country_code', query.country_code.toLowerCase());
+        dbQuery = dbQuery.eq('country_id', query.country_code.toLowerCase());
       }
 
       if (query.language_code) {
@@ -492,7 +492,7 @@ export class KeywordBankService implements IKeywordBankService {
         .select('*', { count: 'exact', head: true });
 
       if (countryCode) {
-        query = query.eq('country_code', countryCode.toLowerCase());
+        query = query.eq('country_id', countryCode.toLowerCase());
       }
 
       if (languageCode) {
@@ -507,7 +507,7 @@ export class KeywordBankService implements IKeywordBankService {
         .select('*', { count: 'exact', head: true })
         .eq('is_data_found', true);
 
-      if (countryCode) dataFoundQuery = dataFoundQuery.eq('country_code', countryCode.toLowerCase());
+      if (countryCode) dataFoundQuery = dataFoundQuery.eq('country_id', countryCode.toLowerCase());
       if (languageCode) dataFoundQuery = dataFoundQuery.eq('language_code', languageCode.toLowerCase());
 
       const { count: dataFoundCount } = await dataFoundQuery;
@@ -519,7 +519,7 @@ export class KeywordBankService implements IKeywordBankService {
         .select('*', { count: 'exact', head: true })
         .gte('data_updated_at', sevenDaysAgo.toISOString());
 
-      if (countryCode) freshQuery = freshQuery.eq('country_code', countryCode.toLowerCase());
+      if (countryCode) freshQuery = freshQuery.eq('country_id', countryCode.toLowerCase());
       if (languageCode) freshQuery = freshQuery.eq('language_code', languageCode.toLowerCase());
 
       const { count: freshCount } = await freshQuery;
@@ -659,7 +659,7 @@ export class KeywordBankService implements IKeywordBankService {
     return {
       id: row.id,
       keyword: row.keyword,
-      country_code: row.country_code,
+      country_code: row.country_id,
       language_code: row.language_code,
       is_data_found: row.is_data_found,
       volume: row.volume,
@@ -681,7 +681,7 @@ export class KeywordBankService implements IKeywordBankService {
     try {
       const insertData: KeywordBankInsertRow = {
         keyword: data.keyword.trim().toLowerCase(),
-        country_code: data.country_code.toLowerCase(),
+        country_id: data.country_code.toLowerCase(),
         language_code: (data.language_code || 'en').toLowerCase(),
         is_data_found: data.is_data_found,
         volume: data.volume,
@@ -696,7 +696,7 @@ export class KeywordBankService implements IKeywordBankService {
       const { data: result, error } = await supabaseAdmin
         .from('indb_keyword_bank')
         .upsert(insertData, {
-          onConflict: 'keyword,country_code,language_code'
+          onConflict: 'keyword,country_id,language_code'
         })
         .select()
         .single();
@@ -767,7 +767,7 @@ export class KeywordBankService implements IKeywordBankService {
       const { data: result, error } = await supabaseAdmin
         .from('indb_keyword_bank')
         .upsert(insertData, {
-          onConflict: 'keyword,country_code,language_code'
+          onConflict: 'keyword,country_id,language_code'
         })
         .select();
 
@@ -899,7 +899,7 @@ export class KeywordBankService implements IKeywordBankService {
         .from('indb_keyword_bank')
         .delete()
         .eq('keyword', keyword.trim().toLowerCase())
-        .eq('country_code', countryCode.toLowerCase());
+        .eq('country_id', countryCode.toLowerCase());
 
       if (error) {
         console.error('Error deleting keyword data:', error);
