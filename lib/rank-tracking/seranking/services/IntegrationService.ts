@@ -130,9 +130,9 @@ export class IntegrationService implements IIntegrationService {
   /**
    * Get SeRanking integration settings
    */
-  async getIntegrationSettings(): Promise<ServiceResponse<{
+  async getIntegrationSettings(userId?: string): Promise<ServiceResponse<{
     service_name: string;
-    apikey: string;
+    api_key: string;
     api_url: string;
     api_quota_limit: number;
     api_quota_used: number;
@@ -156,7 +156,7 @@ export class IntegrationService implements IIntegrationService {
           success: true,
           data: {
             service_name: 'seranking_keyword_export',
-            apikey: '',
+            api_key: '',
             api_url: 'https://api.seranking.com',
             api_quota_limit: this.config.defaultQuotaLimit,
             api_quota_used: 0,
@@ -174,7 +174,7 @@ export class IntegrationService implements IIntegrationService {
         success: true,
         data: {
           service_name: data.service_name,
-          apikey: data.apikey,
+          api_key: data.api_key,
           api_url: data.api_url,
           api_quota_limit: data.api_quota_limit,
           api_quota_used: data.api_quota_used,
@@ -573,7 +573,7 @@ export class IntegrationService implements IIntegrationService {
    */
   async getQuotaStatus(): Promise<ServiceResponse<QuotaStatus>> {
     try {
-      const settingsResult = await this.getIntegrationSettings(userId);
+      const settingsResult = await this.getIntegrationSettings();
       if (!settingsResult.success) {
         throw new Error('Failed to get integration settings');
       }

@@ -517,41 +517,6 @@ export interface Database {
           updated_at?: string
         }
       }
-      indb_site_integration: {
-        Row: {
-          id: string
-          service_name: string
-          scrappingdog_apikey: string
-          api_quota_limit: number
-          api_quota_used: number
-          quota_reset_date: string
-          is_active: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          service_name?: string
-          scrappingdog_apikey: string
-          api_quota_limit?: number
-          api_quota_used?: number
-          quota_reset_date?: string
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          service_name?: string
-          scrappingdog_apikey?: string
-          api_quota_limit?: number
-          api_quota_used?: number
-          quota_reset_date?: string
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
       indb_indexing_url_submissions: {
         Row: {
           id: string

@@ -18,15 +18,17 @@ import {
   CacheStats
 } from '../types/KeywordBankTypes';
 import { SeRankingKeywordData } from '../types/SeRankingTypes';
+import { IKeywordBankService } from '../types/ServiceTypes';
+import { BulkKeywordBankOperationResult } from '../types/KeywordBankTypes';
 
 // Type aliases for convenience
 type KeywordBankRow = Database['public']['Tables']['indb_keyword_bank']['Row'];
 type KeywordBankInsertRow = Database['public']['Tables']['indb_keyword_bank']['Insert'];
 type KeywordBankUpdateRow = Database['public']['Tables']['indb_keyword_bank']['Update'];
 
-export class KeywordBankService {
+export class KeywordBankService implements IKeywordBankService {
   /**
-   * Get keyword data from bank by keyword and location
+   * Get keyword data from bank by keyword and location (Interface implementation)
    */
   async getKeywordData(
     keyword: string,
@@ -475,47 +477,7 @@ export class KeywordBankService {
     }
   }
 
-  /**
-   * Delete keyword data from bank
-   */
-  async deleteKeywordData(id: string): Promise<KeywordBankOperationResult> {
-    try {
-      const { error } = await supabaseAdmin
-        .from('indb_keyword_bank')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting keyword data:', error);
-        return {
-          success: false,
-          error: {
-            message: error.message,
-            code: error.code
-          },
-          keyword: id,
-          operation: 'delete'
-        };
-      }
-
-      return {
-        success: true,
-        keyword: id,
-        operation: 'delete'
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Error in deleteKeywordData:', error);
-      return {
-        success: false,
-        error: {
-          message: errorMessage
-        },
-        keyword: id,
-        operation: 'delete'
-      };
-    }
-  }
+  // Removed duplicate deleteKeywordData method - interface version below is the correct one
 
   /**
    * Get cache statistics
@@ -710,6 +672,265 @@ export class KeywordBankService {
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at)
     };
+  }
+
+  /**
+   * Insert or update keyword data in bank (Interface method)
+   */
+  async upsertKeywordData(data: KeywordBankInsert): Promise<KeywordBankOperationResult> {
+    try {
+      const insertData: KeywordBankInsertRow = {
+        keyword: data.keyword.trim().toLowerCase(),
+        country_code: data.country_code.toLowerCase(),
+        language_code: (data.language_code || 'en').toLowerCase(),
+        is_data_found: data.is_data_found,
+        volume: data.volume,
+        cpc: data.cpc,
+        competition: data.competition,
+        difficulty: data.difficulty,
+        history_trend: data.history_trend,
+        keyword_intent: data.keyword_intent,
+        data_updated_at: new Date().toISOString()
+      };
+
+      const { data: result, error } = await supabaseAdmin
+        .from('indb_keyword_bank')
+        .upsert(insertData, {
+          onConflict: 'keyword,country_code,language_code'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error upserting keyword data:', error);
+        return {
+          success: false,
+          error: {
+            message: error.message,
+            code: error.code
+          },
+          keyword: data.keyword,
+          operation: 'upsert'
+        };
+      }
+
+      return {
+        success: true,
+        data: result ? this.mapRowToEntity(result) : undefined,
+        keyword: data.keyword,
+        operation: 'upsert'
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in upsertKeywordData:', error);
+      return {
+        success: false,
+        error: {
+          message: errorMessage
+        },
+        keyword: data.keyword,
+        operation: 'upsert'
+      };
+    }
+  }
+
+  /**
+   * Bulk upsert keyword data (Interface method)
+   */
+  async bulkUpsertKeywordData(data: KeywordBankInsert[]): Promise<BulkKeywordBankOperationResult> {
+    try {
+      if (data.length === 0) {
+        return {
+          success: true,
+          data: [],
+          total_processed: 0,
+          successful: 0,
+          failed: 0,
+          errors: []
+        };
+      }
+
+      const insertData: KeywordBankInsertRow[] = data.map(item => ({
+        keyword: item.keyword.trim().toLowerCase(),
+        country_code: item.country_code.toLowerCase(),
+        language_code: (item.language_code || 'en').toLowerCase(),
+        is_data_found: item.is_data_found,
+        volume: item.volume,
+        cpc: item.cpc,
+        competition: item.competition,
+        difficulty: item.difficulty,
+        history_trend: item.history_trend,
+        keyword_intent: item.keyword_intent,
+        data_updated_at: new Date().toISOString()
+      }));
+
+      const { data: result, error } = await supabaseAdmin
+        .from('indb_keyword_bank')
+        .upsert(insertData, {
+          onConflict: 'keyword,country_code,language_code'
+        })
+        .select();
+
+      if (error) {
+        console.error('Error in bulk upsert operation:', error);
+        const errors = data.map(item => ({
+          keyword: item.keyword,
+          country_code: item.country_code,
+          error: error.message
+        }));
+
+        return {
+          success: false,
+          data: [],
+          total_processed: data.length,
+          successful: 0,
+          failed: data.length,
+          errors
+        };
+      }
+
+      const entities = (result || []).map(row => this.mapRowToEntity(row));
+      
+      return {
+        success: true,
+        data: entities,
+        total_processed: data.length,
+        successful: entities.length,
+        failed: 0,
+        errors: []
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in bulkUpsertKeywordData:', error);
+      
+      const errors = data.map(item => ({
+        keyword: item.keyword,
+        country_code: item.country_code,
+        error: errorMessage
+      }));
+
+      return {
+        success: false,
+        data: [],
+        total_processed: data.length,
+        successful: 0,
+        failed: data.length,
+        errors
+      };
+    }
+  }
+
+  /**
+   * Search keyword bank with filters (Interface method)
+   */
+  async searchKeywords(query: KeywordBankQuery): Promise<KeywordBankQueryResult> {
+    return this.queryKeywordData(query);
+  }
+
+  /**
+   * Get keywords that need refresh (Interface method)
+   */
+  async getStaleKeywords(olderThanDays: number, limit?: number): Promise<KeywordBankEntity[]> {
+    try {
+      const cutoffDate = new Date(Date.now() - olderThanDays * 24 * 60 * 60 * 1000);
+      
+      let query = supabaseAdmin
+        .from('indb_keyword_bank')
+        .select('*')
+        .lt('data_updated_at', cutoffDate.toISOString())
+        .order('data_updated_at', { ascending: true });
+
+      if (limit) {
+        query = query.limit(limit);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching stale keywords:', error);
+        return [];
+      }
+
+      return (data || []).map(row => this.mapRowToEntity(row));
+    } catch (error) {
+      console.error('Error in getStaleKeywords:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get bank statistics (Interface method - simplified version)
+   */
+  async getBankStats(): Promise<{
+    total_keywords: number;
+    with_data: number;
+    without_data: number;
+    average_age_days: number;
+  }> {
+    try {
+      const cacheStats = await this.getCacheStats();
+      
+      // Calculate average age (simplified)
+      const averageAge = 0; // Could be enhanced to calculate actual average age
+      
+      return {
+        total_keywords: cacheStats.total_keywords,
+        with_data: cacheStats.keywords_with_data,
+        without_data: cacheStats.keywords_without_data,
+        average_age_days: averageAge
+      };
+    } catch (error) {
+      console.error('Error in getBankStats:', error);
+      return {
+        total_keywords: 0,
+        with_data: 0,
+        without_data: 0,
+        average_age_days: 0
+      };
+    }
+  }
+
+  /**
+   * Delete keyword data from bank (Interface method - updated signature)
+   */
+  async deleteKeywordData(keyword: string, countryCode: string): Promise<KeywordBankOperationResult> {
+    try {
+      const { error } = await supabaseAdmin
+        .from('indb_keyword_bank')
+        .delete()
+        .eq('keyword', keyword.trim().toLowerCase())
+        .eq('country_code', countryCode.toLowerCase());
+
+      if (error) {
+        console.error('Error deleting keyword data:', error);
+        return {
+          success: false,
+          error: {
+            message: error.message,
+            code: error.code
+          },
+          keyword,
+          operation: 'delete'
+        };
+      }
+
+      return {
+        success: true,
+        keyword,
+        operation: 'delete'
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error in deleteKeywordData:', error);
+      return {
+        success: false,
+        error: {
+          message: errorMessage
+        },
+        keyword,
+        operation: 'delete'
+      };
+    }
   }
 
   /**

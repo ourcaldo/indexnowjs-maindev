@@ -13,6 +13,7 @@ import { IntegrationService } from '../../../../../../../lib/rank-tracking/seran
 import { SeRankingApiClient } from '../../../../../../../lib/rank-tracking/seranking/client/SeRankingApiClient';
 import { ErrorHandlingService } from '../../../../../../../lib/rank-tracking/seranking/services/ErrorHandlingService';
 import { EnrichmentQueue } from '../../../../../../../lib/rank-tracking/seranking/services/EnrichmentQueue';
+import { EnrichmentJobType, JobPriority } from '../../../../../../../lib/rank-tracking/seranking/types/EnrichmentJobTypes';
 
 // Request validation schema
 const BulkEnrichmentRequestSchema = z.object({
@@ -21,7 +22,7 @@ const BulkEnrichmentRequestSchema = z.object({
     country_code: z.string().regex(/^[a-z]{2}$/i).optional().default('us'),
     language_code: z.string().regex(/^[a-z]{2}$/i).optional().default('en')
   })).min(1).max(1000),
-  priority: z.enum(['high', 'normal', 'low']).optional().default('normal')
+  priority: z.enum(['HIGH', 'NORMAL', 'LOW']).optional().default('NORMAL')
   // Removed callback_url to prevent SSRF attacks until proper verification is implemented
 });
 
@@ -38,7 +39,7 @@ interface BulkEnrichmentResponse {
   message?: string;
 }
 
-async function initializeServices(userId: string = 'system'): Promise<{
+async function initializeServices(): Promise<{
   enrichmentService: KeywordEnrichmentService;
   integrationService: IntegrationService;
   enrichmentQueue: EnrichmentQueue;
@@ -55,8 +56,8 @@ async function initializeServices(userId: string = 'system'): Promise<{
       enableMetrics: true
     });
 
-    // Get SeRanking integration settings with userId
-    const integrationSettings = await integrationService.getIntegrationSettings(userId);
+    // Get SeRanking integration settings
+    const integrationSettings = await integrationService.getIntegrationSettings();
     
     if (!integrationSettings.success || !integrationSettings.data) {
       console.error('SeRanking integration not configured');
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
     const systemUserId = 'system'; // Temporary - should be authenticated user ID
 
     // Initialize services with authenticated user
-    const services = await initializeServices(systemUserId);
+    const services = await initializeServices();
     if (!services) {
       return NextResponse.json({
         success: false,
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
     const { enrichmentService, integrationService, enrichmentQueue } = services;
 
     // Get integration settings to check quota for the authenticated user
-    const integrationSettings = await integrationService.getIntegrationSettings(systemUserId);
+    const integrationSettings = await integrationService.getIntegrationSettings();
     if (!integrationSettings.success || !integrationSettings.data) {
       return NextResponse.json({
         success: false,
@@ -184,26 +185,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Create enrichment job with authenticated user
-    const jobResult = await enrichmentQueue.enqueueJob({
-      type: 'bulk_enrichment',
+    const jobResult = await enrichmentQueue.enqueueJob(systemUserId, {
+      type: EnrichmentJobType.BULK_ENRICHMENT,
       data: {
         keywords: keywords.map(k => ({
           keyword: k.keyword,
-          country_code: k.country_code,
-          language_code: k.language_code
+          countryCode: k.country_code,
+          languageCode: k.language_code
         })),
         // callback_url removed for security - will be added back with proper verification
-        total_keywords: totalKeywords
+        metadata: { total_keywords: totalKeywords }
       },
-      priority,
+      priority: priority === 'HIGH' ? JobPriority.HIGH : 
+                priority === 'LOW' ? JobPriority.LOW : 
+                JobPriority.NORMAL,
       config: {
         batchSize: 25,
         maxRetries: 3,
-        timeoutMs: 300000,
-        enableParallel: true,
-        parallelLimit: 3
+        timeoutMs: 300000
       }
-    }, systemUserId);
+    });
 
     if (!jobResult.success) {
       return NextResponse.json({
@@ -221,7 +222,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      job_id: jobResult.job_id,
+      job_id: jobResult.jobId,
       status: 'queued',
       total_keywords: totalKeywords,
       estimated_completion: estimatedCompletion,

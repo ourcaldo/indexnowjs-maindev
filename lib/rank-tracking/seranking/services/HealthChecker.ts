@@ -678,7 +678,6 @@ export class HealthChecker implements IHealthChecker {
         case 'healthy': return 100;
         case 'degraded': return 70;
         case 'unhealthy': return 30;
-        case 'critical': return 10;
         default: return 50;
       }
     });
@@ -936,7 +935,7 @@ export class HealthChecker implements IHealthChecker {
   private async identifyPerformanceBottlenecks(): Promise<SystemHealthSummary['performance_bottlenecks']> {
     const bottlenecks: SystemHealthSummary['performance_bottlenecks'] = [];
     
-    for (const [serviceName, healthCheck] of this.healthCache.entries()) {
+    for (const [serviceName, healthCheck] of Array.from(this.healthCache.entries())) {
       if (healthCheck.response_time && healthCheck.response_time > this.config.thresholds.responseTime.degraded) {
         bottlenecks.push({
           component: serviceName,
@@ -988,10 +987,23 @@ export class HealthChecker implements IHealthChecker {
 
   private log(level: string, message: string, ...args: any[]): void {
     if (this.shouldLog(level)) {
-      console[level as keyof Console](
-        `[HealthChecker] ${new Date().toISOString()} - ${message}`,
-        ...args
-      );
+      const logMessage = `[HealthChecker] ${new Date().toISOString()} - ${message}`;
+      switch (level) {
+        case 'debug':
+          console.debug(logMessage, ...args);
+          break;
+        case 'info':
+          console.info(logMessage, ...args);
+          break;
+        case 'warn':
+          console.warn(logMessage, ...args);
+          break;
+        case 'error':
+          console.error(logMessage, ...args);
+          break;
+        default:
+          console.log(logMessage, ...args);
+      }
     }
   }
 
@@ -1011,7 +1023,7 @@ export class HealthChecker implements IHealthChecker {
     }
     
     // Resolve any active incidents
-    for (const incident of this.activeIncidents.values()) {
+    for (const incident of Array.from(this.activeIncidents.values())) {
       incident.resolved_at = new Date();
     }
     
