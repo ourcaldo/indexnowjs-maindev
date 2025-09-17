@@ -11,7 +11,6 @@ import {
   CreditCard
 } from 'lucide-react'
 import GeneralSettingsPage from './general/page'
-import ProfileSettingsPage from './profile/page'
 import ServiceAccountsSettingsPage from './service-accounts/page'
 import PlansBillingSettingsPage from './plans-billing/page'
 
@@ -25,7 +24,7 @@ export default function SettingsPage() {
   // Set active tab from URL parameter on load
   useEffect(() => {
     const tab = searchParams?.get('tab')
-    if (tab && ['general', 'profile', 'service-accounts', 'plans-billing'].includes(tab)) {
+    if (tab && ['general', 'service-accounts', 'plans-billing'].includes(tab)) {
       setActiveTab(tab)
     }
   }, [searchParams])
@@ -33,15 +32,9 @@ export default function SettingsPage() {
   const tabs = [
     {
       id: 'general',
-      label: 'General Settings',
-      icon: SettingsIcon,
-      description: 'Configure default schedule, timeouts, and notifications'
-    },
-    {
-      id: 'profile',
-      label: 'Profile',
+      label: 'Account Setting',
       icon: User,
-      description: 'Update your profile information and password'
+      description: 'Update your profile information, password and notifications'
     },
     {
       id: 'service-accounts',
@@ -62,8 +55,6 @@ export default function SettingsPage() {
     switch (activeTab) {
       case 'general':
         return <GeneralSettingsPage />
-      case 'profile':
-        return <ProfileSettingsPage />
       case 'service-accounts':
         return <ServiceAccountsSettingsPage />
       case 'plans-billing':
