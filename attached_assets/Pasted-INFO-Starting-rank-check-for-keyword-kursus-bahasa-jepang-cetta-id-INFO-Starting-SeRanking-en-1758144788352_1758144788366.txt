@@ -1,0 +1,33 @@
+INFO] Starting rank check for keyword: kursus bahasa jepang (cetta.id)
+[INFO] Starting SeRanking enrichment for 1 keywords
+[INFO] Site has 50423 API credits remaining
+ ✓ Compiled /api/v1/integrations/seranking/keyword-data/bulk in 222ms
+[INFO] Firecrawl Rank Tracker service initialized with database API key
+[INFO] Firecrawl: Checking rank for keyword "kursus bahasa jepang" domain "cetta.id"
+[INFO] Firecrawl: Making search request for keyword "kursus bahasa jepang" in location "Indonesia"
+[INFO] Firecrawl: Sending request to https://api.firecrawl.dev/v2/search
+[INFO] Firecrawl: Request body: {"query":"kursus bahasa jepang","sources":["web"],"categories":[],"limit":100,"location":"Indonesia"}
+Job table check completed
+EnrichmentQueue initialized successfully
+{"timestamp":"2025-09-17T21:27:10.499Z","level":"info","service":"KeywordEnrichmentService","message":"Initializing KeywordEnrichmentService"}
+Failed to insert job: {}
+ POST /api/v1/integrations/seranking/keyword-data/bulk 500 in 899ms
+[ERROR] SeRanking enrichment failed: {"success":false,"error":"Failed to queue enrichment job","message":"Failed to create job"}
+ POST /api/v1/rank-tracking/keywords 200 in 3352ms
+ ○ Compiling /dashboard/indexnow/overview ...
+[INFO] Firecrawl: Response status: 200 OK
+[INFO] Firecrawl: Request successful, found 99 results, used undefined credits
+[INFO] Firecrawl: Processing 99 search results
+[INFO] Firecrawl: Found domain "cetta.id" at position 38
+[INFO] Credit usage check: 50325 credits remaining
+[INFO] Updated credit usage: undefined credits used, 50325 remaining
+[INFO] API credits consumed for successful request: keyword kursus bahasa jepang
+{"timestamp":"2025-09-17T21:27:12.007Z","level":"warn","service":"KeywordEnrichmentService","message":"Failed to update quota status: Error: Quota status must be retrieved from integration settings"}
+{"timestamp":"2025-09-17T21:27:12.007Z","level":"info","service":"KeywordEnrichmentService","message":"KeywordEnrichmentService initialized successfully"}
+ ✓ Compiled /dashboard/indexnow/overview in 993ms
+ GET /dashboard/indexnow/overview 200 in 1108ms
+[INFO] Successfully stored rank result for keyword ad77ffdd-6f2a-42f6-852d-b2e98c092907
+[INFO] Updated last check date for keyword ad77ffdd-6f2a-42f6-852d-b2e98c092907
+[INFO] Rank check completed for keyword ad77ffdd-6f2a-42f6-852d-b2e98c092907: Position 38
+Rank check completed for keyword: kursus bahasa jepang
+Rank check batch completed: 1 successful, 0 failed

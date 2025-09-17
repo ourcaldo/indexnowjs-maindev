@@ -431,26 +431,53 @@ export async function POST(request: NextRequest) {
         if (!systemApiKey) {
           console.error('System API key not configured - skipping keyword enrichment')
         } else {
-          // Make internal API call to SeRanking bulk enrichment endpoint
-          const enrichmentResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/v1/integrations/seranking/keyword-data/bulk`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-System-API-Key': systemApiKey
-            },
-            body: JSON.stringify({
-              keywords: keywordsForEnrichment,
-              priority: 'NORMAL'
+          
+          if (keywordsForEnrichment.length === 1) {
+            // For single keyword, use the single keyword enrichment endpoint
+            const singleKeyword = keywordsForEnrichment[0]
+            const enrichmentUrl = new URL(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/v1/integrations/seranking/keyword-data`)
+            enrichmentUrl.searchParams.set('keyword', singleKeyword.keyword)
+            enrichmentUrl.searchParams.set('country_code', singleKeyword.country_code)
+            enrichmentUrl.searchParams.set('language_code', singleKeyword.language_code)
+            
+            const enrichmentResponse = await fetch(enrichmentUrl.toString(), {
+              method: 'GET',
+              headers: {
+                'X-System-API-Key': systemApiKey
+              }
             })
-          })
 
-          if (enrichmentResponse.ok) {
-            const enrichmentData = await enrichmentResponse.json()
-            console.log(`[INFO] SeRanking enrichment queued: Job ID ${enrichmentData.job_id}`)
-            enrichmentTriggered = true
+            if (enrichmentResponse.ok) {
+              const enrichmentData = await enrichmentResponse.json()
+              console.log(`[INFO] SeRanking enrichment completed for single keyword: ${singleKeyword.keyword}`)
+              enrichmentTriggered = true
+            } else {
+              const errorText = await enrichmentResponse.text()
+              console.error(`[ERROR] Single SeRanking enrichment failed:`, errorText)
+            }
+            
           } else {
-            const errorText = await enrichmentResponse.text()
-            console.error(`[ERROR] SeRanking enrichment failed:`, errorText)
+            // For multiple keywords, use the bulk enrichment endpoint
+            const enrichmentResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/v1/integrations/seranking/keyword-data/bulk`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-System-API-Key': systemApiKey
+              },
+              body: JSON.stringify({
+                keywords: keywordsForEnrichment,
+                priority: 'NORMAL'
+              })
+            })
+
+            if (enrichmentResponse.ok) {
+              const enrichmentData = await enrichmentResponse.json()
+              console.log(`[INFO] SeRanking bulk enrichment queued: Job ID ${enrichmentData.job_id}`)
+              enrichmentTriggered = true
+            } else {
+              const errorText = await enrichmentResponse.text()
+              console.error(`[ERROR] SeRanking bulk enrichment failed:`, errorText)
+            }
           }
         }
       }

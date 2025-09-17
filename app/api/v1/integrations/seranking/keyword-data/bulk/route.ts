@@ -12,8 +12,6 @@ import { KeywordBankService } from '../../../../../../../lib/rank-tracking/seran
 import { IntegrationService } from '../../../../../../../lib/rank-tracking/seranking/services/IntegrationService';
 import { SeRankingApiClient } from '../../../../../../../lib/rank-tracking/seranking/client/SeRankingApiClient';
 import { ErrorHandlingService } from '../../../../../../../lib/rank-tracking/seranking/services/ErrorHandlingService';
-import { EnrichmentQueue } from '../../../../../../../lib/rank-tracking/seranking/services/EnrichmentQueue';
-import { EnrichmentJobType, JobPriority } from '../../../../../../../lib/rank-tracking/seranking/types/EnrichmentJobTypes';
 import { withSystemAuth, SystemAuthContext } from '../../../../../../../lib/middleware/auth/SystemAuthMiddleware';
 
 // Request validation schema
@@ -30,11 +28,26 @@ const BulkEnrichmentRequestSchema = z.object({
 // Response interface
 interface BulkEnrichmentResponse {
   success: boolean;
-  job_id?: string;
-  status?: 'queued' | 'processing' | 'completed' | 'failed';
+  results?: Array<{
+    keyword: string;
+    country_code: string;
+    success: boolean;
+    data?: {
+      volume: number | null;
+      cpc: number | null;
+      competition: number | null;
+      difficulty: number | null;
+      keyword_intent: string | null;
+      history_trend: Record<string, number> | null;
+      source: 'cache' | 'api';
+      last_updated: string;
+    };
+    error?: string;
+  }>;
   total_keywords?: number;
-  estimated_completion?: string;
-  quota_required?: number;
+  successful?: number;
+  failed?: number;
+  quota_used?: number;
   quota_available?: number;
   error?: string;
   message?: string;
@@ -43,7 +56,6 @@ interface BulkEnrichmentResponse {
 async function initializeServices(authContext: SystemAuthContext): Promise<{
   enrichmentService: KeywordEnrichmentService;
   integrationService: IntegrationService;
-  enrichmentQueue: EnrichmentQueue;
 } | null> {
   const userId = authContext.userId || 'system';
   try {
@@ -51,15 +63,9 @@ async function initializeServices(authContext: SystemAuthContext): Promise<{
     const keywordBankService = new KeywordBankService();
     const integrationService = new IntegrationService();
     const errorHandler = new ErrorHandlingService();
-    const enrichmentQueue = new EnrichmentQueue({
-      maxQueueSize: 10000,
-      defaultBatchSize: 25,
-      jobTimeout: 300000,
-      enableMetrics: true
-    });
 
-    // Get SeRanking integration settings
-    const integrationSettings = await integrationService.getIntegrationSettings();
+    // Get SeRanking integration settings with userId
+    const integrationSettings = await integrationService.getIntegrationSettings(userId);
     
     if (!integrationSettings.success || !integrationSettings.data) {
       console.error('SeRanking integration not configured');
@@ -90,24 +96,13 @@ async function initializeServices(authContext: SystemAuthContext): Promise<{
       errorHandler
     );
 
-    return { enrichmentService, integrationService, enrichmentQueue };
+    return { enrichmentService, integrationService };
   } catch (error) {
     console.error('Error initializing SeRanking services:', error);
     return null;
   }
 }
 
-function calculateEstimatedCompletion(keywordCount: number, batchSize: number = 25): string {
-  // Estimate: 2 seconds per batch + 1 second per keyword for API calls
-  const batchCount = Math.ceil(keywordCount / batchSize);
-  const estimatedSeconds = (batchCount * 2) + keywordCount;
-  const estimatedMinutes = Math.ceil(estimatedSeconds / 60);
-  
-  const completionTime = new Date();
-  completionTime.setMinutes(completionTime.getMinutes() + estimatedMinutes);
-  
-  return completionTime.toISOString();
-}
 
 async function handleBulkEnrichmentRequest(request: NextRequest, authContext: SystemAuthContext): Promise<Response> {
   try {
@@ -156,10 +151,10 @@ async function handleBulkEnrichmentRequest(request: NextRequest, authContext: Sy
       } as BulkEnrichmentResponse, { status: 503 });
     }
 
-    const { enrichmentService, integrationService, enrichmentQueue } = services;
+    const { enrichmentService, integrationService } = services;
 
     // Get integration settings to check quota for the authenticated user
-    const integrationSettings = await integrationService.getIntegrationSettings();
+    const integrationSettings = await integrationService.getIntegrationSettings(authContext.userId || 'system');
     if (!integrationSettings.success || !integrationSettings.data) {
       return NextResponse.json({
         success: false,
@@ -176,56 +171,88 @@ async function handleBulkEnrichmentRequest(request: NextRequest, authContext: Sy
         success: false,
         error: 'Insufficient quota',
         message: `Required quota: ${quotaRequired}, Available: ${quotaAvailable}`,
-        quota_required: quotaRequired,
         quota_available: quotaAvailable
       } as BulkEnrichmentResponse, { status: 429 });
     }
 
-    // Create enrichment job with authenticated user
-    const jobResult = await enrichmentQueue.enqueueJob(authContext.userId || 'system', {
-      type: EnrichmentJobType.BULK_ENRICHMENT,
-      data: {
-        keywords: keywords.map(k => ({
-          keyword: k.keyword,
-          countryCode: k.country_code,
-          languageCode: k.language_code
-        })),
-        // callback_url removed for security - will be added back with proper verification
-        metadata: { total_keywords: totalKeywords }
-      },
-      priority: priority === 'HIGH' ? JobPriority.HIGH : 
-                priority === 'LOW' ? JobPriority.LOW : 
-                JobPriority.NORMAL,
-      config: {
-        batchSize: 25,
-        maxRetries: 3,
-        timeoutMs: 300000
-      }
-    });
+    // Process each keyword synchronously using the enrichment service
+    const results = [];
+    let quotaUsed = 0;
+    let successful = 0;
+    let failed = 0;
 
-    if (!jobResult.success) {
-      return NextResponse.json({
-        success: false,
-        error: 'Failed to queue enrichment job',
-        message: jobResult.error || 'Unknown error occurred'
-      } as BulkEnrichmentResponse, { status: 500 });
+    for (const keywordRequest of keywords) {
+      try {
+        const result = await enrichmentService.enrichKeyword(
+          keywordRequest.keyword,
+          keywordRequest.country_code,
+          false // Don't force refresh, use cache-first strategy
+        );
+
+        if (result.success && result.data) {
+          results.push({
+            keyword: keywordRequest.keyword,
+            country_code: keywordRequest.country_code,
+            success: true,
+            data: {
+              volume: result.data.volume,
+              cpc: result.data.cpc,
+              competition: result.data.competition,
+              difficulty: result.data.difficulty,
+              keyword_intent: result.data.keyword_intent,
+              history_trend: result.data.history_trend,
+              source: result.metadata?.source as 'cache' | 'api' || 'api',
+              last_updated: result.data.data_updated_at?.toISOString() || new Date().toISOString()
+            }
+          });
+          successful++;
+          
+          // Count quota usage (only for API calls, not cache hits)
+          if (result.metadata?.source === 'api') {
+            quotaUsed++;
+          }
+        } else {
+          results.push({
+            keyword: keywordRequest.keyword,
+            country_code: keywordRequest.country_code,
+            success: false,
+            error: result.error?.message || 'Unknown error'
+          });
+          failed++;
+        }
+      } catch (error) {
+        console.error(`Error processing keyword ${keywordRequest.keyword}:`, error);
+        results.push({
+          keyword: keywordRequest.keyword,
+          country_code: keywordRequest.country_code,
+          success: false,
+          error: 'Processing error'
+        });
+        failed++;
+      }
     }
 
-    const estimatedCompletion = calculateEstimatedCompletion(totalKeywords);
-
-    // TODO: Move quota recording to execution time in KeywordEnrichmentService/queue worker
-    // Recording at enqueue time risks over/under counting and doesn't account for cache hits/failures
-    // await integrationService.recordApiUsage(quotaRequired, { operationType: 'bulk_enrichment', userId: systemUserId });
+    // Update quota usage if any API calls were made
+    if (quotaUsed > 0) {
+      try {
+        await integrationService.recordApiUsage(quotaUsed, { 
+          operationType: 'bulk_enrichment', 
+          userId: authContext.userId || 'system' 
+        });
+      } catch (error) {
+        console.error('Failed to record quota usage:', error);
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      job_id: jobResult.jobId,
-      status: 'queued',
+      results,
       total_keywords: totalKeywords,
-      estimated_completion: estimatedCompletion,
-      quota_required: quotaRequired,
-      quota_available: quotaAvailable
-    } as BulkEnrichmentResponse, { status: 202 });
+      successful,
+      failed,
+      quota_used: quotaUsed,
+      quota_available: quotaAvailable - quotaUsed
+    } as BulkEnrichmentResponse, { status: 200 });
 
   } catch (error) {
     console.error('Error in bulk enrichment endpoint:', error);
