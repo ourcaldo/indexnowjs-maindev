@@ -78,6 +78,10 @@ export interface SeRankingError extends Error {
   statusCode?: number;
   response?: any;
   retryable: boolean;
+  context?: any;
+  timestamp?: Date;
+  originalError?: Error;
+  circuitBreakerState?: any;
 }
 
 // Quota Management Types
@@ -113,6 +117,9 @@ export interface HealthCheckResult {
   response_time?: number;
   last_check: Date;
   error_message?: string;
+  error?: string;
+  warning?: string;
+  timestamp?: Date;
 }
 
 // Service Response Types

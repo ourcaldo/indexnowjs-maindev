@@ -455,6 +455,7 @@ export class ErrorHandlingService {
       return {
         status: 'unhealthy',
         response_time: undefined,
+        last_check: new Date(),
         error: `High error rate (${errorRate}) or circuit breakers open (${circuitBreakersOpen})`,
         timestamp: new Date()
       };
@@ -464,6 +465,7 @@ export class ErrorHandlingService {
       return {
         status: 'degraded',
         response_time: this.errorStats.averageRecoveryTime,
+        last_check: new Date(),
         warning: `Elevated error rate: ${errorRate} errors in last 5 minutes`,
         timestamp: new Date()
       };
@@ -472,6 +474,7 @@ export class ErrorHandlingService {
     return {
       status: 'healthy',
       response_time: this.errorStats.averageRecoveryTime,
+      last_check: new Date(),
       timestamp: new Date()
     };
   }
@@ -720,7 +723,24 @@ export class ErrorHandlingService {
    */
   private generateDegradedResponse<T>(context?: ErrorContext): T | undefined {
     // Similar to fallback but indicates degraded service
-    return this.generateFallbackData<T>(context);
+    if (!context || !context.operation) {
+      return undefined;
+    }
+
+    // Return empty/default data structures based on operation type
+    switch (context.operation) {
+      case 'fetchKeywordData':
+        return [] as T;
+      
+      case 'getKeywordData':
+        return null as T;
+      
+      case 'queryKeywordData':
+        return { data: [], total: 0, has_more: false } as T;
+      
+      default:
+        return undefined;
+    }
   }
 
   /**
