@@ -174,7 +174,7 @@ export class IntegrationService implements IIntegrationService {
         success: true,
         data: {
           service_name: data.service_name,
-          api_key: data.api_key,
+          api_key: data.apikey,
           api_url: data.api_url,
           api_quota_limit: data.api_quota_limit,
           api_quota_used: data.api_quota_used,
