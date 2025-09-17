@@ -50,7 +50,7 @@ export default function RankTrackerPreview() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm font-medium text-foreground">{item.keyword}</span>
+                  <span className="text-sm font-medium text-white">{item.keyword}</span>
                   <div className="flex items-center space-x-2">
                     <span className={`text-lg font-bold ${
                       item.position <= 3 ? 'text-success' : 
@@ -92,14 +92,14 @@ export default function RankTrackerPreview() {
                 <Globe className="w-4 h-4 text-info" />
                 <span className="text-sm font-medium text-white/90">Global Tracking</span>
               </div>
-              <div className="text-xl font-bold text-foreground">12 Countries</div>
+              <div className="text-xl font-bold text-white">12 Countries</div>
             </div>
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-center space-x-2 mb-2">
                 <MapPin className="w-4 h-4 text-success" />
                 <span className="text-sm font-medium text-white/90">City Level</span>
               </div>
-              <div className="text-xl font-bold text-foreground">24 Cities</div>
+              <div className="text-xl font-bold text-white">24 Cities</div>
             </div>
           </div>
 
@@ -114,7 +114,7 @@ export default function RankTrackerPreview() {
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center space-x-3">
                   <MapPin className="w-4 h-4 text-white/60" />
-                  <span className="text-sm text-foreground">{item.location}</span>
+                  <span className="text-sm text-white">{item.location}</span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm font-medium text-white/80">Rank #{item.rank}</span>
@@ -141,7 +141,7 @@ export default function RankTrackerPreview() {
               <div className="w-2 h-2 bg-info rounded-full"></div>
               <span className="text-sm font-medium text-info">DOMAIN STATS</span>
             </div>
-            <div className="text-foreground font-medium">
+            <div className="text-white font-medium">
               example.com: 47 keywords tracked
             </div>
             <div className="text-xs text-white/60 mt-1">Last updated today</div>
@@ -156,7 +156,7 @@ export default function RankTrackerPreview() {
             ].map((item, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm text-foreground">{item.keyword}</span>
+                  <span className="text-sm text-white">{item.keyword}</span>
                   <span className="text-xs text-white/60">{item.device}</span>
                 </div>
                 <div className="flex items-center space-x-2">
