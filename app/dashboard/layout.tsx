@@ -65,12 +65,16 @@ export default function DashboardLayout({
     }
   }, [sidebarCollapsed, cookiesLoaded])
 
-  // Check if we're on the login page
-  const isLoginPage = mounted && typeof window !== 'undefined' && window.location.pathname === '/auth/login'
+  // Check if we're on pages that should be full-width (no sidebar)
+  const isFullWidthPage = mounted && typeof window !== 'undefined' && (
+    window.location.pathname === '/auth/login' ||
+    window.location.pathname.includes('/dashboard/settings/plans-billing/checkout') ||
+    window.location.pathname.includes('/dashboard/settings/plans-billing/orders')
+  )
   
 
-  // Check if we're on the login page
-  if (isLoginPage) {
+  // Check if we're on a full-width page
+  if (isFullWidthPage) {
     return (
       <QueryProvider>
         <ToastContainer>
