@@ -34,7 +34,7 @@ export interface IntegrationServiceConfig {
 interface IntegrationRow {
   id: string;
   service_name: string;
-  apikey: string;
+  api_key: string;  // Fixed: should be api_key not apikey to match database schema
   api_url: string;
   api_quota_limit: number;
   api_quota_used: number;
@@ -206,7 +206,7 @@ export class IntegrationService implements IIntegrationService {
     settings: {
       api_quota_limit?: number;
       is_active?: boolean;
-      apikey?: string;
+      api_key?: string;  // Fixed: should be api_key not apikey to match database schema
       api_url?: string;
     }
   ): Promise<ServiceResponse<boolean>> {
@@ -221,8 +221,8 @@ export class IntegrationService implements IIntegrationService {
       if (settings.is_active !== undefined) {
         updateData.is_active = settings.is_active;
       }
-      if (settings.apikey !== undefined) {
-        updateData.apikey = settings.apikey;
+      if (settings.api_key !== undefined) {
+        updateData.api_key = settings.api_key;
       }
       if (settings.api_url !== undefined) {
         updateData.api_url = settings.api_url;
