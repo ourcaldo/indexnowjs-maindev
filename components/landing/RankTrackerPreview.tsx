@@ -24,15 +24,15 @@ export default function RankTrackerPreview() {
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
               <div className="text-2xl font-bold text-success">247</div>
-              <div className="text-xs text-muted-foreground">Keywords Tracked</div>
+              <div className="text-xs text-white/70">Keywords Tracked</div>
             </div>
             <div className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
               <div className="text-2xl font-bold text-info">15</div>
-              <div className="text-xs text-muted-foreground">Top 10 Rankings</div>
+              <div className="text-xs text-white/70">Top 10 Rankings</div>
             </div>
             <div className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
               <div className="text-2xl font-bold text-warning">+12</div>
-              <div className="text-xs text-muted-foreground">Position Changes</div>
+              <div className="text-xs text-white/70">Position Changes</div>
             </div>
           </div>
 
@@ -42,11 +42,11 @@ export default function RankTrackerPreview() {
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-1">
                     {item.device === 'mobile' ? 
-                      <Phone className="w-3 h-3 text-muted-foreground" /> : 
-                      <Monitor className="w-3 h-3 text-muted-foreground" />
+                      <Phone className="w-3 h-3 text-white/60" /> : 
+                      <Monitor className="w-3 h-3 text-white/60" />
                     }
-                    <MapPin className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">{item.location}</span>
+                    <MapPin className="w-3 h-3 text-white/60" />
+                    <span className="text-xs text-white/60">{item.location}</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -54,7 +54,7 @@ export default function RankTrackerPreview() {
                   <div className="flex items-center space-x-2">
                     <span className={`text-lg font-bold ${
                       item.position <= 3 ? 'text-success' : 
-                      item.position <= 10 ? 'text-warning' : 'text-muted-foreground'
+                      item.position <= 10 ? 'text-warning' : 'text-white/60'
                     }`}>
                       #{item.position}
                     </span>
@@ -71,7 +71,7 @@ export default function RankTrackerPreview() {
                       </div>
                     )}
                     {item.change === 0 && (
-                      <Minus className="w-3 h-3 text-muted-foreground" />
+                      <Minus className="w-3 h-3 text-white/60" />
                     )}
                   </div>
                 </div>
@@ -90,21 +90,21 @@ export default function RankTrackerPreview() {
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-center space-x-2 mb-2">
                 <Globe className="w-4 h-4 text-info" />
-                <span className="text-sm font-medium">Global Tracking</span>
+                <span className="text-sm font-medium text-white/90">Global Tracking</span>
               </div>
               <div className="text-xl font-bold text-foreground">12 Countries</div>
             </div>
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-center space-x-2 mb-2">
                 <MapPin className="w-4 h-4 text-success" />
-                <span className="text-sm font-medium">City Level</span>
+                <span className="text-sm font-medium text-white/90">City Level</span>
               </div>
               <div className="text-xl font-bold text-foreground">24 Cities</div>
             </div>
           </div>
 
           <div className="space-y-3">
-            <div className="text-sm font-medium text-muted-foreground mb-3">Location Performance</div>
+            <div className="text-sm font-medium text-white/70 mb-3">Location Performance</div>
             {[
               { location: 'New York, US', rank: 3, traffic: '+15%', color: 'success' },
               { location: 'London, UK', rank: 7, traffic: '+8%', color: 'warning' },
@@ -113,11 +113,11 @@ export default function RankTrackerPreview() {
             ].map((item, idx) => (
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center space-x-3">
-                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <MapPin className="w-4 h-4 text-white/60" />
                   <span className="text-sm text-foreground">{item.location}</span>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm font-medium">Rank #{item.rank}</span>
+                  <span className="text-sm font-medium text-white/80">Rank #{item.rank}</span>
                   <span className={`text-sm font-medium ${
                     item.color === 'success' ? 'text-success' : 
                     item.color === 'warning' ? 'text-warning' : 'text-destructive'
@@ -144,11 +144,11 @@ export default function RankTrackerPreview() {
             <div className="text-foreground font-medium">
               example.com: 47 keywords tracked
             </div>
-            <div className="text-xs text-muted-foreground mt-1">Last updated today</div>
+            <div className="text-xs text-white/60 mt-1">Last updated today</div>
           </div>
 
           <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground mb-3">Recent Position Changes</div>
+            <div className="text-sm font-medium text-white/70 mb-3">Recent Position Changes</div>
             {[
               { keyword: 'seo tools', position: 3, change: '+2', device: 'Desktop' },
               { keyword: 'rank tracker', position: 1, change: '-', device: 'Mobile' },
@@ -157,13 +157,13 @@ export default function RankTrackerPreview() {
               <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center space-x-3">
                   <span className="text-sm text-foreground">{item.keyword}</span>
-                  <span className="text-xs text-muted-foreground">{item.device}</span>
+                  <span className="text-xs text-white/60">{item.device}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">#{item.position}</span>
+                  <span className="text-sm font-medium text-white/80">#{item.position}</span>
                   <span className={`text-xs ${
                     item.change.includes('+') ? 'text-success' : 
-                    item.change === '-' ? 'text-muted-foreground' : 'text-error'
+                    item.change === '-' ? 'text-white/60' : 'text-error'
                   }`}>
                     {item.change}
                   </span>
@@ -173,7 +173,7 @@ export default function RankTrackerPreview() {
           </div>
 
           <div className="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
-            <div className="text-sm text-muted-foreground mb-1">Position History Available</div>
+            <div className="text-sm text-white/70 mb-1">Position History Available</div>
             <button className="text-info text-sm font-medium hover:underline">
               View Historical Data
             </button>
@@ -203,7 +203,7 @@ export default function RankTrackerPreview() {
             <h3 className="text-lg font-semibold text-white mb-1">
               {slides[activeSlide].title}
             </h3>
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-white/70">
               {slides[activeSlide].description}
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function RankTrackerPreview() {
               key={idx}
               onClick={() => setActiveSlide(idx)}
               className={`w-2 h-2 rounded-full transition-colors ${
-                idx === activeSlide ? 'bg-info' : 'bg-muted/20'
+                idx === activeSlide ? 'bg-info' : 'bg-white/20'
               }`}
             />
           ))}
