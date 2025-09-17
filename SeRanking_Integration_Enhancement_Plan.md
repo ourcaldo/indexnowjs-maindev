@@ -120,47 +120,137 @@ CREATE INDEX "idx_indb_keyword_keywords_difficulty"
 
 ### Phase 2: Backend Service Implementation
 
-#### 2.1 SeRanking API Service (`lib/integrations/seranking/`)
-**File Structure:**
+#### 2.1 Well-Refactored Service Architecture
+**Complete File Structure:**
 ```
 lib/integrations/seranking/
-├── SeRankingClient.ts          # API client for SeRanking
-├── SeRankingService.ts         # Business logic service
-├── KeywordBankService.ts       # Keyword bank management
-├── types.ts                    # TypeScript interfaces
-└── index.ts                    # Barrel exports
+├── client/
+│   ├── SeRankingApiClient.ts      # HTTP client with authentication
+│   ├── ApiRequestBuilder.ts       # Request formatting and validation
+│   └── RateLimiter.ts            # API rate limiting and throttling
+├── services/
+│   ├── SeRankingService.ts        # Core business logic orchestration  
+│   ├── KeywordBankService.ts      # Keyword bank CRUD operations
+│   ├── KeywordEnrichmentService.ts # Keyword intelligence workflow
+│   ├── IntegrationService.ts      # Integration settings management
+│   └── BulkProcessingService.ts   # Batch processing and queuing
+├── validation/
+│   ├── ApiResponseValidator.ts    # SeRanking response validation
+│   ├── KeywordValidator.ts        # Keyword input validation
+│   └── QuotaValidator.ts         # Usage quota validation
+├── errors/
+│   ├── SeRankingErrorHandler.ts   # Specialized error handling
+│   ├── ApiErrorTypes.ts          # Error type definitions
+│   └── ErrorRecoveryService.ts   # Retry and recovery logic
+├── monitoring/
+│   ├── ApiMetricsCollector.ts    # Usage metrics and performance
+│   ├── QuotaMonitor.ts          # Quota usage monitoring
+│   └── HealthChecker.ts         # Integration health checks
+├── queue/
+│   ├── EnrichmentQueue.ts        # Background job queue management
+│   ├── JobProcessor.ts          # Individual job processing
+│   └── QueueMonitor.ts          # Queue health and monitoring
+├── types/
+│   ├── SeRankingTypes.ts        # API request/response types
+│   ├── KeywordBankTypes.ts      # Database entity types
+│   └── ServiceTypes.ts          # Service interface types
+└── index.ts                     # Barrel exports with facade pattern
 ```
 
-**Key Components:**
-- **SeRankingClient**: HTTP client wrapper for SeRanking API endpoints
-- **SeRankingService**: Handles API calls, response parsing, quota management
-- **KeywordBankService**: Manages local keyword bank cache and database operations
-- **Rate Limiting**: Implement request throttling to respect API limits
-- **Error Handling**: Comprehensive error handling with retry logic
+#### 2.2 Service Responsibility Matrix
 
-#### 2.2 Keyword Enrichment Flow
-**Service Logic:**
+**Client Layer (`client/`):**
+- **SeRankingApiClient**: HTTP requests, authentication, connection management
+- **ApiRequestBuilder**: Request formatting, parameter validation, URL construction  
+- **RateLimiter**: Request throttling, quota enforcement, retry delays
+
+**Business Logic Layer (`services/`):**
+- **SeRankingService**: Orchestrates API calls, manages integration state
+- **KeywordBankService**: Database operations for keyword bank table
+- **KeywordEnrichmentService**: End-to-end keyword intelligence workflow
+- **IntegrationService**: Manages `indb_site_integration` settings and credentials
+- **BulkProcessingService**: Handles batch operations and queue management
+
+**Validation Layer (`validation/`):**
+- **ApiResponseValidator**: Validates SeRanking API response structure and data
+- **KeywordValidator**: Validates keyword inputs and country codes
+- **QuotaValidator**: Checks usage limits and prevents quota exhaustion
+
+**Error Handling Layer (`errors/`):**
+- **SeRankingErrorHandler**: Specialized handling for SeRanking API errors
+- **ApiErrorTypes**: Comprehensive error type definitions and codes
+- **ErrorRecoveryService**: Retry logic, circuit breaker, fallback strategies
+
+**Monitoring Layer (`monitoring/`):**
+- **ApiMetricsCollector**: Tracks API usage, response times, success rates
+- **QuotaMonitor**: Real-time quota usage tracking and alerting
+- **HealthChecker**: Integration health status and diagnostics
+
+**Queue Layer (`queue/`):**
+- **EnrichmentQueue**: Manages background keyword enrichment jobs
+- **JobProcessor**: Processes individual enrichment tasks
+- **QueueMonitor**: Queue health, job status, and performance metrics
+
+#### 2.3 Enhanced Enrichment Workflow
+**Multi-Service Orchestration:**
 ```typescript
 class KeywordEnrichmentService {
-  async enrichKeyword(keyword: string, countryCode: string): Promise<KeywordData> {
-    // 1. Check keyword bank first
-    const cachedData = await this.keywordBankService.getKeywordData(keyword, countryCode);
+  constructor(
+    private keywordBankService: KeywordBankService,
+    private seRankingService: SeRankingService,
+    private quotaValidator: QuotaValidator,
+    private keywordValidator: KeywordValidator,
+    private errorHandler: SeRankingErrorHandler,
+    private metricsCollector: ApiMetricsCollector
+  ) {}
+
+  async enrichKeyword(keyword: string, countryCode: string): Promise<KeywordEnrichmentResult> {
+    const startTime = Date.now();
     
-    if (cachedData && this.isFreshData(cachedData.data_updated_at)) {
-      return cachedData;
+    try {
+      // 1. Input validation
+      await this.keywordValidator.validateKeywordInput(keyword, countryCode);
+      
+      // 2. Quota check
+      await this.quotaValidator.checkQuotaAvailability();
+      
+      // 3. Check keyword bank cache first
+      const cachedData = await this.keywordBankService.getKeywordData(keyword, countryCode);
+      
+      if (cachedData && this.isFreshData(cachedData.data_updated_at)) {
+        this.metricsCollector.recordCacheHit(Date.now() - startTime);
+        return { data: cachedData, source: 'cache' };
+      }
+      
+      // 4. Fetch from SeRanking API with error handling
+      const freshData = await this.seRankingService.fetchKeywordData(keyword, countryCode);
+      
+      // 5. Validate API response
+      const validatedData = await this.responseValidator.validateApiResponse(freshData);
+      
+      // 6. Update keyword bank with fresh data
+      await this.keywordBankService.upsertKeywordData(validatedData);
+      
+      // 7. Update quota usage
+      await this.quotaValidator.recordApiUsage();
+      
+      this.metricsCollector.recordApiCall(Date.now() - startTime, 'success');
+      return { data: validatedData, source: 'api' };
+      
+    } catch (error) {
+      await this.errorHandler.handleEnrichmentError(error, keyword, countryCode);
+      this.metricsCollector.recordApiCall(Date.now() - startTime, 'error');
+      throw error;
     }
-    
-    // 2. Fetch from SeRanking API if not in cache or stale
-    const freshData = await this.seRankingService.fetchKeywordData(keyword, countryCode);
-    
-    // 3. Update keyword bank with fresh data
-    await this.keywordBankService.upsertKeywordData(freshData);
-    
-    return freshData;
+  }
+
+  async bulkEnrichKeywords(keywords: KeywordRequest[]): Promise<BulkEnrichmentResult> {
+    // Queue-based bulk processing
+    const jobId = await this.bulkProcessingService.queueBulkEnrichment(keywords);
+    return { jobId, status: 'queued', estimatedCompletion: this.calculateEstimatedTime(keywords.length) };
   }
   
   private isFreshData(lastUpdate: Date): boolean {
-    // Consider data fresh for 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     return lastUpdate > thirtyDaysAgo;
@@ -168,13 +258,111 @@ class KeywordEnrichmentService {
 }
 ```
 
-#### 2.3 API Endpoints
-**New API Routes:**
+#### 2.4 Comprehensive API Endpoints
+**New API Route Structure:**
 ```
-/api/v1/integrations/seranking/
-├── keyword-data              # GET: Fetch keyword intelligence
-├── bulk-enrich              # POST: Bulk keyword enrichment
-└── quota-status             # GET: API quota information
+app/api/v1/integrations/seranking/
+├── keyword-data/
+│   ├── route.ts                    # GET: Single keyword intelligence
+│   └── bulk/
+│       └── route.ts               # POST: Bulk keyword enrichment
+├── quota/
+│   ├── status/route.ts            # GET: Current quota usage
+│   ├── history/route.ts           # GET: Quota usage history
+│   └── alerts/route.ts            # GET/POST: Quota alert settings
+├── health/
+│   ├── route.ts                   # GET: Integration health check
+│   └── metrics/route.ts           # GET: Performance metrics
+├── admin/
+│   ├── integration/route.ts       # GET/PUT: Integration settings
+│   ├── cache/
+│   │   ├── stats/route.ts         # GET: Cache statistics
+│   │   └── clear/route.ts         # DELETE: Clear cache
+│   └── jobs/
+│       ├── route.ts               # GET: Job queue status
+│       └── [jobId]/route.ts       # GET: Individual job status
+└── webhooks/
+    └── quota-alerts/route.ts      # POST: Quota webhook endpoint
+```
+
+**Detailed API Specifications:**
+
+**Single Keyword Intelligence** (`GET /api/v1/integrations/seranking/keyword-data`)
+```typescript
+// Query parameters
+interface KeywordDataRequest {
+  keyword: string;
+  country_code?: string;
+  language_code?: string;
+  force_refresh?: boolean;
+}
+
+// Response
+interface KeywordDataResponse {
+  success: boolean;
+  data: {
+    keyword: string;
+    country_code: string;
+    is_data_found: boolean;
+    volume: number | null;
+    cpc: number | null;
+    competition: number | null;
+    difficulty: number | null;
+    keyword_intent: string | null;
+    history_trend: Record<string, number> | null;
+    source: 'cache' | 'api';
+    last_updated: string;
+  };
+  quota_remaining: number;
+  cache_hit: boolean;
+}
+```
+
+**Bulk Enrichment** (`POST /api/v1/integrations/seranking/keyword-data/bulk`)
+```typescript
+// Request body
+interface BulkEnrichmentRequest {
+  keywords: Array<{
+    keyword: string;
+    country_code?: string;
+    language_code?: string;
+  }>;
+  priority?: 'high' | 'normal' | 'low';
+  callback_url?: string;
+}
+
+// Response
+interface BulkEnrichmentResponse {
+  success: boolean;
+  job_id: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  total_keywords: number;
+  estimated_completion: string;
+  quota_required: number;
+  quota_available: number;
+}
+```
+
+**Quota Status** (`GET /api/v1/integrations/seranking/quota/status`)
+```typescript
+interface QuotaStatusResponse {
+  success: boolean;
+  data: {
+    current_usage: number;
+    quota_limit: number;
+    quota_remaining: number;
+    usage_percentage: number;
+    reset_date: string;
+    daily_usage: Array<{
+      date: string;
+      usage: number;
+    }>;
+    alerts: {
+      enabled: boolean;
+      thresholds: number[];
+    };
+  };
+}
 ```
 
 ### Phase 3: Database Integration Enhancements
