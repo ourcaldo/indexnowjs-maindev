@@ -213,7 +213,10 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body using shared schema
     const body = await request.json()
-    const validation = apiRequestSchemas.keywordCreate.extend({
+    
+    console.log('Keyword creation request body:', JSON.stringify(body, null, 2))
+    
+    const validation = z.object({
       domain_id: z.string().uuid('Invalid domain ID'),
       keywords: z.array(z.string().min(1)).min(1, 'At least one keyword is required'),
       device_type: z.enum(['desktop', 'mobile']).default('desktop'),
@@ -341,7 +344,15 @@ export async function POST(request: NextRequest) {
       .from('indb_keyword_keywords')
       .insert(keywordEntries)
       .select(`
-        *,
+        id,
+        user_id,
+        domain_id,
+        keyword,
+        device_type,
+        country_id,
+        tags,
+        created_at,
+        updated_at,
         domain:indb_keyword_domains(domain_name, display_name),
         country:indb_keyword_countries(name, iso2_code)
       `)

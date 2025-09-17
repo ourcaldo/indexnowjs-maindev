@@ -154,7 +154,7 @@ export interface Database {
         Row: {
           id: string
           keyword: string
-          country_code: string
+          country_id: string
           language_code: string
           is_data_found: boolean
           volume: number | null
@@ -170,7 +170,7 @@ export interface Database {
         Insert: {
           id?: string
           keyword: string
-          country_code: string
+          country_id: string
           language_code?: string
           is_data_found?: boolean
           volume?: number | null
@@ -186,7 +186,7 @@ export interface Database {
         Update: {
           id?: string
           keyword?: string
-          country_code?: string
+          country_id?: string
           language_code?: string
           is_data_found?: boolean
           volume?: number | null

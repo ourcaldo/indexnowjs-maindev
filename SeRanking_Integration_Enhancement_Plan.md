@@ -58,7 +58,7 @@ INSERT INTO "public"."indb_site_integration" (
 CREATE TABLE "public"."indb_keyword_bank" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "keyword" text NOT NULL,
-    "country_code" text NOT NULL DEFAULT 'us',
+    "country_id" uuid NOT NULL REFERENCES "public"."indb_keyword_countries"("id"),
     "language_code" text NOT NULL DEFAULT 'en',
     "is_data_found" boolean NOT NULL DEFAULT false,
     "volume" integer NULL,
@@ -71,7 +71,7 @@ CREATE TABLE "public"."indb_keyword_bank" (
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
     "updated_at" timestamp with time zone NOT NULL DEFAULT now(),
     CONSTRAINT "indb_keyword_bank_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "indb_keyword_bank_keyword_country_unique" UNIQUE ("keyword", "country_code", "language_code")
+    CONSTRAINT "indb_keyword_bank_keyword_country_unique" UNIQUE ("keyword", "country_id", "language_code")
 ) TABLESPACE pg_default;
 
 -- Add RLS policies for keyword bank
@@ -87,7 +87,7 @@ CREATE POLICY "keyword_bank_system_write" ON "public"."indb_keyword_bank"
 
 -- Add indexes for performance
 CREATE INDEX "idx_indb_keyword_bank_keyword" ON "public"."indb_keyword_bank" ("keyword");
-CREATE INDEX "idx_indb_keyword_bank_country" ON "public"."indb_keyword_bank" ("country_code");
+CREATE INDEX "idx_indb_keyword_bank_country" ON "public"."indb_keyword_bank" ("country_id");
 CREATE INDEX "idx_indb_keyword_bank_updated" ON "public"."indb_keyword_bank" ("data_updated_at");
 ```
 

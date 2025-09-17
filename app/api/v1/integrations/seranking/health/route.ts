@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { IntegrationService } from '../../../../../../lib/rank-tracking/seranking/services/IntegrationService';
 import { SeRankingApiClient } from '../../../../../../lib/rank-tracking/seranking/client/SeRankingApiClient';
 import { KeywordBankService } from '../../../../../../lib/rank-tracking/seranking/services/KeywordBankService';
+import { withSystemAuth, SystemAuthContext } from '../../../../../../lib/middleware/auth/SystemAuthMiddleware';
 
 // Response interface
 interface HealthCheckResponse {

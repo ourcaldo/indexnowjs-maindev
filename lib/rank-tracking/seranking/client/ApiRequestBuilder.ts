@@ -58,11 +58,10 @@ export class ApiRequestBuilder {
   /**
    * Build health check request configuration
    */
-  buildHealthCheckRequest(): ApiRequestConfig {
+  buildHealthCheckRequest(countryCode: string = 'us'): ApiRequestConfig {
     const testKeywords = ['test'];
-    const testCountryCode = 'us';
     
-    return this.buildKeywordExportRequest(testKeywords, testCountryCode);
+    return this.buildKeywordExportRequest(testKeywords, countryCode);
   }
 
   /**

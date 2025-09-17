@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { IntegrationService } from '../../../../../../../lib/rank-tracking/seranking/services/IntegrationService';
+import { withSystemAuth, SystemAuthContext } from '../../../../../../../lib/middleware/auth/SystemAuthMiddleware';
 
 // Response interface
 interface QuotaStatusResponse {

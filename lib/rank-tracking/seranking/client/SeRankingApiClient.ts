@@ -82,12 +82,12 @@ export class SeRankingApiClient {
   /**
    * Test API connection and authentication
    */
-  async testConnection(): Promise<HealthCheckResult> {
+  async testConnection(countryCode: string = 'us'): Promise<HealthCheckResult> {
     const startTime = Date.now();
     
     try {
-      // Use ApiRequestBuilder for health check request
-      const requestConfig = this.requestBuilder.buildHealthCheckRequest();
+      // Use ApiRequestBuilder for health check request with dynamic country
+      const requestConfig = this.requestBuilder.buildHealthCheckRequest(countryCode);
       const response = await this.makeRequest(requestConfig);
       
       const responseTime = Date.now() - startTime;

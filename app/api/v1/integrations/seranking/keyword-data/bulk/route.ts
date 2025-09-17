@@ -14,6 +14,7 @@ import { SeRankingApiClient } from '../../../../../../../lib/rank-tracking/seran
 import { ErrorHandlingService } from '../../../../../../../lib/rank-tracking/seranking/services/ErrorHandlingService';
 import { EnrichmentQueue } from '../../../../../../../lib/rank-tracking/seranking/services/EnrichmentQueue';
 import { EnrichmentJobType, JobPriority } from '../../../../../../../lib/rank-tracking/seranking/types/EnrichmentJobTypes';
+import { withSystemAuth, SystemAuthContext } from '../../../../../../../lib/middleware/auth/SystemAuthMiddleware';
 
 // Request validation schema
 const BulkEnrichmentRequestSchema = z.object({
@@ -39,11 +40,12 @@ interface BulkEnrichmentResponse {
   message?: string;
 }
 
-async function initializeServices(): Promise<{
+async function initializeServices(authContext: SystemAuthContext): Promise<{
   enrichmentService: KeywordEnrichmentService;
   integrationService: IntegrationService;
   enrichmentQueue: EnrichmentQueue;
 } | null> {
+  const userId = authContext.userId || 'system';
   try {
     // Initialize services
     const keywordBankService = new KeywordBankService();
@@ -107,7 +109,7 @@ function calculateEstimatedCompletion(keywordCount: number, batchSize: number = 
   return completionTime.toISOString();
 }
 
-export async function POST(request: NextRequest) {
+async function handleBulkEnrichmentRequest(request: NextRequest, authContext: SystemAuthContext): Promise<Response> {
   try {
     // Parse request body
     let body;
@@ -144,13 +146,8 @@ export async function POST(request: NextRequest) {
     const { keywords, priority } = validation.data;
     const totalKeywords = keywords.length;
 
-    // SECURITY WARNING: In production, user_id MUST be derived from authenticated session/JWT
-    // NEVER trust client-provided user_id as it enables tenant impersonation and quota theft
-    // TODO: Replace with: const authenticatedUserId = getAuthenticatedUserId(request);
-    const systemUserId = 'system'; // Temporary - should be authenticated user ID
-
-    // Initialize services with authenticated user
-    const services = await initializeServices();
+    // Initialize services with authenticated context
+    const services = await initializeServices(authContext);
     if (!services) {
       return NextResponse.json({
         success: false,
@@ -185,7 +182,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create enrichment job with authenticated user
-    const jobResult = await enrichmentQueue.enqueueJob(systemUserId, {
+    const jobResult = await enrichmentQueue.enqueueJob(authContext.userId || 'system', {
       type: EnrichmentJobType.BULK_ENRICHMENT,
       data: {
         keywords: keywords.map(k => ({
@@ -240,3 +237,6 @@ export async function POST(request: NextRequest) {
     } as BulkEnrichmentResponse, { status: 500 });
   }
 }
+
+// Export wrapped with system authentication middleware
+export const POST = withSystemAuth(handleBulkEnrichmentRequest);

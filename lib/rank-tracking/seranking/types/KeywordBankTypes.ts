@@ -7,7 +7,7 @@
 export interface KeywordBankEntity {
   id: string;
   keyword: string;
-  country_code: string;
+  country_id: string;
   language_code: string;
   is_data_found: boolean;
   volume: number | null;
@@ -24,7 +24,7 @@ export interface KeywordBankEntity {
 // Insert/Update Types
 export interface KeywordBankInsert {
   keyword: string;
-  country_code: string;
+  country_id: string;
   language_code?: string;
   is_data_found: boolean;
   volume?: number | null;

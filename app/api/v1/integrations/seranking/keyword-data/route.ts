@@ -12,6 +12,7 @@ import { KeywordBankService } from '../../../../../../lib/rank-tracking/serankin
 import { IntegrationService } from '../../../../../../lib/rank-tracking/seranking/services/IntegrationService';
 import { SeRankingApiClient } from '../../../../../../lib/rank-tracking/seranking/client/SeRankingApiClient';
 import { ErrorHandlingService } from '../../../../../../lib/rank-tracking/seranking/services/ErrorHandlingService';
+import { withSystemAuth, SystemAuthContext } from '../../../../../../lib/middleware/auth/SystemAuthMiddleware';
 
 // Request validation schema
 const KeywordDataRequestSchema = z.object({
@@ -43,10 +44,11 @@ interface KeywordDataResponse {
   message?: string;
 }
 
-async function initializeServices(userId: string = 'system'): Promise<{
+async function initializeServices(authContext: SystemAuthContext): Promise<{
   enrichmentService: KeywordEnrichmentService;
   integrationService: IntegrationService;
 } | null> {
+  const userId = authContext.userId || 'system';
   try {
     // Initialize services
     const keywordBankService = new KeywordBankService();
@@ -92,7 +94,7 @@ async function initializeServices(userId: string = 'system'): Promise<{
   }
 }
 
-export async function GET(request: NextRequest) {
+async function handleKeywordDataRequest(request: NextRequest, authContext: SystemAuthContext): Promise<Response> {
   try {
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
@@ -115,12 +117,8 @@ export async function GET(request: NextRequest) {
 
     const { keyword, country_code, language_code, force_refresh } = validation.data;
 
-    // SECURITY WARNING: In production, user_id MUST be derived from authenticated session/JWT
-    // TODO: Replace 'system' with authenticated user ID from session/token
-    const authenticatedUserId = 'system'; // Temporary - should be from authentication context
-    
-    // Initialize services
-    const services = await initializeServices(authenticatedUserId);
+    // Initialize services with authenticated context
+    const services = await initializeServices(authContext);
     if (!services) {
       return NextResponse.json({
         success: false,
@@ -132,7 +130,7 @@ export async function GET(request: NextRequest) {
     const { enrichmentService, integrationService } = services;
 
     // Get integration settings to check quota for authenticated user
-    const integrationSettings = await integrationService.getIntegrationSettings(authenticatedUserId);
+    const integrationSettings = await integrationService.getIntegrationSettings(authContext.userId || 'system');
     if (!integrationSettings.success || !integrationSettings.data) {
       return NextResponse.json({
         success: false,
@@ -212,3 +210,6 @@ export async function GET(request: NextRequest) {
     } as KeywordDataResponse, { status: 500 });
   }
 }
+
+// Export wrapped with system authentication middleware
+export const GET = withSystemAuth(handleKeywordDataRequest);
