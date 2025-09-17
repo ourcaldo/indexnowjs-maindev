@@ -150,6 +150,56 @@ export interface Database {
           updated_at?: string
         }
       }
+      indb_keyword_bank: {
+        Row: {
+          id: string
+          keyword: string
+          country_code: string
+          language_code: string
+          is_data_found: boolean
+          volume: number | null
+          cpc: number | null
+          competition: number | null
+          difficulty: number | null
+          history_trend: any | null
+          keyword_intent: string | null
+          data_updated_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          keyword: string
+          country_code: string
+          language_code?: string
+          is_data_found?: boolean
+          volume?: number | null
+          cpc?: number | null
+          competition?: number | null
+          difficulty?: number | null
+          history_trend?: any | null
+          keyword_intent?: string | null
+          data_updated_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          keyword?: string
+          country_code?: string
+          language_code?: string
+          is_data_found?: boolean
+          volume?: number | null
+          cpc?: number | null
+          competition?: number | null
+          difficulty?: number | null
+          history_trend?: any | null
+          keyword_intent?: string | null
+          data_updated_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
       indb_keyword_domains: {
         Row: {
           id: string

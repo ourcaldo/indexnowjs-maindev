@@ -101,6 +101,8 @@ export interface KeywordBankOperationResult {
   success: boolean;
   data?: KeywordBankEntity;
   affected_rows?: number;
+  keyword?: string;
+  operation?: string;
   error?: {
     message: string;
     code?: string;
@@ -140,6 +142,15 @@ export interface CacheStats {
   average_age: number;
   expired_entries: number;
   memory_usage: number;
+  // Additional fields for cache status
+  total_keywords: number;
+  keywords_with_data: number;
+  keywords_without_data: number;
+  fresh_data: number;
+  stale_data: number;
+  data_found_rate: number;
+  fresh_data_rate: number;
+  last_updated: string;
 }
 
 // Data Migration Types
@@ -224,6 +235,36 @@ export interface KeywordSyncStatus {
   sync_errors: string[];
   retry_count: number;
   next_retry_at: Date | null;
+}
+
+// Missing types used in KeywordBankService
+export interface KeywordLookupParams {
+  keyword: string;
+  countryCode: string;
+  languageCode?: string;
+}
+
+export interface CacheStatus {
+  total_keywords: number;
+  cached_keywords: number;
+  missing_keywords: number;
+  fresh_cache: number;
+  stale_cache: number;
+  cache_hit_rate: number;
+  needs_api_call: boolean;
+  missing_keyword_list: string[];
+  stale_keyword_list: string[];
+  fresh_data: KeywordBankEntity[];
+  stale_data: KeywordBankEntity[];
+}
+
+export interface KeywordBankBatchResult {
+  total_operations: number;
+  successful_operations: number;
+  failed_operations: number;
+  success_rate: number;
+  results: KeywordBankOperationResult[];
+  errors: string[];
 }
 
 // Export composite types for easier imports
