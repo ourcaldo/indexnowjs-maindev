@@ -23,7 +23,7 @@ export const CheckoutSubmitButton = ({
         type="submit"
         disabled={submitting || !paymentMethod}
         onClick={onSubmit}
-        className="w-full bg-primary hover:bg-slate-50 hover:text-primary hover:border-primary text-primary-foreground font-medium py-3 h-12 transition-colors duration-150"
+        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 h-12 transition-colors duration-150"
       >
         {submitting ? (
           <>

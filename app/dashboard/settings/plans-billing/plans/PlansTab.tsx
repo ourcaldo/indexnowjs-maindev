@@ -359,7 +359,7 @@ export default function PlansTab() {
                   ? 'border-foreground shadow-md' 
                   : pkg.is_current
                   ? 'border-success'
-                  : 'border-border hover:border-foreground'
+                  : 'border-border hover:border-accent'
               }`}
             >
               {/* Popular Badge */}
@@ -464,7 +464,7 @@ export default function PlansTab() {
                     disabled={subscribing === pkg.id}
                     className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 ${
                       pkg.is_popular
-                        ? 'bg-foreground text-background hover:bg-foreground/90 hover:shadow-md'
+                        ? 'bg-foreground text-background hover:bg-foreground/80 hover:shadow-md'
                         : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md'
                     } ${subscribing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
@@ -485,7 +485,7 @@ export default function PlansTab() {
                       disabled={startingTrial === pkg.id}
                       className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center h-12 border-2 ${
                         pkg.is_popular
-                          ? 'border-foreground text-foreground hover:bg-foreground hover:text-background'
+                          ? 'border-foreground text-foreground hover:bg-accent hover:text-accent-foreground'
                           : 'border-primary text-primary hover:bg-primary hover:text-primary-foreground'
                       } ${startingTrial === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >

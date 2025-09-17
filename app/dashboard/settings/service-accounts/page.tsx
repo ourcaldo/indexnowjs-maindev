@@ -302,7 +302,7 @@ export default function ServiceAccountsSettingsPage() {
                       <Button 
                         variant="ghost"
                         size="icon"
-                        className="text-destructive hover:text-destructive hover:bg-slate-50 self-start sm:self-auto transition-colors duration-150"
+                        className="text-destructive hover:text-destructive hover:bg-secondary/50 self-start sm:self-auto transition-colors duration-150"
                         title="Delete Account"
                         onClick={() => handleDeleteServiceAccount(account.id)}
                         disabled={deletingServiceAccount === account.id}
