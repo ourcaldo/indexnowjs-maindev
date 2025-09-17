@@ -149,8 +149,9 @@ export interface IIntegrationService {
   /**
    * Get SeRanking integration settings
    */
-  getIntegrationSettings(): Promise<ServiceResponse<{
+  getIntegrationSettings(userId?: string): Promise<ServiceResponse<{
     service_name: string;
+    api_key: string;
     api_url: string;
     api_quota_limit: number;
     api_quota_used: number;

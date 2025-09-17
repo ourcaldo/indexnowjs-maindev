@@ -138,6 +138,7 @@ export class IntegrationService implements IIntegrationService {
    */
   async getIntegrationSettings(userId?: string): Promise<ServiceResponse<{
     service_name: string;
+    api_key: string;
     api_url: string;
     api_quota_limit: number;
     api_quota_used: number;
@@ -179,6 +180,7 @@ export class IntegrationService implements IIntegrationService {
         success: true,
         data: {
           service_name: data.service_name,
+          api_key: data.api_key,
           api_url: data.api_url,
           api_quota_limit: data.api_quota_limit,
           api_quota_used: data.api_quota_used,

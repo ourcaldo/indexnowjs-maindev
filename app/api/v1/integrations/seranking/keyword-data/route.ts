@@ -61,12 +61,18 @@ async function initializeServices(userId: string = 'system'): Promise<{
       return null;
     }
 
-    const { api_url } = integrationSettings.data;
+    const { api_key, api_url } = integrationSettings.data;
+    
+    // Validate API key exists before proceeding
+    if (!api_key || api_key.trim() === '') {
+      console.error('SeRanking API key not configured');
+      return null;
+    }
 
-    // Initialize API client with hardcoded API key for now
+    // Initialize API client with stored API key
     const apiClient = new SeRankingApiClient({
       baseUrl: api_url,
-      apiKey: '952945a4-5d7a-4719-16cd-5e4b8b3892d6', // From the plan
+      apiKey: api_key, // Use stored key from integration settings
       timeout: 30000,
       retryAttempts: 3,
       retryDelay: 1000
@@ -109,8 +115,12 @@ export async function GET(request: NextRequest) {
 
     const { keyword, country_code, language_code, force_refresh } = validation.data;
 
+    // SECURITY WARNING: In production, user_id MUST be derived from authenticated session/JWT
+    // TODO: Replace 'system' with authenticated user ID from session/token
+    const authenticatedUserId = 'system'; // Temporary - should be from authentication context
+    
     // Initialize services
-    const services = await initializeServices('system');
+    const services = await initializeServices(authenticatedUserId);
     if (!services) {
       return NextResponse.json({
         success: false,
@@ -121,8 +131,8 @@ export async function GET(request: NextRequest) {
 
     const { enrichmentService, integrationService } = services;
 
-    // Get integration settings to check quota
-    const integrationSettings = await integrationService.getIntegrationSettings('system');
+    // Get integration settings to check quota for authenticated user
+    const integrationSettings = await integrationService.getIntegrationSettings(authenticatedUserId);
     if (!integrationSettings.success || !integrationSettings.data) {
       return NextResponse.json({
         success: false,
@@ -156,6 +166,12 @@ export async function GET(request: NextRequest) {
         quota_remaining: quotaRemaining
       } as KeywordDataResponse, { status: 500 });
     }
+
+    // TODO: Move quota recording to KeywordEnrichmentService execution time
+    // Should only record when actual API calls are made, not on cache hits
+    // if (enrichmentResult.metadata?.source === 'api') {
+    //   await integrationService.recordApiUsage(1, { operationType: 'keyword_export', userId: authenticatedUserId });
+    // }
 
     const keywordData = enrichmentResult.data;
     if (!keywordData) {

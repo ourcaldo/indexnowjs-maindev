@@ -21,9 +21,8 @@ const BulkEnrichmentRequestSchema = z.object({
     country_code: z.string().regex(/^[a-z]{2}$/i).optional().default('us'),
     language_code: z.string().regex(/^[a-z]{2}$/i).optional().default('en')
   })).min(1).max(1000),
-  priority: z.enum(['high', 'normal', 'low']).optional().default('normal'),
-  callback_url: z.string().url().optional(),
-  user_id: z.string().min(1)
+  priority: z.enum(['high', 'normal', 'low']).optional().default('normal')
+  // Removed callback_url to prevent SSRF attacks until proper verification is implemented
 });
 
 // Response interface
@@ -39,7 +38,7 @@ interface BulkEnrichmentResponse {
   message?: string;
 }
 
-async function initializeServices(): Promise<{
+async function initializeServices(userId: string = 'system'): Promise<{
   enrichmentService: KeywordEnrichmentService;
   integrationService: IntegrationService;
   enrichmentQueue: EnrichmentQueue;
@@ -56,8 +55,8 @@ async function initializeServices(): Promise<{
       enableMetrics: true
     });
 
-    // Get SeRanking integration settings
-    const integrationSettings = await integrationService.getIntegrationSettings('seranking_keyword_export');
+    // Get SeRanking integration settings with userId
+    const integrationSettings = await integrationService.getIntegrationSettings(userId);
     
     if (!integrationSettings.success || !integrationSettings.data) {
       console.error('SeRanking integration not configured');
@@ -65,8 +64,14 @@ async function initializeServices(): Promise<{
     }
 
     const { api_key, api_url } = integrationSettings.data;
+    
+    // Validate API key exists before proceeding
+    if (!api_key || api_key.trim() === '') {
+      console.error('SeRanking API key not configured');
+      return null;
+    }
 
-    // Initialize API client
+    // Initialize API client with stored API key
     const apiClient = new SeRankingApiClient({
       baseUrl: api_url,
       apiKey: api_key,
@@ -116,11 +121,16 @@ export async function POST(request: NextRequest) {
       } as BulkEnrichmentResponse, { status: 400 });
     }
 
-    const { keywords, priority, callback_url, user_id } = validation.data;
+    const { keywords, priority } = validation.data;
     const totalKeywords = keywords.length;
 
-    // Initialize services
-    const services = await initializeServices();
+    // SECURITY WARNING: In production, user_id MUST be derived from authenticated session/JWT
+    // NEVER trust client-provided user_id as it enables tenant impersonation and quota theft
+    // TODO: Replace with: const authenticatedUserId = getAuthenticatedUserId(request);
+    const systemUserId = 'system'; // Temporary - should be authenticated user ID
+
+    // Initialize services with authenticated user
+    const services = await initializeServices(systemUserId);
     if (!services) {
       return NextResponse.json({
         success: false,
@@ -131,9 +141,9 @@ export async function POST(request: NextRequest) {
 
     const { enrichmentService, integrationService, enrichmentQueue } = services;
 
-    // Check quota status
-    const quotaStatus = await integrationService.getQuotaStatus('seranking_keyword_export');
-    if (!quotaStatus.success || !quotaStatus.data) {
+    // Get integration settings to check quota for the authenticated user
+    const integrationSettings = await integrationService.getIntegrationSettings(systemUserId);
+    if (!integrationSettings.success || !integrationSettings.data) {
       return NextResponse.json({
         success: false,
         error: 'Unable to check quota status',
@@ -142,7 +152,7 @@ export async function POST(request: NextRequest) {
     }
 
     const quotaRequired = totalKeywords; // Assume 1 quota per keyword
-    const quotaAvailable = quotaStatus.data.remaining;
+    const quotaAvailable = integrationSettings.data.api_quota_limit - integrationSettings.data.api_quota_used;
 
     if (quotaAvailable < quotaRequired) {
       return NextResponse.json({
@@ -154,7 +164,7 @@ export async function POST(request: NextRequest) {
       } as BulkEnrichmentResponse, { status: 429 });
     }
 
-    // Create enrichment job
+    // Create enrichment job with authenticated user
     const jobResult = await enrichmentQueue.enqueueJob({
       type: 'bulk_enrichment',
       data: {
@@ -163,7 +173,7 @@ export async function POST(request: NextRequest) {
           country_code: k.country_code,
           language_code: k.language_code
         })),
-        callback_url,
+        // callback_url removed for security - will be added back with proper verification
         total_keywords: totalKeywords
       },
       priority,
@@ -174,7 +184,7 @@ export async function POST(request: NextRequest) {
         enableParallel: true,
         parallelLimit: 3
       }
-    }, user_id);
+    }, systemUserId);
 
     if (!jobResult.success) {
       return NextResponse.json({
@@ -185,6 +195,10 @@ export async function POST(request: NextRequest) {
     }
 
     const estimatedCompletion = calculateEstimatedCompletion(totalKeywords);
+
+    // TODO: Move quota recording to execution time in KeywordEnrichmentService/queue worker
+    // Recording at enqueue time risks over/under counting and doesn't account for cache hits/failures
+    // await integrationService.recordApiUsage(quotaRequired, { operationType: 'bulk_enrichment', userId: systemUserId });
 
     return NextResponse.json({
       success: true,
