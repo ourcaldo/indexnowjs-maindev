@@ -94,17 +94,28 @@ CREATE INDEX "idx_indb_keyword_bank_updated" ON "public"."indb_keyword_bank" ("d
 #### 1.3 Keyword Table Enhancement
 **SQL Query to Execute in Supabase:**
 ```sql
--- Add keyword bank reference to existing keyword table
+-- Add keyword intelligence columns and bank reference to existing keyword table
 ALTER TABLE "public"."indb_keyword_keywords" 
 ADD COLUMN "keyword_bank_id" uuid NULL,
+ADD COLUMN "search_volume" integer NULL,
+ADD COLUMN "cpc" numeric(10,2) NULL,
+ADD COLUMN "competition" numeric(3,2) NULL,
+ADD COLUMN "difficulty" integer NULL,
+ADD COLUMN "keyword_intent" text NULL,
+ADD COLUMN "history_trend" jsonb NULL,
+ADD COLUMN "intelligence_updated_at" timestamp with time zone NULL,
 ADD CONSTRAINT "fk_keyword_bank" 
     FOREIGN KEY ("keyword_bank_id") 
     REFERENCES "public"."indb_keyword_bank"("id") 
     ON DELETE SET NULL;
 
--- Add index for keyword bank relationships
+-- Add indexes for keyword bank relationships and intelligence data
 CREATE INDEX "idx_indb_keyword_keywords_bank_id" 
     ON "public"."indb_keyword_keywords" ("keyword_bank_id");
+CREATE INDEX "idx_indb_keyword_keywords_search_volume" 
+    ON "public"."indb_keyword_keywords" ("search_volume");
+CREATE INDEX "idx_indb_keyword_keywords_difficulty" 
+    ON "public"."indb_keyword_keywords" ("difficulty");
 ```
 
 ### Phase 2: Backend Service Implementation
@@ -171,11 +182,11 @@ class KeywordEnrichmentService {
 #### 3.1 Automatic Keyword Enrichment Trigger
 **SQL Query to Execute in Supabase:**
 ```sql
--- Function to automatically link keywords with bank data
+-- Function to automatically link keywords with bank data and populate intelligence fields
 CREATE OR REPLACE FUNCTION link_keyword_to_bank()
 RETURNS TRIGGER AS $$
 DECLARE
-    bank_record_id uuid;
+    bank_record RECORD;
     country_code text;
 BEGIN
     -- Get country code from country_id
@@ -183,15 +194,23 @@ BEGIN
     FROM indb_keyword_countries 
     WHERE id = NEW.country_id;
     
-    -- Find matching keyword bank record
-    SELECT id INTO bank_record_id
+    -- Find matching keyword bank record with all intelligence data
+    SELECT id, volume, cpc, competition, difficulty, keyword_intent, history_trend, data_updated_at
+    INTO bank_record
     FROM indb_keyword_bank 
     WHERE keyword = NEW.keyword 
     AND country_code = COALESCE(country_code, 'us');
     
-    -- Update keyword with bank reference if found
-    IF bank_record_id IS NOT NULL THEN
-        NEW.keyword_bank_id = bank_record_id;
+    -- Update keyword with bank reference and intelligence data if found
+    IF bank_record.id IS NOT NULL THEN
+        NEW.keyword_bank_id = bank_record.id;
+        NEW.search_volume = bank_record.volume;
+        NEW.cpc = bank_record.cpc;
+        NEW.competition = bank_record.competition;
+        NEW.difficulty = bank_record.difficulty;
+        NEW.keyword_intent = bank_record.keyword_intent;
+        NEW.history_trend = bank_record.history_trend;
+        NEW.intelligence_updated_at = bank_record.data_updated_at;
     END IF;
     
     RETURN NEW;
