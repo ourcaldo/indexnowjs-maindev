@@ -440,6 +440,83 @@ export interface Database {
           updated_at?: string
         }
       }
+      indb_enrichment_jobs: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          type: string // 'keyword_enrichment'
+          job_type: 'single_keyword' | 'bulk_enrichment' | 'cache_refresh' | 'batch_update' | 'scheduled_enrichment'
+          status: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'paused' | 'retrying'
+          priority: number // 1=low, 2=normal, 3=high, 4=critical
+          config: any // JSONB - EnrichmentJobConfig
+          source_data: any // JSONB - EnrichmentJobData
+          progress_data: any // JSONB - JobProgress
+          result_data: any | null // JSONB - JobResult
+          retry_count: number
+          last_retry_at: string | null
+          next_retry_at: string | null
+          worker_id: string | null
+          locked_at: string | null
+          started_at: string | null
+          completed_at: string | null
+          cancelled_at: string | null
+          error_message: string | null
+          metadata: any | null // JSONB
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          type?: string
+          job_type: 'single_keyword' | 'bulk_enrichment' | 'cache_refresh' | 'batch_update' | 'scheduled_enrichment'
+          status?: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'paused' | 'retrying'
+          priority?: number
+          config?: any
+          source_data?: any
+          progress_data?: any
+          result_data?: any | null
+          retry_count?: number
+          last_retry_at?: string | null
+          next_retry_at?: string | null
+          worker_id?: string | null
+          locked_at?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          cancelled_at?: string | null
+          error_message?: string | null
+          metadata?: any | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          type?: string
+          job_type?: 'single_keyword' | 'bulk_enrichment' | 'cache_refresh' | 'batch_update' | 'scheduled_enrichment'
+          status?: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'paused' | 'retrying'
+          priority?: number
+          config?: any
+          source_data?: any
+          progress_data?: any
+          result_data?: any | null
+          retry_count?: number
+          last_retry_at?: string | null
+          next_retry_at?: string | null
+          worker_id?: string | null
+          locked_at?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          cancelled_at?: string | null
+          error_message?: string | null
+          metadata?: any | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       indb_site_integration: {
         Row: {
           id: string
@@ -601,6 +678,103 @@ export interface Database {
           updated_at?: string
         }
       }
+      indb_seranking_integrations: {
+        Row: {
+          id: string
+          user_id: string
+          service_name: string
+          api_key: string
+          api_url: string
+          api_quota_limit: number
+          api_quota_used: number
+          quota_reset_date: string
+          quota_reset_interval: string
+          is_active: boolean
+          rate_limits: any
+          alert_settings: any
+          last_health_check: string | null
+          health_status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          service_name: string
+          api_key?: string
+          api_url?: string
+          api_quota_limit?: number
+          api_quota_used?: number
+          quota_reset_date?: string
+          quota_reset_interval?: string
+          is_active?: boolean
+          rate_limits?: any
+          alert_settings?: any
+          last_health_check?: string | null
+          health_status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          service_name?: string
+          api_key?: string
+          api_url?: string
+          api_quota_limit?: number
+          api_quota_used?: number
+          quota_reset_date?: string
+          quota_reset_interval?: string
+          is_active?: boolean
+          rate_limits?: any
+          alert_settings?: any
+          last_health_check?: string | null
+          health_status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      indb_seranking_usage_logs: {
+        Row: {
+          id: string
+          integration_id: string
+          operation_type: string
+          request_count: number
+          successful_requests: number
+          failed_requests: number
+          response_time_ms: number | null
+          timestamp: string
+          date: string
+          metadata: any | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          integration_id: string
+          operation_type: string
+          request_count?: number
+          successful_requests?: number
+          failed_requests?: number
+          response_time_ms?: number | null
+          timestamp?: string
+          date?: string
+          metadata?: any | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          integration_id?: string
+          operation_type?: string
+          request_count?: number
+          successful_requests?: number
+          failed_requests?: number
+          response_time_ms?: number | null
+          timestamp?: string
+          date?: string
+          metadata?: any | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -628,6 +802,8 @@ export type KeywordKeyword = Database['public']['Tables']['indb_keyword_keywords
 export type KeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Row']
 export type KeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Row']
 export type SiteIntegration = Database['public']['Tables']['indb_site_integration']['Row']
+export type SeRankingIntegration = Database['public']['Tables']['indb_seranking_integrations']['Row']
+export type SeRankingUsageLog = Database['public']['Tables']['indb_seranking_usage_logs']['Row']
 
 // Insert types
 export type InsertUserProfile = Database['public']['Tables']['indb_auth_user_profiles']['Insert']
@@ -642,6 +818,8 @@ export type InsertKeywordKeyword = Database['public']['Tables']['indb_keyword_ke
 export type InsertKeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Insert']
 export type InsertKeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Insert']
 export type InsertSiteIntegration = Database['public']['Tables']['indb_site_integration']['Insert']
+export type InsertSeRankingIntegration = Database['public']['Tables']['indb_seranking_integrations']['Insert']
+export type InsertSeRankingUsageLog = Database['public']['Tables']['indb_seranking_usage_logs']['Insert']
 
 // Update types
 export type UpdateUserProfile = Database['public']['Tables']['indb_auth_user_profiles']['Update']
@@ -654,3 +832,5 @@ export type UpdateKeywordKeyword = Database['public']['Tables']['indb_keyword_ke
 export type UpdateKeywordRanking = Database['public']['Tables']['indb_keyword_rankings']['Update']
 export type UpdateKeywordUsage = Database['public']['Tables']['indb_keyword_usage']['Update']
 export type UpdateSiteIntegration = Database['public']['Tables']['indb_site_integration']['Update']
+export type UpdateSeRankingIntegration = Database['public']['Tables']['indb_seranking_integrations']['Update']
+export type UpdateSeRankingUsageLog = Database['public']['Tables']['indb_seranking_usage_logs']['Update']
