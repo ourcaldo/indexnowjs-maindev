@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { IntegrationService } from '../../../../../../../lib/rank-tracking/seranking/services/IntegrationService';
+import { withSystemAuth, SystemAuthContext } from '../../../../../../../lib/middleware/auth/SystemAuthMiddleware';
 
 // Query parameters validation schema
 const QuotaHistoryRequestSchema = z.object({
@@ -100,7 +101,7 @@ function isWeekend(date: Date): boolean {
   return day === 0 || day === 6; // Sunday = 0, Saturday = 6
 }
 
-export async function GET(request: NextRequest) {
+async function handleQuotaHistoryRequest(request: NextRequest, authContext: SystemAuthContext): Promise<Response> {
   try {
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
@@ -214,3 +215,6 @@ export async function GET(request: NextRequest) {
     } as QuotaHistoryResponse, { status: 500 });
   }
 }
+
+// Export wrapped with system authentication middleware
+export const GET = withSystemAuth(handleQuotaHistoryRequest);

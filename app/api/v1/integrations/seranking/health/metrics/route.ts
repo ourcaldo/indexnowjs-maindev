@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { IntegrationService } from '../../../../../../../lib/rank-tracking/seranking/services/IntegrationService';
 import { KeywordBankService } from '../../../../../../../lib/rank-tracking/seranking/services/KeywordBankService';
+import { withSystemAuth, SystemAuthContext } from '../../../../../../../lib/middleware/auth/SystemAuthMiddleware';
 
 // Query parameters validation schema
 const MetricsRequestSchema = z.object({
@@ -141,7 +142,7 @@ function generateMockMetrics(hours: number) {
   };
 }
 
-export async function GET(request: NextRequest) {
+async function handleMetricsRequest(request: NextRequest, authContext: SystemAuthContext): Promise<Response> {
   try {
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
@@ -275,3 +276,6 @@ export async function GET(request: NextRequest) {
     } as MetricsResponse, { status: 500 });
   }
 }
+
+// Export wrapped with system authentication middleware
+export const GET = withSystemAuth(handleMetricsRequest);
