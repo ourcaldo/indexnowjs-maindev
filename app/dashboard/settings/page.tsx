@@ -83,7 +83,9 @@ export default function SettingsPage() {
               variant={activeTab === tab.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200"
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors duration-150 ${
+                activeTab === tab.id ? '' : 'hover:bg-slate-50'
+              }`}
               data-testid={`tab-${tab.id}`}
             >
               <tab.icon className="w-4 h-4" />
@@ -101,7 +103,9 @@ export default function SettingsPage() {
                 variant={activeTab === tab.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setActiveTab(tab.id)}
-                className="flex flex-col items-center gap-1 p-3 h-auto text-xs font-medium"
+                className={`flex flex-col items-center gap-1 p-3 h-auto text-xs font-medium transition-colors duration-150 ${
+                  activeTab === tab.id ? '' : 'hover:bg-slate-50'
+                }`}
                 data-testid={`tab-mobile-${tab.id}`}
               >
                 <tab.icon className="w-4 h-4" />
