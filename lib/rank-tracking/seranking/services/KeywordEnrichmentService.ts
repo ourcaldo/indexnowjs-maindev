@@ -1,7 +1,8 @@
 /**
- * Keyword Enrichment Service
- * Main business logic coordinator for keyword intelligence workflow
- * Orchestrates cache-first strategy, API calls, validation, and error handling
+ * Keyword Enrichment Service - FIXED VERSION
+ * Properly separates two distinct flows:
+ * 1. Flow 1: Force enrichment for new keywords (keyword_bank_id IS NULL) - NO cache check
+ * 2. Flow 2: Refresh stale keywords (data older than 30 days) - direct keyword_bank lookup
  */
 
 import {
@@ -37,8 +38,7 @@ import {
 
 import { ValidationService, ValidationResult } from './ValidationService';
 import { ErrorHandlingService } from './ErrorHandlingService';
-import { KeywordBankService } from './KeywordBankService';
-import { SeRankingApiClient } from '../client/SeRankingApiClient';
+import { supabaseAdmin } from '../../../database/supabase';
 
 // Configuration interface
 export interface KeywordEnrichmentConfig {
@@ -54,12 +54,12 @@ export interface KeywordEnrichmentConfig {
   logLevel: 'debug' | 'info' | 'warn' | 'error';
 }
 
-// Batch request type
-export interface BatchKeywordRequest {
+// Interface for stale keywords
+interface StaleKeywordEntity {
+  id: string;
   keyword: string;
-  countryCode: string;
-  languageCode?: string;
-  priority?: 'high' | 'normal' | 'low';
+  country_id: string;
+  data_updated_at: string;
 }
 
 export class KeywordEnrichmentService implements IKeywordEnrichmentService {
@@ -80,7 +80,7 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
     config: Partial<KeywordEnrichmentConfig> = {}
   ) {
     this.config = {
-      cacheExpiryDays: 30,  // Changed from 7 to 30 days
+      cacheExpiryDays: 30,
       batchSize: 25,
       maxConcurrentRequests: 3,
       enableMetrics: true,
@@ -134,20 +134,22 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
   }
 
   /**
-   * Enrich single keyword with intelligence data (cache-first strategy)
+   * FLOW 1: Force enrichment for NEW keywords (keyword_bank_id IS NULL)
+   * This method does NOT check cache - it forces API enrichment for new keywords
    */
-  async enrichKeyword(
+  async enrichNewKeyword(
     keyword: string,
-    countryCode: string,
-    forceRefresh: boolean = false
+    countryCode: string
   ): Promise<ServiceResponse<KeywordBankEntity>> {
     const startTime = Date.now();
     
     try {
+      this.log('info', `[FLOW 1] Force enriching new keyword: ${keyword} (${countryCode})`);
+      
       // Validate inputs
       const validation = ValidationService.validateKeywordBankInsert({
         keyword,
-        country_code: countryCode,
+        country_id: countryCode,
         language_code: this.config.defaultLanguageCode,
         is_data_found: false
       });
@@ -160,39 +162,27 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
         );
       }
 
-      // Check cache first (if not forcing refresh)
-      let cachedData: KeywordBankEntity | null = null;
-      if (!forceRefresh) {
-        cachedData = await this.getCachedKeywordDataInternal(keyword, countryCode);
-        
-        if (cachedData && this.isCacheFresh(cachedData)) {
-          this.metrics.cache_hits++;
-          this.metrics.successful_requests++;
-          
-          return {
-            success: true,
-            data: cachedData,
-            metadata: {
-              source: 'cache',
-              timestamp: new Date()
-            }
-          };
-        }
-      }
-
-      // Cache miss or force refresh - fetch from API
+      // NO CACHE CHECK FOR FLOW 1 - we want to force enrichment
       this.metrics.cache_misses++;
       
       // Check quota before making API call
       const quotaOk = await this.checkQuotaStatus();
       if (!quotaOk) {
-        return this.handleQuotaExceeded(cachedData);
+        return this.createErrorResponse(
+          SeRankingErrorType.QUOTA_EXCEEDED_ERROR,
+          'API quota exceeded - cannot enrich new keyword',
+          { quotaStatus: this.quotaStatus }
+        );
       }
 
-      // Fetch from API
+      // Force fetch from API - no fallback for new keywords
       const apiResponse = await this.fetchFromApi([keyword], countryCode);
       if (!apiResponse.success || !apiResponse.data || apiResponse.data.length === 0) {
-        return this.handleApiFailure(apiResponse.error, cachedData);
+        return this.createErrorResponse(
+          apiResponse.error?.type || SeRankingErrorType.UNKNOWN_ERROR,
+          `Failed to fetch data for new keyword: ${apiResponse.error?.message || 'Unknown error'}`,
+          { apiError: apiResponse.error }
+        );
       }
 
       // Process and store API data
@@ -207,12 +197,13 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
       if (!enrichedData.success) {
         return this.createErrorResponse(
           SeRankingErrorType.UNKNOWN_ERROR,
-          'Failed to store enriched data',
+          'Failed to store enriched data for new keyword',
           { error: enrichedData.error }
         );
       }
 
       this.metrics.successful_requests++;
+      this.log('info', `[FLOW 1] Successfully enriched new keyword: ${keyword}`);
       
       return {
         success: true,
@@ -225,38 +216,269 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
 
     } catch (error) {
       this.metrics.failed_requests++;
+      this.log('error', `[FLOW 1] Failed to enrich new keyword ${keyword}: ${error}`);
       
-      const recoveryResult = await this.errorHandler.handleError(
-        error as Error,
-        {
-          operation: 'enrichKeyword',
-          timestamp: new Date(),
-          keywords: [keyword],
-          countryCode
-        }
-      );
-
-      if (recoveryResult.success) {
-        return {
-          success: true,
-          data: recoveryResult.data as KeywordBankEntity,
-          metadata: {
-            source: recoveryResult.fallbackUsed ? 'cache' : 'api',
-            timestamp: new Date()
-          }
-        };
-      }
-
       return this.createErrorResponse(
         SeRankingErrorType.UNKNOWN_ERROR,
-        'Failed to enrich keyword',
-        { error: error, recoveryResult }
+        'Failed to enrich new keyword',
+        { error, keyword, countryCode }
       );
     }
   }
 
   /**
-   * Enrich multiple keywords efficiently with batch processing
+   * FLOW 2: Refresh OLD keywords that have stale cache data (>30 days)
+   * This method directly looks at keyword_bank table and refreshes stale data
+   */
+  async refreshStaleKeywords(limit: number = 50): Promise<ServiceResponse<{
+    processed: number;
+    successful: number;
+    failed: number;
+    keywords: string[];
+  }>> {
+    const startTime = Date.now();
+    
+    try {
+      this.log('info', `[FLOW 2] Finding stale keywords to refresh (limit: ${limit})`);
+      
+      // Find keywords in keyword_bank that are older than 30 days
+      const staleKeywords = await this.findStaleKeywords(limit);
+      
+      if (staleKeywords.length === 0) {
+        this.log('info', '[FLOW 2] No stale keywords found');
+        return {
+          success: true,
+          data: {
+            processed: 0,
+            successful: 0,
+            failed: 0,
+            keywords: []
+          },
+          metadata: {
+            source: 'cache',
+            timestamp: new Date()
+          }
+        };
+      }
+
+      this.log('info', `[FLOW 2] Found ${staleKeywords.length} stale keywords to refresh`);
+      
+      let processed = 0;
+      let successful = 0;
+      let failed = 0;
+      const processedKeywords: string[] = [];
+      
+      // Process each stale keyword
+      for (const staleKeyword of staleKeywords) {
+        try {
+          const refreshResult = await this.refreshStaleKeyword(staleKeyword);
+          processed++;
+          processedKeywords.push(staleKeyword.keyword);
+          
+          if (refreshResult.success) {
+            successful++;
+            this.log('info', `[FLOW 2] Refreshed stale keyword: ${staleKeyword.keyword}`);
+          } else {
+            failed++;
+            this.log('warn', `[FLOW 2] Failed to refresh stale keyword: ${staleKeyword.keyword}`);
+          }
+          
+          // Small delay between requests
+          await this.delay(500);
+          
+        } catch (error) {
+          processed++;
+          failed++;
+          processedKeywords.push(staleKeyword.keyword);
+          this.log('error', `[FLOW 2] Error refreshing ${staleKeyword.keyword}: ${error}`);
+        }
+      }
+      
+      this.log('info', `[FLOW 2] Completed refresh: ${processed} processed, ${successful} successful, ${failed} failed`);
+      
+      return {
+        success: true,
+        data: {
+          processed,
+          successful,
+          failed,
+          keywords: processedKeywords
+        },
+        metadata: {
+          source: 'api',
+          timestamp: new Date()
+        }
+      };
+      
+    } catch (error) {
+      this.log('error', `[FLOW 2] Error in refreshStaleKeywords: ${error}`);
+      
+      return this.createErrorResponse(
+        SeRankingErrorType.UNKNOWN_ERROR,
+        'Failed to refresh stale keywords',
+        { error }
+      );
+    }
+  }
+
+  /**
+   * Find stale keywords in keyword_bank table (older than 30 days)
+   */
+  private async findStaleKeywords(limit: number = 50): Promise<StaleKeywordEntity[]> {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { data, error } = await supabaseAdmin
+        .from('indb_keyword_bank')
+        .select('id, keyword, country_id, data_updated_at')
+        .lt('data_updated_at', thirtyDaysAgo.toISOString())
+        .eq('is_data_found', true)
+        .limit(limit);
+
+      if (error) {
+        this.log('error', `[FLOW 2] Error finding stale keywords: ${error.message}`);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      this.log('error', `[FLOW 2] Error in findStaleKeywords: ${error}`);
+      return [];
+    }
+  }
+
+  /**
+   * Refresh a single stale keyword
+   */
+  private async refreshStaleKeyword(staleKeyword: StaleKeywordEntity): Promise<ServiceResponse<KeywordBankEntity>> {
+    try {
+      this.log('info', `[FLOW 2] Refreshing stale keyword: ${staleKeyword.keyword} (${staleKeyword.country_id})`);
+
+      // Check quota before making API call
+      const quotaOk = await this.checkQuotaStatus();
+      if (!quotaOk) {
+        return this.createErrorResponse(
+          SeRankingErrorType.QUOTA_EXCEEDED_ERROR,
+          'API quota exceeded - cannot refresh stale keyword',
+          { quotaStatus: this.quotaStatus }
+        );
+      }
+
+      // Fetch fresh data from API
+      const apiResponse = await this.fetchFromApi([staleKeyword.keyword], staleKeyword.country_id);
+      if (!apiResponse.success || !apiResponse.data || apiResponse.data.length === 0) {
+        return this.createErrorResponse(
+          apiResponse.error?.type || SeRankingErrorType.UNKNOWN_ERROR,
+          `Failed to refresh stale keyword: ${apiResponse.error?.message || 'Unknown error'}`,
+          { apiError: apiResponse.error }
+        );
+      }
+
+      // Update existing keyword_bank record with fresh data
+      const apiKeywordData = apiResponse.data[0];
+      const updateResult = await this.updateExistingKeywordData(
+        staleKeyword.id,
+        apiKeywordData
+      );
+
+      if (!updateResult.success) {
+        return this.createErrorResponse(
+          SeRankingErrorType.UNKNOWN_ERROR,
+          'Failed to update stale keyword data',
+          { error: updateResult.error }
+        );
+      }
+
+      this.metrics.successful_requests++;
+      this.log('info', `[FLOW 2] Successfully refreshed stale keyword: ${staleKeyword.keyword}`);
+      
+      return {
+        success: true,
+        data: updateResult.data!,
+        metadata: {
+          source: 'api',
+          timestamp: new Date()
+        }
+      };
+
+    } catch (error) {
+      this.log('error', `[FLOW 2] Error refreshing stale keyword ${staleKeyword.keyword}: ${error}`);
+      
+      return this.createErrorResponse(
+        SeRankingErrorType.UNKNOWN_ERROR,
+        'Failed to refresh stale keyword',
+        { error, keyword: staleKeyword.keyword }
+      );
+    }
+  }
+
+  /**
+   * Update existing keyword_bank record with fresh API data
+   */
+  private async updateExistingKeywordData(
+    keywordBankId: string,
+    apiData: SeRankingKeywordData
+  ): Promise<KeywordBankOperationResult> {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('indb_keyword_bank')
+        .update({
+          volume: apiData.volume,
+          cpc: apiData.cpc,
+          competition: apiData.competition,
+          difficulty: apiData.difficulty,
+          history_trend: apiData.history_trend,
+          keyword_intent: null, // Will be set by separate logic later
+          is_data_found: apiData.is_data_found,
+          data_updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', keywordBankId)
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          success: false,
+          error: {
+            message: error.message,
+            details: error
+          }
+        };
+      }
+
+      return {
+        success: true,
+        data: data as KeywordBankEntity
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          message: error instanceof Error ? error.message : 'Unknown update error',
+          details: error
+        }
+      };
+    }
+  }
+
+  /**
+   * Backward compatibility method - now properly decides which flow to use
+   * For new keywords (first time enrichment), use Flow 1
+   */
+  async enrichKeyword(
+    keyword: string,
+    countryCode: string,
+    forceRefresh: boolean = false
+  ): Promise<ServiceResponse<KeywordBankEntity>> {
+    // This method delegates to the appropriate flow
+    // By default, we assume this is for new keywords (Flow 1)
+    return this.enrichNewKeyword(keyword, countryCode);
+  }
+
+  /**
+   * Bulk enrichment using enrichNewKeyword for each keyword
    */
   async enrichKeywordsBulk(
     keywords: Array<{keyword: string; countryCode: string}>
@@ -332,8 +554,6 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
    * Get enrichment job status
    */
   async getJobStatus(jobId: string): Promise<ServiceResponse<BulkProcessingJob>> {
-    const startTime = Date.now();
-    
     try {
       const job = this.activeJobs.get(jobId);
       
@@ -367,8 +587,6 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
    * Cancel enrichment job
    */
   async cancelJob(jobId: string): Promise<ServiceResponse<boolean>> {
-    const startTime = Date.now();
-    
     try {
       const job = this.activeJobs.get(jobId);
       
@@ -413,8 +631,6 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
    * Retry failed keyword enrichments
    */
   async retryFailedEnrichments(jobId: string): Promise<ServiceResponse<BulkProcessingJob>> {
-    const startTime = Date.now();
-    
     try {
       const job = this.activeJobs.get(jobId);
       
@@ -467,208 +683,7 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
     }
   }
 
-  /**
-   * Get cached keyword data only (no API calls)
-   */
-  async getCachedKeywordData(
-    keyword: string,
-    countryCode: string
-  ): Promise<ServiceResponse<KeywordBankEntity | null>> {
-    const startTime = Date.now();
-    
-    try {
-      const cachedData = await this.getCachedKeywordDataInternal(keyword, countryCode);
-      
-      return {
-        success: true,
-        data: cachedData,
-        metadata: {
-          source: 'cache',
-          timestamp: new Date()
-        }
-      };
-
-    } catch (error) {
-      return this.createErrorResponse(
-        SeRankingErrorType.UNKNOWN_ERROR,
-        'Failed to get cached data',
-        { error }
-      );
-    }
-  }
-
-  /**
-   * Force refresh keyword data from API
-   */
-  async refreshKeywordData(
-    keyword: string,
-    countryCode: string
-  ): Promise<ServiceResponse<KeywordBankEntity>> {
-    return this.enrichKeyword(keyword, countryCode, true);
-  }
-
-  /**
-   * Get keyword statistics and analytics
-   */
-  async getKeywordStats(): Promise<ServiceResponse<{
-    cache_stats: CacheStats;
-    api_metrics: ApiMetrics;
-    quota_status?: QuotaStatus;
-    active_jobs: number;
-  }>> {
-    const startTime = Date.now();
-    
-    try {
-      // Get bank statistics through service if available
-      let cacheStats: CacheStats;
-      
-      if (this.keywordBankService instanceof KeywordBankService) {
-        const bankStats = await this.keywordBankService.getBankStats();
-        
-        cacheStats = {
-          total_entries: bankStats.total_keywords,
-          cache_hits: this.metrics.cache_hits,
-          cache_misses: this.metrics.cache_misses,
-          hit_ratio: this.metrics.cache_hits / (this.metrics.cache_hits + this.metrics.cache_misses || 1),
-          average_age: bankStats.average_age_days,
-          expired_entries: 0,
-          memory_usage: 0,
-          total_keywords: bankStats.total_keywords,
-          keywords_with_data: bankStats.with_data,
-          keywords_without_data: bankStats.without_data,
-          fresh_data: 0,
-          stale_data: 0,
-          data_found_rate: bankStats.with_data / (bankStats.total_keywords || 1),
-          fresh_data_rate: 0,
-          last_updated: new Date().toISOString()
-        };
-      } else {
-        // Fallback stats structure
-        cacheStats = {
-          total_entries: 0,
-          cache_hits: this.metrics.cache_hits,
-          cache_misses: this.metrics.cache_misses,
-          hit_ratio: this.metrics.cache_hits / (this.metrics.cache_hits + this.metrics.cache_misses || 1),
-          average_age: 0,
-          expired_entries: 0,
-          memory_usage: 0,
-          total_keywords: 0,
-          keywords_with_data: 0,
-          keywords_without_data: 0,
-          fresh_data: 0,
-          stale_data: 0,
-          data_found_rate: 0,
-          fresh_data_rate: 0,
-          last_updated: new Date().toISOString()
-        };
-      }
-
-      // Update quota status
-      await this.updateQuotaStatus();
-
-      return {
-        success: true,
-        data: {
-          cache_stats: cacheStats,
-          api_metrics: this.metrics,
-          quota_status: this.quotaStatus,
-          active_jobs: this.activeJobs.size
-        },
-        metadata: {
-          source: 'api',
-          timestamp: new Date()
-        }
-      };
-
-    } catch (error) {
-      return this.createErrorResponse(
-        SeRankingErrorType.UNKNOWN_ERROR,
-        'Failed to get keyword stats',
-        { error }
-      );
-    }
-  }
-
-  /**
-   * Check service health
-   */
-  async checkHealth(): Promise<ServiceResponse<HealthCheckResult>> {
-    const startTime = Date.now();
-    
-    try {
-      const apiHealth = await this.apiClient.testConnection();
-      const quotaOk = await this.checkQuotaStatus();
-      
-      let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-      let errorMessage: string | undefined;
-      
-      if (apiHealth.status === 'unhealthy') {
-        status = 'unhealthy';
-        errorMessage = `API unhealthy: ${apiHealth.error_message}`;
-      } else if (apiHealth.status === 'degraded' || !quotaOk) {
-        status = 'degraded';
-        errorMessage = !quotaOk ? 'Quota exceeded or near limit' : apiHealth.error_message;
-      }
-
-      const healthResult: HealthCheckResult = {
-        status,
-        response_time: Date.now() - startTime,
-        last_check: new Date(),
-        error_message: errorMessage
-      };
-
-      return {
-        success: true,
-        data: healthResult,
-        metadata: {
-          source: 'api',
-          timestamp: new Date()
-        }
-      };
-
-    } catch (error) {
-      const healthResult: HealthCheckResult = {
-        status: 'unhealthy',
-        response_time: Date.now() - startTime,
-        last_check: new Date(),
-        error_message: error instanceof Error ? error.message : 'Unknown error'
-      };
-
-      return {
-        success: false,
-        data: healthResult,
-        error: {
-          type: SeRankingErrorType.UNKNOWN_ERROR,
-          message: 'Health check failed',
-          details: error
-        },
-        metadata: {
-          source: 'api',
-          timestamp: new Date()
-        }
-      };
-    }
-  }
-
   // Private helper methods
-
-  private async getCachedKeywordDataInternal(
-    keyword: string,
-    countryCode: string
-  ): Promise<KeywordBankEntity | null> {
-    try {
-      return await this.keywordBankService.getKeywordData(keyword, countryCode);
-    } catch (error) {
-      this.log('warn', `Failed to get cached data for ${keyword}: ${error}`);
-      return null;
-    }
-  }
-
-  private isCacheFresh(data: KeywordBankEntity): boolean {
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() - this.config.cacheExpiryDays);
-    return new Date(data.data_updated_at) > expiryDate;
-  }
 
   private async fetchFromApi(
     keywords: string[],
@@ -719,14 +734,15 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
   ): Promise<KeywordBankOperationResult> {
     const insertData: KeywordBankInsert = {
       keyword: keyword.trim().toLowerCase(),
-      country_code: countryCode.toLowerCase(),
+      country_id: countryCode.toLowerCase(), // Fixed: use country_id to match schema
       language_code: languageCode.toLowerCase(),
       is_data_found: apiData.is_data_found,
       volume: apiData.volume,
       cpc: apiData.cpc,
       competition: apiData.competition,
       difficulty: apiData.difficulty,
-      history_trend: apiData.history_trend
+      history_trend: apiData.history_trend,
+      keyword_intent: null // Will be set by separate logic later
     };
 
     try {
@@ -763,7 +779,7 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
     }
 
     // Update final job status
-    if (job.status !== 'cancelled') {
+    if (job.status !== 'cancelled' as any) {
       job.status = job.progress.failed > 0 ? 'failed' : 'completed';
       job.completed_at = new Date();
     }
@@ -781,7 +797,7 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
       }
 
       try {
-        const result = await this.enrichKeyword(
+        const result = await this.enrichNewKeyword(
           request.keyword,
           request.country_code
         );
@@ -841,49 +857,6 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
     } catch (error) {
       this.log('warn', `Failed to update quota status: ${error}`);
     }
-  }
-
-  private handleQuotaExceeded(
-    fallbackData?: KeywordBankEntity | null
-  ): ServiceResponse<KeywordBankEntity> {
-    if (this.config.enableGracefulDegradation && fallbackData) {
-      return {
-        success: true,
-        data: fallbackData,
-        metadata: {
-          source: 'cache',
-          timestamp: new Date()
-        }
-      };
-    }
-
-    return this.createErrorResponse(
-      SeRankingErrorType.QUOTA_EXCEEDED_ERROR,
-      'API quota exceeded',
-      { quotaStatus: this.quotaStatus }
-    );
-  }
-
-  private handleApiFailure(
-    error?: { type: SeRankingErrorType; message: string; details?: any },
-    fallbackData?: KeywordBankEntity | null
-  ): ServiceResponse<KeywordBankEntity> {
-    if (this.config.enableGracefulDegradation && fallbackData) {
-      return {
-        success: true,
-        data: fallbackData,
-        metadata: {
-          source: 'cache',
-          timestamp: new Date()
-        }
-      };
-    }
-
-    return this.createErrorResponse(
-      error?.type || SeRankingErrorType.UNKNOWN_ERROR,
-      error?.message || 'API call failed',
-      { apiError: error, fallbackData }
-    );
   }
 
   private createErrorResponse<T>(
@@ -953,43 +926,5 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
   private shouldLog(level: 'debug' | 'info' | 'warn' | 'error'): boolean {
     const levels = { debug: 0, info: 1, warn: 2, error: 3 };
     return levels[level] >= levels[this.config.logLevel];
-  }
-
-  // Static factory methods
-  static createDefaultConfig(): KeywordEnrichmentConfig {
-    return {
-      cacheExpiryDays: 7,
-      batchSize: 25,
-      maxConcurrentRequests: 3,
-      enableMetrics: true,
-      enableCachePreloading: false,
-      defaultLanguageCode: 'en',
-      quotaThresholdWarning: 0.8,
-      quotaThresholdError: 0.95,
-      enableGracefulDegradation: true,
-      logLevel: 'info'
-    };
-  }
-
-  static createProductionConfig(): KeywordEnrichmentConfig {
-    return {
-      ...KeywordEnrichmentService.createDefaultConfig(),
-      batchSize: 50,
-      maxConcurrentRequests: 5,
-      enableMetrics: true,
-      enableCachePreloading: true,
-      logLevel: 'warn'
-    };
-  }
-
-  static createDevelopmentConfig(): KeywordEnrichmentConfig {
-    return {
-      ...KeywordEnrichmentService.createDefaultConfig(),
-      batchSize: 10,
-      maxConcurrentRequests: 1,
-      enableMetrics: true,
-      enableCachePreloading: false,
-      logLevel: 'debug'
-    };
   }
 }

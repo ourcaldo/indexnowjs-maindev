@@ -10,6 +10,7 @@ import { KeywordBankService } from '../rank-tracking/seranking/services/KeywordB
 import { SeRankingApiClient } from '../rank-tracking/seranking/client/SeRankingApiClient';
 import { KeywordEnrichmentService } from '../rank-tracking/seranking/services/KeywordEnrichmentService';
 import { ErrorHandlingService } from '../rank-tracking/seranking/services/ErrorHandlingService';
+import { IntegrationService } from '../rank-tracking/seranking/services/IntegrationService';
 
 interface KeywordToEnrich {
   id: string;
@@ -28,16 +29,40 @@ export class KeywordEnrichmentWorker {
   private keywordBankService: KeywordBankService;
   private enrichmentService: KeywordEnrichmentService;
   private errorHandler: ErrorHandlingService;
+  private integrationService: IntegrationService;
 
-  private constructor() {
+  private async initialize() {
     // Initialize services
     this.keywordBankService = new KeywordBankService();
     this.errorHandler = new ErrorHandlingService();
     
-    // Initialize SeRanking API client
+    // Initialize integration service to get API key from database
+    this.integrationService = new IntegrationService({
+      defaultQuotaLimit: 1000,
+      enableMetrics: true,
+      logLevel: 'info'
+    } as any, {} as any); // We'll only use getIntegrationSettings method
+
+    // Get API key directly from database using correct column name 'apikey'
+    const { data: integrationData, error } = await supabaseAdmin
+      .from('indb_site_integration')
+      .select('apikey')
+      .eq('service_name', 'seranking_keyword_export')
+      .eq('is_active', true)
+      .single();
+
+    const apiKey = integrationData?.apikey || '';
+    
+    if (!apiKey) {
+      console.warn('[Keyword Enrichment Worker] No SeRanking API key found in database');
+    } else {
+      console.log('[Keyword Enrichment Worker] ✅ Found SeRanking API key in database');
+    }
+
+    // Initialize SeRanking API client with API key from database
     const apiClient = new SeRankingApiClient({
-      apiKey: process.env.SERANKING_API_KEY || '',
-      baseUrl: process.env.SERANKING_API_URL || 'https://api.seranking.com',
+      apiKey: apiKey,
+      baseUrl: 'https://api.seranking.com',
       timeout: 30000
     });
 
@@ -54,9 +79,14 @@ export class KeywordEnrichmentWorker {
     );
   }
 
-  static getInstance(): KeywordEnrichmentWorker {
+  private constructor() {
+    // Constructor is now empty, initialization happens in initialize() method
+  }
+
+  static async getInstance(): Promise<KeywordEnrichmentWorker> {
     if (!KeywordEnrichmentWorker.instance) {
       KeywordEnrichmentWorker.instance = new KeywordEnrichmentWorker();
+      await KeywordEnrichmentWorker.instance.initialize();
     }
     return KeywordEnrichmentWorker.instance;
   }
@@ -65,7 +95,7 @@ export class KeywordEnrichmentWorker {
    * Start the background worker
    * Runs immediately on startup, then every hour to check for keywords that need enrichment
    */
-  start(): void {
+  async start(): Promise<void> {
     if (this.isRunning) {
       console.log('✅ Keyword enrichment worker is already running');
       return;
@@ -74,9 +104,15 @@ export class KeywordEnrichmentWorker {
     console.log('🚀 [Keyword Enrichment] Starting background worker...');
     this.isRunning = true;
 
+    // Wait for enrichmentService to be ready before processing keywords
+    while (!this.enrichmentService) {
+      console.log('⏳ [Keyword Enrichment] Waiting for service initialization...');
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
     // Run immediately on startup to check for keywords
     console.log('⚡ [Keyword Enrichment] Running initial keyword check...');
-    this.processKeywords().catch(error => {
+    await this.processKeywords().catch(error => {
       console.error('❌ [Keyword Enrichment] Initial run failed:', error);
     });
 

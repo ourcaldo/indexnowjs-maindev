@@ -201,16 +201,15 @@ export class WorkerStartup {
     try {
       logger.info('Starting SeRanking keyword enrichment worker...')
       
-      // Initialize the simple background worker that checks user keywords
-      const { keywordEnrichmentWorker } = await import('./keyword-enrichment-worker')
+      // Initialize the async background worker
+      const { KeywordEnrichmentWorker } = await import('./keyword-enrichment-worker')
       
-      // Start the background worker
-      keywordEnrichmentWorker.start()
+      // Get instance and start the worker
+      const worker = await KeywordEnrichmentWorker.getInstance()
+      await worker.start()
       
-      // Get worker status
-      const status = keywordEnrichmentWorker.getStatus()
-      logger.info(`SeRanking enrichment worker: ${status.isRunning ? 'ACTIVE' : 'INACTIVE'}`)
-      logger.info(`Worker schedule: ${status.schedule} (${status.description})`)
+      logger.info('SeRanking enrichment worker: ACTIVE')
+      logger.info('Worker schedule: 30 * * * * (Checks for keywords needing enrichment every hour)')
       logger.info('Using cache-first approach with 30-day data freshness')
       logger.info('SeRanking keyword enrichment worker initialized successfully')
       

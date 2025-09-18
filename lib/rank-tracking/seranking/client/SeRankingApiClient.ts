@@ -15,6 +15,7 @@ import {
 } from '../types/SeRankingTypes';
 import { RateLimiter } from './RateLimiter';
 import { ApiRequestBuilder } from './ApiRequestBuilder';
+import { supabaseAdmin } from '../../../database/supabase';
 
 export class SeRankingApiClient {
   private config: SeRankingClientConfig;
@@ -22,6 +23,8 @@ export class SeRankingApiClient {
   private requestBuilder: ApiRequestBuilder;
   private lastHealthCheck?: HealthCheckResult;
   private lastHealthCheckTime?: Date;
+  private integrationApiKey?: string;
+  private integrationApiKeyExpiry?: Date;
 
   constructor(config: SeRankingClientConfig, rateLimiter?: RateLimiter) {
     this.config = {
@@ -34,7 +37,8 @@ export class SeRankingApiClient {
     // Initialize rate limiter with default config if not provided
     this.rateLimiter = rateLimiter || new RateLimiter(RateLimiter.createDefaultConfig());
     
-    // Initialize request builder
+    // Initialize request builder with system auth key for authorization
+    // Actual API key will be fetched from database when needed
     this.requestBuilder = new ApiRequestBuilder(this.config.baseUrl, this.config.apiKey);
   }
 
@@ -46,8 +50,21 @@ export class SeRankingApiClient {
     await this.rateLimiter.waitForAvailability(keywords.length);
     
     try {
+      // Get actual API key from database
+      const actualApiKey = await this.getActualApiKey();
+      if (!actualApiKey) {
+        throw new SeRankingApiError(
+          'No SeRanking API key found in integration settings',
+          SeRankingErrorType.AUTHENTICATION_ERROR,
+          { statusCode: 401, retryable: false }
+        );
+      }
+
+      // Create a new request builder with the actual API key
+      const requestBuilder = new ApiRequestBuilder(this.config.baseUrl, actualApiKey);
+      
       // Use ApiRequestBuilder to build request configuration
-      const requestConfig = this.requestBuilder.buildKeywordExportRequest(
+      const requestConfig = requestBuilder.buildKeywordExportRequest(
         keywords, 
         countryCode,
         {
@@ -86,8 +103,23 @@ export class SeRankingApiClient {
     const startTime = Date.now();
     
     try {
+      // Get actual API key from database
+      const actualApiKey = await this.getActualApiKey();
+      if (!actualApiKey) {
+        this.lastHealthCheck = {
+          status: 'unhealthy',
+          response_time: Date.now() - startTime,
+          last_check: new Date(),
+          error_message: 'No SeRanking API key found in integration settings'
+        };
+        return this.lastHealthCheck;
+      }
+
+      // Create a new request builder with the actual API key
+      const requestBuilder = new ApiRequestBuilder(this.config.baseUrl, actualApiKey);
+      
       // Use ApiRequestBuilder for health check request with dynamic country
-      const requestConfig = this.requestBuilder.buildHealthCheckRequest(countryCode);
+      const requestConfig = requestBuilder.buildHealthCheckRequest(countryCode);
       const response = await this.makeRequest(requestConfig);
       
       const responseTime = Date.now() - startTime;
@@ -355,6 +387,48 @@ export class SeRankingApiClient {
         response: error 
       }
     );
+  }
+
+  /**
+   * Get actual SeRanking API key from database
+   * Uses caching to avoid repeated database queries
+   */
+  private async getActualApiKey(): Promise<string | null> {
+    try {
+      // Check if cached key is still valid (cache for 5 minutes)
+      if (this.integrationApiKey && this.integrationApiKeyExpiry && new Date() < this.integrationApiKeyExpiry) {
+        return this.integrationApiKey;
+      }
+
+      // Fetch from database using correct column name 'apikey'
+      const { data, error } = await supabaseAdmin
+        .from('indb_site_integration')
+        .select('apikey, is_active')
+        .eq('service_name', 'seranking_keyword_export')
+        .eq('is_active', true)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('[SeRankingApiClient] Database error fetching API key:', error);
+        return null;
+      }
+
+      if (!data || !data.apikey) {
+        console.warn('[SeRankingApiClient] No active SeRanking integration found');
+        return null;
+      }
+
+      console.log('[SeRankingApiClient] ✅ Retrieved API key from database');
+
+      // Cache the API key for 5 minutes
+      this.integrationApiKey = data.apikey;
+      this.integrationApiKeyExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+      return this.integrationApiKey;
+    } catch (error) {
+      console.error('[SeRankingApiClient] Failed to fetch API key:', error);
+      return null;
+    }
   }
 
   /**
