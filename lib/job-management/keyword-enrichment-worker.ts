@@ -26,10 +26,10 @@ export class KeywordEnrichmentWorker {
   private isRunning: boolean = false;
   private cronJob: cron.ScheduledTask | null = null;
   
-  private keywordBankService: KeywordBankService;
-  private enrichmentService: KeywordEnrichmentService;
-  private errorHandler: ErrorHandlingService;
-  private integrationService: IntegrationService;
+  private keywordBankService!: KeywordBankService;
+  private enrichmentService!: KeywordEnrichmentService;
+  private errorHandler!: ErrorHandlingService;
+  private integrationService!: IntegrationService;
 
   private async initialize() {
     // Initialize services
@@ -173,8 +173,8 @@ export class KeywordEnrichmentWorker {
           successful++;
           processed++;
           
-          // Small delay between requests to be respectful
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Rate limiting: 2 requests per second (500ms delay)
+          await new Promise(resolve => setTimeout(resolve, 500));
           
         } catch (error) {
           console.error(`❌ [Keyword Enrichment] Failed to enrich "${keyword.keyword}":`, error);

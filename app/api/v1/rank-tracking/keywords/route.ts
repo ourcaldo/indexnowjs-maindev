@@ -456,8 +456,51 @@ export async function POST(request: NextRequest) {
               console.error(`[ERROR] Single SeRanking enrichment failed:`, errorText)
             }
             
+          } else if (keywordsForEnrichment.length <= 10) {
+            // For small batches (≤10), process one by one with rate limiting
+            console.log(`[INFO] Processing ${keywordsForEnrichment.length} keywords individually with rate limiting`)
+            let successful = 0
+            let failed = 0
+            
+            for (const keywordData of keywordsForEnrichment) {
+              try {
+                const enrichmentUrl = new URL(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/v1/integrations/seranking/keyword-data`)
+                enrichmentUrl.searchParams.set('keyword', keywordData.keyword)
+                enrichmentUrl.searchParams.set('country_code', keywordData.country_code)
+                enrichmentUrl.searchParams.set('language_code', keywordData.language_code)
+                
+                const enrichmentResponse = await fetch(enrichmentUrl.toString(), {
+                  method: 'GET',
+                  headers: {
+                    'X-System-API-Key': systemApiKey
+                  }
+                })
+
+                if (enrichmentResponse.ok) {
+                  successful++
+                  console.log(`[INFO] SeRanking enrichment completed for keyword: ${keywordData.keyword}`)
+                } else {
+                  failed++
+                  const errorText = await enrichmentResponse.text()
+                  console.error(`[ERROR] SeRanking enrichment failed for keyword ${keywordData.keyword}:`, errorText)
+                }
+                
+                // Rate limiting: 2 requests per second (500ms delay)
+                if (keywordData !== keywordsForEnrichment[keywordsForEnrichment.length - 1]) {
+                  await new Promise(resolve => setTimeout(resolve, 500))
+                }
+                
+              } catch (error) {
+                failed++
+                console.error(`[ERROR] SeRanking enrichment exception for keyword ${keywordData.keyword}:`, error)
+              }
+            }
+            
+            console.log(`[INFO] Manual enrichment completed: ${successful} successful, ${failed} failed`)
+            enrichmentTriggered = successful > 0
+            
           } else {
-            // For multiple keywords, use the bulk enrichment endpoint
+            // For large batches (>10), use the bulk enrichment endpoint (it has its own rate limiting)
             const enrichmentResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/v1/integrations/seranking/keyword-data/bulk`, {
               method: 'POST',
               headers: {
