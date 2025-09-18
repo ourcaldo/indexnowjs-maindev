@@ -189,22 +189,30 @@ export class KeywordEnrichmentWorker {
     try {
       console.log(`🔄 [Keyword Enrichment] Enriching keyword: "${keyword.keyword}"`);
 
-      // Get country code from country_id
+      // Get ISO2 code from country_id - lookup from countries table to get the actual ISO2 code
+      console.log(`🔍 [Keyword Enrichment] Looking up country_id: ${keyword.country_id} for keyword: "${keyword.keyword}"`);
+      
       const { data: countryData, error: countryError } = await supabaseAdmin
         .from('indb_keyword_countries')
-        .select('country_code')
+        .select('iso2_code, name')
         .eq('id', keyword.country_id)
         .single();
 
       if (countryError || !countryData) {
         console.error(`❌ [Keyword Enrichment] Could not find country for keyword "${keyword.keyword}"`);
+        console.error(`❌ [Keyword Enrichment] Country ID: ${keyword.country_id}, Error:`, countryError);
         return;
       }
 
-      // Use the enrichment service to get data
+      console.log(`✅ [Keyword Enrichment] Found country: ${countryData.name} (${countryData.iso2_code}) for keyword: "${keyword.keyword}"`);
+
+      // Use lowercase ISO2 code for KeywordBankService (it expects direct ISO2 codes like "id", "us")
+      const countryCodeForBank = countryData.iso2_code.toLowerCase();
+      console.log(`🔄 [Keyword Enrichment] Using country code for bank: "${countryCodeForBank}"`);
+      
       const result = await this.enrichmentService.enrichKeyword(
         keyword.keyword, 
-        countryData.country_code
+        countryCodeForBank
       );
 
       if (result.success && result.data) {

@@ -659,7 +659,7 @@ export class KeywordBankService implements IKeywordBankService {
     return {
       id: row.id,
       keyword: row.keyword,
-      country_code: row.country_id,
+      country_id: row.country_id,
       language_code: row.language_code,
       is_data_found: row.is_data_found,
       volume: row.volume,
@@ -681,7 +681,7 @@ export class KeywordBankService implements IKeywordBankService {
     try {
       const insertData: KeywordBankInsertRow = {
         keyword: data.keyword.trim().toLowerCase(),
-        country_id: data.country_code.toLowerCase(),
+        country_id: data.country_id.toLowerCase(),
         language_code: (data.language_code || 'en').toLowerCase(),
         is_data_found: data.is_data_found,
         volume: data.volume,
