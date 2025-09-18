@@ -63,7 +63,7 @@ const KeywordExportRequestSchema = z.object({
 
 const KeywordBankInsertSchema = z.object({
   keyword: z.string().min(1).max(500).transform(s => s.trim().toLowerCase()),
-  country_code: z.string().regex(/^[a-z]{2}$/i).transform(s => s.toLowerCase()),
+  country_id: z.string().regex(/^[a-z]{2}$/i).transform(s => s.toLowerCase()),
   language_code: z.string().regex(/^[a-z]{2}$/i).transform(s => s.toLowerCase()).default('en'),
   is_data_found: z.boolean().default(false),
   volume: z.number().int().min(0).nullable().optional(),
@@ -299,12 +299,12 @@ export class ValidationService {
       const errors: ValidationError[] = [];
 
       // Validate country and language codes
-      if (!VALID_COUNTRIES.has(validatedData.country_code)) {
+      if (!VALID_COUNTRIES.has(validatedData.country_id)) {
         errors.push({
-          field: 'country_code',
-          message: `Unsupported country code: ${validatedData.country_code}`,
+          field: 'country_id',
+          message: `Unsupported country code: ${validatedData.country_id}`,
           code: 'INVALID_COUNTRY_CODE',
-          value: validatedData.country_code
+          value: validatedData.country_id
         });
       }
 
