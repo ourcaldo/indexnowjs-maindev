@@ -187,6 +187,10 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
 
       // Process and store API data
       const apiKeywordData = apiResponse.data[0];
+      
+      // Log API data for debugging
+      this.log('info', `[FLOW 1] API Data for ${keyword}: is_data_found=${apiKeywordData.is_data_found}, volume=${apiKeywordData.volume}, cpc=${apiKeywordData.cpc}`);
+      
       const enrichedData = await this.storeEnrichedData(
         keyword,
         countryCode,
@@ -195,12 +199,15 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
       );
 
       if (!enrichedData.success) {
+        this.log('error', `[FLOW 1] Failed to store data for ${keyword}: ${JSON.stringify(enrichedData.error)}`);
         return this.createErrorResponse(
           SeRankingErrorType.UNKNOWN_ERROR,
           'Failed to store enriched data for new keyword',
           { error: enrichedData.error }
         );
       }
+      
+      this.log('info', `[FLOW 1] Successfully stored ${keyword} in bank with ID: ${enrichedData.data?.id}`)
 
       this.metrics.successful_requests++;
       this.log('info', `[FLOW 1] Successfully enriched new keyword: ${keyword}`);

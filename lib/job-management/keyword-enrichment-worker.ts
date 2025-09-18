@@ -251,8 +251,17 @@ export class KeywordEnrichmentWorker {
         countryCodeForBank
       );
 
+      console.log(`🔍 [Keyword Enrichment] Enrichment result for "${keyword.keyword}":`, {
+        success: result.success,
+        hasData: !!result.data,
+        dataFound: result.data?.is_data_found,
+        volume: result.data?.volume,
+        bankId: result.data?.id
+      });
+
       if (result.success && result.data) {
         // Update the keyword record with bank_id and intelligence data
+        // ALWAYS update keyword_bank_id regardless of is_data_found status
         const updateData: any = {
           keyword_bank_id: result.data.id,
           search_volume: result.data.volume,
@@ -265,6 +274,8 @@ export class KeywordEnrichmentWorker {
           updated_at: new Date().toISOString()
         };
 
+        console.log(`📝 [Keyword Enrichment] Updating keyword "${keyword.keyword}" with bank_id: ${result.data.id}, is_data_found: ${result.data.is_data_found}`);
+
         const { error: updateError } = await supabaseAdmin
           .from('indb_keyword_keywords')
           .update(updateData)
@@ -273,10 +284,18 @@ export class KeywordEnrichmentWorker {
         if (updateError) {
           console.error(`❌ [Keyword Enrichment] Failed to update keyword "${keyword.keyword}":`, updateError);
         } else {
-          console.log(`✅ [Keyword Enrichment] Successfully enriched: "${keyword.keyword}" (volume: ${result.data.volume})`);
+          if (result.data.is_data_found) {
+            console.log(`✅ [Keyword Enrichment] Successfully enriched: "${keyword.keyword}" (volume: ${result.data.volume})`);
+          } else {
+            console.log(`✅ [Keyword Enrichment] Successfully processed: "${keyword.keyword}" (no market data available)`);
+          }
         }
       } else {
-        console.log(`⚠️ [Keyword Enrichment] No data found for: "${keyword.keyword}"`);
+        console.error(`❌ [Keyword Enrichment] Failed to enrich keyword "${keyword.keyword}":`, {
+          success: result.success,
+          error: result.error,
+          hasData: !!result.data
+        });
       }
 
     } catch (error) {

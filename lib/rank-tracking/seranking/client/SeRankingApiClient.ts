@@ -81,6 +81,12 @@ export class SeRankingApiClient {
       }
 
       const data = await response.json();
+      
+      // Log raw API response for debugging (do not log API key)
+      console.log(`🔍 [SeRanking API] Raw Response for keywords: ${keywords.join(', ')} (${countryCode})`);
+      console.log(`📊 [SeRanking API] HTTP ${response.status}: ${response.statusText}`);
+      console.log(`📝 [SeRanking API] Response payload:`, JSON.stringify(data, null, 2));
+      
       const result = this.validateAndTransformResponse(data);
       
       // Record successful request in rate limiter
