@@ -69,7 +69,10 @@ export class WorkerStartup {
       // 6. Start indexing job monitor (CRITICAL - processes pending jobs)
       await this.initializeJobMonitor()
 
-      // 7. Add any other background workers here
+      // 7. Start SeRanking keyword bank service (simple cache-based)
+      await this.initializeSeRankingKeywordBank()
+
+      // 8. Add any other background workers here
       // await this.initializeNotificationWorker()
 
       this.isInitialized = true
@@ -187,6 +190,32 @@ export class WorkerStartup {
       
     } catch (error) {
       logger.error('Failed to initialize trial monitoring:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Initialize SeRanking keyword enrichment worker (simple table-based approach)
+   */
+  private async initializeSeRankingKeywordBank(): Promise<void> {
+    try {
+      logger.info('Starting SeRanking keyword enrichment worker...')
+      
+      // Initialize the simple background worker that checks user keywords
+      const { keywordEnrichmentWorker } = await import('./keyword-enrichment-worker')
+      
+      // Start the background worker
+      keywordEnrichmentWorker.start()
+      
+      // Get worker status
+      const status = keywordEnrichmentWorker.getStatus()
+      logger.info(`SeRanking enrichment worker: ${status.isRunning ? 'ACTIVE' : 'INACTIVE'}`)
+      logger.info(`Worker schedule: ${status.schedule} (${status.description})`)
+      logger.info('Using cache-first approach with 30-day data freshness')
+      logger.info('SeRanking keyword enrichment worker initialized successfully')
+      
+    } catch (error) {
+      logger.error('Failed to initialize SeRanking keyword enrichment worker:', error)
       throw error
     }
   }

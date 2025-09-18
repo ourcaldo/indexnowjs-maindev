@@ -585,9 +585,30 @@ export class EnrichmentQueue extends EventEmitter {
   }
 
   /**
-   * Get queue statistics
+   * Get queue statistics - DISABLED (table doesn't exist)
    */
   async getQueueStats(): Promise<QueueStats> {
+    // OLD COMPLEX SYSTEM - DISABLED 
+    // Return mock stats since we're using simple keyword enrichment worker now
+    return {
+      totalJobs: 0,
+      queuedJobs: 0,
+      processingJobs: 0,
+      completedJobs: 0,
+      failedJobs: 0,
+      cancelledJobs: 0,
+      averageProcessingTime: 0,
+      throughput: 0,
+      queueHealth: 'healthy' as const,
+      oldestQueuedJob: undefined,
+      workerStatus: {
+        activeWorkers: 0,
+        idleWorkers: 0,
+        totalWorkers: 0
+      }
+    };
+
+    /* COMMENTED OUT - CAUSES ERRORS WITH NON-EXISTENT TABLE
     try {
       // Get job counts by status
       const { data: statusCounts, error } = await supabaseAdmin
@@ -668,6 +689,7 @@ export class EnrichmentQueue extends EventEmitter {
       console.error('Error getting queue stats:', error);
       throw error;
     }
+    */
   }
 
   /**

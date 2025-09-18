@@ -80,7 +80,7 @@ export class KeywordEnrichmentService implements IKeywordEnrichmentService {
     config: Partial<KeywordEnrichmentConfig> = {}
   ) {
     this.config = {
-      cacheExpiryDays: 7,
+      cacheExpiryDays: 30,  // Changed from 7 to 30 days
       batchSize: 25,
       maxConcurrentRequests: 3,
       enableMetrics: true,

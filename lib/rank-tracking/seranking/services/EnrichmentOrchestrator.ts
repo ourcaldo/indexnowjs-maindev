@@ -56,9 +56,9 @@ const DEFAULT_ORCHESTRATOR_CONFIG: OrchestratorConfig = {
 
 export class EnrichmentOrchestrator extends EventEmitter {
   private config: OrchestratorConfig;
-  private queue: EnrichmentQueue;
-  private processor: JobProcessor;
-  private enrichmentService: KeywordEnrichmentService;
+  private queue!: EnrichmentQueue;
+  private processor!: JobProcessor;
+  private enrichmentService!: KeywordEnrichmentService;
   private isInitialized: boolean = false;
   private isRunning: boolean = false;
   private eventHandlers: Map<string, Function> = new Map();
