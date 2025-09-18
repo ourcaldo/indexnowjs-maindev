@@ -18,6 +18,29 @@ export default function Login() {
   const [isMagicLinkMode, setIsMagicLinkMode] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   
+  // Check for auth callback errors in URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const authError = urlParams.get('error')
+    if (authError) {
+      switch (authError) {
+        case 'auth_callback_failed':
+          setError('Authentication failed. Please try again.')
+          break
+        case 'auth_callback_exception':
+          setError('An error occurred during authentication. Please try again.')
+          break
+        case 'missing_auth_code':
+          setError('Invalid authentication link. Please request a new magic link.')
+          break
+        default:
+          setError('Authentication error occurred.')
+      }
+      // Clear the error from URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
+  
   // Site settings hooks
   const siteName = useSiteName()
   const logoUrl = useSiteLogo(true) // Always use full logo for login page
@@ -210,7 +233,8 @@ export default function Login() {
                       }
                       setIsLoading(true)
                       try {
-                        await authService.createMagicLink(email, `${window.location.origin}/dashboard`)
+                        // Use current origin for dev/prod environment awareness
+                        await authService.createMagicLink(email, `${window.location.origin}/auth/callback?next=/dashboard`)
                         setMagicLinkSent(true)
                         setError("")
                       } catch (error: any) {
