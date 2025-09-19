@@ -321,7 +321,7 @@ export default function VerifyEmail() {
           {/* Help text with inline resend */}
           <div className="mt-8 pt-6 border-t border-border">
             <p className="text-sm text-muted-foreground text-center">
-              Don't see an email? Check your spam or other filtered folders.{' '}
+              Don't see an email? Check your spam folder, or{' '}
               {verificationStatus !== 'verified' && (
                 <>
                   <button
@@ -329,14 +329,14 @@ export default function VerifyEmail() {
                     disabled={!canResend || isResending}
                     className="text-brand-primary hover:underline bg-transparent border-none cursor-pointer p-0 font-inherit disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isResending ? 'Sending...' : canResend ? 'Resend email' : `Resend in ${countdown}s`}
+                    {isResending ? 'sending...' : canResend ? 'resend email' : `resend in ${countdown}s`}
                   </button>
                   .
                 </>
               )}
             </p>
             <p className="text-sm text-muted-foreground text-center mt-2">
-              If you are not able to verify,{' '}
+              Having trouble verifying?{' '}
               <button
                 onClick={() => {
                   // Log out and redirect to login
@@ -346,7 +346,7 @@ export default function VerifyEmail() {
                 }}
                 className="text-brand-primary hover:underline bg-transparent border-none cursor-pointer p-0 font-inherit"
               >
-                click here to log out
+                Sign in with a different account
               </button>
               .
             </p>
