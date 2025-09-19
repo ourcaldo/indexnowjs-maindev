@@ -111,6 +111,18 @@ export default function Login() {
       
       router.push("/dashboard")
     } catch (error: any) {
+      // Handle email not confirmed error specifically
+      if (error.message && (
+        error.message.includes('Email not confirmed') ||
+        error.message.includes('email_not_confirmed') ||
+        error.message.includes('confirmation') ||
+        error.message.includes('verify')
+      )) {
+        // Redirect to verification page instead of showing error
+        router.push(`/verify?email=${encodeURIComponent(email)}`)
+        return
+      }
+      
       setError(error.message || "Login failed")
     } finally {
       setIsLoading(false)
