@@ -192,15 +192,6 @@ export default function VerifyEmail() {
           )}
         </p>
 
-        {/* Real-time status indicator */}
-        {isCheckingVerification && verificationStatus === 'pending' && (
-          <div className="mb-6 p-3 bg-info/10 border border-info rounded-lg">
-            <p className="text-sm text-info">
-              🔄 Checking verification status...
-            </p>
-          </div>
-        )}
-
         {/* Success message */}
         {resendMessage && (
           <div className="mb-6 p-3 bg-success/10 border border-success rounded-lg">
@@ -228,56 +219,12 @@ export default function VerifyEmail() {
             Go to Dashboard
           </button>
         ) : (
-          <>
-            {/* Show different content based on email availability */}
-            {email ? (
-              <>
-                {/* Resend email button */}
-                <button
-                  onClick={handleResendEmail}
-                  disabled={!canResend || isResending}
-                  className={`w-full py-3 px-6 border-none rounded-lg text-base font-semibold cursor-pointer transition-opacity mb-4 ${
-                    canResend && !isResending 
-                      ? 'bg-info text-info-foreground hover:opacity-90' 
-                      : 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'
-                  }`}
-                >
-                  {isResending ? (
-                    'Sending...'
-                  ) : canResend ? (
-                    'Resend Verification Email'
-                  ) : (
-                    `Resend in ${countdown}s`
-                  )}
-                </button>
-
-                {/* Back to login button */}
-                <button
-                  onClick={() => router.push('/login')}
-                  className="w-full py-3 px-6 bg-brand-primary text-white border-none rounded-lg text-base font-semibold cursor-pointer hover:opacity-90 transition-opacity"
-                >
-                  Back to Sign In
-                </button>
-              </>
-            ) : (
-              <>
-                {/* No email case - provide options to go back */}
-                <button
-                  onClick={() => router.push('/register')}
-                  className="w-full py-3 px-6 bg-brand-primary text-white border-none rounded-lg text-base font-semibold cursor-pointer hover:opacity-90 transition-opacity mb-4"
-                >
-                  Sign Up
-                </button>
-
-                <button
-                  onClick={() => router.push('/login')}
-                  className="w-full py-3 px-6 bg-muted text-muted-foreground border-none rounded-lg text-base font-semibold cursor-pointer hover:opacity-90 transition-opacity"
-                >
-                  Back to Sign In
-                </button>
-              </>
-            )}
-          </>
+          <button
+            onClick={() => router.push('/login')}
+            className="w-full py-3 px-6 bg-brand-primary text-white border-none rounded-lg text-base font-semibold cursor-pointer hover:opacity-90 transition-opacity"
+          >
+            Back to Sign In
+          </button>
         )}
 
         {/* Help text */}
