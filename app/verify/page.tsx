@@ -308,49 +308,32 @@ export default function VerifyEmail() {
             </div>
           )}
 
-          {/* Resend Email Button */}
-          {verificationStatus !== 'verified' && (
-            <div className="mb-8">
-              <button
-                onClick={handleResendEmail}
-                disabled={!canResend || isResending}
-                className="w-full py-[14px] px-6 bg-secondary hover:bg-secondary/80 text-foreground border border-border rounded-lg text-base font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-              >
-                {isResending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                    Sending...
-                  </>
-                ) : canResend ? (
-                  '📧 Resend email'
-                ) : (
-                  `Resend in ${countdown}s`
-                )}
-              </button>
-            </div>
-          )}
-
-          {/* Action buttons */}
-          {verificationStatus === 'verified' ? (
+          {/* Continue button for verified users */}
+          {verificationStatus === 'verified' && (
             <button
               onClick={() => router.push(gotoUrl)}
-              className="w-full py-[14px] px-6 bg-success text-success-foreground rounded-lg text-base font-semibold cursor-pointer hover:opacity-90 transition-opacity mb-4"
+              className="w-full py-[14px] px-6 bg-success text-success-foreground rounded-lg text-base font-semibold cursor-pointer hover:opacity-90 transition-opacity mb-8"
             >
               Continue
             </button>
-          ) : (
-            <button
-              onClick={() => router.push('/login')}
-              className="w-full py-[14px] px-6 bg-brand-primary text-white rounded-lg text-base font-semibold cursor-pointer hover:bg-brand-secondary transition-colors"
-            >
-              Back to Sign In
-            </button>
           )}
 
-          {/* Help text */}
+          {/* Help text with inline resend */}
           <div className="mt-8 pt-6 border-t border-border">
             <p className="text-sm text-muted-foreground text-center">
-              Don't see an email? Check your spam or other filtered folders.
+              Don't see an email? Check your spam or other filtered folders.{' '}
+              {verificationStatus !== 'verified' && (
+                <>
+                  <button
+                    onClick={handleResendEmail}
+                    disabled={!canResend || isResending}
+                    className="text-brand-primary hover:underline bg-transparent border-none cursor-pointer p-0 font-inherit disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isResending ? 'Sending...' : canResend ? 'Resend email' : `Resend in ${countdown}s`}
+                  </button>
+                  .
+                </>
+              )}
             </p>
             <p className="text-sm text-muted-foreground text-center mt-2">
               If you are not able to verify,{' '}
