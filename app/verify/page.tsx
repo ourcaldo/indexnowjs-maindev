@@ -38,6 +38,27 @@ export default function VerifyEmail() {
     return () => window.removeEventListener('resize', checkIfMobile)
   }, [])
 
+  // Helper function to validate and sanitize goto URL
+  const sanitizeGotoUrl = (gotoParam: string | null): string => {
+    if (!gotoParam) return '/dashboard'
+    
+    // Only allow relative internal paths starting with '/'
+    if (!gotoParam.startsWith('/')) return '/dashboard'
+    
+    // Prevent protocol-relative URLs (//evil.com)
+    if (gotoParam.startsWith('//')) return '/dashboard'
+    
+    // Basic validation - must be a relative path
+    try {
+      const url = new URL(gotoParam, window.location.origin)
+      // Ensure it's the same origin
+      if (url.origin !== window.location.origin) return '/dashboard'
+      return url.pathname + url.search + url.hash
+    } catch {
+      return '/dashboard'
+    }
+  }
+
   // Authentication and access control check
   useEffect(() => {
     const checkAuthAndAccess = async () => {
@@ -45,30 +66,27 @@ export default function VerifyEmail() {
         setIsLoading(true)
         const currentUser = await authService.getCurrentUser()
         
+        // Get and sanitize goto parameter
+        const urlParams = new URLSearchParams(window.location.search)
+        const gotoParam = urlParams.get('goto')
+        const safeGotoUrl = sanitizeGotoUrl(gotoParam)
+        
         // If not logged in, redirect to login with return path
         if (!currentUser) {
-          const urlParams = new URLSearchParams(window.location.search)
-          const gotoParam = urlParams.get('goto') || '/dashboard'
-          router.push(`/login?goto=${encodeURIComponent(`/verify?goto=${encodeURIComponent(gotoParam)}`)}`) 
+          router.push(`/login?goto=${encodeURIComponent(`/verify?goto=${encodeURIComponent(safeGotoUrl)}`)}`) 
           return
         }
         
         // If already verified, redirect to destination
         if (currentUser.emailVerification) {
-          const urlParams = new URLSearchParams(window.location.search)
-          const destination = urlParams.get('goto') || '/dashboard'
-          router.push(destination)
+          router.push(safeGotoUrl)
           return
         }
         
         // User is logged in but not verified - show verify page
         setUser(currentUser)
         setEmail(currentUser.email || '')
-        
-        // Get goto parameter for post-verification redirect
-        const urlParams = new URLSearchParams(window.location.search)
-        const gotoParam = urlParams.get('goto') || '/dashboard'
-        setGotoUrl(gotoParam)
+        setGotoUrl(safeGotoUrl)
         
       } catch (error) {
         console.error('Auth check error:', error)
@@ -108,7 +126,10 @@ export default function VerifyEmail() {
           setVerificationStatus('verified')
           // Redirect to destination after a brief delay
           setTimeout(() => {
-            router.push(`${gotoUrl}?message=email_verified`)
+            // Safely build URL with query parameter
+            const url = new URL(gotoUrl, window.location.origin)
+            url.searchParams.set('message', 'email_verified')
+            router.push(url.pathname + url.search + url.hash)
           }, 2000)
         }
       } catch (error) {
