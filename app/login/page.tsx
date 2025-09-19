@@ -53,6 +53,16 @@ export default function Login() {
     
     try {
       await authService.signIn(email, password)
+      
+      // Get user object to check email verification status
+      const user = await authService.getCurrentUser()
+      
+      // Check email verification status
+      if (!user?.emailVerification) {
+        router.push(`/verify?email=${encodeURIComponent(email)}`)
+        return
+      }
+      
       router.push("/dashboard")
     } catch (error: any) {
       setError(error.message || "Login failed")
