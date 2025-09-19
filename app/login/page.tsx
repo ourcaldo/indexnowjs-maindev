@@ -99,30 +99,8 @@ export default function Login() {
     
     try {
       await authService.signIn(email, password)
-      
-      // Get user object to check email verification status
-      const user = await authService.getCurrentUser()
-      
-      // Check email verification status
-      if (!user?.emailVerification) {
-        router.push(`/verify?goto=/dashboard`)
-        return
-      }
-      
       router.push("/dashboard")
     } catch (error: any) {
-      // Handle email not confirmed error specifically
-      if (error.message && (
-        error.message.includes('Email not confirmed') ||
-        error.message.includes('email_not_confirmed') ||
-        error.message.includes('confirmation') ||
-        error.message.includes('verify')
-      )) {
-        // Redirect to verification page instead of showing error
-        router.push(`/verify?goto=/dashboard`)
-        return
-      }
-      
       setError(error.message || "Login failed")
     } finally {
       setIsLoading(false)
@@ -331,6 +309,21 @@ export default function Login() {
                 {error && (
                   <div className="badge-error p-3 mb-6 text-center rounded-lg">
                     {error}
+                    {/* Show resend verification link for email confirmation errors */}
+                    {(error.toLowerCase().includes('email not confirmed') || 
+                      error.toLowerCase().includes('confirm') || 
+                      error.toLowerCase().includes('verification')) && (
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          onClick={() => router.push("/resend-verification")}
+                          className="bg-transparent border-0 text-white text-sm cursor-pointer hover:underline transition-all"
+                          data-testid="link-resend-verification"
+                        >
+                          Resend verification email →
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 

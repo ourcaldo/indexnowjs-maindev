@@ -75,11 +75,11 @@ function checkRateLimit(email: string, clientIP: string): { allowed: boolean; re
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse request body
+    // Parse request body to get email
     const body = await request.json()
     const { email } = body
 
-    // Validate email parameter
+    // Validate email input
     if (!email || typeof email !== 'string') {
       return NextResponse.json(
         { error: 'Email address is required' },
@@ -89,12 +89,21 @@ export async function POST(request: NextRequest) {
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email.trim())) {
       return NextResponse.json(
-        { error: 'Invalid email address format' },
+        { error: 'Please enter a valid email address' },
         { status: 400 }
       )
     }
+
+    const normalizedEmail = email.trim().toLowerCase()
+
+    // Create Supabase client for API operations
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
     // Get client IP for rate limiting
     const clientIP = request.headers.get('x-forwarded-for') || 
@@ -103,7 +112,7 @@ export async function POST(request: NextRequest) {
                     '127.0.0.1'
 
     // Check rate limiting (both email and IP based)
-    const rateCheck = checkRateLimit(email, clientIP)
+    const rateCheck = checkRateLimit(normalizedEmail, clientIP)
     if (!rateCheck.allowed) {
       return NextResponse.json(
         { 
@@ -119,19 +128,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create simple Supabase client (no cookies needed for auth.resend)
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
     // Always attempt to resend verification email
     // Don't check if user exists or verification status to prevent enumeration
     const { error: resendError } = await supabase.auth.resend({
       type: 'signup',
-      email: email,
+      email: normalizedEmail,
       options: {
-        emailRedirectTo: `${request.nextUrl.origin}/auth/v1/verify`
+        emailRedirectTo: `${request.nextUrl.origin}/auth/callback`
       }
     })
 

@@ -10,9 +10,9 @@ interface RouteProtection {
 }
 
 const PROTECTED_ROUTES: RouteProtection[] = [
-  // User authentication required
+  // User authentication required (removed /verify from here as it needs special handling)
   {
-    patterns: ['/dashboard', '/verify'],
+    patterns: ['/dashboard'],
     authLevel: 'user',
     redirect: '/login'
   },
@@ -165,6 +165,7 @@ export async function middleware(request: NextRequest) {
       return new NextResponse(null, { status: 204 }) // No Content - stops the noise
     }
   }
+
 
   // Handle admin routes with dedicated middleware, except login page
   if (pathname.startsWith('/backend/admin') && pathname !== '/backend/admin/login') {
