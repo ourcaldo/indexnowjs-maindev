@@ -105,7 +105,7 @@ export default function Login() {
       
       // Check email verification status
       if (!user?.emailVerification) {
-        router.push(`/verify?email=${encodeURIComponent(email)}`)
+        router.push(`/verify?goto=/dashboard`)
         return
       }
       
@@ -119,7 +119,7 @@ export default function Login() {
         error.message.includes('verify')
       )) {
         // Redirect to verification page instead of showing error
-        router.push(`/verify?email=${encodeURIComponent(email)}`)
+        router.push(`/verify?goto=/dashboard`)
         return
       }
       
