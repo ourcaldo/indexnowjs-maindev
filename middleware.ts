@@ -12,9 +12,9 @@ interface RouteProtection {
 const PROTECTED_ROUTES: RouteProtection[] = [
   // User authentication required
   {
-    patterns: ['/dashboard'],
+    patterns: ['/dashboard', '/verify'],
     authLevel: 'user',
-    redirect: '/auth/login'
+    redirect: '/login'
   },
   // Admin authentication required
   {

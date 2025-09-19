@@ -59,9 +59,9 @@ export default function VerifyEmail() {
     }
   }
 
-  // Authentication and access control check
+  // Get user and handle verification flow
   useEffect(() => {
-    const checkAuthAndAccess = async () => {
+    const initializeVerifyPage = async () => {
       try {
         setIsLoading(true)
         const currentUser = await authService.getCurrentUser()
@@ -71,33 +71,33 @@ export default function VerifyEmail() {
         const gotoParam = urlParams.get('goto')
         const safeGotoUrl = sanitizeGotoUrl(gotoParam)
         
-        // If not logged in, redirect to login with return path
-        if (!currentUser) {
-          router.push(`/login?goto=${encodeURIComponent(`/verify?goto=${encodeURIComponent(safeGotoUrl)}`)}`) 
-          return
+        // If user is logged in
+        if (currentUser) {
+          // If already verified, redirect to destination
+          if (currentUser.emailVerification) {
+            router.push(safeGotoUrl)
+            return
+          }
+          
+          // User is logged in but not verified - show verify page
+          setUser(currentUser)
+          setEmail(currentUser.email || '')
+          setGotoUrl(safeGotoUrl)
+        } else {
+          // User not logged in - let middleware handle the redirect
+          // Just set the goto URL for when they do log in
+          setGotoUrl(safeGotoUrl)
         }
-        
-        // If already verified, redirect to destination
-        if (currentUser.emailVerification) {
-          router.push(safeGotoUrl)
-          return
-        }
-        
-        // User is logged in but not verified - show verify page
-        setUser(currentUser)
-        setEmail(currentUser.email || '')
-        setGotoUrl(safeGotoUrl)
         
       } catch (error) {
-        console.error('Auth check error:', error)
-        // Redirect to login on any auth error
-        router.push('/login')
+        console.error('Verify page initialization error:', error)
+        setGotoUrl('/dashboard')
       } finally {
         setIsLoading(false)
       }
     }
 
-    checkAuthAndAccess()
+    initializeVerifyPage()
   }, [])
 
   // Countdown timer for resend button
