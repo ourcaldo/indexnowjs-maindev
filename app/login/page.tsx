@@ -33,6 +33,52 @@ export default function Login() {
         case 'missing_auth_code':
           setError('Invalid authentication link. Please request a new magic link.')
           break
+        // Enhanced error handling for new verification routes
+        case 'email_verification_failed':
+          setError('Email verification failed. Please check your email or request a new verification link.')
+          break
+        case 'recovery_verification_failed':
+          setError('Password reset verification failed. Please request a new password reset link.')
+          break
+        case 'magiclink_verification_failed':
+          setError('Magic link verification failed. Please request a new magic link.')
+          break
+        case 'expired_link':
+          setError('This link has expired. Please request a new verification link.')
+          break
+        case 'invalid_link':
+          setError('This link is invalid. Please request a new verification link.')
+          break
+        case 'access_denied':
+          setError('Access denied. Please try signing in again.')
+          break
+        case 'server_error':
+          setError('Server error occurred. Please try again later.')
+          break
+        case 'temporarily_unavailable':
+          setError('Service temporarily unavailable. Please try again later.')
+          break
+        case 'network_error':
+          setError('Network error occurred. Please check your connection and try again.')
+          break
+        case 'timeout_error':
+          setError('Request timed out. Please try again.')
+          break
+        case 'no_session_data':
+          setError('Session data not found. Please try signing in again.')
+          break
+        case 'missing_verification_token':
+          setError('Verification token missing. Please request a new verification link.')
+          break
+        case 'missing_verification_type':
+          setError('Invalid verification link. Please request a new verification link.')
+          break
+        case 'unknown_verification_type':
+          setError('Unknown verification type. Please request a new verification link.')
+          break
+        case 'verification_exception':
+          setError('Verification error occurred. Please try again.')
+          break
         default:
           setError('Authentication error occurred.')
       }
