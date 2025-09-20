@@ -51,7 +51,7 @@ export default function ServiceAccountsSettingsPage() {
       if (!token) return
 
       // Load service accounts
-      const serviceAccountsResponse = await fetch('/api/v1/indexing/service-accounts', {
+      const serviceAccountsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/indexing/service-accounts`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -107,7 +107,7 @@ export default function ServiceAccountsSettingsPage() {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      const response = await fetch('/api/v1/indexing/service-accounts', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/indexing/service-accounts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
