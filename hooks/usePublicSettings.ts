@@ -24,9 +24,9 @@ export interface PublicSettingsData {
 
 export const usePublicSettings = () => {
   return useQuery({
-    queryKey: ['/api/v1/public/settings'],
+    queryKey: [`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/public/settings`],
     queryFn: async (): Promise<PublicSettingsData> => {
-      const response = await fetch('/api/v1/public/settings', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/public/settings`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'

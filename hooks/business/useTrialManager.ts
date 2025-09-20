@@ -89,7 +89,7 @@ export function useTrialManager(): UseTrialManagerReturn {
         return
       }
 
-      const response = await fetch('/api/v1/billing/trial/info', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/billing/trial/info`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -122,7 +122,7 @@ export function useTrialManager(): UseTrialManagerReturn {
         return { success: false, error: 'Authentication required' }
       }
 
-      const response = await fetch('/api/v1/billing/trial/extend', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/billing/trial/extend`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -154,7 +154,7 @@ export function useTrialManager(): UseTrialManagerReturn {
         return { success: false, error: 'Authentication required' }
       }
 
-      const response = await fetch('/api/v1/billing/trial/upgrade', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/billing/trial/upgrade`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

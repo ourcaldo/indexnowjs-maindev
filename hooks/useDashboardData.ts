@@ -22,7 +22,7 @@ export interface DashboardData {
 
 export const useDashboardData = () => {
   return useQuery({
-    queryKey: ['/api/v1/dashboard'],
+    queryKey: [`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/dashboard`],
     queryFn: async (): Promise<DashboardData> => {
       const { data: { session } } = await supabase.auth.getSession()
       
@@ -30,7 +30,7 @@ export const useDashboardData = () => {
         throw new Error('No access token available')
       }
 
-      const response = await fetch('/api/v1/dashboard', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/dashboard`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

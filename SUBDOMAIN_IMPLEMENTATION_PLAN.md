@@ -37,41 +37,39 @@ Current Structure:
 
 ---
 
-### Step 2: Create Next.js Middleware
-**Objective**: Implement subdomain detection and internal routing logic
+### Step 2: Standardize API Calls to Use Environment Variables
+**Objective**: Update all API calls to use base URL from environment variables for proper api.domain.com display
 
 **Goals**:
-- ✅ Detect incoming subdomain from request headers
-- ✅ Rewrite internal paths based on subdomain
-- ✅ Handle authentication redirects appropriately
-- ✅ Maintain proper error handling
+- ✅ All API calls show `api.domain.com/v1/xxx` in network tab
+- ✅ Use existing `NEXT_PUBLIC_API_BASE_URL` environment variable
+- ✅ Standardize API call format across entire codebase
+- ✅ Ensure consistent API URL structure
 
-**Technical Requirements**:
-- Create `middleware.ts` in project root
-- Implement subdomain extraction from request headers
-- Create internal rewrites without external redirects
-- Handle edge cases (www, apex domain, invalid subdomains)
+**Current Environment Configuration**:
+```bash
+# .env.local (already configured)
+NEXT_PUBLIC_API_BASE_URL=http://0.0.0.0:5000/api  # Will change to https://api.domain.com
+```
 
 **Expected Behavior**:
 ```
-dashboard.domain.com/indexnow/overview
-  ↓ (middleware detects 'dashboard')
-  → internally serves app/dashboard/indexnow/overview/page.tsx
-
-backend.domain.com/users
-  ↓ (middleware detects 'backend') 
-  → internally serves app/backend/admin/users/page.tsx
-
-api.domain.com/v1/auth/login
-  ↓ (middleware detects 'api')
-  → internally serves app/api/v1/auth/login/route.ts
+Before: fetch('/api/v1/auth/login')        → Network shows: /api/v1/auth/login
+After:  fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/login`) → Network shows: https://api.domain.com/v1/auth/login
 ```
 
+**Technical Requirements**:
+- Update ~60 files with hardcoded `/api/...` calls
+- Replace with `${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/...` format
+- Maintain existing API route structure
+- No new helper functions or middleware needed
+
 **Action Items**:
-- [ ] Create middleware.ts file
-- [ ] Implement subdomain detection logic
-- [ ] Add internal rewrite rules
-- [ ] Test middleware logic locally
+- [ ] Update core API helper functions
+- [ ] Update all hook files with API calls (~20 files)
+- [ ] Update all page components with API calls (~30 files)
+- [ ] Update TanStack Query keys
+- [ ] Test all API calls work with env variable URLs
 
 ---
 

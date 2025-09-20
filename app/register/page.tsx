@@ -47,7 +47,7 @@ export default function Register() {
   useEffect(() => {
     const detectCountry = async () => {
       try {
-        const response = await fetch('/api/v1/auth/detect-location')
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/detect-location`)
         if (response.ok) {
           const data = await response.json()
           if (data.country) {

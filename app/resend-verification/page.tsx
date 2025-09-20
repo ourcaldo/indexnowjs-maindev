@@ -43,7 +43,7 @@ export default function ResendVerification() {
     }
 
     try {
-      const response = await fetch('/api/v1/auth/resend-verification', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/resend-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

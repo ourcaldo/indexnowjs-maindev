@@ -114,7 +114,7 @@ export function useServiceAccounts(): UseServiceAccountsReturn {
         return
       }
 
-      const response = await fetch('/api/v1/google/service-accounts', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/google/service-accounts`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -145,7 +145,7 @@ export function useServiceAccounts(): UseServiceAccountsReturn {
         return { success: false, error: 'Authentication required' }
       }
 
-      const response = await fetch('/api/v1/google/service-accounts', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/google/service-accounts`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`
@@ -406,7 +406,7 @@ export function useServiceAccounts(): UseServiceAccountsReturn {
       const { data: { session } } = await supabaseBrowser.auth.getSession()
       if (!session?.access_token) return
 
-      const response = await fetch('/api/v1/google/service-accounts/stats', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/google/service-accounts/stats`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

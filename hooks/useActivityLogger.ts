@@ -26,7 +26,7 @@ export const useActivityLogger = () => {
       const token = (await supabase.auth.getSession()).data.session?.access_token
       if (!token) return
 
-      await fetch('/api/v1/admin/activity', {
+      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/admin/activity`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -35,7 +35,7 @@ export default function TrialStatusCard() {
       const { data: { session } } = await supabaseBrowser.auth.getSession()
       if (!session?.access_token) return
 
-      const response = await fetch('/api/v1/auth/user/trial-status', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/user/trial-status`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ export default function TrialStatusCard() {
       const { data: { session } } = await supabaseBrowser.auth.getSession()
       if (!session?.access_token) return
 
-      const response = await fetch('/api/v1/billing/cancel-trial', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/billing/cancel-trial`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

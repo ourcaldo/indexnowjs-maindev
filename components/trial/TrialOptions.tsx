@@ -36,7 +36,7 @@ export default function TrialOptions({ userCurrency }: TrialOptionsProps) {
       const { data: { session } } = await supabaseBrowser.auth.getSession()
       if (!session?.access_token) return
 
-      const response = await fetch('/api/v1/auth/user/trial-eligibility', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/user/trial-eligibility`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

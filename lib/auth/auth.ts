@@ -133,7 +133,7 @@ export class AuthService {
       document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`
       
       // Also transfer to server-side session
-      await fetch('/api/v1/auth/session', {
+      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export class AuthService {
   }
 
   async signUp(email: string, password: string, fullName: string, phoneNumber?: string, country?: string) {
-    const response = await fetch('/api/v1/auth/register', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ export class AuthService {
     
     // Clear session from server
     try {
-      await fetch('/api/v1/auth/session', {
+      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/session`, {
         method: 'DELETE',
         credentials: 'include'
       })

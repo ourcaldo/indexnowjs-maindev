@@ -92,7 +92,7 @@ export const usePricingData = (options: UsePricingDataOptions = {}) => {
       } else {
         // User not logged in - use IP detection
         try {
-          const locationResponse = await fetch('/api/v1/auth/detect-location')
+          const locationResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/detect-location`)
           if (locationResponse.ok) {
             const locationData = await locationResponse.json()
             if (locationData.country) {
@@ -119,7 +119,7 @@ export const usePricingData = (options: UsePricingDataOptions = {}) => {
 
   const loadPackages = async () => {
     try {
-      const response = await fetch('/api/v1/public/settings', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/public/settings`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'

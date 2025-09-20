@@ -96,7 +96,7 @@ export function useGlobalQuotaManager() {
       }
 
       // Use merged dashboard endpoint for better performance
-      const dashboardResponse = await fetch('/api/v1/dashboard', {
+      const dashboardResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/dashboard`, {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       })
 

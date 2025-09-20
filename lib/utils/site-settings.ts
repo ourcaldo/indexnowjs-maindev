@@ -71,7 +71,7 @@ class SiteSettingsService {
     }
 
     try {
-      const response = await fetch('/api/v1/public/settings')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/public/settings`)
       if (response.ok) {
         const data = await response.json()
         // Extract site settings from merged response

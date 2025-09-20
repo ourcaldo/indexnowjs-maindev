@@ -24,7 +24,11 @@ export const queryClient = new QueryClient({
 
 // Helper function for API requests
 export const apiRequest = async (url: string, options?: RequestInit) => {
-  const response = await fetch(url, {
+  // Construct full API URL using environment variable
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || ''
+  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url.startsWith('/') ? url.replace('/api', '') : `/${url}`}`
+  
+  const response = await fetch(fullUrl, {
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,

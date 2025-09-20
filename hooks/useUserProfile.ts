@@ -67,7 +67,7 @@ export function useUserProfile() {
       }
 
       // Get user profile through API layer instead of direct database call
-      const response = await fetch('/api/v1/auth/user/profile', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/auth/user/profile`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'

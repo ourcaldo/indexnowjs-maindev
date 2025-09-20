@@ -430,7 +430,7 @@ export function usePaymentProcessor({
             }
 
             // Call 3DS callback API to finalize payment
-            const callbackResponse = await fetch('/api/v1/billing/midtrans-3ds-callback', {
+            const callbackResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/billing/midtrans-3ds-callback`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
