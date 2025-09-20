@@ -98,10 +98,22 @@ export default function Login() {
     setError("")
     
     try {
-      await authService.signIn(email, password)
-      router.push("/dashboard")
+      if (isMagicLinkMode) {
+        // Handle magic link submission
+        if (!email) {
+          setError("Please enter your email address first.")
+          return
+        }
+        await authService.createMagicLink(email, `${window.location.origin}/auth/callback?next=/dashboard`)
+        setMagicLinkSent(true)
+        setError("")
+      } else {
+        // Handle password login
+        await authService.signIn(email, password)
+        router.push("/dashboard")
+      }
     } catch (error: any) {
-      setError(error.message || "Login failed")
+      setError(error.message || (isMagicLinkMode ? "Failed to send magic link" : "Login failed"))
     } finally {
       setIsLoading(false)
     }
@@ -269,41 +281,17 @@ export default function Login() {
                 )}
 
                 {/* Login/Magic Link Button */}
-                {isMagicLinkMode ? (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!email) {
-                        setError("Please enter your email address first.")
-                        return
-                      }
-                      setIsLoading(true)
-                      try {
-                        // Use current origin for dev/prod environment awareness
-                        await authService.createMagicLink(email, `${window.location.origin}/auth/callback?next=/dashboard`)
-                        setMagicLinkSent(true)
-                        setError("")
-                      } catch (error: any) {
-                        setError(error.message || "Failed to send magic link")
-                      } finally {
-                        setIsLoading(false)
-                      }
-                    }}
-                    disabled={isLoading}
-                    className="w-full py-[14px] px-6 bg-info text-info-foreground border-0 rounded-lg text-base font-semibold cursor-pointer mb-6 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center hover:opacity-90 transition-opacity"
-                  >
-                    <span style={{ marginRight: '8px' }}>✨</span>
-                    {isLoading ? "Sending..." : "Send Magic Link"}
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-[14px] px-6 bg-brand-primary text-white border-0 rounded-lg text-base font-semibold cursor-pointer mb-6 disabled:opacity-70 disabled:cursor-not-allowed hover:bg-brand-secondary transition-colors"
-                  >
-                    {isLoading ? "Signing In..." : "Sign In"}
-                  </button>
-                )}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-[14px] px-6 bg-brand-primary text-white border-0 rounded-lg text-base font-semibold cursor-pointer mb-6 disabled:opacity-70 disabled:cursor-not-allowed hover:bg-brand-secondary transition-colors flex items-center justify-center"
+                >
+                  {isMagicLinkMode && <span style={{ marginRight: '8px' }}>✨</span>}
+                  {isLoading ? 
+                    (isMagicLinkMode ? "Sending..." : "Signing In...") : 
+                    (isMagicLinkMode ? "Send Magic Link" : "Sign In")
+                  }
+                </button>
 
                 {/* Error Message */}
                 {error && (
