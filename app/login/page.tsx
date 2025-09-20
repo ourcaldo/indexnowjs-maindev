@@ -308,22 +308,11 @@ export default function Login() {
                 {/* Error Message */}
                 {error && (
                   <div className="badge-error p-3 mb-6 text-center rounded-lg">
-                    {error}
-                    {/* Show resend verification link for email confirmation errors */}
-                    {(error.toLowerCase().includes('email not confirmed') || 
-                      error.toLowerCase().includes('confirm') || 
-                      error.toLowerCase().includes('verification')) && (
-                      <div className="mt-3">
-                        <button
-                          type="button"
-                          onClick={() => router.push("/resend-verification")}
-                          className="bg-transparent border-0 text-white text-sm cursor-pointer hover:underline transition-all"
-                          data-testid="link-resend-verification"
-                        >
-                          Resend verification email →
-                        </button>
-                      </div>
-                    )}
+                    {/* Transform email confirmation error to be more descriptive */}
+                    {error.toLowerCase().includes('email not confirmed') 
+                      ? 'Please verify your email before accessing your account.'
+                      : error
+                    }
                   </div>
                 )}
 
@@ -341,8 +330,8 @@ export default function Login() {
             )}
           </form>
 
-          {/* Register Link */}
-          <div className="text-center pt-6 border-t border-border">
+          {/* Register Link and Verification Link */}
+          <div className="text-center pt-6 border-t border-border space-y-3">
             <p className="text-sm text-muted-foreground m-0">
               Don't have an account?{' '}
               <button
@@ -352,6 +341,23 @@ export default function Login() {
                 Sign up here
               </button>
             </p>
+            
+            {/* Show verification link for email confirmation errors */}
+            {error && (error.toLowerCase().includes('email not confirmed') || 
+              error.toLowerCase().includes('confirm') || 
+              error.toLowerCase().includes('verification')) && (
+              <p className="text-sm text-muted-foreground m-0">
+                Haven't received your verification email?{' '}
+                <button
+                  type="button"
+                  onClick={() => router.push("/resend-verification")}
+                  className="bg-transparent border-0 text-brand-primary text-sm font-semibold cursor-pointer hover:underline transition-all"
+                  data-testid="link-resend-verification"
+                >
+                  Resend verification email
+                </button>
+              </p>
+            )}
           </div>
         </div>
       </div>
