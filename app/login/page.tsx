@@ -181,12 +181,12 @@ export default function Login() {
           <form onSubmit={handleSubmit}>
             {/* Magic Link Success Notification */}
             {magicLinkSent && (
-              <div className="bg-info/10 border border-info rounded-xl p-5 mb-8 text-center">
+              <div className="mb-8 text-center">
                 <div className="mb-4 text-[32px]">✨</div>
                 <h3 className="text-lg font-semibold text-foreground mb-2 m-0">
                   Magic Link Sent!
                 </h3>
-                <p className="text-muted-foreground text-sm m-0 leading-relaxed">
+                <p className="text-muted-foreground text-sm m-0 leading-relaxed mb-4">
                   Check your email ({email}) and click the link to log in instantly.
                 </p>
                 <button
@@ -195,7 +195,7 @@ export default function Login() {
                     setMagicLinkSent(false)
                     setIsMagicLinkMode(false)
                   }}
-                  className="mt-4 bg-transparent border-0 text-info text-sm cursor-pointer underline hover:text-info-foreground transition-colors"
+                  className="bg-transparent border-0 text-brand-primary text-sm cursor-pointer underline hover:text-brand-secondary transition-colors"
                 >
                   Back to login
                 </button>
